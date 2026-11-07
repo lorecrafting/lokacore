@@ -2,8 +2,8 @@ import { knowledgeSave } from './knowledge-save.ts';
 import { patrolSave } from './patrol-save.ts';
 import { expeditionSave } from './expedition-save.ts';
 import { riddleSave, selectorSave } from './riddle-save.ts';
-import { topicsSave } from './topics-save.ts';
-import { exchangeSave } from './exchange-save.ts';
+import { repeatExchanges } from './exchange-save.ts';
+import { newestReceipt } from './receipt-history.ts';
 import { liquidSave } from './liquid-save.ts';
 import { combatReceipts } from './combat-receipt.ts';
 import { skillsSave } from './skills-save.ts';
@@ -11,23 +11,41 @@ import { dialogueSave } from './dialogue-save.ts';
 import { commerceSave } from './commerce-save.ts';
 import { deadlineSave } from './deadline-save.ts';
 import { deerSave } from './deer-save.ts';
+import { jobSave } from './job-save.ts';
 import type { World } from '../../../kernel/ts/src/runtime/decision.ts';
 import type { Db, Meta } from './store.ts';
 
-export function receiptRecovery(fresh: World, world: World, db: Db, meta: Meta, revision: number) {
+// A save holding an accepted cheat opens only on a dev host. JSON.parse, as a replay reads the
+// command: json_extract takes a duplicate key's first.
+// ponytail: parses every accepted command on each release open; index only after measuring reopen.
+const ACCEPTED = `SELECT command FROM receipt WHERE json_extract(response,'$.kind')='accepted'`;
+const hasDevReceipt = (db: Db) =>
+  db
+    .getAllSync<{ command: string }>(ACCEPTED)
+    .some((r) => /^dev_/.test(JSON.parse(r.command)?.payload?.type));
+
+export function receiptRecovery(
+  fresh: World,
+  world: World,
+  db: Db,
+  meta: Meta,
+  revision: number,
+  dev = false,
+) {
+  if (!dev && hasDevReceipt(db)) throw new SyntaxError('malformed JSON: a dev save');
+  newestReceipt(world, db, meta, revision);
+  jobSave(fresh, world);
   knowledgeSave(world);
   patrolSave(world);
   expeditionSave(world, db, meta, revision);
   selectorSave(world, db, meta);
   riddleSave(world, db, meta);
-  topicsSave(world, db, meta);
   skillsSave(world, db, meta);
   combatReceipts(db, `story/${meta.lineage_id}/${world.character}`);
-  const liquids = liquidSave(fresh, world, db, meta, revision);
-  const exchanges = exchangeSave(fresh, world, db, meta, revision, liquids);
+  liquidSave(fresh, world);
   dialogueSave(world, db, meta);
   commerceSave(fresh, world, db, meta, revision);
-  deadlineSave(world, db, meta, exchanges);
+  deadlineSave(world, db, meta, repeatExchanges(fresh, world));
   if (Object.values(world.cartridge.populations ?? {}).some((p) => p.sight))
     deerSave(world, db, meta);
 }

@@ -1,0 +1,12 @@
+{
+  "duration": 5400,
+  "tick_every": 1800,
+  "resource": "mv",
+  "per_tick": -10,
+  "name": "condition.parched",
+  "narration": {
+    "applied": "narration.parched.applied",
+    "tick": "narration.parched.tick",
+    "expired": "narration.parched.expired"
+  }
+}

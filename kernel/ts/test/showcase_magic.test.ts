@@ -44,6 +44,7 @@ const view = (w: World) => {
   assert.deepEqual(validate('GameView', v), []);
   return v;
 };
+const two = { level: 2, from: 30, next: 100, level_up: 'levelling.level_up' };
 const words = (w: World) => view(w).spell_words;
 const chip = (w: World, key: string) => view(w).actions.find((a) => a.action_key === key);
 const pools = (w: World) =>
@@ -83,11 +84,11 @@ let w: World;
 
 // Breaks: the hub has no ladder up, the sign is not readable in the loft, or an unlearned spell
 // leaks into spell_words.
-test('magic 1: up the ladder; the sign reads and the Word bar is empty', () => {
+test('magic 1: up the ladder; the sign reads and the Word bar holds only mend', () => {
   w = go(newWorld(content, ctx(CTX), [1, 2, 3, 4]), 'up').world;
   const sign = play(w, { type: 'read', target_id: detail(w, 'sign_magic') });
   assert.deepEqual(sign.lines, ['readable.sign_magic']);
-  assert.equal(words(w), undefined);
+  assert.equal(String(words(w)?.map((s) => s.word)), 'mend');
 });
 
 // Breaks: the wizard opens the errand before teaching lux, the errand is not accepted, lux casts
@@ -170,7 +171,7 @@ test('magic 4: level 2 from the errand; ward needs cha 7, one raise', () => {
   w = go(w, 'south').world;
   assert.equal(offer(w, npc(w, 'hedge_wizard'), 'flamma'), undefined); // flamma's policy is npc_present wight
   assert.equal(fact(w, 'ward_taught'), true);
-  assert.deepEqual(view(w).levelling, { level: 2, experience: 30, next: 100, unspent: 1 });
+  assert.deepEqual(view(w).levelling, { ...two, experience: 30, unspent: 1 });
   const ward = {
     word: 'ward',
     available: false,
@@ -338,7 +339,7 @@ test('magic 7: flamma burns the wight to 4 and the bier; warded blow 1; the seco
       : undefined;
   assert.equal((died as { killer_id?: string } | undefined)?.killer_id, w.body);
   assert.equal(hp(w, 'wight'), 0);
-  assert.deepEqual(view(w).levelling, { level: 2, experience: 40, next: 100, unspent: 0 });
+  assert.deepEqual(view(w).levelling, { ...two, experience: 40, unspent: 0 });
   assert.equal(pools(w).ma, 0);
   assert.equal(refused(w, flamma), 'invalid_target'); // a dead wight is no aimed target (loka-x6t.109.2)
 });

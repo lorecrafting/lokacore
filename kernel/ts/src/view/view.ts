@@ -47,6 +47,7 @@ import { shelf } from '../mechanics/commerce/shared.ts';
 import { timeView } from './time.ts';
 import { carrying } from '../mechanics/crow/behavior.ts';
 import { currentBleed } from '../mechanics/bleed/shared.ts';
+import { bleedingView } from './bleed.ts';
 
 /**
  * The player's GameView of the current place (04 §14; 00 §4.10): its description the variant
@@ -109,6 +110,7 @@ export function gameView(world: World, actor: CharacterId = world.character): Ga
     ...timeView(world),
     ...(choice && { choice }),
     ...(pools.length > 0 && { resources: pools }),
+    ...(world.cartridge.world?.death?.revival && { revival: world.cartridge.world.death.revival }),
   };
   if (steps.n > LIMITS.query_steps) throw new KernelError('budget_exceeded');
   return view;
@@ -133,18 +135,8 @@ function placeView(world: World, actor: CharacterId, here: EntityId | undefined,
         ? (room.dark_description ?? ('place.dark' as TextKey))
         : describe(world, actor, lit, steps),
     ),
-  };
-}
-
-function bleedingView(world: World, bleed: NonNullable<ReturnType<typeof currentBleed>>) {
-  const spec = world.cartridge.bleeds![refString(bleed.effect!)];
-  return {
-    label: 'condition.bleeding' as TextKey,
-    generation: bleed.generation,
-    ends_at: bleed.ends_at!,
-    next_tick_at: bleed.next_tick_at!,
-    hp_loss: spec.hp_loss,
-    tick_every: spec.tick_every,
+    ...(room.sound && { sound: room.sound }),
+    ...(room.tags?.includes('exposed') && { exposed: true as const }),
   };
 }
 
@@ -258,7 +250,15 @@ const viewOf = (
   ...(e.kind === 'npc' && e.shop && { shop: shelf(world, actor, id as EntityId) }),
   ...(e.kind === 'npc' &&
     carrying(world, id as EntityId) && { carrying: carrying(world, id as EntityId) }),
+  ...victimView(world, actor, id as EntityId, steps),
 });
+
+// Owner decision 2026-11-02: an NPC's corpse names its victim, the victim's short as `actor` sees it.
+function victimView(world: World, actor: CharacterId, id: EntityId, steps: Steps) {
+  const origin = world.state.created?.[id]?.origin;
+  if (origin?.kind !== 'death' || world.entities[origin.victim_id]?.kind !== 'npc') return {};
+  return { victim: describeEntity(world, actor, origin.victim_id, 'short', steps) };
+}
 
 type Lists = ReturnType<typeof lists>;
 

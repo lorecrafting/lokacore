@@ -1,0 +1,23 @@
+{
+  "name": "room.mill.title",
+  "description": "room.mill.description",
+  "sound": "mill",
+  "exits": {
+    "down": {
+      "to": "village_green"
+    },
+    "south": {
+      "to": "tollhouse",
+      "barrier": "tollhouse_door"
+    }
+  },
+  "details": {
+    "millwheel": {
+      "aliases": [
+        "wheel",
+        "millwheel"
+      ],
+      "description": "detail.millwheel"
+    }
+  }
+}

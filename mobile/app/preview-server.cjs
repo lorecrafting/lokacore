@@ -4,6 +4,8 @@ const http = require('node:http');
 const net = require('node:net');
 const { execFileSync, spawn } = require('node:child_process');
 const path = require('node:path');
+const readline = require('node:readline');
+const { quiet } = require('./quiet-metro.cjs');
 
 const previewPort = Number(process.env.LOKA_PREVIEW_PORT || 19006);
 // LOKA_METRO_PORT=0 (the e2e configs): ask the OS for a free port, so concurrent runs never share one.
@@ -27,23 +29,33 @@ const expo = spawn(
     '--port',
     String(metroPort),
   ],
-  { cwd: __dirname, stdio: 'inherit', env: { ...process.env, EXPO_NO_TELEMETRY: '1' } },
+  { cwd: __dirname, stdio: ['inherit', 'pipe', 'pipe'], env: { ...process.env, EXPO_NO_TELEMETRY: '1' } },
 );
+for (const [from, to] of [[expo.stdout, process.stdout], [expo.stderr, process.stderr]]) {
+  const keep = quiet();
+  readline.createInterface({ input: from }).on('line', (line) => keep(line) && to.write(`${line}\n`));
+}
 
+// `/__author/*` goes to `bin/loka dev --watch`'s live stream (kernel/ts/play/live.ts).
+const authorPort = Number(process.env.LOKA_AUTHOR_PORT || 19008);
 const server = http.createServer((request, response) => {
+  const author = request.url.startsWith('/__author/');
+  const port = author ? authorPort : metroPort;
   const upstream = http.request(
     {
       hostname: 'localhost',
-      port: metroPort,
-      path: request.url,
+      port,
+      path: author ? request.url.slice('/__author'.length) : request.url,
       method: request.method,
-      headers: { ...request.headers, host: `localhost:${metroPort}` },
+      // the author server checks the page's own Host (a rebinding name's is foreign)
+      headers: { ...request.headers, host: author ? request.headers.host : `localhost:${port}` },
     },
     (result) => {
       response.writeHead(result.statusCode, {
         ...result.headers,
         'cross-origin-opener-policy': 'same-origin',
         'cross-origin-embedder-policy': 'require-corp',
+        'cross-origin-resource-policy': 'same-site', // the author panel page (another port) frames it
       });
       result.pipe(response);
     },
@@ -52,7 +64,7 @@ const server = http.createServer((request, response) => {
     if (response.headersSent) response.destroy();
     else {
       response.writeHead(502);
-      response.end('Metro is starting');
+      response.end(author ? 'bin/loka dev --watch is not running' : 'Metro is starting');
     }
   });
   request.pipe(upstream);

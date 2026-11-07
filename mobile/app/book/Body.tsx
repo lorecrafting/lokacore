@@ -1,3 +1,4 @@
+import { useContext, useRef } from 'react';
 import { View } from 'react-native';
 import { Text } from './Text.tsx';
 import { DreamPage } from './DreamPage.tsx';
@@ -9,22 +10,32 @@ import { ContentsPage, InsidePage, Item, type Section } from './Menu.tsx';
 import { NpcDetail } from './Npc.tsx';
 import { ShelfPage } from './Shelf.tsx';
 import { NoticePage, proseLinks } from './notices.tsx';
-import { VerbLine } from './actions.tsx';
-import { Here, LogLines, nameLink } from './lines.tsx';
-import { Page as PageShell, RunningHead } from './pages.tsx';
+import { ActionCard, VerbLine } from './actions.tsx';
+import type { Wait } from './Unavailable.tsx';
+import { LABEL } from './labels.ts';
+import { focusTitle, titleContext } from './title.ts';
+import { LogLines, nameLink } from './lines.tsx';
+import { Here } from './people.tsx';
+import { Page as PageShell } from './pages.tsx';
+import { RunningHead } from './RunningHead.tsx';
 import { note, prose, usePalette, useType, type Palette, type Type } from './palette.ts';
+import { ItemPop } from './ItemPop.tsx';
 import { space } from './tokens.ts';
+import { UnderInk } from './UnderInk.tsx';
+import { DeadPage } from './DeadPage.tsx';
 import { chapterLabel } from './words.ts';
-import type { Reading } from './reading.ts';
+import type { Effects, Reading } from './reading.ts';
 import {
   AncestryPage,
   CarryingPage,
   ChapterPage,
   CharacterPage,
   MapPage,
-  ScenePage,
   SettingsPage,
 } from './sections.tsx';
+import { ScenePage } from './ScenePage.tsx';
+import { SkillsPage } from './skills.tsx';
+import { CreditsPage } from './CreditsPage.tsx';
 import type { GameView } from '../../packages/game-view/session.ts';
 import type { DetailLine } from './logs.ts';
 type Say = (key: string) => string;
@@ -41,8 +52,10 @@ type BodyProps = {
   chapterDone: () => void;
   world: () => void;
   back: () => void;
+  rise: () => void;
   stack: Page[];
   reading?: Reading;
+  effects?: Effects;
 };
 // The NPC page (this visit, by identity) in conversation; BookView holds it outside PageTurn's remount.
 type Talk = { talkingOn?: Page; talkOn: (page?: Page) => void };
@@ -57,9 +70,12 @@ export function Body(p: BodyProps & Talk) {
   const t = useType();
   const water = p.screen.view.water;
   const surface = water && p.g.exits.find((e) => e.direction === 'up')?.button;
+  if (p.screen.dead) return <DeadPage {...p.screen} dead={p.screen.dead} letGo={p.world} />;
   return (
     <View style={{ flex: 1 }}>
-      {p.page?.kind !== 'journal' && <RunningHead view={p.screen.view} text={p.screen.text} />}
+      {p.page?.kind !== 'journal' && !p.screen.spirit && !p.screen.treatment && (
+        <RunningHead view={p.screen.view} text={p.screen.text} />
+      )}
       {water && (
         <View style={{ paddingHorizontal: space.page }}>
           <Text style={note(c, t)}>{water.remaining_seconds} seconds to surface</Text>
@@ -84,11 +100,11 @@ function PageBody(p: BodyProps & Talk) {
         press={p.press}
       />
     );
-  if (view.scene)
-    return <ScenePage scene={view.scene} text={text} next={p.g.continue} press={p.press} />;
+  if (view.scene) return <ScenePage {...p.screen} next={p.g.continue} press={p.press} />;
   if (page?.kind === 'chapter' && view.chapter)
     return (
       <ChapterPage
+        key={view.chapter.index}
         label={chapterLabel(view.chapter.index)}
         title={text(view.chapter.title)}
         done={p.chapterDone}
@@ -110,6 +126,17 @@ function PageBody(p: BodyProps & Talk) {
 }
 
 // A Contents section's page; Carrying is the last.
+const SettingsRoute = (p: BodyProps & { contents?: () => void }) => (
+  <SettingsPage
+    startOver={p.startOver}
+    credits={() => p.open({ kind: 'credits' })}
+    world={p.world}
+    contents={p.contents}
+    reading={p.reading}
+    effects={p.effects}
+  />
+);
+
 function sectionPage(p: BodyProps, page: Page) {
   const { view, text } = p.screen;
   const openThing = (id: string) => p.open({ kind: 'thing', id });
@@ -120,20 +147,18 @@ function sectionPage(p: BodyProps, page: Page) {
   };
   if (page.kind === 'contents')
     return <ContentsPage open={(kind: Section) => p.open({ kind })} world={p.world} />;
-  if (page.kind === 'character')
-    return (
-      <CharacterPage
-        view={view}
-        text={text}
-        {...home}
-        buttons={p.screen.buttons}
-        press={p.press}
-        pending={p.screen.pending}
-      />
-    );
+  const sheet = {
+    view,
+    text,
+    ...home,
+    buttons: p.screen.buttons,
+    press: p.press,
+  };
+  if (page.kind === 'character') return <CharacterPage {...sheet} />;
+  if (page.kind === 'skills') return <SkillsPage {...sheet} pending={p.screen.pending} />;
   if (page.kind === 'map') return <MapPage view={view} text={text} {...home} />;
-  if (page.kind === 'settings')
-    return <SettingsPage startOver={p.startOver} {...home} reading={p.reading} />;
+  if (page.kind === 'credits') return <CreditsPage back={p.back} />;
+  if (page.kind === 'settings') return <SettingsRoute {...p} {...home} />;
   if (page.kind === 'journal') return <JournalPage {...p.screen} {...home} press={p.press} />;
   return (
     <CarryingPage
@@ -147,7 +172,7 @@ function sectionPage(p: BodyProps, page: Page) {
 }
 
 function WorldPage(p: BodyProps) {
-  const { view, text, log } = p.screen;
+  const { view, text, log, spirit } = p.screen;
   const openThing = (id: string) => p.open({ kind: 'thing', id });
   return (
     <RoomPage
@@ -157,7 +182,9 @@ function WorldPage(p: BodyProps) {
       g={p.g}
       press={p.press}
       open={openThing}
-      links={proseLinks(p)}
+      links={spirit ? undefined : proseLinks(p)}
+      spirit={spirit}
+      rise={p.rise}
     />
   );
 }
@@ -181,23 +208,62 @@ export function RoomPage(p: {
   press: (b: Button) => void;
   open: (id: string) => void;
   links?: ReadonlyMap<string, () => void>; // a linked fixture's press, by link target (proseLinks)
+  spirit?: Wait; // the spirit state (book-ui.md): plain prose, the log and the rise card only
+  rise?: () => void;
 }) {
   const c = usePalette();
   const t = useType();
-  const look = p.g.look;
+  const look = !p.spirit && p.g.look;
   return (
-    <PageShell
-      title={p.text(p.view.place.title.key)}
-      fixedTitle
-      onTitlePress={look && (() => p.press(look))}
-      scrollToEnd={p.log.length > 0}
-    >
-      <View style={{ gap: space.lg }}>
-        {paragraphs(c, t, p.text(p.view.place.description.key), p.links)}
-        <Here view={p.view} text={p.text} open={p.open} />
-      </View>
-      {p.log.length > 0 && <LogLines lines={p.log} />}
-    </PageShell>
+    <View style={{ flex: 1 }}>
+      <UnderInk view={p.view} treatment={p.spirit ? 'spirit' : undefined} />
+      <PageShell
+        paperless
+        title={p.text(p.view.place.title.key)}
+        fixedTitle
+        onTitlePress={look ? () => p.press(look) : undefined}
+        scrollToEnd={p.log.length > 0}
+        foot={p.spirit && <Rise wait={p.spirit} rise={p.rise!} />}
+      >
+        <View style={{ gap: space.lg }}>
+          {paragraphs(c, t, p.text(p.view.place.description.key), p.links)}
+          {!p.spirit && <Here view={p.view} text={p.text} open={p.open} />}
+        </View>
+        {!!p.log.length && (
+          <View>
+            <LogLines lines={p.log} />
+            <ItemPop view={p.view} text={p.text} />
+          </View>
+        )}
+      </PageShell>
+    </View>
+  );
+}
+
+// The spirit state's one control: unavailable, its ring draining, until zero; then Rise, focus to
+// the title (book-ui.md, Spirit state). At zero the card is a new element: focus held on the
+// waiting card moves to it once; focus elsewhere stays. A blur as the waiting card leaves is not a move.
+function Rise(p: { wait: Wait; rise: () => void }) {
+  const title = useContext(titleContext);
+  const held = useRef(false);
+  const waiting = useRef(true);
+  waiting.current = p.wait.left > 0;
+  const rise = () => (p.rise(), focusTitle(title.last));
+  const ready = (card: View | null) => {
+    if (card && held.current) ((held.current = false), focusTitle(card as never));
+  };
+  return (
+    <View style={{ flexGrow: 1 }}>
+      {p.wait.left ? (
+        <ActionCard
+          label={LABEL.rise}
+          wait={p.wait}
+          focus={(on) => void ((on || waiting.current) && (held.current = on))}
+        />
+      ) : (
+        <ActionCard label={LABEL.rise} onPress={rise} ref={ready} centred />
+      )}
+    </View>
   );
 }
 

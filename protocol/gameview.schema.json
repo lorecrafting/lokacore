@@ -33,6 +33,15 @@
             },
             "reason": {
               "$ref": "#/$defs/UnavailableReason"
+            },
+            "ends_at": {
+              "$ref": "command.schema.json#/$defs/LogicalTime",
+              "description": "loka-x6t.135: the projected time the running cooldown ends (the actor's last admitted attempt plus the scripted action's cooldown, commands/actions.ts cooling), the ConditionView clock; present only when reason.code is cooldown, and absent then too when that end passes 2^53 - 1."
+            },
+            "duration": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "loka-x6t.135: the scripted action's authored cooldown length; present exactly when ends_at is."
             }
           },
           "required": [
@@ -40,6 +49,14 @@
             "available",
             "reason"
           ],
+          "dependentRequired": {
+            "ends_at": [
+              "duration"
+            ],
+            "duration": [
+              "ends_at"
+            ]
+          },
           "additionalProperties": false
         }
       ],
@@ -58,7 +75,7 @@
       ]
     },
     "AdvertisedAction": {
-      "description": "One action of a resolved ActionSet (04 §19), for the entity or place it is listed under, with what the client needs to build its ActionInvocation (04 §2, §17) without a handwritten per-action catalog: the target spec (implicit entity targets name the entity an action is listed under; concrete target_ids name the exact targets, including Read place actions aimed at inspectable details) and the input parameters it requires, both from its ActionDefinition (action.schema.json). Lists are in presentation order, highest priority first (00 §4.10). Optional command is the resolved semantic command key for participant wording/ownership; action_key remains the invocation identity. Light item controls supply it.",
+      "description": "One action of a resolved ActionSet (04 §19), for the entity or place it is listed under, with what the client needs to build its ActionInvocation (04 §2, §17) without a handwritten per-action catalog: the target spec (implicit entity targets name the entity an action is listed under; concrete target_ids name the exact targets, including Read place actions aimed at inspectable details; an empty list means the action names its own target) and the input parameters it requires, both from its ActionDefinition (action.schema.json). Lists are in presentation order, highest priority first (00 §4.10). Optional command is the resolved semantic command key for participant wording/ownership; action_key remains the invocation identity. Light item controls supply it.",
       "oneOf": [
         {
           "description": "Offered and currently legal.",
@@ -134,6 +151,15 @@
             },
             "command": {
               "$ref": "action.schema.json#/$defs/Key"
+            },
+            "ends_at": {
+              "$ref": "command.schema.json#/$defs/LogicalTime",
+              "description": "loka-x6t.135: the projected time the running cooldown ends (the actor's last admitted attempt plus the scripted action's cooldown, commands/actions.ts cooling), the ConditionView clock; present only when reason.code is cooldown, and absent then too when that end passes 2^53 - 1."
+            },
+            "duration": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "loka-x6t.135: the scripted action's authored cooldown length; present exactly when ends_at is."
             }
           },
           "required": [
@@ -144,6 +170,14 @@
             "target",
             "input"
           ],
+          "dependentRequired": {
+            "ends_at": [
+              "duration"
+            ],
+            "duration": [
+              "ends_at"
+            ]
+          },
           "additionalProperties": false
         }
       ],
@@ -221,6 +255,11 @@
             },
             "action_key": {
               "$ref": "action.schema.json#/$defs/Key"
+            },
+            "asked": {
+              "description": "The player has already taken this option; it stays usable and the Book dims it (DialogueChoice.asked_when).",
+              "type": "boolean",
+              "enum": [true]
             }
           },
           "required": [
@@ -270,6 +309,12 @@
           "available": true,
           "choice_id": "carry",
           "label": "choice.carry"
+        },
+        {
+          "available": true,
+          "choice_id": "ask",
+          "label": "choice.ask",
+          "asked": true
         },
         {
           "available": true,
@@ -502,6 +547,10 @@
           "$ref": "text.schema.json#/$defs/TextKey"
         },
         "carrying": {
+          "$ref": "text.schema.json#/$defs/TextKey"
+        },
+        "victim": {
+          "description": "An NPC's death-created corpse: the victim's short as the viewer sees it, filling {victim} in the corpse's text (owner decision 2026-11-02); absent otherwise.",
           "$ref": "text.schema.json#/$defs/TextKey"
         },
         "contents": {
@@ -1116,6 +1165,14 @@
         },
         "description": {
           "$ref": "text.schema.json#/$defs/Text"
+        },
+        "sound": {
+          "description": "The room's authored sound bed tag (room.sound); absent where the room names none. The cartridge owns the tag names.",
+          "$ref": "action.schema.json#/$defs/Key"
+        },
+        "exposed": {
+          "description": "The room carries the exposed tag: open to the weather. Absent otherwise.",
+          "const": true
         }
       },
       "required": [
@@ -1255,7 +1312,7 @@
           "$ref": "command.schema.json#/$defs/LogicalTime"
         },
         "recap_after": {
-          "description": "Toolbox row W27: the authored away recap threshold in logical seconds (recap_after_minutes x 60 x rate); present exactly when the cartridge authors it.",
+          "description": "Toolbox row W27: the authored away recap threshold in logical seconds (recap_after_minutes x 60 x rate, at most the away cap); present exactly when the cartridge authors it.",
           "$ref": "command.schema.json#/$defs/LogicalTime"
         },
         "actor_name": {
@@ -1328,7 +1385,7 @@
           }
         },
         "levelling": {
-          "description": "The player's level, experience, the total that reaches the next level (absent at the top level) and unspent attribute points, when the cartridge declares world.levelling (toolbox row 4).",
+          "description": "The player's level, experience, the total that reached the current level (0 at level 1), the total that reaches the next level (absent at the top level) and unspent attribute points, when the cartridge declares world.levelling (toolbox row 4).",
           "type": "object",
           "properties": {
             "level": {
@@ -1339,6 +1396,10 @@
               "type": "integer",
               "minimum": 0
             },
+            "from": {
+              "type": "integer",
+              "minimum": 0
+            },
             "next": {
               "type": "integer",
               "minimum": 1
@@ -1346,11 +1407,15 @@
             "unspent": {
               "type": "integer",
               "minimum": 0
+            },
+            "level_up": {
+              "$ref": "text.schema.json#/$defs/TextKey"
             }
           },
           "required": [
             "level",
             "experience",
+            "from",
             "unspent"
           ],
           "additionalProperties": false
@@ -1496,6 +1561,10 @@
           },
           "minItems": 1,
           "description": "Sense cues reaching the actor's room (toolbox row G6), nearest first, then by direction and text; absent when none."
+        },
+        "revival": {
+          "$ref": "cartridge.schema.json#/$defs/Revival",
+          "description": "loka-kgd.206 (death@1): the cartridge's world.death.revival, present exactly when it is authored. Nothing is stored: a client plays it when a receipt tells the player's own death."
         }
       },
       "required": [
@@ -2128,6 +2197,12 @@
         "count": {
           "type": "integer",
           "minimum": 1
+        },
+        "treatment": {
+          "enum": [
+            "reverie"
+          ],
+          "description": "The running scene's Book treatment, when its definition names one; absent otherwise."
         }
       },
       "required": [
@@ -2201,12 +2276,18 @@
             "additionalProperties": false
           },
           "description": "Exact current pack roster, in canonical EntityId order; absent for ordinary one-opponent combat."
+        },
+        "interval": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "loka-x6t.135: clock units between combat rounds, the cartridge's world.combat.interval that schedules each round job (mechanics/combat/rule.ts, round_flow.ts)."
         }
       },
       "required": [
         "encounter_id",
         "opponent_id",
-        "name"
+        "name",
+        "interval"
       ],
       "additionalProperties": false,
       "examples": [
@@ -2214,7 +2295,8 @@
           "encounter_id": "11111111-2222-4333-8444-555555555555",
           "opponent_id": "11111111-2222-4333-8444-555555555555",
           "name": "npc.rat",
-          "band": "few_bruises"
+          "band": "few_bruises",
+          "interval": 150
         }
       ],
       "description": "The current encounter and visible opponent presented to the player."
@@ -2480,6 +2562,26 @@
         "profession": {
           "$ref": "text.schema.json#/$defs/TextKey",
           "description": "Homestead hs-14: present only when the skill names a profession heading."
+        },
+        "learned": {
+          "$ref": "text.schema.json#/$defs/TextKey",
+          "description": "Level-up rush: present when the skill declares a learned line, acquired or not."
+        },
+        "rank": {
+          "type": "object",
+          "properties": {
+            "label": {
+              "$ref": "text.schema.json#/$defs/TextKey"
+            },
+            "reached": {
+              "$ref": "text.schema.json#/$defs/TextKey"
+            }
+          },
+          "required": [
+            "label"
+          ],
+          "additionalProperties": false,
+          "description": "Level-up rush: the current level's rank, present when the skill declares ranks and its level is at least 1; reached only when that rank declares a line."
         }
       },
       "required": [
@@ -2799,7 +2901,7 @@
       "additionalProperties": false
     },
     "ConditionView": {
-      "description": "One active body status: its authored label, end, authored duration in seconds and next tick (ends_at and duration absent for a permanent status, row W8, and next_tick_at too unless it ticks, loka-rn3b; duration is present exactly when ends_at is, loka-x6t.65, and ends_at minus duration is the last application, since a reapplication refreshes ends_at to now plus duration) and per-tick resource change (absent for a status that never ticks, row 2c). kind (loka-x6t.64) is the status's authored kind; otherwise debuff when per_tick is negative, any modifies or resistances entry is negative, fear, blocks or allows is present, sight is blind, hearing is deaf or movement.cost_percent is above 100; else buff when the status has any gain (a positive per_tick, modifies or resistances entry, another sight, movement passes, a cost_percent below 100 or a concealment); absent for a status with no effect field.",
+      "description": "One active body status: its authored label, end, authored duration in seconds and next tick (ends_at and duration absent for a permanent status, row W8, and next_tick_at too unless it ticks, loka-rn3b; duration is present exactly when ends_at is, loka-x6t.65; ends_at is the latest end any application set, an applies duration or a later-end refresh, so ends_at minus duration need not be the last application, loka-kgd.209) and per-tick resource change (absent for a status that never ticks, row 2c; a status with several ticks lists them in ticks instead of resource and per_tick, loka-kgd.209). kind (loka-x6t.64) is the status's authored kind; otherwise debuff when any per_tick is negative, any modifies or resistances entry is negative, fear, blocks or allows is present, sight is blind, hearing is deaf or movement.cost_percent is above 100; else buff when the status has any gain (a positive per_tick, modifies or resistances entry, another sight, movement passes, a cost_percent below 100 or a concealment); absent for a status with no effect field.",
       "examples": [
         {
           "label": "condition.poisoned",
@@ -2846,11 +2948,33 @@
           "type": "integer",
           "minimum": 1,
           "maximum": 2147483647
+        },
+        "ticks": {
+          "description": "loka-kgd.209: each pool a status with several ticks changes and by how much per tick, in authored order; present exactly when resource is absent.",
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "properties": {
+              "resource": {
+                "$ref": "action.schema.json#/$defs/Key"
+              },
+              "per_tick": {
+                "type": "integer",
+                "minimum": -2147483647,
+                "maximum": 2147483647
+              }
+            },
+            "required": [
+              "resource",
+              "per_tick"
+            ],
+            "additionalProperties": false
+          }
         }
       },
       "required": [
         "label",
-        "resource",
         "tick_every"
       ],
       "dependentRequired": {

@@ -30,18 +30,19 @@ function encounterValid(world: World, id: string, row: EncounterRow, occupied: S
   const planBy = origin?.kind === 'spawned' ? origin.by : undefined;
   const plan = origin?.kind === 'spawned' ? world.populationSpecs[key(origin.by)]?.plan : undefined;
   const pack = !!plan?.pack;
+  // Diku rounds (loka-kgd.197): an Attack's round 1 that closes the fight leaves its job unscheduled;
+  // valid whatever the cartridge's initiative now says, so dropping it keeps such saves opening.
+  const opening = row.status === 'closed' && row.round === 1;
   if (
     npc?.kind !== 'npc' ||
     !npc.attack ||
-    !job ||
-    job.encounter_id !== id ||
-    !same(job.job, npcRef(world, row.npc_id)) ||
+    (job ? job.encounter_id !== id || !same(job.job, npcRef(world, row.npc_id)) : !opening) ||
     pack !== (row.active_ids !== undefined) ||
     (pack && !packValid(world, row, plan!, planBy))
   )
     return false;
-  if (row.status === 'closed' && job.status === 'pending') return false;
-  return row.status !== 'open' || openValid(world, row, job, pack, occupied);
+  if (row.status === 'closed' && job?.status === 'pending') return false;
+  return row.status !== 'open' || openValid(world, row, job!, pack, occupied);
 }
 
 function packValid(world: World, row: EncounterRow, plan: { cap: number }, planBy: unknown) {

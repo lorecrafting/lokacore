@@ -1,9 +1,20 @@
-// StatusIcons: the round, graphic-only condition icons above the status line
-// (StatusIcons' doc comment). Time 720 in every story.
+// size: allow 330, one story per StatusIcons doc-comment state, and the drawings' contact sheet
+// StatusIcons: the round, graphic-only condition icons below the status line
+// (StatusIcons' doc comment). Time 720 in every story. CanvasKit loads first, served locally;
+// without it the discs are empty.
 import type { Meta, StoryObj } from '@storybook/react-native-web-vite';
 import { useState } from 'react';
+import { View } from 'react-native';
 import { expect, fireEvent, fn, waitFor } from 'storybook/test';
+import wasm from 'canvaskit-wasm/bin/full/canvaskit.wasm?url';
 import { StatusIcons } from '../book/StatusIcon.tsx';
+import { space } from '../book/tokens.ts';
+import { fallback, glyphs } from '../book/statusGlyphs.ts';
+
+const loadSkia = async () => {
+  const { LoadSkiaWeb } = await import('@shopify/react-native-skia/lib/module/web/LoadSkiaWeb');
+  await LoadSkiaWeb({ locateFile: () => wasm });
+};
 
 // A timed status lasts an hour (duration 3600), so its countdown ring shows what is left of it.
 const at = (label: string, kind?: 'buff' | 'debuff', ends_at?: number) =>
@@ -24,6 +35,7 @@ const five = [fed, poisoned, rested, scarred, at('warded', 'buff', 810)];
 const meta = {
   title: 'Book/StatusIcon',
   component: StatusIcons,
+  loaders: [loadSkia],
   args: {
     conditions: [fed],
     time: 720,
@@ -75,21 +87,34 @@ export const Permanent: Story = {
   },
 };
 
-// Five conditions: five icons, no +N disc.
-export const Five: Story = {
-  args: { conditions: five },
+// Six statuses: six icons, debuffs first, then neutral, then buffs; no +N disc.
+const six = [...five, at('mighty', 'buff', 4000)];
+export const Six: Story = {
+  args: { conditions: six },
   play: async ({ canvas }) => {
-    await expect(canvas.getAllByRole('button')).toHaveLength(5);
-    await expect(canvas.queryByRole('button', { name: /more/ })).toBeNull();
+    const names = canvas.getAllByRole('button').map((b) => b.getAttribute('aria-label'));
+    await expect(names.map((n) => n!.split(',')[0])).toEqual([
+      'poisoned',
+      'scarred',
+      'rested',
+      'fed',
+      'warded',
+      'mighty',
+    ]);
   },
 };
 
-// Six: five icons, then a +1 disc that opens Character too (6x44 + 5x6 = 294 px within 358 at 390).
+// Seven: five icons, then a +2 disc that opens Character too and whose tip lists the hidden two
+// in row order (6x44 + 5x6 = 294 px within 328 at 360).
 export const Overflow: Story = {
-  args: { conditions: [...five, at('mighty', 'buff', 4000)] },
-  play: async ({ canvas }) => {
+  args: { conditions: [...six, at('sharp', 'buff')] },
+  play: async ({ canvas, args, userEvent }) => {
     await expect(canvas.getAllByRole('button')).toHaveLength(6);
-    await expect(canvas.getByRole('button', { name: '+1 more, opens Character' })).toBeVisible();
+    const more = canvas.getByRole('button', { name: '+2 more, mighty, sharp, opens Character' });
+    await userEvent.hover(more);
+    await waitFor(() => expect(canvas.getByText('mighty, sharp')).toBeVisible());
+    await userEvent.click(more);
+    await expect(args.open).toHaveBeenCalled();
   },
 };
 
@@ -137,6 +162,10 @@ function Live(p: { text: (key: string) => string }) {
     </>
   );
 }
+// An expired icon fades out in the tree before a new one may share its name.
+const fedGone = (canvas: { queryByRole: Function }) =>
+  waitFor(() => expect(canvas.queryByRole('button', { name: /^fed/ })).toBeNull());
+
 export const Focused: Story = {
   render: (args) => <Live text={args.text} />,
   play: async ({ canvas, userEvent }) => {
@@ -155,6 +184,7 @@ export const Focused: Story = {
     await tip('fed, 47m remaining');
     press('expire'); // poisoned takes fed's place; its tip must not appear
     await none();
+    await fedGone(canvas);
     canvas.getByRole('button', { name: /^poisoned/ }).focus();
     await tip('poisoned, 3m remaining');
     press('lock');
@@ -166,6 +196,7 @@ export const Focused: Story = {
     await tip('fed, 47m remaining');
     press('expire'); // fed unmounts under the pointer; no hover-out fires
     await none();
+    await fedGone(canvas);
     press('reapply'); // fed's new icon is not hovered: no tip
     await none();
     const poisonedIcon = () => canvas.getByRole('button', { name: /^poisoned/ });
@@ -174,8 +205,8 @@ export const Focused: Story = {
     await tip('poisoned, 3m remaining');
     await userEvent.unhover(canvas.getByRole('button', { name: /^fed/ })); // not poisoned's hold
     await tip('poisoned, 3m remaining');
-    press('expire'); // poisoned moves to fed's place: a new icon, unfocused
-    await none();
+    press('expire'); // poisoned moves to fed's place: the same icon, still focused
+    await tip('poisoned, 3m remaining');
   },
 };
 
@@ -248,5 +279,47 @@ export const RingDrainingPastSix: Story = {
     fireEvent.click(canvas.getByText('redraw'));
     await waitFor(() => expect(left() < 1 && left() > 0).toBe(true)); // still draining, not dropped
     await waitFor(() => expect(left()).toBeNaN(), { timeout: 1100 });
+  },
+};
+
+// Every drawing (statusGlyphs.ts), then the three fallbacks under a label with none, in rows of
+// six, in each look: the contact sheet. Light and dark by the palette global.
+const labels = [...Object.keys(glyphs), 'no drawing'];
+const kinds = ['debuff', undefined, 'buff'] as const;
+export const Drawings: Story = {
+  render: (args) => (
+    <View style={{ rowGap: space.md }}>
+      {kinds.flatMap((kind) =>
+        Array.from({ length: Math.ceil(labels.length / 6) }, (_, i) => (
+          <StatusIcons
+            key={`${kind}-${i}`}
+            {...args}
+            conditions={labels.slice(i * 6, i * 6 + 6).map((l) => at(l, kind))}
+          />
+        )),
+      )}
+    </View>
+  ),
+  // Breaks: a drawing Skia cannot parse (it draws nothing), a disc that draws no canvas, or a
+  // canvas left blank, as when it keeps a WebGL context past the browser's cap and loses it.
+  play: async ({ canvasElement }) => {
+    const { Skia } = await import('@shopify/react-native-skia');
+    const bad = [...Object.values(glyphs), ...Object.values(fallback)].filter(
+      (d) => !Skia.Path.MakeFromSVGString(d),
+    );
+    await expect(bad).toEqual([]);
+    await waitFor(() =>
+      expect(canvasElement.querySelectorAll('canvas')).toHaveLength(labels.length * kinds.length),
+    );
+    const inked = (c: HTMLCanvasElement) =>
+      c
+        .getContext('2d')
+        ?.getImageData(0, 0, c.width, c.height)
+        .data.some((v, i) => i % 4 === 3 && v > 0);
+    await waitFor(
+      () =>
+        expect([...canvasElement.querySelectorAll('canvas')].filter((c) => !inked(c))).toEqual([]),
+      { timeout: 5000 },
+    );
   },
 };

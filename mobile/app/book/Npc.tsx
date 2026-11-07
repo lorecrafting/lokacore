@@ -1,18 +1,20 @@
+// size: allow 317, the talk page with its answers' lift, keeping the page's parts together
 // The NPC page: conversation, choices, skills, shop and services, Look, with the existing book controls.
-import { useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { View } from 'react-native';
 import { Text } from './Text.tsx';
 import type { GameView } from '../../packages/game-view/session.ts';
 import { absent, cap, plain, why, type group, type Page as Route } from './model.ts';
-import type { Button, DetailLine, presenter } from './presenter.ts';
-import { cardKey } from './presenter.ts';
+import { cardKey, type Button, type DetailLine, type presenter } from './presenter.ts';
 import { ActionCard, Cards, PickLists } from './actions.tsx';
 import { LogLines, Note } from './lines.tsx';
 import { Control, Page, SectionTitle, type Thing } from './pages.tsx';
 import { note, prose, usePalette, useType, type Palette, type Type } from './palette.ts';
-import { Riddle } from './Riddle.tsx';
+import { Reanimated, useAnimatedStyle } from './fade.ts';
+import { useDrawn, useFading } from './press.ts';
+import { Riddle, RightWord } from './Riddle.tsx';
 import { npcSkills } from './skills.tsx';
-import { space } from './tokens.ts';
+import { space, motion, size } from './tokens.ts';
 import { picks } from './pick.ts';
 import { purse } from './Shelf.tsx';
 import { LABEL } from './labels.ts';
@@ -24,17 +26,45 @@ type Screen = ReturnType<ReturnType<typeof presenter>['screen']>;
 
 // The pending choice (06 §43): the prompt, each answer (an unavailable one with its reason, not
 // pressable), inside the full NPC/conversation detail page.
+// The continuation last lifted: a redraw or a return to the page never lifts its answers again.
+let lifted: string | undefined;
+
+function Answer(p: { at: number; fresh: boolean; left: boolean; children: ReactNode }) {
+  const lag = Math.min(p.at, motion.stagger.most - 1) * motion.stagger.gap;
+  const drawn = useDrawn(p.fresh, motion.press, lag);
+  const fading = useFading(p.left);
+  const lift = useAnimatedStyle(() => ({
+    opacity: drawn.value,
+    transform: [{ translateY: (1 - drawn.value) * size.rule }],
+  }));
+  return (
+    <Reanimated.View style={lift} pointerEvents={p.left ? 'none' : 'auto'}>
+      <Reanimated.View style={fading}>{p.children}</Reanimated.View>
+    </Reanimated.View>
+  );
+}
+
+// size: allow 60, the answers' lift and fade share the choice's state
 function Choice(p: {
   view: GameView;
   choice: NonNullable<GameView['choice']>;
   text: Say;
   g: Grouped;
   press: (b: Button) => void;
+  pending?: boolean;
 }) {
   const c = usePalette();
   const t = useType();
-  const answer = (id: string) =>
-    p.g.choice.find((b) => (b.input as { choice_id?: string }).choice_id === id);
+  const [fresh] = useState(() => {
+    const isNew = lifted !== p.choice.continuation_id;
+    lifted = p.choice.continuation_id;
+    return isNew;
+  });
+  const [chosen, setChosen] = useState<string>();
+  useEffect(() => {
+    if (!p.pending) setChosen(undefined);
+  }, [p.pending]);
+  const left = (id: string) => !!p.pending && !!chosen && chosen !== id; // a refusal brings them back
   return (
     <View style={{ gap: space.sm }}>
       {p.choice.riddle?.attempts && (
@@ -44,28 +74,40 @@ function Choice(p: {
         </Text>
       )}
       {absent(p.view) !== '' && <Text style={note(c, t)}>{absent(p.view)}</Text>}
-      {p.choice.choices.map((o) => {
-        const b = answer(o.choice_id);
+      {p.choice.choices.map((o, at) => {
+        const b = p.g.choice.find((x) => choiceId(x) === o.choice_id);
         if (b && b === exit(p.g)) return null; // the foot's Leave the conversation sends it
         const riddle = p.choice.riddle;
         if (b && riddle?.choice_id === o.choice_id)
           return (
-            <Riddle
-              key={`${p.choice.continuation_id}:${p.choice.speaker_id}:${riddle.bank.join('')}`}
-              bank={riddle.bank}
-              button={b}
-              press={p.press}
-            />
+            <Answer key={o.choice_id} at={at} fresh={fresh} left={false}>
+              <Riddle
+                key={`${p.choice.continuation_id}:${p.choice.speaker_id}:${riddle.bank.join('')}`}
+                bank={riddle.bank}
+                button={b}
+                press={p.press}
+                lastTry={riddle.attempts?.count === (riddle.attempts?.limit ?? 0) - 1}
+              />
+            </Answer>
           );
-        if (b) return <ActionCard key={o.choice_id} b={b} press={p.press} />;
-        return <ActionCard key={o.choice_id} label={p.text(o.label)} reason={why(o, p.text)} />;
+        const asked = o.available && o.asked;
+        return (
+          <Answer key={o.choice_id} at={at} fresh={fresh} left={left(o.choice_id)}>
+            {b ? (
+              <ActionCard b={b} press={(x) => (setChosen(o.choice_id), p.press(x))} asked={asked} />
+            ) : (
+              <ActionCard label={p.text(o.label)} reason={why(o, p.text)} />
+            )}
+          </Answer>
+        );
       })}
     </View>
   );
 }
 
-// An authored choice whose whole label is the Book's Leave or Close is the talk's exit
-// (loka-512o): the foot sends it, so the content omits it.
+const choiceId = (b: Button) => (b.input as { choice_id?: string }).choice_id;
+
+// A choice labelled just the Book's Leave or Close is the talk's exit; the foot sends it (loka-512o).
 const exit = (g: Grouped) =>
   g.choice.find(
     (b) => b.action_key === 'choose' && ([LABEL.leave, LABEL.close] as string[]).includes(b.label),
@@ -77,6 +119,7 @@ type NpcProps = {
   text: Say;
   g: Grouped;
   press: (b: Button) => void;
+  pending?: boolean;
   log: DetailLine[];
   leave: () => void;
   talking?: boolean; // the Book's latch: answered here and not yet left (Book holds it)
@@ -91,7 +134,8 @@ type Offer = NonNullable<GameView['entities'][number]['services']>[number];
  * A person's detail and conversation in the detail-page order (book-ui.md, NPC dialogue and
  * action details).
  * - Use: an NPC route.
- * - Rules: the description, state notes and this visit's history, then one ordered list of Action
+ * - Rules: a new choice's answers lift in `motion.stagger.gap` apart, once.
+ *   The description, state notes and this visit's history, then one ordered list of Action
  *   cards (owner picks mvlrlvappy4w, mvlymuams73l): one Talk card reading `Talk`, its accessible
  *   name the offer's own label (the first available talk; with none, no card and no filler
  *   line), Trade (opens the shop page), Use an item… and Cast a spell…, Take and other acts,
@@ -104,7 +148,7 @@ type Offer = NonNullable<GameView['entities'][number]['services']>[number];
  *   only beside a priced service. History restarts after Leave the conversation. One exit: an
  *   authored choice labelled exactly Leave or Close is not drawn; the foot sends it (loka-512o).
  * - States: choice; a talk whose only choice is Leave; shop; services; open order; nothing to say (no line); closed conversation;
- *   cannot be hurt (no Attack card).
+ *   cannot be hurt (no Attack card); a sanctuary (grey Attack; NpcAttack.stories.tsx).
  * - Story: NpcPage.stories.tsx
  */
 export function NpcPage(p: NpcProps) {
@@ -123,14 +167,15 @@ export function NpcPage(p: NpcProps) {
       foot={foot}
     >
       {about(c, t, p, !talk && [...services.plain, ...services.order].some((s) => s.price > 0))}
-      <LogLines lines={p.log} />
+      <LogLines lines={p.log} reword />
       {npcSkills(c, t, p)}
       {!talk && enemy && (
         <Note>
           {enemy.refusal ? p.text(enemy.refusal) : hostileRefusal(cap(p.text(enemy.name)))}
         </Note>
       )}
-      {choice && <Choice {...p} press={answer} choice={choice} />}
+      <RightWord view={p.view} choice={choice} pending={p.pending} />
+      {choice && <Choice key={choice.continuation_id} {...p} press={answer} choice={choice} />}
       {!talk && <Offered {...p} actions={actions} enemy={!!enemy} services={services} />}
       {!talk && p.npc && p.look && (
         <Cards>
@@ -154,7 +199,6 @@ function Offered(
     p.npc,
     p.actions.filter((b) => !['buy', 'sell'].includes(b.action_key)),
   );
-  const all = picks(p.view, rest, p.npc.id, p.text);
   const card = (b: Button) => <ActionCard key={cardKey(b)} b={b} press={p.press} />;
   const plain = rest.filter((b) => !b.pick && b.command !== 'use_service');
   const shop = !p.enemy && 'shop' in p.npc && !!p.npc.shop?.length && p.shelf;
@@ -167,7 +211,7 @@ function Offered(
       <PickLists
         {...p}
         page={p.npc.id}
-        lists={all.filter((k) => k.label !== LABEL.giveAnItem)}
+        lists={picks(p.view, rest, p.npc.id, p.text).filter((k) => k.label !== LABEL.giveAnItem)}
         state={shown}
       />
       <Cards>{plain.filter((b) => b.command !== 'ask').map(card)}</Cards>
@@ -256,6 +300,7 @@ export function NpcDetail(p: {
       g={p.g}
       log={log}
       press={(b) => p.press(b, id)}
+      pending={p.screen.pending}
       leave={p.world}
       open={(thing) => p.open({ kind: 'thing', id: thing })}
       shelf={() => p.open({ kind: 'shelf', id })}

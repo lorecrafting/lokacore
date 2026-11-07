@@ -1,7 +1,12 @@
 {
   "name": "quest.lantern.title",
   "offer": {
-    "label": "quest.lantern.accept"
+    "label": "quest.lantern.accept",
+    "target": {
+      "kind": "detail",
+      "room": "ferry_landing",
+      "detail": "mooring_post"
+    }
   },
   "objective": {
     "evidence": "current_state",

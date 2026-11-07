@@ -10,7 +10,7 @@ import { INSTALLED, loadCartridge, type Cartridge, type World } from '../src/ind
 import { refString } from '../src/runtime/decision.ts';
 import { line, ROOT } from './obs.ts';
 import { replayRecords } from './replay.ts';
-import { decideReplay, header, start } from './run.ts';
+import { replayEntry, header, start } from './run.ts';
 
 type Trace = ReturnType<typeof replayRecords>;
 const MARK = /^coverage\.m(\d+)$/;
@@ -37,8 +37,8 @@ export function marked(c: Cartridge) {
 
 /**
  * Replays `trace` against `c` from the trace head's own ids, comparing the header and each
- * produced line with the recorded line at its ordinal; `each` sees the world before each step.
- * Stops before ordinal `upTo` without comparing it.
+ * produced line with the recorded line at its ordinal; `each` sees the world before each adopted
+ * step. Stops before ordinal `upTo` without comparing it.
  */
 export function replay(
   c: Cartridge,
@@ -58,12 +58,15 @@ export function replay(
   );
   const differs = (n: number) => new Error(`replay differs at ordinal ${n}`);
   if (header(r) !== `${recorded[0]}\n`) throw differs(0);
-  for (const e of entries) {
+  for (const [i, e] of entries.entries()) {
     if (e.data.ordinal === upTo) return;
     const before = r.world;
-    const { trace: t, decision } = decideReplay(r, e.data.command);
-    if (line(t) !== `${recorded[r.ordinal]}\n`) throw differs(r.ordinal);
-    each?.(before, decision, r.ordinal);
+    const { trace: t, decision } = replayEntry(r, e);
+    // line i + 1, not ordinal: an unknown entry's follow-up repeats its ordinal (ADR-075 §4)
+    if (line(t) !== `${recorded[i + 1]}\n`) throw differs(e.data.ordinal);
+    // a failed or unknown commit was decided but not adopted, so it exercises nothing (PM ruling)
+    if (!['failed', 'unknown'].includes(e.data.commit.state))
+      each?.(before, decision, e.data.ordinal);
   }
 }
 
@@ -76,7 +79,7 @@ export function coverage(c: Cartridge, traces: Trace[]) {
     try {
       replay(cartridge, t, (before, d, n) => {
         if (d.kind !== 'accepted') return;
-        // closing() (mechanics/death/lines.ts:22) cuts narration to 64 lines: a cut marker is unknown
+        // closing() (mechanics/death/lines.ts:28) cuts narration to 64 lines: a cut marker is unknown
         if ((d.narration?.length ?? 0) >= 64)
           throw new Error(`narration cap reached at ordinal ${n}`);
         for (const n of d.narration ?? []) seen.add(ruleOf(n.key) ?? '');

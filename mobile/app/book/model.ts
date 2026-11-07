@@ -1,3 +1,4 @@
+// size: allow 310, the condition line names one tick or several (loka-kgd.209); bleeding's parts
 import { dreamPages, dreamAt } from './dreams.ts';
 import type {
   ActionInput,
@@ -13,8 +14,12 @@ import { cap, doorSentence, dur, message, reasonOf, refusedSentence, why } from 
 import { opens, things } from './item-pages.ts';
 export { things, restoredItemPages } from './item-pages.ts';
 type Say = (key: string) => string;
-export const bleedingLine = (b: NonNullable<GameView['bleeding']>, time: number, text: Say) =>
-  `${text(b.label)} · ${dur(Math.max(0, b.ends_at - time))} remaining · ${b.hp_loss} HP each ${dur(b.tick_every)}`;
+// Bleeding's label, time left and cadence: the status icon's tip takes two, its name all three.
+export const bleedingParts = (b: NonNullable<GameView['bleeding']>, time: number, text: Say) => [
+  text(b.label),
+  `${dur(Math.max(0, b.ends_at - time))} remaining`,
+  `${b.hp_loss} HP each ${dur(b.tick_every)}`,
+];
 // Toolbox row W24 Journal countdown (wording proposed; designer to approve).
 export const timeLeft = (remaining: number) => `Time left: ${dur(remaining)}`;
 type Condition = NonNullable<GameView['conditions']>[number];
@@ -24,9 +29,15 @@ const left = (c: Condition, time: number) =>
 export const conditionLine = (c: Condition, time: number, text: Say) =>
   [text(c.label), left(c, time)].filter(Boolean).join(' · ') +
   // A status that never ticks (row 2c) shows no tick part.
-  (c.per_tick === undefined
-    ? ''
-    : ` · ${c.per_tick > 0 ? '+' : ''}${c.per_tick} ${c.resource.toUpperCase()} each ${dur(c.tick_every)}`);
+  tickings(c)
+    .map(
+      (t) =>
+        ` · ${t.per_tick > 0 ? '+' : ''}${t.per_tick} ${t.resource.toUpperCase()} each ${dur(c.tick_every)}`,
+    )
+    .join('');
+// Each pool a status ticks and by how much: one `resource`, or several `ticks` (loka-kgd.209).
+export const tickings = (c: Condition) =>
+  c.ticks ?? (c.per_tick === undefined ? [] : [{ resource: c.resource!, per_tick: c.per_tick }]);
 // A status icon's hold tip (book-ui.md Conditions details): label and time left, no tick part.
 export const statusTip = (c: Condition, time: number, text: Say) =>
   [text(c.label), left(c, time)].filter(Boolean).join(', ');
@@ -42,10 +53,12 @@ export type Page =
       kind:
         | 'contents'
         | 'character'
+        | 'skills'
         | 'journal'
         | 'carrying'
         | 'map'
         | 'settings'
+        | 'credits'
         | 'chapter'
         | 'combat';
     }
@@ -58,7 +71,7 @@ export const npcPage = (page: Page | undefined, view: GameView) =>
 
 // A detail page (owner pick mvlrlvappy4w), Contents and its sections (loka-8lpm) draw no status line.
 const DETAIL =
-  'thing board notice dialogue shelf sale inside contents character carrying map journal settings';
+  'thing board notice dialogue shelf sale inside contents character skills carrying map journal settings credits';
 export const detailPage = (page: Page | undefined) => DETAIL.split(' ').includes(page?.kind ?? '');
 
 export { nextPosition, POSITION_ACTIONS } from './positions.ts';
@@ -279,7 +292,7 @@ export function actionContext(
     commandOf(b) === 'use_transport'
       ? view.notices?.find((n) => n.id === b.detail_id)?.transport
       : null,
-    ['fill', 'pour', 'drink', 'use_service'].includes(commandOf(b))
+    ['fill', 'pour', 'consume', 'use_service'].includes(commandOf(b))
       ? things(view)
           .filter((e) => b.target_ids.includes(e.id))
           .map((e) => [e.id, e.liquid, 'services' in e ? e.services : undefined])

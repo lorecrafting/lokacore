@@ -16,7 +16,7 @@ test('glade without an axe: the real Book says why Chop wood is refused', (t) =>
   b.tap('oak, open');
   b.refuse('Chop wood');
   assert.ok(
-    b.text().includes('Chop wood\nNeeds an axe and woodcutting 1.'),
+    b.text().includes('Needs an axe and woodcutting 1.'),
     JSON.stringify(b.text().slice(-8)),
   );
 });
@@ -32,5 +32,5 @@ test('a worn cursed ring: its Item page shows Remove; a press says "It will not 
   b.tap(/silver ring/);
   b.tap(/^Wear/);
   b.refuse('Remove');
-  assert.ok(b.text().includes('Remove\nIt will not come off.'), JSON.stringify(b.text()));
+  assert.ok(b.text().includes('It will not come off.'), JSON.stringify(b.text()));
 });

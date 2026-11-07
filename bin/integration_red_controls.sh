@@ -191,6 +191,13 @@ mt
 printf 'a.txt\ty=1\ty=2\na.txt\ty=1\ty=3\n' > m.tsv
 rc=0; capped sh "$bin/mutate.sh" m.tsv "cat > /dev/null; grep -q '^x=1$' a.txt" > out 2>&1 || rc=$?
 [ "$rc" = 0 ] && [ "$(wc -l < out)" -eq 2 ] || bad "mutate stdin-reader: exit $rc, $(wc -l < out) result lines, want 0 and 2"
+# Break (loka-vduxr.15): no per-mutant limit, so a hung test ran for hours. The full command sleeps past
+# the limit and would then pass (SURVIVED); the limit must kill it and its child, reporting red.
+mt
+printf 'a.txt\ty=1\ty=2\n' > m.tsv
+rc=0; MUTATE_MUTANT_SECONDS=1 capped sh "$bin/mutate.sh" m.tsv "echo \$\$ > hung.pid; exec sleep 1234" > out 2>&1 || rc=$?
+[ "$rc" = 0 ] && [ "$(cut -f1 out)" = 'red-full timeout' ] || { bad "mutate hung mutant: exit $rc, want 0 and 'red-full timeout'"; cat out; }
+! kill -0 "$(cat hung.pid)" 2> /dev/null || { bad 'mutate hung mutant: child left running'; kill "$(cat hung.pid)"; }
 mt
 printf 'a.txt\ty=1\ty=2\n' > m.tsv
 rc=0; capped sh "$bin/mutate.sh" m.tsv "grep -q '^x=1$' a.txt" > out 2>&1 || rc=$?
@@ -215,7 +222,7 @@ rc=0; MUTATE_REBUILD='! grep -q y=9 a.txt && cp a.txt b.txt' capped sh "$bin/mut
 printf 'a.txt\tx=1\tx=2\n' > m.tsv; rc=0; MUTATE_REBUILD=false capped sh "$bin/mutate.sh" m.tsv true > out 2>&1 || rc=$?
 [ "$rc" = 1 ] && grep -q '^red-rebuild RESTORE-FAIL' out || { bad "mutate rebuild-after-restore fails: exit $rc, want 1 and RESTORE-FAIL"; cat out; }
 # Break: a sweep stopped mid-mutant restores the source but leaves b.txt built from the mutant.
-printf 'a.txt\tx=1\tx=2\tkill $PPID\n' > m.tsv; rc=0; MUTATE_REBUILD='cp a.txt b.txt' capped sh "$bin/mutate.sh" m.tsv true > out 2>&1 || rc=$?
+printf 'a.txt\tx=1\tx=2\tkill $(ps -o ppid= -p $PPID)\n' > m.tsv; rc=0; MUTATE_REBUILD='cp a.txt b.txt' capped sh "$bin/mutate.sh" m.tsv true > out 2>&1 || rc=$?
 [ "$rc" = 130 ] && grep -q '^x=1$' b.txt || { bad "mutate interrupted: exit $rc, want 130 and b.txt rebuilt from the restored a.txt"; cat out; }
 # Break: no time budget (a sweep runs past MUTATE_MINUTES), or a timeboxed sweep exits 0/1 as a clean pass.
 mt
@@ -253,26 +260,25 @@ ss() { # <case> <issues-json> <must-match> <must-not-match>
 }
 new='{"id":"hk-1","title":"Open one","status":"open","created_at":"2026-10-08T13:00:00.5Z"}'
 old='{"id":"hk-2","title":"Old closed","status":"closed","created_at":"2026-10-08T11:00:00Z"}'
-ss fresh-open "[$new,$old]" 'open housekeeping issues: 1' 'without a retro'
-ss stale "[$old]" 'open housekeeping issues: 0' 'hk-2 Old closed'
+ss fresh-open "[$new,$old]" 'housekeeping: 1 open (br list -l housekeeping)' 'without a retro\|hk-1'
+ss stale "[$old]" 'Before you clear' 'housekeeping: 0\|hk-2 Old closed'
 ss stale-note "[$old]" 'ended without a retro' 'NEVER'
 grep -q 'ready: 2, blocked: 3' out || bad 'session_status: wrong ready/blocked counts'
 ss none "[]" 'ended without a retro' 'NEVER'
 printf 'x' > hk.json; rc=0; HK=hk.json PATH="$tmp/stub:$PATH" capped sh bin/session_status.sh > out 2>&1 || rc=$?
 [ "$rc" = 0 ] && grep -q 'queue unavailable' out || bad 'session_status bad-json: failed or no note'
 grep -q 'Before you clear: ask the PM for handoff + retro' out || bad 'session_status: no clear reminder'
-# Break: a stray worktree, a stash or a merged review ref goes unlisted, the session's own checkout
-# or an unmerged review ref is listed.
+# Break: a worktree already merged into origin/main (branch x), a stash or a merged review ref goes unlisted; the
+# session's own checkout, a live unmerged worktree (branch y) or an unmerged review ref is listed.
 git branch review-1 x; git checkout -qb y; echo c > a; git commit -qam y; git branch review-2; git checkout -q main
-git worktree add -q "$R.wt" y 2>/dev/null; echo d > a; git stash -q
+git worktree add -q "$R.wt" x 2>/dev/null; git worktree add -q "$R.live" y 2>/dev/null; echo d > a; git stash -q
 HK=hk.json PATH="$tmp/stub:$PATH" capped sh bin/session_status.sh > out 2>&1 || bad 'session_status leftovers: exit non-zero'
 wt=$(cd "$R.wt" && pwd -P)
-grep -qxF "worktree $wt" out && grep -qx 'stashes: 1' out && grep -qx 'merged review ref (delete): review-1' out \
+grep -qxF "worktree $wt (HEAD in main; check for work)" out && ! grep -qF "$R.live" out && grep -qx 'stashes: 1' out && grep -qx 'merged review ref (delete): review-1' out \
   && ! grep -q "worktree $(pwd -P)\$" out && ! grep -q review-2 out || { bad 'session_status leftovers: wrong list'; sed 's/^/  /' out; }
 HK=hk.json PATH="$tmp/stub:$PATH" capped sh "$R.wt/bin/session_status.sh" > out 2>&1 || true
 if grep -q '^worktree' out; then bad 'session_status leftovers: main checkout listed from a linked worktree'; fi
-# Break: a red nightly prints nothing or reads as green, a running one reads as red, a missing one
-# prints a blank. A stub gh applies the real --jq to controlled `run list` records; other calls fail.
+# Break: a red nightly prints nothing or reads as green, a running or missing one is printed without --full (noise) or reads as red. A stub gh applies the real --jq to controlled `run list` records; other calls fail.
 mkdir -p "$tmp/gh"; cat > "$tmp/gh/gh" <<'SH'
 #!/bin/sh
 case "$1 $2" in "run list") ;; "run view") eval "json=\${JOBS_$3:-\$JOBS}" ;; "pr list") json=$PRS ;; *) exit 1 ;; esac
@@ -283,11 +289,18 @@ SH
 chmod +x "$tmp/gh/gh"
 CI='[{"conclusion":"failure","status":"completed","headSha":"abcdef0123","url":"u1"}]' E2E='[]' \
   HK=hk.json PATH="$tmp/gh:$tmp/stub:$PATH" capped sh bin/session_status.sh > out 2>&1 || true
-grep -qx 'ci.yml failure abcdef01 u1 (red: fix first)' out && grep -qx 'book-e2e.yml no scheduled run yet' out \
-  || { bad 'session_status nightly: red or missing run misreported'; sed -n '/Nightly/,/Housekeeping/p' out; }
+grep -qx 'nightly ci.yml failure abcdef01 u1 (red: fix first)' out && ! grep -q 'book-e2e' out \
+  || { bad 'session_status nightly: red or missing run misreported'; sed 's/^/  /' out; }
 CI='[{"conclusion":"","status":"in_progress","headSha":"abcdef0123","url":"u1"}]' E2E='[]' \
   HK=hk.json PATH="$tmp/gh:$tmp/stub:$PATH" capped sh bin/session_status.sh > out 2>&1 || true
-grep -qx 'ci.yml in_progress abcdef01 u1' out || bad 'session_status nightly: running run misreported'
+! grep -q 'nightly' out || bad 'session_status nightly: running run printed without --full'
+CI='[{"conclusion":"","status":"in_progress","headSha":"abcdef0123","url":"u1"}]' E2E='[]' \
+  HK=hk.json PATH="$tmp/gh:$tmp/stub:$PATH" capped sh bin/session_status.sh --full > out 2>&1 || true
+grep -qx 'nightly ci.yml in_progress abcdef01 u1' out && grep -qx 'nightly book-e2e.yml no scheduled run yet' out || bad 'session_status --full: nightly lines missing'
+# Break: a hung gh (network) loses the rest of the output or hangs past the hook's 30 s: each slow call is capped at 6 s.
+mkdir -p "$tmp/hang"; printf '#!/bin/sh\nexec sleep 60\n' > "$tmp/hang/gh"; chmod +x "$tmp/hang/gh"
+rc=0; HK=hk.json PATH="$tmp/hang:$tmp/stub:$PATH" capped sh bin/session_status.sh > out 2>&1 || rc=$?
+[ "$rc" = 0 ] && grep -q 'gh unavailable' out && grep -q 'ready: 2, blocked: 3' out || { bad 'session_status hung gh: hung, failed or lost the rest'; sed 's/^/  /' out; }
 # --- pm_merge.sh ---------------------------------------------------------------------------
 # A batch worktree, a slice and a record branch on a bare origin (stub prepush.sh passes). Stub gh applies the real
 # --jq to $CI and $E2E, the run lists of ci.yml and book-e2e.yml (newest first). Break: a merge goes ahead while the newest
@@ -434,7 +447,7 @@ case $* in *loka.lint*) echo "lint: ${RG_LINT:-finding}" >&2; exit 1 ;; esac
 SH
 chmod +x "$tmp/rg/mise"
 R=$(mktemp -d); cd "$R"; git init -q -b main; mkdir -p bin kernel/ts mobile/app protocol/fixtures cartridges/a/transcripts cartridges/b cartridges/c/transcripts test/loka
-cp "$bin/regen.sh" bin/; : > bin/review_index.sh; echo 'print("containers", file=open(__import__("os").environ["RG_LOG"], "a"))' > test/loka/cartridge_containers_hash.py
+cp "$bin/regen.sh" bin/; : > bin/review_index.sh; : > bin/source_reference.py; echo 'print("containers", file=open(__import__("os").environ["RG_LOG"], "a"))' > test/loka/cartridge_containers_hash.py
 printf 'echo "$2" >> "$RG_LOG"; perl -pi -e s/old/new/ "$2"\n' > bin/regen_hash_fixture.sh
 for c in a b; do printf '{\n  "description": "x",\n  "canonical": "{\\"manifest\\":{\\"id\\":\\"%s\\"}}",\n  "sha256": "old"\n}\n' $c > protocol/fixtures/${c}_hash.json; done
 printf '{\n  "description": "x",\n  "value": 1,\n  "canonical": "{\\"manifest\\":{\\"id\\":\\"b\\"}}",\n  "sha256": "old"\n}\n' > protocol/fixtures/v_hash.json

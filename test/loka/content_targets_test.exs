@@ -21,4 +21,47 @@ defmodule Loka.ContentTargetsTest do
       assert expected in Enum.map(diags, &{&1["code"], &1["path"]}), inspect(diags)
     end
   end
+
+  # Break: an ally with an engage line compiles silently, though its line never plays; or the
+  # warning fires for an ally without one.
+  test "an ally with an engage line warns and still compiles", %{dir: dir} do
+    engage = fn n ->
+      Map.put(n, "disposition", %{
+        "hostile" => %{"op" => "all", "items" => []},
+        "engage" => "npc.guard.engage"
+      })
+    end
+
+    edits = [
+      {"npcs/guard.json", engage},
+      {"text.json", &Map.put(&1, "npc.guard.engage", "x")},
+      {"cartridge.json", &put_in(&1, ["requires", "capabilities", "policy"], 1)}
+    ]
+
+    assert {:ok, _, warnings} = Loka.ContentSource.compile(dir, edits)
+
+    assert [{"warning", "ALLY_ENGAGE_UNUSED", "cartridge.world.combat.allies[0]"}] ==
+             for(
+               %{"code" => "ALLY_ENGAGE_UNUSED"} = w <- warnings,
+               do: {w["severity"], w["code"], w["path"]}
+             )
+
+    assert {:ok, _, plain} = Loka.ContentSource.compile(dir, [])
+    refute Enum.any?(plain, &(&1["code"] == "ALLY_ENGAGE_UNUSED"))
+
+    # A friendly-only ally has no engage line, so it must not warn.
+    friendly = [
+      {"npcs/guard.json",
+       &Map.put(&1, "disposition", %{"friendly" => %{"op" => "all", "items" => []}})},
+      List.last(edits)
+    ]
+
+    assert {:ok, _, quiet} = Loka.ContentSource.compile(dir, friendly)
+    refute Enum.any?(quiet, &(&1["code"] == "ALLY_ENGAGE_UNUSED"))
+
+    # The warning must not hide the template-ally error.
+    templated = [{"npcs/guard.json", &Map.put(engage.(&1), "spawn_template", true)} | tl(edits)]
+    assert {:error, errors} = Loka.ContentSource.compile(dir, templated)
+    assert Enum.any?(errors, &(&1["path"] == "cartridge.world.combat.allies[0]"))
+  end
 end

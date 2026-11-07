@@ -1,5 +1,18 @@
 [
   {
+    "key": "dev",
+    "version": 1,
+    "portability": "portable",
+    "residency": "portable_capability",
+    "commands": [
+      "dev_go_to_room",
+      "dev_set_fact",
+      "dev_set_level"
+    ],
+    "definitions": [],
+    "events": []
+  },
+  {
     "key": "movement",
     "version": 1,
     "portability": "portable",
@@ -131,6 +144,7 @@
     ],
     "policies": [
       "fact_compare",
+      "fact_at_least",
       "time_since"
     ]
   },
@@ -151,6 +165,9 @@
     "commands": [
       "choose_ancestry",
       "raise_attribute"
+    ],
+    "events": [
+      "level_reached"
     ],
     "definitions": [
       "attribute"
@@ -421,8 +438,7 @@
     "residency": "portable_capability",
     "commands": [
       "fill",
-      "pour",
-      "drink"
+      "pour"
     ],
     "events": [
       "filled",
@@ -554,7 +570,7 @@
     "portability": "portable",
     "residency": "portable_capability",
     "commands": [
-      "eat"
+      "consume"
     ],
     "definitions": [
       "edible"

@@ -1,16 +1,20 @@
-// Entity lines, Here lines, log lines and a press's fault (their doc comments).
-import { Fragment, useState } from 'react';
+// Entity lines, log lines and a press's fault (their doc comments).
+import { type ReactNode, useEffect, useRef, useState } from 'react';
 import { View } from 'react-native';
 import { Text } from './Text.tsx';
 import type { GameView } from '../../packages/game-view/session.ts';
-import { cap, plain } from './model.ts';
-import { COUNT, LABEL } from './labels.ts';
-import type { DetailLine } from './logs.ts';
-import { lineText, subject } from './words.ts';
+import { plain } from './model.ts';
+import { LABEL } from './labels.ts';
+import { InkText, Reanimated } from './fade.ts';
+import { haptic } from './haptic';
+import { logMark, markDrawn, type DetailLine } from './logs.ts';
+import { GiltLine } from './GiltLine.tsx';
+import { useDry } from './press.ts';
+import { lineText, worded } from './words.ts';
 import { grouped, type RecapLine } from './recap.ts';
 import { Control, Tap } from './pages.tsx';
 import { narrated, note, prose, usePalette, useType } from './palette.ts';
-import { size, space, type } from './tokens.ts';
+import { motion, size, space, type } from './tokens.ts';
 
 // Web keys on a Text or View: react-native-web forwards onKeyDown, React Native's types lack it.
 export const onKey = (f: (key: string) => unknown) =>
@@ -32,7 +36,11 @@ export function EntityLine(p: { name: string; rest?: string; note?: string; onPr
   // A trailing space ends the first line, so the shown text reads like the name (it hangs unseen).
   const gap = p.note ? ' ' : '';
   return (
-    <Tap label={`${p.name}${p.rest ?? ''}${p.note ? ` ${p.note}` : ''}, open`} onPress={p.onPress}>
+    <Tap
+      label={`${p.name}${p.rest ?? ''}${p.note ? ` ${p.note}` : ''}, open`}
+      pulse="selection"
+      onPress={p.onPress}
+    >
       {p.rest ? (
         <Text style={prose(c, t)}>
           <Text style={type.named}>{p.name}</Text>
@@ -69,38 +77,103 @@ export function Note({ children }: { children: string }) {
  *   value`, drawn once in ink italic (palette.ts `narrated`; book-ui.md Line placement, loka-lsqi).
  *   A refused line is a narrated event with no tag or chip (owner pick mvlyp3gphp2t); its reason
  *   word stays in its accessible name (`locked, The way west is locked.`, as the live region reads
- *   it). A speech line (speaker bar) waits until the log projects a speaker.
+ *   it). A speech line (speaker bar) waits until the log projects a speaker. A line no page has
+ *   drawn yet dries in, a narrated event `motion.dry.lag` later; a quiet merge, a page return and
+ *   restored history do not. `keep` hides lines without renumbering the rest. A log
+ *   with round marks (the combat log, logs.ts `newRound`) draws each round as its own block: `space.sm`
+ *   inside, `space.xl` between (book-ui.md, Live combat response).
  * - States: narration (a repeated quiet line reads `<line> (N times)`); narrated event; refused;
- *   an away recap entry, drawn as AwayRecap.
+ *   an away recap entry, drawn as AwayRecap; drying; rounds.
  * - Story: LogLines.stories.tsx
  */
-export function LogLines({ lines }: { lines: readonly DetailLine[] }) {
-  const c = usePalette();
+export function LogLines({
+  lines,
+  keep,
+  rounds: run,
+  reword,
+}: {
+  lines: readonly DetailLine[];
+  keep?: (line: DetailLine) => boolean; // shows only these; the rest still count as drawn
+  rounds?: true; // combat: a round's lines run on, one blank line between rounds (owner 2026-11-04)
+  reword?: true; // a conversation: the author preview re-words each line from its keys (worded.made)
+}) {
+  const { gone, drawn, rounds } = logMark(lines);
   const t = useType();
-  if (!lines.length) return null;
+  useEffect(() => markDrawn(lines), [gone + lines.length]);
+  // A line's number, also its stable key; a round's first number keys its block.
+  const starts = new Set(rounds);
+  const blocks: [number, ReactNode[]][] = [[gone, []]];
+  lines.forEach((line, i) => {
+    const n = gone + i;
+    if (starts.has(n) && blocks.at(-1)![1].length) blocks.push([n, []]);
+    if (!keep || keep(line))
+      blocks.at(-1)![1].push(<LogLine key={n} line={line} fresh={n >= drawn} reword={reword} />);
+  });
+  const shown = blocks.filter(([, b]) => b.length);
+  if (!shown.length) return null;
   return (
     // The walk tells log lines from refusal notes by this id (walkthrough/walk.ts live).
-    <View testID="log-lines" style={{ gap: space.sm }}>
-      {lines.map((line, i) =>
-        typeof line === 'string' || 'quiet' in line ? (
-          <Text key={i} style={{ ...t.log, color: c.fg }}>
-            {lineText(line)}
-          </Text>
-        ) : 'recap' in line ? (
-          <AwayRecap key={i} lines={grouped(line.recap)} />
-        ) : 'event' in line ? (
-          <Text key={i} style={narrated(c, t)}>
-            {line.text}
-          </Text>
-        ) : (
-          <Text key={i} accessibilityLabel={`${line.reason}, ${line.text}`} style={narrated(c, t)}>
-            {line.text}
-          </Text>
-        ),
-      )}
+    // Always nested, so a second round arriving remounts no line (a drying line keeps drying).
+    <View testID="log-lines" style={{ gap: run ? t.log.lineHeight : space.xl }}>
+      {shown.map(([n, b]) => (
+        <View key={n} style={{ gap: run ? 0 : space.sm }}>
+          {b}
+        </View>
+      ))}
     </View>
   );
 }
+
+// `fresh` is read once: the redraw after this one must not cut the drying, and an old line stays a
+// plain Text, so a long log carries no animation.
+function LogLine({ line, fresh, reword }: { line: DetailLine; fresh: boolean; reword?: true }) {
+  const c = usePalette();
+  const t = useType();
+  const dries = useRef(fresh).current;
+  if (typeof line === 'object' && 'recap' in line) {
+    const recap = <AwayRecap lines={grouped(line.recap)} />;
+    return dries ? <DryBlock>{recap}</DryBlock> : recap;
+  }
+  const plain = typeof line === 'string' || 'quiet' in line || 'level' in line;
+  const style = plain ? { ...t.log, color: c.fg } : narrated(c, t);
+  const stored = plain ? lineText(line) : line.text;
+  const words = (reword && worded.made?.get(stored)?.()) || stored;
+  const name =
+    typeof line === 'object' && 'reason' in line
+      ? { accessibilityLabel: `${line.reason}, ${words}` }
+      : {};
+  if (dries && typeof line === 'object' && ('level' in line || 'gilt' in line)) {
+    const hold = 'level' in line && line.first ? motion.first.hold : undefined;
+    return (
+      <GiltLine style={style} hold={hold}>
+        {words}
+      </GiltLine>
+    );
+  }
+  return dries ? (
+    <DryLine style={style} lag={plain ? 0 : motion.dry.lag} {...name}>
+      {words}
+    </DryLine>
+  ) : (
+    <Text style={style} {...name}>
+      {words}
+    </Text>
+  );
+}
+
+function DryLine(p: {
+  style: { color: string };
+  lag: number;
+  accessibilityLabel?: string;
+  children: string;
+}) {
+  const { style, lag, ...rest } = p;
+  return <InkText style={[style, useDry(style.color, lag)]} {...rest} />;
+}
+
+const DryBlock = ({ children }: { children: ReactNode }) => (
+  <Reanimated.View style={useDry()}>{children}</Reanimated.View>
+);
 
 /**
  * A room log entry after an absence (book-ui.md, Away recap).
@@ -144,79 +217,6 @@ export function AwayRecap({
           );
         })}
     </View>
-  );
-}
-
-/**
- * The room's people, then items; no headings, an empty group omitted (book-ui.md, Room page
- * anatomy).
- * - Use: RoomPage only.
- * - Rules: each group is one sentence, "Aldous, Bess, the carpenter, chandler, and cook are here."
- *   ("A and B are here.", "A crow is here.", "Two crows are here."): serial comma, the first word
- *   capitalised, each name its own link named "<name>, open"; articles, commas and "and" are plain
- *   text. A name with words shows its bare name; an article is shared by a run of different names
- *   that take it.
- * - Story: RoomPage.stories.tsx
- */
-export function Here(p: {
-  view: GameView;
-  text: (key: string) => string;
-  open: (id: string) => void;
-}) {
-  const npcs = p.view.entities.filter((e) => e.kind === 'npc');
-  const items = p.view.entities.filter((e) => e.kind !== 'npc');
-  return [
-    npcs.length > 0 && <Present key="npcs" group={npcs} text={p.text} open={p.open} />,
-    items.length > 0 && <Present key="items" group={items} text={p.text} open={p.open} />,
-  ];
-}
-
-// One group as one sentence of inline name links (owner, mvl9864n2qi8, mvl9q99wzm29). With name
-// words (loka-6qi): the bare name, its article written when it differs from the previous link's or
-// the name ends in the previous link's last word (a name without one breaks the run), and
-// same-name entities with a plural as one. With a carrier: "<Carrier> carries <links>." or, with
-// verb wears, "<Carrier> wears <links>." (the NPC's Look page, InsidePage), first link lowercase.
-const noun = (n?: string) => n?.split(' ').pop(); // 'cowering goblin' and 'goblin' end alike
-type Group = {
-  group: GameView['entities'];
-  text: (key: string) => string;
-  open: (id: string) => void;
-  carrier?: string;
-  verb?: 'carries' | 'wears';
-};
-// An empty group draws no sentence (a seen NPC always has worn, often []).
-export const carries = (p: Group & { carrier: string }) => p.group.length > 0 && <Present {...p} />;
-function Present(p: Group) {
-  const [c, t] = [usePalette(), useType()];
-  type Link = { id: string; name: string; article?: string; many?: true };
-  const links = p.group.flatMap((e): Link[] => {
-    const { bare, article, plural } = e.words ?? {};
-    const kind = (o: (typeof p.group)[number]) => o.words?.plural && p.text(o.words.plural); // eggs keyed egg_01..06
-    const same = plural ? p.group.filter((o) => kind(o) === kind(e)) : [e];
-    if (same[0] !== e) return []; // a later member of a collapsed group
-    const n = same.length;
-    if (n > 1) return [{ id: e.id, name: `${COUNT[n - 2] ?? n} ${p.text(plural!)}`, many: true }];
-    return [{ id: e.id, name: p.text(bare ?? e.name), article }];
-  });
-  return (
-    <Text style={prose(c, t)}>
-      {p.carrier && `${p.carrier} ${p.verb ?? 'carries'} `}
-      {links.map((l, i) => {
-        const prev = links[i - 1];
-        const article =
-          (l.article !== prev?.article || noun(l.name) === noun(prev?.name)) && l.article;
-        const first = (s: string) => (i === 0 && !p.carrier ? cap(s) : s);
-        return (
-          <Fragment key={l.id}>
-            {i > 0 && (i < links.length - 1 ? ', ' : links.length > 2 ? ', and ' : ' and ')}
-            {article && `${first(article)} `}
-            {nameLink(article ? l.name : first(l.name), () => p.open(l.id))}
-          </Fragment>
-        );
-      })}
-      {!p.carrier && subject(links.at(-1)?.name ?? '').endsWith(',') && ','}
-      {p.carrier ? '.' : links.length > 1 || links[0]?.many ? ' are here.' : ' is here.'}
-    </Text>
   );
 }
 
@@ -267,11 +267,12 @@ export const unseen = {
  * that any press still sends (03 §14).
  * - Use: Book's foot, after a press throws.
  * - Rules: the message sits outside the button, since its accessibilityLabel replaces the
- *   children it reads.
+ *   children it reads. An error haptic once per fault, no sound.
  * - Story: Live.stories.tsx
  */
 export function Fault(p: { fault: string; startOver: () => void }) {
   const c = usePalette();
+  useEffect(() => haptic('error'), [p.fault]);
   return (
     <View style={{ alignItems: 'center' }}>
       <Text style={{ ...useType().small, color: c.dim }}>{p.fault}</Text>

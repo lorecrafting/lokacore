@@ -1,0 +1,292 @@
+// Keep my place (docs/system/cartridge.md#author-preview): the author preview records the inputs
+// the session saved under the artifact hash and, after a reload into a different artifact, sends
+// them again through the normal command path. Targets are kept as definition refs because entity
+// ids shift when an edit adds or removes an entity. Nothing here writes state directly.
+import type { EntityId, GameView, Intent, Reply } from '../../packages/game-view/session.ts';
+
+export type Step = { intent: Intent } | { advance: number }; // advance: dev-clock milliseconds
+// stopped: a replay stopped under this artifact; its save already holds the path up to there.
+export type Place = {
+  hash: string;
+  steps: Step[];
+  stopped?: { hash: string; at?: number; note: string };
+};
+type Ids = Readonly<Record<string, string>>; // definition ref -> entity id
+type Pulsed = {
+  pulse: (mode: 'active' | 'drain') => { kind: string; code?: string; message?: string };
+};
+export type Replayable = Pulsed & {
+  view: () => { view: Pick<GameView, 'choice'>; token: string };
+  invoke: (intent: Intent) => Reply;
+  entityIds: () => Ids;
+  text: (key: string) => string | undefined;
+  dialogueOf: (continuation: string) => string | undefined;
+};
+// refused: the game or the file said no to this step, so dropping it can help; a pending or fault reply is not that.
+export type Outcome = { done: number; failed?: string; refused?: true };
+/** After the dev clock moved: credit the elapsed time now, so the next replayed input is not refused as catching up. Returns how the delivery ended. */
+export function caughtUp(game: Pulsed) {
+  game.pulse('active'); // a drain never captures the clocks (elapsed.ts pulse); an active pulse does
+  let rounds = 0;
+  let last = game.pulse('drain');
+  while (++rounds < 1000 && last.kind === 'catching_up') last = game.pulse('drain');
+  const why = last.code ?? last.message;
+  return why ? `${last.kind} ${why}` : last.kind;
+}
+
+// The browser's budget for one advance, in game minutes: delivery is synchronous and its cost follows game
+// time; on the toolbox showcase (rate 50) 60,600 minutes took 14 s and 1094 view emits while 3000 took 0.3 s
+// (loka-wfrgk.55). `bin/loka check` replays off the browser with no budget.
+export const ADVANCE_BUDGET_MINUTES = 3000;
+// The panel's ceil(minutes * 60000 / rate), so the whole budget converts to an ms the limit accepts.
+const limit = (rate: number) => Math.ceil((ADVANCE_BUDGET_MINUTES * 60_000) / rate);
+
+/** The dev clock moved by `ms`, delivered now and recorded only if delivered; else what stopped it. */
+export function advanced(
+  ms: number,
+  moveClock: (ms: number) => void,
+  game: Pulsed,
+  keep: (step: Step) => void,
+  rate: number,
+) {
+  if (ms > limit(rate))
+    return `Advance: ${Math.floor((ms * rate) / 60_000)} game minutes is over the ${ADVANCE_BUDGET_MINUTES}-minute budget for one advance; advance less.`;
+  moveClock(ms);
+  const how = caughtUp(game);
+  if (how !== 'ready') return `Advance: ${how}; not recorded.`;
+  keep({ advance: ms });
+}
+
+/**
+ * The dev cartridge's host clocks, the same in the author preview and `bin/loka check`: they move
+ * only with the dev clock, so a recording replays alike in both.
+ */
+export const frozenClock = (moved: () => number) => ({
+  wall: () => 10_000 + moved(), // any start reads the same: only the deltas matter
+  monotonic: moved,
+});
+
+const isRef = (target: string) => target.includes('@');
+
+/** The intent with each defined target named by its ref; a runtime-born entity keeps its id. */
+export const asRefs = (intent: Intent, ids: Ids): Intent => ({
+  ...intent,
+  target_ids: intent.target_ids.map(
+    (id) => (Object.keys(ids).find((ref) => ids[ref] === id) ?? id) as EntityId,
+  ),
+});
+
+type Recorded = {
+  invoke: (intent: Intent) => Reply;
+  entityIds: () => Ids;
+  pending: () => boolean;
+  subscribe: (update: (u: { kind: string; reply?: Reply }) => void) => unknown;
+};
+/**
+ * `game.invoke` recording each accepted input once. The session may hold an input (invocation.ts):
+ * it settles on a later pulse, and until then any other invoke is answered with the held input's
+ * reply, so what is recorded is the held input, not the latest sent.
+ */
+export function recording(game: Recorded, keep: (step: Step) => void) {
+  let held: Intent | undefined;
+  const settle = (reply: Reply) => {
+    if (reply.kind === 'saved' && reply.decision.kind === 'accepted' && held)
+      keep({ intent: held });
+    if (!game.pending()) held = undefined;
+  };
+  game.subscribe((u) => {
+    if (u.kind === 'completion' && u.reply) settle(u.reply);
+  });
+  return (intent: Intent) => {
+    if (!game.pending()) held = undefined; // a throw that left nothing held
+    held ??= asRefs(intent, game.entityIds()); // before the action eats, gives away or kills its target
+    const reply = game.invoke(intent); // a throw (the write failed) leaves the attempt held
+    settle(reply);
+    return reply;
+  };
+}
+
+const describe = (reply: Reply) => {
+  if (reply.kind !== 'saved') return reply.kind;
+  const d = reply.decision;
+  return d.kind === 'rejected'
+    ? `rejected ${d.error.code}`
+    : d.kind === 'fault'
+      ? `fault ${d.code}`
+      : d.kind;
+};
+
+/** The panel's dev-only ask (docs/system/cartridge.md#author-preview), by definition key. */
+export type Cheat =
+  | { op: 'go_to_room'; room: string }
+  | { op: 'set_fact'; fact: string; value: boolean | number | string }
+  | { op: 'set_level'; level: number; points: Record<string, number> };
+
+/** A cheat as the ordinary invocation the session decides and records. */
+export function cheatIntent(
+  cheat: Cheat,
+  { id, version }: { id: string; version: string },
+  token: string,
+): Intent {
+  const ref = (kind: string, key: string) => ({
+    cartridge_id: id,
+    cartridge_version: version,
+    kind,
+    key,
+  });
+  const input =
+    cheat.op === 'go_to_room'
+      ? { room: ref('room', cheat.room) }
+      : cheat.op === 'set_fact'
+        ? { fact: ref('fact', cheat.fact), value: cheat.value }
+        : {
+            level: cheat.level,
+            allocated: Object.entries(cheat.points).map(([key, points]) => ({
+              attribute: ref('attribute', key),
+              points,
+            })),
+          };
+  return {
+    action_key: `dev_${cheat.op}`,
+    target_ids: [],
+    input,
+    view_freshness_token: token,
+  } as unknown as Intent;
+}
+
+const REFUSED: Record<Cheat['op'], Record<string, string>> = {
+  go_to_room: {
+    not_found: 'no such room in this cartridge',
+    invalid_state:
+      'already there, the room is underwater, or in a fight, not standing, in water, riding, escorting, leading a group, on a patrol or expedition, in a scene, at an open choice or before the ancestry choice; finish that first',
+  },
+  set_fact: {
+    not_found: 'no such fact in this cartridge',
+    invalid_state:
+      'already that value, the wrong type or range, per subject, owned by a mechanic, or the ancestry choice is still open',
+  },
+  set_level: {
+    not_found: 'no such attribute in this cartridge',
+    invalid_state:
+      'already that level and those points, no levelling, past the top level, fewer points than already allocated, or more points than the level grants',
+  },
+};
+const LABEL: Record<Cheat['op'], string> = {
+  go_to_room: 'Go to room',
+  set_fact: 'Set fact',
+  set_level: 'Set level',
+};
+/** Whether the panel's message is a cheat the Book sends as an intent. */
+export const isCheat = (asked: { op: string }): asked is Cheat => Object.hasOwn(LABEL, asked.op);
+
+/** The author's plain words for a cheat's reply; empty when it was accepted. */
+export function cheatNote(op: Cheat['op'], reply: Reply) {
+  if (reply.kind === 'saved' && reply.decision.kind === 'accepted') return '';
+  const code =
+    reply.kind === 'saved' && reply.decision.kind === 'rejected' && reply.decision.error.code;
+  return `${LABEL[op]} ${reply.kind === 'pending' ? 'not confirmed' : 'refused'}: ${(code && REFUSED[op][code]) || describe(reply)}.`;
+}
+
+/**
+ * Sends a cheat once the time due is delivered: a reply held for catch-up would land on a later pulse,
+ * unrecorded and after the author read it as refused. Returns the note: `kept` (a stop note still true of
+ * the path) when the cheat was accepted, so a cheat does not hide why the replay stopped.
+ */
+export function sendCheat(
+  game: Replayable,
+  cheat: Cheat,
+  manifest: { id: string; version: string },
+  kept = '',
+) {
+  const after = caughtUp(game);
+  if (after !== 'ready') return `Not sent, the game is still catching up: ${after}.`;
+  return cheatNote(cheat.op, game.invoke(cheatIntent(cheat, manifest, game.view().token))) || kept;
+}
+
+/** The path without the step at `index`. */
+export const dropStep = (steps: Step[], index: number) => steps.filter((_, i) => i !== index);
+
+/** Sends one recorded input; `done` is filled by the caller. */
+function send(i: number, intent: Intent, game: Replayable): Omit<Outcome, 'done'> | undefined {
+  const ids = game.entityIds();
+  const { direction } = intent.input;
+  const said = [intent.action_key, ...intent.target_ids, ...(direction ? [direction] : [])];
+  const name = `step ${i + 1} (${said.join(' ')})`;
+  const missing = intent.target_ids.find((t) => isRef(t) && !(t in ids));
+  if (missing) return { failed: `${name}: no ${missing} in this cartridge`, refused: true };
+  const { view, token } = game.view();
+  // A choice names its continuation, which this run issued afresh.
+  const input =
+    intent.input.continuation_id && view.choice
+      ? { ...intent.input, continuation_id: view.choice.continuation_id }
+      : intent.input;
+  const reply = game.invoke({
+    ...intent,
+    target_ids: intent.target_ids.map((t) => (ids[t] ?? t) as EntityId),
+    input,
+    view_freshness_token: token,
+  });
+  if (reply.kind === 'saved' && reply.decision.kind === 'accepted') return undefined;
+  const rejected = reply.kind === 'saved' && reply.decision.kind === 'rejected';
+  return {
+    failed: `${name}: ${(rejected && gone(intent.input.choice_id, view.choice, game)) || describe(reply)}`,
+    ...(rejected && { refused: true }),
+  };
+}
+
+// A recorded choice the open choice does not offer (its words were edited, or its `when` or an earlier
+// step changed): name it, the open dialogue and what that offers now.
+function gone(chosen: unknown, choice: GameView['choice'], game: Replayable) {
+  if (typeof chosen !== 'string' || !choice || choice.choices.some((c) => c.choice_id === chosen))
+    return undefined;
+  const offers = choice.choices.map((c) => `'${game.text(c.label)}'`).join(', ');
+  return `the choice '${chosen}' is not offered in ${game.dialogueOf(choice.continuation_id)}; it offers: ${offers}`;
+}
+
+/** Exactly one of advance and intent, and an intent `send` can read: this is hand-edited JSON. */
+const wellFormed = (step: Step | null) =>
+  typeof step === 'object' &&
+  !!step &&
+  'advance' in step !== 'intent' in step &&
+  ('advance' in step ||
+    (!!step.intent?.input &&
+      Array.isArray(step.intent.target_ids) &&
+      step.intent.target_ids.every((t) => typeof t === 'string')));
+
+/** Sends the steps in order; the first the session does not save and accept stops the replay, named. */
+export function replay(
+  steps: Step[],
+  game: Replayable,
+  moveClock: (ms: number) => void,
+  rate: number | undefined, // the cartridge's time_policy rate; undefined: no budget (off the browser)
+): Outcome {
+  for (const [i, step] of steps.entries()) {
+    if (!wellFormed(step))
+      return {
+        done: i,
+        failed: `step ${i + 1}: not a step (needs advance or intent, not both)`,
+        refused: true,
+      };
+    if ('advance' in step) {
+      const name = `step ${i + 1} (advance ${step.advance})`;
+      if (!Number.isSafeInteger(step.advance) || step.advance < 0)
+        return { done: i, failed: `${name}: not whole milliseconds`, refused: true };
+      if (rate !== undefined && step.advance > limit(rate))
+        return {
+          done: i,
+          failed: `${name}: over the ${ADVANCE_BUDGET_MINUTES}-minute budget`,
+          refused: true,
+        };
+      moveClock(step.advance);
+      const after = caughtUp(game);
+      if (after !== 'ready') return { done: i, failed: `${name}: ${after}` };
+      continue;
+    }
+    const stopped = send(i, step.intent, game);
+    if (stopped) return { done: i, ...stopped };
+  }
+  return { done: steps.length };
+}
+
+/** "1 step", "2 steps". */
+export const steps = (n: number) => `${n} ${n === 1 ? 'step' : 'steps'}`;

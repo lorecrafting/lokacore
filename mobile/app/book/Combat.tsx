@@ -1,107 +1,137 @@
 // A full reading page with the offered actions following its combat history.
-import { useState } from 'react';
-import { View } from 'react-native';
-import { Text } from './Text.tsx';
-import { bandPhrase, type group } from './model.ts';
+import { useRef, useState, type RefObject } from 'react';
+import type { View } from 'react-native';
+import { Hotbar, HotbarList } from './Hotbar.tsx';
+import type { group } from './model.ts';
 import { ActionCard, Cards, PickLists, type Shown } from './actions.tsx';
+import { picks } from './pick.ts';
 import { commandOf } from './buttons.ts';
 import { LogLines } from './lines.tsx';
 import { LABEL } from './labels.ts';
-import { Control, Page, RunningHead } from './pages.tsx';
-import { prose, usePalette, useType } from './palette.ts';
+import { Control, Page } from './pages.tsx';
+import { RunningHead } from './RunningHead.tsx';
+import { UnderInk } from './UnderInk.tsx';
+import { Blow } from './Blow.tsx';
+import { Reanimated } from './fade.ts';
+import { useDry } from './press.ts';
 import type { presenter, Button } from './presenter.ts';
 import { cardKey } from './presenter.ts';
 
-type Screen = ReturnType<ReturnType<typeof presenter>['screen']>;
-type Encounter = NonNullable<Screen['ended']>;
-
-// The opponent lines, "name — band", one block of touching lines (a run of one kind, like the
-// mock's entity lines; Page's doc comment). A foe with name words reads definite, "the goblin"
-// (a proper name stays bare), one line per foe (loka-6qi). Your own bleeding and conditions stay on the
-// status line and Character (book-ui.md, Live combat response).
-// Under a live foe's line, its Cast a spell… list; a pick keeps the combat page (loka-x6t.109.5).
-function Fight(
-  p: Pick<Screen, 'view' | 'text' | 'buttons' | 'pending'> & {
-    combat: Encounter;
-    press: (b: Button) => void;
-  },
-) {
-  const c = usePalette();
-  const t = useType();
-  const { view, text, combat } = p;
-  const { opponent_id: id, name, band, words } = combat;
-  const shown: Shown = useState(); // one for every foe's list: one list open at a time (book-ui.md)
-  const casts = p.buttons.filter((b) => commandOf(b) === 'cast');
+/**
+ * The one foot control of an ended page: Let go or Back to World, dry until the page is read.
+ * - Use: the closed Combat page's foot, the dead page's Let go.
+ * - Story: CombatPage.stories.tsx
+ */
+export function Foot(p: {
+  label: typeof LABEL.letGo | typeof LABEL.backToWorld;
+  onPress: () => void;
+}) {
   return (
-    <View>
-      {(combat.active_opponents ?? [{ id, name, band, words }]).map((opponent) => (
-        <View key={opponent.id}>
-          <Text style={prose(c, t)}>
-            {opponent.words
-              ? `${opponent.words.article ? `${LABEL.the} ` : ''}${text(opponent.words.bare)}`
-              : text(opponent.name)}
-            {combat.active_opponents && opponent.id === combat.opponent_id && view.combat
-              ? ' (your target)'
-              : ''}
-            {/* a closed encounter's band is stale (a dead foe has none) */}
-            {view.combat && opponent.band && ` — ${bandPhrase({ band: opponent.band }, text)}`}
-          </Text>
-          <PickLists
-            page={opponent.id}
-            view={view}
-            buttons={casts.filter((b) => b.detail_id === opponent.id)}
-            text={text}
-            press={p.press}
-            pending={p.pending}
-            state={shown}
-          />
-        </View>
+    <Reanimated.View style={useDry()}>
+      <Control label={p.label} onPress={p.onPress} />
+    </Reanimated.View>
+  );
+}
+
+type Props = {
+  screen: ReturnType<ReturnType<typeof presenter>['screen']>;
+  g: ReturnType<typeof group>;
+  press: (button: Button) => void;
+  world: () => void;
+};
+
+type Foe = { name: string; words?: { bare: string; article?: string } };
+// A foe as its projected name, definite with name words ("the goblin"); a proper name stays bare.
+const named = (o: Foe, text: (key: string) => string) =>
+  o.words ? `${o.words.article ? `${LABEL.the} ` : ''}${text(o.words.bare)}` : text(o.name);
+
+// A foe's pick lists, its Cast a spell… option naming it.
+const foeLists = (
+  view: Parameters<typeof picks>[0],
+  casts: Button[],
+  o: Foe & { id: string },
+  text: (key: string) => string,
+) =>
+  picks(
+    view,
+    casts.filter((b) => b.detail_id === o.id),
+    o.id,
+    text,
+  ).map((k) =>
+    k.label === LABEL.castASpell ? { ...k, label: LABEL.castASpellOn(named(o, text)) } : k,
+  );
+
+// A live fight's response cards, each foe's Cast a spell on it… last. ponytail: two foes of one
+// name read alike (book-ui.md, Aimed spells off the target's page).
+function Responses(p: Props & { shown: Shown; opener: RefObject<View | null> }) {
+  const { view, text } = p.screen;
+  const casts = p.screen.buttons.filter((b) => commandOf(b) === 'cast');
+  const c = view.combat!;
+  const foes = c.active_opponents ?? [{ ...c, id: c.opponent_id }];
+  const stand = p.g.position.find((b) => b.action_key === 'stand');
+  return (
+    <Cards>
+      {stand && <ActionCard b={stand} press={p.press} />}
+      {p.g.flee.map((b) => (
+        <ActionCard key={cardKey(b)} b={b} press={p.press} />
       ))}
-    </View>
+      {p.g.bandage.map((b) => (
+        <ActionCard key={b.target_ids[0]} b={b} press={p.press} />
+      ))}
+      {/* a pick keeps the combat page (loka-x6t.109.5) */}
+      {foes.map((o) => (
+        <PickLists
+          key={o.id}
+          page={o.id}
+          view={view}
+          lists={foeLists(view, casts, o, text)}
+          text={text}
+          press={p.press}
+          pending={p.screen.pending}
+          state={p.shown}
+        />
+      ))}
+      <HotbarList {...p.screen} press={p.press} shown={p.shown} opener={p.opener} />
+    </Cards>
   );
 }
 
 /**
  * The combat foreground (book-ui.md, Live combat response).
- * - Use: while a fight is on.
- * - Rules: opponent lines (name, band phrase; none of your own condition lines) as one block of
- *   touching lines, then the isolated log, then the response cards; no PageFoot.
- * - States: one foe; pack; bleeding.
+ * - Use: while a fight is on, and its closed page until the foot is pressed.
+ * - Rules: the page opens with its log (no foe or band line above it, owner 2026-11-02), then the
+ *   response cards, each live foe's Cast a spell on it… last; no PageFoot. The page follows its newest
+ *   line; each round's lines (one receipt) run on as one block, one blank line between rounds. A closed
+ *   fight has one foot control: Back to World, or Let go when the player fell in it (Falling).
+ * - States: one foe; pack; bleeding; rounds; death (held red, Let go, no countdown).
  * - Story: CombatPage.stories.tsx
  */
-export function Combat(p: {
-  screen: ReturnType<ReturnType<typeof presenter>['screen']>;
-  g: ReturnType<typeof group>;
-  press: (button: Button) => void;
-  world: () => void;
-}) {
-  const c = usePalette();
-  const { view, text, combatLog, ended } = p.screen;
-  const combat = view.combat ?? ended;
-  if (!combat) return null;
-  // A closed encounter keeps its page: no actions, one Back to World (book-ui.md, Closure).
-  const foot = !view.combat && <Control label={LABEL.backToWorld} onPress={p.world} />;
-  const stand = p.g.position.find((b) => b.action_key === 'stand');
+export function Combat(p: Props) {
+  const { view, text, combatLog, ended, fell } = p.screen;
+  const shown: Shown = useState(); // one for every foe's list and the hotbar's: one open at a time (book-ui.md)
+  const opener = useRef<View>(null);
+  if (!view.combat && !ended) return null;
+  // A closed encounter keeps its page: no actions, one foot control (book-ui.md, Closure).
+  // Let go goes to World; with `revival` the presenter's leaveCombat makes it the spirit state.
+  const foot = !view.combat && (
+    <Foot label={fell ? LABEL.letGo : LABEL.backToWorld} onPress={p.world} />
+  );
   return (
     // Paper behind the running head too: the leaving page fades over the arriving one.
-    <View style={{ backgroundColor: c.bg, flex: 1 }}>
+    <Blow under={<UnderInk view={view} />}>
       <RunningHead view={view} text={text} />
-      <Page title="Combat" foot={foot}>
-        <Fight {...p.screen} combat={combat} press={p.press} />
-        <LogLines lines={combatLog} />
-        {view.combat && (
-          <Cards>
-            {stand && <ActionCard b={stand} press={p.press} />}
-            {p.g.look && <ActionCard b={p.g.look} press={p.press} />}
-            {p.g.flee.map((b) => (
-              <ActionCard key={cardKey(b)} b={b} press={p.press} />
-            ))}
-            {p.g.bandage.map((b) => (
-              <ActionCard key={b.target_ids[0]} b={b} press={p.press} />
-            ))}
-          </Cards>
-        )}
+      <Page
+        paperless
+        title={p.screen.title ?? 'Combat'}
+        foot={foot}
+        scrollToEnd={combatLog.length > 0}
+        strip={
+          view.combat && <Hotbar {...p.screen} press={p.press} shown={shown} opener={opener} />
+        }
+      >
+        <LogLines lines={combatLog} rounds />
+        {view.combat && <Responses {...p} shown={shown} opener={opener} />}
       </Page>
-    </View>
+    </Blow>
   );
 }

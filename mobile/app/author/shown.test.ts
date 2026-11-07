@@ -1,0 +1,132 @@
+// The author panel's State and Why read (docs/system/cartridge.md#author-preview).
+import assert from 'node:assert/strict';
+import { test } from 'node:test';
+import type { GameView } from '../../packages/game-view/session.ts';
+import { clockWords, factRows, shown, type Canon } from './shown.ts';
+
+const ref = (kind: string, key: string) => ({
+  cartridge_id: 'c',
+  cartridge_version: '1',
+  kind,
+  key,
+});
+const view = {
+  place: { id: 'r1', title: { key: 'room.t' } },
+  entities: [
+    { id: 'n1', kind: 'npc', name: 'npc.maud' },
+    { id: 'i1', kind: 'item', name: 'item.stone' },
+  ],
+  inventory: [{ id: 'i2', kind: 'item', name: 'item.lamp' }],
+  journal: [{ quest: ref('quest', 'lantern'), state: 'active' }],
+  resources: [
+    {
+      resource: { key: 'health' },
+      current: 3,
+      maximum: 9,
+      band: 'hurt',
+      tone: 'warn',
+    },
+  ],
+  conditions: [{ label: 'status.cold', resource: 'cold', ends_at: 40 }],
+  time: { label: 'dusk' },
+  map: { rooms: [{ id: 'r2' }], links: [], unexplored: [] },
+  choice: {
+    prompt: { key: 'choice.p' },
+    choices: [{ choice_id: 'a', label: 'choice.a', available: true }],
+  },
+} as unknown as GameView;
+const canon: Canon = {
+  scripted_actions: {
+    a: { key: 'here', target: { kind: 'detail', room: ref('room', 'r') } },
+    b: { key: 'there', target: { kind: 'detail', room: ref('room', 'other') } },
+    c: { key: 'tool', target: { kind: 'use' } },
+  },
+  dialogues: {
+    d: { key: 'with_maud', npc: ref('npc', 'maud') },
+    e: { key: 'with_bram', npc: ref('npc', 'bram') },
+  },
+};
+const rooms = {
+  'c@1:room/r': 'r1',
+  'c@1:room/other': 'r2',
+};
+const ids = {
+  'c@1:npc/maud': 'n1',
+  'c@1:npc/bram': 'n2',
+};
+const words: Record<string, string> = { 'room.t': 'Cellar', 'npc.maud': 'Maud', 'choice.a': 'Yes' };
+
+// Breaks: an item listed among the people; a key shown where its words exist; a key with no words
+// lost; a visited room missing from the map's path or the current one counted as visited; a quest's Ref passed through (an object as a React child blanks the panel, Book included).
+test('the view reads with its words, a key standing in for a line with none', () => {
+  const { offers: _, ...state } = shown(view, (k) => words[k], canon, ids, rooms);
+  assert.deepEqual(state, {
+    room: 'Cellar',
+    here: 'c@1:room/r',
+    visited: ['c@1:room/other'],
+    people: ['Maud'],
+    held: ['item.lamp'],
+    quests: [{ quest: 'lantern', state: 'active' }],
+    pools: [{ key: 'health', current: 3, maximum: 9, band: 'hurt', tone: 'warn' }],
+    statuses: [{ label: 'status.cold', ends_at: 40 }],
+    clock: { time: { label: 'dusk' }, calendar: undefined },
+    choice: { prompt: 'choice.p', options: ['Yes'] },
+  });
+});
+
+// Breaks: a detail action of another room offered; a tool action tied to a room; a dialogue offered
+// whose NPC is elsewhere.
+test('offers are this room: its details, any tool or spell, and the dialogues of who is here', () => {
+  assert.deepEqual(shown(view, () => undefined, canon, ids, rooms).offers, {
+    action: ['here', 'tool'],
+    dialogue: ['with_maud'],
+  });
+});
+
+// Breaks: raw seconds on the clock; a calendar's sky left out; minutes unpadded.
+test('the clock reads in words', () => {
+  assert.equal(clockWords({ time: 3725 }), '1h 02m');
+  assert.equal(
+    clockWords({
+      time: 0,
+      calendar: { day: 3, hour: 14, subdivision: 0, season: 'autumn', weather: 'rain' },
+    }),
+    'day 3, hour 14, autumn, rain',
+  );
+  // Break: a calendar without day or hour printing "undefined".
+  const partial = { subdivision: 0, season: 'autumn' } as GameView['calendar_status'];
+  assert.equal(clockWords({ time: 3725, calendar: partial }), '1h 02m');
+});
+
+// Breaks: a held fact matched by short key across cartridges (an extended cartridge's same key);
+// two subjects' rows of one fact collapsed into one; an unset declared fact dropped or shown
+// without its default; a held fact nothing declares lost.
+test('facts: every declared one by short key, unset at its default, each held row kept', () => {
+  const held = (c: string, key: string, subject_id?: string) =>
+    JSON.stringify({
+      fact: { ...ref('fact', key), cartridge_id: c },
+      scope: { kind: 'player' },
+      subject_id,
+    });
+  const declared = {
+    'c@1:fact/met': { key: 'met', value_type: { default: false } },
+    'base@1:fact/met': { key: 'met', value_type: { default: 0 } },
+  };
+  const rows = factRows(
+    {
+      [held('c', 'gone')]: 'x',
+      [held('base', 'met', 'npc1')]: 2,
+      [held('base', 'met', 'npc2')]: 7,
+    },
+    declared,
+  );
+  assert.deepEqual(
+    rows.map(({ id, key, value, set }) => [id, key, value, set]),
+    [
+      ['c@1:fact/met', 'met', false, false],
+      ['base@1:fact/met', 'met (npc1)', 2, true],
+      ['base@1:fact/met', 'met (npc2)', 7, true],
+      ['c@1:fact/gone', 'gone', 'x', true],
+    ],
+  );
+});

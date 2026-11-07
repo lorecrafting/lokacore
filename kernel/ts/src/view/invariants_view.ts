@@ -46,8 +46,7 @@ export const gameview_agrees_with_admission = ({
   if (command.world_context_id !== context) return code === 'not_found';
   if (type === 'continue' || (type === 'choose' && command.payload.dream))
     return dreamAgrees(view, command.payload, decision, action_key);
-  if (['fill', 'pour', 'drink'].includes(type))
-    return liquidAgrees(view, command, decision, action_key); // own keys only: an action may be keyed `constructor`
+  if (['fill', 'pour'].includes(type)) return liquidAgrees(view, command, decision, action_key); // own keys only: an action may be keyed `constructor`
   const commandOf = (a: AdvertisedAction) =>
     Object.hasOwn(resolves, a.action_key) ? resolves[a.action_key] : undefined;
   const equip = (a: AdvertisedAction) => EQUIP_VERBS.includes(commandOf(a));
@@ -88,7 +87,7 @@ function entryAgrees(
   if (!entry)
     return aimed
       ? decision.kind !== 'accepted' && !shown.includes(code)
-      : p.type !== 'perform' || decision.kind !== 'accepted';
+      : !['perform', 'accept_quest'].includes(p.type) || decision.kind !== 'accepted';
   if (entry.available) return !shown.includes(code);
   return decision.kind !== 'accepted' && (!shown.includes(code) || code === entry.reason.code);
 }
@@ -98,13 +97,12 @@ function entryAgrees(
 const aimedEntry = (view: GameView, p: Any, key: string | undefined) =>
   entityView(view, p.target_id)?.actions.find((a) => a.command === 'cast' && a.action_key === key);
 
-/**
- * The observation's maps from the actor's resolved set: each key's command, each aimed spell word's
- * key, and the keys of scripted actions aimed at a room detail (loka-x6t.120).
- */
+// From the actor's resolved set: each key's command, each aimed spell word's key, the keys on a page.
 export const offerMaps = (actions: readonly Offered[]) => ({
   resolves: Object.fromEntries(actions.map((a) => [a.key, a.command])),
-  details: actions.filter((a) => a.scripted?.target.kind === 'detail').map((a) => a.key),
+  details: actions
+    .filter((a) => a.scripted?.target.kind === 'detail' || a.detail || (a.quest && a.speaker))
+    .map((a) => a.key),
   words: Object.fromEntries(
     actions.flatMap((a) =>
       a.scripted?.target.kind === 'spell' ? [[a.scripted.target.word, a.key]] : [],
@@ -178,15 +176,15 @@ function advertised(
     );
   const id = p.type === 'perform' ? undefined : (p.item_id ?? p.target_id);
   if (id === undefined) {
-    const key = p.type === 'perform' ? p.action : p.type;
-    const actions =
-      p.type === 'perform'
-        ? [
-            ...view.actions,
-            ...(view.notices ?? []).flatMap((n) => n.actions ?? []),
-            ...(view.notice_boards ?? []).flatMap((b) => b.notices.flatMap((n) => n.actions ?? [])),
-          ]
-        : view.actions;
+    const quest = p.type === 'accept_quest';
+    const key = p.type === 'perform' ? p.action : quest ? p.quest?.key : p.type;
+    const pages = (view.notice_boards ?? []).flatMap((b) => b.notices);
+    const notices = quest || p.type === 'perform' ? [...(view.notices ?? []), ...pages] : [];
+    const actions = [
+      ...view.actions,
+      ...notices.flatMap((n) => n.actions ?? []),
+      ...(quest ? view.entities.flatMap((e) => e.actions) : []),
+    ];
     return actions.find((a) => a.action_key === key);
   }
   return entityView(view, id)?.actions.find((a) =>
@@ -214,12 +212,7 @@ const entityView = (view: GameView, id: string): EntityView | ContentView | unde
 
 function liquidAgrees(view: GameView, command: Any, decision: Any, key?: string): boolean {
   const p = command.payload;
-  const targets =
-    p.type === 'fill'
-      ? [p.source_id, p.vessel_id]
-      : p.type === 'pour'
-        ? [p.source_id, p.receiver_id]
-        : [p.vessel_id];
+  const targets = p.type === 'fill' ? [p.source_id, p.vessel_id] : [p.source_id, p.receiver_id];
   const source =
     p.type === 'fill'
       ? (view.notices ?? []).find((n) => n.id === p.source_id)

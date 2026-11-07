@@ -11,6 +11,7 @@ import {
   useState,
   type Dispatch,
   type ReactNode,
+  type Ref,
   type SetStateAction,
 } from 'react';
 import { View } from 'react-native';
@@ -25,14 +26,18 @@ import Animated, {
 } from 'react-native-reanimated';
 import { scheduleOnRN } from 'react-native-worklets';
 import {
+  Blur,
   Canvas,
   Fill,
+  Image,
   ImageShader,
   Shader,
   Skia,
   type SkImage,
   type SkRuntimeEffect,
 } from '@shopify/react-native-skia';
+import { cardContext } from './card.ts';
+import { curlContext } from './press.ts';
 import curl from './page-curl.sksl';
 import { easing } from './easing.ts';
 import { motion } from './tokens.ts';
@@ -51,10 +56,18 @@ const over = {
   ...({ inert: true } as object),
 } as const;
 
-type Leaving = { turn: number; dir: 1 | -1; page: ReactNode; image?: SkImage };
+type Leaving = { turn: number; dir: 1 | -1; riffle?: boolean; page: ReactNode; image?: SkImage };
 
 // `paper`: the shown palette's bg, the leaf's back.
-type Props = { turn: number; dir: 1 | -1; paper: string; children: ReactNode };
+// card: the arriving page is a chapter card, which dries over the blurred picture and does not curl.
+type Props = {
+  turn: number;
+  dir: 1 | -1;
+  riffle?: boolean; // a travel's turn: `motion.riffle` sweeps of the one picture
+  paper: string;
+  card?: boolean;
+  children: ReactNode;
+}; // mutate-skip: type
 type Size = { width: number; height: number };
 type SetLeaving = Dispatch<SetStateAction<Leaving | undefined>>;
 
@@ -70,41 +83,66 @@ export function PageTurn(p: Props) {
   const reduced = useReducedMotion();
   const [size, setSize] = useState<Size>({ width: 0, height: 0 });
   const [leaving, setLeaving] = useLeaving(p);
-  const { progress, page } = useMotion(p.turn, leaving, setLeaving, reduced);
+  const card = !!p.card && !reduced;
+  const { progress, page } = useMotion(p.turn, leaving, setLeaving, reduced, card);
   const fade = useAnimatedStyle(() => ({ opacity: reduced ? 1 - progress.value : 1 }));
+  const drawn = leaving?.image && { image: leaving.image, dir: leaving.dir, size, progress };
+  const sweeps = leaving?.riffle ? motion.riffle.sweeps : 1;
+  const context = !card || !leaving ? undefined : leaving.image ? 'picture' : 'waiting';
+  const curl = leaving && !card && !reduced ? curlLength(sweeps, leaving.riffle) : 0;
   // An arriving page's title takes focus only after a turn (title.ts titleFocus).
   const titles = useRef(titleFocus()).current;
   titles.turned = p.turn > 0;
   // Both pages are the same keyed element type, so the leaving page keeps its mounted instance.
   return (
     <titleContext.Provider value={titles}>
-      <View
-        style={{ flex: 1 }}
-        onLayout={({ nativeEvent: { layout: l } }) => setSize({ width: l.width, height: l.height })}
-      >
-        {[
-          <Animated.View key={p.turn} ref={page(p.turn)} collapsable={false} style={{ flex: 1 }}>
-            {p.children}
-          </Animated.View>,
-          leaving && !leaving.image && (
-            <Animated.View key={leaving.turn} {...over} style={[over.style, fade]}>
-              {leaving.page}
-            </Animated.View>
-          ),
-        ]}
-        {leaving?.image && (
-          <Curl
-            image={leaving.image}
-            dir={leaving.dir}
-            paper={p.paper}
-            size={size}
-            progress={progress}
-          />
-        )}
-      </View>
+      <cardContext.Provider value={context}>
+        <curlContext.Provider value={curl}>
+          <View
+            style={{ flex: 1 }}
+            onLayout={({ nativeEvent: { layout: l } }) =>
+              setSize({ width: l.width, height: l.height })
+            }
+          >
+            {card && drawn && <CardBlur {...drawn} />}
+            {[
+              arrivingPage(p.turn, page(p.turn), p.children),
+              leaving && !leaving.image && leavingPage(leaving, fade),
+            ]}
+            {!card && drawn && <Curl {...drawn} paper={p.paper} sweeps={sweeps} />}
+          </View>
+        </curlContext.Provider>
+      </cardContext.Provider>
     </titleContext.Provider>
   );
 }
+
+// The same bound as curlEnds and a riffle's length, known here at the arriving page's first render.
+const curlLength = (sweeps: number, riffle?: boolean) =>
+  motion.quick.duration + (riffle ? sweeps * motion.riffle.duration : motion.turn.duration);
+
+const arrivingPage = (turn: number, ref: Ref<never>, children: ReactNode) => (
+  <Animated.View key={turn} ref={ref} collapsable={false} style={{ flex: 1 }}>
+    {children}
+  </Animated.View>
+);
+
+const leavingPage = (l: { turn: number; page: ReactNode }, fade: object) => (
+  <Animated.View key={l.turn} {...over} style={[over.style, fade]}>
+    {l.page}
+  </Animated.View>
+);
+
+const timingOf = (pictured: boolean, reduced: boolean, card: boolean, riffle?: boolean) =>
+  pictured
+    ? card
+      ? { duration: motion.card.duration + motion.card.out, easing: motion.card.easing }
+      : riffle
+        ? { duration: motion.riffle.sweeps * motion.riffle.duration, easing: motion.riffle.easing }
+        : motion.turn
+    : reduced
+      ? motion.fade
+      : undefined;
 
 // Takes the leaving page's picture, then curls it (or, under reduced motion, fades the page itself).
 function useMotion(
@@ -112,6 +150,7 @@ function useMotion(
   leaving: Leaving | undefined,
   setLeaving: SetLeaving,
   reduced: boolean,
+  card: boolean,
 ) {
   const progress = useSharedValue(0);
   // Each page's view by turn, from its mount: Reanimated reads a ref prop only when it mounts.
@@ -126,7 +165,7 @@ function useMotion(
   useLayoutEffect(() => {
     // A curl or fade first draws with the progress it mounts on (a stale 1 flashed the arriving page).
     if (!leaving) return void (progress.value = 0);
-    const timing = leaving.image ? motion.turn : reduced ? motion.fade : undefined;
+    const timing = timingOf(!!leaving.image, reduced, card, leaving.riffle);
     if (timing) return animate(progress, timing, leaving, setLeaving);
     let live = true;
     // No picture in time, or none at all: the page has simply changed.
@@ -156,10 +195,8 @@ function useLeaving(p: Props) {
     lastPage.current = p.children;
   });
   if (p.turn !== turn) {
-    // Sound: the polish phase plays sound.pageTurn here (curl and cross-fade alike) unless Sound is
-    // off; there is no audio library yet.
     setTurn(p.turn);
-    state[1]({ turn, dir: p.dir, page: lastPage.current });
+    state[1]({ turn, dir: p.dir, riffle: p.riffle, page: lastPage.current });
   }
   return state;
 }
@@ -184,18 +221,38 @@ function animate(
     void requestAnimationFrame(() => requestAnimationFrame(() => leaving.image?.dispose()));
 }
 
+// The leaving page's picture under an arriving chapter card: it blurs on, then lets go in `out`.
+function CardBlur(p: { image: SkImage; size: Size; progress: SharedValue<number> }) {
+  const { duration, out, blurFrom, blurTo } = motion.card;
+  const blur = useDerivedValue(() => blurFrom + (blurTo - blurFrom) * p.progress.value);
+  const shown = useDerivedValue(() =>
+    Math.min(1, ((duration + out) * (1 - p.progress.value)) / out),
+  );
+  return (
+    <View {...over}>
+      <Canvas style={{ flex: 1 /* mutate-skip: layout */ }}>
+        <Image image={p.image} fit="fill" x={0} y={0} {...p.size} opacity={shown}>
+          <Blur blur={blur} mode="clamp" />
+        </Image>
+      </Canvas>
+    </View>
+  );
+}
+
 function Curl(p: {
   image: SkImage;
   dir: 1 | -1;
   paper: string;
   size: Size;
   progress: SharedValue<number>;
+  sweeps: number;
 }) {
   const paper = useMemo(() => Array.from(Skia.Color(p.paper)).slice(0, 3), [p.paper]);
   effect ??= Skia.RuntimeEffect.Make(curl)!;
   const uniforms = useDerivedValue(() => ({
     size: [p.size.width, p.size.height],
-    progress: p.progress.value,
+    // Each sweep starts the one picture over; the last stays finished for its last frame.
+    progress: p.progress.value >= 1 ? 1 : (p.progress.value * p.sweeps) % 1,
     direction: p.dir,
     paper,
   }));

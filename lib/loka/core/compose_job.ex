@@ -1,6 +1,18 @@
 defmodule Loka.Core.ComposeJob do
   @moduledoc "Job times inside one advance (twin of kernel/ts/src/foundation/compose_job.ts)."
 
+  @doc """
+  An encounter round's occurrence clock: its job's due time; an Attack's opening round
+  (loka-kgd.197) runs on a job never scheduled, at the current clock. A pack round's expected row
+  names its round; a later round's missing job has no occurrence (nil, a refusal).
+  """
+  def occurrence(state, %{"job_id" => job_id} = op) do
+    case get_in(state, ["jobs", job_id]) do
+      nil -> if get_in(op, ["expected", "round"]) == 1, do: state["clock"]
+      job -> job["due_time"]
+    end
+  end
+
   # Each op's scheduling time: the due time of the last job.complete before it, else `at`
   # (the target; a partial compose: the clock).
   def times(state, ops, at) do

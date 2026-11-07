@@ -2,11 +2,14 @@
 // 1/ZOOM at rest, so it is crisp both ways. You are the dot; each compass exit is a path out to
 // an open ring, or a stub ending in a red tick when closed; up and down are stair nodes that fade
 // in with the zoom. Real data only: the current room and its exits.
+import { type ReactNode, useRef } from 'react';
 import { Animated, View } from 'react-native';
 import { Text } from './Text.tsx';
 import type { GameView } from '../../packages/game-view/session.ts';
+import { Reanimated } from './fade.ts';
 import { ANGLE, STAIR, ZOOM as U } from './joystick.ts';
 import { usePalette } from './palette.ts';
+import { useDry } from './press.ts';
 import { font } from './tokens.ts';
 
 type Exit = GameView['exits'][number];
@@ -125,21 +128,40 @@ function Stair({ exit, on }: { exit: Exit; on: boolean }) {
   );
 }
 
+// The ways newly open in this room (book-ui.md, Lever and latch); a first view's or a new room's are just there.
+type Way = Exit['direction'];
+type Seen = { room: string; open: Way[]; drying: Way[] };
+function seenNow(was: Seen | undefined, room: string, exits: readonly Exit[]): Seen {
+  const open = exits.filter((e) => e.available).map((e) => e.direction);
+  if (was?.room !== room) return { room, open, drying: [] };
+  const newly = open.filter((d) => !was.open.includes(d));
+  return { room, open, drying: [...was.drying.filter((d) => open.includes(d)), ...newly] };
+}
+
+const Dry = ({ children }: { children: ReactNode }) => (
+  <Reanimated.View style={useDry()}>{children}</Reanimated.View>
+);
+
 /**
  * The footer minimap's drawing: you are the dot; each exit a path to an open ring, or a stub with
  * a tick when barred: in the path ink for a closed door, `danger` when locked or otherwise barred
- * (owner 2026-10-23: the door state shows here, not on World); stair nodes fade in with the zoom.
+ * (owner 2026-10-23: the door state shows here, not on World); stair nodes fade in with the zoom;
+ * a compass way newly open in the room dries in.
  * - Use: Footer only.
  * - Rules: a drawing, exempt from space tokens; real data only (the current room and its exits).
  * - Story: Footer.stories.tsx
  */
 export function MapDrawing(p: {
+  room: string;
   exits: readonly Exit[];
   lit: string | null;
   zoom: Animated.Value; // 0 at rest, 1 zoomed
   knob: { x: number; y: number }; // your dot's offset from the middle, in zoomed px
 }) {
   const c = usePalette();
+  const seen = useRef<Seen | undefined>(undefined);
+  seen.current = seenNow(seen.current, p.room, p.exits);
+  const { drying } = seen.current;
   const scale = p.zoom.interpolate({ inputRange: [0, 1], outputRange: [1 / U, 1] });
   return (
     <Animated.View
@@ -151,7 +173,13 @@ export function MapDrawing(p: {
       </Animated.View>
       {p.exits.map((e) =>
         e.direction in ANGLE ? (
-          <Path key={e.direction} exit={e} on={e.direction === p.lit} />
+          drying.includes(e.direction) ? (
+            <Dry key={e.direction}>
+              <Path exit={e} on={e.direction === p.lit} />
+            </Dry>
+          ) : (
+            <Path key={e.direction} exit={e} on={e.direction === p.lit} />
+          )
         ) : e.direction in STAIR ? (
           <Animated.View key={e.direction} style={{ opacity: p.zoom }}>
             <Stair exit={e} on={e.direction === p.lit} />

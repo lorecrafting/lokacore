@@ -14,6 +14,12 @@ import {
 import { fadeStub } from './__tests__/fade-stub.ts';
 const require = createRequire(import.meta.url);
 const ts = require('typescript');
+// Components drawn with nodes() alone hold no state; the Book's own test sets real hooks.
+(globalThis as any).d2Hooks = {
+  state: (v: any) => [typeof v === 'function' ? v() : v, () => {}],
+  ref: (current: any) => ({ current }),
+  effect() {},
+};
 registerHooks({
   resolve(s, c, next) {
     // The page curl needs Skia and Reanimated; a page_turn.e2e.ts concern, not these tests'.
@@ -59,6 +65,7 @@ const ids = idsOf(source().value);
 const LEDGER = 'The mill ground more sacks at night than by day.';
 const { InsidePage, Item } = await import('./Menu.tsx');
 const { default: Book, BookView } = await import('./Book.tsx');
+const { Leaf } = await import('./Leaf.tsx');
 function nodes(e: any): any[] {
   if (Array.isArray(e)) return e.flatMap(nodes);
   if (!e || typeof e !== 'object') return [];
@@ -213,12 +220,12 @@ for (const settlement of ['pulse', 'title press'])
       assert.deepEqual(draw().props.stack, [{ kind: 'chapter' }]);
       if (settlement === 'title press') {
         const chapter = BookView(draw().props).props.children.props.children.props.children[0].props
-          .children[0].props.children;
-        chapter.props.chapterDone();
+          .children[0].props.children.props.children;
+        Leaf(chapter.props).props.children[1].props.chapterDone();
         assert.deepEqual(draw().props.stack, []);
         a.fault.reads = false;
         const world = BookView(draw().props).props.children.props.children.props.children[0].props
-          .children[0].props.children;
+          .children[0].props.children.props.children;
         nodes(world)
           .find((n) => n.type === 'Pressable' && n.props.accessibilityLabel === 'Study, look')!
           .props.onPress();
@@ -229,8 +236,8 @@ for (const settlement of ['pulse', 'title press'])
         const settled = draw();
         assert.equal(settled.props.stack.at(-1).kind, 'chapter');
         const chapter = BookView(settled.props).props.children.props.children.props.children[0]
-          .props.children[0].props.children;
-        chapter.props.chapterDone();
+          .props.children[0].props.children.props.children;
+        Leaf(chapter.props).props.children[1].props.chapterDone();
       }
       assert.equal(draw().props.screen.detail(book).length, 1);
       assert.deepEqual(draw().props.stack, [

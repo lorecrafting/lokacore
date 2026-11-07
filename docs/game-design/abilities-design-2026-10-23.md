@@ -369,7 +369,7 @@ never a sure money loser; paid NPCs stop at beginner tier.
 
 | Profession | Output | Consumed by (system) | Offline buyer | Gap |
 |---|---|---|---|---|
-| Tiller | food, buffs | hunger G13, spoilage row 41, `hearty` | inn, commissions | none |
+| Tiller | food, buffs | Well fed ([Consume](../system/mechanics.md#consume-loka-kgd209)), spoilage row 41, `hearty` | inn, commissions | none |
 | Wright | tools, furniture, rooms | durability row 21, built rooms | repair service, settlers | tool wear (only weapons wear) |
 | Healer | dressings, remedies | bleed, wounds, statuses (cures) | infirmary | none |
 | Scout | hides, meat, guidance | crafts, escorts | traders, escort jobs | none |
@@ -579,7 +579,7 @@ stage 4, so the coin fee starts after the prologue. This departs from the coin-f
 
 | Option | Engine | Verdict |
 |---|---|---|
-| **A. The questline ends at the teacher: a dialogue choice offered once the quest's objective holds does `skill.acquire`, no payment** | none: quests, dialogue choices and `skill.acquire` exist | **Recommended**; a choice may teach a skill with no payment (`lib/loka/content/skills.ex:313-316`); the gift to the teacher is a `hand_over` (the player gives; `receive` is the reverse, the NPC giving, as `cartridges/toolbox_showcase/dialogues/aldous_lesson.json` does) |
+| **A. The questline ends at the teacher: a dialogue choice offered once the quest's objective holds does `skill.acquire`, no payment** | none: quests, dialogue choices and `skill.acquire` exist | **Recommended**; a choice may teach a skill with no payment (`lib/loka/content/skills.ex:313-316`); the gift to the teacher is a `hand_over` (the player gives; `receive` is the reverse, the NPC giving, as `cartridges/toolbox_showcase/areas/combat/dialogues/aldous_lesson.json` does) |
 | B. A `skill.acquire` step on the `quest_resolved` reaction | new reaction step; save recovery checks each acquired fact against a dialogue grant receipt (`skills-save.ts`) | Only if A cannot carry it |
 | C. Gift as a `lesson_payment` in items | lesson payments are coin today | Not needed: the gift is a quest objective |
 

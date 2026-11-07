@@ -97,7 +97,7 @@ const whole = (m: Record<string, Json>) =>
  * or lacks a field play relies on: the head's numbers, the receipt scope and replay ids (03 §14),
  * the binding (null: a guest) (OFF-07). A corrupt save is reported, never replaced by `fresh`.
  */
-export function load(db: Db, fresh: World, first: () => Meta) {
+export function load(db: Db, fresh: World, first: () => Meta, dev = false) {
   // Inside one, a read would take this handle's own uncommitted rows as saved (03 §15).
   if (db.isInTransactionSync()) throw new Error('a transaction is open; outcome unknown');
   // Classified before any table is created: empty only when no table holds progress (the trace
@@ -126,10 +126,10 @@ export function load(db: Db, fresh: World, first: () => Meta) {
     const world = hydrate(fresh, { ...state, clock: h.clock, rng } as World['state'], true);
     if (!world || !restorable(world)) return undefined;
     const meta = { ...m, parent, seed, pin } as Meta;
-    receiptRecovery(fresh, world, db, meta, h.revision);
+    receiptRecovery(fresh, world, db, meta, h.revision, dev);
     return saved(world, h.revision, meta, db);
   } catch (e) {
-    if (e instanceof SyntaxError || /malformed JSON/.test(String(e))) return undefined;
+    if (unreadable(e)) return undefined;
     throw e;
   }
 }
@@ -155,6 +155,12 @@ const restorable = (world: World) =>
         (validate('LogicalTime', q.started_at).length || q.started_at > world.state.clock)),
   ) &&
   !recoveryFault(world) &&
+  // death@1: a corpse-bound job is a decay of a death's corpse (an unbound decay fails upstream).
+  Object.values(world.state.jobs ?? {}).every(
+    (j) =>
+      j.corpse_id == null ||
+      (j.job.kind === 'decay' && world.state.created?.[j.corpse_id]?.origin.kind === 'death'),
+  ) &&
   Object.entries(world.entityResourceSpecs).every(([target, spec]) =>
     validOverrideRow(world.state.resources?.[target], spec, world.state.clock),
   );
@@ -181,6 +187,10 @@ function saved(world: World, revision: number, meta: Meta, db: Db) {
 
 // ponytail: SQLite's own messages for SQLITE_NOTADB and SQLITE_CORRUPT, as node:sqlite reports
 // them; expo-sqlite's wording is checked on the phone (S6b), its error codes if it differs.
+/** True when a saved row is unusable. Never a TypeError: a bug in our code must not offer to wipe a save. */
+export const unreadable = (e: unknown) =>
+  e instanceof SyntaxError || /malformed JSON/.test(String(e));
+
 /** True when SQLite reports the file is not a database or a page of it corrupt, not bad JSON (OFF-07). */
 export const corrupt = (e: unknown) => /file is not a database|malformed(?! JSON)/.test(String(e));
 

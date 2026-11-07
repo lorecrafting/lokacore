@@ -1,5 +1,7 @@
 # Toolbox showcase
 
+> The showcase cartridge's player-facing text is agent-written placeholder: see [placeholder prose](showcase/placeholder-prose.md).
+
 `cartridges/toolbox_showcase` (the hub and the body, world and social districts of [showcase plan 1](showcase/hub-and-first-districts.md) are built, the combat district of [showcase plan 2](showcase/combat-district.md) is built, the cause-and-effect slice of [showcase plan 3](showcase/cause-and-effect.md) is built, the magic district (plan 6) is built, and the Homestead, economy and law districts and the traps district of plans [4](showcase/homestead-district.md), [5](showcase/economy-law-district.md) and [7](showcase/traps-district.md) are built, each held by its `kernel/ts/test/showcase_<district>.test.ts`; compiled answer
 `protocol/fixtures/toolbox_showcase_hash.json`, held by `test/loka/content_showcase_test.exs`) is the composition proof for the [mechanics toolbox](MECHANICS-TOOLBOX.md):
 one playable cartridge where finished mechanics meet each other, so a pair that only works in its
@@ -7,9 +9,9 @@ own sampler shows up here ([owner decision](decisions/owner-decision-showcase-20
 Integration rows such as W22 Fire live in it. It replaces Chapter 1 as the regression fixture once
 it covers Chapter 1's play families (see [Retiring Chapter 1](#retiring-chapter-1)).
 
-**Coverage** (2026-10-28, at b9309910c, `node kernel/ts/play/coverage.ts <artifact>` over the 30
-showcase transcripts, `walk_*` included): 128 of 140 reactions fired, 46 of 49 scripted actions completed,
-25 of 34 choices taken, 3 of 3 quests done.
+**Coverage** (2026-11-01, Beads `loka-kgd.197`, `node kernel/ts/play/coverage.ts <artifact>` over the 30
+showcase transcripts, `walk_*` included): 127 of 139 reactions fired, 49 of 52 scripted actions completed,
+26 of 34 choices taken, 3 of 3 quests done.
 To re-pin a `walk_*` transcript after a content change, run `node kernel/ts/play/record.ts <transcript.jsonl>`: it replays the transcript's own commands and rewrites it. To record a new walk, drive `Rec` in a script (`new Rec(ctx)`, its moves, `r.save(out)`).
 
 ## Structure
@@ -24,6 +26,9 @@ To re-pin a `walk_*` transcript after a content change, run `node kernel/ts/play
   freely.
 - **Quests and scenes** get their own guided loop in the social district: a quest with a deadline
   and hints, and a scene whose dialogue choices drive reactions.
+- **Area folders**: each district's rooms, and the definitions only that district names, live in
+  `areas/<district>/` ([area layout](rnd/cartridge-area-layout-design-2026-11-04.md)); anything two
+  districts share stays in the root folders. `bin/area_split.py` did the move with the hash unchanged.
 
 ## Pairwise mechanic matrix
 

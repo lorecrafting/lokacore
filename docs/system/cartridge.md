@@ -18,6 +18,8 @@ its NPC and item definitions with the rest of the world's definitions and text:
 | `rooms/<key>.json` `zones` | source only: `["<Key>", ...]`, the zones the room belongs to; the compiler strips it ([Source shortcuts](#source-shortcuts)) |
 | `behaviours/<name>.json`; `npcs/` and `items/` `behaviours` | source only: `{"reactions": {"<rule>": ReactionRule without key}}`, and the NPC's or item's `["<name>", ...]` (or `{"behaviour": "<name>", "with": {...}}` entries); the compiler expands each to copies and strips both ([Source shortcuts](#source-shortcuts)) |
 | `areas/<name>.json` | an area bundle: several definitions of any of those directories in one file, `{"<dir>": {"<key>": definition without key}}` ([Source shortcuts](#source-shortcuts)) |
+| `areas/<area>/<dir>/<key>.json` (`.scene`, `.cut` as at the root) | an area folder: the file `<dir>/<key>.json` would be, owned by the area `<area>` ([Area folders](#area-folders)) |
+| `outline.json` | author notes, not content: the Story map's beats, `{"parts": [{title?, minutes?, beats: [{n, title?, nodes?, seeds?, pays?}]}]}` ([schema](../../schemas/source/outline.schema.json)); the compiler skips it, and `bin/loka story <cartridge>` (`GET /story` in the author preview) reports each beat built, `~` or missing and each seed without a later payoff and payoff without an earlier seed ([design](../rnd/story-map-design-2026-11-05.md)) |
 
 `requires.kernel_api` is a range `{at_least, below}` with `at_least < below` (`KERNEL_API_RANGE_INVALID` at `cartridge.requires.kernel_api`, compiler); the loader refuses an installed API outside it (`KERNEL_API_UNSUPPORTED`). `at_least` rises only when the content uses a newer kernel feature; a contract bump alone changes `INSTALLED.kernel_api` and never a cartridge (the save pin carries the kernel_api, [save.md](save.md#opening-a-story); loka-daha). Floors raised by contract bumps before loka-daha (the dialogue cartridges at 1.124, the showcase at 1.126; 2026-10-30) stand; they are not lowered. No field carries its own floor; a cartridge released later states the API it was compiled against here.
 
@@ -27,8 +29,7 @@ file outside these recognized root files and definition directories is `UNKNOWN_
 definition may sit in an area bundle, may name a parent of its own kind with `"extends"` and may
 be marked `"abstract": true`; the compiler opens bundles and flattens the rest away first
 ([Source shortcuts](#source-shortcuts)). A
-source with rooms, text or an entry compiles to
-`loka-cartridge-v2`; v1 (manifest, facts, actions) is the R4 form.
+source compiles to `loka-cartridge-v2`, the one format; it needs rooms, an entry and text.
 
 ## Current bundled chapter
 
@@ -87,7 +88,7 @@ bar.” Reading either grants no quest, fact or reward.
 ## Compiler
 
 `mix loka.compile <source dir> <artifact path>` (`lib/mix/tasks/loka.compile.ex:12`) writes
-the artifact and prints warnings as JSON lines, or prints every diagnostic and exits 1.
+the artifact and prints warnings as plain lines, or prints every diagnostic and exits 1.
 `Loka.Content.compile/2` (`lib/loka/content.ex:38`) runs the stages on the parts earlier
 stages accepted, so one bad file hides no other diagnostic; diagnostics are unique and sorted by
 path, code, then canonical text (`:73`). The artifact is the canonical encoding of
@@ -96,14 +97,14 @@ path, code, then canonical text (`:73`). The artifact is the canonical encoding 
 `resource@1` and `schedule@1` in its lock, with or without `resources.json`
 (`lib/loka/content/resources.ex:141`, `def requires`); the engine defaults are hp 0..20 start 20 gain 5, ma
 0..100 start 100 gain 4, mv 0..82 start 82 gain 18 per game hour (`:15`), and
-`minimum <= start <= maximum` else `RESOURCE_SPEC_INVALID`. Without `world`, a move costs 1 mv
+`minimum <= start <= maximum` else `RESOURCE_SPEC_INVALID`; an hp pool with `minimum` or `start` below 0 is `BODY_BELOW_ZERO`. Without `world`, a move costs 1 mv
 and every pool takes the engine default band table ([protocol.md](protocol.md#gameview)); the
 compiler writes `world` and `bands` only where the source authors them.
 
 An optional `NpcDefinition.hp` contains exactly `minimum`, `maximum`, `start`, and `gain`
 for the cartridge's existing hp pool. Bounds/start are ResourceInt; gain is a nonnegative
 ResourceInt. The compiler requires `minimum <= start <= maximum`
-(`RESOURCE_SPEC_INVALID`). No bands, regen, key or arbitrary pool map is accepted.
+(`RESOURCE_SPEC_INVALID`) and refuses `minimum` or `start` below 0 (`BODY_BELOW_ZERO`); a reaction's `resource.adjust` with a negative `by` is `REACTION_DRAINS_BODY`. No bands, regen, key or arbitrary pool map is accepted.
 Missing hp preserves legacy behavior. Presence requires resource@1. Older-development compatibility is not required under the [owner policy](../decisions/owner-decision-forward-development-2026-10-05.md). Runtime definition and
 row semantics live in [resource@1](mechanics.md#resource1-kerneltssrcmechanicsresourcets).
 
@@ -193,8 +194,8 @@ What the compiler checks (`lib/loka/content/*.ex` moduledocs; codes in
 - story points: there is no story point file. A dialogue choice's `story_point: "<key>/<outcome>"`
   and a scene's `on_end` declare the point's outcomes, and the point is located at its first
   claim. A second claim of one outcome is `DUPLICATE_DEFINITION` at its site
-  (`dialogues/<d>.choices.<c>.story_point` or `scenes/<s>.on_end`); a claiming choice's dialogue
-  resolves a quest (`OUTCOME_MISMATCH` at the choice's `story_point`); a scene-claimed key is at most
+  (`dialogues/<d>.choices.<c>.story_point` or `scenes/<s>.on_end`); a claiming choice has no `then`
+  or `then_failed`, since reaching a point ends the talk (`OUTCOME_MISMATCH`, why `story_point_then`, at the choice's `story_point`); a scene-claimed key is at most
   52 characters (`SCHEMA_VIOLATION` at `scenes/<s>.on_end.story_point`); a point needs dialogue@1
   (`UNDECLARED_CAPABILITY`, `lib/loka/content/dialogues.ex`);
 - policies: a policy is its condition tree inline (`protocol/policy.schema.json` `Policy`); no
@@ -260,24 +261,28 @@ field of the op; a list names the only fields run besides `op`.
 | `quest.resolve` | `quest_resolved` | all | | | |
 | `barrier.set` | `barrier_changed` | all | | | |
 | `npc.move` | `entity_entered_room` | all | | | |
-| `quest.fail`, `population.suppress`, `population.spawn`, `experience.grant`, `narrate`, `item.move`, `replenish.run` | | all | | | |
+| `quest.fail`, `population.suppress`, `population.spawn`, `experience.grant`, `narrate`, `item.move`, `replenish.run`, `end_talk` | | all | | | |
 | `status.apply` | | all | `npc`, `status` | | |
 | `status.cure` | | all | all | | |
-| `damage`, `light.ignite`, `resource.adjust` | | | all | | |
+| `damage`, `light.ignite` | | | all | | |
+| `resource.adjust` | | all | all | | |
 | `build` | | | `structure`, `direction` | | all |
 | `skill.acquire`, `topic.grant` | | | | all | |
 | `entitlement`, `meal`, `drink`, `repair`, `claim`, `cancel`, `deposit`, `withdraw`, `mend`, `raze` | | | | | all |
+
+`end_talk` closes the delivery actor's open conversation; the compiler admits it only on a player's own act (`choice_resolved`, `choice_opened`, `check_passed`, `check_failed`, `action_completed`, `story_point_reached`; `end_talk_event`), since any other event's delivery may fall past an NPC subject to whoever acted, or to the tick's root.
 
 ### Source shortcuts
 
 The compiler rewrites the source before any other stage reads it (`Loka.Content.Source.load/1`,
 `lib/loka/content/areas.ex`, `lib/loka/content/extends.ex`, `lib/loka/content/prose.ex`,
 `lib/loka/content/behaviours.ex`, `lib/loka/content/params.ex`,
-`lib/loka/content/zones.ex`),
+`lib/loka/content/zones.ex`, `lib/loka/content/waits.ex`),
 so `mix loka.compile` and `mix loka.lint` see the same flattened definitions. The order is: open
 area bundles, refuse repeated definitions, flatten `extends`, lower inline prose, expand
-behaviours, expand zone rules, refuse repeated definitions again. The artifact
-never carries a bundle, `extends`, `abstract`, a prose marker, a behaviour or a zone;
+behaviours, expand zone rules, refuse repeated definitions again, split waits, refuse repeated
+definitions again. The artifact
+never carries a bundle, `extends`, `abstract`, a prose marker, a behaviour, a zone or a wait;
 the loader is unchanged.
 
 **Actions with outcomes.** Every player action is `actions/<key>.json`. A file with `command`
@@ -299,7 +304,7 @@ A built-in action and a scripted action cannot share a key: two files cannot, an
 definition beside a file is `DUPLICATE_DEFINITION` at both sites (`actions/<key>`,
 `areas/<name>.actions.<key>`).
 
-**Area bundles.** `areas/<name>.json` (one level; `areas/x/y.json` is `UNKNOWN_FIELD`) holds
+**Area bundles.** `areas/<name>.json` (a `.json` directly in `areas/<area>/` is `UNKNOWN_FIELD`) holds
 `{"<dir>": {"<key>": <definition without key>}}`, where each `<dir>` is a definition directory
 of the [Source layout](#source-layout) table. `text` and `facts` stay in their root files.
 - A bundled definition is exactly the file `<dir>/<key>.json` would be: every stage checks it, and
@@ -308,10 +313,11 @@ of the [Source layout](#source-layout) table. `text` and `facts` stay in their r
 - A prototype may live in a bundle: bundles open before `extends` resolves.
 - `mix loka.lint` names a bundled definition by its definition address, `<dir>/<key>.json`
   (`reactions/elder_hears.json: ...`), not by the bundle file.
-- A bundle that fails to decode adds nothing; its `INVALID_JSON` fails the build. While any
-  bundle is refused (undecodable, not an object, or with an unknown or non-object member), every
-  `UNRESOLVED_REFERENCE` is held back, since its definitions are missing; the other diagnostics
-  stand.
+- Any source file that fails to decode (`INVALID_JSON`, bundle or not) stops the compile after
+  loading: only the decode errors report, since the definitions that file holds are missing and
+  every other error would follow from that. While any bundle is refused (not an object, or with an
+  unknown or non-object member), every `UNRESOLVED_REFERENCE` is held back the same way; the other
+  diagnostics stand.
 - An `actions/` file refused at load or by its `extends` holds back every other file's
   `UNRESOLVED_REFERENCE` the same way until it is fixed (its kind is unknown); its own stand.
 
@@ -324,6 +330,37 @@ of the [Source layout](#source-layout) table. `text` and `facts` stay in their r
 
 [speech_sampler](../../cartridges/speech_sampler/areas/village.json) is the working example: its
 rooms, NPCs, dialogue and reactions are one file.
+
+#### Area folders
+
+`areas/<area>/<dir>/<key>.json` is read as the root file `<dir>/<key>.json` (`Source.classify`,
+`lib/loka/content/source.ex`); `.scene` sits under `scenes/` or `dialogues/` and `.cut` under
+`scenes/`, as at the root. The folder name is the area: no `area` field (a stray one is
+`UNKNOWN_FIELD`), no key prefix, and nothing of it reaches the artifact, so moving a file in or
+out of an area folder leaves `content_hash` unchanged, except a room entering or leaving an area
+that a reaction `zone` names (the implicit zone below). `areas/<area>.json` and `areas/<area>/` are
+one area. Diagnostics carry the file path (`areas/hollow/npcs/wren.room`); `mix loka.lint` names
+the root address (`npcs/wren.json: ...`).
+- An area is an implicit zone of its rooms (`Zones.expand`): a reaction `"zone": "<area>"` with no
+  `on.room` copies once per room of the area. Explicit `zones` still name any key.
+- **Border rule** (`Loka.Content.Areas.area_of/1`; the root has no area). A file of area A may name
+  a definition of area B only when B is A, either is the root, or the target is a room. The
+  compiler checks every reference after short references expand (`Loka.Content.AreaRules`), each
+  `extends` (`Extends.flatten`) and each `behaviours` entry (`Behaviours.expand`). Text keys and
+  facts are root and never checked.
+
+| Case | Code | Path | data |
+|---|---|---|---|
+| A reference from area A to a non-room definition of area B | `SCHEMA_VIOLATION` | `<src>.<path to the ref>` (`areas/coop/reactions/crow_lands.on.npc`) | `{"why": "area_crossing", "target": "npcs/crow", "area": "rookery"}` |
+| `extends` or `behaviours[i]` naming a parent or behaviour of another area | `SCHEMA_VIOLATION` | `<src>.extends`, `<src>.behaviours[<i>]` | the same, `target` `items/pebble` or `behaviours/nibbles` |
+| An area folder with no room (its bundle's rooms count; a room-less bundle `areas/<name>.json` alone is never empty: PM ruling 2026-11-04) | `SCHEMA_VIOLATION` | `areas/<area>` | `{"why": "area_empty", "area": "<area>"}` |
+| An area folder name that is not a Key (lowercase snake_case) | `SCHEMA_VIOLATION` | `"areas/<Name>"` (quoted: the name is no key) | `{"why": "area_name"}` |
+| An unknown folder in an area, a deeper folder, or a `.json` directly in `areas/<area>/` | `UNKNOWN_FIELD` | `areas/rookery/widgets/w` | `{}` |
+| One kind and key in two areas, or an area and the root | `DUPLICATE_DEFINITION` | each site | `{}` |
+
+A behaviour with no reactions copies nothing and is not checked. The rationale and the showcase
+migration are the [area layout design](../rnd/cartridge-area-layout-design-2026-11-04.md); the
+[Builders' Guide](../BUILDERS-GUIDE.md#cartridge-layout) is the author's view.
 
 **`extends`.** A file in a definition directory may hold `"extends": "<key>"`, the key of a
 definition of the same kind (the short-reference convention), in any file of that kind.
@@ -404,6 +441,15 @@ diagnostic fails the build. The refusals, with `<src>` the file's source path:
 
 [speech_sampler](../../cartridges/speech_sampler/areas/village.json) writes 21 of its 23 lines
 inline; its artifact equals the hand-keyed one byte for byte.
+
+**Waits.** One step list for a reaction that plays out over time, lowered to [FD1](mechanics.md#delayed-reactions-toolbox-row-fd1) rules.
+- A reaction's `steps` may carry `{"op": "wait", "seconds": N}`, N a whole number of logical seconds, at least 1.
+- The list is split at its waits. The first stretch keeps the rule's key; each later stretch is a sibling rule `<rule>_wait_<n>` (n from 1), with the same `on` and `when` and an `after` of the rule's own `after` plus every wait before it. A leading wait leaves no stretch before it, so the rule itself takes the `after`: `wait 600` then steps compiles to the same bytes as `after: 600` with those steps.
+- All stretches are scheduled from the same event, not chained: [FD1](mechanics.md#delayed-reactions-toolbox-row-fd1) refuses `event.emit` on a delayed rule. A list that narrates in any stretch counts as narrating in each for the silent-write lint.
+- Refused in the catalog's words at the authored step (SCHEMA_VIOLATION invalid_value): a `wait` outside a reaction's `steps` (any other definition, such as an action, a dialogue choice or a service; a `.scene` file has no way to write one); `seconds` not a whole number of at least 1, an extra field, or a running total above the `after` maximum; a `wait` with no step after it, or followed by another `wait`; a step after a wait that reads the event, the FD1 event-bound list (`wait_event`); a `when` with `subject: "subject"` (`wait_subject`).
+- **Death, leaving, saving: FD1 unchanged.** Each stretch is its own reaction job for the delivery's actor. A save holds the pending jobs and a cold reopen fires each once. Leaving the room cancels nothing, since a job is bound to its actor, not a room. Nothing about a death cancels a job, and no test pins a job firing after the actor's death. The only cancellation is `when`, read at delivery and again at fire, so an author who wants a list to stop writes that into `when`.
+- **Timed actions.** An action's events carry its start, and FD1 lands a job due inside the advance 1 s after it, in job id order (minted per command). So a list on `action_completed` naming a scripted action with a `duration` adds that duration to every stretch that has an `after`: waits count from the action's end and keep their order and spacing. The same list on `action_completed` with no `action`, while any timed scripted action exists, or on a custom event a timed action's outcome emits, is refused (`wait_inside_action`) when it has two or more delayed stretches: the duration is not known there. One delayed stretch cannot reorder, so it compiles. `action_completed` does not fire on a failed check (`scripted_action/rule.ts`), so a failure path uses `check_failed`, an event of the kind below, or one wait on the failure's own event.
+- **Known limits.** `when` is read for each stretch, so a list whose earlier step makes its own `when` false drops the later stretches; the compiler does not look for this, and a writer may use it to cancel. A list on any other event inside a long command (a check or fact change inside a timed action, a chain of events from one, a `wait` command) is not known at compile: stretches due inside the advance all land 1 s after it, and their order can differ per command. A fact step on a per-subject fact with no `npc` or `item` after a wait writes nothing, since the job has no event subject. A fault another stage finds in a later stretch (an unknown text key) names the sibling's renumbered step, under the authored file (`ponytail:` in `lib/loka/content/waits.ex`).
 
 **Zones.** One reaction for many rooms.
 - A room's source may carry `"zones": ["<Key>", ...]`; the compiler strips it from every room.
@@ -501,7 +547,7 @@ being objects (they hold parameter markers).
 
 `loadCartridge(bytes, installed)` (`kernel/ts/src/content/cartridge.ts:23`) returns the decoded
 cartridge and its hash, or the first diagnostic of the first failing stage (`:15`): size
-(`ARTIFACT_TOO_LARGE`), JSON (`INVALID_JSON`), format (`UNKNOWN_FORMAT`: v1 or v2), the
+(`ARTIFACT_TOO_LARGE`), JSON (`INVALID_JSON`), format (`UNKNOWN_FORMAT`: not `loka-cartridge-v2`), the
 `CartridgeArtifact` schema (`SCHEMA_VIOLATION`, `UNKNOWN_FIELD`), `CONTENT_HASH_MISMATCH`,
 map keys against manifest and definition (`ARTIFACT_DEFINITION_KEY_MISMATCH`, `:109`), the
 lock (`:134`: `LOCK_MANIFEST_MISMATCH`), and the installed kernel
@@ -543,18 +589,18 @@ the loader diagnostic and exits 1 on refusal, otherwise prints one canonical JSO
   UNREACHABLE_DETAIL.
 - **Orphans.** `orphan_items`: template items with no inbound edge. `orphan_facts`: `unused` (no
   inbound edge), `write_only` (every inbound edge a write), `read_only` (inbound edges, none a
-  write). A write is an edge with op `fact.assign` or `fact.adjust`, or at an engine write site
+  write). A write is an edge with op `fact.assign`, `fact.adjust` or `fact.stamp`, or at an engine write site
   with no op: `world.death_credit[n].fact`; a topic's `fact` (also a read: the codex lists known
   topics); a scene's `on_end.assign[n].fact` and `on.rest.credit`; a quest's
   `expedition.survived_fact`, `expedition.faction`, `exchange.contribution`, `exchange.faction`,
   `deadline.fact` and `deadline.trust_fact`; an ancestry's `faction.fact`; an item's
-  `weapon.durability.fact` (a hit wears it); a service's `benefit.fact` (a repair restores it). Facts the engine owns
+  `weapon.durability.fact` (a hit wears it); a service's `benefit.fact` (a repair restores it) and `benefit.account` (a deposit or withdraw writes it). Facts the engine owns
   are left out: the [Compiler](#compiler)'s reserved facts (position, `scene_<key>`,
   `story_point_<key>`, `skill_<key>`, `uses_<key>`, `seen_tip_<key>`), a quest patrol's
   `trust_fact` and an entitlement service's fact, as RESERVED_FACT keeps them.
 - Each list is sorted by ref. ponytail: static initial state, rooms reached through exits only (a
   room reached by travel, a ferry or a scripted action shows unreachable, a quest's own `offer` counts
-  without evaluating its policy, and a quest without one that only a scripted action, reaction or action
+  without evaluating its policy, only if its target's room or NPC is reachable (a bare offer counts), and a quest without one that only a scripted action, reaction or action
   names shows unreachable), no dialogue choices or reaction chains, and engine read sites with no op are not reads (such a fact may show `write_only`); any
   other engine writer shows its fact `read_only`. A committed graph waits for a consumer (R6, L6).
 
@@ -619,7 +665,7 @@ committed or checked in CI. Refs are DefinitionRefStrings.
   paying mechanic shows.
 - **Items.** `items.faucets`: `receive` (ref the dialogue, `choice`, `item` and `npc` its roles),
   `drop` (ref the NPC, `item`, `chance`). `items.sinks`: `hand_over` (ref the dialogue, `choice`,
-  `item` and `npc` its roles), `edible` (ref the item, `resource`, `amount`).
+  `item` and `npc` its roles), `edible` (ref the item, `resource` and `amount` when it restores).
 - **Ecology.** `populations`: each plan `{ref, home, area, cap, day_target, night_target,
   replacement_delay, chance?, npc, item?, corpse}`, `chance` only on an encounter plan; a replacement is the only thing that mints an item. `seams`: each harvest detail `{room, detail, items, tool?,
   careful?}`: the count of its items, its tool's tag, its careful count.
@@ -749,7 +795,8 @@ Beads `loka-kgd.194.2` ([design audit](../rnd/design-audit-abilities-authoring-2
 findings 16 and 23, approach F, plan phase 4) lists the definitions that no example transcript
 exercises. `node kernel/ts/play/coverage.ts <artifact> [<transcript.jsonl> ...]` replays each
 transcript (by default `cartridges/<manifest id>/transcripts/*.jsonl`, sorted) against the
-artifact. It loads and refuses as `reach.ts` above (the loader diagnostic on stderr, exit 1), exits
+artifact; a refused entry recorded `committed` replays in that form and exercises nothing. It loads
+and refuses as `reach.ts` above (the loader diagnostic on stderr, exit 1), exits
 1 when a transcript does not replay byte for byte (`<transcript>: replay differs at ordinal <n>`,
 the path relative to the repository) or when a replayed decision reaches the 64-line narration cap
 (`<transcript>: narration cap reached at ordinal <n>`: a cut marker would report a fired rule as
@@ -789,7 +836,8 @@ loads and refuses as `reach.ts` above (exit 1). It reads the transcript with its
 on the marked copy of Transcript coverage above, comparing each line with the recording; a
 difference exits 1 (`<transcript>: replay differs at ordinal <n>`, the path relative to the
 repository). Step `<ordinal>` itself is decided, never compared, so an edited rule can be
-explained. Exit 2: wrong arguments, both flags, an ordinal that is not an integer in
+explained; a refused step answers `outcome: rejected`, each reaction `fired: 0` with no causes.
+Exit 2: wrong arguments, both flags, an ordinal that is not an integer in
 1..entries, or a `--action`/`--dialogue` key no definition has. Otherwise it prints one canonical
 JSON document. Nothing is committed or checked in CI; only its unit test runs.
 
@@ -836,6 +884,149 @@ model strips them to prose until details are tappable (`mobile/app/book/model.ts
 source, a line may be written in place and lowered to a generated key
 ([inline prose](#source-shortcuts)).
 
+## Author preview
+
+`bin/loka dev <cartridge dir> --watch` ([`author.ts`](../../kernel/ts/play/author.ts)) compiles the
+source tree into the artifact the web preview bundles (`mobile/app/.dev-cartridge/current.json`,
+[`metro.config.js`](../../mobile/app/metro.config.js), `npm run author`) and serves a local,
+loopback-only author API (`LOKA_AUTHOR_PORT`, default 19008) that the preview proxies at
+`/__author/`. Release, test and e2e bundles never set `LOKA_DEV_CARTRIDGE`; a production bundle
+with it set fails to build, and the app throws when the dev cartridge flag reaches a non-`__DEV__`
+build. The author tools below are reachable only in that bundle (a production export keeps a few dead strings) and change no protocol, save or kernel_api.
+
+- **Numbers.** The panel's Numbers tab and `bin/loka sim <cartridge dir>` ([`sim.ts`](../../kernel/ts/play/sim.ts)) report, read-only: each pool over game hours under the [measured-flows](#measured-flows-balance-tool-2) worker, XP per level with the kills that pay for it, and the [fight matrix](#fight-matrix-and-encounter-rating-balance-tool-7) (`GET /__author/numbers`; an NPC card's Run fights asks `GET /__author/fights`, the fight rows alone, without the minutes the pacing sim takes). Each report runs in a child process killed at a limit; one that does not finish says so. Nothing is written to the source tree.
+- **Keep my place.** The preview records each input the Book sends that the session saved (the
+  intent, its targets as definition refs `cartridge@version:kind/key`, and each dev-clock advance
+  in milliseconds) under the artifact's hash. The preview keeps one save file per kernel_api and
+  clock, never `loka-showcase.db`: the browser's save pool holds six files, so a file per edit filled
+  it within four edits (loka-wfrgk.58). On a save pinned to another edit it starts over without
+  asking (the file and its trace stay); the release build keeps the refusal above. After a reload
+  into a different hash it replays the path through the normal command path, one step at a time; the first step the session does not
+  save and accept stops the replay and is named by its ordinal and reply. Nothing writes state directly.
+  The dev cartridge plays one fixed seed; at `?dev=1`, on a frozen clock that moves only with the dev clock, as
+  `bin/loka check` does, so a recording replays alike in both, but for one budget; a release is untouched.
+  The browser refuses one advance over 3000 game minutes, on record and on replay, because delivery
+  is synchronous and its cost follows game time (loka-wfrgk.55); `bin/loka check` replays off the
+  browser with no budget, so a step it passes can be refused in the panel.
+- **Fast loop.** A `text.json` save is pushed to the open page as a text overlay before its
+  compile and shows at once: no compile, reload or replay. The compile still runs after it and
+  reports its diagnostics to the page; an edit whose compiled cartridge differs from the page's
+  only in text values (inline prose too) is pushed the same way once compiled, and the artifact
+  is written on the next structural edit. Any other edit compiles, and the page reloads and
+  replays. The overlay lives in the watcher's memory and the page; no file carries it. A failed compile keeps the last good
+  artifact and names the fault. Each compile after the first goes to one resident compiler
+  (`mix loka.compile --serve`), one at a time in save order, and answers exactly as the one-shot
+  would; when it dies, wedges or finds changed engine code, that compile runs one-shot (on the new
+  code) and a new resident starts. The release compile (`mix loka.compile`) and every CI check are
+  unchanged by the fast path; the overlay never becomes an artifact.
+- **Checkpoints.** A recorded path saved under a name is a plain file in the source tree,
+  `checkpoints/<name>.json` (`{"steps": [...]}`, the same steps as keep my place, versioned with
+  the cartridge; a name is `[a-z0-9_-]+`, never a path). The watcher reads and writes them
+  (`GET /__author/checkpoints`, `GET|PUT /__author/checkpoints/<name>`); the compiler and the
+  watcher's rebuild skip the directory. The panel lists them; jumping to one starts the game over
+  and replays it, and a refused step offers dropping it and replaying the rest. `bin/loka check
+  <cartridge>` replays each one headless on a fresh session through the same replay, without the
+  browser's advance budget, and exits 1 on any refusal; CI runs it for every cartridge with the directory.
+- **Author panel** (`tools/author-panel`, its own web page framing the Book at `?dev=1`; nothing of it enters the app's dependencies or bundles): the last compile's diagnostics in plain words
+  (`severity: file:line message`, which is what `mix loka.compile` prints: one sentence and one fix
+  per diagnostic code, from `Loka.Content.Explain`, the path mapped to its line by the source JSON;
+  invalid JSON adds `:column`), and under them the lint findings, folded behind their count (`mix loka.lint`, run after each
+  successful compile; a lint that could not run says so); the game state from the view (room, people,
+  held items, pools with their bands, statuses, clock, pending choice and quests) and every declared
+  fact by its short key, a fact never set at its declared default; why a
+  scripted action or dialogue is missing or refused, offered from the current room rather than typed and
+  answered in sentences (`fact met_thera is false; needs true`; [rule explainer](#rule-explainer-loka-kgd1943)
+  on the recorded path, its policy read on the world as it stands after the last step); find (`GET /__author/find?q=`): a key or
+  words to every source `file:line`, and each definition of the compiled artifact whose refs name that
+  key; Alt-click on a Book line opens its source `file:line` in the owner's editor by the line's text key, a bound or speaker-joined line too (`POST /__author/open`,
+  `LOKA_EDITOR`, default `code --goto`); the game-time control, which delivers the time at once and
+  records it only when delivered; the checkpoint list; the still-to-write list; go to a room and set a fact by key (below). An input the session held
+  (`pending`, `catching_up`) is recorded when it settles as accepted.
+- **Editor write path** ([`write.ts`](../../kernel/ts/play/write.ts), [GUI editor design §11](../rnd/gui-editor-design-2026-11-04.md)): the only way the editor changes the source tree.
+  Every request whose `Host` is not `localhost` or `127.0.0.1` (any port) is answered 403, and so is
+  any non-GET whose `Origin` is not one of those. `GET /source?file=` answers the file's bytes, its
+  sha256 and its kind, key and area, and for a `.scene` its dialogue's words in the last compile's
+  artifact (`text`, `dialogue.<key>.` and `dialogue.<key>_` keys); `GET /schema/<dir>` the source schema with its `$defs` inlined;
+  `GET /journal` the entries, newest first. `POST /change {file, was, ops}` sets or deletes JSON
+  fields by path and writes the file in the house format (two-space JSON, a final newline);
+  `/edit {file, line, was, words}` replaces the words of one line (a JSON string literal, or a
+  scene's `* ` line; a key line, a choice label and words with a newline or tab are refused);
+  `/set {file, line, was, value}` ([`scene_card.ts`](../../kernel/ts/play/scene_card.ts)) replaces
+  the value of one `.scene` `npc:`, `with:` or `then:` line with a key from the last good compile's
+  artifact, the keys the card's picker offers: an NPC's for `npc:` and `with:`; for `then:` `end` or
+  a dialogue a then can enter (not a keyword, quest or riddle one, `dialogue_links.ex`), so only
+  `end` before any compile (any other line, value or file is refused 400; `was` is the line's text);
+  `/delete {file, was}` (a room's `layout.json` row goes with it); `/move {file, was, area}`;
+  `/new {kind, name, from?, area?, extends?}` runs `mix loka.new` (`area` its `--area`, `extends`
+  its `--extends`; refused while any symlink is in the tree) and journals the files it wrote, from
+  a snapshot diff; `/undo {id}`. `GET /templates` lists the abstract NPC and item sources
+  (`dir`, `key`), which the compile drops; templates inside an area bundle file are not listed.
+  `GET /world` lists the sibling cartridge folders (`name`, the `cartridge.json` title) and the
+  `current` one; `POST /world {name, new?, from?}` switches to a listed sibling, or with `new`
+  first runs `mix loka.new cartridge` (`from` its `--from`, a listed sibling) for a free folder
+  name `[a-z][a-z0-9_]{0,31}` (`mix loka.new`'s 32), refused while a write is in flight. The watcher then exits 75 and
+  `bin/loka dev` restarts it on that world, remembered in `.dev-cartridge/world` for the next
+  `bin/author.sh` with no folder; journal, Hold and the panel's selection start empty.
+  `was` is the sha256 of the whole file (for `/edit`, the line's text): a file
+  changed since answers 409 with its current bytes, and nothing is written. One path guard reads
+  every path a body names: a normal relative path under the real source root (not the root as a
+  string prefix), no symlink on the way to it, for a read a listed regular file, for a create a free
+  place a source file may take. Each write is a `.tmp` and a rename. The journal keeps one entry per
+  editor write and one per watcher burst of outside saves (`by: outside`), with each file's before
+  and after, capped at 64M characters (the oldest go first); `/undo` refuses when any of its files
+  changed since. Each write and burst pushes `changed: [{file, sha256, by}]` to the page. `POST
+  /hold {on}`: while held, a structural compile waits (`pending` counts them, the newest kept) and
+  the Hold's end writes it, so the Book does not reload mid-edit; text overlays still push until one waits. Each
+  compile also pushes `diagnostics`, `mix loka.compile --json <file>`.
+- **World card** ([GUI editor design §6](../rnd/gui-editor-design-2026-11-04.md), E6e): the inspector's hand-built card
+  for `cartridge.json`, `resources.json`, `attributes.json` and each population, transport and barrier
+  file (their rows in `tools/author-panel/src/edit/registry.json`), opened from the Hierarchy's and the
+  Project tab's World button or by selecting one of those definitions. It writes only through the
+  routes above (`/change`, `/undo`, Hold). A known reference field is a picker of the keys its kind has
+  (rooms, items, NPCs and transports from the last good compile; resources, with the default pools hp,
+  ma and mv, and attributes from their root files) and refuses any other key at the field, before it is
+  written; with no keys known yet (no good compile) it takes any text. A new resource or attribute gets a
+  lowercase key of at most 64 characters that no entry has, with its required numbers at 0.
+- **Rules block** ([GUI editor design §4.5](../rnd/gui-editor-design-2026-11-04.md), E6c): an
+  action's policy and check and a reaction's trigger, condition and steps are edited by one block
+  (`tools/author-panel/src/edit/blocks/Rules.tsx`) inside the inspector's card. It draws the branch
+  the value's tag names (`op`, `event` or `kind`); picking another branch writes that tag and keeps
+  only the fields the new branch declares with the same shape (a check's `key` survives a switch of
+  kind); a branch that only states which fields are required draws nothing. Adding or removing a
+  check stays with the generic card, since a check needs its `failure` outcome.
+- **Go to room, set fact, set level** ([owner decision](../decisions/owner-decision-authoring-readiness-2026-10-31.md), dev@1): the panel sends them as ordinary invocations `dev_go_to_room`, `dev_set_fact` and `dev_set_level` the session decides, saves as receipts and records as steps, so a reopen and `bin/loka check` re-decide them under the fixed seed and clock and a checkpoint may hold them. Only a host with `dev` set (the preview, `bin/loka check`) reaches `stepDev`; any other host answers `unsupported_capability`, `step` answers `permission_denied`, and no cartridge action can name them. Go to room moves the body alone and is refused `invalid_state` when that would leave a world invariant wrong: already there, engaged, not standing, in water, with an escort, mount or group that would come along, on a patrol or expedition, in a modal scene or at an open choice. It runs no entry sight or arrival line. Set fact is refused `invalid_state` for a per-subject fact, a value of the wrong type or range, the value it already has, the position and scene facts, and a fact another mechanic owns. Set level writes the actor's levelling row (toolbox row 4): experience becomes the threshold of the given level (0 at level 1), and each listed attribute's allocated points become the given count. It sets the row and nothing more, like the other cheats that set state: no gained, level up or death penalty line, and no `level_reached`, so no level reaction springs. It is refused `not_found` for an attribute the cartridge does not declare, and `invalid_state` with no levelling, a level above the last threshold's, a count below the points already allocated, more points than the level grants, or the row it already holds. The panel states each refusal in one plain sentence.
+- **Still to write.** A text value with a line that trims to `~` is a placeholder, in JSON or in
+  a scene file. The panel and
+  `bin/loka todo <cartridge dir>` list placeholders grouped by the beat (file) that owns them with
+  word counts of what is written. A release compile refuses a cartridge with placeholders
+  unless `--allow-placeholders` is given: one `placeholder_text` per key, at the source file and
+  line that wrote it (the scene or JSON file of an inline word, else `text.json`).
+- **Scene files.** `scenes/*.scene` (or `dialogues/*.scene`) is a plain-text form of one dialogue,
+  and `scenes/*.cut` of one modal scene's steps (its `on` and `control` come from `scenes/<key>.json`,
+  refused when missing, as is `steps` in that JSON, which would replace the words; a scene-format
+  line in the `.cut` warns and stays words),
+  lowered by [Source shortcuts](#source-shortcuts) into today's dialogue or scene JSON and `text.json`
+  keys before any other pass; what it cannot say stays in a JSON file of the same key. Errors name the
+  scene file and line, with `data.why` for a bad line (`npc` beside it once known); the other lines
+  of the file still lower, so a fault behind a bad line reports in the same compile. When no other
+  line is bad, a top set with no words before its first choice is `why: no_prompt` and one with no
+  `- ` choice `why: no_choices`, both at its `npc:` line, unless its same-key JSON writes that field. A `when:` or `needs:` naming a fact that
+  is not a bool is `FACT_TYPE_MISMATCH`; Explain names the fact (last on its line) and its `facts.json` type. A choice `- ~` is a placeholder choice: it has no words to key it by, so its key is
+  `todo__<n>`, `n` its line in the file (a label never slugs to a double `_`), and two stay distinct; a release compile refuses it like any `~`. `needs:` (`<fact>` or `not <fact>`), `once`, `once: sitting` (`sitting`), `asked` and `then:` (a key or `end`) lower on a choice; a
+  deeper `- ` under a reply lowers to the dialogue `<key>_<choice>`, whose `then` the parent takes.
+  A deeper set takes `entry: false`, since its way back makes a loop with the root and inference would open the widest; the root takes no marker, so a speaker's several nested scenes are tried by key.
+  `once` lowers in the compile pipeline for every dialogue: the engine fact `<key>_<choice>_done`,
+  a `fact.assign` step, and a policy `not` of it (under `all` beside an authored policy). A JSON of
+  the same key (a nested set's included) is refused `scene_overlap` for any field the scene writes. The
+  runtime shows choices by `order`, then key, so a set written out of key order gives each choice an
+  `order` from 1 in written order (a choice only its JSON adds has none and follows, sorted). Keys stay
+  the words, and only the compiler writes `order` (`choice_order_written`). A `gives:`
+  declares its item role. A `gives:` whose item does not start with the scene's NPC is a warning
+  `OUTCOME_MISMATCH` (`data.item`, `data.holder`): the choice stays hidden until play moves it there.
+  Schema refusals carry hint data for those words: `valid` on `UNKNOWN_FIELD`, `expected` (and an
+  object's `fields`) on `invalid_type`, `allowed` on `not_in_enum`. Gate: a sampler dialogue re-expressed as a scene compiles byte-identical.
+  Rules: [owner decision](../decisions/owner-decision-handwritten-prose-2026-10-31.md).
+
 ## Development cartridges
 
 `cartridges/scene_sampler` exercises [modal scenes](mechanics.md#scene1-mechanicsscenerulets),
@@ -847,9 +1038,10 @@ saved bytes and exact mismatch refusal.
 
 The slice samplers (`cartridges/<name>_sampler`) each exercise one slice; most carry replayable
 transcripts (`cartridges/<name>/transcripts/<capability>.jsonl`, replayed by
-`kernel/ts/test/transcripts.test.ts`). `cartridges/lantern_proof` is the R6P proof, "The
-Ferryman's Lantern" (its stats and gate: [owner rules](owner-rules.md#product-and-scope)); its
-known answer remains historical proof.
+`kernel/ts/test/transcripts.test.ts`). `cartridges/lantern_proof` is a frozen conformance fixture, not a game, and never ships: it hosts
+the frozen traces in `docs/spec/conformance/lantern-traces.json` (R6P, "The Ferryman's Lantern";
+its stats and gate: [owner rules](owner-rules.md#product-and-scope)). Its manifest carries no
+description field, so this line is its marker; nothing else may be built on it.
 
 ## Skill and bleed declarations
 
@@ -908,17 +1100,40 @@ the schema refuses the bounds and any other field. `cartridges/penalty_sampler` 
 (`lib/loka/content/death.ex`) refuses an unknown key (UNRESOLVED_REFERENCE at `world.death.narration.<field>`); the schema refuses any other field. The toolbox showcase declares
 `woke`.
 
+### Revival declarations
+
+[Revival](mechanics.md#death1--corpse-custody-and-same-body-return-m5-b-foundation) reads the
+optional `world.death.revival` (`Revival`, Beads `loka-kgd.206`): `lines`, 1 to 16 TextKeys
+shown in order, and `seconds`, an integer from 1 to 600 over which a client shows them. The
+cartridge owns both. The compiler (`lib/loka/content/death.ex`) refuses a line missing from
+text (UNRESOLVED_REFERENCE at `world.death.revival.lines[<index>]`); the schema refuses any
+other field and the bounds. The toolbox showcase declares five lines over 10 seconds.
+
+### Corpse decay declarations
+
+[Corpse decay](mechanics.md#death1--corpse-custody-and-same-body-return-m5-b-foundation) reads
+the optional `world.death.npc_corpse_decay` and `world.death.player_corpse_decay`
+(`DeathSettings`, [owner decision](../decisions/owner-decision-corpses-respawn-2026-11-02.md)):
+logical units from death to decay, each an integer of at least 1; the schema refuses the
+bounds. The compiler (`lib/loka/content/death.ex`) refuses either without schedule@1 and
+food@1 (UNDECLARED_CAPABILITY at the field): the run is a job and its sink is the consumed
+holder. Omitted means the corpse never decays. A corpse template's text may bind `{victim}`,
+the victim's short. The toolbox showcase declares 15000 and 90000 (5 and 30 real minutes at
+rate 50).
+
 ## First encounter authoring (M6-A)
 
 `world.combat` requires combat@1, schedule@1, death@1, valid `world.death`
 corpse/shrine settings. It owns
-`player_attack {chance, damage_min, damage_max}`, positive `interval`,
+`player_attack {chance, damage_min, damage_max, attacks?}` ([swings](#swing-declarations)), positive `interval`,
 `sleep_multiplier` and `flee_multiplier`, and `narration` text keys for player_hit,
 player_miss, npc_hit, npc_miss, player_died and npc_died. All six resolve in the
 cartridge catalog. An NPC's optional `attack` profile explicitly
 makes it attackable and supplies its own chance/damage bounds; it requires explicit HP.
 Chances are integers 0..100, damage bounds positive and ordered, multipliers positive.
-Room `sanctuary: true` forbids admission. All new objects reject unknown fields.
+An NPC's optional `unattackable: true` overrides `attack`: no offer, no admission, no engage
+([combat@1](mechanics.md#combat1--first-live-encounter-m6-a)); with `disposition.engage` it is a compile error.
+Room `sanctuary: true` forbids admission; the text key `combat.sanctuary` is the one line every sanctuary refuses Attack with. The line opens with a capital; a lowercase one reads `You can't do that—<line>.` on the card. A combat cartridge without the key reads `Not here` (compiler does not require it). All new objects reject unknown fields.
 
 Optional `world.combat.target_choice: true` opts into [target choice](mechanics.md#target-choice-in-the-same-room-toolbox-row-6a)
 (toolbox row 6a). `cartridges/targets_sampler` is the sampler.
@@ -1008,11 +1223,13 @@ Required cartridge text: `service.unaffordable`, and `service.no_funds` for eith
 
 ## Status declarations
 
-[Status effects](mechanics.md#status-effects-over-time-toolbox-row-1) read `statuses/<key>.json` (compiled `statuses`, capabilities `status@1` and `death@1` since a fatal hp tick runs the death sequence): `{duration, tick_every, resource, per_tick, name, narration: {applied, tick, expired}}`. `duration` and `tick_every` are positive logical seconds with `tick_every < duration`; `resource` names one pool of this cartridge; `per_tick` is a nonzero signed integer added each tick; `name` and each narration key must exist in the text catalog. A reaction step `{op: "status.apply", status: <key>}` names a declared status. An edible item's optional `cures: [<key>, ...]` names declared statuses it ends. The compiler (`lib/loka/content/status.ex`) refuses each violation. `cartridges/status_sampler` is the sampler: `poison` (hp −1 every 60 s for 300 s), `blessing` (mv +5 every 600 s for 3600 s), an antidote curing `poison`, and two room-entry reactions. [Row G3](mechanics.md#statuses-on-npcs-and-things-toolbox-row-g3) adds: an NPC or item definition's optional `immune: [<key>, ...]` (declared statuses, at least one); a `status.apply` step's optional `item: <key>` (an item of this cartridge, whose authored instance takes the status); and the triggers `{event: "status_ticked"}` and `{event: "status_expired"}` with an optional `status: <key>` filter. The compiler refuses an unresolved name (`UNRESOLVED_REFERENCE`). `cartridges/npc_status_sampler` is its sampler. [Row 2c](mechanics.md#status-modifiers-toolbox-row-2c) adds a status's optional `modifies: [{attribute, modifier}, ...]` (1 to 16 `ItemAffect`): `attribute` names an attribute of this cartridge (source: its short key), `modifier` is a ResourceInt. The compiler refuses an unresolved attribute (UNRESOLVED_REFERENCE at the entry's `attribute`). A status with `modifies` may omit `per_tick` and then never ticks; the compiler refuses a status with neither (SCHEMA_VIOLATION at `per_tick`). Its samplers are `might` in `cartridges/derived_sampler` and `fury` in `cartridges/npc_status_sampler`, neither of which ticks. [Homestead row hs-5](mechanics.md#cooking-homestead-row-hs-5) adds an edible item's optional `applies: [<key>, ...]` (declared statuses, at least one), applied to the eater's body after the meal and its cures. The compiler refuses an unresolved name (UNRESOLVED_REFERENCE at the entry) and a listed status whose `modifies` names a `world.derived.hp_max` term attribute (SCHEMA_VIOLATION at the entry; loka-kgd.50). Sampler: `cartridges/kitchen_sampler`. Row loka-x6t.64 adds a status's optional `kind: "buff" | "debuff"`, the polarity of its icon in the GameView's `ConditionView.kind`; without it the kernel derives one from the effect fields (`kernel/ts/src/view/resources.ts`): debuff on any harm (a negative `per_tick`, modifier or resistance, `fear`, `blocks`, `allows`, `perception` blind or deaf, a `movement.cost_percent` above 100), buff on a gain alone, and no kind for a status with no effect field. The compiler refuses another value (SCHEMA_VIOLATION at `kind`). Samplers, all authored debuffs: `bruised` and `notched` in `cartridges/variants_sampler` (a positive tick that is harm), `gored` in `cartridges/toolbox_showcase` and `scar` in `cartridges/scars_sampler`. Row loka-kgd.176 adds a status's optional `narration.observed` (a TextKey), told when a first application lands on an NPC or item the player sees in the room, or on the room the player stands in, and for an item it also turns on the expired line when the player sees it go out (for a room, when the player stands in it; loka-x6t.37; a room's lines describe what is felt or heard, not seen, because they also play in a dark room) ([row G3](mechanics.md#statuses-on-npcs-and-things-toolbox-row-g3); loka-y6yg.48). The compiler refuses a key missing from the text catalog (SCHEMA_VIOLATION at `narration`, as for the other narration keys). Samplers: the golem's `wet`, `shocked`, `stunned` and `warm`, and the bier's `burning`, in `cartridges/toolbox_showcase`. Row `loka-x6t.30` adds the optional `narration.skipped` (TextKey): told when the status bars a combat blow, in place of the engine's `combat.skipped`; the compiler refuses a missing key.
+[Status effects](mechanics.md#status-effects-over-time-toolbox-row-1) read `statuses/<key>.json` (compiled `statuses`, capabilities `status@1` and `death@1` since a fatal hp tick runs the death sequence): `{duration, tick_every, resource, per_tick, name, narration: {applied, tick, expired}}`. `duration` and `tick_every` are positive logical seconds with `tick_every < duration`; `resource` names one pool of this cartridge; `per_tick` is a nonzero signed integer added each tick; `name` and each narration key must exist in the text catalog. A reaction step `{op: "status.apply", status: <key>}` names a declared status. An edible item's optional `cures: [<key>, ...]` names declared statuses it ends. The compiler (`lib/loka/content/status.ex`) refuses each violation. `cartridges/status_sampler` is the sampler: `poison` (hp −1 every 60 s for 300 s), `blessing` (mv +5 every 600 s for 3600 s), an antidote curing `poison`, and two room-entry reactions. [Row G3](mechanics.md#statuses-on-npcs-and-things-toolbox-row-g3) adds: an NPC or item definition's optional `immune: [<key>, ...]` (declared statuses, at least one); a `status.apply` step's optional `item: <key>` (an item of this cartridge, whose authored instance takes the status); and the triggers `{event: "status_ticked"}` and `{event: "status_expired"}` with an optional `status: <key>` filter. The compiler refuses an unresolved name (`UNRESOLVED_REFERENCE`). `cartridges/npc_status_sampler` is its sampler. [Row 2c](mechanics.md#status-modifiers-toolbox-row-2c) adds a status's optional `modifies: [{attribute, modifier}, ...]` (1 to 16 `ItemAffect`): `attribute` names an attribute of this cartridge (source: its short key), `modifier` is a ResourceInt. The compiler refuses an unresolved attribute (UNRESOLVED_REFERENCE at the entry's `attribute`). A status with `modifies` may omit `per_tick` and then never ticks; the compiler refuses a status with neither (SCHEMA_VIOLATION at `per_tick`). Its samplers are `might` in `cartridges/derived_sampler` and `fury` in `cartridges/npc_status_sampler`, neither of which ticks. [Homestead row hs-5](mechanics.md#cooking-homestead-row-hs-5) adds an edible item's optional `applies: [<key>, ...]` (declared statuses, at least one), applied to the eater's body after the meal and its cures. The compiler refuses an unresolved name (UNRESOLVED_REFERENCE at the entry) and a listed status whose `modifies` names a `world.derived.hp_max` term attribute (SCHEMA_VIOLATION at the entry; loka-kgd.50). Sampler: `cartridges/kitchen_sampler`. [Consume](mechanics.md#consume-loka-kgd209) lets an `applies` entry be `{status, duration}` too (a positive duration overriding the status's own; the compiler refuses one on a permanent status, SCHEMA_VIOLATION at the entry), and lets a status declare `ticks: [{resource, per_tick}, ...]` (1 to 16, each `per_tick` nonzero) in place of the single `resource` and `per_tick` pair, every listed pool changing on each tick; the single pair stays valid, and the compiler refuses `ticks` beside either (SCHEMA_VIOLATION). Sampler: `well_fed` in `cartridges/toolbox_showcase`. Row loka-x6t.64 adds a status's optional `kind: "buff" | "debuff"`, the polarity of its icon in the GameView's `ConditionView.kind`; without it the kernel derives one from the effect fields (`kernel/ts/src/view/resources.ts`): debuff on any harm (a negative `per_tick`, modifier or resistance, `fear`, `blocks`, `allows`, `perception` blind or deaf, a `movement.cost_percent` above 100), buff on a gain alone, and no kind for a status with no effect field. The compiler refuses another value (SCHEMA_VIOLATION at `kind`). Samplers, all authored debuffs: `bruised` and `notched` in `cartridges/variants_sampler` (a positive tick that is harm), `gored` in `cartridges/toolbox_showcase` and `scar` in `cartridges/scars_sampler`. Row loka-kgd.176 adds a status's optional `narration.observed` (a TextKey), told when a first application lands on an NPC or item the player sees in the room, or on the room the player stands in, and for an item it also turns on the expired line when the player sees it go out (for a room, when the player stands in it; loka-x6t.37; a room's lines describe what is felt or heard, not seen, because they also play in a dark room) ([row G3](mechanics.md#statuses-on-npcs-and-things-toolbox-row-g3); loka-y6yg.48). The compiler refuses a key missing from the text catalog (SCHEMA_VIOLATION at `narration`, as for the other narration keys). Samplers: the golem's `wet`, `shocked`, `stunned` and `warm`, and the bier's `burning`, in `cartridges/toolbox_showcase`. Row `loka-x6t.30` adds the optional `narration.skipped` (TextKey): told when the status bars a combat blow, in place of the engine's `combat.skipped`; the compiler refuses a missing key.
+
+The `statuses` and `bleeds` maps take the bare key pattern of their sibling maps, so a bad key is a schema diagnostic (loka-k5z4). A rejected `text.json` reports at its own path, not as a crash in the bleed or population checks that read its keys (loka-kgd.194.21). A scripted action with a positive `duration` cannot carry a `status.apply` step, and neither can a reaction without `after`, `when` or `witness` on its `action_completed` (named or unfiltered) or on a `custom` event the action's own step emits (`SCHEMA_VIOLATION`, why `duration_status`, loka-kgd.104): the row would start before the action's own time advance. A step that schedules no job is lawful: a permanent status with no `per_tick`, or a step whose `npc` is immune to the status (loka-vduxr.21). A path the compiler cannot know runs (a `fact_changed`, a longer cascade, another event, a `custom_event` rule with no `custom`, any rule with a `when` or a `witness`) still compiles; it is the [known limit](mechanics.md#spell-effects-toolbox-row-29b) at runtime.
 
 [Rows 18 and 42](mechanics.md#potions-and-songs-toolbox-rows-18-and-42) add a `status.apply` step's optional `npc: <key>`: an NPC of this cartridge, whose authored instance takes the status. The compiler refuses an unresolved NPC (UNRESOLVED_REFERENCE at the step's `npc`), a spawn template or a step that also names `item` (SCHEMA_VIOLATION at `npc`). A potion is content: a liquid kind, a vessel holding it and a reaction on `{event: "drank", kind: <key>}`. `cartridges/buffs_sampler` is the sampler.
 
-[Row W8](mechanics.md#permanent-statuses-toolbox-row-w8) allows `duration: "permanent"`: such a status is exempt from `tick_every < duration`, may declare a nonzero `per_tick` (it then ticks until cured, Beads `loka-rn3b`) and may omit `narration.expired`, which a timed status still requires; its `modifies` may not name an attribute the derived hp maximum reads. The compiler refuses each violation (SCHEMA_VIOLATION at `narration.expired` or at `modifies[i].attribute`). `cartridges/scars_sampler` is the sampler.
+[Row W8](mechanics.md#permanent-statuses-toolbox-row-w8) allows `duration: "permanent"`: such a status is exempt from `tick_every < duration`, may declare a nonzero `per_tick` (it then ticks until cured, Beads `loka-rn3b`; the compiler refuses a `status.apply` of such a status naming `item`, `room` or `tag`, or using the default subject on a `status_applied`, `status_ticked` or `status_expired` trigger, SCHEMA_VIOLATION at that step's key, or its `status` for the default subject; a non-body holder those checks do not reach, a structure's `weathering` or another event's default subject, never folds and costs one step per tick) and may omit `narration.expired`, which a timed status still requires; its `modifies` may not name an attribute the derived hp maximum reads. The compiler refuses each violation (SCHEMA_VIOLATION at `narration.expired` or at `modifies[i].attribute`). `cartridges/scars_sampler` is the sampler.
 
 [Row W21](mechanics.md#fear-and-morale-for-npcs-toolbox-row-w21) adds a status's optional `fear: true` and a `status.apply` step's optional `co_present: true`: such a status may omit `per_tick`, as one with `modifies` may; such a step names no holder. The compiler refuses a `co_present` step that also names `item` or `npc` (SCHEMA_VIOLATION at that field); the schema refuses any other value. `cartridges/fear_sampler` is the sampler.
 
@@ -1060,9 +1277,11 @@ Gear budget (balance tool 6b, [study](../rnd/balance-diagnostics-2026-10-11.md) 
 
 Equip words (row 6a, Beads `loka-x6t.20`) are an item's optional `equip` (`ItemDefinition.equip`, `{wear, remove, worn, removed}`, all four TextKeys and all four required). `wear` and `remove` are the item's Wear and Remove labels, `worn` and `removed` the lines [equipment@1](mechanics.md#equipment1-kerneltssrcmechanicsequipmentrulets) tells when it is worn or removed. The item needs a `slot`. The compiler (`lib/loka/content/derived.ex`, `lib/loka/content/entities.ex`) refuses `equip` without a slot (SCHEMA_VIOLATION at `equip`), a key outside the text catalog (UNRESOLVED_REFERENCE at `equip.<field>`). A cartridge without `equip` keeps its bytes, hash and behavior.
 
-[Experience and levelling](mechanics.md#experience-and-levelling-toolbox-row-4) read the optional `world.levelling` in `cartridge.json` (owned by `attribute@1`): `{thresholds, points_per_level, kills: [{npc, experience}, ...], level_up}`. `thresholds` are strictly increasing positive ResourceInts; `points_per_level` is at least 1; each `npc` names an NPC of this cartridge (source: its short key) and `experience` is a positive ResourceInt; `level_up` must exist in the text catalog. A reaction step `{op: "experience.grant", amount}` needs `world.levelling`. The compiler (`lib/loka/content/levelling.ex`) refuses thresholds that do not rise (SCHEMA_VIOLATION at the threshold), an unresolved NPC or text (UNRESOLVED_REFERENCE), a grant without `world.levelling` (SCHEMA_VIOLATION at the step), a missing `attribute@1` (UNDECLARED_CAPABILITY at `world.levelling`). `cartridges/levelling_sampler` is the sampler. A cartridge without `world.levelling` keeps its bytes, hash and behavior.
+[Experience and levelling](mechanics.md#experience-and-levelling-toolbox-row-4) read the optional `world.levelling` in `cartridge.json` (owned by `attribute@1`): `{thresholds, points_per_level, kills: [{npc, experience}, ...], level_up, gained}`. `thresholds` are strictly increasing positive ResourceInts; `points_per_level` is at least 1; each `npc` names an NPC of this cartridge (source: its short key) and `experience` is a positive ResourceInt; `level_up` and the optional `gained` (bindings `{amount}`) must exist in the text catalog (UNRESOLVED_REFERENCE at the field). A rule with `on.event: level_reached` needs `world.levelling` (SCHEMA_VIOLATION at `on.event`), its `level` filter is an integer from 2 to the thresholds' count + 1 (SCHEMA_VIOLATION `invalid_value` at `on.level`) and an `experience.grant` step in it is refused (SCHEMA_VIOLATION at the step); a grant reached indirectly, through a `fact_changed` rule, is allowed and bounded by the `reaction_depth` budget. Per level, such a rule narrates what opened and assigns the fact a new ability reads through `level_compare` or `fact_compare`. A reaction step `{op: "experience.grant", amount}` needs `world.levelling`. The compiler (`lib/loka/content/levelling.ex`) refuses thresholds that do not rise (SCHEMA_VIOLATION at the threshold), an unresolved NPC or text (UNRESOLVED_REFERENCE), a grant without `world.levelling` (SCHEMA_VIOLATION at the step), a missing `attribute@1` (UNDECLARED_CAPABILITY at `world.levelling`). `cartridges/levelling_sampler` is the sampler. A cartridge without `world.levelling` keeps its bytes, hash and behavior. A level-up refill is a `level_reached` rule with `{op: resource.adjust, resource, by: 2147483647}`; each cartridge chooses which pools refill, and `resource` must name a declared resource (UNRESOLVED_REFERENCE at the step).
 
 ## Tag declarations
+
+A room's optional `sound` (`RoomDefinition`, a `Key` the cartridge names) is its sound bed tag, projected unchanged as `place.sound`; it needs no capability, since nothing but the host reads it, and the Book plays that tag's bed ([Beds](book-ui.md#effects-sound-and-haptics)).
 
 [Property tags](mechanics.md#property-tags-and-the-policy-leaf-set-toolbox-row-g1) are an optional `tags` list on an item, barrier or room source file (`ItemDefinition`, `BarrierDefinition`, `RoomDefinition`), each a `Tag` of the engine set; the compiler copies it into the artifact unchanged. A `tags` list and a `has_tag` policy node need `tag@1` in `requires.capabilities` (UNDECLARED_CAPABILITY at the member otherwise); its `item`, `barrier` or `room` takes a short key, expanded like `has_item`'s, and an unresolved one is UNRESOLVED_REFERENCE at that member in the compiler. Precedent sampler: `cartridges/tags_sampler`.
 
@@ -1082,9 +1301,27 @@ Equip words (row 6a, Beads `loka-x6t.20`) are an item's optional `equip` (`ItemD
 
 [Ranged first strike](mechanics.md#ranged-first-strike-toolbox-row-17) reads an item's optional `weapon.ranged {ammo}` (`protocol/entity.schema.json` `WeaponProfile`, no other field): `ammo` is a resource DefinitionRef (a short key in source, named like allies) of the body pool each shot spends; an unknown pool is UNRESOLVED_REFERENCE at `weapon.ranged.ammo`. When any item declares `weapon.ranged`, the combat narration must name `shot_hit` and `shot_miss` (optional TextKeys otherwise); a missing one is SCHEMA_VIOLATION at `.cartridge.world.combat.narration.shot_hit` (or `shot_miss`), as for `ally_hit` and `ally_miss`. `cartridges/ranged_sampler` is the sampler.
 
+## Diku rounds
+
+[Diku rounds](mechanics.md#diku-rounds-loka-kgd197) read three optional keys of `world.combat` (`protocol/cartridge.schema.json` `CombatSettings`):
+
+- `world.combat.initiative: true` (the only value) opts into the initiative draw, round 1 at Attack and named lines (`{attacker}`, `{target}`) in every combat narration key.
+- `world.combat.tiers`: a non-empty list of `{at_percent, player_hit?, npc_hit?, ally_hit?, shot_hit?}`, highest `at_percent` first; `at_percent` is an integer 1..100 (the schema refuses others). Each named key resolves in the catalog (UNRESOLVED_REFERENCE at `.cartridge.world.combat.tiers[i].<field>`); a cut not strictly below the one before is SCHEMA_VIOLATION at `.cartridge.world.combat.tiers[i].at_percent` (`tiers_unordered`).
+- `world.combat.conditions`: a non-empty list of `{at_percent, text}` (both required), ordered and bounded as `tiers`; `text` resolves in the catalog (UNRESOLVED_REFERENCE at `.cartridge.world.combat.conditions[i].text`), told after each round for the player's foe with a `{target}` binding.
+
+A cartridge without them keeps its bytes, hash and behavior. `cartridges/diku_sampler` is the sampler; `cartridges/toolbox_showcase` declares all three.
+
+## Swing declarations
+
+[Swings](mechanics.md#swings-loka-kgd200) read an optional `attacks` on every attack profile (`protocol/entity.schema.json` `AttackProfile`): `world.combat.player_attack`, an item's `weapon.attack` and an NPC's `attack`. It is an integer 1..10 (the schema refuses others), default 1. A weapon that declares `ranged` with `attacks` above 1 is SCHEMA_VIOLATION at its `weapon.attack.attacks` (`ranged_swings`). Nine optional `world.combat.narration` TextKeys tell the summary line: `player_volley`, `player_volley_all`, `player_volley_one`, and the same for `npc_` and `ally_`; each resolves in the catalog (UNRESOLVED_REFERENCE at `.cartridge.world.combat.narration.<key>`), and its words may use `{count}` and `{hits}`, and for `npc_` and `ally_` `{attacker}`. A missing key tells no summary line. A cartridge without them keeps its bytes, hash and behavior. `cartridges/diku_sampler` declares the six player and npc keys; `cartridges/toolbox_showcase` declares all nine.
+
 ## Skill growth and rating declarations
 
 [Skill growth and opposed checks](mechanics.md#skill-growth-and-opposed-checks-toolbox-rows-5-and-g5) read a skill's optional `growth` (`SkillDefinition.growth`, 1 to 8 strictly increasing positive integers), a detail's optional `rating` (`InspectableDetail.rating`, an integer) and the action check `{kind: "opposed", key}` with exactly one of `skill` or `attribute` (source: short keys, expanded like `attribute_threshold`'s). The compiler (`lib/loka/content/skills.ex`, `lib/loka/content/scripted_actions.ex`) synthesizes the reserved fact `uses_<key>` for each skill with growth (an authored fact of that key is RESERVED_FACT) and refuse growth not strictly increasing (SCHEMA_VIOLATION at `growth`), an unresolved skill or attribute (UNRESOLVED_REFERENCE at the check member), an opposed check whose target detail has no `rating` (SCHEMA_VIOLATION at `check`). `cartridges/skills_sampler` is the sampler. A cartridge without these fields keeps its bytes, hash and behavior.
+
+[Skill ranks](mechanics.md#skill-ranks-level-up-rush) add two optional skill fields: `learned`, a TextKey, and `ranks`, a list of `{name, reached?}` TextKeys, one per level. `ranks` needs `growth` and exactly `growth.length + 1` entries (`Loka.Content.Skills.ranks/1`; otherwise SCHEMA_VIOLATION `invalid_value` at `skills/<key>.ranks`); an unknown text is UNRESOLVED_REFERENCE at `skills/<key>.learned` or `skills/<key>.ranks[i].name` or `.reached`. A cartridge without them keeps its bytes and hash.
+
+Recipe: give a skill its `learned` line and, with `growth`, a `ranks` entry per level, adding `reached` where a rank should say so; a skill still comes from its teacher (`skill.acquire`).
 
 ## Hidden passage declarations
 
@@ -1117,6 +1354,10 @@ Equip words (row 6a, Beads `loka-x6t.20`) are an item's optional `equip` (`ItemD
 ## Puzzle declarations
 
 [Order and dial puzzles](mechanics.md#sequence-and-combination-puzzles-toolbox-row-26) add no field: bounded int instance facts, actions on room details, reactions on `action_completed {action}` with `fact.assign` or `fact.adjust`, and a barrier `opens_when` of `fact_compare`s, as the fact, reaction, [standing](#standing-and-disposition-declarations) and barrier declarations already check. Sampler: `cartridges/puzzles_sampler`.
+
+## Quest offer target
+
+A quest's optional `offer.target` names the fixture or NPC the offer draws on: `{kind: "detail", room, detail}` or `{kind: "npc", npc}`, with `room` and `npc` short refs (`protocol/quest.schema.json`). A reference that does not resolve is `UNRESOLVED_REFERENCE` at `quests/<key>.offer.target` (`.detail` beneath it for a missing fixture). The compiler refuses an offer without a target (`SCHEMA_VIOLATION` `invalid_value` at `quests/<key>.offer.target`), since the Room page draws no loose action ([book-ui.md](book-ui.md#room-page-anatomy)); the loader still accepts one and lists it on World. [Admission](mechanics.md#quest1-mechanicsquestrulets-kerneltssrcmechanicsquestlifecyclets) reads the target; a dialogue choice's `accept` does not.
 
 ## Quest deadlines
 
@@ -1152,9 +1393,9 @@ A detail may carry `title` (TextKey; UNRESOLVED_REFERENCE at `rooms/<room>.detai
 
 [Sense cues](mechanics.md#sense-cues-sound-smell-and-heat-toolbox-row-g6) add one optional field, `cues` (`Cues`: 1 to 4 `Cue {sense, text, range, when?}`, `protocol/entity.schema.json`), on a room, a room's detail, an item or NPC definition, an item's source `fuel`, a status and an action outcome (`outcomes.success` or `.failure`), and one leaf, `cue_perceived {npc, sense}`. Both are owned by `sense_cue@1` (UNDECLARED_CAPABILITY at the cue, `rooms/forge.cues[0]`, or at the leaf's op). A cue's `text` without a catalog entry is UNRESOLVED_REFERENCE at it (`actions/pick_lock.outcomes.failure.cues[0].text`); its `when` is checked and short references in it expand like any condition (`Loka.Content.Resolve.expand/2` expands every `cues` list), and the leaf's `npc` takes a short key through `Loka.Content.LeafRefs`. Compiler `lib/loka/content/cues.ex`. Sampler: `cartridges/senses_sampler`.
 
-## Need declarations
+## Liquid effect declarations
 
-[Hunger, thirst and dry days](mechanics.md#hunger-thirst-and-dry-days-toolbox-rows-g13-and-w25-dry) add one field: a liquid's optional `cures: [<key>, ...]` (`LiquidDefinition.cures`, at least one declared status), ended by a Drink of it. The compiler (`lib/loka/content/status.ex`) refuses an unresolved name (UNRESOLVED_REFERENCE at the entry). Needs themselves are [status declarations](#status-declarations) on cartridge pools. Sampler: `cartridges/needs_sampler`.
+A liquid kind declares [Consume](mechanics.md#consume-loka-kgd209)'s effect block in its `LiquidDefinition`, with an edible item's rules: the restore pair (`resource`, `amount`), `cures: [<key>, ...]` (`LiquidDefinition.cures`, at least one declared status, ended by a Drink of it) and `applies`. An edible's `resource` and `amount` are optional (both or neither). The compiler (`lib/loka/content/status.ex`) refuses an unresolved name (UNRESOLVED_REFERENCE at the entry). Need pools are [retired](mechanics.md#hunger-thirst-and-dry-days-toolbox-rows-g13-and-w25-dry). Sampler: `cartridges/fed_sampler`.
 
 ## Dialogue check declarations
 
@@ -1162,7 +1403,7 @@ A detail may carry `title` (TextKey; UNRESOLVED_REFERENCE at `rooms/<room>.detai
 
 ## Entity and pair fact declarations
 
-[Entity and pair facts](mechanics.md#entity-and-pair-facts-toolbox-row-w2) add one `FactSpec` field, `per_subject: true` (absent otherwise; `false` is a schema error), on a fact with `scopes: ["instance"]` (entity) or `["player"]` (pair); `fact_compare` gains `subject: "target"`, `npc` and `item`, and a reaction's `fact.assign` gains `npc` and `item`, each `npc` or `item` a short key the compiler expands (`Loka.Content.LeafRefs`, `Loka.Content.Resolve`). A reaction step's unresolved `npc` or `item` is UNRESOLVED_REFERENCE in the compiler. The loader alone (installed stage, as before) reports FACT_SCOPE_UNSUPPORTED at: any reference to a `per_subject` fact other than a `fact_compare`'s, `fact.assign`'s or `fact.adjust`'s `fact` or a reaction's `fact_changed` trigger; a `fact_compare` of one naming no subject; a subject field on any other fact, a second subject field, or an `npc` that is a spawn template; a `subject: "target"` in a reaction, quest, barrier or skill, which has no action target; and such a fact in the steps of an escort, receive or hand_over choice, a riddle answer with a `wrong_limit`, or any choice of a dialogue whose quest has a legacy deadline `fact`. Sampler: `cartridges/scoped_facts_sampler`.
+[Entity and pair facts](mechanics.md#entity-and-pair-facts-toolbox-row-w2) add one `FactSpec` field, `per_subject: true` (absent otherwise; `false` is a schema error), on a fact with `scopes: ["instance"]` (entity) or `["player"]` (pair); `fact_compare` gains `subject: "target"`, `npc` and `item`, and a reaction's `fact.assign` gains `npc` and `item`, each `npc` or `item` a short key the compiler expands (`Loka.Content.LeafRefs`, `Loka.Content.Resolve`). A reaction step's unresolved `npc` or `item` is UNRESOLVED_REFERENCE in the compiler. The loader alone (installed stage, as before) reports FACT_SCOPE_UNSUPPORTED at: any reference to a `per_subject` fact other than a `fact_compare`'s, `fact.assign`'s or `fact.adjust`'s `fact` or a reaction's `fact_changed` trigger; a `fact_compare` of one naming no subject (the compiler also reports this one, and a `fact_at_least` or `time_since` of one naming no subject, at the op's file line, in every policy it walks: `lib/loka/content/policies.ex`); a subject field on any other fact, a second subject field, or an `npc` that is a spawn template; a `subject: "target"` in a reaction, quest, barrier or skill, which has no action target; and such a fact in the steps of an escort, receive or hand_over choice, a riddle answer with a `wrong_limit`, or any choice of a dialogue whose quest has a legacy deadline `fact`. Sampler: `cartridges/scoped_facts_sampler`.
 
 ## Group declarations
 
@@ -1184,6 +1425,8 @@ A detail may carry `title` (TextKey; UNRESOLVED_REFERENCE at `rooms/<room>.detai
 
 Author rule: an NPC with `disposition.hostile` refuses every dialogue while hostile, so give a quest's accept, hand-over, receive and escort to a speaker who cannot turn hostile, or make that betrayal the design. The compiler warns (HOSTILE_QUEST_SPEAKER, severity warning, at `dialogues/<key>.npc`) when such an NPC speaks a dialogue with a choice carrying `accept`, `hand_over`, `receive` or `escort`; the build succeeds and the loader does not check it.
 
+Author rule: an NPC listed in `world.combat.allies` only ever strikes the opponent, so a `disposition.engage` line on it never plays. The compiler warns (ALLY_ENGAGE_UNUSED, severity warning, at `cartridge.json` `world.combat.allies[i]`); the build succeeds. To clear it, remove `disposition` (a `hostile` attacker without `engage` fails SCHEMA_VIOLATION), or set `unattackable: true` and remove `engage`.
+
 ## Rumour declarations
 
 [Rumour by co-presence](mechanics.md#rumour-by-co-presence-toolbox-row-w3) adds one optional reaction trigger filter, `npc` on `entity_entered_room` (a short key the compiler expands, `Loka.Content.Reactions.filters/0`). An unresolved `npc` is UNRESOLVED_REFERENCE at `reactions/<key>.on.npc`, and a spawn template there, which has no instance to enter, is SCHEMA_VIOLATION `invalid_value`. Example (`cartridges/rumour_sampler/reactions/tells_innkeeper.json`): `{"on": {"event": "entity_entered_room", "room": "inn", "npc": "ada"}, "when": {"op": "fact_compare", "fact": "knows_mill", "npc": "ada", "equals": true}, "steps": [{"op": "fact.assign", "fact": "knows_mill", "npc": "innkeeper", "value": true}]}`.
@@ -1197,6 +1440,8 @@ Author rule: an NPC with `disposition.hostile` refuses every dialogue while host
 
 The [away recap](mechanics.md#away-recap-toolbox-row-w27) reads the optional `time_policy.recap_after_minutes` in `cartridge.json` (`TimePolicy.recap_after_minutes`, an integer from 1 to 10080, real minutes, the maximum a safety bound). The schema refuses a value out of range or not an integer. `cartridges/recap_sampler` is the sampler. A cartridge without the field keeps its bytes, hash and behavior.
 
+The optional `time_policy.away_cap_hours` (an integer from 1 to 168, in-game hours, the maximum a safety bound) sets the [away cap](save.md#durable-elapsed-sessions), the most world time one absence catches up. Absent, it is one in-game day of the cartridge's calendar.
+
 ## Speech declarations
 
 [Social verbs](mechanics.md#social-verbs-say-whisper-and-shout-toolbox-row-g9-engine-half) add one dialogue field and one reaction trigger. A dialogue's optional `keyword` (`SpokenKeyword`: 1 to 32 lowercase ASCII letters, `protocol/dialogue.schema.json`) makes a say or whisper of that word open it; talk never offers it. A reaction trigger `{event: "spoken", npc?, word?, loudness?}` (`protocol/reaction.schema.json`; `npc` a short key, `word` a `SpokenKeyword`, `loudness` one of `whisper`, `say`, `shout`) fires once per hearer (without `npc`, two hearers' writes to one shared fact compose in order; [limits](mechanics.md#social-verbs-say-whisper-and-shout-toolbox-row-g9-engine-half)). Both need `speech@1` (UNDECLARED_CAPABILITY at `dialogues/<key>.keyword` or at the trigger's event); a keyword dialogue declaring a `riddle` is OUTCOME_MISMATCH at its `keyword` (the riddle's save proof reads a talk receipt). Compiler `lib/loka/content/keywords.ex` and `lib/loka/content/reactions.ex`. A cartridge may declare `speech: {phrases}` (`protocol/cartridge.schema.json`): 1 or more speech@1 `Word`s (1 to 32 ASCII letters, SCHEMA_VIOLATION at `cartridge.speech.phrases[i]`), shown as say's word chips and projected unchanged as the GameView's `phrases`. Sampler: `cartridges/speech_sampler`.
@@ -1204,6 +1449,10 @@ The [away recap](mechanics.md#away-recap-toolbox-row-w27) reads the optional `ti
 ## Emote declarations
 
 [NPC emotes](mechanics.md#npc-emotes-g9) are a cartridge table owned by `emote@1` (`protocol/capability_registry.json`; the section without it is UNDECLARED_CAPABILITY). `emotes` (`protocol/cartridge.schema.json` `EmoteDefinition`) maps `id@version:emote/key` to `{key, others, to?}`, one file per entry under `emotes/` (the key is the file name). `others` is the TextKey the room sees, its text with `{actor}` ("{actor} cowers in fear."); `to`, when present, has both `others` ("{actor} bows to {target}.") and `you` ("{actor} bows to you."), else SCHEMA_VIOLATION. Every form must be in the text catalog (UNRESOLVED_REFERENCE at it). A [reaction@1](mechanics.md#reaction1-kerneltssrcmechanicsreactionts) step `{op: "emote", emote, npc?, to?: "subject"}` plays one (`protocol/step.schema.json`); `emote` and `npc` are short keys. An unknown `emote` is UNRESOLVED_REFERENCE at it, a `to` on an emote without `to` forms UNRESOLVED_REFERENCE at the step's `to` (`target` the emote's ref), and a spawn-template `npc` is refused as for every step `npc`.
+
+## Ambient declarations
+
+[Ambient emotes](mechanics.md#ambient-emotes) are owned by `emote@1`. A room (`protocol/room.schema.json`), NPC or item (`protocol/entity.schema.json`) may declare `ambient`, one to four sets. A room's or item's set is `AmbientSet` `{lines, every, chance?, when?}`; an NPC's is `NpcAmbientSet`, with `lines` or `emotes` (short emote keys), exactly one. `lines` and `emotes` hold one to eight entries; `every` is at least 1; `chance` is 1 to 100, default 100; `when` is a [policy](mechanics.md#target_resolution1-policy1-fact1) read with the entity as target. Refusals: `ambient` without `emote@1` is UNDECLARED_CAPABILITY at the holder's `ambient`; `every` or `chance` out of range is SCHEMA_VIOLATION at the field; an NPC set with both or neither of `lines` and `emotes` is SCHEMA_VIOLATION at the set; `emotes` on a room or item set is UNKNOWN_FIELD; a line not in the text catalog or an unknown emote is UNRESOLVED_REFERENCE at it.
 
 ## Use declarations
 

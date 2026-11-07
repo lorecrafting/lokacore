@@ -1,7 +1,8 @@
 {
   "name": "quest.apprentice.title",
   "offer": {
-    "label": "quest.apprentice.accept"
+    "label": "quest.apprentice.accept",
+    "target": { "kind": "detail", "room": "tower", "detail": "sigil" }
   },
   "objective": {
     "evidence": "current_state",

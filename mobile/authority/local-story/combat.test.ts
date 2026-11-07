@@ -12,7 +12,7 @@ import { level, resourceRef } from '../../../kernel/ts/src/mechanics/resource.ts
 import { value } from '../../../kernel/ts/src/mechanics/fact.ts';
 import { engaged } from '../../../kernel/ts/src/mechanics/combat/shared.ts';
 import { openStory } from './authority.ts';
-import { coldReopen, elapsedHost } from './__tests__/elapsed-host.test.ts';
+import { elapsedHost } from './__tests__/elapsed-host.test.ts';
 import { load } from './store.ts';
 
 const releases = [{ fresh, content_hash: bundle.sha256 }] as const;
@@ -93,7 +93,29 @@ test('real SQLite reopens Attack and both M4 A rounds with original receipt repl
   assert.equal(replay.kind, 'saved');
   if (replay.kind === 'saved') assert.equal(replay.replay, true);
   assert.equal(encode(again.world().state as never), beforeReplay);
-  coldReopen(path, bundle);
+  // The setup places the player by hand, so these receipts cannot replay from a fresh world.
+  elapsedHost(path, undefined, bundle).sql.close();
+});
+
+// Breaks: the miss compares attacker_id with the character id (entity ids differ), or the clock path
+// skips it, so the whisper never fires on a real round (#558 B1).
+test('a real round on the clock names the player miss on its record', () => {
+  const p = setup();
+  try {
+    assert.equal(p.story.invoke(p.invocation('attack', [rat(fresh)])).kind, 'saved');
+    let from = 64800;
+    const records = [];
+    for (let i = 0; i < 12; i++) {
+      const evidence = { expected_run_id: p.story.runId(), from, until: from + 150 };
+      assert.equal(p.story.elapsed(evidence).kind, 'saved');
+      from += 150;
+      records.push(p.story.narration());
+    }
+    assert.ok(records.some((r) => r?.missed));
+    assert.ok(records.some((r) => !r?.missed));
+  } finally {
+    p.sql.close();
+  }
 });
 
 // Breaks: the fatal receipt omits credit/identity, or replay delivers the death mapper twice.

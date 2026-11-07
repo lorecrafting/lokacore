@@ -9,22 +9,22 @@
       "additionalProperties": false,
       "required": ["bare"],
       "properties": {
-        "bare": {"$ref": "text.schema.json#/$defs/TextKey"},
-        "article": {"enum": ["a", "an", "the"]},
-        "plural": {"$ref": "text.schema.json#/$defs/TextKey"}
+        "bare": {"description":"Text key of the name with no article.","$ref": "text.schema.json#/$defs/TextKey"},
+        "article": {"description":"The article a presenter puts before bare.","enum": ["a", "an", "the"]},
+        "plural": {"description":"Text key of the plural.","$ref": "text.schema.json#/$defs/TextKey"}
       },
       "examples": [{"bare": "item.lantern.bare", "article": "a", "plural": "item.lantern.plural"}]
     },
     "ItemLocation": {
       "description": "Where an item starts (00a §12 location): in a room, held by an NPC, or inside another item of the same cartridge, named by the field its kind selects. The containers an artifact's items start in form no cycle (CONTAINMENT_CYCLE) and hold at most their capacity (CAPACITY_EXCEEDED).",
       "oneOf": [
-        {
+        {"description":"Starts lying in a room.",
           "type": "object",
           "properties": {
             "in": {
               "const": "room"
             },
-            "room": {
+            "room": {"description":"The room it lies in.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             }
           },
@@ -34,13 +34,13 @@
           ],
           "additionalProperties": false
         },
-        {
+        {"description":"Starts carried by an NPC.",
           "type": "object",
           "properties": {
             "in": {
               "const": "npc"
             },
-            "npc": {
+            "npc": {"description":"The NPC carrying it.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             }
           },
@@ -50,13 +50,13 @@
           ],
           "additionalProperties": false
         },
-        {
+        {"description":"Starts inside another item of this cartridge.",
           "type": "object",
           "properties": {
             "in": {
               "const": "item"
             },
-            "item": {
+            "item": {"description":"The item that holds it.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             }
           },
@@ -66,7 +66,7 @@
           ],
           "additionalProperties": false
         },
-        {
+        {"description":"Starts nowhere: it is a copy source only, and exists in play only once another rule makes a copy.",
           "type": "object",
           "properties": {
             "in": {
@@ -137,10 +137,10 @@
       "description": "One attribute modifier an item grants its wearer while worn (docs/system/mechanics.md item slots and affects, toolbox row 3), or an active status grants its holder (StatusDefinition.modifies, row 2c; the shape of an ancestry's attribute modifier): attribute, an attribute of this cartridge; modifier, the signed amount added to the value attribute@1 reads. The number is the cartridge's.",
       "type": "object",
       "properties": {
-        "attribute": {
+        "attribute": {"description":"An attribute of this cartridge.",
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
         },
-        "modifier": {
+        "modifier": {"description":"The signed amount added.",
           "$ref": "resource.schema.json#/$defs/ResourceInt"
         }
       },
@@ -168,7 +168,7 @@
         "key": {
           "$ref": "action.schema.json#/$defs/Key"
         },
-        "keywords": {
+        "keywords": {"description":"Words a player names it by.",
           "type": "array",
           "items": {
             "$ref": "room.schema.json#/$defs/Alias"
@@ -176,36 +176,36 @@
           "minItems": 1,
           "maxItems": 16
         },
-        "name": {
+        "name": {"description":"Text key of its short description.",
           "$ref": "text.schema.json#/$defs/TextKey"
         },
         "words": {
           "$ref": "#/$defs/NameWords"
         },
-        "name_variants": {
+        "name_variants": {"description":"Name variants; first match wins.",
           "$ref": "#/$defs/NameVariants"
         },
-        "room_line": {
+        "room_line": {"description":"Text key of the line a room shows while it lies there.",
           "$ref": "text.schema.json#/$defs/TextKey"
         },
-        "room_line_variants": {
+        "room_line_variants": {"description":"Room line variants; first match wins.",
           "$ref": "#/$defs/TextVariants"
         },
-        "description": {
+        "description": {"description":"Text key examine shows.",
           "$ref": "text.schema.json#/$defs/TextKey"
         },
-        "description_variants": {
+        "description_variants": {"description":"Description variants.",
           "$ref": "#/$defs/TextVariants"
         },
-        "location": {
+        "location": {"description":"Where a fresh world puts it.",
           "$ref": "#/$defs/ItemLocation"
         },
-        "capacity": {
+        "capacity": {"description":"Most items held directly; receptacles only.",
           "type": "integer",
           "minimum": 1,
           "maximum": 1024
         },
-        "slot": {
+        "slot": {"description":"The slot it is worn in.",
           "$ref": "#/$defs/SlotKey"
         },
         "equip": {
@@ -214,10 +214,10 @@
           "additionalProperties": false,
           "required": ["wear", "remove", "worn", "removed"],
           "properties": {
-            "wear": {"$ref": "text.schema.json#/$defs/TextKey"},
-            "remove": {"$ref": "text.schema.json#/$defs/TextKey"},
-            "worn": {"$ref": "text.schema.json#/$defs/TextKey"},
-            "removed": {"$ref": "text.schema.json#/$defs/TextKey"}
+            "wear": {"description":"The item's Wear label.","$ref": "text.schema.json#/$defs/TextKey"},
+            "remove": {"description":"The item's Remove label.","$ref": "text.schema.json#/$defs/TextKey"},
+            "worn": {"description":"The line told when the item is worn.","$ref": "text.schema.json#/$defs/TextKey"},
+            "removed": {"description":"The line told when the item is removed.","$ref": "text.schema.json#/$defs/TextKey"}
           }
         },
         "affects": {
@@ -238,7 +238,7 @@
           "minimum": 1,
           "maximum": 2147483647
         },
-        "barrier": {
+        "barrier": {"description":"The barrier on it, a container lid.",
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
         },
         "mass_grams": {
@@ -255,13 +255,13 @@
           "description": "Only explicitly authored receptacles hold items. Absence is false; capacity and barrier require this field.",
           "const": true
         },
-        "fuel": {
+        "fuel": {"description":"Makes the item a lightable fuel source that burns while lit, or a supply that refuels one.",
           "$ref": "#/$defs/FuelSpec"
         },
         "weapon": {
           "$ref": "entity.schema.json#/$defs/WeaponProfile"
         },
-        "block_chance": {
+        "block_chance": {"description":"Percent chance that this shield blocks while held.",
           "type": "integer",
           "minimum": 0,
           "maximum": 100
@@ -296,8 +296,11 @@
             "$ref": "identity.schema.json#/$defs/DefinitionRef"
           }
         },
-        "cues": {
+        "cues": {"description":"Sense cues reaching nearby rooms from this item: 1 to 4 of {sense, text, range, when?}.",
           "$ref": "entity.schema.json#/$defs/Cues"
+        },
+        "ambient": {"description":"Ambient lines told while the player is in this item's room and sees it: 1 to 4 of {lines, every, chance?, when?}.",
+          "$ref": "entity.schema.json#/$defs/AmbientSets"
         },
         "locks": {
           "description": "Toolbox row G7 (mechanics.md Access locks): get, the policy an actor must hold to take this item or anything inside it, and put, the policy to put an item into it (a container only: compiler SCHEMA_VIOLATION invalid_value at locks.put). Each is optional (absent holds) and read with this item as target; failing it refuses permission_denied.",
@@ -438,85 +441,85 @@
       "description": "Toolbox row G2 (docs/system/mechanics.md damage model): an NPC's percent resistance per damage kind (DamageKind) and per material tag (Tag) of the weapon whose own attack strikes (an unarmed or NPC attack has none); negative is a weakness. An attack sums the entries for its kind and each such tag, clamps the sum to -100..100 and scales its damage by (100 - sum) / 100, rounded down. Its members are exactly the DamageKind and Tag values.",
       "type": "object",
       "properties": {
-        "cold": {
+        "cold": {"description":"Percent resistance to `cold` damage. Negative is a weakness.",
           "$ref": "entity.schema.json#/$defs/ResistancePercent"
         },
-        "fire": {
+        "fire": {"description":"Percent resistance to `fire` damage. Negative is a weakness.",
           "$ref": "entity.schema.json#/$defs/ResistancePercent"
         },
-        "physical": {
+        "physical": {"description":"Percent resistance to `physical` damage. Negative is a weakness.",
           "$ref": "entity.schema.json#/$defs/ResistancePercent"
         },
-        "poison": {
+        "poison": {"description":"Percent resistance to `poison` damage. Negative is a weakness.",
           "$ref": "entity.schema.json#/$defs/ResistancePercent"
         },
-        "burnable": {
+        "burnable": {"description":"Percent resistance to attacks from a weapon with the material tag `burnable`. Negative is a weakness.",
           "$ref": "entity.schema.json#/$defs/ResistancePercent"
         },
-        "cool": {
+        "cool": {"description":"Percent resistance to attacks from a weapon with the material tag `cool`. Negative is a weakness.",
           "$ref": "entity.schema.json#/$defs/ResistancePercent"
         },
-        "cursed": {
+        "cursed": {"description":"Percent resistance to attacks from a weapon with the material tag `cursed`. Negative is a weakness.",
           "$ref": "entity.schema.json#/$defs/ResistancePercent"
         },
-        "exposed": {
+        "exposed": {"description":"Percent resistance to attacks from a weapon with the material tag `exposed`. Negative is a weakness.",
           "$ref": "entity.schema.json#/$defs/ResistancePercent"
         },
-        "fragile": {
+        "fragile": {"description":"Percent resistance to attacks from a weapon with the material tag `fragile`. Negative is a weakness.",
           "$ref": "entity.schema.json#/$defs/ResistancePercent"
         },
-        "lamp": {
+        "lamp": {"description":"Percent resistance to attacks from a weapon with the material tag `lamp`. Negative is a weakness.",
           "$ref": "entity.schema.json#/$defs/ResistancePercent"
         },
-        "liquid_holding": {
+        "liquid_holding": {"description":"Percent resistance to attacks from a weapon with the material tag `liquid_holding`. Negative is a weakness.",
           "$ref": "entity.schema.json#/$defs/ResistancePercent"
         },
-        "metal": {
+        "metal": {"description":"Percent resistance to attacks from a weapon with the material tag `metal`. Negative is a weakness.",
           "$ref": "entity.schema.json#/$defs/ResistancePercent"
         },
-        "rod": {
+        "rod": {"description":"Percent resistance to attacks from a weapon with the material tag `rod`. Negative is a weakness.",
           "$ref": "entity.schema.json#/$defs/ResistancePercent"
         },
-        "sharp": {
+        "sharp": {"description":"Percent resistance to attacks from a weapon with the material tag `sharp`. Negative is a weakness.",
           "$ref": "entity.schema.json#/$defs/ResistancePercent"
         },
-        "silver": {
+        "silver": {"description":"Percent resistance to attacks from a weapon with the material tag `silver`. Negative is a weakness.",
           "$ref": "entity.schema.json#/$defs/ResistancePercent"
         },
-        "warm": {
+        "warm": {"description":"Percent resistance to attacks from a weapon with the material tag `warm`. Negative is a weakness.",
           "$ref": "entity.schema.json#/$defs/ResistancePercent"
         },
-        "waterproof": {
+        "waterproof": {"description":"Percent resistance to attacks from a weapon with the material tag `waterproof`. Negative is a weakness.",
           "$ref": "entity.schema.json#/$defs/ResistancePercent"
         },
-        "windproof": {
+        "windproof": {"description":"Percent resistance to attacks from a weapon with the material tag `windproof`. Negative is a weakness.",
           "$ref": "entity.schema.json#/$defs/ResistancePercent"
         },
-        "wooden": {
+        "wooden": {"description":"Percent resistance to attacks from a weapon with the material tag `wooden`. Negative is a weakness.",
           "$ref": "entity.schema.json#/$defs/ResistancePercent"
         },
-        "air": {
+        "air": {"description":"Percent resistance to attacks from a weapon with the material tag `air`. Negative is a weakness.",
           "$ref": "entity.schema.json#/$defs/ResistancePercent"
         },
-        "chasm": {
+        "chasm": {"description":"Percent resistance to attacks from a weapon with the material tag `chasm`. Negative is a weakness.",
           "$ref": "entity.schema.json#/$defs/ResistancePercent"
         },
-        "water": {
+        "water": {"description":"Percent resistance to attacks from a weapon with the material tag `water`. Negative is a weakness.",
           "$ref": "entity.schema.json#/$defs/ResistancePercent"
         },
-        "bed": {
+        "bed": {"description":"Percent resistance to attacks from a weapon with the material tag `bed`. Negative is a weakness.",
           "$ref": "entity.schema.json#/$defs/ResistancePercent"
         },
-        "forge": {
+        "forge": {"description":"Percent resistance to attacks from a weapon with the material tag `forge`. Negative is a weakness.",
           "$ref": "entity.schema.json#/$defs/ResistancePercent"
         },
-        "rug": {
+        "rug": {"description":"Percent resistance to attacks from a weapon with the material tag `rug`. Negative is a weakness.",
           "$ref": "entity.schema.json#/$defs/ResistancePercent"
         },
-        "marsh": {
+        "marsh": {"description":"Percent resistance to attacks from a weapon with the material tag `marsh`. Negative is a weakness.",
           "$ref": "entity.schema.json#/$defs/ResistancePercent"
         },
-        "road": {
+        "road": {"description":"Percent resistance to attacks from a weapon with the material tag `road`. Negative is a weakness.",
           "$ref": "entity.schema.json#/$defs/ResistancePercent"
         }
       },
@@ -536,7 +539,7 @@
         "key": {
           "$ref": "action.schema.json#/$defs/Key"
         },
-        "keywords": {
+        "keywords": {"description":"Words a player names it by.",
           "type": "array",
           "items": {
             "$ref": "room.schema.json#/$defs/Alias"
@@ -544,28 +547,28 @@
           "minItems": 1,
           "maxItems": 16
         },
-        "name": {
+        "name": {"description":"Text key of its short description.",
           "$ref": "text.schema.json#/$defs/TextKey"
         },
         "words": {
           "$ref": "#/$defs/NameWords"
         },
-        "name_variants": {
+        "name_variants": {"description":"Name variants, its mood.",
           "$ref": "#/$defs/NameVariants"
         },
-        "room_line": {
+        "room_line": {"description":"Text key of the line a room shows.",
           "$ref": "text.schema.json#/$defs/TextKey"
         },
-        "description": {
+        "description": {"description":"Text key examine shows.",
           "$ref": "text.schema.json#/$defs/TextKey"
         },
-        "description_variants": {
+        "description_variants": {"description":"Description variants, its mood.",
           "$ref": "#/$defs/TextVariants"
         },
-        "room": {
+        "room": {"description":"The room a fresh world puts it in.",
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
         },
-        "capacity": {
+        "capacity": {"description":"Most items it holds.",
           "type": "integer",
           "minimum": 1,
           "maximum": 1024
@@ -590,16 +593,16 @@
             "friendly": {
               "$ref": "policy.schema.json#/$defs/Policy"
             },
-            "engage": {
+            "engage": {"description":"Said when this hostile NPC engages a player who walks in.",
               "$ref": "text.schema.json#/$defs/TextKey"
             },
-            "arrest": {
+            "arrest": {"description":"Instead of engage: this hostile NPC stops a player who walks in, and no encounter opens.",
               "type": "object",
               "properties": {
-                "to": {
+                "to": {"description":"The room the arrested body goes to.",
                   "$ref": "identity.schema.json#/$defs/DefinitionRef"
                 },
-                "narration": {
+                "narration": {"description":"Said when the player is arrested.",
                   "$ref": "text.schema.json#/$defs/TextKey"
                 }
               },
@@ -617,24 +620,24 @@
           "description": "Toolbox row FD7 (speech@1 with topic@1): what the NPC says when asked about a topic. The first answer in authored order whose topic is the one asked and whose when holds (the player as the actor, the NPC as the target) is narrated and grants its grants topic; none: unknown.",
           "type": "object",
           "properties": {
-            "unknown": {
+            "unknown": {"description":"What the NPC says when no answer matches the topic.",
               "$ref": "text.schema.json#/$defs/TextKey"
             },
-            "answers": {
+            "answers": {"description":"What the NPC answers, topic by topic.",
               "type": "array",
               "items": {
                 "type": "object",
                 "properties": {
-                  "topic": {
+                  "topic": {"description":"The topic this answer is for.",
                     "$ref": "identity.schema.json#/$defs/DefinitionRef"
                   },
-                  "text": {
+                  "text": {"description":"What the NPC says when asked about this topic.",
                     "$ref": "text.schema.json#/$defs/TextKey"
                   },
                   "when": {
                     "$ref": "policy.schema.json#/$defs/Policy"
                   },
-                  "grants": {
+                  "grants": {"description":"Granted when this answer is given.",
                     "$ref": "identity.schema.json#/$defs/DefinitionRef"
                   }
                 },
@@ -661,7 +664,7 @@
         "hp": {
           "$ref": "resource.schema.json#/$defs/NpcHp"
         },
-        "resource_starts": {
+        "resource_starts": {"description":"Starting value of each named resource.",
           "type": "object",
           "propertyNames": {
             "pattern": "^[a-z][a-z0-9_]*$"
@@ -670,16 +673,20 @@
             "$ref": "resource.schema.json#/$defs/ResourceInt"
           }
         },
+        "unattackable": {
+          "description": "loka-w9id: this NPC is never an Attack target and never opens a fight: no Attack offer, Attack refused invalid_target. An arrest still applies. Absent means attackable if it has an attack profile.",
+          "type": "boolean"
+        },
         "attack": {
           "$ref": "entity.schema.json#/$defs/AttackProfile"
         },
         "shop": {
           "$ref": "entity.schema.json#/$defs/Shop"
         },
-        "perception": {
+        "perception": {"description":"Hides the NPC until a fact is true.",
           "type": "object",
           "properties": {
-            "discovered": {
+            "discovered": {"description":"A fact that must be true for this NPC to be visible.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             }
           },
@@ -688,10 +695,10 @@
           ],
           "additionalProperties": false
         },
-        "spawn_template": {
+        "spawn_template": {"description":"Not placed in a fresh world; used as a population template.",
           "const": true
         },
-        "services": {
+        "services": {"description":"Services this NPC offers.",
           "type": "array",
           "items": {
             "$ref": "identity.schema.json#/$defs/DefinitionRef"
@@ -705,10 +712,10 @@
           "items": {
             "type": "object",
             "properties": {
-              "item": {
+              "item": {"description":"An item of this cartridge held by this NPC.",
                 "$ref": "identity.schema.json#/$defs/DefinitionRef"
               },
-              "chance": {
+              "chance": {"description":"Percent chance, 1 to 100, that the item stays on the corpse; otherwise it is kept back.",
                 "type": "integer",
                 "minimum": 1,
                 "maximum": 100
@@ -743,10 +750,10 @@
           "items": {
             "type": "object",
             "properties": {
-              "attribute": {
+              "attribute": {"description":"A cartridge attribute, read by opposed checks.",
                 "$ref": "identity.schema.json#/$defs/DefinitionRef"
               },
-              "value": {
+              "value": {"description":"This NPC's value of the attribute.",
                 "$ref": "resource.schema.json#/$defs/ResourceInt"
               }
             },
@@ -757,8 +764,11 @@
             "additionalProperties": false
           }
         },
-        "cues": {
+        "cues": {"description":"Sense cues reaching nearby rooms from this NPC: 1 to 4 of {sense, text, range, when?}.",
           "$ref": "entity.schema.json#/$defs/Cues"
+        },
+        "ambient": {"description":"Ambient lines or emotes told while the player is in this NPC's room and sees it: 1 to 4 of {lines | emotes, every, chance?, when?}.",
+          "$ref": "entity.schema.json#/$defs/NpcAmbientSets"
         },
         "locks": {
           "description": "Toolbox row 33 (mechanics.md Theft, fence and witnessed offense): get, the policy an actor must hold to take an item this NPC directly holds (target: that item); refuses permission_denied.",
@@ -774,7 +784,7 @@
           "description": "Toolbox row 43b (needs world.mount): this NPC can be ridden. While world.mount.riding is true for (this NPC, a character) and both share a room, the character's moves need a destination room carrying one of terrain, each move's fare is scaled by cost_percent (default 100, floored, applied last) and this NPC moves with the body. Never on a spawn template.",
           "type": "object",
           "properties": {
-            "terrain": {
+            "terrain": {"description":"Room tags this mount carries a rider over; a move into a room with none of them is refused. 1 to 8 unique tags.",
               "type": "array",
               "minItems": 1,
               "maxItems": 8,
@@ -783,7 +793,7 @@
                 "$ref": "entity.schema.json#/$defs/Tag"
               }
             },
-            "cost_percent": {
+            "cost_percent": {"description":"Percent, 0 to 1000, applied last to the rider's move cost, rounded down. Absent: the cost is not scaled.",
               "type": "integer",
               "minimum": 0,
               "maximum": 1000
@@ -833,7 +843,7 @@
           "when": {
             "$ref": "policy.schema.json#/$defs/Policy"
           },
-          "description": {
+          "description": {"description":"Text key of the short name used while this variant applies.",
             "$ref": "text.schema.json#/$defs/TextKey"
           },
           "words": {
@@ -900,15 +910,18 @@
       "description": "Toolbox row W10: the cases of one conditional schedule hour, tried in order when the hour's job runs: the first whose when holds (an absent when holds; read with the player as the actor, the NPC as the target and the clock at the job's due time) names the room. A walks case moves only along a path (toolbox row W26). A case's optional goal is narration shown when the NPC leaves the player's room by that case.",
       "type": "array",
       "items": {
+        "description": "One case of the hour: where the NPC goes, and optionally why and how.",
         "type": "object",
         "properties": {
           "when": {
             "$ref": "policy.schema.json#/$defs/Policy"
           },
           "room": {
+            "description": "The room the NPC moves to when this case is chosen.",
             "$ref": "identity.schema.json#/$defs/DefinitionRef"
           },
           "goal": {
+            "description": "Text key told when the NPC leaves the player's room by this case; silent if the player does not see it go.",
             "$ref": "text.schema.json#/$defs/TextKey"
           },
           "walks": {
@@ -950,23 +963,23 @@
     "AttackProfile": {
       "type": "object",
       "properties": {
-        "chance": {
+        "chance": {"description":"Percent chance an attack is accurate; a defense can still prevent the hit.",
           "type": "integer",
           "minimum": 0,
           "maximum": 100
         },
-        "damage_min": {
+        "damage_min": {"description":"Least positive damage.",
           "type": "integer",
           "minimum": 1
         },
-        "damage_max": {
+        "damage_max": {"description":"Most positive damage; at least damage_min.",
           "type": "integer",
           "minimum": 1
         },
-        "on_positive_hit": {
+        "on_positive_hit": {"description":"What a hit that takes off HP also does.",
           "type": "object",
           "properties": {
-            "effect": {
+            "effect": {"description":"The bleed applied to the player; used only when the attacker is spawned as a population hunter.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             }
           },
@@ -975,19 +988,25 @@
           ],
           "additionalProperties": false
         },
-        "kind": {
+        "kind": {"description":"The damage kind (cold, fire, physical or poison); the target's resistance to it reduces the damage.",
           "$ref": "entity.schema.json#/$defs/DamageKind"
+        },
+        "attacks": {
+          "description": "Swings (loka-kgd.200): how many swings one opportunity makes, each rolled on its own, their damage summed (1 to 10; default 1).",
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 10
         },
         "crit": {
           "description": "Toolbox row G2: a hit whose accuracy roll (the hit draw, uniform in [0, 100)) is below chance is critical and its damage is multiplied by multiplier, before resistances.",
           "type": "object",
           "properties": {
-            "chance": {
+            "chance": {"description":"Percent of all attacks, sharing the accuracy draw: a hit whose draw is below this is critical, so a chance above the accuracy makes every hit critical.",
               "type": "integer",
               "minimum": 1,
               "maximum": 100
             },
-            "multiplier": {
+            "multiplier": {"description":"Damage of a critical hit is multiplied by this (2 to 10).",
               "type": "integer",
               "minimum": 2,
               "maximum": 10
@@ -1031,15 +1050,15 @@
       "description": "One exact authored shop item definition with its positive buy and sell prices; custody determines availability (B3).",
       "type": "object",
       "properties": {
-        "item": {
+        "item": {"description":"The item definition offered.",
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
         },
-        "buy": {
+        "buy": {"description":"Its positive buy price.",
           "type": "integer",
           "minimum": 1,
           "maximum": 2147483647
         },
-        "sell": {
+        "sell": {"description":"Its positive sell price.",
           "type": "integer",
           "minimum": 1,
           "maximum": 2147483647
@@ -1048,7 +1067,7 @@
           "description": "Toolbox row W11: sell from this identity set, items[0] the offer's item, at buy[n-1] while the shopkeeper directly holds n of it; buy has one entry per item and buy[0] equals the offer's buy.",
           "type": "object",
           "properties": {
-            "items": {
+            "items": {"description":"The interchangeable items sold as one offer; the first is the offer's item.",
               "type": "array",
               "minItems": 2,
               "maxItems": 16,
@@ -1056,7 +1075,7 @@
                 "$ref": "identity.schema.json#/$defs/DefinitionRef"
               }
             },
-            "buy": {
+            "buy": {"description":"Buy prices by count held: entry n is the price while the shopkeeper holds n of the items; one entry per item.",
               "type": "array",
               "minItems": 2,
               "maxItems": 16,
@@ -1113,10 +1132,10 @@
       "description": "A finite NPC shop: conserved resource, exact authored item offers and committed purchase/sale narration keys (B3).",
       "type": "object",
       "properties": {
-        "resource": {
+        "resource": {"description":"The conserved resource prices are paid in.",
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
         },
-        "offers": {
+        "offers": {"description":"The exact item offers.",
           "type": "array",
           "minItems": 1,
           "maxItems": 32,
@@ -1124,33 +1143,33 @@
             "$ref": "entity.schema.json#/$defs/ShopOffer"
           }
         },
-        "bought": {
+        "bought": {"description":"Text key of the purchase narration.",
           "$ref": "text.schema.json#/$defs/TextKey"
         },
-        "sold": {
+        "sold": {"description":"Text key of the sale narration.",
           "$ref": "text.schema.json#/$defs/TextKey"
         },
         "buy_discount": {
           "description": "A buy price of floor(buy * numerator / denominator), at least minimum, while its condition holds: exactly one of skill (the actor has the skill usable) or (toolbox row 15) friendly, the shop's NPC disposed friendly to the actor (its disposition).",
           "type": "object",
           "properties": {
-            "skill": {
+            "skill": {"description":"The discount applies while the actor has this skill usable. Give this or friendly.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "friendly": {
+            "friendly": {"description":"Must be true: the discount applies while the shop's NPC is friendly to the actor. Give this or skill.",
               "const": true
             },
-            "numerator": {
+            "numerator": {"description":"Multiplies the buy price; see denominator.",
               "type": "integer",
               "minimum": 1,
               "maximum": 2147483647
             },
-            "denominator": {
+            "denominator": {"description":"Divides the buy price; the price is floor(buy times numerator over denominator).",
               "type": "integer",
               "minimum": 1,
               "maximum": 2147483647
             },
-            "minimum": {
+            "minimum": {"description":"The discounted buy price is never below this.",
               "type": "integer",
               "minimum": 1,
               "maximum": 2147483647
@@ -1208,40 +1227,40 @@
     },
     "FuelSpec": {
       "oneOf": [
-        {
+        {"description":"A lightable item that burns fuel while lit, and is refilled from a supply item.",
           "type": "object",
           "properties": {
             "kind": {
               "const": "source"
             },
-            "capacity": {
+            "capacity": {"description":"The most fuel the source holds, in its unit.",
               "type": "integer",
               "minimum": 1,
               "maximum": 9007199254740991
             },
-            "initial": {
+            "initial": {"description":"Fuel it holds at the start; at most capacity.",
               "type": "integer",
               "minimum": 0,
               "maximum": 9007199254740991
             },
-            "rate": {
+            "rate": {"description":"Fuel burned per logical time unit while lit; at least 1. It goes out when the fuel runs out.",
               "type": "integer",
               "minimum": 1,
               "maximum": 9007199254740991
             },
-            "unit": {
+            "unit": {"description":"The fuel's unit name; the supply must use the same one.",
               "$ref": "action.schema.json#/$defs/Key"
             },
-            "supply": {
+            "supply": {"description":"The supply item that refuels it; the supply's unit must match.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "ignited": {
+            "ignited": {"description":"Text key of the line told when it is lit.",
               "$ref": "text.schema.json#/$defs/TextKey"
             },
-            "doused": {
+            "doused": {"description":"Text key of the line told when it is put out.",
               "$ref": "text.schema.json#/$defs/TextKey"
             },
-            "refueled": {
+            "refueled": {"description":"Text key of the line told when it is refilled.",
               "$ref": "text.schema.json#/$defs/TextKey"
             },
             "cues": {
@@ -1262,23 +1281,23 @@
           ],
           "additionalProperties": false
         },
-        {
+        {"description":"An item that holds fuel for refilling sources; it is emptied by what it gives.",
           "type": "object",
           "properties": {
             "kind": {
               "const": "supply"
             },
-            "capacity": {
+            "capacity": {"description":"The most fuel the supply holds, in its unit.",
               "type": "integer",
               "minimum": 1,
               "maximum": 9007199254740991
             },
-            "initial": {
+            "initial": {"description":"Fuel it holds at the start; at most capacity.",
               "type": "integer",
               "minimum": 0,
               "maximum": 9007199254740991
             },
-            "unit": {
+            "unit": {"description":"The fuel's unit name; a source takes only a supply with the same one.",
               "$ref": "action.schema.json#/$defs/Key"
             }
           },
@@ -1320,16 +1339,16 @@
     "WeaponProfile": {
       "type": "object",
       "properties": {
-        "skill": {
+        "skill": {"description":"The required skill.",
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
         },
-        "attack": {
+        "attack": {"description":"Its attack profile.",
           "$ref": "entity.schema.json#/$defs/AttackProfile"
         },
         "ranged": {
           "type": "object",
           "properties": {
-            "ammo": {
+            "ammo": {"description":"The resource pool one unit of which each shot spends.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             }
           },
@@ -1342,10 +1361,10 @@
         "durability": {
           "type": "object",
           "properties": {
-            "fact": {
+            "fact": {"description":"The bounded int fact that holds the weapon's durability.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "wear": {
+            "wear": {"description":"Durability each of the weapon's hits takes off.",
               "type": "integer",
               "minimum": 1,
               "maximum": 2147483647
@@ -1385,13 +1404,13 @@
       "description": "API1.24: one explicit held-item Read, with optional declared Boolean topic grant.",
       "type": "object",
       "properties": {
-        "label": {
+        "label": {"description":"Text key of the read action's button.",
           "$ref": "text.schema.json#/$defs/TextKey"
         },
-        "text": {
+        "text": {"description":"Text key of what the player reads.",
           "$ref": "text.schema.json#/$defs/TextKey"
         },
-        "topic": {
+        "topic": {"description":"A topic the reader learns on reading.",
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
         }
       },
@@ -1413,11 +1432,35 @@
         }
       ]
     },
-    "ItemEdible": {
-      "description": "D4 held-food metadata; a complete original item grants capped recovery when Eat commits.",
+    "AppliedStatus": {
+      "description": "loka-kgd.209: a status a consumable applies; duration, logical seconds, replaces the status's own (never on a permanent status, compiler SCHEMA_VIOLATION). A repeat refreshes to the later end. The source may name the status alone.",
       "type": "object",
       "properties": {
-        "resource": {
+        "status": {
+          "$ref": "identity.schema.json#/$defs/DefinitionRef"
+        },
+        "duration": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2147483647
+        }
+      },
+      "required": [
+        "status"
+      ],
+      "additionalProperties": false,
+      "examples": [
+        {
+          "status": {"cartridge_id": "kitchen_sampler", "cartridge_version": "0.0.1", "kind": "status", "key": "fed"},
+          "duration": 7200
+        }
+      ]
+    },
+    "ItemEdible": {
+      "description": "D4 held-food metadata; a complete original item grants its effect (capped recovery, cures, applies) when Consume commits.",
+      "type": "object",
+      "properties": {
+        "resource": {"description":"The pool eating restores (for example mv); with amount, or neither (loka-kgd.209).",
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
         },
         "amount": {
@@ -1425,10 +1468,10 @@
           "minimum": 1,
           "description": "Positive integer; the canonical numeric profile supplies the safe-integer upper limit."
         },
-        "label": {
+        "label": {"description":"Text key of the eat action's button.",
           "$ref": "text.schema.json#/$defs/TextKey"
         },
-        "narration": {
+        "narration": {"description":"Text key of the line told when it is eaten.",
           "$ref": "text.schema.json#/$defs/TextKey"
         },
         "cures": {
@@ -1440,20 +1483,26 @@
           "minItems": 1
         },
         "applies": {
-          "description": "Toolbox row hs-5: statuses Eat applies to the eater's body after the recovery and any cures, through the shared status apply (status_applied on a first application, immune holds, a refresh is silent); none may modify an hp-maximum attribute.",
+          "description": "Toolbox row hs-5: statuses Consume applies to the eater's body after the recovery and any cures, through the shared status apply (status_applied on a first application, immune holds, a refresh is silent); none may modify an hp-maximum attribute.",
           "type": "array",
           "items": {
-            "$ref": "identity.schema.json#/$defs/DefinitionRef"
+            "$ref": "#/$defs/AppliedStatus"
           },
           "minItems": 1
         }
       },
       "required": [
-        "resource",
-        "amount",
         "label",
         "narration"
       ],
+      "dependentRequired": {
+        "resource": [
+          "amount"
+        ],
+        "amount": [
+          "resource"
+        ]
+      },
       "additionalProperties": false,
       "examples": [
         {
@@ -1491,16 +1540,16 @@
       ],
       "type": "object",
       "properties": {
-        "effect": {
+        "effect": {"description":"The bleed this bandage treats.",
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
         },
-        "skill": {
+        "skill": {"description":"The skill the actor must have usable to bandage.",
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
         },
-        "action": {
+        "action": {"description":"Must be bandage: the key of the action that applies it.",
           "$ref": "action.schema.json#/$defs/Key"
         },
-        "narration": {
+        "narration": {"description":"Text key of the line told when the bandage is applied.",
           "$ref": "text.schema.json#/$defs/TextKey"
         }
       },
@@ -1523,22 +1572,22 @@
       ],
       "type": "object",
       "properties": {
-        "sense": {
+        "sense": {"description":"Sound, smell or heat.",
           "enum": [
             "sound",
             "smell",
             "heat"
           ]
         },
-        "text": {
+        "text": {"description":"The authored line.",
           "$ref": "text.schema.json#/$defs/TextKey"
         },
-        "range": {
+        "range": {"description":"Rooms it carries through exits, 0 to 2.",
           "type": "integer",
           "minimum": 0,
           "maximum": 2
         },
-        "when": {
+        "when": {"description":"A condition read for the listener.",
           "$ref": "policy.schema.json#/$defs/Policy"
         }
       },
@@ -1566,6 +1615,109 @@
       "items": {
         "$ref": "#/$defs/Cue"
       }
+    },
+    "AmbientSet": {
+      "description": "An ambient set (emote@1; mechanics.md Ambient emotes): one of its lines is told, at most one per entity per advance, when the clock crosses a multiple of every and the chance roll passes, chosen by SHA-256 of \"<entity ref>:<set index>:<boundary>\", never the authority RNG.",
+      "examples": [
+        {
+          "lines": ["room.cave.drip"],
+          "every": 600
+        }
+      ],
+      "type": "object",
+      "properties": {
+        "lines": {"description":"The lines, 1 to 8 text keys.",
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 8,
+          "items": {
+            "$ref": "text.schema.json#/$defs/TextKey"
+          }
+        },
+        "every": {"description":"Logical seconds between chances; a set is due when the clock crosses a multiple of it.",
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "chance": {"description":"Percent chance it fires when due, 1 to 100; 100 when absent.",
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100
+        },
+        "when": {"description":"A condition read with the entity as target (a room has none); the first set whose when holds is the active one.",
+          "$ref": "policy.schema.json#/$defs/Policy"
+        }
+      },
+      "required": [
+        "lines",
+        "every"
+      ],
+      "additionalProperties": false
+    },
+    "NpcAmbientSet": {
+      "description": "An NPC's ambient set (emote@1): as AmbientSet, with exactly one of lines or emotes (the compiler refuses both or neither); an emote pick is told by emote.performed with the NPC as actor.",
+      "examples": [
+        {
+          "emotes": [{"cartridge_id": "emote_sampler", "cartridge_version": "0.0.1", "kind": "emote", "key": "glance"}],
+          "every": 300
+        }
+      ],
+      "type": "object",
+      "properties": {
+        "lines": {"description":"The lines, 1 to 8 text keys.",
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 8,
+          "items": {
+            "$ref": "text.schema.json#/$defs/TextKey"
+          }
+        },
+        "emotes": {"description":"The emotes, 1 to 8 EmoteDefinitions.",
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 8,
+          "items": {
+            "$ref": "identity.schema.json#/$defs/DefinitionRef"
+          }
+        },
+        "every": {"description":"Logical seconds between chances; a set is due when the clock crosses a multiple of it.",
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "chance": {"description":"Percent chance it fires when due, 1 to 100; 100 when absent.",
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100
+        },
+        "when": {"description":"A condition read with the entity as target (a room has none); the first set whose when holds is the active one.",
+          "$ref": "policy.schema.json#/$defs/Policy"
+        }
+      },
+      "required": [
+        "every"
+      ],
+      "additionalProperties": false
+    },
+    "AmbientSets": {
+      "description": "A room's or item's ambient sets (AmbientSet), in authored order.",
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 4,
+      "items": {
+        "$ref": "#/$defs/AmbientSet"
+      },
+      "examples": [[{"lines": ["room.cave.drip"], "every": 600, "chance": 50}]]
+    },
+    "NpcAmbientSets": {
+      "description": "An NPC's ambient sets, each lines or emotes, in authored order.",
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 4,
+      "items": {
+        "$ref": "#/$defs/NpcAmbientSet"
+      },
+      "examples": [[{"emotes": [{"cartridge_id": "emote_sampler", "cartridge_version": "0.0.1", "kind": "emote", "key": "glance"}], "every": 300}, {"lines": ["npc.goblin.mutter"], "every": 600}]]
     }
   }
 }

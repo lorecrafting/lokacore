@@ -12,13 +12,14 @@
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { test } from 'node:test';
-import type { Command, DecisionResult, DefinitionRef } from '../src/contracts.gen.ts';
+import type { Command, DecisionResult, DefinitionRef, EntityId } from '../src/contracts.gen.ts';
 import { loadCartridge, type Cartridge, type World } from '../src/index.ts';
 import { encode } from '../src/foundation/canonical.ts';
 import { gameView, INSTALLED, newWorld, step } from '../src/runtime/world.ts';
 import { decide } from '../play/run.ts';
 import { key } from '../src/foundation/compose.ts';
 import { resourceRef } from '../src/mechanics/resource.ts';
+import { choiceIds, spokenBy } from '../src/mechanics/dialogue/selection.ts';
 import { read } from './read.ts';
 
 const CONTEXT = '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f';
@@ -113,6 +114,28 @@ test('talk opens one pending choice bound to EntityIds, stamped with its revisio
     { key: 'dialogue.bram.prompt', participants: { actor: BODY, speaker: BRAM } },
   ]);
   assert.equal(w.state.choices![C]!.opened_revision, 3);
+});
+
+// Breaks: the room's actions list lowest priority first.
+test("a place's actions list by priority, then key", () => {
+  const w = world((c) => {
+    for (const [key, priority] of [
+      ['a_low', 0],
+      ['z_high', 1],
+    ] as const)
+      c.actions[`${F}:action/${key}`] = {
+        key,
+        name: 'action.talk',
+        accessibility: 'action.talk',
+        target: { kind: 'none' },
+        command: key,
+        priority,
+        input: [],
+        policy: { op: 'all', items: [] },
+      };
+  });
+  const keys = gameView(w).actions.map((a) => String(a.action_key));
+  assert.ok(keys.indexOf('z_high') < keys.indexOf('a_low') && keys.includes('a_low'), `${keys}`);
 });
 
 // Breaks: every accepted action copying the choices map (O(choice history) per step).
@@ -468,6 +491,40 @@ test('a hub conversation ends as Leave would once the speaker or the player leav
   assert.equal(gameView(after).choice, undefined);
 });
 
+// Breaks (loka-vduxr.10): a linked single-choice dialogue left out of the farewell, so a nested
+// talk's row outlives the player leaving the room; the book keeps a card no choose can accept.
+test('a nested conversation with one option ends once the player leaves', () => {
+  const linked = hub((d, c) => {
+    const keys = Object.keys(d.choices);
+    c.dialogues[`${F}:dialogue/nested`] = {
+      ...d,
+      key: 'nested',
+      choices: { [keys[0]!]: d.choices[keys[0]!] },
+    };
+    d.choices = { [keys[0]!]: { ...d.choices[keys[0]!], then: 'nested' } };
+    delete c.dialogues[`${F}:dialogue/nested`].choices[keys[0]!].then;
+  });
+  const opened = open(linked);
+  const [choice_id] = gameView(opened).choice!.choices.map((o: any) => o.choice_id);
+  const nested = ok(opened, { type: 'choose', continuation_id: C, choice_id }, 4).world;
+  assert.equal(nested.state.choices![NEXT]!.beat, 'nested');
+  const away = ok(nested, { type: 'move', direction: 'north' }, 5).world;
+  assert.equal(gameView(away).choice, undefined);
+  assert.equal(away.state.choices![NEXT]!.status, 'closed');
+});
+
+// Breaks: a one-option dialogue that leads on only when its check fails read as ending at its
+// answer, so walking away leaves the talk open.
+test('a one-option dialogue with only then_failed closes when the player leaves', () => {
+  const linked = hub((d, c) => {
+    const key = Object.keys(d.choices)[0]!;
+    c.dialogues[`${F}:dialogue/nested`] = { ...d, key: 'nested' };
+    d.choices = { [key]: { ...d.choices[key], then_failed: 'nested' } };
+  });
+  const away = ok(open(linked), { type: 'move', direction: 'north' }, 4).world;
+  assert.equal(away.state.choices![C]!.status, 'closed');
+});
+
 // Breaks (loka-x6t.5): a hub reopened after an answer that ends the conversation: the dialogue's
 // only choice, or a riddle's solved answer.
 test('a single-choice or riddle dialogue ends at its answer', () => {
@@ -593,4 +650,35 @@ test('the loader checks story point keys', () => {
     declared: 'lantern_resolved',
     expected: 'other',
   });
+});
+
+// Breaks: `order` is ignored, overrides the wrong way, or a tie or an absent one leaves key order.
+test('choices sort by order, then by key; a choice with none follows', () => {
+  const shown = (order: Record<string, number | undefined>) =>
+    choiceIds({
+      choices: Object.fromEntries(Object.entries(order).map(([k, o]) => [k, { order: o }])),
+    } as unknown as Parameters<typeof choiceIds>[0]);
+  assert.deepEqual(shown({ b: undefined, a: undefined }), ['a', 'b']);
+  assert.deepEqual(shown({ a: 2, z: 1 }), ['z', 'a']);
+  assert.deepEqual(shown({ c: 1, b: 1 }), ['b', 'c']);
+  assert.deepEqual(shown({ a: undefined, z: 1, b: undefined }), ['z', 'a', 'b']);
+});
+
+// Breaks: a Talk that selects one of a speaker's dialogues opens the speaker's first one instead,
+// or ignores the selection.
+test('a Talk that selects a dialogue opens that one', () => {
+  const w = open(
+    hub((d, c) => {
+      c.dialogues[`${F}:dialogue/bram2`] = { ...structuredClone(d), key: 'bram2' };
+    }),
+  );
+  const by = (selected?: string) =>
+    spokenBy(
+      w,
+      w.character,
+      BRAM as EntityId,
+      { n: 0 },
+      selected ? ref('dialogue', selected) : undefined,
+    )?.key;
+  assert.deepEqual([by(), by('bram2'), by('bram')], ['bram', 'bram2', 'bram']);
 });

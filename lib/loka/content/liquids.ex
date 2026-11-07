@@ -3,9 +3,8 @@ defmodule Loka.Content.Liquids do
   import Loka.Content.Source, only: [at: 2, diag: 3, diag: 4]
   import Loka.Content.Refs, only: [reference: 6]
 
-  @spec check(map() | nil, map(), {term(), map() | :unknown} | nil) :: [map()]
+  @spec check(map() | nil, map(), {term(), map() | :unknown}) :: [map()]
   def check(nil, _, _), do: []
-  def check(_, _, nil), do: []
 
   def check(m, defs, {_, text}) do
     declarations = declarations(defs)

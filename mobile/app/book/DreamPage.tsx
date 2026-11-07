@@ -1,6 +1,7 @@
 import type { GameView } from '../../packages/game-view/session.ts';
 import type { Page as Route } from './model.ts';
 // A resumable child of the actual bed, using the existing detail/control grammar.
+import { View } from 'react-native';
 import { Text } from './Text.tsx';
 import type { Button, presenter } from './presenter.ts';
 import { dreamAt, dreamOwner } from './dreams.ts';
@@ -9,6 +10,17 @@ import { LogLines } from './lines.tsx';
 import { Control, Page } from './pages.tsx';
 import { prose, usePalette, useType } from './palette.ts';
 import { LABEL } from './labels.ts';
+import { color, opacity } from './tokens.ts';
+
+const tint = {
+  position: 'absolute',
+  top: 0,
+  right: 0,
+  bottom: 0,
+  left: 0,
+  backgroundColor: color.dusk.bg,
+  opacity: opacity.faint,
+} as const;
 
 type Screen = ReturnType<ReturnType<typeof presenter>['screen']>;
 /**
@@ -31,23 +43,28 @@ export function DreamPage(p: {
   if (!dream) return null;
   const buttons = p.screen.buttons.filter((b) => b.detail_id === owner);
   return (
-    <Page
-      title={p.screen.text(dream.title)}
-      foot={<Control label={LABEL.close} onPress={p.close} />}
-    >
-      <Text style={prose(c, t)}>{p.screen.text(dream.description)}</Text>
-      <LogLines lines={p.screen.detail(owner)} />
-      <Text style={prose(c, t)}>{p.screen.text(dream.line)}</Text>
-      <Cards>
-        {buttons.map((b) => (
-          <ActionCard
-            key={b.action_key + JSON.stringify(b.input)}
-            b={b}
-            press={(b) => p.press(b, owner)}
-          />
-        ))}
-      </Cards>
-    </Page>
+    // The curl or fade brings the tint and takes it away (book-ui.md, Page life).
+    <View style={{ flex: 1, backgroundColor: c.bg }}>
+      <View style={tint} pointerEvents="none" aria-hidden />
+      <Page
+        paperless
+        title={p.screen.text(dream.title)}
+        foot={<Control label={LABEL.close} onPress={p.close} />}
+      >
+        <Text style={prose(c, t)}>{p.screen.text(dream.description)}</Text>
+        <LogLines lines={p.screen.detail(owner)} />
+        <Text style={prose(c, t)}>{p.screen.text(dream.line)}</Text>
+        <Cards>
+          {buttons.map((b) => (
+            <ActionCard
+              key={b.action_key + JSON.stringify(b.input)}
+              b={b}
+              press={(b) => p.press(b, owner)}
+            />
+          ))}
+        </Cards>
+      </Page>
+    </View>
   );
 }
 

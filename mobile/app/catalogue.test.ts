@@ -12,13 +12,26 @@ const stories = readdirSync(new URL('stories/', app)).filter((f) => f.endsWith('
 // Not drawn on their own: each with its reason.
 const EXEMPT: Record<string, string> = {
   'book/Text.tsx:Text': 'every line of every story',
+  'book/Leaf.tsx:Leaf': 'the open page inside Book, shown through every page story',
   'book/pages.tsx:Tap': 'shown through VerbLine and the room title',
-  'book/lines.tsx:Here': 'the room page lines, shown through the RoomPage stories',
+  'book/people.tsx:Here': 'the room page lines, shown through the RoomPage stories',
   'book/StatusIcon.tsx:Tooltip':
     'the status icon tip, shown through the StatusIcon Held and Focused stories',
+  'book/StatusGlyph.tsx:StatusGlyph': "an icon's drawing, shown through StatusIcon Drawings",
   'book/Chip.tsx:Row': 'a titled chip row, shown through Chip ReadingSize',
+  'book/StatusIcon.tsx:Ring':
+    'shown through StatusIcon Ring*, and the rise card through ActionCard Waiting',
+  'book/Unavailable.tsx:Unavailable': 'the grey ActionCard, shown through ActionCard Unavailable',
+  'book/Combat.tsx:Foe': 'one line of the fight block, shown through the Combat stories',
+  'book/Combat.tsx:Foot': 'the ended page foot, shown through the CombatPage and DeadPage stories',
   'book/MapDrawing.tsx:MapDrawing': 'a drawing, shown through the map pages',
+  'book/Riddle.tsx:RightWord': 'shown after a submitted answer, which no story sends',
   'book/lines.tsx:Fault': 'a press that threw; reached live only, no story throws one',
+  'book/ScenePage.tsx:Scene': 'one line of ScenePage, shown through the ChapterPages scene stories',
+  'book/Hotbar.tsx:Hotbar': "the Combat page's strip, shown through the CombatPage Hotbar stories",
+  'book/Hotbar.tsx:HotbarList': 'the opener list, shown through CombatPage Hotbar, opener open',
+  'book/HotbarGlyph.tsx:HotbarGlyph':
+    "a slot's drawing, shown through the CombatPage Hotbar stories",
 };
 
 // Every exported component, with its doc comment (stories/specs.ts, shared with the specs page).
@@ -84,9 +97,37 @@ test('every exported component has a story that imports it', () => {
 // fonts are read through usePalette and `type`, so the groups checked are the named-value ones. Type
 // roles are read at the Reading size, through useType() (`const t = useType()`; loka-x6t.86).
 const NO_BOOK_CONSUMER: Record<string, string> = {
-  'space.hair': 'read only by dev chrome (the picker overlay, the System dashboard)',
-  'size.speechBar': 'the Log line row: waits until the log projects a speaker',
   'type.speaker': 'the Log line row: waits until the log projects a speaker',
+  ...Object.fromEntries(
+    [
+      'pickup',
+      'coin',
+      'level',
+      'skillNew',
+      'questDone',
+      'questFailed',
+      'questGained',
+      'chapter',
+      'impact',
+      'fightIn',
+      'miss',
+      'lever',
+      'latch',
+      'death',
+      'thunder',
+      'bed',
+      'weather',
+    ].map((k) => [
+      `sound.${k}`,
+      'reached as sound[name] in play(name); played by the cue that names it (cueSounds.ts)',
+    ]),
+  ),
+  ...Object.fromEntries(
+    ['light', 'medium'].map((k) => [
+      `haptic.${k}`,
+      'reached as tokens.haptic[kind] in haptic(kind); its first caller comes with loka-gj82.4',
+    ]),
+  ),
 };
 test('every token has a consumer outside tokens.ts', async () => {
   const tokens: Record<string, object> = await import('./book/tokens.ts');
@@ -96,17 +137,35 @@ test('every token has a consumer outside tokens.ts', async () => {
   const files = [...book.map((f) => `book/${f}`), 'App.tsx', 'SaveError.tsx'].map(read);
   // `t.` counts as a type read only where `t` is the Reading-size type (useType() or a Type parameter).
   const typed = files.filter((f) => /useType\(\)|\bt: Type\b/.test(f)).join('\n');
-  const code = files.join('\n');
-  const groups = ['type', 'space', 'size', 'radius', 'opacity', 'motion', 'sound', 'nightSky'];
+  const stripComments = (src: string) => src.replace(/\/\*[\s\S]*?\*\/|\/\/.*/g, '');
+  const code = stripComments(files.join('\n'));
+  const groups = [
+    'type',
+    'space',
+    'size',
+    'radius',
+    'opacity',
+    'motion',
+    'sound',
+    'mix',
+    'haptic',
+    'nightSky',
+  ];
+  const typedCode = stripComments(typed);
+  const consumed = (name: string) => {
+    const [g, k] = name.split('.') as [string, string];
+    return (
+      new RegExp(`(\\b${g}|useType\\(\\))\\.${k}\\b`).test(code) ||
+      (g === 'type' && new RegExp(`\\bt\\.${k}\\b`).test(typedCode)) ||
+      (g === 'sound' && new RegExp(`\\bplay\\('${k}'\\)`).test(code)) ||
+      (g === 'haptic' && new RegExp(`\\bhaptic\\('${k}'\\)`).test(code))
+    );
+  };
   const dead = groups.flatMap((g) =>
     Object.keys(tokens[g])
       .map((k) => `${g}.${k}`)
-      .filter(
-        (name) =>
-          !(name in NO_BOOK_CONSUMER) &&
-          !new RegExp(`(\\b${g}|useType\\(\\))\\.${name.split('.')[1]}\\b`).test(code) &&
-          !(g === 'type' && new RegExp(`\\bt\\.${name.split('.')[1]}\\b`).test(typed)),
-      ),
+      .filter((name) => !(name in NO_BOOK_CONSUMER) && !consumed(name)),
   );
   assert.deepEqual(dead, []);
+  assert.deepEqual(Object.keys(NO_BOOK_CONSUMER).filter(consumed), [], 'stale escape: remove it');
 });

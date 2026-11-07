@@ -1,0 +1,40 @@
+id: mobile-book-effects-literals
+language: tsx
+severity: error
+message: 'Timing and easing come from tokens.ts (docs/system/book-ui.md, Effects, sound and haptics), and only book/sound and book/haptic touch the audio or vibration APIs: use motion.*, play(name) or haptic(kind).'
+files: [mobile/app/book/**, mobile/app/App*.tsx, mobile/app/SaveError.tsx]
+# The two modules own the device calls; tokens.ts and easing.ts own the values. Stories and tests are
+# not the player's. Two old Easing.linear uses (NightSky, StatusIcon) carry an ast-grep-ignore.
+ignores:
+  - mobile/app/book/tokens.ts
+  - mobile/app/book/easing.ts
+  - mobile/app/book/sound.ts
+  - mobile/app/book/sound.web.ts
+  - mobile/app/book/haptic.ts
+  - mobile/app/book/haptic.web.ts
+  - mobile/app/book/*.test.ts
+# ponytail: sees a literal in the call or the pair, not one held in a const or a variable, and not a
+# destructured `const { vibrate } = navigator`; a data-flow check is not worth it until one slips through.
+utils:
+  literal:
+    any:
+      - kind: number
+      - any: [{ kind: binary_expression }, { kind: ternary_expression }, { kind: unary_expression }]
+        has: { kind: number, stopBy: { kind: call_expression } } # Math.log(1 - x) is not a timing literal
+rule:
+  any:
+    - kind: member_expression
+      has: { field: property, regex: '^(vibrate|play)$' }
+    - kind: new_expression
+      has: { field: constructor, regex: '(^|\.)(Audio|AudioContext)$' }
+    - pattern: Easing.$E
+    - kind: string_fragment
+      regex: 'cubic-bezier'
+    - kind: pair
+      all:
+        - has: { field: key, regex: '([dD]uration|[dD]elay)[''"]?$' }
+        - has: { field: value, matches: literal }
+    - kind: call_expression
+      all:
+        - has: { field: function, regex: '(^|\.)(setTimeout|setInterval|withDelay)$' }
+        - has: { field: arguments, has: { matches: literal } }

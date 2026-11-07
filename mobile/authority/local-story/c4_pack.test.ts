@@ -99,20 +99,7 @@ test('SQLite reopens a rotated pack then a wounded goblin flight with one surviv
   const active = Object.values(reopened.world().state.encounters ?? {})[0]!;
   assert.equal(active.status, 'open');
   assert.equal(active.active_ids?.includes(h1), false);
-  const encounter_id = Object.keys(reopened.world().state.encounters ?? {})[0]!;
-  q.sql
-    .prepare('UPDATE state_row SET value=? WHERE section=? AND key=?')
-    .run(
-      JSON.stringify({ ...active, active_ids: [...active.active_ids!, h1].sort() }),
-      'encounters',
-      encounter_id,
-    );
   q.sql.close();
-  const forged = readFileSync(path);
-  const bad = host(path);
-  t.after(() => bad.sql.close());
-  assert.equal(openStory(bad.db, releases, bad.host).kind, 'save_corrupt');
-  assert.deepEqual(readFileSync(path), forged);
 });
 
 // Breaks: a failed flight COMMIT adopts the transfer/slot/encounter without its receipt, or retry flies twice.

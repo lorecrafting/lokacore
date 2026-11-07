@@ -21,20 +21,28 @@ Hard-won lessons for SQLite and persistence. Persistence lessons from R6 onward 
   ([C5 save review](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/reviews/2026-10-06-c5-bleeding-bandage-save-second-review.md)).
 
 **Recovery and retry**
-- Cold-reopen validation replays the exact stored receipts; it never re-infers order with
-  a second heuristic. A validator that read every drop in writer-group number as a sight
+- A cold open does not replay receipts
+  ([decision](../decisions/owner-decision-fast-cold-open-2026-11-01.md)), so never rely on replay
+  there; a reader past open (Journal, narration) meets rows nothing vetted and refuses or skips, never
+  throws. A check at open never infers order from rows with a heuristic. A validator that read every drop in writer-group number as a sight
   handoff rejected a lawful combat/bleed interleaving as `save_corrupt`, and a D9
   suppression deadline check did the same
   ([ARCH-D10-01](../evidence/2026-10-06-post-d10-architecture-audit.md)).
 - Each sampler save file gets one `coldReopen(path, bundle)`
   (`mobile/authority/local-story/__tests__/elapsed-host.test.ts`): a fresh connection through
-  `openGame`, the app's launch path, after the last scripted move. Reviewers found the 37a
-  sight, two-shop receipt and W12 floor breaks only after such moves (loka-dgl6).
+  `load`, then a replay of every receipt (`receiptHistory`), after the last scripted move. It is the
+  only check of saved rows against receipts, and it stops at CI. Reviewers found the 37a sight,
+  two-shop receipt and W12 floor breaks only after such moves (loka-dgl6).
 - Snapshot caller-owned input deeply at admission. A session shallow-copied the caller's
   intent; the caller later appended a target, so the retry no longer matched the private
   reservation and every later command returned `conflict`
   ([M1-B1 review](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/reviews/2026-10-04-m1-b1-driver-review.md)).
-- Pin a save to everything its replay depends on, not only to the content. The pin held the
+- Pin a save to everything that reads its rows, not only to the content. The pin held the
   content hash alone, so a kernel contract bump (1.124 dialogue receipts gained `speaker`) left
   unbumped cartridges' old saves reopening as `save_corrupt`; #514 bumped `at_least` on every
   dialogue cartridge by hand. The pin now carries `kernel_api`, compared by equality (loka-daha).
+- Reopen refuses a row only when it doesn't parse or validate, its identity doesn't bind, or the
+  kernel would throw or hang on the next command. If any sequence of accepted commands can reach
+  the state, the check goes, and if the kernel then throws, fix the kernel. Facts and holders are
+  evidence of nothing: a book, a reaction, a death or a theft reaches them too, and each inference
+  from them refused a lawful save for good (#544, loka-vduxr.10).

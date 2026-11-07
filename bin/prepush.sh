@@ -40,6 +40,7 @@ if touched "$ex"; then
   run CREDO mix credo --strict
 fi
 run DOCS elixir bin/check_docs.exs
+run SOUNDS python3 bin/check_sounds.py
 # (docs/state-sections.gen.json needs no check: regen rewrites it, so REGEN_DIRTY catches a stale one).
 # Story views, saves and CSF meta indexing (#431); hosted mobile runs it too (loka-8qzi, loka-yz58).
 if touched '^(mobile/|kernel/ts/src/|protocol/)'; then
@@ -49,6 +50,9 @@ fi
 if [ "$changed" != ALL ] && touched '^protocol/fixtures/.*_sampler_hash\.json$'; then
   run TRANSCRIPTS sh -c 'cd kernel/ts && node --test --test-reporter=dot test/transcripts.test.ts'
   run IMPACT_STORY sh bin/check_impact_fixtures.sh
+fi
+if touched '^bin/author'; then
+  run AUTHOR_SH sh bin/author_red_controls.sh
 fi
 # worktree_setup.sh clones with macOS cp -c, so hosted CI (ubuntu) cannot run its red control.
 if touched '^bin/worktree_setup'; then

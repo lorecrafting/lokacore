@@ -1,5 +1,5 @@
-// The Book's design tokens: the one place for its colours, type, spacing, sizes, radius, motion and
-// sound. Rules, states and consumers: docs/BOOK-UI-COMPONENTS.md#design-tokens. Values are the
+// The Book's design tokens: the one place for its colours, type, spacing, sizes, radius, motion,
+// sound and haptics. Rules, states and consumers: docs/BOOK-UI-COMPONENTS.md#design-tokens. Values are the
 // Chapter 1 mock's base page with every effect off (docs/design/ui-exploration/chapter-one-playable.html,
 // `.ph`), consolidated.
 
@@ -58,6 +58,63 @@ const dusk: typeof light = {
 
 export const color = { light, dawn, dusk, dark };
 
+// The editor chrome (tools/author-panel, never the Book), by OS scheme: docs/design/editor-chrome-rulings.md.
+const chromeLight = {
+  bg: '#f6f5f2', // panels, the map
+  surface: '#ffffff', // inputs, inspector cards, popovers, Cmd-K
+  sunken: '#eae8e3', // the well behind the Book strip, collapsed rails
+  fg: '#1c1b19',
+  dim: '#5c5952',
+  line: '#dcd9d2', // hairlines and dividers, not text
+  strong: '#8d887e', // control borders, 3:1 on bg and surface
+  accent: '#1d5bbf', // selection, focus ring, primary button, reload badge
+  accentSoft: '#dde7f8', // a selected row
+  onFill: '#ffffff', // text on an accent or refusal fill
+  outside: '#7a3bb0', // a change made outside the editor
+  outsideSoft: '#efe5f8',
+  refusal: '#b0261d', // compiler refusals only
+  refusalSoft: '#fbe4e1',
+  warning: '#875800', // lint, `~`, unconfirmed, stale, Hold, over budget
+  warningSoft: '#f7ecd4',
+  ok: '#2b7136', // compiled, within budget
+};
+const chromeDark: typeof chromeLight = {
+  bg: '#1f2023',
+  surface: '#292a2e',
+  sunken: '#17181a',
+  fg: '#e7e5e0',
+  dim: '#a29f98',
+  line: '#36383d',
+  strong: '#74767d',
+  accent: '#79acff',
+  accentSoft: '#22324c',
+  onFill: '#17181a',
+  outside: '#c7a2f5',
+  outsideSoft: '#352a4a',
+  refusal: '#ff8f85',
+  refusalSoft: '#47231f',
+  warning: '#e9b350',
+  warningSoft: '#3f321a',
+  ok: '#80c98d',
+};
+export const chrome = {
+  light: chromeLight,
+  dark: chromeDark,
+  // Map hulls and Story map anchor bands, by area (sorted id, index mod 6); 3:1 on bg, distinct under CVD.
+  area: {
+    light: ['#bd8300', '#1c95d9', '#332288', '#117733', '#aa4499', '#ee3377'],
+    dark: ['#e69f00', '#56b4e9', '#6a55d5', '#127b35', '#aa4499', '#ee3377'],
+  },
+  sans: 'ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif',
+  mono: 'ui-monospace, "SF Mono", Menlo, Consolas, monospace',
+  type: { body: [13, 18], label: [11, 16], code: [12, 16], prose: [15, 22] }, // mutate-skip: uncalibrated design value
+  size: { row: 28, header: 32, handle: 8, icon: 16, palette: 560 }, // mutate-skip: uncalibrated design value
+  radius: 6, // mutate-skip: uncalibrated design value
+};
+
+export const spirit = { day: '#c8dcf6', night: '#0b1e45' }; // the spirit state's layer: day on light and dawn, night on dusk and dark
+export const reverie = { day: '#fffbf0', night: '#f6e6b4' }; // the reverie treatment's layer: ivory on light and dawn, pale gold on dusk and dark
+
 // The night sky's star and shooting-star colour (the mock's meteor, rgba(255,255,245)).
 export const nightSky = { star: '#fffff5' };
 
@@ -111,28 +168,133 @@ export const size = {
   card: 48, // action card minimum height
   rule: 1, // hairline
   speechBar: 2,
+  experienceRule: 2, // the rule under the status row (owner, 2026-10-31)
   minimap: 56, // the endpaper map at rest
   footerRule: 92, // each hairline beside the minimap
   focus: 2, // the web keyboard focus ring: its outline width and its offset
   chapterRule: 80, // the chapter card's short rule (the mock's `.chapter i`)
-  statusIcon: 28, // a status icon's disc, inside a size.touch box
+  statusIcon: 22, // a status icon's disc, inside a size.touch box (owner: smaller, 2026-11-04)
   unseen: 1, // a box a screen reader reads and the eye cannot see (the live region)
+  bloodshot: { spread: 10, blur: 8 }, // the fatal hold's edge: a solid band, then feathered, gone before the page margins' ink -- mutate-skip: uncalibrated design value
   column: 768, // the Book's widest page column (tablet width), centred on a desktop; a phone fills the screen
 };
 
 export const radius = { card: 10, chip: 22 }; // chip: a pill, half size.touch
 
-export const opacity = { disabled: 0.45 };
+export const opacity = {
+  disabled: 0.45,
+  press: 0.3, // a lifted card: `line` blended into `card` (rises size.rule)
+  afterimage: 0.12, // Storm's light, the second exemption: BOOK-UI-COMPONENTS.md#design-tokens -- mutate-skip: uncalibrated design value
+  wash: 0.18, // the blow wash at its peak, the exemption: BOOK-UI-COMPONENTS.md#design-tokens
+  washStill: 0.09, // the same wash under reduced motion
+  faint: 0.06, // a held under-ink layer: low-health vignette, dream paper; 4.5:1 holds -- mutate-skip: uncalibrated design value
+  fatal: { day: 0.075, night: 0.25 }, // the fatal blow's held red, by polarity: the most light's dim and warning, and dark's warning, bear at 4.5:1 -- mutate-skip: uncalibrated design value
+  bloodshot: 1, // the fatal hold's edges at the screen's rim, a size.bloodshot.spread band feathered in over size.bloodshot.blur -- mutate-skip: uncalibrated design value
+  glow: 0.08, // the lamp at the page's hip, at its peak; 4.5:1 holds -- mutate-skip: uncalibrated design value
+  spirit: 0.6, // the spirit layer, held; every text role keeps 4.5:1 -- mutate-skip: brief-set design value
+  reverie: { day: 0.8, night: 0.06 }, // the reverie layer, held, by polarity; every text role keeps 4.5:1 (night 0.08 breaks dark.warning) -- mutate-skip: brief-set design value
+};
 
-// Plain state changes only. `turn` drives page-curl.sksl; `fade` replaces it under reduced motion.
+// Book motion. `turn` drives page-curl.sksl; `fade` replaces it under reduced motion. `duration` and
+// `easing` are the way in; `out` the way back (ms), on `outEasing` if it differs.
 export const motion = {
-  quick: { duration: 160, easing: 'ease' }, // minimap zoom, knob return, the page turn's picture deadline
+  quick: { duration: 160, easing: 'ease' }, // minimap zoom, knob return, the page turn's picture deadline, Page's scroll sampling
   turn: { duration: 500, easing: 'inOutQuad' }, // the page curl; tune the duration on a device
   fade: { duration: 160, easing: 'linear' }, // reduced-motion cross-fade
   palette: { duration: 1500, easing: 'inOutQuad' }, // same-polarity phase change only; flips cut (BOOK-UI-COMPONENTS.md#design-tokens)
   meteor: { duration: 700, easing: 'linear' }, // one shooting star's streak (the mock's .7 s); none under reduced motion
+  press: { duration: 90, easing: 'ease', out: 160 }, // ActionCard, Control, Chip, Tap, letter tile -- mutate-skip: uncalibrated design value
+  dry: { duration: 240, easing: 'linear', lag: 60 }, // a new log line; lag: a narrated event after its line -- mutate-skip: uncalibrated design value
+  pop: {
+    duration: 220,
+    easing: 'ease',
+    from: 0.6,
+    hold: 1800, // mutate-skip: uncalibrated design value
+    out: 400, // mutate-skip: uncalibrated design value
+    outEasing: 'linear',
+    rise: space.sm,
+  }, // a status icon arriving, scaling up from `from`; the item pop rising `rise`, then held and out -- mutate-skip: uncalibrated design value
+  flash: { duration: 120, easing: 'inOutQuad', out: 380, gap: 1000, swell: 1.015 }, // the blow wash; swell: the page's scale at its peak; gap: the Flash limit, a later blow keeps all but the wash -- mutate-skip: uncalibrated design value
+  bed: { duration: 1000, easing: 'linear' }, // a room's bed and weather layer, cross-fading on a linear ramp -- mutate-skip: uncalibrated design value
+  afterimage: {
+    duration: 60,
+    easing: 'inOutQuad',
+    out: 1200,
+    outEasing: 'linear',
+    every: [20000, 60000],
+    thunder: [1000, 3000],
+  }, // Storm's light -- mutate-skip: uncalibrated design value
+  flutter: { duration: 600, easing: 'inOutQuad', lift: space.xs, times: 2 }, // Wind's corner paper -- mutate-skip: uncalibrated design value
+  flicker: { min: 80, max: 140, depth: 0.08 }, // the lamp's random step (ms) and share of opacity.glow; the peak is opacity.glow -- mutate-skip: uncalibrated design value
+  settle: { duration: 400, easing: 'inOutQuad', hold: 600 }, // a resolved running head retiring; hold: gilt's warning ink before it settles -- mutate-skip: uncalibrated design value
+  breathe: { duration: 2400, easing: 'inOutQuad' }, // one way of the vignette and the star groups -- mutate-skip: uncalibrated design value
+  reverie: { duration: 2400, easing: 'inOutQuad', lag: 400 }, // a reverie line rising from the paper, `lag` after its page lands; Continue then shows over motion.settle -- mutate-skip: uncalibrated design value
+  stagger: { gap: 40, most: 8 }, // choice answers lifting in, with motion.press -- mutate-skip: uncalibrated design value
+  riffle: { sweeps: 5, duration: 120, easing: 'linear' }, // one travel's sweeps over one snapshot -- mutate-skip: uncalibrated design value
+  first: { hold: 1200 }, // gilt's hold on a first of a playthrough (ordinary: motion.settle.hold) -- mutate-skip: uncalibrated design value
+  card: {
+    duration: 600,
+    easing: 'inOutQuad',
+    out: 300,
+    stagger: 120,
+    blurFrom: 6,
+    blurTo: 12,
+    auto: 4000,
+  }, // chapter card over the leaving page's blur (Skia sigma); auto: when it turns itself -- mutate-skip: uncalibrated design value
 };
 
-// The paper page-turn sound, on by default, off in Settings. The mock's synthesised `pageSound` plays
-// at this level until a recorded CC0 sample (under 1 s, bundled) replaces it.
-export const sound = { pageTurn: { volume: 1 } };
+// Each sound by key: its loudness tier, its round-robin variants and the haptic it brings. Files live
+// in the asset manifest (loka-p2s8), human-made only. Rules: docs/system/book-ui.md#effects-sound-and-haptics.
+export const sound = {
+  pageTurn: { tier: 'note', variants: 3 }, // paper; no haptic during a turn -- mutate-skip: uncalibrated design value
+  pickup: { tier: 'note', variants: 3, haptic: 'light' }, // a paper flick; a buy plays coin instead -- mutate-skip: uncalibrated design value
+  tick: { tier: 'whisper', variants: 1, haptic: 'selection' }, // a debuff arriving; a letter tile's press plays it too -- mutate-skip: uncalibrated design value
+  coin: { tier: 'whisper', variants: 1, haptic: 'selection' }, // one purchase, sale or pennies -- mutate-skip: uncalibrated design value
+  blow: { tier: 'beat', variants: 3, haptic: 'heavy' }, // a blow taken: the thud -- mutate-skip: uncalibrated design value
+  level: { tier: 'note', variants: 1, haptic: 'medium' }, // level up: note high -- mutate-skip: uncalibrated design value
+  skillNew: { tier: 'note', variants: 1, haptic: 'light' }, // new skill: note low -- mutate-skip: uncalibrated design value
+  questDone: { tier: 'note', variants: 1, haptic: 'light' }, // quest resolved: note low -- mutate-skip: uncalibrated design value
+  questFailed: { tier: 'note', variants: 1, haptic: 'warning' }, // quest failed: the close -- mutate-skip: uncalibrated design value
+  skillUp: { tier: 'whisper', variants: 1, gap: 30000 }, // skill improves: tone high, at most once per gap (ms) -- mutate-skip: uncalibrated design value
+  questGained: { tier: 'note', variants: 1 }, // quest gained: tone low -- mutate-skip: uncalibrated design value
+  chapter: { tier: 'chapter', variants: 1, haptic: 'medium' }, // the theme cut, on the music bus -- mutate-skip: uncalibrated design value
+  miss: { tier: 'whisper', variants: 1 }, // an attack that found nothing: one family -- mutate-skip: uncalibrated design value
+  lever: { tier: 'beat', variants: 1, haptic: 'medium' }, // a lever's clunk -- mutate-skip: uncalibrated design value
+  latch: { tier: 'note', variants: 1, haptic: 'light' }, // the player's own action opened an exit -- mutate-skip: uncalibrated design value
+  thunder: { tier: 'beat', variants: 3 }, // Storm: its heavy haptic is Storm's, only on a room entry's first -- mutate-skip: uncalibrated design value
+  bed: { tier: 'bed', variants: 1 }, // a room's bed, by tag (sources) -- mutate-skip: uncalibrated design value
+  weather: { tier: 'bed', variants: 1 }, // the weather layer -- mutate-skip: uncalibrated design value
+  explore: { tier: 'chapter', variants: 1, gap: 600000 }, // an exploration piece, by tag; gap: ms since the last -- mutate-skip: uncalibrated design value
+  impact: { tier: 'note', variants: 3 }, // a blow dealt, under the music -- mutate-skip: uncalibrated design value
+  fightIn: { tier: 'chapter', variants: 1 }, // a fight's stinger, into the loop -- mutate-skip: uncalibrated design value
+  fightLoop: { tier: 'chapter', variants: 1, gap: 60000 }, // a fight within gap (ms) of the last skips the stinger -- mutate-skip: uncalibrated design value
+  riddleRight: { tier: 'note', variants: 1, haptic: 'light' }, // the note-low sample; no new file -- mutate-skip: uncalibrated design value
+  riffle: { tier: 'note', variants: 1, haptic: 'light' }, // one travel's turn -- mutate-skip: uncalibrated design value
+  fightWon: { tier: 'chapter', variants: 1, haptic: 'light' }, // a foe falling: the fanfare -- mutate-skip: uncalibrated design value
+  death: { tier: 'beat', variants: 1 }, // the player falls: the book's close until a Falling cue is recorded; no new file -- mutate-skip: uncalibrated design value
+};
+
+// Loudness targets (LUFS, uncalibrated until recorded samples are heard), voices per bus, ambience
+// ducking under S3 and S4, and the round-robin's pitch spread.
+export const mix = {
+  tier: { bed: -30, whisper: -24, note: -18, beat: -14, chapter: -12 },
+  bus: { ambience: 3, sfx: 4, ui: 2, music: 1 }, // mutate-skip: uncalibrated design value
+  bedUnderMusic: { db: -6 }, // beds under an exploration piece -- mutate-skip: uncalibrated design value
+  muffle: { hz: 800, db: -6 }, // weather and thunder through a wall -- mutate-skip: uncalibrated design value
+  duck: { db: -6, duration: 300, out: 1200 },
+  dip: { db: -3 }, // music under a blow, on duck's times -- mutate-skip: uncalibrated design value
+  spread: 0.04, // a short sound's playback rate, plus or minus
+  coalesce: 300, // small cues of one key inside this many ms are one
+};
+
+// Haptic kinds to their web analogue, a navigator.vibrate pattern in ms (uncalibrated); the native
+// stub ignores them until loka-k5ci maps the kinds to the device. `gap`: the least ms between two.
+export const haptic = {
+  gap: 100,
+  selection: 10, // mutate-skip: uncalibrated design value
+  light: 15,
+  medium: 25,
+  heavy: 40,
+  warning: [20, 60, 20],
+  error: [40, 60, 40], // mutate-skip: uncalibrated design value
+};

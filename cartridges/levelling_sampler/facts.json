@@ -10,6 +10,17 @@
         "player"
       ],
       "meaning": "The player found the den."
+    },
+    "second_wind": {
+      "version": 1,
+      "value_type": {
+        "type": "bool",
+        "default": false
+      },
+      "scopes": [
+        "player"
+      ],
+      "meaning": "The player reached level 2."
     }
   }
 }

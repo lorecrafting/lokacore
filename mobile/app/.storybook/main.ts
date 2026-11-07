@@ -97,6 +97,7 @@ const config: StorybookConfig = {
   staticDirs: [{ from: '../book/fonts', to: '/fonts' }],
   viteFinal: async (config, { configType }) =>
     mergeConfig(config, {
+      define: { __DEV__: 'true' }, // the haptic pulse shows here (book-ui.md, Effects, sound and haptics)
       // The Loka picker's queue (docs/web-preview.md#polish-queue)
       plugins: dev(configType) ? [...plugins, polishQueue()] : plugins,
       // expo-modules-core's src imports declare-only classes for its global types (Metro drops them).

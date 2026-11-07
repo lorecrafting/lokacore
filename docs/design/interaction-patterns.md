@@ -96,7 +96,7 @@ order is a bug, not a variation ([owner, 2026-10-23](../decisions/owner-decision
 
 ### Combat
 
-- Order: own page; opponent block "name — band"; combat log (each line also in the World log); vertical action list (Stand, Flee,
+- Order: own page; combat log (its first line names the foe; no opponent block, owner 2026-11-02) (each line also in the World log); vertical action list (Stand, Flee,
   Look, item combat uses, Cast a spell… per foe); on closure the page stays with Back to World.
 - Never appears: a minimap or say field; horizontal buttons.
 - Source: [Combat interaction](../system/book-ui.md#combat-interaction),
@@ -109,17 +109,18 @@ order is a bug, not a variation ([owner, 2026-10-23](../decisions/owner-decision
 
 ### Sections (Contents)
 
-- Order: Contents lists exactly Character, Inventory, Map, Journal, Settings; each section ends
-  with "Back to World". Character: resources, levelling and Raise cards, skills and professions,
-  Spells (refused words with reasons). Journal: quests, then Lore. Settings: Reading size,
-  page-turn sound.
-- Never appears: a sixth section without an owner decision; game actions other than Raise and
+- Order: Contents lists exactly Character, Skills, Inventory, Map, Journal, Settings; each section
+  ends with Back to Contents when opened from Contents, else "Back to World". Character: resources, levelling and Raise cards. Skills: skills and
+  professions, Spells (refused words with reasons). Journal: quests, then Lore. Settings: Reading size,
+  Sound, Music, Haptics, Flashes, Credits, Start over. Credits opens a child page of Settings listing
+  each non-null `credit` in `mobile/app/book/sounds/manifest.json`; it is not a Contents section.
+- Never appears: a further section without an owner decision; game actions other than Raise and
   aimed spells; a status line.
 - Source: [World and status entry](../system/book-ui.md#world-and-status-entry),
   [Levelling details](../system/book-ui.md#levelling-details), [Lore details](../system/book-ui.md#lore-details),
   [Skill tree details](../system/book-ui.md#skill-tree-details).
-- Enforcement: `mobile/app/catalogue.test.ts` (every component listed); none yet for the fixed
-  Contents list.
+- Enforcement: `mobile/app/catalogue.test.ts` (every component listed); `mobile/app/book/polish.test.ts`
+  (the fixed Contents list).
 
 ## 2. Where actions live
 
@@ -149,7 +150,7 @@ order is a bug, not a variation ([owner, 2026-10-23](../decisions/owner-decision
 
 ### Aimed spells
 
-- Rule: Cast a spell… appears on person and item pages, on the Character Spells block ("Flamma,
+- Rule: Cast a spell… appears on person and item pages, on the Skills Spells block ("Flamma,
   cast on…") and per foe on the Combat page; a refused spell lists its reason under Spells. An
   untargeted spell word is a Spells card `lux, cast`; an accepted cast turns to World.
 - Why: a spell is aimed like any other targeted action; the Spells block is the only place to read
@@ -199,7 +200,7 @@ order is a bug, not a variation ([owner, 2026-10-23](../decisions/owner-decision
 - Rule: a buy redraws purse and list on the shop page (its line is quiet); a retained item action appends to the
   item's history; Take, Drop and a confirmed pick return to World with one named log line.
 - Why: the reader sees cause and effect on the same page, or one turn back with one line.
-- Do: "You have 12p." updates under the cards. Don't: a toast, a modal, a second confirming line.
+- Do: "You have 12p." updates under the cards. Don't: a toast, a modal, a second confirming line. The one exception is the `+ item` pop ([Room page anatomy](../system/book-ui.md#room-page-anatomy)).
 - Source: [Item details](../system/book-ui.md#item-details-and-takedrop),
   [Live action freshness](../system/book-ui.md#live-action-freshness).
 - Enforcement: `polish_detail.test.ts:16`, `:123`, `:162`, `:241`; `hostile_refusal.test.ts:43`.
@@ -340,7 +341,7 @@ Conflicts (code or spec contradicts a pattern above):
 
 Gaps (no pattern or no check yet):
 
-- Fixed Contents list and "no Chip inside a page": needs filing (one render test each).
+- "No Chip inside a page": needs filing (one render test).
 - Label-in-name prefix rule: needs filing (one accessibility-name test).
 - Device Back on a pick list: loka-x6t.113. Whisper hidden until loka-x6t.115. Wider sale lists:
   loka-x6t.117. NPC conditions page: loka-x6t.70.

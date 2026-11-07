@@ -19,7 +19,7 @@ test('farm yard: a too-heavy seed sack reads "Take"; a press sends nothing and s
   assert.ok(!b.text().some((t) => t.includes('too heavy')), JSON.stringify(b.text()));
   b.refuse('Take');
   assert.equal(head(), before);
-  assert.ok(b.text().includes("Take\nIt's too heavy to carry."), JSON.stringify(b.text()));
+  assert.ok(b.text().includes("It's too heavy to carry."), JSON.stringify(b.text()));
   const card = b.draw().find((n) => n.props?.accessibilityState?.disabled);
   // Pressed, the name holds the reason (label in name), so the hint drops it: read once.
   assert.deepEqual(

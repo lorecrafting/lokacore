@@ -1,0 +1,18 @@
+{
+  "name": "room.wayside_shrine.title",
+  "description": "room.wayside_shrine.description",
+  "sanctuary": true,
+  "exits": {
+    "down": {
+      "to": "shore_steps"
+    }
+  },
+  "details": {
+    "candles": {
+      "aliases": [
+        "candles"
+      ],
+      "description": "detail.candles"
+    }
+  }
+}

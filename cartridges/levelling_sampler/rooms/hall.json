@@ -1,6 +1,12 @@
 {
   "name": "room.hall.title",
   "description": "room.hall.description",
+  "details": {
+    "cull_notice": {
+      "aliases": ["notice"],
+      "description": "detail.cull_notice"
+    }
+  },
   "exits": {
     "east": {
       "to": "pit"

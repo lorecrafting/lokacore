@@ -7,10 +7,12 @@ import { test } from 'node:test';
 import { elapsedHost } from '../../authority/local-story/__tests__/elapsed-host.test.ts';
 import { group } from './model.ts';
 import { presenter } from './presenter.ts';
+import { fadeStub } from './__tests__/fade-stub.ts';
 
 const ts = createRequire(import.meta.url)('typescript');
 registerHooks({
   resolve(specifier, context, next) {
+    if (specifier === './fade.ts') return fadeStub;
     // Components are called outside React: the palette context reads its default (light).
     if (specifier === 'react') return { url: 'test:item-react', shortCircuit: true };
     return specifier === 'react-native'
@@ -18,13 +20,14 @@ registerHooks({
       : next(specifier, context);
   },
   load(url, context, next) {
-    if (url === 'test:item-react') return reactShim();
+    if (url === 'test:item-react')
+      return reactShim(`({ state: (v) => [v, () => {}], effect: () => {} })`);
     if (url === 'test:item-native')
       return {
         format: 'module',
         shortCircuit: true,
         source:
-          "export const Pressable='Pressable',Text='Text',View='View',ScrollView='ScrollView',AccessibilityInfo={};",
+          "export const Pressable='Pressable',Text='Text',View='View',ScrollView='ScrollView',AccessibilityInfo={},Animated={};",
       };
     if (!url.endsWith('.tsx')) return next(url, context);
     return {
@@ -36,7 +39,7 @@ registerHooks({
     };
   },
 });
-const { Item } = await import('./Menu.tsx');
+const { Item, InsidePage, ThingPage } = await import('./Menu.tsx');
 
 function nodes(element: any): any[] {
   if (Array.isArray(element)) return element.flatMap(nodes);
@@ -125,4 +128,41 @@ test('a wield-slot item with no equip words reads Wield, You take up and You put
     'You take up a pickaxe.',
     'You put away a pickaxe.',
   ]);
+});
+
+// Breaks: a corpse's item page or Look inside page titled from its raw short, "The corpse of {victim}",
+// or its contents listed by raw short (Menu.tsx, loka-kgd.203). Expected words by hand.
+test('a corpse page and its Look inside name the victim, and so do corpses inside it', () => {
+  const words: Record<string, string> = {
+    corpse: 'the corpse of {victim}',
+    goblin: 'a goblin',
+    rat: 'a rat',
+  };
+  const text = (k: string) => words[k] ?? k;
+  const rat = { id: 'r', name: 'corpse', victim: 'rat', container_id: 'c', actions: [] };
+  const corpse = { id: 'c', name: 'corpse', victim: 'goblin', actions: [], contents: [rat] };
+  const view = { entities: [corpse], inventory: [], actions: [] } as any;
+  const shown = (el: any) =>
+    nodes(el)
+      .filter((n) => n.type === 'Text')
+      .map((n) => n.props.children)
+      .flat();
+  const none = () => {};
+  const page = ThingPage({
+    thing: corpse as any,
+    text,
+    label: text,
+    actions: [],
+    view,
+    log: [],
+    press: none,
+    lookInside: none,
+    leave: none,
+  });
+  assert.ok(shown(page).includes('The corpse of a goblin'), shown(page).join(' | '));
+  const look = shown(
+    InsidePage({ screen: { view, text } as any, id: 'c', open: none, close: none }),
+  );
+  assert.ok(look.includes('The corpse of a goblin'), look.join(' | '));
+  assert.ok(look.includes('The corpse of a rat'), look.join(' | '));
 });

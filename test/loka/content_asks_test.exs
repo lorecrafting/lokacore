@@ -21,6 +21,13 @@ defmodule Loka.ContentAsksTest do
     assert diags.([{"npcs/smith.json", &nope.(&1, ["ask", "answers", Access.at(0), "grants"])}]) ==
              [{"UNRESOLVED_REFERENCE", "npcs/smith.ask.answers[0].grants"}]
 
+    # Breaks: a dialogue choice's topic.grant step naming no topic compiles (LeafRefs.steps row).
+    grant =
+      &Map.update!(&1, "steps", fn s -> s ++ [%{"op" => "topic.grant", "topic" => "nope"}] end)
+
+    assert diags.([{"dialogues/smith_talk.json", &update_in(&1, ["choices", "help"], grant)}]) ==
+             [{"UNRESOLVED_REFERENCE", "dialogues/smith_talk.choices.help.steps[1].topic"}]
+
     for {path, at} <- [
           {["ask", "unknown"], "unknown"},
           {["ask", "answers", Access.at(0), "text"], "answers[0].text"},

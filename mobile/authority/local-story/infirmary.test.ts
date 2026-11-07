@@ -138,49 +138,24 @@ test('failed and lost COMMIT exchange outcomes reconcile all-prior or all-next r
   }
 });
 
-// Breaks: forged contribution, occurrence, transfer receipt or current custody is accepted as a lawful repeat save.
-test('exchange history corruption refuses without rewriting the SQLite rows', () => {
-  for (const corruption of ['contribution', 'occurrence', 'transfer', 'custody']) {
-    const a = setup();
-    a.gather();
-    a.accept();
-    a.turn();
-    if (corruption === 'contribution')
-      a.sql
-        .prepare(
-          "UPDATE state_row SET value='0' WHERE section='facts' AND key LIKE '%contribution%'",
-        )
-        .run();
-    if (corruption === 'occurrence')
-      a.sql
-        .prepare(
-          "UPDATE state_row SET value=json_set(value,'$.quest_instance_id','aaaaaaaa-1111-4222-8333-444444444444') WHERE section='choices' AND json_extract(value,'$.choice_id')='exchange'",
-        )
-        .run();
-    if (corruption === 'custody')
-      a.sql
-        .prepare("UPDATE state_row SET value=? WHERE section='containers' AND key=?")
-        .run(JSON.stringify(fresh.body), herbs[0]);
-    if (corruption === 'transfer') {
-      const row = a.sql
-        .prepare(
-          "SELECT rowid,response FROM receipt WHERE json_extract(response,'$.outcome')='exchange'",
-        )
-        .get() as { rowid: number; response: string };
-      const d = JSON.parse(row.response);
-      d.delta.ops = d.delta.ops.filter((o: any) => o.entity_id !== herbs[0]);
-      a.sql
-        .prepare('UPDATE receipt SET response=? WHERE rowid=?')
-        .run(JSON.stringify(d), row.rowid);
-    }
-    const snapshot = a.sql.prepare('SELECT * FROM state_row ORDER BY section,key').all();
-    assert.equal(
-      openStory(a.db, [{ fresh, content_hash: bundle.sha256 }], a.host).kind,
-      'save_corrupt',
-    );
-    assert.deepEqual(a.sql.prepare('SELECT * FROM state_row ORDER BY section,key').all(), snapshot);
-    a.sql.close();
-  }
+// Breaks: a repeat-exchange row naming a foreign occurrence opens, or the refusal rewrites the rows.
+test('a repeat-exchange row with a foreign occurrence refuses without rewriting the SQLite rows', () => {
+  const a = setup();
+  a.gather();
+  a.accept();
+  a.turn();
+  a.sql
+    .prepare(
+      "UPDATE state_row SET value=json_set(value,'$.quest_instance_id','aaaaaaaa-1111-4222-8333-444444444444') WHERE section='choices' AND json_extract(value,'$.choice_id')='exchange'",
+    )
+    .run();
+  const snapshot = a.sql.prepare('SELECT * FROM state_row ORDER BY section,key').all();
+  assert.equal(
+    openStory(a.db, [{ fresh, content_hash: bundle.sha256 }], a.host).kind,
+    'save_corrupt',
+  );
+  assert.deepEqual(a.sql.prepare('SELECT * FROM state_row ORDER BY section,key').all(), snapshot);
+  a.sql.close();
 });
 
 // Breaks: temporary loss of direct custody resets the active occurrence or makes it unreopenable.

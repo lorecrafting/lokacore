@@ -1,11 +1,16 @@
 // The offered-action controls: action card, pick lists, verb line, continue button (BOOK-UI-COMPONENTS.md).
 import { Children, type ReactNode, type Ref, useContext, useEffect, useRef, useState } from 'react';
-import { AccessibilityInfo, Pressable, View } from 'react-native';
+import { Pressable, View } from 'react-native';
 import { Text } from './Text.tsx';
-import { refusedProps, Tap } from './pages.tsx';
+import { card, linked, Unavailable, type Wait } from './Unavailable.tsx';
+import { InkText, LiftPressable } from './fade.ts';
+import { haptic } from './haptic';
+import { Tap } from './pages.tsx';
+import { useInk, useLift, usePress } from './press.ts';
 import { note, prose, usePalette, useType } from './palette.ts';
-import { onKey, unseen } from './lines.tsx';
+import { onKey } from './lines.tsx';
 import { hides, reasonSentence } from './reasons.ts';
+import { ASKED } from './words.ts';
 import type { GameView } from '../../packages/game-view/session.ts';
 import { picks, type Pick } from './pick.ts';
 import { focusTitle, titleContext } from './title.ts';
@@ -20,33 +25,46 @@ type CardProps = (
       name?: string;
       note?: string;
       link?: string;
+      asked?: boolean;
     }
-  | { label: string; onPress: () => void; expanded?: boolean }
-  | { label: string; reason?: string; name?: string; link?: string }
+  | { label: string; onPress: () => void; expanded?: boolean; centred?: true }
+  | {
+      label: string;
+      reason?: string;
+      name?: string;
+      link?: string;
+      wait?: Wait;
+      focus?: (on: boolean) => void;
+    }
 ) & { ref?: Ref<View> };
 /**
  * An offered action as a card.
- * - Use: a detail page's offered action or dialogue choice, the
- *   Raise cards, a Pick list's option and rows; never an accent text link.
+ * - Use: a detail page's offered action or dialogue choice, the Raise cards, a Pick list's option and rows; never an accent text link.
  * - Rules: no outer margin; cards stack in Cards. Without a Button it is the unavailable form
  *   (book-ui.md, Unavailable actions): the same card reading its plain label, never `label: reason`;
  *   a press sends nothing and grays it, its reason as one sentence beneath (`reasonSentence`, reasons.ts), read
- *   once; a permanent refusal (`hides`, reasons.ts) draws nothing. It is exposed as disabled yet
+ *   once; a Button with `refused` (a sanctuary's Attack) is this form, but its press sends, so the log says it;
+ *   a permanent refusal (`hides`, reasons.ts) draws nothing. It is exposed as disabled yet
  *   stays focusable and pressable, its sentence its hint. With
  *   `onPress` it sends nothing: a Pick list's option (with `expanded`) or a card that opens a child
  *   page (the NPC page's Trade and Look, an item's Look inside). A row may show its own label, accessible name and quiet note in
  *   place of the Button's label. With `link` it is a shop line, not a card (book-ui.md, Shop
  *   lines): a Tap reading its label as prose, the `link` words in the room link style
  *   (`type.named`), named by `name` (its shown text, then the action and spoken price); unavailable, the same press and
- *   sentence with no card. Shop lines stack in `Cards lines`.
- * - States: available; unavailable; unavailable, pressed; each as a card or a line.
- * - Line form stories: NpcPage.stories.tsx (Shelf, Sale, Services).
+ *   sentence with no card. Shop lines stack in `Cards lines`. Stories: NpcPage (Shelf, Sale, Services).
+ * - States: available; asked (a dialogue choice already taken: dim italic words, named with ASKED, still pressable); unavailable; unavailable, pressed; each as a card or a line.
+ * - Effects: a card lifts with a selection haptic; an unavailable press does not lift, its reason
+ *   dries and it gives a warning haptic. With `wait` (the rise card, book-ui.md, Spirit state) it has
+ *   no reason: a countdown ring leads its label, the two centred, its value the whole seconds left;
+ *   ready, the rise card's label stays centred (`centred`).
  * - Story: ActionCard.stories.tsx
  */
 export function ActionCard(p: CardProps) {
   const c = usePalette();
   const t = useType();
   if (!('b' in p) && !('onPress' in p)) return hides(p.reason) ? null : <Unavailable {...p} />;
+  if ('b' in p && p.b.refused)
+    return <Unavailable label={p.b.label} reason={p.b.refused} send={() => p.press(p.b)} />;
   const label = p.label ?? ('b' in p ? p.b.label : '');
   if ('b' in p && p.link)
     return (
@@ -54,99 +72,44 @@ export function ActionCard(p: CardProps) {
         <Text style={prose(c, t)}>{linked(label, p.link)}</Text>
       </Tap>
     );
+  return <Available {...p} label={label} />;
+}
+
+function Available(
+  p: Extract<CardProps, { b: Button } | { onPress: () => void }> & { label: string },
+) {
+  const c = usePalette();
+  const t = useType();
+  const label = p.label;
+  const press = usePress('selection');
+  const lift = useLift(press, c.card);
   return (
-    <Pressable
+    <LiftPressable
       ref={p.ref}
+      {...press.handlers}
       accessibilityRole="button"
-      accessibilityLabel={('b' in p && p.name) || label}
+      accessibilityLabel={('b' in p && (p.name || (p.asked && `${label}${ASKED}`))) || label}
       aria-expanded={'onPress' in p ? p.expanded : undefined} // RN web maps aria-expanded, not accessibilityState
-      onPress={'b' in p ? () => p.press(p.b) : p.onPress}
-      style={card(c)}
+      onPress={press.commit('b' in p ? () => p.press(p.b) : p.onPress)}
+      style={[card(c), lift]}
     >
-      <Text style={prose(c, t)}>
+      <Text
+        style={[
+          'b' in p && p.asked ? { ...note(c, t), ...type.italic } : prose(c, t),
+          'onPress' in p && p.centred && { textAlign: 'center' },
+        ]}
+      >
         {/* One text node with a line break, so axe reads "label note" as the name's start. */}
         {'b' in p && p.note
           ? [label, <Text key="note" style={note(c, t)}>{`\n${p.note}`}</Text>]
           : label}
       </Text>
-    </Pressable>
-  );
-}
-
-const card = (c: ReturnType<typeof usePalette>, grayed = false) => ({
-  backgroundColor: grayed ? c.bg : c.card,
-  borderColor: c.line,
-  borderWidth: size.rule,
-  borderRadius: radius.card,
-  minHeight: size.card,
-  justifyContent: 'center' as const,
-  paddingVertical: space.md,
-  paddingHorizontal: space.lg,
-});
-
-// A shop line's words with its `link` words drawn as the room link (lines.tsx nameLink's style).
-const linked = (label: string, link: string) => {
-  const i = label.indexOf(link);
-  return i < 0
-    ? [label]
-    : [
-        label.slice(0, i),
-        <Text key="link" style={type.named}>
-          {link}
-        </Text>,
-        label.slice(i + link.length),
-      ];
-};
-
-// The unavailable form: its own component, so its pressed state is the card's alone. The state
-// keeps the label and reason it was pressed on, so a changed card starts unpressed. Its name is the
-// shown text, then the rest of `name`, which starts with the label (label in name). Once pressed the
-// name holds the reason, so the hint drops it: read once either way.
-// ponytail: announceForAccessibility is a no-op on web, where the card's own polite region reads the
-// sentence; where native maps aria-live too, it may be read twice (Footer.tsx, check on device).
-function Unavailable(p: { label: string; reason?: string; name?: string; link?: string }) {
-  const [c, t] = [usePalette(), useType()];
-  const sentence = reasonSentence(p.reason);
-  const [pressed, setPressed] = useState<string>();
-  const shown = `${p.label}\n${sentence}`;
-  const grayed = pressed === shown;
-  const label = p.link ? linked(p.label, p.link) : p.label;
-  const a11y = (grayed && sentence ? shown : p.label) + (p.name ?? p.label).slice(p.label.length);
-  const hint = grayed ? '' : sentence;
-  const press = () => {
-    setPressed(shown);
-    if (sentence) AccessibilityInfo.announceForAccessibility(sentence);
-  };
-  const body = (
-    <Text style={grayed ? note(c, t) : prose(c, t)}>
-      {grayed && sentence ? [label, `\n${sentence}`].flat() : label}
-    </Text>
-  );
-  return (
-    <View>
-      {p.link ? (
-        <Tap label={a11y} refused={hint} onPress={press}>
-          {body}
-        </Tap>
-      ) : (
-        <Pressable
-          accessibilityLabel={a11y}
-          {...refusedProps(hint)}
-          onPress={press}
-          style={card(c, grayed)}
-        >
-          {body}
-        </Pressable>
-      )}
-      <View aria-live="polite" style={unseen}>
-        {grayed && sentence ? <Text>{sentence}</Text> : null}
-      </View>
-    </View>
+    </LiftPressable>
   );
 }
 
 // An open list's rows, inset as the option's children; Escape anywhere in it closes it.
-const rows = (k: Pick, first: Ref<View>, press: (b: Button) => void, close: () => void) => (
+export const rows = (k: Pick, first: Ref<View>, press: (b: Button) => void, close: () => void) => (
   <View style={{ paddingLeft: space.lg }} {...onKey((key) => key === 'Escape' && close())}>
     <Cards>
       {k.rows.map((r, i) => (
@@ -193,6 +156,7 @@ export type Shown = ReturnType<typeof useState<{ page: string; label: string }>>
  *   the answer leaves the option no row, the option goes and focus moves to the page title.
  *   Rows are inset space.lg; an unavailable row is the unavailable form.
  * - States: closed; open; open with an unavailable row; scripted actions mixed; pending.
+ * - Refs: one per card for its whole life; an animated component keeps the first it is given.
  * - Story: PickList.stories.tsx
  */
 export function PickLists(p: {
@@ -204,18 +168,18 @@ export function PickLists(p: {
   text: (key: string) => string;
   press: (b: Button) => void;
   pending?: boolean;
-  /** shared open state, for lists on one screen under several pages (Combat's foe lines) */
+  /** shared open state, for lists on one screen under several pages (Combat's foes) */
   state?: Shown;
 }) {
   const own = useState<{ page: string; label: string }>();
   const [shown, setShown] = p.state ?? own;
   const open = shown?.page === p.page ? shown.label : undefined;
-  const option = useRef<View>(null);
+  const options = useRef<Record<string, View | null>>({});
   const all = p.lists ?? picks(p.view, p.buttons ?? [], p.page, p.text);
   const { first, sent } = useFocus(open, p.view, all);
   const close = () => {
     setShown(undefined);
-    option.current?.focus();
+    if (open) options.current[open]?.focus();
   };
   const press = (b: Button) => {
     p.press(b);
@@ -226,7 +190,7 @@ export function PickLists(p: {
   return all.map((k) => (
     <View key={k.label} style={{ gap: space.sm }}>
       <ActionCard
-        ref={k.label === open ? option : undefined}
+        ref={(v) => void (options.current[k.label] = v)}
         label={k.label}
         expanded={k.label === open}
         onPress={() => (k.label === open ? close() : setShown({ page: p.page, label: k.label }))}
@@ -270,16 +234,20 @@ export function VerbLine({ b, press }: { b: Button; press: (b: Button) => void }
 /**
  * An ink-filled scene or chapter continuation.
  * - Use: a scene or chapter page's Continue.
+ * - Rules: an ink press (`bg` to `dim`, `action` being unreadable on the ink fill) and a selection haptic.
  * - Story: ContinueButton.stories.tsx
  */
 export function ContinueButton(p: { label: string; onPress: () => void }) {
   const c = usePalette();
   const t = useType();
+  const press = usePress('selection');
+  const ink = useInk(press, c.bg, c.dim);
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={p.label}
-      onPress={() => p.onPress()} // no press event: the handler takes none
+      onPress={press.commit(p.onPress)}
+      {...press.handlers}
       style={{
         backgroundColor: c.fg,
         borderRadius: radius.card,
@@ -291,7 +259,7 @@ export function ContinueButton(p: { label: string; onPress: () => void }) {
         paddingHorizontal: space.lg,
       }}
     >
-      <Text style={{ ...t.control, color: c.bg, textAlign: 'center' }}>{p.label}</Text>
+      <InkText style={[t.control, { textAlign: 'center' }, ink]}>{p.label}</InkText>
     </Pressable>
   );
 }

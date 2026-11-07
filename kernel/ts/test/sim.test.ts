@@ -232,14 +232,14 @@ test('400 fixed showcase sequences keep every invariant and end in each district
     'holding_croft',
     'counting_house',
   ]; // one end room per district; E2's theft moved the ends (carpenter_shop, forge_stall dropped out)
-  const verbs = ['drink', 'eat', 'read', 'sit', 'sleep', 'wear'];
+  const verbs = ['consume', 'read', 'sit', 'sleep', 'wear'];
   assert.deepEqual(
     [...inner.filter((r) => !rooms.has(r)), ...verbs.filter((v) => !seen.has(v))],
     [],
   );
   // Pass-1 check 4: a committed change the Book shows without a narration line.
   assert.deepEqual(unnarrated({ silent }), []);
-  assert.ok(changed.has('eat') && changed.has('take'), 'no change recorded');
+  assert.ok(changed.has('consume') && changed.has('take'), 'no change recorded');
   const showcase = [cartridgeFile(ROOT + SHOWCASE)];
   for (const seed of PINNED)
     assert.equal(simulate(seed, KERNEL, showcase).failure?.id, 'gameview_agrees_with_admission');

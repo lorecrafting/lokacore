@@ -90,6 +90,8 @@ defmodule Loka.ContentScenesTest do
            ]), ".steps[1].type", "SCHEMA_VIOLATION", %{"error" => "not_in_enum"}},
           {Map.put(s, "control", "restricted"), ".control", "SCHEMA_VIOLATION",
            %{"error" => "unknown_variant"}},
+          {Map.put(s, "treatment", "dream"), ".treatment", "SCHEMA_VIOLATION",
+           %{"error" => "not_in_enum", "allowed" => "reverie"}},
           {update_in(s, ["on"], &Map.delete(&1, "story_point")), ".on", "SCHEMA_VIOLATION",
            %{"error" => "exclusive_properties"}},
           {put_in(s, ["on", "quest"], "ring_the_bell"), ".on", "SCHEMA_VIOLATION",
@@ -113,6 +115,51 @@ defmodule Loka.ContentScenesTest do
               [
                 d("DUPLICATE_DEFINITION", "scenes/bell_echo.on"),
                 d("DUPLICATE_DEFINITION", "scenes/bell_rung.on")
+              ]}
+  end
+
+  # Breaks: the compiler refuses an opening scene (`on: {start: true}`), drops its trigger or
+  # its scene fact, admits a second opening scene, or stops requiring an outcome on a story point.
+  test "an opening scene compiles once per cartridge; other triggers still need an outcome", %{
+    tmp_dir: dir
+  } do
+    opening = %{
+      "on" => %{"start" => true},
+      "control" => "modal",
+      "treatment" => "reverie",
+      "steps" => [
+        %{"type" => "narrate", "text" => "scene.bell_rung.bell"},
+        %{"type" => "await_ack"},
+        %{"type" => "end"}
+      ]
+    }
+
+    assert {:ok, _, []} = Loka.Content.compile("cartridges/opening_sampler")
+    assert {:ok, out, []} = compile(dir, %{"scenes/opening.json" => opening})
+    c = JSON.decode!(out)["cartridge"]
+    assert c["scenes"]["scene_sampler@0.0.1:scene/opening"]["on"] == %{"start" => true}
+    assert c["facts"]["scene_sampler@0.0.1:fact/scene_opening"]["value_type"]["maximum"] == 1
+
+    assert compile(Path.join(dir, "two"), %{
+             "scenes/opening.json" => opening,
+             "scenes/dawn.json" => opening
+           }) ==
+             {:error,
+              [
+                d("DUPLICATE_DEFINITION", "scenes/dawn.on"),
+                d("DUPLICATE_DEFINITION", "scenes/opening.on")
+              ]}
+
+    s = src("scenes/bell_rung.json")
+
+    assert compile(Path.join(dir, "no_outcome"), %{
+             "scenes/bell_rung.json" => update_in(s, ["on"], &Map.delete(&1, "outcome"))
+           }) ==
+             {:error,
+              [
+                d("SCHEMA_VIOLATION", "scenes/bell_rung.on.outcome", %{
+                  "error" => "missing_property"
+                })
               ]}
   end
 
@@ -184,6 +231,7 @@ defmodule Loka.ContentScenesTest do
   test "scene definitions require scene@1", %{tmp_dir: dir} do
     File.cp_r!(@src, dir)
     File.rm!(Path.join(dir, "reactions/bell_after.json"))
+    File.rm!(Path.join(dir, "scenes/rope_reverie.json"))
     m = src("cartridge.json") |> update_in(["requires", "capabilities"], &Map.delete(&1, "scene"))
     File.write!(Path.join(dir, "cartridge.json"), JSON.encode!(m))
 

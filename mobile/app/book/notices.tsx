@@ -121,10 +121,6 @@ const fare = (c: Palette, t: Type, f: NonNullable<Notice['transport']>) => (
 const fresh = (description: string) => (line: DetailLine) =>
   typeof line !== 'string' || plain(line) !== description;
 
-// The notice's fresh reads.
-const history = (screen: Screen, id: string, description: string) =>
-  screen.detail(id).filter(fresh(description));
-
 /**
  * A notice or board detail in the detail-page order (book-ui.md, Notice board details).
  * - Use: a notice route.
@@ -148,7 +144,7 @@ export function NoticePage(
     <Page title={p.screen.text(detail.title)} foot={foot(p, !!board, detail.id)}>
       <Text style={prose(c, t)}>{description}</Text>
       {'remaining' in detail && <Text style={note(c, t)}>Remaining: {detail.remaining}</Text>}
-      <LogLines lines={history(p.screen, detail.id, description)} />
+      <LogLines lines={p.screen.detail(detail.id)} keep={fresh(description)} />
       {'transport' in detail && detail.transport && fare(c, t, detail.transport)}
       {!!board?.notices.length && (
         <View>

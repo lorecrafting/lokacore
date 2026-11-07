@@ -1,5 +1,7 @@
 # Themes and questions
 
+> Reference only: agent-drafted worldbuilding text (not the owner's words). Never ships as written; the owner writes shipped prose ([rule](../../decisions/owner-decision-human-made-content-2026-10-31.md)).
+
 Status: draft. Area: [Foundations: premise, tone, player, canon housekeeping](../README.md#00-foundations). Canon tier: draft (owner-directed 2026-10-16).
 
 **Purpose.** The handful of questions the world keeps asking (the thematic spine), stated as questions, not morals.

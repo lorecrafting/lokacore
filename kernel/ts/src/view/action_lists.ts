@@ -1,4 +1,4 @@
-// size: allow 350, food, water, practical skills, local Knock, G7 get locks and row 33 theft and the row FD7 ask share the composed view list; the viewer is threaded (loka-kgd.150.5)
+// size: allow 355, food, water, practical skills, local Knock, G7 get locks and row 33 theft and the row FD7 ask share the composed view list; the viewer is threaded (loka-kgd.150.5); the hotbar's cooldown pair (loka-x6t.135)
 import { aimedRefused, craftRefused, policyRefusal } from '../mechanics/scripted_action/shared.ts';
 import { running as modalScene } from '../mechanics/scene/shared.ts';
 import { foodActions } from './food.ts';
@@ -20,8 +20,16 @@ import type {
   Key,
   TargetSpec,
 } from '../contracts.gen.ts';
-import { admission, detailAt, refusal, resolved, type Offered } from '../commands/actions.ts';
+import {
+  admission,
+  cooling,
+  detailAt,
+  refusal,
+  resolved,
+  type Offered,
+} from '../commands/actions.ts';
 import { bodyOf, type Steps, type World, type NpcEntity } from '../runtime/decision.ts';
+import { oneTalk } from '../mechanics/dialogue/fall_through.ts';
 import { MODAL, speaks, talkRefused } from '../mechanics/dialogue/shared.ts';
 import { holds } from '../mechanics/policy.ts';
 import * as barrier from '../mechanics/barrier/rule.ts';
@@ -47,7 +55,7 @@ import { chainRefused } from '../mechanics/locks.ts';
 const HIDDEN = [
   'where',
   'recover_corpse',
-  'eat',
+  'consume',
   'bandage',
   'buy',
   'sell',
@@ -55,11 +63,14 @@ const HIDDEN = [
   'read',
   'fill',
   'pour',
-  'drink',
   ...MODAL,
 ];
 const hidden = (world: World, actor: CharacterId, a: Offered) =>
   HIDDEN.includes(a.command) || (a.command === 'continue' && !modalScene(world, actor));
+const byPriority =
+  (set: Record<string, Offered>) => (a: { action_key: string }, b: { action_key: string }) =>
+    set[b.action_key]!.priority - set[a.action_key]!.priority || cmp(a.action_key, b.action_key);
+
 // size: allow 60, one composed ActionSet/query context projects item and exact-subject Notice offers
 export function lists(world: World, actor: CharacterId, steps = { n: 0 }) {
   const set = resolved(world, actor);
@@ -99,12 +110,12 @@ export function lists(world: World, actor: CharacterId, steps = { n: 0 }) {
           a.command !== current,
       ),
       ...readActions(world, actor, set, steps),
-    ].sort(
-      (a, b) =>
-        set[b.action_key].priority - set[a.action_key].priority || cmp(a.action_key, b.action_key),
-    ),
+    ].sort(byPriority(set)),
     of: (scope: string, id: string, nested = false) =>
-      listed((a) => entityOffered(world, actor, a, scope, id, nested, steps), id, scope).concat(
+      oneTalk(
+        set,
+        listed((a) => entityOffered(world, actor, a, scope, id, nested, steps), id, scope),
+      ).concat(
         liquid(id),
         foodActions(world, actor, id, set, steps),
         useActions(world, actor, id, set, steps),
@@ -114,6 +125,7 @@ export function lists(world: World, actor: CharacterId, steps = { n: 0 }) {
     worn: (id: string) =>
       listed((a) => entityOffered(world, actor, a, 'worn', id, false, steps), id).concat(
         liquid(id),
+        foodActions(world, actor, id, set, steps),
         useActions(world, actor, id, set, steps),
       ),
     door: (direction: Key) => listed((a) => door(a) && usable(world, actor, a, { direction })),
@@ -234,7 +246,8 @@ function advertise(
   // The unpaid cost names itself (pass-1 R1); an authored refusal wins.
   const short = unpaid(world, bodyOf(world, actor)!, admitted, a.scripted?.costs ?? []);
   const reason = code && (refused ?? (typeof code === 'object' ? code : { code, ...short }));
-  return reason ? { available: false, ...shown, reason } : { available: true, ...shown };
+  const cooled = reason?.code === 'cooldown' && a.scripted && cooling(world, a.scripted, actor);
+  return reason ? { available: false, ...shown, reason, ...cooled } : { available: true, ...shown };
 }
 
 function harvestOffered(
@@ -331,6 +344,7 @@ function lightOffered(world: World, actor: CharacterId, a: Offered, item: Entity
 }
 
 function targetsFor(world: World, actor: CharacterId, a: Offered, id?: string) {
+  if (a.quest && a.speaker) return []; // the offer names its own target (loka-vx2v)
   if ((a.command === 'expedition' || a.command === 'cast') && id) return [id as EntityId];
   return id && light.VERBS.includes(a.command)
     ? [id as EntityId, ...(a.command === 'refuel' ? [light.refillSupply(world, actor, id)!] : [])]

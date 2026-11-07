@@ -21,6 +21,10 @@ export type NarrationRecord = CommittedNarration & {
   arrival?: number; // a room-changing closure's first line in the room reached (book-ui Line placement)
   detail_id?: string;
   pickup_name?: string; // confirmed corpse-content Take, routed from its saved receipt
+  died?: true; // the player's death in this receipt's events (book-ui.md, Falling)
+  lever?: true; // an action completed that emitted the authored `lever` event (book-ui.md, Lever and latch)
+  opened?: true; // an action completed or a barrier changed in this press's receipt (Lever and latch)
+  missed?: true; // the player's own attack in this receipt missed and none landed (book-ui.md, Fight music)
   read?: true; // Read text: its page's only, never the room log (book-ui.md)
 };
 /** One Chronicle entry (mechanics.md, Chronicle): a host projection, not a kernel contract. */
@@ -46,7 +50,8 @@ export type ElapsedStatus =
   | { kind: 'fault'; code: ErrorCode }
   | { kind: 'error'; reason?: 'save_corrupt'; message: string };
 export type GameSubscription =
-  | { kind: 'state'; projection: Projection; status: ElapsedStatus }
+  // `resumed`: this view settles a return from the background; what changed happened while away.
+  | { kind: 'state'; projection: Projection; status: ElapsedStatus; resumed?: boolean }
   | { kind: 'completion'; invocation_id: string; intent: Intent; before: Projection; reply: Reply };
 
 /** One game being played. */
@@ -64,7 +69,12 @@ export interface Game {
   lastNarration(command_id?: string): NarrationRecord | undefined;
   /** Every committed narration of this story, by day (mechanics.md, Chronicle). */
   chronicle(): readonly ChronicleEntry[];
+  /** Who opened an open encounter, from its opening receipt; none when no receipt holds it. */
+  opener?(encounter_id: string): Opener | undefined;
 }
+
+/** The NPC on the encounter.open op, and whether the player's own command opened it. */
+export type Opener = { npc_id: string; player: boolean };
 
 /**
  * Why there is no game: the save's kind (none: untyped), its message, a `code` for a start over

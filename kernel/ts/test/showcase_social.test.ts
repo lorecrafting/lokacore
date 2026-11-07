@@ -38,6 +38,7 @@ import {
   topics,
   wait,
   where,
+  missing,
 } from './showcase_fixture.ts';
 import { noticeAction } from './notice_action.ts';
 
@@ -107,9 +108,9 @@ test('social 2-3: help makes Nell friendly (bread 2); wrong twice makes her host
   const east = go(w, 'east');
   assert.equal(engaged(east.world, east.world.body)?.row.npc_id, npc(w, 'warden'));
   assert.ok(east.lines.includes('npc.warden.engage'), JSON.stringify(east.lines));
-  // Ten rounds of waiting: the Warden lives, so after a flee and a mended standing the talk path
-  // to the toll gate stays open.
-  const held = wait(east.world, east.world.state.clock + 1500).world;
+  // Ten rounds of waiting, each seeded to an unarmed miss (chance 50 would kill his 5 hp): the
+  // Warden lives, so after a flee and a mended standing the talk path to the toll gate stays open.
+  const held = missing(east.world, east.world.state.clock + 1500).world;
   assert.equal(engaged(held, held.body)?.row.npc_id, npc(w, 'warden'));
   const fled = play(held, { type: 'flee' }).world;
   assert.equal(where(fled, fled.body), room(fled, 'village_green'));
@@ -369,9 +370,9 @@ test('social 13: unfinished at +60000 the letter is late: the Reeve turns cold, 
 
 // Breaks: the recap threshold is not authored (no recap_after), or a long absence loses the
 // deadline's writes. The recap block itself is Book-side: mobile/app/book/showcase_recap.test.ts.
-test('social 14: the manifest sets a 30 real minute recap; 150 game hours away the letter is late', () => {
+test('social 14: the manifest sets a 30 real minute recap; 150 game hours of session time the letter is late', () => {
   const x = wait(say(green(), 'reeve', 'accept').world, AT_SEVEN + 150 * HOUR).world;
-  assert.equal(gameView(x).recap_after, 90000);
+  assert.equal(gameView(x).recap_after, 86400);
   assert.deepEqual([fact(x, 'letter_late'), fact(x, 'wardle_standing')], [true, -1]);
 });
 

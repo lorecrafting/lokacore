@@ -7,6 +7,7 @@ import {
   absent,
   branch,
   cap,
+  conditionLine,
   group,
   hint,
   initialPages,
@@ -312,4 +313,18 @@ test('a shelf closes when its keeper leaves the room', () => {
   const stack = [{ kind: 'shelf', id: 'nell' }] as Page[];
   assert.deepEqual(pagesAfter(stack, view(['nell']), view(['nell'])), stack);
   assert.deepEqual(pagesAfter(stack, view(['nell']), view([])), []);
+});
+
+// Breaks: a gain of one loses its plus sign, or a status with several ticks shows one (loka-kgd.209;
+// per_tick 0 is refused by the compiler).
+test('a condition line names each tick with its sign', () => {
+  const ticks = [
+    { resource: 'hp', per_tick: 1 },
+    { resource: 'mv', per_tick: -5 },
+  ];
+  const c = { label: 'condition.well_fed', ticks, tick_every: 60 } as never;
+  assert.equal(
+    conditionLine(c, 0, (k) => k),
+    'condition.well_fed · +1 HP each 60s · -5 MV each 60s',
+  );
 });

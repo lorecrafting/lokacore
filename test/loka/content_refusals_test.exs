@@ -8,7 +8,7 @@ defmodule Loka.ContentRefusalsTest do
 
   setup_all do
     for name <-
-          ~w(derived_sampler scene_sampler prices_sampler harvest_sampler shoo_sampler codex_sampler toolbox_showcase),
+          ~w(derived_sampler scene_sampler prices_sampler harvest_sampler shoo_sampler codex_sampler identity_sampler toolbox_showcase),
         into: %{},
         do: {String.to_atom(name), Source.copy("cartridges/#{name}")}
   end
@@ -68,6 +68,9 @@ defmodule Loka.ContentRefusalsTest do
 
   # Breaks: an action-started scene can bind a different detail than its Begin scripted action targets.
   test "action scene detail must match its Begin scripted action", %{scene_sampler: dir} do
+    # The sampler's own coil_rope scene would collide with this test's (one scene per trigger).
+    File.rm!(Path.join(dir, "scenes/rope_reverie.json"))
+
     scene = %{
       "on" => %{
         "action" => "coil_rope",
@@ -287,7 +290,7 @@ defmodule Loka.ContentRefusalsTest do
   # Breaks: a hound-style area whose rooms are not joined both ways compiles and later strands
   # wandering members (showcase goblins: goblin_pit <-> drill_yard).
   test "population area requires the opposite return exit", %{toolbox_showcase: dir} do
-    assert {"SCHEMA_VIOLATION", "populations/goblins.area"} in codes(dir, [
+    assert {"SCHEMA_VIOLATION", "areas/combat/populations/goblins.area"} in codes(dir, [
              {"rooms/drill_yard.json",
               &update_in(&1, ["exits"], fn e -> Map.delete(e, "south") end)}
            ])
@@ -303,18 +306,24 @@ defmodule Loka.ContentRefusalsTest do
           %{"night_start" => 1, "night_end" => 5},
           %{"night_start" => 5, "night_end" => 5}
         ] do
-      assert {"SCHEMA_VIOLATION", "populations/goblins.wander_interval"} in codes(dir, [
-               {"populations/goblins.json", &Map.merge(&1, change)}
-             ]),
+      assert {"SCHEMA_VIOLATION", "areas/combat/populations/goblins.wander_interval"} in codes(
+               dir,
+               [
+                 {"populations/goblins.json", &Map.merge(&1, change)}
+               ]
+             ),
              inspect(change)
     end
   end
 
   # Breaks: a zero flight threshold compiles, so no living member can ever flee.
   test "pack flight threshold must be positive", %{toolbox_showcase: dir} do
-    assert {"SCHEMA_VIOLATION", "populations/goblins.pack.flight_below_percent"} in codes(dir, [
-             {"populations/goblins.json", &put_in(&1, ["pack", "flight_below_percent"], 0)}
-           ])
+    assert {"SCHEMA_VIOLATION", "areas/combat/populations/goblins.pack.flight_below_percent"} in codes(
+             dir,
+             [
+               {"populations/goblins.json", &put_in(&1, ["pack", "flight_below_percent"], 0)}
+             ]
+           )
   end
 
   # Breaks: a deer plan compiles without its hide (only a scavenger plan may omit the item).
@@ -380,5 +389,29 @@ defmodule Loka.ContentRefusalsTest do
              {"topics/mill_copy.json",
               File.read!(Path.join(dir, "topics/mill.json")) |> JSON.decode!()}
            ])
+  end
+
+  # Breaks: an NPC's discovered fact or a room detail's marker title names a
+  # definition or text key that does not exist, so a Codex entry is granted or lit by nothing.
+  test "NPC discovery and detail markers must resolve", %{identity_sampler: dir} do
+    marker = fn r ->
+      put_in(r, ["details", "notice", "perception"], %{
+        "self_luminous" => true,
+        "title" => "missing"
+      })
+    end
+
+    found =
+      codes(dir, [
+        {"npcs/stranger.json", &Map.put(&1, "perception", %{"discovered" => "missing"})},
+        {"rooms/square.json", marker}
+      ])
+
+    for path <- [
+          "npcs/stranger.perception.fact",
+          "rooms/square.details.notice.perception.title"
+        ] do
+      assert {"UNRESOLVED_REFERENCE", path} in found, inspect({path, found})
+    end
   end
 end

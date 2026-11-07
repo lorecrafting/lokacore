@@ -54,5 +54,19 @@ defmodule Loka.ContentSchedulesTest do
              diags,
              &{&1["code"], &1["path"]}
            )
+
+    least = %{"op" => "fact_at_least", "fact" => "child_lost", "at_least" => 1}
+    at_least = &put_in(&1, ["daily_schedule", "8", Access.at(0), "when"], least)
+
+    assert {:error, diags} =
+             Loka.ContentSource.compile(dir, [
+               {"facts.json", player},
+               {"npcs/maud.json", at_least}
+             ])
+
+    assert {"FACT_SCOPE_UNSUPPORTED", "npcs/maud.daily_schedule.8[0].when.fact"} in Enum.map(
+             diags,
+             &{&1["code"], &1["path"]}
+           )
   end
 end

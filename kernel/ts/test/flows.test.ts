@@ -4,9 +4,9 @@
 // friends only, and the player starts with nothing in hand.
 import assert from 'node:assert/strict';
 import { execFileSync, spawnSync } from 'node:child_process';
-import { mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { globSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { basename, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { after, test } from 'node:test';
 import { flows, worker, type Policy } from '../play/flows.ts';
@@ -100,7 +100,7 @@ test('the worker tries a sale before a take or a talk', () => {
 // CLI ignoring --seeds or --days.
 // On the showcase, where the seed's generator decides which of its many offers come first. Also
 // breaks: populations read from the wrong field, so no plan shows (its five plans each hold 2 at
-// the start: day_target 2 in cartridges/toolbox_showcase/populations); or the worker never
+// the start: day_target 2 in the showcase populations files); or the worker never
 // passing the day (hours 0-24), because a refused Wait in this real-elapsed world or a repeatable
 // conversation ends or spends its run.
 test('the CLI prints the same canonical report as the same run in this process', () => {
@@ -115,11 +115,11 @@ test('the CLI prints the same canonical report as the same run in this process',
   const plan = (key: string) => `toolbox_showcase@0.0.1:population/${key}`;
   // Each showcase population is a non-encounter plan born by day, so it starts at its day_target
   // (genesis, population/shared.ts); an encounter plan (`chance`) would start at 0.
-  const dir = 'cartridges/toolbox_showcase/populations';
+  const dir = 'cartridges/toolbox_showcase';
   const living = Object.fromEntries(
-    readdirSync(new URL(`../../../${dir}`, import.meta.url))
-      .filter((f) => f.endsWith('.json'))
-      .map((f) => [plan(f.replace(/\.json$/, '')), read(`${dir}/${f}`).day_target]),
+    globSync(['populations/*.json', 'areas/*/populations/*.json'], {
+      cwd: new URL(`../../../${dir}`, import.meta.url),
+    }).map((f) => [plan(basename(f, '.json')), read(`${dir}/${f}`).day_target]),
   );
   assert.deepEqual(here.populations[0], { hour: 0, living });
   assert.equal(here.coin.supply.at(-1)!.hour, 24);

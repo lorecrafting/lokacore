@@ -14,7 +14,18 @@ import { checkpoint, elapsedHost } from '../authority/local-story/__tests__/elap
 import { localSession, openGame } from '../authority/local-story/session.ts';
 import type { Db } from '../authority/local-story/store.ts';
 import { LABEL } from './book/labels.ts';
+import { hidePulses, tickPulse } from './clock-tick.ts';
 import { webDb } from './sqlite-web.ts';
+
+// The pinned app: no author preview, so App mounts the Book alone (author/panel.tsx).
+const panel = {
+  devClock: false,
+  played: (g: unknown) => g,
+  restorePlace() {},
+  resetPlace() {},
+  skew: () => 0,
+  useAuthorPanel() {},
+};
 
 const require = createRequire(import.meta.url);
 const ts = require('typescript');
@@ -102,11 +113,13 @@ test('the app opens and replaces only its showcase save, preserving Lantern, sam
     'expo-sqlite/kv-store': {},
     '../authority/local-story/session': { localSession, KERNEL_ID: 'loka-kernel' },
     './sqlite-web.ts': { webDb },
+    './clock-tick': { hidePulses, tickPulse },
     './book/Book.tsx': {},
     './book/model.ts': { hint: () => ({}) },
-    './book/reading.ts': { readingSize: () => ({}) },
+    './book/reading.ts': { readingSize: () => ({}), effectStores: () => ({}) },
     './book/labels.ts': { LABEL },
     './SaveError': {},
+    './author/panel.tsx': panel,
   };
   const js = ts.transpileModule(readFileSync(new URL('App.tsx', import.meta.url), 'utf8'), {
     compilerOptions: { module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.React },
@@ -157,6 +170,9 @@ test('the app opens and replaces only its showcase save, preserving Lantern, sam
     edit.close();
     session = run();
     assert.equal(session.game(), undefined);
+    // Breaks: a changed-hash save refused as save_corrupt, which Start over would replace blind.
+    assert.equal(session.failed()?.kind, 'pinned_release_missing');
+    assert.equal((session.failed() as { replace?: boolean }).replace, false);
     assert.equal(session.failed()?.startOver, true);
     assert.equal(pin().content_hash, '0'.repeat(64));
     assert.equal(session.startOver(), undefined);
@@ -287,11 +303,13 @@ function appHost() {
     'expo-sqlite/kv-store': {},
     '../authority/local-story/session': { localSession, KERNEL_ID: 'loka-kernel' },
     './sqlite-web.ts': { webDb },
+    './clock-tick': { hidePulses, tickPulse },
     './book/Book.tsx': { default: 'Book' },
     './book/model.ts': { hint: () => ({}) },
-    './book/reading.ts': { readingSize: () => ({}) },
+    './book/reading.ts': { readingSize: () => ({}), effectStores: () => ({}) },
     './book/labels.ts': { LABEL },
     './SaveError': {},
+    './author/panel.tsx': panel,
   };
   const globals: { loka_session?: ReturnType<typeof localSession> } = {},
     exports: any = {};
@@ -376,6 +394,24 @@ test('actual App pause and resume preserve 9ms plus 11ms as exactly one logical 
     assert.deepEqual(checkpoint(h.sql), { wall_ms: 10020, remainder: 0, target: 25201 });
     h.change('active');
     assert.deepEqual(checkpoint(h.sql), { wall_ms: 10020, remainder: 0, target: 25201 });
+  } finally {
+    h.close();
+  }
+});
+
+// Breaks: App's hide skips the stall check, or a resume leaves no tick for a stall before the first one.
+test('actual App caps a hide after a stall before the first tick at one in-game day', () => {
+  const h = appHost();
+  try {
+    h.next();
+    h.change('background');
+    h.change('active');
+    const start = checkpoint(h.sql).target;
+    const year = 365 * 86400 * 1000;
+    h.clock.wall += year;
+    h.clock.mono += year;
+    h.change('background');
+    assert.equal(checkpoint(h.sql).target - start, 86400);
   } finally {
     h.close();
   }

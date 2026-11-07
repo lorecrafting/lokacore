@@ -5,6 +5,26 @@ defmodule Loka.ContentCalendarTest do
   defp update(path, fun),
     do: File.write!(path, path |> File.read!() |> JSON.decode!() |> fun.() |> JSON.encode!())
 
+  # Break: a spawn template with a schedule compiles and then throws a TypeError at catch-up.
+  test "a spawn template with a daily schedule is refused in plain words", %{tmp_dir: dir} do
+    File.cp_r!("cartridges/settle_sampler", dir)
+
+    update(
+      Path.join(dir, "npcs/raider.json"),
+      &put_in(&1, ["daily_schedule"], %{"8" => "square"})
+    )
+
+    {:error, diags} = Loka.Content.compile(dir)
+
+    assert [%{"data" => %{"why" => "template_schedule"}, "path" => "npcs/raider.daily_schedule"}] =
+             Enum.filter(diags, &(&1["data"]["why"] == "template_schedule"))
+
+    assert Enum.any?(
+             Loka.Content.explained(diags, dir),
+             &(&1 =~ "`npcs/raider` is a spawn template")
+           )
+  end
+
   # Breaks: the compiler emits a calendar whose period or schedule cannot be consumed safely.
   test "compiler rejects malformed authored periods and out-of-day schedules", %{tmp_dir: dir} do
     File.cp_r!("cartridges/ferry_sampler", dir)

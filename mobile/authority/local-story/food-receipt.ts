@@ -9,7 +9,7 @@ export function eatReceipt(
   d: Extract<DecisionResult, { kind: 'accepted' }>,
 ): undefined {
   const p = command.payload;
-  if (p.type !== 'eat') throw new Error('malformed JSON: invalid committed Eat');
+  if (p.type !== 'consume') throw new Error('malformed JSON: invalid committed Eat');
   const item = world.entities[p.item_id];
   // mechanics.md Cooking binds only line 0; reactions and `alternates` may add or vary later lines (session.ts keys each).
   if (

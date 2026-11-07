@@ -193,4 +193,53 @@ defmodule Loka.ContentErrandTest do
                 })
               ]}
   end
+
+  # Breaks: an offer target naming a room, a detail or an NPC the cartridge does not have compiling,
+  # or a short ref not expanding (loka-vx2v; the good target is the ferry's, in quest_dialogue.test.ts).
+  test "an offer target's room, detail and npc resolve", %{dir: dir} do
+    target = fn t -> edit("quests/lantern.json", ["offer", "target"], t) end
+    missing = fn key -> "errand_sampler@0.0.1:#{key}" end
+
+    assert compile(dir, target.(%{"kind" => "detail", "room" => "nowhere", "detail" => "post"})) ==
+             {:error,
+              [
+                d("UNRESOLVED_REFERENCE", "quests/lantern.offer.target.room", %{
+                  "target" => missing.("room/nowhere")
+                })
+              ]}
+
+    assert compile(
+             dir,
+             target.(%{"kind" => "detail", "room" => "ferry_landing", "detail" => "post"})
+           ) ==
+             {:error,
+              [
+                d("UNRESOLVED_REFERENCE", "quests/lantern.offer.target.detail", %{
+                  "target" => "post"
+                })
+              ]}
+
+    assert compile(dir, target.(%{"kind" => "npc", "npc" => "nobody"})) ==
+             {:error,
+              [
+                d("UNRESOLVED_REFERENCE", "quests/lantern.offer.target.npc", %{
+                  "target" => missing.("npc/nobody")
+                })
+              ]}
+
+    assert {:ok, bytes, []} = compile(dir, target.(%{"kind" => "npc", "npc" => "bram"}))
+    compiled = JSON.decode!(bytes)["cartridge"]["quests"]["errand_sampler@0.0.1:quest/lantern"]
+    assert compiled["offer"]["target"] == %{"kind" => "npc", "npc" => ref("npc", "bram")}
+  end
+
+  # Breaks: a targetless offer compiling, so it ships with no control in the Book (loka-vx2v).
+  test "an offer without a target is refused", %{dir: dir} do
+    rel = "quests/lantern.json"
+
+    assert compile(dir, %{rel => update_in(src(rel), ["offer"], &Map.delete(&1, "target"))}) ==
+             {:error,
+              [
+                d("SCHEMA_VIOLATION", "quests/lantern.offer.target", %{"error" => "invalid_value"})
+              ]}
+  end
 end

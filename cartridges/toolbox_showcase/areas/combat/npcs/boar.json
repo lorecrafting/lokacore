@@ -1,0 +1,42 @@
+{
+  "keywords": [
+    "boar"
+  ],
+  "name": "npc.boar.short",
+  "room_line": "npc.boar.room",
+  "description": "npc.boar.description",
+  "room": "boar_run",
+  "hp": {
+    "minimum": 0,
+    "maximum": 8,
+    "start": 8,
+    "gain": 0
+  },
+  "attack": {
+    "chance": 60,
+    "damage_min": 1,
+    "damage_max": 3,
+    "attacks": 2
+  },
+  "drops": [
+    {
+      "item": "tusk",
+      "chance": 100
+    },
+    {
+      "item": "purse",
+      "chance": 50
+    }
+  ],
+  "cues": [
+    {
+      "sense": "sound",
+      "text": "cue.boar",
+      "range": 1
+    }
+  ],
+  "words": {
+    "bare": "npc.boar.bare",
+    "article": "the"
+  }
+}

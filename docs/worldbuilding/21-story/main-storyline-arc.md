@@ -1,5 +1,7 @@
 # Main storyline arc
 
+> Reference only: agent-drafted worldbuilding text (not the owner's words). Never ships as written; the owner writes shipped prose ([rule](../../decisions/owner-decision-human-made-content-2026-10-31.md)).
+
 Status: draft. Area: [The main storyline, chapters and themes](../README.md#21-story). Canon tier: draft (owner-directed 2026-10-16).
 
 **Purpose.** The spine of the Story mode: where it begins, what it is about, where it can end.

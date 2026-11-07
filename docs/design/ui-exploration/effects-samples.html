@@ -1,0 +1,590 @@
+<!doctype html>
+<html lang="en" data-rm="0">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Loka Book: effects samples</title>
+<!-- The only external request: the Book's three faces. Everything else is inline. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=IM+Fell+English:ital@0;1&family=IM+Fell+English+SC&display=swap" rel="stylesheet">
+<style>
+/* Tokens copied from mobile/app/book/tokens.ts at commit 68028bf74 (light, dusk, dark palettes; type;
+   space; motion). Proposed additions are marked "proposed" and live in docs/design/effects-and-sound-plan.md. */
+:root{
+  --bg:#ebe6d7; --fg:#241f19; --dim:#645c4f; --line:#d0c7b0; --card:#e4decd; --action:#7b2d20; --danger:#6b2160; --warning:#845512;
+  --dusk-bg:#2c2846; --dusk-fg:#e8e2ec; --dusk-dim:#aca5bd; --dusk-line:#474263; --dusk-card:#363253; --dusk-action:#f0b462; --dusk-danger:#f4a8b8;
+  --dark-bg:#10151e; --dark-fg:#d9e0ea; --dark-dim:#8e9aab; --dark-line:#263041; --dark-card:#171e2a; --dark-action:#e6a650; --dark-danger:#e39a88; --dark-warning:#d0712a;
+  --star:#fffff5;
+  --head:'IM Fell English',serif; --body:'EB Garamond',serif; --caps:'IM Fell English SC',serif;
+  --sp-xs:4px; --sp-sm:6px; --sp-md:8px; --sp-lg:12px; --sp-xl:16px; --sp-page:24px;
+  --touch:44px; --card-h:48px; --r-card:10px; --r-chip:22px; --status-icon:28px;
+  /* motion (built): quick 160 ease, turn 500 inOutQuad, fade 160 linear, palette 1500 inOutQuad, meteor 700 linear.
+     proposed: press 90/160, dry 240, pop 220 (+1800 hold, 400 out), flash 120/380, settle 400, card 600, riffle 5x120, breathe 2400, flicker 80-140 */
+}
+*{box-sizing:border-box}
+html{background:#d9d3c3}
+body{margin:0;font-family:var(--body);color:var(--fg);font-size:17px;line-height:26px}
+header{max-width:720px;margin:0 auto;padding:var(--sp-page)}
+header h1{font-family:var(--head);font-weight:400;font-size:26px;line-height:30px;margin:0 0 var(--sp-md)}
+header p{margin:0 0 var(--sp-md);color:var(--dim)}
+header label{display:inline-flex;gap:var(--sp-sm);align-items:center;font-family:var(--caps);font-size:14px;letter-spacing:1.1px;min-height:var(--touch)}
+main{max-width:720px;margin:0 auto;padding:0 var(--sp-lg) 80px;display:grid;gap:28px}
+.fx{display:grid;gap:var(--sp-md)}
+.fx h2{font-family:var(--caps);font-weight:400;font-size:16px;letter-spacing:.5px;margin:0;display:flex;justify-content:space-between;align-items:baseline;gap:var(--sp-md)}
+.fx h2 small{font-family:var(--caps);font-size:11px;letter-spacing:.7px;color:var(--dim)}
+.fx .cap{margin:0;font-size:15px;line-height:22px;color:var(--dim)}
+.fx .cap b{font-weight:500;color:var(--fg)}
+.bar{display:flex;gap:var(--sp-sm);flex-wrap:wrap}
+button.replay{font-family:var(--caps);font-size:14px;letter-spacing:1.1px;min-height:var(--touch);padding:0 var(--sp-xl);border:1px solid var(--line);border-radius:var(--r-chip);background:var(--card);color:var(--action);cursor:pointer}
+button.replay:active{color:var(--fg)}
+/* the stage: one phone-width page */
+.stage{position:relative;width:min(100%,390px);margin:0 auto;height:300px;overflow:hidden;border-radius:4px;box-shadow:0 1px 2px rgba(0,0,0,.15);perspective:1200px}
+.page{position:absolute;inset:0;background:var(--bg);color:var(--fg);padding:var(--sp-xl) var(--sp-page);display:flex;flex-direction:column;gap:var(--sp-md);backface-visibility:hidden}
+.runhead{font-family:var(--caps);font-size:12px;line-height:16px;letter-spacing:1.7px;color:var(--dim);min-height:16px;position:relative}
+.runhead span{position:absolute;left:0;top:0}
+.title{font-family:var(--head);font-size:26px;line-height:30px}
+.body{font-size:18px;line-height:28px}
+.log{font-size:17px;line-height:26px;display:flex;flex-direction:column}
+.log .ev{font-style:italic}
+.log .ref{font-style:italic}
+.dim{color:var(--dim)}
+.status{display:flex;gap:var(--sp-lg);font-size:13px;line-height:19px;font-variant-numeric:oldstyle-nums;align-items:center}
+.status .k{font-family:var(--caps);font-size:11px;letter-spacing:.7px}
+.card{min-height:var(--card-h);display:flex;align-items:center;padding:0 var(--sp-lg);background:var(--card);border:1px solid var(--line);border-radius:var(--r-card);color:var(--action);font-size:18px;user-select:none;cursor:pointer}
+.ctrl{font-family:var(--caps);font-size:14px;letter-spacing:1.1px;color:var(--action);min-height:var(--touch);display:inline-flex;align-items:center;cursor:pointer;user-select:none}
+.chip{display:inline-flex;align-items:center;min-height:var(--touch);padding:0 var(--sp-xl);border:1px solid var(--line);border-radius:var(--r-chip);background:var(--card);color:var(--action);font-size:17px;cursor:pointer;user-select:none;margin-right:var(--sp-sm)}
+.pop{position:absolute;left:var(--sp-page);font-size:13px;line-height:19px;color:var(--action);opacity:0;pointer-events:none}
+.wash{position:absolute;inset:0;background:var(--action);opacity:0;pointer-events:none}
+.vig{position:absolute;inset:0;pointer-events:none;opacity:0;background:radial-gradient(ellipse at center, transparent 55%, var(--fg) 140%)}
+.glow{position:absolute;right:-40px;bottom:-40px;width:60%;aspect-ratio:1;border-radius:50%;pointer-events:none;opacity:0;background:radial-gradient(circle, var(--dark-action) 0%, transparent 70%)}
+.after{position:absolute;inset:0;background:var(--bg);opacity:0;pointer-events:none}
+.icon{width:var(--status-icon);height:var(--status-icon);border-radius:50%;background:var(--card);border:1px solid var(--line);display:inline-grid;place-items:center;position:relative;font-family:var(--caps);font-size:11px}
+.icon svg{position:absolute;inset:-1px;width:calc(100% + 2px);height:calc(100% + 2px);transform:rotate(-90deg)}
+.icon circle{fill:none;stroke:var(--action);stroke-width:2}
+.band{font-family:var(--caps);letter-spacing:.5px}
+.star{position:absolute;width:2px;height:2px;border-radius:50%;background:var(--star);opacity:0}
+.meteor{position:absolute;width:60px;height:1px;background:linear-gradient(90deg,transparent,var(--star));opacity:0;transform:rotate(25deg)}
+.tile{width:var(--touch);height:var(--touch);display:inline-grid;place-items:center;background:var(--card);border:1px solid var(--line);border-radius:var(--r-card);font-family:var(--head);font-size:23px;margin-right:var(--sp-sm);cursor:pointer;user-select:none}
+.chapter{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--sp-md);opacity:0;pointer-events:none}
+.chapter .lab{font-family:var(--caps);font-size:13px;letter-spacing:2.6px}
+.chapter .rule{width:80px;height:1px;background:var(--line)}
+.chapter .ttl{font-family:var(--head);font-size:38px;line-height:40px}
+.chapter .ctrl{margin-top:var(--sp-xl)}
+.leaf{transform-origin:left center}
+.note{font-size:15px;color:var(--dim)}
+.placeholder{font-family:var(--caps);font-size:11px;letter-spacing:.7px;color:var(--dim)}
+svg.map{width:100%;height:150px}
+svg.map path{fill:none;stroke:var(--fg);stroke-width:1.5}
+svg.map circle{fill:var(--bg);stroke:var(--fg);stroke-width:1.5}
+svg.map text{font-family:var(--caps);font-size:11px;fill:var(--fg)}
+.kbd{font-family:var(--caps);font-size:11px;letter-spacing:.7px;color:var(--dim)}
+</style>
+</head>
+<body>
+<header>
+  <h1>Effects samples</h1>
+  <p>Playable sketches of the entries in <i>effects-and-sound-plan.md</i> where seeing matters more than reading. Every sound is a <b class="placeholder">synth placeholder</b> (WebAudio); on device each is a recorded CC0 sample. Motion here is CSS/Web Animations standing in for Reanimated and Skia; the plan names the build per entry. Tap any page to hear and see it; <i>Replay</i> runs it again.</p>
+  <label><input type="checkbox" id="rm"> Reduced motion</label>
+  <span class="kbd"> (follows the system setting by default)</span>
+</header>
+<main>
+
+<section class="fx" id="press">
+  <h2>Press feedback <small>P0 · S2 · Reanimated</small></h2>
+  <div class="stage"><div class="page">
+    <div class="runhead"><span>Find the lantern</span></div>
+    <div class="title">The Inn</div>
+    <div class="card" data-press="card">Look at the sack</div>
+    <div class="card" data-press="card">Take the sack</div>
+    <div><span class="chip" data-press="chip">Yes</span><span class="chip" data-press="chip">No</span></div>
+    <div class="ctrl" data-press="ink">Back to World</div>
+  </div></div>
+  <p class="cap"><b>Fires on</b> every press of ActionCard, Chip, Control (4.1). <b>Why</b> the page must answer the finger before the engine answers the tap: a card lifts 1 px with a hairline shadow, a control's ink darkens, 90 ms in and 160 ms out. No sound; a selection haptic on device.</p>
+  <div class="bar"><button class="replay" data-fx="press">Replay (presses each)</button></div>
+</section>
+
+<section class="fx" id="turn">
+  <h2>Page turn with paper <small>built motion · P0 sound · Skia</small></h2>
+  <div class="stage" id="turnStage">
+    <div class="page" data-arrive><div class="runhead"><span>Find the lantern</span></div><div class="title">The Loft</div><div class="body">Dust and straw. A lantern hangs from a nail.</div></div>
+    <div class="page leaf" data-leave><div class="runhead"><span>Find the lantern</span></div><div class="title">The Inn</div><div class="body">A low room, smoke in the beams. Nell wipes the counter.</div></div>
+  </div>
+  <p class="cap"><b>Fires on</b> every page change (3.1). <b>Why</b> the owner's base look: the Skia curl at 500 ms inOutQuad (this is a CSS fold standing in for it) with one recorded paper turn under it; under reduced motion a 160 ms cross-fade, same sound.</p>
+  <div class="bar"><button class="replay" data-fx="turn">Replay</button></div>
+</section>
+
+<section class="fx" id="dry">
+  <h2>Ink dries: a new log line <small>P0 · S1 · Reanimated</small></h2>
+  <div class="stage"><div class="page">
+    <div class="title">The Inn</div>
+    <div class="log" id="dryLog"><div>You look at the sack.</div><div class="dim">Nell says nothing.</div></div>
+  </div></div>
+  <p class="cap"><b>Fires on</b> each line that enters the log this turn (4.6). <b>Why</b> the cheapest effect with the widest reach: the line enters at <i>dim</i> and settles to <i>fg</i> over 240 ms, so the eye finds what is new without a scroll or a highlight. A narrated event (italic) dries 60 ms later than the narration.</p>
+  <div class="bar"><button class="replay" data-fx="dry">Replay</button></div>
+</section>
+
+<section class="fx" id="pickup">
+  <h2>Pickup pop with a pluck <small>P0 · S2 · Reanimated</small></h2>
+  <div class="stage"><div class="page">
+    <div class="title">The Inn</div>
+    <div class="log" id="pickLog"><div>You look at the sack.</div></div>
+    <div class="pop" id="pickPop">+ sack</div>
+  </div></div>
+  <p class="cap"><b>Fires on</b> the inventory gaining an item (3.2; owner's choice). <b>Why</b> something came into the hand: a small-type "+ sack" in <i>action</i> rises 6 px under the log, holds, fades; two in one command are one line. Sound: the lab's pluck (reads cartoony to the owner) or a drier paper flick (Q7). Light haptic.</p>
+  <div class="bar"><button class="replay" data-fx="pickup" data-v="pluck">Replay (lab pluck)</button><button class="replay" data-fx="pickup" data-v="flick">Replay (dry flick)</button><button class="replay" data-fx="pickup" data-v="two">Two items</button></div>
+</section>
+
+<section class="fx" id="damage">
+  <h2>Blow taken: swell and red <small>P0 · S3 · Reanimated</small></h2>
+  <div class="stage" id="dmgStage"><div class="page" id="dmgPage">
+    <div class="status"><span class="k">HP</span><span id="dmgHp">12</span><span class="k">Pennies</span><span>4</span></div>
+    <div class="title">A boar</div>
+    <div class="log" id="dmgLog"><div>You swing. The boar is hurt.</div></div>
+  </div><div class="wash"></div></div>
+  <p class="cap"><b>Fires on</b> the player's HP falling in combat (3.3; owner's choice). <b>Why</b> damage must land in the body before the number is read: the page swells 1.5 % and an <i>action</i> oxblood wash rises in 120 ms and falls in 380; the HP value dries red. Dull paper thud, heavy haptic. Reduced motion: no swell, half wash. Flashes off: the number alone.</p>
+  <div class="bar"><button class="replay" data-fx="damage" data-v="hit">Replay</button><button class="replay" data-fx="damage" data-v="crit">Critical</button><button class="replay" data-fx="damage" data-v="flurry">Three blows</button></div>
+</section>
+
+<section class="fx" id="foe">
+  <h2>Foe falls <small>P1 · S3 · Reanimated</small></h2>
+  <div class="stage"><div class="page">
+    <div class="title">A boar</div>
+    <div class="band" id="foeBand">the boar — hurt</div>
+    <div class="log"><div>You swing. The boar drops.</div></div>
+    <div class="ctrl" id="foeBack" style="opacity:0">Back to World</div>
+  </div></div>
+  <p class="cap"><b>Fires on</b> the encounter ending with the opponent dead (3.3). <b>Why</b> the closure page exists already; the band settling to <i>dim</i> over 400 ms and the Control drying in make it read as an ending. One soft book-close, light haptic.</p>
+  <div class="bar"><button class="replay" data-fx="foe">Replay</button></div>
+</section>
+
+<section class="fx" id="status">
+  <h2>Status icon arrives and expires <small>P0 · S2 · Reanimated</small></h2>
+  <div class="stage"><div class="page">
+    <div class="status"><span class="k">HP</span><span>12</span><span class="icon" id="stIcon" style="opacity:0">Fd<svg viewBox="0 0 30 30"><circle cx="15" cy="15" r="14" id="stRing"/></svg></span></div>
+    <div class="title">The Inn</div>
+    <div class="log"><div>You eat the bread.</div><div class="ev">You feel fed.</div></div>
+  </div></div>
+  <p class="cap"><b>Fires on</b> a condition added to the player (3.4); the icon pops from 0.6 scale over 220 ms with the countdown ring full; expiry fades it over 160 ms; ticks stay silent (owner rule). <b>Why</b> the icon row is graphic-only, so arrival needs a motion the eye catches. Tick sound only for a debuff; selection haptic.</p>
+  <div class="bar"><button class="replay" data-fx="status" data-v="buff">Applied (buff)</button><button class="replay" data-fx="status" data-v="debuff">Applied (debuff)</button><button class="replay" data-fx="status" data-v="out">Expired</button></div>
+</section>
+
+<section class="fx" id="faint">
+  <h2>Low HP: faint <small>P2 · S1 · Skia or Reanimated</small></h2>
+  <div class="stage"><div class="page">
+    <div class="status"><span class="k">HP</span><span style="color:var(--danger)">3</span></div>
+    <div class="title">Boar run</div>
+    <div class="body">The boar circles. Your side is wet.</div>
+  </div><div class="vig" id="faintVig"></div></div>
+  <p class="cap"><b>Fires while</b> HP is in the danger band (3.3). <b>Why</b> the number is small type; the page should dim at its edges before it is read. A vignette at 10 % breathing over 2.4 s; a steady vignette under reduced motion; no sound.</p>
+  <div class="bar"><button class="replay" data-fx="faint">Start / stop</button></div>
+</section>
+
+<section class="fx" id="runhead">
+  <h2>Running head cross-fades <small>P0 · S2 · Reanimated</small></h2>
+  <div class="stage"><div class="page">
+    <div class="runhead"><span id="rhA">Find the lantern</span><span id="rhB" style="opacity:0">Deliver the Reeve's letter</span></div>
+    <div class="title">The Inn</div>
+    <div class="log"><div>The Reeve hands you a folded letter. "For Wat, at the mill."</div></div>
+  </div></div>
+  <p class="cap"><b>Fires on</b> a quest activating (3.6). <b>Why</b> the owner chose the running head as the tracker; a cut is missed, a 240 ms cross-fade says the book turned to this. No sound.</p>
+  <div class="bar"><button class="replay" data-fx="runhead">Replay</button></div>
+</section>
+
+<section class="fx" id="quest">
+  <h2>Quest resolved <small>P0 · S3 · Reanimated</small></h2>
+  <div class="stage"><div class="page">
+    <div class="runhead"><span id="qRh">Deliver the Reeve's letter</span></div>
+    <div class="title">The Mill</div>
+    <div class="log" id="qLog"><div>Wat breaks the seal and reads.</div></div>
+  </div></div>
+  <p class="cap"><b>Fires on</b> a quest resolving with success (3.6). <b>Why</b> closure should be felt once: the running head settles to <i>dim</i> and out over 400 ms, the journal line gilds for 600 ms, a two-note rise a fifth below the level's, light haptic. Failure: the head fades, one low book-close, no note.</p>
+  <div class="bar"><button class="replay" data-fx="quest" data-v="ok">Resolved</button><button class="replay" data-fx="quest" data-v="fail">Failed</button></div>
+</section>
+
+<section class="fx" id="level">
+  <h2>Level up without a card <small>P0 · S3 · Reanimated · Q1</small></h2>
+  <div class="stage"><div class="page">
+    <div class="title">Boar run</div>
+    <div class="log" id="lvLog"><div>The boar drops.</div></div>
+  </div></div>
+  <p class="cap"><b>Fires on</b> the level rising (3.5). <b>Why</b> the owner reserved cards for story arcs; a level is the one "you grew" moment, so the log line dries with gilt (600 ms of <i>warning</i>'s hue), a two-note rise plays, medium haptic. On Character "1 point to spend" holds the gilt until spent.</p>
+  <div class="bar"><button class="replay" data-fx="level">Replay</button></div>
+</section>
+
+<section class="fx" id="chapter">
+  <h2>Chapter card: blur and theme cut <small>P0 · S4 · Skia blur on the snapshot</small></h2>
+  <div class="stage"><div class="page" id="chPage">
+    <div class="runhead"><span>Find the lantern</span></div>
+    <div class="title">The Inn</div>
+    <div class="body">A low room, smoke in the beams. Nell wipes the counter. The door stands open on the yard.</div>
+  </div><div class="chapter" id="chCard"><div class="lab">CHAPTER TWO</div><div class="rule"></div><div class="ttl">The Shore</div><div class="ctrl">Continue</div></div></div>
+  <p class="cap"><b>Fires on</b> the chapter index rising (3.6; owner's choice, reserved for story-arc markers). <b>Why</b> the one effect that stops the read: the page behind blurs over 600 ms, label, rule and title dry in staggered by 120 ms, the theme cut under it (a synth chord stands in here), medium haptic. Reduced motion: fixed blur, no stagger; the cut stays.</p>
+  <div class="bar"><button class="replay" data-fx="chapter">Replay</button></div>
+</section>
+
+<section class="fx" id="night">
+  <h2>Nightfall: palette, stars, meteor <small>palette and meteor built · twinkle P2</small></h2>
+  <div class="stage"><div class="page" id="nightPage">
+    <div class="status"><span class="k">Hour</span><span id="nightHour">dusk</span></div>
+    <div class="title">The Yard</div>
+    <div class="body">The light goes out of the sky over the fold.</div>
+    <div id="stars"></div><div class="meteor" id="meteor"></div>
+  </div></div>
+  <p class="cap"><b>Fires on</b> the solar phase changing (3.9). <b>Why</b> the day/night rule: the palette cross-fades 1.5 s (built), then dusk to dark; outdoors the stars come up and a meteor streaks 700 ms (built, none under reduced motion); the P2 twinkle breathes each star on its own phase.</p>
+  <div class="bar"><button class="replay" data-fx="night">Replay</button></div>
+</section>
+
+<section class="fx" id="lamp">
+  <h2>Lamp lit: glow at the hip, candle flicker <small>P1 · S2 · Skia RadialGradient</small></h2>
+  <div class="stage"><div class="page" id="lampPage" style="background:var(--dark-bg);color:var(--dark-fg)">
+    <div class="title">The Loft</div>
+    <div class="body">You strike a light. The lantern catches.</div>
+    <div class="glow" id="lampGlow"></div>
+  </div></div>
+  <p class="cap"><b>Fires on</b> a held or room light's lit state turning true, on dusk and dark palettes only (3.2; owner's choice, Beads x6t.7). <b>Why</b> the lamp is the one light the player carries: a warm radial at the page's hip fades in over 1.5 s and, indoors, flickers ±8 % at 80-140 ms steps (none under reduced motion); douse settles it out over 400 ms. No sound.</p>
+  <div class="bar"><button class="replay" data-fx="lamp" data-v="lit">Light it</button><button class="replay" data-fx="lamp" data-v="out">Douse</button></div>
+</section>
+
+<section class="fx" id="storm">
+  <h2>Lightning afterimage and thunder <small>P2 · S3 · Reanimated + sample</small></h2>
+  <div class="stage"><div class="page" style="background:var(--dusk-bg);color:var(--dusk-fg)">
+    <div class="status"><span class="k">Sky</span><span>storm</span></div>
+    <div class="title">The Fold</div>
+    <div class="body">Rain comes in sheets off the hill. The sheep press the wall.</div>
+  </div><div class="after" id="stormAfter"></div></div>
+  <p class="cap"><b>Fires at</b> random 20-60 s intervals while weather is storm and the room is exposed (3.9). <b>Why</b> the kernel derives the weather and the status line names it; the page should answer: a flash to the light palette's paper in 60 ms fading over 1.2 s, thunder 1-3 s later, one heavy haptic. Never indoors (Q8); never more than one flash a second; none with Flashes off.</p>
+  <div class="bar"><button class="replay" data-fx="storm">Replay</button></div>
+</section>
+
+<section class="fx" id="wind">
+  <h2>Wind: page flutter and beds <small>P1 beds · P2 flutter</small></h2>
+  <div class="stage"><div class="page leaf" id="windPage">
+    <div class="status"><span class="k">Sky</span><span id="windSky">windy</span></div>
+    <div class="title">The Shore Steps</div>
+    <div class="body">The wind comes up the steps with the smell of weed.</div>
+  </div></div>
+  <p class="cap"><b>Fires on</b> the weather changing and on entering an exposed room while windy (3.9). <b>Why</b> the derived sky made real: the page's top outer corner lifts 2-3 px and settles, twice, 600 ms (none under reduced motion); the wind bed rises, rain joins it in rain, both muffle indoors.</p>
+  <div class="bar"><button class="replay" data-fx="wind" data-v="flutter">Flutter</button><button class="replay" data-fx="wind" data-v="rain">Rain bed on/off</button><button class="replay" data-fx="wind" data-v="wind">Wind bed on/off</button></div>
+</section>
+
+<section class="fx" id="amb">
+  <h2>Ambience: indoors and out <small>P1 · beds by room tag · Q3</small></h2>
+  <div class="stage"><div class="page">
+    <div class="title" id="ambTitle">The Yard</div>
+    <div class="body" id="ambBody">Wind over the fold; a gull somewhere.</div>
+    <div class="note">bed: <span id="ambBed">wild (wind)</span></div>
+  </div></div>
+  <p class="cap"><b>Fires on</b> the room changing (6: place bed by a cartridge room tag, weather layer by the sky, low-pass muffle when the room is not exposed). <b>Why</b> Showcase has an inn, a shore, a cave, a forge and a crypt; a read room should sound like one. Cross-fade 1 s; two voices at most.</p>
+  <div class="bar"><button class="replay" data-fx="amb" data-v="out">Outdoors</button><button class="replay" data-fx="amb" data-v="in">Inn (muffled, hearth)</button><button class="replay" data-fx="amb" data-v="stop">Stop</button></div>
+</section>
+
+<section class="fx" id="map">
+  <h2>Map: a room draws on <small>P1 · S2 · Skia path trim</small></h2>
+  <div class="stage"><div class="page">
+    <div class="title">Map</div>
+    <svg class="map" viewBox="0 0 340 150">
+      <path d="M60 110 L140 110" /><circle cx="60" cy="110" r="5"/><circle cx="140" cy="110" r="5"/>
+      <text x="40" y="132">INN</text><text x="120" y="132">YARD</text>
+      <path id="mapPath" d="M140 110 L230 60" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1"/>
+      <circle id="mapDot" cx="230" cy="60" r="5" style="opacity:0"/><text id="mapTxt" x="212" y="46" style="opacity:0">LOFT</text>
+    </svg>
+  </div></div>
+  <p class="cap"><b>Fires on</b> the discovered map gaining a room (3.10). <b>Why</b> the map is the player's own drawing: the connection draws on over 400 ms, the dot and name dry in; appears at once under reduced motion. No sound.</p>
+  <div class="bar"><button class="replay" data-fx="map">Replay</button></div>
+</section>
+
+<section class="fx" id="riffle">
+  <h2>Travel: a riffle of pages <small>P2 · S3 · one snapshot, five sweeps</small></h2>
+  <div class="stage" id="rifStage">
+    <div class="page" data-arrive><div class="title">The Shore</div><div class="body">Shingle, and the tide out.</div></div>
+    <div class="page leaf" data-leave><div class="title">The Yard</div><div class="body">The carter nods you up.</div></div>
+  </div>
+  <p class="cap"><b>Fires on</b> a transport, expedition or patrol step (3.10; needs the event channel to tell it from a step). <b>Why</b> a journey is many pages: five compressed turns at 120 ms with one paper riffle, light haptic at the end; one cross-fade under reduced motion.</p>
+  <div class="bar"><button class="replay" data-fx="riffle">Replay</button></div>
+</section>
+
+<section class="fx" id="mech">
+  <h2>Mechanisms: lever, latch, dial <small>P1 · S3 / S2 · samples only</small></h2>
+  <div class="stage"><div class="page">
+    <div class="title">The Vault Door</div>
+    <div class="log" id="mechLog"><div>An iron lever, a brass dial, a lock.</div></div>
+    <div class="card" data-press="card">Pull the lever</div>
+  </div></div>
+  <p class="cap"><b>Fires on</b> the lever, unlock or dial action completing (3.11; needs the event channel). <b>Why</b> the lever is in the prose, not drawn, so the sound is the whole effect: a 250 ms wooden clunk with a medium haptic, a latch with a light one, a tick per dial step with a selection.</p>
+  <div class="bar"><button class="replay" data-fx="mech" data-v="lever">Lever</button><button class="replay" data-fx="mech" data-v="latch">Latch</button><button class="replay" data-fx="mech" data-v="dial">Dial</button></div>
+</section>
+
+<section class="fx" id="refused">
+  <h2>Refused: felt, not heard <small>P0 · S1 · Reanimated</small></h2>
+  <div class="stage"><div class="page">
+    <div class="title">The Vault Door</div>
+    <div class="log" id="refLog"><div>The door is iron-bound.</div></div>
+    <div class="card" id="refCard" style="color:var(--dim)">Open the door</div>
+  </div></div>
+  <p class="cap"><b>Fires on</b> a refused line or an unavailable card pressed (4.1, 4.11). <b>Why</b> a refusal should not punish: no lift, no sound; the reason dries in italic, a warning haptic once.</p>
+  <div class="bar"><button class="replay" data-fx="refused">Replay</button></div>
+</section>
+
+<section class="fx" id="death">
+  <h2>Falling and waking <small>own slice · S4 · page sequence</small></h2>
+  <div class="stage" id="deathStage">
+    <div class="page" data-arrive style="background:#e2d7d7;color:#1c2128"><div class="status"><span class="k">Hour</span><span>dawn</span></div><div class="title">The Inn</div><div class="log"><div>You wake at the inn.</div></div></div>
+    <div class="page leaf" data-leave id="deathPage"><div class="status"><span class="k">HP</span><span id="deathHp">2</span></div><div class="title">Boar run</div><div class="log" id="deathLog"><div>The boar turns.</div></div></div>
+    <div class="wash" id="deathWash"></div>
+  </div>
+  <p class="cap"><b>Fires on</b> the actor's death (5.6). <b>Why</b> death is not a chapter: the fatal blow's wash holds while the page settles to dark over 600 ms, "You fall." dries alone, a beat, then the turn into the morning palette and "You wake at the inn." Heavy haptic once, then nothing; no chord.</p>
+  <div class="bar"><button class="replay" data-fx="death">Replay</button></div>
+</section>
+
+<section class="fx" id="riddle">
+  <h2>Letter tiles and a right answer <small>P1 · S2 · Reanimated</small></h2>
+  <div class="stage"><div class="page">
+    <div class="title">The Riddle Stone</div>
+    <div class="body" id="ridWord"><span>K</span><span>E</span><span>Y</span></div>
+    <div><span class="tile" data-press="tile">K</span><span class="tile" data-press="tile">E</span><span class="tile" data-press="tile">Y</span><span class="tile" data-press="tile">S</span></div>
+  </div></div>
+  <p class="cap"><b>Fires on</b> a tile press and on the answer being accepted (3.11). <b>Why</b> the one place the player handles pieces, so a tile lifts with a tick; a right answer gilds the word for 600 ms with a note; a wrong one returns the tiles silently.</p>
+  <div class="bar"><button class="replay" data-fx="riddle" data-v="tile">Tile</button><button class="replay" data-fx="riddle" data-v="right">Right answer</button></div>
+</section>
+
+<section class="fx" id="pennies">
+  <h2>Pennies counted <small>P0 · S2 · Reanimated</small></h2>
+  <div class="stage"><div class="page">
+    <div class="status"><span class="k">HP</span><span>12</span><span class="k">Pennies</span><span id="penVal">4</span></div>
+    <div class="title">Nell's Shop</div>
+    <div class="log" id="penLog"><div>You buy the rope for 2 pennies.</div></div>
+  </div></div>
+  <p class="cap"><b>Fires on</b> the pennies resource changing (3.7). <b>Why</b> money should sound like money: the value dries, one short coin clink (a tick stands in here), a selection haptic.</p>
+  <div class="bar"><button class="replay" data-fx="pennies">Replay</button></div>
+</section>
+
+<section class="fx" id="catch">
+  <h2>Catching up: breathing text <small>P0 · S1 · Reanimated</small></h2>
+  <div class="stage"><div class="page" style="justify-content:center;align-items:center"><div class="dim" id="catchTxt">Catching up…</div></div></div>
+  <p class="cap"><b>Fires while</b> the open-time catch-up runs (4.11). <b>Why</b> a book waiting, not a device working: the text breathes between <i>dim</i> and <i>fg</i> over 2.4 s; steady under reduced motion; no spinner, no sound.</p>
+  <div class="bar"><button class="replay" data-fx="catch">Start / stop</button></div>
+</section>
+
+</main>
+<script>
+(() => {
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const rmBox = $('#rm');
+rmBox.checked = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const sync = () => document.documentElement.dataset.rm = rmBox.checked ? '1' : '0';
+rmBox.addEventListener('change', sync); sync();
+const rm = () => rmBox.checked;
+const EASE = 'cubic-bezier(.25,.1,.25,1)', INOUT = 'cubic-bezier(.455,.03,.515,.955)', LIN = 'linear';
+const C = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const anim = (el, kf, o) => el.animate(kf, { fill: 'forwards', ...o }).finished;
+// ink dries: dim -> fg over motion.dry (240), motion.fade (160) under reduced motion
+const dry = (el, ms = 240) => anim(el, [{ color: C('--dim') }, { color: getComputedStyle(el.parentElement).color }], { duration: rm() ? 160 : ms, easing: LIN });
+const gilt = async el => { const to = getComputedStyle(el).color; await anim(el, [{ color: C('--warning') }, { color: C('--warning') }, { color: to }], { duration: rm() ? 160 : 600, easing: INOUT }); };
+const addLine = (log, text, cls) => { const d = document.createElement('div'); d.textContent = text; if (cls) d.className = cls; log.appendChild(d); return d; };
+const reset = log => { while (log.children.length > 1) log.lastChild.remove(); };
+
+/* ---------- synth placeholders (WebAudio); each stands for a recorded CC0 sample on device ---------- */
+let ac, master, amb, sfx;
+const audio = () => {
+  if (ac) return ac;
+  ac = new (window.AudioContext || window.webkitAudioContext)();
+  master = ac.createGain(); master.gain.value = .8; master.connect(ac.destination);
+  amb = ac.createGain(); amb.gain.value = 1; amb.connect(master);   // ambience bus (ducked)
+  sfx = ac.createGain(); sfx.connect(master);                         // sfx + ui bus
+  return ac;
+};
+const TIER = { whisper: .08, note: .18, beat: .32, chapter: .4 };
+let noise;
+const noiseBuf = () => { if (noise) return noise; const n = ac.sampleRate * 2, b = ac.createBuffer(1, n, ac.sampleRate), d = b.getChannelData(0); for (let i = 0; i < n; i++) d[i] = Math.random() * 2 - 1; return noise = b; };
+const burst = ({ t = 0, f = 2000, q = 1.4, peak = .2, dur = .05, type = 'bandpass', sweep = .6, bus = sfx } = {}) => {
+  const s = ac.createBufferSource(); s.buffer = noiseBuf();
+  const bp = ac.createBiquadFilter(); bp.type = type; bp.Q.value = q; bp.frequency.setValueAtTime(f, ac.currentTime + t); bp.frequency.exponentialRampToValueAtTime(f * sweep, ac.currentTime + t + dur);
+  const g = ac.createGain(); g.gain.setValueAtTime(0, ac.currentTime + t); g.gain.linearRampToValueAtTime(peak, ac.currentTime + t + .005); g.gain.exponentialRampToValueAtTime(.001, ac.currentTime + t + dur);
+  s.connect(bp); bp.connect(g); g.connect(bus); s.start(ac.currentTime + t); s.stop(ac.currentTime + t + dur + .05);
+};
+const tone = ({ t = 0, f = 440, dur = .4, peak = .05, type = 'triangle' } = {}) => {
+  const o = ac.createOscillator(); o.type = type; o.frequency.value = f;
+  const g = ac.createGain(); g.gain.setValueAtTime(0, ac.currentTime + t); g.gain.linearRampToValueAtTime(peak, ac.currentTime + t + .02); g.gain.exponentialRampToValueAtTime(.001, ac.currentTime + t + dur);
+  o.connect(g); g.connect(sfx); o.start(ac.currentTime + t); o.stop(ac.currentTime + t + dur + .05);
+};
+const duck = (db = -6) => { const g = amb.gain, now = ac.currentTime; g.cancelScheduledValues(now); g.setValueAtTime(g.value, now); g.linearRampToValueAtTime(Math.pow(10, db / 20), now + .3); g.linearRampToValueAtTime(1, now + 1.5); };
+const vary = () => 1 + (Math.random() - .5) * .08;  // ±4 % pitch
+const S = {
+  paper: (peak = TIER.note) => { burst({ f: 1800 * vary(), q: .8, peak, dur: .32, sweep: .4 }); burst({ t: .12, f: 900, q: .7, peak: peak * .6, dur: .2, sweep: .5 }); },
+  riffle: () => { for (let i = 0; i < 5; i++) burst({ t: i * .11, f: 2200 * vary(), q: 1, peak: TIER.note * .7, dur: .09, sweep: .5 }); },
+  pluck: () => { const v = vary(); burst({ f: 2600 * v, q: 1.4, peak: TIER.note, dur: .035 }); burst({ t: .05, f: 1400 * v, q: 1.4, peak: TIER.note * .55, dur: .06 }); },  // the lab's recipe
+  flick: () => burst({ f: 3200 * vary(), q: .9, peak: TIER.note, dur: .07, sweep: .35 }),
+  tick: () => burst({ f: 5000, q: 2, peak: TIER.whisper, dur: .012, sweep: 1 }),
+  thud: (peak = TIER.beat) => { duck(); burst({ f: 220, q: .6, peak, dur: .2, type: 'lowpass', sweep: .4 }); tone({ f: 70, dur: .25, peak: peak * .5, type: 'sine' }); },
+  close: () => { burst({ f: 1200, q: .7, peak: TIER.note * .7, dur: .25, sweep: .3 }); burst({ t: .18, f: 300, q: .6, peak: TIER.note * .5, dur: .18, type: 'lowpass' }); },
+  note: (base = 392) => { duck(); tone({ f: base, dur: .5, peak: .05 }); tone({ t: .18, f: base * 1.5, dur: .8, peak: .05 }); },
+  low: () => tone({ f: 147, dur: .9, peak: .05 }),
+  chord: () => { duck(-9); [196, 294, 392, 587].forEach((f, i) => tone({ t: i * .12, f, dur: 2.2, peak: .035 })); },
+  thunder: () => { duck(-9); const s = ac.createBufferSource(); s.buffer = noiseBuf(); s.loop = true; const lp = ac.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.setValueAtTime(420, ac.currentTime); lp.frequency.exponentialRampToValueAtTime(70, ac.currentTime + 3); const g = ac.createGain(); g.gain.setValueAtTime(0, ac.currentTime); g.gain.linearRampToValueAtTime(.35, ac.currentTime + .15); g.gain.exponentialRampToValueAtTime(.001, ac.currentTime + 3); s.connect(lp); lp.connect(g); g.connect(sfx); s.start(); s.stop(ac.currentTime + 3.2); },
+  clunk: () => { burst({ f: 400, q: .8, peak: TIER.beat, dur: .25, type: 'lowpass', sweep: .5 }); tone({ f: 120, dur: .2, peak: .08, type: 'sine' }); burst({ t: .2, f: 2000, q: 1, peak: TIER.whisper, dur: .03 }); },
+  latch: () => { burst({ f: 3000, q: 2, peak: TIER.note * .8, dur: .02, sweep: 1 }); burst({ t: .09, f: 1800, q: 2, peak: TIER.note, dur: .04, sweep: .8 }); },
+  snap: () => burst({ f: 2400, q: 3, peak: TIER.note, dur: .03, sweep: .5 }),
+};
+// looping beds; one filtered noise each, with a muffle (low-pass) when indoors
+const beds = {};
+const bed = (name, { f, q, lfo, peak }) => {
+  if (beds[name]) return beds[name];
+  const s = ac.createBufferSource(); s.buffer = noiseBuf(); s.loop = true;
+  const bp = ac.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = f; bp.Q.value = q;
+  const muf = ac.createBiquadFilter(); muf.type = 'lowpass'; muf.frequency.value = 20000;
+  const g = ac.createGain(); g.gain.value = 0;
+  const l = ac.createOscillator(); l.frequency.value = lfo; const lg = ac.createGain(); lg.gain.value = f * .4; l.connect(lg); lg.connect(bp.frequency); l.start();
+  s.connect(bp); bp.connect(muf); muf.connect(g); g.connect(amb); s.start();
+  return beds[name] = { g, muf, peak, on: false };
+};
+const BEDS = { wind: { f: 500, q: .5, lfo: .15, peak: .12 }, rain: { f: 4000, q: .3, lfo: .5, peak: .07 }, hearth: { f: 180, q: .8, lfo: 2.5, peak: .1 }, surf: { f: 700, q: .4, lfo: .08, peak: .1 } };
+const bedTo = (name, on, muffled = false, ms = 1000) => { const b = bed(name, BEDS[name]); const now = ac.currentTime; b.g.gain.cancelScheduledValues(now); b.g.gain.setValueAtTime(b.g.gain.value, now); b.g.gain.linearRampToValueAtTime(on ? b.peak : 0, now + ms / 1000); b.muf.frequency.setTargetAtTime(muffled ? 800 : 20000, now, .3); b.on = on; return b; };
+
+/* ---------- press feedback on every tappable in the page ---------- */
+const pressIn = el => { const k = el.dataset.press;
+  if (k === 'ink') return anim(el, [{ color: C('--action') }, { color: C('--fg') }], { duration: 90, easing: EASE });
+  return anim(el, [{ transform: 'translateY(0)', boxShadow: '0 0 0 ' + C('--line'), backgroundColor: C('--card') }, { transform: rm() ? 'none' : 'translateY(-1px)', boxShadow: '0 1px 0 ' + C('--line'), backgroundColor: 'color-mix(in srgb, ' + C('--card') + ' 70%, ' + C('--line') + ')' }], { duration: 90, easing: EASE }); };
+const pressOut = el => { const k = el.dataset.press;
+  if (k === 'ink') return anim(el, [{ color: C('--fg') }, { color: C('--action') }], { duration: 160, easing: EASE });
+  return anim(el, [{ transform: rm() ? 'none' : 'translateY(-1px)', boxShadow: '0 1px 0 ' + C('--line'), backgroundColor: 'color-mix(in srgb, ' + C('--card') + ' 70%, ' + C('--line') + ')' }, { transform: 'translateY(0)', boxShadow: '0 0 0 ' + C('--line'), backgroundColor: C('--card') }], { duration: 160, easing: EASE }); };
+$$('[data-press]').forEach(el => { el.addEventListener('pointerdown', () => { audio(); pressIn(el); if (el.dataset.press === 'tile') S.tick(); }); ['pointerup', 'pointerleave', 'pointercancel'].forEach(e => el.addEventListener(e, () => pressOut(el))); });
+const pressTap = async el => { await pressIn(el); await sleep(120); await pressOut(el); };
+
+/* ---------- a CSS fold standing in for the Skia curl ---------- */
+const turn = async (stage, ms = 500) => {
+  const leave = $('[data-leave]', stage), arrive = $('[data-arrive]', stage);
+  arrive.style.opacity = 1;
+  if (rm()) { await anim(leave, [{ opacity: 1 }, { opacity: 0 }], { duration: 160, easing: LIN }); }
+  else await anim(leave, [{ transform: 'rotateY(0deg)' }, { transform: 'rotateY(-180deg)' }], { duration: ms, easing: INOUT });
+  leave.style.visibility = 'hidden';
+};
+const unturn = stage => { const leave = $('[data-leave]', stage); leave.getAnimations().forEach(a => a.cancel()); leave.style.visibility = ''; leave.style.transform = ''; leave.style.opacity = ''; };
+
+/* ---------- the samples ---------- */
+const FX = {
+  async press() { for (const el of $$('#press [data-press]')) { await pressTap(el); await sleep(80); } },
+  async turn() { const st = $('#turnStage'); unturn(st); await sleep(50); S.paper(); await turn(st); },
+  async dry() { const log = $('#dryLog'); reset(log); await sleep(100); const a = addLine(log, 'You take the sack.'); await dry(a); const b = addLine(log, 'Nell looks up.', 'ev'); await sleep(60); await dry(b); },
+  async pickup(v) {
+    const log = $('#pickLog'), pop = $('#pickPop'); reset(log); pop.getAnimations().forEach(a => a.cancel());
+    const line = addLine(log, v === 'two' ? 'You take the sack and the rope.' : 'You take the sack.'); dry(line);
+    pop.textContent = v === 'two' ? '+ sack, + rope' : '+ sack';
+    pop.style.top = (log.offsetTop + log.offsetHeight + 4) + 'px';
+    (v === 'flick' ? S.flick : S.pluck)();
+    const rise = rm() ? [{ opacity: 0, color: C('--dim') }, { opacity: 1, color: C('--action') }] : [{ opacity: 0, transform: 'translateY(6px)', color: C('--dim') }, { opacity: 1, transform: 'translateY(0)', color: C('--action') }];
+    await anim(pop, rise, { duration: rm() ? 160 : 220, easing: EASE });
+    await sleep(1800); await anim(pop, [{ opacity: 1 }, { opacity: 0 }], { duration: 400, easing: LIN });
+  },
+  async damage(v) {
+    const page = $('#dmgPage'), wash = $('#dmgStage .wash'), hp = $('#dmgHp'), log = $('#dmgLog'); reset(log);
+    const blow = async (loss, hard) => {
+      hp.textContent = String(+hp.textContent - loss);
+      const line = addLine(log, hard ? 'The boar gores you. A deep wound.' : 'The boar catches your leg.'); dry(line);
+      S.thud(hard ? TIER.beat * 1.3 : TIER.beat);
+      const op = (hard ? .28 : .18) * (rm() ? .5 : 1), sc = hard ? 1.03 : 1.015;
+      anim(hp, [{ color: C('--danger') }, { color: C('--danger'), offset: .4 }, { color: C('--fg') }], { duration: 800, easing: LIN });
+      if (!rm()) anim(page, [{ transform: 'scale(1)' }, { transform: `scale(${sc})`, offset: .24 }, { transform: 'scale(1)' }], { duration: 500, easing: INOUT });
+      return anim(wash, [{ opacity: 0 }, { opacity: op, offset: .24 }, { opacity: 0 }], { duration: 500, easing: INOUT });
+    };
+    if (v === 'flurry') { blow(2); await sleep(140); blow(3); await sleep(140); await blow(2); }  // one wash that re-peaks
+    else await blow(v === 'crit' ? 6 : 3, v === 'crit');
+    await sleep(400); hp.textContent = '12';
+  },
+  async foe() { const band = $('#foeBand'), back = $('#foeBack'); band.style.color = ''; back.style.opacity = 0; await sleep(100); S.close(); await anim(band, [{ color: C('--fg') }, { color: C('--dim') }], { duration: rm() ? 160 : 400, easing: INOUT }); await anim(back, [{ opacity: 0, color: C('--dim') }, { opacity: 1, color: C('--action') }], { duration: 240, easing: LIN }); },
+  async status(v) {
+    const icon = $('#stIcon'), ring = $('#stRing'); ring.style.strokeDasharray = ring.style.strokeDasharray || (2 * Math.PI * 14);
+    if (v === 'out') { await anim(icon, [{ opacity: 1 }, { opacity: 0 }], { duration: 160, easing: LIN }); return; }
+    if (v === 'debuff') S.tick();
+    ring.getAnimations().forEach(a => a.cancel());
+    await anim(icon, rm() ? [{ opacity: 0 }, { opacity: 1 }] : [{ opacity: 0, transform: 'scale(.6)' }, { opacity: 1, transform: 'scale(1)' }], { duration: rm() ? 160 : 220, easing: EASE });
+    anim(ring, [{ strokeDashoffset: 0 }, { strokeDashoffset: 2 * Math.PI * 14 }], { duration: 12000, easing: LIN });  // the countdown ring draining (built), compressed here
+  },
+  faint() { const v = $('#faintVig'); const on = v.getAnimations().length; v.getAnimations().forEach(a => a.cancel()); if (on) { v.style.opacity = 0; return; }
+    if (rm()) { v.style.opacity = .1; v.animate([{ opacity: .1 }, { opacity: .1 }], { duration: 1e9 }); return; }
+    v.animate([{ opacity: .04 }, { opacity: .12 }, { opacity: .04 }], { duration: 2400, iterations: Infinity, easing: INOUT }); },
+  async runhead() { const a = $('#rhA'), b = $('#rhB'); a.style.opacity = 1; b.style.opacity = 0; await sleep(300); const d = rm() ? 160 : 240; anim(a, [{ opacity: 1 }, { opacity: 0 }], { duration: d, easing: LIN }); await anim(b, [{ opacity: 0 }, { opacity: 1 }], { duration: d, easing: LIN }); },
+  async quest(v) {
+    const rh = $('#qRh'), log = $('#qLog'); reset(log); rh.style.opacity = 1; rh.style.color = ''; await sleep(200);
+    if (v === 'ok') { const line = addLine(log, 'Wat nods. "Tell the Reeve it is done."'); dry(line); S.note(262); await anim(rh, [{ color: C('--dim'), opacity: 1 }, { color: C('--dim'), opacity: 0 }], { duration: rm() ? 160 : 400, easing: INOUT }); const j = addLine(log, 'Deliver the Reeve\'s letter: done.', 'ev'); await gilt(j); }
+    else { const line = addLine(log, 'The seal is broken; the letter is late.', 'ev'); dry(line); S.close(); await anim(rh, [{ opacity: 1 }, { color: C('--dim'), opacity: 0 }], { duration: rm() ? 160 : 400, easing: INOUT }); }
+  },
+  async level() { const log = $('#lvLog'); reset(log); await sleep(100); const line = addLine(log, 'Level 2. One point to spend.'); S.note(392); await gilt(line); },
+  async chapter() {
+    const page = $('#chPage'), card = $('#chCard'); card.style.opacity = 0; page.style.filter = ''; await sleep(100);
+    S.chord();
+    anim(page, [{ filter: 'blur(0px)' }, { filter: 'blur(6px)' }], { duration: rm() ? 160 : 600, easing: INOUT });
+    card.style.opacity = 1;
+    const parts = [...card.children]; parts.forEach(p => p.style.opacity = 0);
+    for (const [i, p] of parts.entries()) { if (!rm()) await sleep(i ? 120 : 0); anim(p, [{ opacity: 0 }, { opacity: 1 }], { duration: rm() ? 160 : 240, easing: LIN }); }
+  },
+  async night() {
+    const page = $('#nightPage'), hour = $('#nightHour'), stars = $('#stars'), met = $('#meteor');
+    const texts = $$('.title,.body,.status', page);
+    const to = async (bg, fg) => { anim(page, [{ backgroundColor: getComputedStyle(page).backgroundColor }, { backgroundColor: bg }], { duration: rm() ? 1500 : 1500, easing: INOUT }); await Promise.all(texts.map(t => anim(t, [{ color: getComputedStyle(t).color }, { color: fg }], { duration: 1500, easing: INOUT }))); };
+    stars.replaceChildren(); met.getAnimations().forEach(a => a.cancel()); met.style.opacity = 0;
+    await to(C('--bg'), C('--fg')); hour.textContent = 'dusk'; await to(C('--dusk-bg'), C('--dusk-fg')); hour.textContent = 'night'; await to(C('--dark-bg'), C('--dark-fg'));
+    for (let i = 0; i < 18; i++) { const s = document.createElement('div'); s.className = 'star'; s.style.left = (10 + Math.random() * 80) + '%'; s.style.top = (55 + Math.random() * 40) + '%'; stars.appendChild(s);
+      const kf = [{ opacity: 0 }, { opacity: .9 }]; s.animate(kf, { duration: 800, delay: i * 40, fill: 'forwards' });
+      if (!rm()) setTimeout(() => s.animate([{ opacity: .9 }, { opacity: .4 }, { opacity: .9 }], { duration: 2400, iterations: Infinity, easing: INOUT, delay: Math.random() * 2400 }), 1200); }
+    if (rm()) return;
+    await sleep(900); met.style.left = '20%'; met.style.top = '60%'; met.animate([{ opacity: 0, transform: 'rotate(25deg) translateX(0)' }, { opacity: 1, offset: .2 }, { opacity: 0, transform: 'rotate(25deg) translateX(160px)' }], { duration: 700, easing: LIN });
+  },
+  async lamp(v) {
+    const g = $('#lampGlow'); g.getAnimations().forEach(a => a.cancel());
+    if (v === 'out') { await anim(g, [{ opacity: getComputedStyle(g).opacity }, { opacity: 0 }], { duration: rm() ? 160 : 400, easing: INOUT }); return; }
+    await anim(g, [{ opacity: 0 }, { opacity: .35 }], { duration: rm() ? 160 : 1500, easing: INOUT });
+    if (rm()) return;
+    const flicker = () => { if (!g.isConnected || +getComputedStyle(g).opacity < .05) return; g.animate([{ opacity: .35 }, { opacity: .35 * (1 + (Math.random() - .5) * .16) }], { duration: 80 + Math.random() * 60, fill: 'forwards' }).finished.then(flicker).catch(() => {}); };
+    flicker();
+  },
+  async storm() { const a = $('#stormAfter'); a.style.background = C('--bg'); S.paper(TIER.whisper); if (!rm()) await anim(a, [{ opacity: 0 }, { opacity: .9, offset: .05 }, { opacity: 0 }], { duration: 1260, easing: 'ease-out' }); await sleep(1000 + Math.random() * 1500); S.thunder(); },
+  async wind(v) {
+    if (v === 'rain') { const b = bed('rain', BEDS.rain); bedTo('rain', !b.on); $('#windSky').textContent = b.on ? 'rain' : 'windy'; return; }
+    if (v === 'wind') { const b = bed('wind', BEDS.wind); bedTo('wind', !b.on); return; }
+    if (rm()) return; const p = $('#windPage'); p.style.transformOrigin = 'left center';
+    await anim(p, [{ transform: 'rotateY(0)' }, { transform: 'rotateY(-3deg)' }, { transform: 'rotateY(0)' }, { transform: 'rotateY(-2deg)' }, { transform: 'rotateY(0)' }], { duration: 600, easing: INOUT });
+  },
+  amb(v) {
+    const t = $('#ambTitle'), b = $('#ambBody'), tag = $('#ambBed');
+    if (v === 'stop') { Object.keys(beds).forEach(n => bedTo(n, false)); tag.textContent = 'none'; return; }
+    const indoors = v === 'in';
+    bedTo('wind', true, indoors); bedTo('hearth', indoors);
+    t.textContent = indoors ? 'The Inn' : 'The Yard'; b.textContent = indoors ? 'The fire ticks. Outside, the wind is a rumour.' : 'Wind over the fold; a gull somewhere.'; tag.textContent = indoors ? 'inn (hearth) + wind, muffled' : 'wild (wind)';
+    dry(t); dry(b);
+  },
+  async map() { const p = $('#mapPath'), d = $('#mapDot'), x = $('#mapTxt'); p.style.strokeDashoffset = 1; d.style.opacity = 0; x.style.opacity = 0; await sleep(100);
+    if (rm()) { p.style.strokeDashoffset = 0; d.style.opacity = 1; x.style.opacity = 1; return; }
+    await anim(p, [{ strokeDashoffset: 1 }, { strokeDashoffset: 0 }], { duration: 400, easing: INOUT }); anim(d, [{ opacity: 0 }, { opacity: 1 }], { duration: 240 }); await anim(x, [{ opacity: 0 }, { opacity: 1 }], { duration: 240 }); },
+  async riffle() { const st = $('#rifStage'); unturn(st); await sleep(50); const leave = $('[data-leave]', st); $('[data-arrive]', st).style.opacity = 1;
+    if (rm()) { S.paper(); await turn(st); return; }
+    S.riffle(); for (let i = 0; i < 5; i++) await anim(leave, [{ transform: 'rotateY(0)' }, { transform: `rotateY(${i < 4 ? -40 : -180}deg)` }], { duration: 120, easing: LIN }); leave.style.visibility = 'hidden'; },
+  async mech(v) { const log = $('#mechLog'); reset(log);
+    if (v === 'lever') { S.clunk(); await dry(addLine(log, 'The lever goes over with a clunk. Somewhere, stone grinds.')); }
+    else if (v === 'latch') { S.latch(); await dry(addLine(log, 'The key turns. The lock gives.')); }
+    else { for (let i = 0; i < 4; i++) { S.tick(); await sleep(220); } await dry(addLine(log, 'The dial reads IV.')); } },
+  async refused() { const log = $('#refLog'), card = $('#refCard'); reset(log); await sleep(100); await dry(addLine(log, 'You can\'t do that—locked.', 'ref')); },
+  async death() {
+    const st = $('#deathStage'), page = $('#deathPage'), wash = $('#deathWash'), log = $('#deathLog'), hp = $('#deathHp');
+    unturn(st); wash.getAnimations().forEach(a => a.cancel()); wash.style.opacity = 0; page.style.backgroundColor = ''; page.style.color = ''; reset(log); hp.textContent = '2'; hp.style.color = ''; await sleep(100);
+    hp.textContent = '0'; hp.style.color = C('--danger'); S.thud(TIER.beat * 1.3);
+    anim(wash, [{ opacity: 0 }, { opacity: .28 }], { duration: 120, easing: INOUT });          // the wash holds
+    await sleep(300);
+    const d = rm() ? 160 : 600;
+    anim(wash, [{ opacity: .28 }, { opacity: 0 }], { duration: d, easing: INOUT });
+    await anim(page, [{ backgroundColor: C('--bg'), color: C('--fg') }, { backgroundColor: C('--dark-bg'), color: C('--dark-fg') }], { duration: d, easing: INOUT });
+    const fall = addLine(log, 'You fall.'); await anim(fall, [{ color: C('--dark-dim') }, { color: C('--dark-fg') }], { duration: rm() ? 160 : 240 });
+    await sleep(1200); S.paper(); await turn(st);
+  },
+  async riddle(v) { if (v === 'tile') { await pressTap($('#riddle .tile')); return; } S.note(523); S.flick(); const w = $('#ridWord'); await Promise.all($$('span', w).map((s, i) => sleep(i * 60).then(() => gilt(s)))); },
+  async pennies() { const log = $('#penLog'), val = $('#penVal'); reset(log); val.textContent = '4'; await sleep(100); const line = addLine(log, 'You buy the rope for 2 pennies.'); dry(line); S.tick(); val.textContent = '2'; await dry(val); },
+  catch() { const t = $('#catchTxt'); if (t.getAnimations().length) { t.getAnimations().forEach(a => a.cancel()); return; } if (rm()) { t.animate([{ color: C('--dim') }, { color: C('--dim') }], { duration: 1e9 }); return; } t.animate([{ color: C('--dim') }, { color: C('--fg') }, { color: C('--dim') }], { duration: 2400, iterations: Infinity, easing: INOUT }); },
+};
+const busy = new Set();
+$$('button.replay').forEach(b => b.addEventListener('click', async () => { audio(); if (ac.state === 'suspended') await ac.resume(); const k = b.dataset.fx; if (busy.has(k)) return; busy.add(k); try { await FX[k](b.dataset.v); } finally { busy.delete(k); } }));
+$$('.stage').forEach(st => st.addEventListener('click', e => { if (e.target.closest('[data-press]')) return; const b = $('button.replay', st.closest('.fx')); b && b.click(); }));
+})();
+</script>
+</body>
+</html>

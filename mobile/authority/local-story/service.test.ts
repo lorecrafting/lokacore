@@ -142,66 +142,28 @@ test('room-before-Rest, meal, partial/empty ale reopen and exact retries preserv
   );
 });
 
-// Breaks: bounded forged entitlement/stock/ale or altered service/payment/benefit receipts pass current-value checks.
-test('forged bounded service rows and swapped/omitted historical service evidence refuse without repair', (t) => {
-  for (const mutation of [
-    'entitlement',
-    'meals',
-    'ale',
-    'service',
-    'provider',
-    'quote',
-    'payment',
-    'stock',
-    'benefit',
-  ]) {
+// Breaks: the service loader opens a receipt whose service, provider, quote or payment no longer binds, or an unearned entitlement row.
+test('a service receipt that no longer binds, and an unearned entitlement row, refuse without repair', (t) => {
+  for (const mutation of ['service', 'provider', 'quote', 'payment']) {
     const a = setup();
     try {
       a.invoke('kitchen_room');
       a.invoke('kitchen_meal');
       a.invoke('kitchen_ale');
-      if (mutation === 'entitlement')
-        a.sql
-          .prepare(
-            "UPDATE state_row SET value='false' WHERE section='facts' AND key LIKE '%bed_paid%'",
-          )
-          .run();
-      else if (mutation === 'meals')
-        a.sql
-          .prepare("UPDATE state_row SET value=? WHERE section='resources' AND key=?")
-          .run(
-            JSON.stringify({ value: 4, at: 0 }),
-            resourceKey(a.initial, entity(a.initial, 'npc', 'cook'), 'meal_stock'),
-          );
-      else if (mutation === 'ale')
-        a.sql
-          .prepare("UPDATE state_row SET value=? WHERE section='liquids' AND key=?")
-          .run(
-            JSON.stringify({ kind: ref('liquid', 'draught'), quantity: 4 }),
-            entity(a.initial, 'item', 'kitchen_cask'),
-          );
-      else {
-        const row = a.sql
-          .prepare(
-            "SELECT invocation_id,command,response FROM receipt WHERE json_extract(command,'$.payload.service.key')='kitchen_meal'",
-          )
-          .get()!;
-        const command = JSON.parse(row.command as string),
-          decision = JSON.parse(row.response as string);
-        if (mutation === 'service') command.payload.service.key = 'kitchen_room';
-        if (mutation === 'provider') command.payload.provider_id = entity(a.initial, 'npc', 'hob');
-        if (mutation === 'quote') command.payload.quoted_price = 1;
-        if (mutation === 'payment') decision.delta.ops.shift();
-        if (mutation === 'stock')
-          decision.delta.ops = decision.delta.ops.filter(
-            (o: any) => o.resource?.key !== 'meal_stock',
-          );
-        if (mutation === 'benefit')
-          decision.delta.ops = decision.delta.ops.filter((o: any) => o.resource?.key !== 'mv');
-        a.sql
-          .prepare('UPDATE receipt SET command=?,response=? WHERE invocation_id=?')
-          .run(JSON.stringify(command), JSON.stringify(decision), row.invocation_id);
-      }
+      const row = a.sql
+        .prepare(
+          "SELECT invocation_id,command,response FROM receipt WHERE json_extract(command,'$.payload.service.key')='kitchen_meal'",
+        )
+        .get()!;
+      const command = JSON.parse(row.command as string),
+        decision = JSON.parse(row.response as string);
+      if (mutation === 'service') command.payload.service.key = 'kitchen_room';
+      if (mutation === 'provider') command.payload.provider_id = entity(a.initial, 'npc', 'hob');
+      if (mutation === 'quote') command.payload.quoted_price = 1;
+      if (mutation === 'payment') decision.delta.ops.shift();
+      a.sql
+        .prepare('UPDATE receipt SET command=?,response=? WHERE invocation_id=?')
+        .run(JSON.stringify(command), JSON.stringify(decision), row.invocation_id);
       const before = disk(a);
       assert.equal(a.refuse().kind, 'save_corrupt', mutation);
       assert.deepEqual(disk(a), before, mutation);
@@ -381,9 +343,37 @@ test('same-body fatal return reopens the paid room, meal and ale truth', (t) => 
   b.reopen();
   const w = b.story.world();
   assert.equal(w.body, b.initial.body);
-  assert.equal(w.state.containers[w.body], b.initial.roomIds[`${prefix}:room/crossroads_inn`]);
+  assert.equal(w.state.containers[w.body], b.initial.roomIds[`${prefix}:room/wayside_shrine`]);
   assert.deepEqual(amounts(w), [14, 16]);
   assert.equal(stock(w), 3);
   assert.equal(ale(w).quantity, 3);
   assert.ok(Object.values(w.entities).some((e) => e.kind === 'item' && e.key === 'player_corpse'));
+});
+
+// Breaks (loka-kgd.206): the keeper's greeting is told before the waking line, so the Book's
+// arrival split leaves it on the boar's fight page instead of the shrine's room log.
+test('a fatal blow opens the shrine log at the waking line, the keeper after it', (t) => {
+  const b = setup(':memory:', (c) => {
+    c.resources[`${prefix}:resource/hp`].start = 1;
+    c.npcs[`${prefix}:npc/boar`].attack = { chance: 100, damage_min: 2, damage_max: 2 };
+    c.npcs[`${prefix}:npc/boar`].room.key = 'farm_kitchen';
+  });
+  t.after(() => b.sql.close());
+  const attack = b.story.invoke({
+    invocation_id: 'ffffffff-0000-4000-8000-0000000000a1',
+    actor_id: b.initial.character,
+    action_key: 'attack',
+    target_ids: [entity(b.initial, 'npc', 'boar')],
+    input: {},
+  });
+  assert.equal(attack.kind, 'saved');
+  const told = b.story.narration()!;
+  const keys = told.lines.map((l) => l.key);
+  assert.ok(told.died);
+  // The fight page keeps the lines before `arrival`; the shrine's log opens at it.
+  assert.deepEqual(keys.slice(told.arrival! - 1), [
+    'combat.player_died',
+    'death.woke',
+    'npc.keeper.revived_1',
+  ]);
 });

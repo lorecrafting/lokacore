@@ -1,6 +1,6 @@
 defmodule Loka.Content.Barriers do
   @moduledoc """
-  Barriers in a v2 source (room.schema.json BarrierDefinition, Connection.barrier; 21 §5
+  Barriers in a source (room.schema.json BarrierDefinition, Connection.barrier; 21 §5
   Barrier; 05 §17, §25): each barrier's owning
   capability is required and its key_item names an item; each exit's barrier names a barrier,
   and an exit with a barrier and its reciprocal face (the destination's exit in the opposite
@@ -21,7 +21,10 @@ defmodule Loka.Content.Barriers do
     "down" => "up"
   }
 
-  @doc "Diagnostics for the schema-valid barriers and rooms of a v2 source with manifest `m`."
+  @doc "The direction back through an exit going `dir`, nil for a word that is no direction."
+  def opposite(dir), do: @opposite[dir]
+
+  @doc "Diagnostics for the schema-valid barriers and rooms of a source with manifest `m`."
   @spec check(map(), map() | nil, map(), [map()]) :: [map()]
   def check(m, entry, defs, registry) do
     required = {m["requires"]["capabilities"], owners(registry, ["definitions"])}

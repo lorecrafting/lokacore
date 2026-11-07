@@ -1,38 +1,106 @@
-// The status icon row above the status line.
-import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
+// size: allow 435, the icon, its arrival, its ring and its tooltip are one component's parts
+// The status icon row below the status line.
+import {
+  lazy,
+  Suspense,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from 'react';
 import { Animated, Pressable, View } from 'react-native';
 import { Text } from './Text.tsx';
 import type { GameView } from '../../packages/game-view/session.ts';
+import { canDraw } from './canDraw.ts';
+import { onCue } from './cues.ts';
 import {
+  curveOf,
   Easing,
+  FadeOut,
   Reanimated,
+  ReduceMotion,
   useAnimatedStyle,
   useReducedMotion,
   useSharedValue,
   withTiming,
 } from './fade.ts';
-import { statusTip } from './model.ts';
+import { bleedingParts, statusTip } from './model.ts';
+import { usePress, useThin } from './press.ts';
 import { usePalette, useType, type Palette } from './palette.ts';
+import { fallback, glyphs } from './statusGlyphs.ts';
 import { motion, radius, size, space, type } from './tokens.ts';
 
+const StatusGlyph = lazy(() => import('./StatusGlyph.tsx'));
+
 type Say = (key: string) => string;
-// Placeholder status icon glyphs (StatusIcons' doc comment) until the own icon set
-// (loka-x6t.63): one character per condition label TextKey, else one by polarity.
-// ponytail: text characters, not drawings; the icon set replaces this map.
-const byLabel: Record<string, string> = { 'condition.fed': '◡' };
-const byKind = { buff: '+', debuff: '−', neutral: '○' }; // signs, not arrows: they sit by the minimap
-const glyph = (label: string, kind?: 'buff' | 'debuff') =>
-  byLabel[label] ?? byKind[kind ?? 'neutral'];
 type Look = 'buff' | 'debuff' | 'neutral';
+// The drawing for a label text key, else its polarity's sign (statusGlyphs.ts).
+export const drawingOf = (label: string, look: Look) => glyphs[label] ?? fallback[look];
 type Condition = NonNullable<GameView['conditions']>[number];
 type Props = {
   conditions: readonly Condition[];
+  bleeding?: NonNullable<GameView['bleeding']>;
   time: number;
   text: Say;
   open?: () => void; // absent while locked
 };
 
-const SHOWN = 5; // icons before the +N disc
+const CAP = 6; // icons that show whole; past it, one fewer and the +N disc
+const MORE = 'more'; // the disc's hold key: no icon key lacks a "-count"
+
+// One icon of the row: its key, label word, look, hold tip, name and ring share.
+type Item = {
+  key: string;
+  label: string;
+  word: string;
+  look: Look;
+  tip: string;
+  name: string;
+  fraction?: number;
+};
+
+// Bleeding (no ring until it carries a duration), then debuffs, neutral and buffs, each group in
+// projected order: the threats stay in view when the disc takes the rest.
+const itemsOf = (p: Props) => {
+  const bleed = p.bleeding && bleedingParts(p.bleeding, p.time, p.text);
+  const of = (look: Look) =>
+    p.conditions
+      .filter((c) => (c.kind ?? 'neutral') === look)
+      .map((c) => {
+        const tip = statusTip(c, p.time, p.text);
+        const name = [tip, c.kind].filter(Boolean).join(', ');
+        return {
+          label: c.label,
+          word: p.text(c.label),
+          look,
+          tip,
+          name,
+          fraction: ringFraction(c, p.time),
+        };
+      });
+  const all: Omit<Item, 'key'>[] = [
+    ...(p.bleeding && bleed
+      ? [
+          {
+            label: p.bleeding.label,
+            word: bleed[0]!,
+            look: 'debuff' as const,
+            tip: bleed.slice(0, 2).join(', '),
+            name: [...bleed, 'debuff'].join(', '),
+          },
+        ]
+      : []),
+    ...of('debuff'),
+    ...of('neutral'),
+    ...of('buff'),
+  ];
+  // A label and its count so far, not the place: an icon going must not remount those after it.
+  return all.map((x, i): Item => ({
+    ...x,
+    key: `${x.label}-${all.slice(0, i).filter((y) => y.label === x.label).length}`,
+  }));
+};
 
 // The share of a timed status's duration still to run, 0 to 1, on each render; none when permanent.
 export const ringFraction = (c: Condition, time: number) =>
@@ -41,45 +109,86 @@ export const ringFraction = (c: Condition, time: number) =>
     : Math.min(1, Math.max(0, (c.ends_at - time) / c.duration));
 
 /**
- * The status icon row above the status line: one round, graphic-only icon per condition, five
- * then a +N disc (book-ui.md, Conditions details).
- * - Use: above the status line.
- * - Rules: a tap opens Character; a hold, hover or keyboard focus shows a Tooltip. The countdown
- *   ring's motion is the Conditions details rule, not restated here.
- * - States: buff; debuff; neutral; permanent; overflow; held; focused; locked (pictures, not
- *   pressable); ring full, near empty, draining.
+ * The status icon row: one round, graphic-only icon per status (book-ui.md, Conditions details).
+ * - Use: below the status line and its experience rule; no height while no icon shows.
+ * - Rules: a tap opens Character; a hold, hover or focus shows a Tooltip; cap, order and ring are
+ *   Conditions details. A 22 px disc in a 44 px box, boxes abutting (no gap, no hitSlop). Its
+ *   drawing, keyed by label (statusGlyphs.ts), is a Skia stroke path in the look's ink: viewBox 24,
+ *   drawn in the centred 14 px area (size.statusIcon − space.md), stroke 2.5 units, round caps
+ *   and joins, no fill, inside 3 to 21, aria-hidden; no letters or emoji. No drawing: the polarity fallback (status-line-rulings.md).
+ * - States: bleeding (first, debuff look, no ring); buff; debuff; neutral; permanent; overflow
+ *   (six show, seven or more show five and a +N disc whose tip lists the rest); held; focused; locked
+ *   (pictures, not pressable); ring full, near empty, draining. Pops on arrival, fades on expiry;
+ *   behind the disc neither (arriving, pushed or revealed); ticks are silent.
  * - Story: StatusIcon.stories.tsx
  */
 export function StatusIcons(p: Props) {
-  // The held icon's label, so the tip follows the clock and goes with the icon or the lock.
-  const [held, setHeld] = useState<string>();
-  const shown = p.conditions.slice(0, SHOWN);
-  const key = (x: Condition, i: number) => `${x.label}-${i}`;
-  const tip = p.open ? shown.find((x, i) => key(x, i) === held) : undefined;
-  // An icon that unmounts (locked, expired, moved) never blurs, so its hold is let go here.
+  const [held, setHeld] = useState<string>(); // the held icon's label: its tip follows the clock
+  const items = itemsOf(p);
+  const shown = items.length > CAP ? CAP - 1 : items.length;
+  const hidden = items.slice(shown).map((x) => x.word);
+  const hold = (k: string) => (on: boolean) => setHeld((h) => (on ? k : h === k ? undefined : h));
+  const tips = new Map(items.slice(0, shown).map((x) => [x.key, x.tip]));
+  const tip =
+    p.open && held ? (held === MORE ? hidden.join(', ') || undefined : tips.get(held)) : undefined;
+  // An icon that unmounts or hides (locked, expired, pushed) never blurs: its hold is let go here.
   if (held !== undefined && !tip) setHeld(undefined);
-  const more = p.conditions.length - shown.length;
   return (
-    <View style={{ flexDirection: 'row', justifyContent: 'center', columnGap: space.sm }}>
-      {shown.map((x, i) => (
+    <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
+      {/* First: a Reanimated exit whose next sibling unmounts with it stays on web (Focused story) */}
+      {tip && <Tooltip text={tip} />}
+      {items.map((x, i) => (
+        <Arrival key={x.key} label={x.label} hidden={i >= shown}>
+          <Icon
+            look={x.look}
+            name={x.name}
+            fraction={x.fraction}
+            hold={hold(x.key)}
+            open={p.open}
+            d={i < shown ? drawingOf(x.label, x.look) : undefined} // a hidden canvas has no size to draw at
+          />
+        </Arrival>
+      ))}
+      {hidden.length > 0 && (
         <Icon
-          key={key(x, i)}
-          look={x.kind ?? 'neutral'}
-          name={[statusTip(x, p.time, p.text), x.kind].filter(Boolean).join(', ')}
-          fraction={ringFraction(x, p.time)}
-          hold={(on) => setHeld((h) => (on ? key(x, i) : h === key(x, i) ? undefined : h))}
+          look="neutral"
+          name={[`+${hidden.length} more`, ...hidden].join(', ')}
+          hold={hold(MORE)}
           open={p.open}
         >
-          {glyph(x.label, x.kind)}
-        </Icon>
-      ))}
-      {more > 0 && (
-        <Icon look="neutral" name={`+${more} more`} open={p.open}>
-          {`+${more}`}
+          {`+${hidden.length}`}
         </Icon>
       )}
-      {tip && <Tooltip text={statusTip(tip, p.time, p.text)} />}
     </View>
+  );
+}
+
+const popCurve = curveOf(motion.pop.easing);
+
+// Pops on its `status_in` cue (so a tick or a page return does not), appears under reduced motion
+// or behind the disc, and fades on expiry. Behind the disc it stays mounted, hidden: pushed there it
+// does not fade, back it does not pop.
+function Arrival(p: { label: string; hidden: boolean; children: ReactNode }) {
+  const still = useReducedMotion();
+  const scale = useSharedValue(1);
+  useEffect(
+    () =>
+      onCue((cue) => {
+        if (still || p.hidden || cue.name !== 'status_in' || !cue.ids?.includes(p.label)) return;
+        scale.value = motion.pop.from;
+        scale.value = withTiming(1, { duration: motion.pop.duration, easing: popCurve });
+      }),
+    [still, p.label, p.hidden], // eslint-disable-line
+  );
+  const style = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
+  return (
+    <Reanimated.View
+      style={[style, p.hidden && { display: 'none' }]}
+      aria-hidden={p.hidden}
+      exiting={FadeOut.duration(motion.fade.duration).reduceMotion(ReduceMotion.Never)}
+    >
+      {p.children}
+    </Reanimated.View>
   );
 }
 
@@ -98,16 +207,24 @@ const box = {
 
 // Locked, the disc goes dim like the Contents button (neutral: dim glyph; dim on a debuff's fg fill
 // would not read).
+// size: allow 45, the drawing and the +N text are both a disc's face
 function Icon(p: {
   look: Look;
   name: string;
   fraction?: number; // the countdown ring's remaining arc; absent, no ring
   hold?: (on: boolean) => void;
   open?: () => void;
-  children: string;
+  d?: string; // the drawing; absent, the text (the +N disc)
+  children?: string;
 }) {
-  const face = <Disc look={p.open ? p.look : 'neutral'}>{p.children}</Disc>;
+  const face = (
+    <Disc look={p.open ? p.look : 'neutral'} d={p.d}>
+      {p.children}
+    </Disc>
+  );
   const disc = ringed(p.fraction, !p.open, face);
+  const press = usePress();
+  const ink = useThin(press, false);
   if (!p.open)
     return (
       <View accessibilityRole="image" accessibilityLabel={p.name} style={box}>
@@ -122,14 +239,15 @@ function Icon(p: {
       accessibilityLabel={`${p.name}, opens Character`}
       onPress={() => p.open?.()} // no press event: open takes none
       onLongPress={show}
-      onPressOut={hide}
+      onPressIn={press.handlers.onPressIn}
+      onPressOut={() => (press.handlers.onPressOut(), hide())}
       onHoverIn={show}
       onHoverOut={hide}
       onFocus={show}
       onBlur={hide}
       style={box}
     >
-      {disc}
+      <Reanimated.View style={ink}>{disc}</Reanimated.View>
     </Pressable>
   );
 }
@@ -153,7 +271,12 @@ export const turns = (deg: number) => {
   return { right: Math.min(deg, 180) - 180, left: Math.max(deg - 180, 0) };
 };
 
-function Ring(p: { fraction: number; locked: boolean; children: ReactNode }) {
+/**
+ * A condition's ring, draining as its time runs out.
+ * - Use: StatusIcons, and Unavailable's rise card (book-ui.md, Spirit state).
+ * - Story: StatusIcon.stories.tsx
+ */
+export function Ring(p: { fraction: number; locked: boolean; children?: ReactNode }) {
   const c = usePalette();
   const deg = 360 * p.fraction;
   const reduced = useReducedMotion();
@@ -164,6 +287,7 @@ function Ring(p: { fraction: number; locked: boolean; children: ReactNode }) {
     const at = performance.now();
     const ms = drainMs(last.current.deg, deg, at - last.current.at, reduced);
     last.current = { deg, at };
+    // ast-grep-ignore: mobile-book-effects-literals -- predates the check; a clock hand's constant speed has no token
     shown.value = ms ? withTiming(deg, { duration: ms, easing: Easing.linear }) : deg;
   }, [deg, reduced, shown]);
   const [track, arc] = p.locked ? [c.line, c.dim] : [c.dim, c.fg];
@@ -227,7 +351,7 @@ function Half(p: { right?: boolean; shown: { value: number }; color: string }) {
 }
 
 // The disc alone, so the countdown ring can wrap it.
-function Disc(p: { look: Look; children: string }) {
+function Disc(p: { look: Look; d?: string; children?: string }) {
   const l = looks(usePalette())[p.look];
   return (
     <View
@@ -242,10 +366,18 @@ function Disc(p: { look: Look; children: string }) {
         justifyContent: 'center',
       }}
     >
-      {/* Fixed size, not useType(): the glyph sits in a fixed 28 px disc, and icons keep their size. */}
-      <Text aria-hidden style={{ ...type.label, color: l.ink }}>
-        {p.children}
-      </Text>
+      {p.d === undefined ? (
+        // Fixed size, not useType(): "+N" sits in the fixed size.statusIcon disc, like the drawings.
+        <Text aria-hidden style={{ ...type.label, color: l.ink }}>
+          {p.children}
+        </Text>
+      ) : (
+        canDraw() && (
+          <Suspense fallback={null}>
+            <StatusGlyph d={p.d} ink={l.ink} />
+          </Suspense>
+        )
+      )}
     </View>
   );
 }

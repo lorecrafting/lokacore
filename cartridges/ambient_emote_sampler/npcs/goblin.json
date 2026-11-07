@@ -1,0 +1,28 @@
+{
+  "keywords": [
+    "goblin"
+  ],
+  "name": "npc.goblin.short",
+  "room_line": "npc.goblin.room",
+  "description": "npc.goblin.description",
+  "room": "cave",
+  "ambient": [
+    {
+      "emotes": [
+        "glance"
+      ],
+      "every": 300,
+      "when": {
+        "op": "status_active",
+        "status": "afraid",
+        "subject": "target"
+      }
+    },
+    {
+      "emotes": [
+        "scratch"
+      ],
+      "every": 1200
+    }
+  ]
+}

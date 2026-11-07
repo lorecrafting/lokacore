@@ -54,7 +54,7 @@ defmodule Loka.ContentRoomsTest do
       File.write!(Path.join(dir, rel), JSON.encode!(v))
     end
 
-    Loka.Content.compile(dir)
+    Loka.ContentSource.plain(Loka.Content.compile(dir))
   end
 
   defp d(code, path, data \\ %{}, suggested \\ []) do

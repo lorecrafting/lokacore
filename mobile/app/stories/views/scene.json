@@ -131,8 +131,10 @@
   "levelling": {
    "level": 1,
    "experience": 0,
+   "from": 0,
    "next": 30,
-   "unspent": 0
+   "unspent": 0,
+   "level_up": "levelling.level_up"
   },
   "skills": [
    {
@@ -323,14 +325,6 @@
   "topics": [],
   "conditions": [
    {
-    "label": "condition.hungry",
-    "next_tick_at": 28800,
-    "resource": "hunger",
-    "per_tick": -1,
-    "tick_every": 3600,
-    "kind": "debuff"
-   },
-   {
     "label": "condition.overheated",
     "ends_at": 34200,
     "duration": 9000,
@@ -338,14 +332,6 @@
     "resource": "hp",
     "per_tick": -1,
     "tick_every": 7200,
-    "kind": "debuff"
-   },
-   {
-    "label": "condition.thirsty",
-    "next_tick_at": 28800,
-    "resource": "thirst",
-    "per_tick": -1,
-    "tick_every": 3600,
     "kind": "debuff"
    }
   ],
@@ -388,7 +374,7 @@
   ],
   "entities": [
    {
-    "id": "63441f36-3a9b-8b10-9acd-43f4b5e634c7",
+    "id": "8cbac3ab-b59e-823a-90ae-6f7935e3b763",
     "name": "npc.wat.short",
     "words": {
      "bare": "npc.wat.bare"
@@ -399,7 +385,7 @@
     "band": "ready",
     "contents": [
      {
-      "id": "6fae7b67-794e-8f5e-accf-fff819cf4067",
+      "id": "493b440f-e305-8b5b-b4d1-300ba594a9fc",
       "name": "item.letter.short",
       "words": {
        "article": "a",
@@ -408,12 +394,12 @@
       "description": "item.letter.description",
       "kind": "item",
       "actions": [],
-      "container_id": "63441f36-3a9b-8b10-9acd-43f4b5e634c7"
+      "container_id": "8cbac3ab-b59e-823a-90ae-6f7935e3b763"
      }
     ]
    },
    {
-    "id": "3b4da12e-4604-8c79-b8c2-2d3f1db2681c",
+    "id": "16c513e4-940c-8c24-9a21-94f7e33adc7d",
     "name": "item.hut_loaf.short",
     "words": {
      "article": "a",
@@ -425,7 +411,7 @@
     "actions": []
    },
    {
-    "id": "08b595bc-213e-89d1-a063-08f39c5187b3",
+    "id": "c05ae6b4-6a5c-8cc0-a18c-1cd559a2812d",
     "name": "item.trough_skin.short",
     "words": {
      "article": "a",
@@ -492,6 +478,15 @@
    "index": 1,
    "count": 2
   },
+  "spell_words": [
+   {
+    "word": "mend",
+    "available": false,
+    "reason": {
+     "code": "unsupported_capability"
+    }
+   }
+  ],
   "time": 25200,
   "calendar_status": {
    "day": 1,
@@ -503,7 +498,7 @@
    "season": "spring",
    "tide": "high"
   },
-  "recap_after": 90000,
+  "recap_after": 86400,
   "resources": [
    {
     "resource": {
@@ -527,18 +522,6 @@
     "current": 10,
     "maximum": 10,
     "band": "ready",
-    "tone": "normal"
-   },
-   {
-    "resource": {
-     "cartridge_id": "toolbox_showcase",
-     "cartridge_version": "0.0.1",
-     "kind": "resource",
-     "key": "hunger"
-    },
-    "current": 10,
-    "maximum": 10,
-    "band": "fed",
     "tone": "normal"
    },
    {
@@ -576,25 +559,23 @@
     "maximum": 100,
     "band": "purse_empty",
     "tone": "danger"
-   },
-   {
-    "resource": {
-     "cartridge_id": "toolbox_showcase",
-     "cartridge_version": "0.0.1",
-     "kind": "resource",
-     "key": "thirst"
-    },
-    "current": 10,
-    "maximum": 10,
-    "band": "quenched",
-    "tone": "normal"
    }
-  ]
+  ],
+  "revival": {
+   "lines": [
+    "death.revival.1",
+    "death.revival.2",
+    "death.revival.3",
+    "death.revival.4",
+    "death.revival.5"
+   ],
+   "seconds": 10
+  }
  },
  "stack": [
   {
    "kind": "thing",
-   "id": "63441f36-3a9b-8b10-9acd-43f4b5e634c7"
+   "id": "8cbac3ab-b59e-823a-90ae-6f7935e3b763"
   }
  ],
  "log": [
@@ -604,7 +585,7 @@
  ],
  "combatLog": [],
  "details": {
-  "63441f36-3a9b-8b10-9acd-43f4b5e634c7": [
+  "8cbac3ab-b59e-823a-90ae-6f7935e3b763": [
    "Wat eyes the letter in your hand.",
    "Wat takes the letter and breaks the seal.",
    {

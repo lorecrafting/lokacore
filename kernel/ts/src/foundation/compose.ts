@@ -1,4 +1,4 @@
-// size: allow 307, final checks order rows by code point so both kernels report the same first fault
+// size: allow 313, death@1 corpse decay's custody exception sits with the other transfer preconditions (loka-kgd.203)
 import { recordKnowledge } from './compose_knowledge.ts';
 import { cmp } from './validate.ts';
 import { choice, pendingAtLimit } from './compose_choice.ts';
@@ -25,7 +25,7 @@ import { completeBirths, creationValid, initialPair, initialPlacement } from './
 import { sightHandoffValid } from './compose_sight.ts';
 import { sightRebindValid } from './compose_sight_rebind.ts';
 import type { Json } from './canonical.ts';
-import { key, get, section, containment, read, rows } from './compose_rows.ts';
+import { key, get, section, containment, read, rows, occurrence } from './compose_rows.ts';
 import { composeAdjustment } from './resource.ts';
 import {
   LIMITS,
@@ -214,14 +214,7 @@ function encounter(
     return changeEncounter(
       op,
       row,
-      (id, room) =>
-        packMemberRemains(
-          id,
-          room,
-          op.writer_group,
-          get(section(ctx.state, 'jobs')[op.job_id], 'due_time'),
-          ctx,
-        ),
+      (id, room) => packMemberRemains(id, room, op.writer_group, occurrence(ctx.state, op), ctx),
       (id, room) => packMemberInitiallyPresent(id, room, ctx.state),
     );
   return openEncounter(
@@ -260,6 +253,7 @@ function transfer(
     known[e]?.kind === 'consumed' ||
     known[source]?.kind === 'consumed' ||
     (known[d]?.kind === 'consumed' &&
+      !decayed(op, ctx) &&
       (known[e]?.kind !== 'item' ||
         known[source]?.kind !== 'body' ||
         (op.consumption === 'bandaged'
@@ -278,6 +272,18 @@ function transfer(
   if (held.length >= cap) return { code: 'capacity_exceeded' };
   return { value: d };
 }
+
+// death@1 decay: a death-created corpse (saved or created in this proposal) leaves its room.
+const decayed = (op: Extract<DeltaOp, { op: 'entity.transfer' }>, ctx: Ctx) =>
+  op.consumption === undefined &&
+  (
+    get(
+      ctx.overlay.get(key({ kind: 'entity', entity_id: op.entity_id }))?.value ??
+        section(ctx.state, 'created')[op.entity_id],
+      'origin',
+    ) as Obj | undefined
+  )?.kind === 'death' &&
+  (section(ctx.state, 'known_entities')[op.source_id!] as Obj | undefined)?.kind === 'room';
 
 // d is e or inside it. Revisiting a container means a cyclic base: fail closed.
 function inside(d: string, e: string, ctx: Ctx): boolean {

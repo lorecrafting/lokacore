@@ -3,6 +3,7 @@ import { key, same } from '../../../kernel/ts/src/foundation/compose.ts';
 import { validate } from '../../../kernel/ts/src/foundation/validate.ts';
 import type { World } from '../../../kernel/ts/src/runtime/decision.ts';
 import type { Db, Meta } from './store.ts';
+import { readableOps } from './receipt-history.ts';
 
 type Any = any;
 const invalid = (): never => {
@@ -10,7 +11,7 @@ const invalid = (): never => {
 };
 
 /** The durable job is justified by its exact checked entry or population transfer receipt.
- * receiptRecovery first replays all population receipts; that kernel owns cross-mechanic groups.
+ * Opening does not replay receipts; the kernel owns cross-mechanic groups.
  */
 export function deerSave(world: World, db: Db, meta: Meta) {
   const jobs = world.state.jobs ?? {};
@@ -22,7 +23,7 @@ export function deerSave(world: World, db: Db, meta: Meta) {
   )) {
     const response = JSON.parse(row.response) as Any;
     const ops: Any[] = response?.delta?.ops;
-    if (!Array.isArray(ops)) invalid();
+    if (!readableOps(ops)) invalid();
     for (const op of ops) {
       if (op.op !== 'job.schedule' || !op.sight) continue;
       checkSight(world, jobs, found, op, ops);

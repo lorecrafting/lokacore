@@ -63,6 +63,17 @@ export const lineSentence = (
   );
 };
 
+/** The text key an emote.performed line is worded from (see emoteSentence), or undefined. */
+export const emoteForm = (
+  t: Parameters<typeof emoteSentence>[0], // mutate-skip: type only
+  emotes: Parameters<typeof emoteSentence>[1] = [], // mutate-skip: type only
+) => {
+  const emote =
+    t.key === 'emote.performed' ? emotes.find((e) => e.key === t.bindings?.emote) : undefined;
+  if (t.participants?.target === undefined) return emote?.others;
+  return t.bindings?.target === undefined ? emote?.to?.you : emote?.to?.others;
+};
+
 /** An emote.performed line's sentence (G9, docs/system/mechanics.md#npc-emotes-g9) from the view's emote
  * table: others when the line has no target, to.you when the target binds no name (the kernel binds none
  * for the reader's own body), else to.others; {actor} is the emoter's name, {target} the binding worded. Undefined for
@@ -77,18 +88,32 @@ export const emoteSentence = (
   word: (value: unknown) => string,
   actor: string,
 ): string | undefined => {
-  const emote = t.key === 'emote.performed' && emotes.find((e) => e.key === t.bindings?.emote);
+  const form = emoteForm(t, emotes);
   const target = t.bindings?.target;
-  const form =
-    emote &&
-    (t.participants?.target === undefined
-      ? emote.others
-      : target === undefined
-        ? emote.to?.you
-        : emote.to?.others);
   return form
     ? word(form)
         .replace(/\{(actor|target)\}/g, (_, k: string) => (k === 'actor' ? actor : word(target)))
         .replace(/^./, (a) => a.toUpperCase())
     : undefined;
 };
+
+// An NPC corpse's text names its victim (owner decision 2026-11-02): `{victim}` is the view's victim short.
+export const victimWords = (text: (key: string) => string, e: object, key: string) => {
+  const { victim } = e as { victim?: string };
+  return fillSlots(text(key), victim === undefined ? undefined : { victim }, (v) =>
+    text(String(v)),
+  );
+};
+
+// An authored line fills its bound slots; an unbound brace stays as written (level-rush rulings).
+// A name that opens the line is capitalised (Diku rounds, loka-kgd.197: "A goblin hits you.").
+export const fillSlots = (
+  said: string,
+  bindings: Record<string, unknown> | undefined,
+  word: (v: unknown) => string,
+) =>
+  said.replace(/\{(\w+)\}/g, (slot, k: string, at: number) =>
+    bindings?.[k] === undefined
+      ? slot
+      : word(bindings[k]).replace(/^./, (a) => (at === 0 ? a.toUpperCase() : a)),
+  );

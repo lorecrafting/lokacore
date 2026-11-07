@@ -1,18 +1,20 @@
 // Page: one shell for every page (Page's doc comment); RunningHead above it, as Body.tsx
 // draws it. Journal texts are the showcase's own (protocol/fixtures/toolbox_showcase_hash.json).
 import type { Meta, StoryObj } from '@storybook/react-native-web-vite';
-import type { ComponentProps } from 'react';
+import { type ComponentProps, useEffect, useState } from 'react';
 import { View } from 'react-native';
 import { expect, fn, waitFor } from 'storybook/test';
 import type { GameView } from '../../packages/game-view/session.ts';
 import { ContinueButton } from '../book/actions.tsx';
 import { EntityLine, LogLines } from '../book/lines.tsx';
-import { Control, Page, RunningHead, SectionTitle } from '../book/pages.tsx';
+import { Control, Page, SectionTitle } from '../book/pages.tsx';
+import { RunningHead } from '../book/RunningHead.tsx';
 import { prose, usePalette, useType } from '../book/palette.ts';
 import { Text } from '../book/Text.tsx';
 import { LABEL } from '../book/labels.ts';
+import { motion } from '../book/tokens.ts';
 
-type Quest = Pick<GameView['journal'][number], 'state' | 'journal'>;
+type Quest = Pick<GameView['journal'][number], 'quest' | 'state' | 'journal'>;
 const say = (k: string) => k;
 
 // A phone-high frame, so the page scrolls inside itself as on a device.
@@ -56,8 +58,9 @@ type Story = StoryObj<typeof meta>;
 export const WithRunningHead: Story = {
   args: {
     journal: [
-      { state: 'resolved', journal: 'quest.bell.prior' },
+      { quest: { key: 'bell' }, state: 'resolved', journal: 'quest.bell.prior' },
       {
+        quest: { key: 'letter' },
         state: 'active',
         journal: 'Take the Reeve’s letter to Wat on the fell.',
       },
@@ -73,6 +76,7 @@ export const LongRunningHead: Story = {
   args: {
     journal: [
       {
+        quest: { key: 'letter' },
         state: 'objectives_complete',
         journal:
           'Carry the Reeve’s letter directly to Wat at his hut on the fell before the third day at six. Payment is due only by the second day at six.',
@@ -82,7 +86,11 @@ export const LongRunningHead: Story = {
 };
 
 export const NoRunningHead: Story = {
-  args: { journal: [{ state: 'resolved', journal: 'quest.bell.prior' }] as Quest[] },
+  args: {
+    journal: [
+      { quest: { key: 'bell' }, state: 'resolved', journal: 'quest.bell.prior' },
+    ] as Quest[],
+  },
   play: async ({ canvas }) => {
     await expect(canvas.queryByText('quest.bell.prior')).toBeNull();
   },
@@ -181,6 +189,98 @@ export const ScrollToEnd: Story = {
   play: async ({ canvas }) => {
     const last = canvas.getByText('Bram says line 30.');
     await waitFor(() => expect(inView(last)).toBe(true));
+  },
+};
+
+// Breaks: on the web ScrollView keeps its first ref callback, so a later render's Page has no view
+// and a line arriving on a full page is cut (the pop unseen).
+// `above`: Say sits above the log, as Here's exits do; `clock`: five
+// lines arrive unpressed on each tick, as combat rounds do.
+function Growing({ above = false, clock = false }) {
+  const [lines, setLines] = useState(30);
+  useEffect(() => {
+    const t =
+      clock && setInterval(() => setLines((n) => Math.min(n + 5, 60)), motion.palette.duration);
+    return () => clearInterval(t || undefined);
+  }, [clock]);
+  const say = <Control label="Say" onPress={() => setLines(lines + 5)} />;
+  return (
+    <Framed title="Old Bram" scrollToEnd foot={above ? undefined : say}>
+      {above && say}
+      <LogLines lines={Array.from({ length: lines }, (_, i) => `Bram says line ${i + 1}.`)} />
+    </Framed>
+  );
+}
+export const LogFollows: Story = {
+  render: () => <Growing />,
+  play: async ({ canvas, userEvent }) => {
+    await waitFor(() => expect(inView(canvas.getByText('Bram says line 30.'))).toBe(true));
+    await userEvent.click(canvas.getByRole('button', { name: 'Say' }));
+    await waitFor(() => expect(inView(canvas.getByText('Bram says line 35.'))).toBe(true));
+  },
+};
+// Breaks: a reader scrolled up to an earlier line is pulled down when a line arrives on the clock.
+const scrollUp = async (first: HTMLElement) => {
+  let pane = first.parentElement!;
+  while (pane.scrollHeight <= pane.clientHeight) pane = pane.parentElement!;
+  pane.scrollTop = 0;
+  pane.dispatchEvent(new Event('scroll'));
+  await waitFor(() => expect(inView(first)).toBe(true));
+  await new Promise((r) => setTimeout(r, motion.quick.duration)); // the sampled scroll settles
+};
+export const ScrolledUpStays: Story = {
+  render: () => <Growing clock />,
+  play: async ({ canvas }) => {
+    const first = canvas.getByText('Bram says line 1.');
+    await waitFor(() => expect(inView(canvas.getByText('Bram says line 30.'))).toBe(true));
+    await scrollUp(first);
+    const next = canvas.getAllByText(/^Bram says line/).length + 5; // a tick after the scroll
+    await canvas.findByText(
+      `Bram says line ${next}.`,
+      {},
+      { timeout: 2 * motion.palette.duration },
+    );
+    await new Promise((r) => setTimeout(r, motion.quick.duration)); // a follow would land by now
+    await expect(inView(first)).toBe(true);
+  },
+};
+// Breaks: a reader scrolled up whose log shrinks to fit the page (no scroll to sample) is not
+// followed when the log grows again.
+function Shrinking() {
+  const [lines, setLines] = useState(30);
+  useEffect(() => {
+    const t = setTimeout(() => setLines(3), motion.palette.duration);
+    const u = setTimeout(() => setLines(40), 2 * motion.palette.duration);
+    return () => [t, u].forEach(clearTimeout);
+  }, []);
+  return (
+    <Framed title="Old Bram" scrollToEnd>
+      <LogLines lines={Array.from({ length: lines }, (_, i) => `Bram says line ${i + 1}.`)} />
+    </Framed>
+  );
+}
+export const ShrinkFollows: Story = {
+  render: () => <Shrinking />,
+  play: async ({ canvas }) => {
+    await waitFor(() => expect(inView(canvas.getByText('Bram says line 30.'))).toBe(true));
+    await scrollUp(canvas.getByText('Bram says line 1.'));
+    const last = await canvas.findByText(
+      'Bram says line 40.',
+      {},
+      { timeout: 3 * motion.palette.duration },
+    );
+    await waitFor(() => expect(inView(last)).toBe(true));
+  },
+};
+// Breaks: a press above the log, made scrolled up, leaves its own result below the fold.
+export const PressFollows: Story = {
+  render: () => <Growing above />,
+  play: async ({ canvas, userEvent }) => {
+    const first = canvas.getByText('Bram says line 1.');
+    await waitFor(() => expect(inView(canvas.getByText('Bram says line 30.'))).toBe(true));
+    await scrollUp(first);
+    await userEvent.click(canvas.getByRole('button', { name: 'Say' }));
+    await waitFor(() => expect(inView(canvas.getByText('Bram says line 35.'))).toBe(true));
   },
 };
 

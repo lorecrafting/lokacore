@@ -1,0 +1,42 @@
+{
+  "name": "room.the_fold.title",
+  "description": "room.the_fold.description",
+  "sound": "wild",
+  "tags": [
+    "exposed"
+  ],
+  "exits": {
+    "west": {
+      "to": "fell_gate"
+    },
+    "south": {
+      "to": "smithy"
+    }
+  },
+  "details": {
+    "fold_post": {
+      "aliases": [
+        "post"
+      ],
+      "description": "detail.fold_post",
+      "title": "detail.fold_post.title"
+    },
+    "fold_bones": {
+      "aliases": [
+        "knucklebones",
+        "bones"
+      ],
+      "description": "detail.fold_bones",
+      "title": "detail.fold_bones.title",
+      "rating": 11
+    },
+    "fold_hearth": {
+      "aliases": [
+        "hearth",
+        "fire"
+      ],
+      "description": "detail.fold_hearth",
+      "title": "detail.fold_hearth.title"
+    }
+  }
+}

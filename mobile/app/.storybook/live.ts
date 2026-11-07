@@ -33,7 +33,7 @@ try {
   }
   const live = Object.values(index.entries).filter((e) => e.title === 'Live' && e.type === 'story');
   if (live.length < 2) throw new Error('fewer than two Live stories in the index');
-  const browser = await chromium.launch();
+  const browser = await chromium.launch({ channel: 'chrome' });
   // The preview's own verdict per story: its first play or render error, else storyFinished's status.
   const watch = () => {
     const w = window as never as {

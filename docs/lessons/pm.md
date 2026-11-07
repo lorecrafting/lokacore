@@ -46,6 +46,10 @@ Lessons from PM sessions (merging, batches, spawns, hosted CI), moved out of the
 - `br` "WAL index recovery already failed ... database is busy": run `br doctor migrate-schema recover`, then retry.
 - `git cherry-pick -q` printed a usage error and picked nothing: use plain `git cherry-pick <sha>`.
 - Agents share one scratchpad and delete files: keep PM working files under a `pm_` prefix (`loka-xmvu`).
+- `bin/wait_ci.sh` takes a commit sha or a branch, never a PR number: a bare number reads as a sha, finds no runs and times out after 40 minutes (2026-11-04: a merge loop on `wait_ci.sh 597` sat for 55 minutes).
+- In a `wait && merge` chain, never pipe the wait through `tail`: the pipe's status is tail's, so a red CI still merges. Redirect to a file, then chain with `&&`.
+- A fresh review or developer worktree needs `npm ci` at the repo root (prettier), in `kernel/ts` and in `mobile/app`, and `mix deps.get`, before its first push.
+- `/clear` keeps the session's background agents and shells running: check `ListAgents` and the worktrees before redoing a previous session's work.
 - `bin/pm_merge.sh` stops on stacked additive conflicts (`mechanics.md`, the gen files): merge by hand keeping both sides, then `elixir bin/contracts.exs`, `bin/review_index.sh`, focused tests.
 
 ## Cloud sessions

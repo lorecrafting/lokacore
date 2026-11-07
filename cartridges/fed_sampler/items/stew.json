@@ -1,0 +1,23 @@
+{
+  "keywords": [
+    "stew"
+  ],
+  "name": "item.stew.short",
+  "room_line": "item.stew.room",
+  "description": "item.stew.description",
+  "mass_grams": 200,
+  "location": {
+    "in": "room",
+    "room": "inn"
+  },
+  "edible": {
+    "label": "action.eat",
+    "narration": "narration.eat_stew",
+    "applies": [
+      {
+        "status": "well_fed",
+        "duration": 7200
+      }
+    ]
+  }
+}

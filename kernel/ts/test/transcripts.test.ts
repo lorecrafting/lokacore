@@ -13,7 +13,7 @@ import { CAPABILITY_OWNERS } from '../src/contracts.gen.ts';
 import { INSTALLED, loadCartridge, type Cartridge } from '../src/index.ts';
 import { ROOT, line } from '../play/obs.ts';
 import { replayRecords } from '../play/replay.ts';
-import { decideReplay, header, start } from '../play/run.ts';
+import { replayEntry, header, start } from '../play/run.ts';
 
 const kats = [
   'protocol/fixtures/cartridge_*hash.json',
@@ -48,8 +48,7 @@ test('every example transcript replays and exercises its capability', () => {
       head.ids.seed,
       head.ids.kernel_version,
     );
-    const out =
-      header(r) + entries.map((e) => line(decideReplay(r, e.data.command).trace)).join('');
+    const out = header(r) + entries.map((e) => line(replayEntry(r, e).trace)).join('');
     assert.equal(out, bytes, `${rel}: replay differs`);
     const capability = basename(file, '.jsonl');
     if (cartridge === 'toolbox_showcase' && capability.startsWith('walk_')) continue;
@@ -57,7 +56,12 @@ test('every example transcript replays and exercises its capability', () => {
       .split('\n')
       .filter(Boolean)
       .slice(1)
-      .map((l) => CAPABILITY_OWNERS.command[JSON.parse(l).data.command.payload.type]);
+      .map((l) => JSON.parse(l))
+      // A vessel's consume is food@1's command but liquid@1's drank outcome (loka-kgd.209).
+      .flatMap(({ data }) => [
+        CAPABILITY_OWNERS.command[data.command.payload.type],
+        CAPABILITY_OWNERS.event[data.decision?.outcome],
+      ]);
     assert.ok(
       owners.some((o) => o?.startsWith(`${capability}@`)),
       `${rel}: no ${capability} command`,

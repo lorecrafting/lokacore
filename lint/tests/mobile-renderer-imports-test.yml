@@ -1,5 +1,6 @@
 id: mobile-renderer-imports
 valid:
+  - "import turn from './sounds/ui-paper-turn-01.m4a';"
   - |
       import { DreamPage } from './DreamPage.tsx';
       import { dreamAt } from './dreams.ts';
@@ -19,6 +20,7 @@ valid:
   - "import { Canvas } from '@shopify/react-native-skia';"
   - "import curl from './page-curl.sksl';"
 invalid:
+  - "import other from './sounds/../x.m4a';"
   - "import other from './other.sksl';"
   - "import { LoadSkiaWeb } from '@shopify/react-native-skia/lib/module/web';"
   - "import font from './fonts/EBGaramond.ttf';"

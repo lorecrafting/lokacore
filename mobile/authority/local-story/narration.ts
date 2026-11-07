@@ -3,11 +3,11 @@ import type { Command } from '../../../kernel/ts/src/contracts.gen.ts';
 import { detailOf } from '../../../kernel/ts/src/commands/actions.ts';
 import { validate } from '../../../kernel/ts/src/foundation/validate.ts';
 import { bellCue } from '../../../kernel/ts/src/mechanics/bell/cue.ts';
-import { units } from '../../../kernel/ts/src/mechanics/calendar.ts';
 import { engaged } from '../../../kernel/ts/src/mechanics/combat/shared.ts';
 import { bodyOf, refString, type Accepted } from '../../../kernel/ts/src/runtime/decision.ts';
-import type { ChronicleEntry, NarrationRecord } from '../../packages/game-view/session.ts';
+import type { NarrationRecord } from '../../packages/game-view/session.ts';
 import { arrival, defenseEvidence } from './combat-receipt.ts';
+import { deedOf } from './deed-receipt.ts';
 import { dialogueDetail } from './dialogue-receipt.ts';
 import { dreamDetail } from './dream-receipt.ts';
 import { eatReceipt } from './food-receipt.ts';
@@ -18,7 +18,12 @@ import { scope, type Story } from './save.ts';
  * before display (06 §43): read from storage, never memory; no acknowledgement is stored. None
  * while a transaction is open (an unknown COMMIT whose ROLLBACK failed).
  */
-type NarrationRow = { revision: number; command_id: string; command: string; response: string };
+export type NarrationRow = {
+  revision: number;
+  command_id: string;
+  command: string;
+  response: string;
+};
 
 export function narration(s: Story, command_id?: string): NarrationRecord | undefined {
   if (s.db.isInTransactionSync()) return undefined; // its rows may be uncommitted (03 §15)
@@ -33,7 +38,11 @@ export function narration(s: Story, command_id?: string): NarrationRecord | unde
     const lines = d.narration ?? [];
     const combat_lines = combatLines(s, d, lines);
     const pickup = corpsePickup(s, r, d);
-    if (!lines.length && !pickup) {
+    const died = d.events.some(
+      (e) => e.payload.type === 'entity_died' && !e.payload.victim_definition,
+    );
+    const deed = deedOf(d, r, bodyOf(s.world, s.world.character), !!command_id);
+    if (!lines.length && !pickup && !died && !deed) {
       if (command_id) return undefined;
       before = r.revision;
       continue;
@@ -43,6 +52,8 @@ export function narration(s: Story, command_id?: string): NarrationRecord | unde
     return {
       command_id: r.command_id,
       lines,
+      ...(died && { died: true }),
+      ...deed,
       ...(cue && { cue }),
       ...(combat_lines.length && { combat_lines, ...arrival(s, lines) }),
       ...(detail_id && { detail_id, ...(d.outcome === 'read' && { read: true }) }),
@@ -51,51 +62,21 @@ export function narration(s: Story, command_id?: string): NarrationRecord | unde
   }
 }
 
-/**
- * The Chronicle (mechanics.md, Chronicle): every accepted receipt's lines in revision order, with
- * its day (from the clock after it) and whether it reached a story point. Nothing stored. Only the
- * lines and their combat routing: the latest receipt's detail, cue and pickup checks read today's
- * world and would refuse an old receipt.
- * ponytail: every response is parsed once per Journal open; a json_extract prefilter is the upgrade
- * if a long save makes it slow.
- */
-export function chronicle(s: Story): ChronicleEntry[] {
-  if (s.db.isInTransactionSync()) return []; // its rows may be uncommitted (03 §15)
-  const { day } = units(s.world.cartridge);
-  let clock = s.fresh.state.clock;
-  const entries: ChronicleEntry[] = [];
-  for (const r of s.db.getAllSync<NarrationRow>(
-    'SELECT revision, command_id, command, response FROM receipt WHERE scope = ? ORDER BY revision',
-    scope(s),
-  )) {
-    const d = JSON.parse(r.response) as Accepted;
-    if (d.kind !== 'accepted') continue;
-    for (const op of d.delta.ops) if (op.op === 'time.advance') clock = op.to;
-    const lines = d.narration ?? [];
-    const combat_lines = combatLines(s, d, lines);
-    // Only receipts with a World line: combat-only ones belong to the combat log.
-    if (lines.length > combat_lines.length)
-      entries.push({
-        day: Math.floor(clock / day) + 1,
-        record: {
-          command_id: r.command_id,
-          lines,
-          ...(combat_lines.length && { combat_lines }),
-        } as NarrationRecord,
-        milestone: d.events.some((e) => e.payload.type === 'story_point_reached'),
-      });
-  }
-  return entries;
-}
-
 const latest = (s: Story, command_id: string | undefined, before: number | null) =>
   s.db.getFirstSync<NarrationRow>(
     `SELECT revision, command_id, command, response FROM receipt WHERE scope = ?
      AND (json_array_length(response, '$.narration') > 0
-       OR json_extract(response, '$.outcome') = 'taken')
+       OR json_extract(response, '$.outcome') = 'taken'
+       OR (? IS NOT NULL AND EXISTS (SELECT 1 FROM json_each(response, '$.events') e
+         WHERE json_extract(e.value, '$.payload.type') IN
+           ('action_completed', 'attack_result', 'barrier_changed', 'custom_event')))
+       OR EXISTS (SELECT 1 FROM json_each(response, '$.events') e
+         WHERE json_extract(e.value, '$.payload.type') = 'entity_died'
+           AND json_extract(e.value, '$.payload.victim_definition') IS NULL))
      AND (? IS NULL OR command_id = ?)
      AND (? IS NULL OR revision < ?) ORDER BY revision DESC LIMIT 1`,
     scope(s),
+    command_id ?? null,
     command_id ?? null,
     command_id ?? null,
     before,
@@ -103,7 +84,7 @@ const latest = (s: Story, command_id: string | undefined, before: number | null)
   );
 
 // Combat lines: a receipt opening an encounter (book-ui.md, Opening), attack, pack, skip, bleed.
-function combatLines(s: Story, d: Accepted, lines: NonNullable<Accepted['narration']>) {
+export function combatLines(s: Story, d: Accepted, lines: NonNullable<Accepted['narration']>) {
   const root = d.delta.ops.some(
     (o) =>
       o.op === 'encounter.open' ||
@@ -111,8 +92,16 @@ function combatLines(s: Story, d: Accepted, lines: NonNullable<Accepted['narrati
         o.op === 'encounter.close' &&
         ['engaged', 'fled'].includes(d.outcome)),
   );
+  const combat = s.world.cartridge.world?.combat;
+  // Every key a round can say: its strike words, its tiers and its foe's condition (loka-kgd.202).
   const keys = d.events.some((e) => e.payload.type === 'attack_result')
-    ? Object.values(s.world.cartridge.world?.combat?.narration ?? {})
+    ? [
+        ...Object.values(combat?.narration ?? {}),
+        ...(combat?.tiers ?? []).flatMap((t) =>
+          Object.values(t).filter((v) => typeof v === 'string'),
+        ),
+        ...(combat?.conditions ?? []).map((c) => c.text),
+      ]
     : [];
   const packKeys = Object.values(s.world.cartridge.populations ?? {}).flatMap((plan) => {
     const n = plan.pack?.narration;
@@ -198,15 +187,16 @@ function receiptDetail(s: Story, r: { command_id: string; command: string }, d: 
   }
   if (command?.payload?.type === 'use_transport' || command?.payload?.type === 'use_service')
     return travelDetail(r, command, d);
-  if (command?.payload?.type === 'eat') return eatReceipt(s.world, command, r.command_id, d);
+  if (command?.payload?.type === 'consume' && d.outcome !== 'drank')
+    return eatReceipt(s.world, command, r.command_id, d);
   if (command?.payload?.type === 'bandage') return bandaged(s, r, command, command.payload, d);
   if (d.outcome === 'harvested' && command?.payload?.type === 'harvest')
     return command.payload.target_id;
   const p = command?.payload;
-  if (p?.type === 'fill' || p?.type === 'pour' || p?.type === 'drink') {
+  if (p?.type === 'fill' || p?.type === 'pour' || p?.type === 'consume') {
     if (validate('Command', command).length || command?.id !== r.command_id)
       throw new Error('malformed JSON: invalid committed liquid action');
-    return p.type === 'drink' ? p.vessel_id : p.source_id;
+    return p.type === 'consume' ? p.item_id : p.source_id;
   }
   return readableDetail(s, r, command, d);
 }

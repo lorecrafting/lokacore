@@ -66,7 +66,7 @@ defmodule Loka.Content.Skills do
 
     Enum.flat_map(
       defs["skill"],
-      &(definition(&1, caps, text) ++ growth(&1) ++ itself(m, &1, hidden))
+      &(definition(&1, caps, text) ++ growth(&1) ++ ranks(&1) ++ itself(m, &1, hidden))
     ) ++
       secret(m, defs) ++
       equipment(m, defs) ++ dodge(m, defs, settings) ++ defense_narration(defs, settings)
@@ -80,14 +80,20 @@ defmodule Loka.Content.Skills do
 
   defp definition(_, _, _), do: []
 
-  defp texts(rel, s, text),
-    do:
-      for(
-        field <- ~w(name requirement profession),
-        is_map_key(s, field),
-        text != :unknown and not is_map_key(text, s[field]),
-        do: diag("UNRESOLVED_REFERENCE", at(rel, [field]), %{"target" => s[field]})
-      )
+  defp texts(rel, s, text) do
+    for {path, key} <- text_refs(s),
+        text != :unknown and not is_map_key(text, key),
+        do: diag("UNRESOLVED_REFERENCE", at(rel, path), %{"target" => key})
+  end
+
+  defp text_refs(s) do
+    fields = for f <- ~w(name requirement profession learned), is_map_key(s, f), do: {[f], s[f]}
+
+    ranks =
+      for {r, i} <- Enum.with_index(s["ranks"] || []), {f, key} <- r, do: {["ranks", i, f], key}
+
+    fields ++ ranks
+  end
 
   # Toolbox row 5: growth thresholds strictly increase.
   defp growth({_, {rel, _, %{"growth" => g}}}) do
@@ -96,6 +102,15 @@ defmodule Loka.Content.Skills do
   end
 
   defp growth(_), do: []
+
+  # One rank per level a skill can reach, so ranks need growth and one entry past it.
+  defp ranks({_, {rel, _, %{"ranks" => r} = s}}) do
+    if s["growth"] && length(r) == length(s["growth"]) + 1,
+      do: [],
+      else: [diag("SCHEMA_VIOLATION", at(rel, ["ranks"]), %{"error" => "invalid_value"})]
+  end
+
+  defp ranks(_), do: []
 
   # Homestead hs-11: a box never requires itself (its own full ref).
   # Homestead hs-14: a shown box never requires a hidden one.
@@ -114,14 +129,15 @@ defmodule Loka.Content.Skills do
 
   defp itself(_, _, _), do: []
 
+  @doc "Whether the skill `ref` names is hidden (Homestead hs-14)."
+  def hidden?(ref, m, defs),
+    do: match?({_, _, %{"hidden" => true}}, Loka.Content.Refs.resolve(ref, "skill", m, defs))
+
   # Homestead hs-14 (secret): no shown skill's qualification and no dialogue policy reads a hidden
   # skill, and no labeled talk or riddle dialogue teaches one.
-  defp secret(m, defs) do
-    hidden? =
-      &match?({_, _, %{"hidden" => true}}, Loka.Content.Refs.resolve(&1, "skill", m, defs))
-
-    shown_qualifications(defs, hidden?) ++ dialogues(defs, hidden?)
-  end
+  defp secret(m, defs),
+    do:
+      shown_qualifications(defs, &hidden?(&1, m, defs)) ++ dialogues(defs, &hidden?(&1, m, defs))
 
   defp shown_qualifications(defs, hidden?),
     do:

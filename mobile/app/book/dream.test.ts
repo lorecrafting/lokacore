@@ -56,15 +56,21 @@ registerHooks({
 });
 const { default: Book } = await import('./Book.tsx');
 const { openGame } = await import('../../authority/local-story/session.ts');
-function nodes(e: any): any[] {
-  if (Array.isArray(e)) return e.flatMap(nodes);
+// The component whose hooks run now, by its place in the tree, as React keys it.
+let here = '';
+let slot = 0;
+function nodes(e: any, at = ''): any[] {
+  if (Array.isArray(e)) return e.flatMap((x, i) => nodes(x, `${at}.${x?.key ?? i}`));
   if (!e || typeof e !== 'object') return [];
   if (typeof e.type === 'function') {
     if (e.type.name === 'Footer') return [e];
-    if (e.type.name === 'PageTurn') return [e, ...nodes(e.props.children)];
-    return nodes(e.type(e.props));
+    const place = `${at}/${e.type.name}`;
+    if (e.type.name === 'PageTurn') return [e, ...nodes(e.props.children, place)];
+    here = place;
+    slot = 0;
+    return nodes(e.type(e.props), place);
   }
-  return [e, ...nodes(e.props?.children)];
+  return [e, ...nodes(e.props?.children, `${at}/${String(e.type)}`)];
 }
 const words = (e: any): string =>
   Array.isArray(e)
@@ -73,24 +79,24 @@ const words = (e: any): string =>
       ? String(e)
       : words(e?.props?.children ?? []);
 function render(game: ReturnType<typeof openGame>) {
-  const state: any[] = [],
-    effects = new Map<number, { deps: any[]; cleanup?: () => void }>();
-  let slot = 0;
+  const state = new Map<string, any>(),
+    effects = new Map<string, { deps: any[]; cleanup?: () => void }>();
   const draw = () => {
+    here = 'Book';
     slot = 0;
     const queued: (() => void)[] = [];
     (globalThis as any)[Symbol.for('dream-state')] = (v: any) => {
-      const i = slot++;
-      if (!(i in state)) state[i] = typeof v === 'function' ? v() : v;
+      const i = `${here}:${slot++}`;
+      if (!state.has(i)) state.set(i, typeof v === 'function' ? v() : v);
       return [
-        state[i],
+        state.get(i),
         (n: any) => {
-          state[i] = typeof n === 'function' ? n(state[i]) : n;
+          state.set(i, typeof n === 'function' ? n(state.get(i)) : n);
         },
       ];
     };
     (globalThis as any)[Symbol.for('dream-effect')] = (f: any, deps: any[]) => {
-      const i = slot++,
+      const i = `${here}:${slot++}`,
         old = effects.get(i);
       if (old && deps.every((d, j) => Object.is(d, old.deps[j]))) return;
       queued.push(() => {
@@ -114,10 +120,10 @@ function render(game: ReturnType<typeof openGame>) {
       .map((n) => n.props.accessibilityLabel);
   return {
     game,
-    presenter: () => state[0],
+    presenter: () => state.get('Book:0'),
     draw,
     labels,
-    stack: () => state[1],
+    stack: () => state.get('Book:1'),
     text: () =>
       draw()
         .filter((n) => n.type === 'Text')

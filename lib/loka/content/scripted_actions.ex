@@ -16,7 +16,7 @@ defmodule Loka.Content.ScriptedActions do
   defp all(defs), do: for({_, {rel, [], r}} <- defs["scripted_action"], do: {rel, r})
 
   @doc """
-  For a v2 source with a valid manifest (else none): each scripted action's owner (scripted_action), its
+  For a source with a valid manifest (else none): each scripted action's owner (scripted_action), its
   check's (check@1, by its events) is required; each outcome's steps are `Loka.Content.Steps`
   :action steps (ops, fields, owning events and references) and its check runs neither failure
   nor rating (`CheckKinds.context/4`);
@@ -32,8 +32,8 @@ defmodule Loka.Content.ScriptedActions do
   registered command's (DUPLICATE_DEFINITION: one key is one ActionSet identity); and each key of a room's action
   contribution names a registered command, an action, a scripted action or a quest (its offer).
   """
-  @spec check(map() | nil, map(), {term(), map() | :unknown} | nil, [map()]) :: [map()]
-  def check(m, _, v2, _) when m == nil or v2 == nil, do: []
+  @spec check(map() | nil, map(), {term(), map() | :unknown}, [map()]) :: [map()]
+  def check(nil, _, _, _), do: []
 
   def check(m, defs, {_, text}, registry) do
     actions = for {_, {_, [], a}} <- defs["action"], into: MapSet.new(), do: a["key"]
@@ -78,6 +78,7 @@ defmodule Loka.Content.ScriptedActions do
       duplicate(rel, r, ctx),
       mismatch(rel, r),
       duration(rel, r, ctx),
+      timed_status(rel, r, ctx),
       ActionTips.check(rel, r, ctx),
       shared(rel, r, ctx.shared)
     ])
@@ -88,6 +89,15 @@ defmodule Loka.Content.ScriptedActions do
       do: [diag("INVALID_TIME_POLICY", at(rel, ["duration"]))],
       else: []
   end
+
+  # The status row would start before the action's own time.advance, which faults at runtime.
+  defp timed_status(rel, %{"duration" => d} = r, ctx) when d > 0 do
+    for {%{"op" => "status.apply"} = step, path} <- steps(r),
+        not Loka.Content.Status.no_job?(step, ctx.m, ctx.defs),
+        do: diag("SCHEMA_VIOLATION", at(rel, path), %{"why" => "duration_status"})
+  end
+
+  defp timed_status(_, _, _), do: []
 
   defp shared(rel, %{"check" => %{"key" => k}}, shared) do
     if k in shared, do: [diag("DUPLICATE_DEFINITION", at(rel, ["check"]))], else: []

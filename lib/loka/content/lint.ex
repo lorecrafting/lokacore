@@ -6,35 +6,37 @@ defmodule Loka.Content.Lint do
   these: a sampler may break them on purpose.
   """
 
-  alias Loka.Content.Source
+  alias Loka.Content.{LintLabels, LintLayout, Source}
 
-  @writes ~w(status.apply status.cure fact.assign fact.adjust fact.stamp)
+  @writes ~w(status.apply status.cure fact.assign fact.adjust fact.stamp resource.adjust)
   @always %{"op" => "all", "items" => []}
 
   @doc "The findings for the source directory `dir`."
   @spec run(Path.t()) :: [String.t()]
-  def run(dir), do: dir |> decoded() |> findings()
+  def run(dir), do: lint(dir, &findings/1, &LintLayout.run/1)
 
   @doc "Only the label findings for the source directory `dir` (samplers are checked for these too)."
   @spec labels(Path.t()) :: [String.t()]
-  def labels(dir), do: dir |> decoded() |> then(&labels(&1, Map.get(&1, "text.json", %{})))
+  def labels(dir),
+    do: lint(dir, &LintLabels.run(&1, Map.get(&1, "text.json", %{})), fn _ -> [] end)
 
-  defp decoded(dir) do
+  defp lint(dir, find, layout) do
     {files, _} = Source.load(dir)
 
     # A missing folder or the parent cartridges folder loads no manifest and would lint clean.
     if !Enum.any?(files, &match?({"cartridge.json", _, %{}}, &1)),
       do: raise(ArgumentError, "#{dir}: no cartridge.json loaded; give a cartridge source folder")
 
-    # ponytail: a bundled definition is linted under its definition address `<dir>/<key>.json`,
-    # not its file; dispatch on kind and print Source.at/2 paths if a builder needs file lines.
-    Map.new(for {rel, kind, value} <- files, is_map(value), do: {lint_rel(rel, kind), value})
+    # ponytail: a bundled definition lints and prints under its root address; upgrade: Source.at/2.
+    root = for {rel, kind, v} <- files, is_map(v), into: %{}, do: {lint_rel(rel, kind), v}
+
+    LintLayout.at_real(find.(root), files, dir) ++ layout.(files)
   end
 
   defp lint_rel(_, {_, key, [dir, _]}), do: dir <> "/" <> key <> ".json"
   # A copy of a bundled behaviour's rule sits at [behaviours, name, reactions, rule].
-  defp lint_rel(_, {:reaction, key, [_, _, _, _]}), do: "reactions/" <> key <> ".json"
-  defp lint_rel(rel, _), do: rel
+  defp lint_rel(_, {:reaction, key, p}) when length(p) in [0, 4], do: "reactions/#{key}.json"
+  defp lint_rel(rel, _), do: Regex.replace(~r{^areas/[^/]+/(?=[^/]+/)}, rel, "")
 
   @doc "The findings for decoded source files, keyed by their path relative to the cartridge."
   @spec findings(%{String.t() => map()}) :: [String.t()]
@@ -43,9 +45,9 @@ defmodule Loka.Content.Lint do
 
     files
     |> Enum.sort()
-    |> Enum.flat_map(fn {rel, v} -> file(Path.split(rel), rel, v) ++ always(rel, v, []) end)
+    |> Enum.flat_map(fn {rel, v} -> file(LintLabels.parts(rel), rel, v) ++ always(rel, v, []) end)
     |> Kernel.++(talk(files, text))
-    |> Kernel.++(labels(files, text))
+    |> Kernel.++(LintLabels.run(files, text))
     |> Kernel.++(items(files))
     |> Kernel.++(fills(files))
     |> Kernel.++(Loka.Content.LintPages.run(files, text))
@@ -134,7 +136,7 @@ defmodule Loka.Content.Lint do
   # eats, consumes, buys back, takes in escrow or asks for never leaves it. Read by field: an id
   # named elsewhere (a guard, a key) is neither.
   defp items(files) do
-    refs = Enum.flat_map(files, fn {rel, v} -> refs(Path.split(rel), v) end)
+    refs = Enum.flat_map(files, fn {rel, v} -> refs(LintLabels.parts(rel), v) end)
 
     for {"items/" <> name, _} <- Enum.sort(files),
         id = Path.rootname(name),
@@ -190,7 +192,8 @@ defmodule Loka.Content.Lint do
         do: fill_line(want, users |> Enum.uniq() |> Enum.sort() |> Enum.join(", "))
   end
 
-  defp scan(files, fun), do: Enum.flat_map(files, fn {rel, v} -> fun.(Path.split(rel), v) end)
+  defp scan(files, fun),
+    do: Enum.flat_map(files, fn {rel, v} -> fun.(LintLabels.parts(rel), v) end)
 
   defp fill_line({:liquid, id}, users),
     do: "liquids/#{id}.json: #{users} want it; no vessel starts with it and no detail gives it"
@@ -226,7 +229,7 @@ defmodule Loka.Content.Lint do
   defp talk(files, text) do
     bare? =
       Enum.any?(files, fn {rel, d} ->
-        String.starts_with?(rel, "dialogues/") and !is_map_key(d, "name") and
+        match?(["dialogues", _], LintLabels.parts(rel)) and !is_map_key(d, "name") and
           !is_map_key(d, "keyword")
       end)
 
@@ -234,66 +237,4 @@ defmodule Loka.Content.Lint do
       do: ["text.json: action.talk has no text, yet a dialogue has no name of its own"],
       else: []
   end
-
-  # A choice or action label is a bare imperative: no single final "." unless it opens with a quote
-  # mark (a spoken line). A status label is authored lowercase; condition.bleeding keeps its capital
-  # (the kernel keys on it). book-ui.md: NPC dialogue and action details, Conditions details.
-  defp labels(files, text) do
-    for(
-      {rel, d} <- Enum.sort(files),
-      {kind, key} <- label_keys(Path.split(rel), d),
-      s = text[key],
-      is_binary(s),
-      msg = label_problem(kind, key, s),
-      do: "#{rel}: label #{key} #{msg}"
-    ) ++ exits(files, text) ++ colon_labels(text)
-  end
-
-  # A sentence that opens with a one-to-three-word label and a colon ("High tide: ...", "Nell: ...")
-  # reads as a form, not prose (book-ui.md Line placement, loka-pxa0); a longer lead-in or a
-  # mid-sentence colon is prose. Link markup, `[words]` or `[words](key)`, reads as its words; a
-  # quotation is the speaker's own words, so only its closing stop counts.
-  @colon_label ~r/(?:^|[.!?]["”’]?\s)(?:[\w'’-]+,?\s){0,2}[\w'’-]+:\s/u
-  defp colon_labels(text) do
-    for {key, s} <- Enum.sort(text),
-        is_binary(s),
-        s
-        |> String.replace(~r/\[([^\[\]]+)\](?:\([^()]*\))?/, "\\1")
-        |> String.replace(~r/["“][^"“”]*?([.!?]?)["”]/u, "\"x\\1\"")
-        |> String.match?(@colon_label),
-        do: "text.json: #{key} opens a sentence with a colon label"
-  end
-
-  # The page's own Leave control ends a talk, so a do-nothing Leave or Close choice is refused
-  # on a talk with more than one choice; a single-choice talk keeps it (book-ui.md NPC
-  # dialogue; loka-x6t.21).
-  defp exits(files, text) do
-    for {"dialogues/" <> _ = rel, %{"choices" => %{} = cs}} <- Enum.sort(files),
-        map_size(cs) > 1,
-        {key, c} <- Enum.sort(cs),
-        Map.keys(c) -- ["label", "narration"] == [],
-        s = text[c["label"]],
-        is_binary(s) and s =~ ~r/^(Leave|Close)\b/,
-        do: "#{rel}: choice #{key} only leaves; the page's own Leave control ends the talk"
-  end
-
-  defp label_keys(["dialogues", _], d),
-    do:
-      Enum.map(
-        [d["name"] | for({_, c} <- Enum.sort(d["choices"] || %{}), do: c["label"])],
-        &{:choice, &1}
-      )
-
-  defp label_keys(["actions", _], d), do: [{:choice, d["name"]}]
-  defp label_keys(["statuses", _], d), do: [{:status, d["name"]}]
-  defp label_keys(_, _), do: []
-
-  defp label_problem(:choice, _, s),
-    do:
-      if(s =~ ~r/[^.]\.$/ and not String.starts_with?(s, ["\"", "“", "‘"]),
-        do: "ends in a period"
-      )
-
-  defp label_problem(:status, key, s),
-    do: if(key != "condition.bleeding" and s != String.downcase(s), do: "is not lowercase")
 end

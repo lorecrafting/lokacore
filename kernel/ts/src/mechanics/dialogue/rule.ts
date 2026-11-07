@@ -1,6 +1,6 @@
 import { chosen } from '../scene/sequence.ts';
 import * as patrol from '../patrol/sequence.ts';
-import { hub, opening, wrongAnswer } from './behavior.ts';
+import { hub, leadOn, opening, wrongAnswer } from './behavior.ts';
 import { exchangeTransfers } from './exchange.ts';
 // Dialogue lowers bound choices, quest transitions and facts in one writer group.
 import type {
@@ -14,6 +14,7 @@ import type {
 } from '../../contracts.gen.ts';
 import { transition as escortTransition } from '../escort/shared.ts';
 import { same } from '../../foundation/compose.ts';
+import { holds } from '../policy.ts';
 import {
   accepted,
   bodyOf,
@@ -104,9 +105,12 @@ function choose(world: World, command: Command<'choose'>, mint: Mint, row: Choic
   if (riddle && answer!.toLowerCase() !== riddle.answer)
     return wrongAnswer(world, command, row, riddle, participants);
   const start = option.check && checked(world, command, mint, row, d, participants);
-  if (start && 'kind' in start) return start;
+  if (start && 'kind' in start)
+    return option.then_failed
+      ? leadOn(world, command, mint, row, start, option.then_failed, used)
+      : start;
   const decided = applyChoice(world, command, mint, row, used, participants, start);
-  return hub(world, command, mint, row, d, option, decided);
+  return hub(world, command, mint, row, d, option, decided, used);
 }
 
 // size: allow 60, one choice lowers its bound quest, custody, payment and events atomically
@@ -164,9 +168,23 @@ function applyChoice(
       resolvedChoice,
       ...storyPoints(world, command, mint, row, at + 1),
     ],
-    [{ key: option.narration, participants }],
+    replies(world, row, option, speaker, used).map((key) => ({ key, participants })),
   );
 }
+
+// The answer's words, read before its writes: the first narration_variants `when` that holds or
+// the narration, then each narrate step's line.
+const replies = (
+  world: World,
+  row: ChoiceRow,
+  option: DialogueChoice,
+  target: EntityId | undefined,
+  steps: Steps,
+) => [
+  option.narration_variants?.find((v) => holds(world, row.actor_id, v.when, { target, steps }))
+    ?.description ?? option.narration,
+  ...(option.steps ?? []).flatMap((s) => (s.op === 'narrate' ? [s.text] : [])),
+];
 
 const resolveOp = (row: ChoiceRow, continuation_id: ContinuationId, choice_id: Key) =>
   ({

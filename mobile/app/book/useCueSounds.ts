@@ -1,0 +1,48 @@
+// What the Book plays: the cues of each view, and the sound of the room it is in.
+import { useEffect, useRef } from 'react';
+import { useCues } from './cues.ts';
+import { hearCues, playRiffle, playTurn } from './cueSounds.ts';
+import { useReducedMotion } from './fade.ts';
+import type { presenter } from './presenter.ts';
+import { ambience, fight } from './sound';
+
+type Screen = ReturnType<ReturnType<typeof presenter>['screen']>;
+
+export function useCueSounds(s: Screen, turn: number, resumes?: number, riffle?: boolean) {
+  useEffect(hearCues, []); // before useCues: heard from its first cue
+  const place = s.view.place;
+  const weather = s.view.calendar_status?.weather;
+  const chapter = s.view.chapter?.index;
+  const read = useRef(chapter);
+  const fell = useRef(s.died);
+  const spirit = !!s.spirit;
+  // Every view, not only a changed tag: a death cuts the room, and the room page brings it back.
+  // This runs before useCues, so a fight or a new chapter's music has not started: no piece, none spent.
+  // Waking is the exception: only the bed returns, and the room's piece is spent (plan 14).
+  useEffect(() => {
+    // The fatal card or the dead page is up: the bed waits for waking, not the room before or after it.
+    if ((s.ended || s.dead) && s.died !== fell.current) {
+      fight('cut');
+      return;
+    }
+    const woke = s.died !== fell.current;
+    fell.current = s.died;
+    const theme = chapter !== undefined && chapter !== read.current;
+    read.current = chapter;
+    const quiet = s.treatment ? 'silent' : woke ? 'woke' : !!s.view.combat || theme;
+    // The spirit state: the bed muffled, opening at the rise; the room is never exposed (no thunder's open air).
+    ambience(place?.sound, weather, !!place?.exposed && !spirit, quiet, spirit);
+  }, [s.view, s.ended, s.dead, spirit, s.treatment]); // eslint-disable-line react-hooks/exhaustive-deps
+  const reduced = useReducedMotion();
+  useCues(
+    s.view,
+    s.catchingUp,
+    turn,
+    resumes,
+    reduced,
+    s.treatment ? undefined : riffle ? playRiffle : playTurn, // no turn sound inside a treatment
+    s.died,
+    s.deed,
+    !!s.treatment,
+  );
+}

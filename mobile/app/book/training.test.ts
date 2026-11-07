@@ -8,10 +8,12 @@ import { readFileSync } from 'node:fs';
 import { createRequire, registerHooks } from 'node:module';
 import { test } from 'node:test';
 import { trainingPin } from '../../authority/local-story/__tests__/training-host.ts';
+import { fadeStub } from './__tests__/fade-stub.ts';
 const require = createRequire(import.meta.url);
 const ts = require('typescript');
 registerHooks({
   resolve(specifier, context, next) {
+    if (specifier === './fade.ts') return fadeStub;
     if (specifier === 'react') return { url: 'test:training-react', shortCircuit: true };
     return specifier === 'react-native'
       ? { url: 'test:training-native', shortCircuit: true }
@@ -27,7 +29,7 @@ registerHooks({
         format: 'module',
         shortCircuit: true,
         source:
-          "export const Pressable='Pressable',Text='Text',TextInput='TextInput',View='View',ScrollView='ScrollView',AccessibilityInfo={};",
+          "export const Pressable='Pressable',Text='Text',TextInput='TextInput',View='View',ScrollView='ScrollView',AccessibilityInfo={},Animated={};",
       };
     if (!url.endsWith('.tsx')) return next(url, context);
     return {
@@ -39,7 +41,7 @@ registerHooks({
     };
   },
 });
-const { SkillDetails, ItemDetails, npcSkills } = await import('./skills.tsx');
+const { SkillDetails, SkillsPage, ItemDetails, npcSkills } = await import('./skills.tsx');
 const { CharacterPage } = await import('./sections.tsx');
 const { NpcDetail, NpcPage } = await import('./Npc.tsx');
 const { usePalette, useType } = await import('./palette.ts');
@@ -60,11 +62,23 @@ const text = (key: string) =>
     'item.description': 'A weathered blade.',
   })[key] ?? key;
 
-// Breaks: Character hides real attributes, treats learned-unqualified as usable, or lists unlearned future skills.
-test('Character draws projected attributes and acquired qualification with authored labels', () => {
+// Breaks: Character hides real attributes or still draws a skill, a profession or Spells; Skills
+// treats learned-unqualified as usable, lists unlearned future skills, or loses a block's order.
+test('Character keeps attributes; Skills draws acquired qualification, then professions, then Spells', () => {
   const view: any = {
     attributes: [{ attribute: { key: 'str' }, value: 9 }],
+    spell_words: [{ word: 'ward', available: false, reason: { code: 'invalid_state' } }],
+    actions: [{ action_key: 'cast', command: 'cast', available: true, target_ids: [] }],
     skills: [
+      {
+        skill: { key: 'whittling' },
+        label: 'Whittling',
+        requirement: '',
+        acquired: true,
+        qualified: true,
+        usable: true,
+        profession: 'Woodcraft',
+      },
       {
         skill: { key: 'swords' },
         label: 'skill.swords',
@@ -86,12 +100,15 @@ test('Character draws projected attributes and acquired qualification with autho
   assert.deepEqual(words(CharacterPage({ view, text, world: () => {} })), [
     'Character',
     'STR 9',
-    'Sword craft — learned, unqualified. STR at least 10',
     'Back to World',
   ]);
-  assert.deepEqual(words(SkillDetails({ view, text })), [
-    'STR 9',
+  assert.deepEqual(words(SkillDetails({ view, text })), ['STR 9']);
+  assert.deepEqual(words(SkillsPage({ view, text, world: () => {} })).slice(0, 5), [
+    'Skills',
     'Sword craft — learned, unqualified. STR at least 10',
+    'Woodcraft',
+    'Whittling — learned',
+    'Spells',
   ]);
 });
 
@@ -99,7 +116,7 @@ test('Character draws projected attributes and acquired qualification with autho
 // an unacquired box dropped or read "locked" when not locked, professions out of first-listed
 // order, a level shown when not projected, an NPC lesson reading "not learned" while the box is
 // locked, or "Nothing is known" drawn above a profession box.
-test('Character groups profession boxes under their title, acquired then not learned', () => {
+test('Skills groups profession boxes under their title, acquired then not learned', () => {
   const box = (key: string, profession: string | undefined, more: object) => ({
     skill: { key },
     label: key,
@@ -120,8 +137,8 @@ test('Character groups profession boxes under their title, acquired then not lea
       box('weaving', 'Loomcraft', {}),
     ],
   };
-  assert.deepEqual(words(CharacterPage({ view, text, world: () => {} })), [
-    'Character',
+  assert.deepEqual(words(SkillsPage({ view, text, world: () => {} })), [
+    'Skills',
     'swords — learned',
     'Woodcraft',
     'whittling, level 2 — learned',
@@ -134,8 +151,8 @@ test('Character groups profession boxes under their title, acquired then not lea
     'Back to World',
   ]);
   const locked = { skills: [box('carving', 'Handcraft', { locked: true })] };
-  assert.deepEqual(words(CharacterPage({ view: locked, text, world: () => {} } as any)), [
-    'Character',
+  assert.deepEqual(words(SkillsPage({ view: locked, text, world: () => {} } as any)), [
+    'Skills',
     'Handcraft',
     'carving — locked. carving req',
     'Back to World',
@@ -149,6 +166,22 @@ test('Character groups profession boxes under their title, acquired then not lea
     'Aldous teaches turning. turning req',
     'Aldous teaches weaving. weaving req',
   ]);
+});
+
+// Breaks: a blank Skills page, a Note above real content, or an unlearned plain skill counted as known.
+test('Skills draws the one Note only when it has nothing else to draw', () => {
+  const note = ['Skills', 'Nothing is known about you yet.', 'Back to World'];
+  const unlearned = { skill: { key: 'x' }, label: 'x', requirement: '', acquired: false };
+  assert.deepEqual(words(SkillsPage({ view: {} as any, text, world: () => {} })), note);
+  assert.deepEqual(
+    words(SkillsPage({ view: { skills: [unlearned] } as any, text, world: () => {} })),
+    note,
+  );
+  const spoken: any = {
+    spell_words: [{ word: 'ward', available: false, reason: { code: 'invalid_state' } }],
+    actions: [{ action_key: 'cast', command: 'cast', available: true, target_ids: [] }],
+  };
+  assert.ok(!words(SkillsPage({ view: spoken, text, world: () => {} })).includes(note[1]!));
 });
 
 // Breaks: the displayed name missing, capitalised, labelled or not first, or the empty placeholder
@@ -228,7 +261,7 @@ test('Character shows the level, xp and one Raise card per attribute only while 
     const buttons = buttonsOf(view, (k) => k, text) as never[];
     return { buttons, words: words(CharacterPage({ view, text, world: () => {}, buttons })) };
   };
-  const spend = page({ level: 2, experience: 30, next: 100, unspent: 1 }, [raise]);
+  const spend = page({ level: 2, experience: 30, from: 30, next: 100, unspent: 1 }, [raise]);
   assert.deepEqual(spend.words, [
     'Character',
     'Level 2, 1 point to spend',
@@ -241,9 +274,9 @@ test('Character shows the level, xp and one Raise card per attribute only while 
   ]);
   assert.deepEqual((spend.buttons[0] as any).input, { attribute: str });
   assert.deepEqual(group(spend.buttons).place, []);
-  const two = page({ level: 3, experience: 100, next: 200, unspent: 2 }, [raise]);
+  const two = page({ level: 3, experience: 100, from: 100, next: 200, unspent: 2 }, [raise]);
   assert.equal(two.words[1], 'Level 3, 2 points to spend');
-  const top = page({ level: 3, experience: 120, unspent: 0 }, []);
+  const top = page({ level: 3, experience: 120, from: 100, unspent: 0 }, []);
   assert.deepEqual(top.words, [
     'Character',
     'Level 3',
@@ -380,7 +413,7 @@ test('Book interaction teaches swords then dodge in the teacher detail and recov
   reopen();
   assert.equal(words(draw()).filter((line) => line === dodge).length, 1);
   const sheet = words(
-    CharacterPage({ view: book.screen().view, text: book.screen().text, world: () => {} }),
+    SkillsPage({ view: book.screen().view, text: book.screen().text, world: () => {} }),
   );
   assert.ok(sheet.includes('Swords — learned') && sheet.includes('Dodge — learned'), String(sheet));
 });
@@ -396,5 +429,17 @@ test('shared item detail draws confirmed fuel for lit and exhausted items', () =
       ItemDetails({ thing: { fuel: { remaining: 0, capacity: 10, lit: false } } as any, text }),
     ),
     ['Empty, unlit.'],
+  );
+});
+
+// Breaks (loka-15g, status-line-rulings.md Character page): the page drops bleeding's time left or
+// cadence, which the status line no longer shows (its icon carries them only in the name).
+test('Character keeps the full bleeding line', () => {
+  const bleeding = { label: 'bleeding', ends_at: 37, hp_loss: 1, tick_every: 60 };
+  const view = { time: 0, bleeding } as any;
+  assert.ok(
+    words(CharacterPage({ view, text, world: () => {} })).includes(
+      'Bleeding · 37s remaining · 1 HP each 60s',
+    ),
   );
 });

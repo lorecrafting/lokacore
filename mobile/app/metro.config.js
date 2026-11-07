@@ -36,8 +36,10 @@ if (process.env.LOKA_DEV_CARTRIDGE) {
     );
   process.env.EXPO_PUBLIC_LOKA_DEV_CARTRIDGE = '1';
   config.resolver.resolveRequest = (context, name, platform) =>
-    context.originModulePath === path.join(__dirname, 'App.tsx') &&
-    /\/protocol\/fixtures\/[^/]+\.json$/.test(name)
+    // panel.tsx keeps the place under this hash: it must read the dev cartridge's, not the pin's
+    ['App.tsx', 'author/panel.tsx'].some(
+      (f) => context.originModulePath === path.join(__dirname, f),
+    ) && /\/protocol\/fixtures\/[^/]+\.json$/.test(name)
       ? { type: 'sourceFile', filePath: devCartridge }
       : context.resolveRequest(context, name, platform);
 } else delete process.env.EXPO_PUBLIC_LOKA_DEV_CARTRIDGE;

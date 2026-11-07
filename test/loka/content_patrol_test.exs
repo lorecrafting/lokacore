@@ -65,6 +65,9 @@ defmodule Loka.ContentPatrolTest do
       {"cartridge.json", "UNDECLARED_CAPABILITY",
        &update_in(&1, ["requires", "capabilities"], fn c -> Map.delete(c, "patrol") end)},
       {"dialogues/maud_turn_in.json", "OUTCOME_MISMATCH", &Map.put(&1, "quest", "watch_rounds")},
+      # A choice's patrol naming a quest with no patrol is refused, not a BadBooleanError (loka-kgd.220).
+      {"dialogues/tobin_watch.json", "OUTCOME_MISMATCH",
+       &put_in(&1, ["choices", "continue", "patrol", "quest"], "mauds_cellar")},
       {"dialogues/tobin_watch.json", "RESERVED_FACT",
        fn d ->
          put_in(d, ["choices", "start", "steps"], [

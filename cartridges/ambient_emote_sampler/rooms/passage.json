@@ -1,0 +1,9 @@
+{
+  "name": "room.passage.title",
+  "description": "room.passage.description",
+  "exits": {
+    "north": {
+      "to": "cave"
+    }
+  }
+}

@@ -92,27 +92,29 @@
   },
   "known_npcs": [
    {
-    "id": "10798f17-56fe-899f-b1f1-2165bc7aa94a",
-    "name": "npc.bess.short"
-   },
-   {
-    "id": "135ad56f-dfaa-8e43-985d-9dd1e051753b",
-    "name": "npc.nell.short"
+    "id": "1ff34115-09bf-88cc-94fc-be3e623e9a19",
+    "name": "npc.hob.short"
    },
    {
     "id": "8a445b6f-2095-87c7-9a12-852d422d4599",
-    "name": "npc.reeve.short"
+    "name": "npc.nell.short"
    },
    {
-    "id": "b303069b-00e7-8e90-9241-9392c7c6bd7d",
-    "name": "npc.hob.short"
+    "id": "ca9abb6b-add9-8496-9f83-3c6069959fb6",
+    "name": "npc.bess.short"
+   },
+   {
+    "id": "dc5fce99-4e8a-89d0-9a6b-72be27764473",
+    "name": "npc.reeve.short"
    }
   ],
   "levelling": {
    "level": 1,
    "experience": 0,
+   "from": 0,
    "next": 30,
-   "unspent": 0
+   "unspent": 0,
+   "level_up": "levelling.level_up"
   },
   "skills": [
    {
@@ -331,22 +333,22 @@
      "title": "room.village_green.title",
      "entities": [
       {
-       "id": "135ad56f-dfaa-8e43-985d-9dd1e051753b",
+       "id": "8a445b6f-2095-87c7-9a12-852d422d4599",
        "name": "npc.nell.short",
        "kind": "npc"
       },
       {
-       "id": "8a445b6f-2095-87c7-9a12-852d422d4599",
+       "id": "dc5fce99-4e8a-89d0-9a6b-72be27764473",
        "name": "npc.reeve.short",
        "kind": "npc"
       },
       {
-       "id": "fae561a6-53e6-8a8c-bd7c-19430abda2ac",
+       "id": "30c00822-6fb5-833d-a05e-7787134bea59",
        "name": "item.apple.short",
        "kind": "item"
       },
       {
-       "id": "6fae7b67-794e-8f5e-accf-fff819cf4067",
+       "id": "493b440f-e305-8b5b-b4d1-300ba594a9fc",
        "name": "item.letter.short",
        "kind": "item"
       }
@@ -459,7 +461,7 @@
   ],
   "notices": [
    {
-    "id": "dd8c6f46-accd-87e3-af31-b0caf37caeeb",
+    "id": "040cd593-516a-8270-9e6d-7b49fe6a516a",
     "key": "hall_cupboard",
     "title": "detail.hall_cupboard.title",
     "description": "detail.hall_cupboard",
@@ -476,7 +478,7 @@
     ]
    },
    {
-    "id": "040cd593-516a-8270-9e6d-7b49fe6a516a",
+    "id": "4c9c088a-aede-8ef6-906d-8bc0a9bc1701",
     "key": "hall_lectern",
     "title": "detail.hall_lectern.title",
     "description": "detail.hall_lectern",
@@ -496,7 +498,7 @@
     ]
    },
    {
-    "id": "4c9c088a-aede-8ef6-906d-8bc0a9bc1701",
+    "id": "e89b9f79-f8a1-8062-a340-1996b92e8a39",
     "key": "hall_strongbox_lock",
     "title": "detail.hall_strongbox_lock.title",
     "description": "detail.hall_strongbox_lock",
@@ -515,7 +517,7 @@
   ],
   "entities": [
    {
-    "id": "10798f17-56fe-899f-b1f1-2165bc7aa94a",
+    "id": "ca9abb6b-add9-8496-9f83-3c6069959fb6",
     "name": "npc.bess.short",
     "words": {
      "bare": "npc.bess.bare"
@@ -552,7 +554,7 @@
     ],
     "shop": [
      {
-      "item_id": "48c6f062-d9b1-8231-8f6d-d1a8dcded5ae",
+      "item_id": "17ebdbed-759e-8d08-9ef8-f9742608718a",
       "name": "item.hall_bread.short",
       "buy": {
        "price": 4,
@@ -567,7 +569,7 @@
     ],
     "contents": [
      {
-      "id": "48c6f062-d9b1-8231-8f6d-d1a8dcded5ae",
+      "id": "17ebdbed-759e-8d08-9ef8-f9742608718a",
       "name": "item.hall_bread.short",
       "words": {
        "article": "a",
@@ -590,12 +592,12 @@
         "input": []
        }
       ],
-      "container_id": "10798f17-56fe-899f-b1f1-2165bc7aa94a"
+      "container_id": "ca9abb6b-add9-8496-9f83-3c6069959fb6"
      }
     ]
    },
    {
-    "id": "677c012e-ec39-8552-8d4f-1811aa3e08b5",
+    "id": "2d56c2ba-0c40-8b90-aaa4-deafc9c16c53",
     "name": "item.hall_roll.short",
     "words": {
      "article": "a",
@@ -619,7 +621,7 @@
     ]
    },
    {
-    "id": "4c2b24ad-1e89-8d16-9b4b-1fb2d613fb25",
+    "id": "d24daef5-84db-8e1f-8947-a89fb421033a",
     "name": "item.hall_strongbox.short",
     "words": {
      "article": "the",
@@ -667,6 +669,12 @@
   ],
   "position": "standing",
   "journal": [],
+  "spell_words": [
+   {
+    "word": "mend",
+    "available": true
+   }
+  ],
   "time": 25200,
   "calendar_status": {
    "day": 1,
@@ -678,7 +686,7 @@
    "season": "spring",
    "tide": "high"
   },
-  "recap_after": 90000,
+  "recap_after": 86400,
   "resources": [
    {
     "resource": {
@@ -702,18 +710,6 @@
     "current": 10,
     "maximum": 10,
     "band": "ready",
-    "tone": "normal"
-   },
-   {
-    "resource": {
-     "cartridge_id": "toolbox_showcase",
-     "cartridge_version": "0.0.1",
-     "kind": "resource",
-     "key": "hunger"
-    },
-    "current": 10,
-    "maximum": 10,
-    "band": "fed",
     "tone": "normal"
    },
    {
@@ -751,20 +747,18 @@
     "maximum": 100,
     "band": "purse_empty",
     "tone": "danger"
-   },
-   {
-    "resource": {
-     "cartridge_id": "toolbox_showcase",
-     "cartridge_version": "0.0.1",
-     "kind": "resource",
-     "key": "thirst"
-    },
-    "current": 10,
-    "maximum": 10,
-    "band": "quenched",
-    "tone": "normal"
    }
-  ]
+  ],
+  "revival": {
+   "lines": [
+    "death.revival.1",
+    "death.revival.2",
+    "death.revival.3",
+    "death.revival.4",
+    "death.revival.5"
+   ],
+   "seconds": 10
+  }
  },
  "stack": [],
  "log": [

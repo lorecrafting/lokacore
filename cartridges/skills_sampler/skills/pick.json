@@ -1,5 +1,28 @@
 {
   "name": "skill.pick.label",
   "requirement": "skill.pick.requirement",
-  "growth": [1, 2, 3, 4, 5]
+  "growth": [1, 2, 3, 4, 5],
+  "learned": "skill.pick.learned",
+  "ranks": [
+    {
+      "name": "skill.pick.rank1"
+    },
+    {
+      "name": "skill.pick.rank2",
+      "reached": "skill.pick.rank2_reached"
+    },
+    {
+      "name": "skill.pick.rank3"
+    },
+    {
+      "name": "skill.pick.rank4"
+    },
+    {
+      "name": "skill.pick.rank5",
+      "reached": "skill.pick.rank5_reached"
+    },
+    {
+      "name": "skill.pick.rank6"
+    }
+  ]
 }

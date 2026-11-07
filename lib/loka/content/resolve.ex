@@ -4,7 +4,7 @@ defmodule Loka.Content.Resolve do
   import Loka.Content.Source, only: [diag: 2, diag: 3, at: 2, ref: 3]
   import Loka.Content.Refs, only: [commands: 0, owners: 1, owners: 2, owned: 3, reference: 6]
 
-  alias Loka.Content.{Barriers, Dialogues, Entities, Exits, Quests, Reactions, RoomParts}
+  alias Loka.Content.{Barriers, Dialogues, Emotes, Entities, Exits, Quests, Reactions, RoomParts}
   alias Loka.Content.ScriptedActions
   alias Loka.Core.Canonical
 
@@ -132,9 +132,11 @@ defmodule Loka.Content.Resolve do
     |> Loka.Content.NpcFields.expand(m, &expand/2)
   end
 
-  # A scripted action's target (ScriptedTarget): its detail a key, so a details map never matches.
+  # A scripted action's or a quest offer's target: a detail is a key, so a details map never matches.
   def expand(%{"kind" => "detail", "room" => _, "detail" => d} = target, m) when is_binary(d),
     do: Map.update!(target, "room", &ref(&1, "room", m))
+
+  def expand(%{"kind" => "npc", "npc" => n} = t, m), do: %{t | "npc" => ref(n, "npc", m)}
 
   # Toolbox row G4: a use target's tool liquid.
   def expand(%{"kind" => "use", "tool" => %{"liquid" => l}} = target, m) when is_binary(l),
@@ -309,16 +311,14 @@ defmodule Loka.Content.Resolve do
   defp nesting(_), do: 0
 
   @doc """
-  Diagnostics for a v2 source (`{entry, text}`; nil for v1): the entry is present, each room's,
+  Diagnostics for the source's `{entry, text}`: the entry is present, each room's,
   item's and NPC's owning capability is required, exits and the entry name rooms of this
   cartridge, items' locations and NPCs' rooms name definitions of their kind, items and NPCs
   start without a containment cycle or over capacity, each room's, item's, NPC's and action's
   text keys have a catalog entry (unless the catalog was rejected, `:unknown`). Scripted actions and
   rooms' action contributions are `Loka.Content.ScriptedActions.check/4`.
   """
-  @spec rooms(map() | nil, map(), {map() | nil, map() | :unknown} | nil, [map()]) :: [map()]
-  def rooms(_, _, nil, _), do: []
-
+  @spec rooms(map() | nil, map(), {map() | nil, map() | :unknown}, [map()]) :: [map()]
   def rooms(m, defs, {entry, text}, registry) do
     rooms = for {_, {rel, [], r}} <- defs["room"], do: {rel, r}
 
@@ -430,7 +430,7 @@ defmodule Loka.Content.Resolve do
       Dialogues.conditions(defs),
       Loka.Content.Skills.conditions(defs),
       Loka.Content.Barriers.conditions(defs),
-      Loka.Content.Cues.conditions(defs),
+      Loka.Content.Cues.conditions(defs) ++ Emotes.conditions(defs),
       Loka.Content.Population.conditions(defs)
     ])
   end
@@ -438,9 +438,10 @@ defmodule Loka.Content.Resolve do
   defp expand_attack(npc, m),
     do: if(npc["attack"], do: Map.put(npc, "attack", expand(npc["attack"], m)), else: npc)
 
-  # run_job is authority-internal (04 §1): no action builds it.
+  # run_job is authority-internal (04 §1), dev_* the author preview's (cartridge.md): no action builds them.
   defp command(rel, name, required, elapsed?) do
-    if name in commands() and name not in ["run_job", "elapsed"] and
+    if name in commands() and
+         name not in ["run_job", "elapsed", "dev_go_to_room", "dev_set_fact", "dev_set_level"] and
          not (elapsed? and name == "wait"),
        do: owned(at(rel, ["command"]), name, required),
        else: [diag("UNKNOWN_COMMAND", at(rel, ["command"]))]

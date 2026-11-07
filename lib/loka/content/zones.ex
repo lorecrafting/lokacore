@@ -1,6 +1,6 @@
 defmodule Loka.Content.Zones do
   @moduledoc """
-  Zones: a room's source-only `zones` lists the zones it belongs to, and a reaction with `"zone"`
+  Zones: a room's source-only `zones` lists the zones it belongs to (its area is one too), and a reaction with `"zone"`
   and no `on.room` stands for one copy `<rule>_<room>` per member room
   (docs/system/cartridge.md, Source shortcuts). `expand/1` strips `zones` from every room. It
   returns faults; Source builds the diagnostics, so this module never calls Source.
@@ -26,14 +26,24 @@ defmodule Loka.Content.Zones do
   end
 
   defp rooms(files),
-    do: for({rel, {:room, room, steps}, %{"zones" => zs}} <- files, do: {rel, room, steps, zs})
+    do:
+      for(
+        {rel, {:room, room, steps}, %{} = v} <- files,
+        do: {rel, room, steps, Map.get(v, "zones", [])}
+      )
 
   defp malformed({rel, _, steps, _}),
     do: {"SCHEMA_VIOLATION", {rel, steps ++ ["zones"]}, invalid("type")}
 
-  # Zone => member rooms; copy order is irrelevant (the artifact keys reactions by id).
+  # Zone => member rooms; a room's area is a zone too. Copy order is irrelevant (the artifact
+  # keys reactions by id).
   defp members(rooms) do
-    pairs = for {_, room, _, zs} <- rooms, zone <- zs, uniq: true, do: {zone, room}
+    pairs =
+      for {rel, room, _, zs} <- rooms,
+          zone <- List.wrap(Areas.area_of(rel)) ++ zs,
+          uniq: true,
+          do: {zone, room}
+
     pairs |> Enum.group_by(&elem(&1, 0), &elem(&1, 1))
   end
 

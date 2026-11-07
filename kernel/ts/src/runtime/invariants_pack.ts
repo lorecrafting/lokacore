@@ -1,5 +1,7 @@
 // Independent pack admission, rotation and member-exit proof.
 import { key, same } from '../foundation/compose.ts';
+import { occurrence } from '../foundation/compose_rows.ts';
+import type { Json } from '../foundation/canonical.ts';
 type Any = any;
 
 export function advancePack(
@@ -30,7 +32,7 @@ export function advancePack(
           containers,
           slots,
           preceding,
-          state.jobs?.[op.job_id]?.due_time,
+          occurrence(state, op),
         ),
     ) &&
     rotationHolds(op, row, state)
@@ -78,7 +80,7 @@ function memberRemains(
   containers: Map<string, Any>,
   slots: Map<string, Any>,
   preceding: Any[],
-  due: number | undefined,
+  due: Json | undefined,
 ) {
   const origin = state.created?.[id]?.origin;
   if (origin?.kind !== 'spawned' || !memberInitiallyPresent(id, room, state)) return false;
@@ -104,7 +106,7 @@ function memberDeparted(
   slot: Any,
   containers: Map<string, Any>,
   preceding: Any[],
-  due: number | undefined,
+  due: Json | undefined,
 ) {
   const reverse = [...preceding].reverse();
   const slotOp = reverse.find(

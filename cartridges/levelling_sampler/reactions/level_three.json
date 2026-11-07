@@ -1,0 +1,12 @@
+{
+  "on": {
+    "event": "level_reached",
+    "level": 3
+  },
+  "steps": [
+    {
+      "op": "narrate",
+      "text": "levelling.level_three"
+    }
+  ]
+}

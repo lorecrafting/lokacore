@@ -1,5 +1,7 @@
 # Showcase plan 3: cause and effect in Low Wardle
 
+> Reference only: agent-written plan; any room, NPC or line text in it is placeholder. Never ships as written; the owner writes shipped prose ([rule](../decisions/owner-decision-human-made-content-2026-10-31.md)).
+
 Content brief for `cartridges/toolbox_showcase` ([showcase](../SHOWCASE.md), Beads `loka-y6yg.4`, idea
 `loka-lvno`), written by Fable for an Opus developer and an Opus reviewer. Base: `main` after PR #369
 (the combat district): the build keeps the Warden's `resistances` and combat 10. Only installed
@@ -30,7 +32,7 @@ a quiet twin (deliver; pick) that pays nothing back.
 Clock: 3600 units a game hour, rate 50, so one real minute is 50 game minutes, a game day 28.8 real
 minutes and the 30-minute recap threshold 25 game hours. One number differs from the owner's sketch:
 the fuse is **one** game day, not two, so the owner's playtest fits one absence of about 35 real
-minutes; it is two fields (`statuses/word_travels.json` `duration` and `tick_every`, `tick_every` one
+minutes; it is two fields (`areas/low_wardle/statuses/word_travels.json` `duration` and `tick_every`, `tick_every` one
 unit less, as the compiler requires it below `duration`) to retune.
 
 ## Pattern 4: the forced strongbox (a fuse)
@@ -39,8 +41,8 @@ unit less, as the compiler requires it below `duration`) to retune.
   `{key: force_strongbox, kind: opposed, attribute: str}` (str 10 beats 1: forcing a cheap lock is
   easy and loud; picking is the quiet skill), policy `all(strongbox_picked false, strongbox_forced
   false)`, success `fact.assign strongbox_forced true`, a failure outcome with its line
-  (`actions/force_tollhouse_door.json`). `pick_strongbox`'s policy adds `strongbox_forced false`;
-  `barriers/strongbox_lid.json` `opens_when any(strongbox_picked, strongbox_forced)`.
+  (`areas/low_wardle/actions/force_tollhouse_door.json`). `pick_strongbox`'s policy adds `strongbox_forced false`;
+  `areas/low_wardle/barriers/strongbox_lid.json` `opens_when any(strongbox_picked, strongbox_forced)`.
 - Status `word_travels`: `duration` 86400, `tick_every` 86399 (the compiler refuses a tick at or past the end), `resource` hp, `per_tick` -1, label and
   three narration keys (required, never shown: an item's status says nothing,
   [row G3](../system/mechanics.md#statuses-on-npcs-and-things-toolbox-row-g3)). It lives on the
@@ -52,7 +54,7 @@ emits `status_expired` only (an expired job skips the tick, `kernel/ts/src/mecha
   `word_out`: `on {event: status_expired, status: word_travels}` `apply fact.assign warden_knows true`
   (`npc_status_sampler/reactions/charred.json`; the delivery runs for the command actor, so the
   player's fact is written whatever advance crosses the expiry). Fact `warden_knows`, instance bool (a schedule case reads it, Realm seam 5).
-- Warden (`npcs/warden.json`): `disposition.hostile` becomes `any(all(wardle_standing -2, trust 0 at
+- Warden (`areas/low_wardle/npcs/warden.json`): `disposition.hostile` becomes `any(all(wardle_standing -2, trust 0 at
   target), all(warden_knows true, trust 0 at target))`; `engage` unchanged. `daily_schedule` `"13":
   [{when: fact_compare warden_knows true, room: village_green, goal: npc.warden.goal_green},
   warden_gate]`, `"14": warden_gate` (13:00, so a box forced before 13:00 on day 1 sends him
@@ -77,7 +79,7 @@ emits `status_expired` only (an expired job skips the tick, `kernel/ts/src/mecha
 
 - `reactions/letter_ash_after.json` adds `fact.assign letter_burnt true` (instance bool, read by Wat's schedule case) beside the
   standing -2.
-- Wat (`npcs/wat.json`): `daily_schedule` adds `"14": [{when: fact_compare letter_burnt true, room:
+- Wat (`areas/fell_road/npcs/wat.json`): `daily_schedule` adds `"14": [{when: fact_compare letter_burnt true, room:
   warden_gate, goal: npc.wat.goal_gate}, shepherd_hut]`, `"16": shepherd_hut`; hours 8 and 9 stay
   (body 7 pins them). `description_variants` on `letter_burnt`, listed **before** the
   `chilled` variants (first match wins, and on a frost day Wat is chilled 08:00 to 10:30): a line
@@ -121,7 +123,7 @@ Social steps continue plan 1's numbering.
 |---|---|---|
 | 15 | Fresh world, 07:00 day 1. Reeve: `help` (no letter: an undelivered letter would fail `late` during step 17 and move the standing); Warden: `lean` twice; east; `force_strongbox` at about 08:00. | Passes (10 ≥ 1); `strongbox_forced` true; the lid opens; `pick_strongbox` unavailable; a `word_travels` row on the strongbox, `ends_at` = force time + 86400; no narration line, Character page unchanged; `warden_knows` false; the Warden's description is the base. Take the ledger; `force_tollhouse_door`; north to the mill, down to the green. |
 | 16 | Same world, `pick_strongbox` instead (two tries). | No status row anywhere; after the whole of step 17's wait `warden_knows` is still false and the Warden is at his gate with the base line. |
-| 17 | From step 15, stand on the green; elapse to 14:30 day 2. | At force time + 86400 (about 08:00 day 2) `status_expired` and `warden_knows` true, nothing said. 13:00 day 2: the Warden enters the green (`entity_entered_room`; he walked in, so no engage, G11); his description reads the hands variant. 14:00: he goes back to the gate. Walk east at 14:30: `engage` opens an encounter (standing 1, trust 0, `warden_knows`); the Warden's chance is 0 so the player takes nothing, and the player's blow lands nothing unarmed (a hit for no loss with the sword, as combat 10); `reactions/gate_shut.json` (on the entry, when the Warden is present, his trust is 0 and standing is -2 or `warden_knows`, the same test as his hostile disposition) sets `toll_gate` closed and `warden_lets_pass` false (else a plain Open would reopen it once he walks off), so Flee leaves by the green, not the tollhouse (loka-y6yg.16). A player he trusts (the ledger gift, step 18) finds the gate open. |
+| 17 | From step 15, stand on the green; elapse to 14:30 day 2. | At force time + 86400 (about 08:00 day 2) `status_expired` and `warden_knows` true, nothing said. 13:00 day 2: the Warden enters the green (`entity_entered_room`; he walked in, so no engage, G11); his description reads the hands variant. 14:00: he goes back to the gate. Walk east at 14:30: `engage` opens an encounter (standing 1, trust 0, `warden_knows`); the Warden's chance is 0 so the player takes nothing, and the player's blow lands nothing unarmed (a hit for no loss with the sword, as combat 10); `areas/low_wardle/reactions/gate_shut.json` (on the entry, when the Warden is present, his trust is 0 and standing is -2 or `warden_knows`, the same test as his hostile disposition) sets `toll_gate` closed and `warden_lets_pass` false (else a plain Open would reopen it once he walks off), so Flee leaves by the green, not the tollhouse (loka-y6yg.16). A player he trusts (the ledger gift, step 18) finds the gate open. |
 | 18 | Branch at 13:00 day 2 on the green, the player there since before 13:00. (a) East, then east again. (b) Give the Warden the ledger, then at 14:30 walk east. (c) From the inn, south onto the green at 13:30. | (a) The gate room is empty, the tollhouse reached, no engage; his 14:00 return engages no one. (c) `engage` on the green; Flee leaves by one of five exits. (b) `trust` (Warden) 1: wary; no engage at 14:30; the hands variant still shows. |
 | 19 | Fresh world, 07:00 day 1, standing 1 after `help`; `accept`, take the letter; reach the hut after 09:00; `burn`. | Scene `letter_ash`; standing -1; `letter_burnt` true; Wat's description reads the variant at once; `knows_ash` false on Wat, Tam and Nell. 14:00 day 1: Wat enters the gate (`knows_ash` on Wat; the goal line only if the player is in the hut). 15:00: Tam enters the gate, `knows_ash` on Tam. 16:00: Wat home. 11:00 day 2: Tam on the green, `knows_ash` on Nell. Talk to Nell at 11:30: `nell_ash` opens (ahead of `nell_rumour`); `press` fails twice and passes the third time with intimidate 0 at the start (growth `[1, 2]`); Lore lists "The surety". Church: read the roll ("The parish"); the Journal shows the card "What the letter carried" from those two (and the heir card once "The fire" is known); `think_letter` grants it once. |
 | 20 | Fresh world, as 19 but `deliver`. | `letter_burnt` false; Wat is in the hut at 14:00 and 16:00 (no event); Tam's 15:00 arrival writes nothing; Nell on day 2 opens `nell_rumour` only; no letter card; standing 2. |
@@ -180,7 +182,7 @@ schedule x dialogue check x codex deduction (the letter).
 
 ## Toolbox findings
 
-1. **Obsolete: `barrier.set` exists now** (`loka-kgd.96`); `reactions/gate_shut.json` shuts the gate (step 17). Kept for the record: **No reaction step changed a barrier.** `apply` offers fact, quest, status, population and
+1. **Obsolete: `barrier.set` exists now** (`loka-kgd.96`); `areas/low_wardle/reactions/gate_shut.json` shuts the gate (step 17). Kept for the record: **No reaction step changed a barrier.** `apply` offers fact, quest, status, population and
    experience steps only (`protocol/reaction.schema.json`), so the toll gate cannot shut when the
    Warden learns; `opens_when` gates `open`, and the gate is already open in every forced save.
    Content fallback: the Warden himself is the shut gate (engage), and his 13:00 walk the detour.

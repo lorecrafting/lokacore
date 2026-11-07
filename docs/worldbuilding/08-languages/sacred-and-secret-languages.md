@@ -1,5 +1,7 @@
 # Sacred and secret languages
 
+> Reference only: agent-drafted worldbuilding text (not the owner's words). Never ships as written; the owner writes shipped prose ([rule](../../decisions/owner-decision-human-made-content-2026-10-31.md)).
+
 Written 2026-10-20 03:26 UTC in the Pi harness by antigravity/gemini-3.8-flash
 
 Status: draft. Area: [Languages and naming](../README.md#08-languages). Canon tier: draft (owner-directed 2026-10-20).

@@ -233,8 +233,8 @@ test('a read error after a durable commit does not commit the press twice', () =
 });
 
 // Breaks (03 §14; R6P-A03): a receipt that is not a DecisionResult replayed as saved, or its
-// conflict leaving pending set, so every later button retries the confirmed "scan".
-test('a confirmed receipt that is not a decision is a conflict and ends the attempt', () => {
+// attempt left pending, so every later button retries "scan". Play stops as a reopen would refuse.
+test('a confirmed receipt that is not a decision is a corrupt save and ends the attempt', () => {
   const { p, arm } = lostAck();
   arm();
   p.press('Scan'); // committed, ack lost, first reconcile read fails: pending
@@ -243,9 +243,10 @@ test('a confirmed receipt that is not a decision is a conflict and ends the atte
   );
   p.press('Scan'); // settles, finds the receipt, which is not a decision
   assert.equal(p.now().pending, false);
+  assert.equal(p.now().fault, 'save corrupt');
   p.press('Go north');
-  assert.deepEqual(p.now().log, ['You arrive from the south.']);
-  assert.equal(p.now().place, 'Village Green');
+  assert.deepEqual(p.now().log, []);
+  assert.equal(p.now().place, 'Ferry Landing');
 });
 
 // The app's save file under localSession, as App.tsx wires it: `remove` closes the handle and deletes

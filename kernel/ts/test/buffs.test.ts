@@ -78,7 +78,7 @@ const fresh = () => newWorld(content, ctx('2e5f9b6d-4a2c-4d3b-8f8e-7c6b5d4e3f2a'
 // stacks (16) or leaves the first end in place (10 at +3601), or the might outlives its refresh.
 test('a potion gives str +3 for an hour; a second dose refreshes it, never stacks', () => {
   let w = play(fresh(), { type: 'take', item_id: id(fresh(), 'item', 'vial') });
-  const drink = (x: World) => play(x, { type: 'drink', vessel_id: id(x, 'item', 'vial') });
+  const drink = (x: World) => play(x, { type: 'consume', item_id: id(x, 'item', 'vial') });
   w = drink(w);
   const t0 = w.state.clock;
   assert.deepEqual([mine(w, 'str'), mine(w, 'dex')], [13, 10]);
@@ -96,7 +96,7 @@ test('a potion gives str +3 for an hour; a second dose refreshes it, never stack
 // refresh rescheduled is missed and the advance faults instead of ending the might.
 test('one advance across a refreshed dose ends the might at its new end', () => {
   let w = play(fresh(), { type: 'take', item_id: id(fresh(), 'item', 'vial') });
-  const drink = (x: World) => play(x, { type: 'drink', vessel_id: id(x, 'item', 'vial') });
+  const drink = (x: World) => play(x, { type: 'consume', item_id: id(x, 'item', 'vial') });
   w = drink(wait(drink(w), 1000));
   assert.equal(mine(w, 'str'), 13);
   assert.equal(mine(wait(w, 4600), 'str'), 10);

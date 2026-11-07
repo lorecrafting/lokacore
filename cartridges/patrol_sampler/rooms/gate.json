@@ -1,0 +1,9 @@
+{
+  "name": "room.gate.title",
+  "description": "room.gate.description",
+  "exits": {
+    "west": {
+      "to": "post"
+    }
+  }
+}

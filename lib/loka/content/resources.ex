@@ -3,7 +3,7 @@ defmodule Loka.Content.Resources do
   `resources.json` and the engine's default pools (resource.schema.json ResourceSpec; 00 §4
   amendment, owner decision HP/MA/MV). The file is `{"resources": {key: fields}}`: a default
   pool's key (hp, ma, mv) overrides any of its fields, another key declares a whole
-  ResourceSpec without `key`. Every loka-cartridge-v2 cartridge gets the three pools and
+  ResourceSpec without `key`. Every cartridge gets the three pools and
   resource@1 and schedule@1 (`requires/1`), with or without the file. `attributes.json`, the
   cartridge's attributes (attribute@1), loads here too (`attributes/1`), the same way.
   """
@@ -28,7 +28,7 @@ defmodule Loka.Content.Resources do
   def load([{rel, file}]) when file != :invalid do
     defs = Map.put(Contracts.defs(), "ResourcesFile", file_schema("resources"))
 
-    case Contracts.validate("ResourcesFile", file, defs) do
+    case Contracts.detailed("ResourcesFile", file, defs) do
       :ok -> specs(rel, file["resources"])
       {:error, es} -> {specs(rel, %{}) |> elem(0), schema(rel, [], file, es)}
     end
@@ -48,7 +48,7 @@ defmodule Loka.Content.Resources do
   def attributes([{rel, file}]) do
     defs = Map.put(Contracts.defs(), "AttributesFile", file_schema("attributes"))
 
-    case Contracts.validate("AttributesFile", file, defs) do
+    case Contracts.detailed("AttributesFile", file, defs) do
       :ok ->
         collect(
           rel,
@@ -84,13 +84,13 @@ defmodule Loka.Content.Resources do
 
   @doc """
   Diagnostics of the condition band tables (resource.schema.json BandTable: each pool's `bands`
-  and cartridge.json's `world.bands`) and of `world.movement.cost`, given a manifest and a v2
+  and cartridge.json's `world.bands`) and of `world.movement.cost`, given a manifest and the
   source: cuts not strictly descending to a last 0, or a repeated key, is RESOURCE_SPEC_INVALID at
   the table; a band key without `band.<key>` in the catalog (unless it was rejected) or a cost
   naming no resource of this cartridge is UNRESOLVED_REFERENCE; an attribute without attribute@1
   in `m`'s requires is UNDECLARED_CAPABILITY.
   """
-  @spec check(map() | nil, map(), {term(), map() | :unknown} | nil, {term(), map()}, [map()]) ::
+  @spec check(map() | nil, map(), {term(), map() | :unknown}, {term(), map()}, [map()]) ::
           [map()]
   def check(m, defs, {_, text}, {_, settings}, registry) when m != nil do
     world = Map.get(settings, "world", %{})
@@ -109,16 +109,16 @@ defmodule Loka.Content.Resources do
   defp npc_balances(defs) do
     for {_, {rel, [], npc}} <- defs["npc"],
         {name, value} <- Map.get(npc, "resource_starts", %{}),
-        spec = defs["resource"][name],
-        not (match?({_, _, _}, spec) and elem(spec, 2)["minimum"] <= value and
-               value <= elem(spec, 2)["maximum"]),
+        # A refused resource has its own line, and no numbers to hold this start to.
+        {_, _, spec} <- [defs["resource"][name]],
+        not (spec["minimum"] <= value and value <= spec["maximum"]),
         do: diag("RESOURCE_SPEC_INVALID", at(rel, ["resource_starts", name]))
   end
 
   defp npc_hp(defs) do
     for {_, {rel, [], %{"hp" => hp}}} <- defs["npc"],
-        not start_in_bounds?(hp),
-        do: diag("RESOURCE_SPEC_INVALID", at(rel, ["hp"]))
+        code = hp_fault(hp),
+        do: diag(code, at(rel, ["hp"]))
   end
 
   defp tables(defs, world) do
@@ -204,36 +204,53 @@ defmodule Loka.Content.Resources do
     collect(rel, "resources", results)
   end
 
-  # {key => {rel, steps, spec} | :invalid, diagnostics} of each key's {:ok, spec} | {:error, ds}.
+  # {key => {rel, steps, spec} | :invalid, diagnostics} of each key's {:ok, spec} | {:error, ds},
+  # or {:error, ds, spec} for a fault that leaves the spec usable.
   defp collect(rel, name, results) do
     {Map.new(results, fn
        {k, {:ok, s}} -> {k, {rel, [name, k], s}}
+       {k, {:error, _, s}} -> {k, {rel, [name, k], s}}
        {k, _} -> {k, :invalid}
-     end), for({_, {:error, ds}} <- results, d <- ds, do: d)}
+     end), for({_, r} <- results, elem(r, 0) == :error, d <- elem(r, 1), do: d)}
   end
 
   defp spec(rel, k, fields) do
     value = @defaults |> Map.get(k, %{}) |> Map.merge(fields) |> Map.put("key", k)
 
-    ordered = start_in_bounds?(value)
+    diags = diags(rel, ["resources", k], fields, value)
 
-    case diags(rel, ["resources", k], fields, value) do
-      [] ->
-        cond do
-          not ordered ->
-            {:error, [diag("RESOURCE_SPEC_INVALID", at(rel, ["resources", k]))]}
-
-          not residual_bound?(value) ->
-            {:error, [diag("RESOURCE_SPEC_INVALID", at(rel, ["resources", k, "regen"]))]}
-
-          true ->
-            {:ok, value}
-        end
-
-      diags ->
-        {:error, diags}
+    # A band's tone changes no number: the pool stays usable, so nothing naming it also fails.
+    if Enum.all?(diags, &(&1["path"] =~ ~r/\.bands\[\d+\]\.tone$/)) do
+      case {diags, number_faults(rel, k, value)} do
+        {[], []} -> {:ok, value}
+        {_, []} -> {:error, diags, value}
+        {_, faults} -> {:error, diags ++ faults}
+      end
+    else
+      {:error, diags}
     end
   end
+
+  defp number_faults(rel, k, value) do
+    cond do
+      code = if(k == "hp", do: hp_fault(value), else: value_fault(value)) ->
+        [diag(code, at(rel, ["resources", k]))]
+
+      not residual_bound?(value) ->
+        [diag("RESOURCE_SPEC_INVALID", at(rel, ["resources", k, "regen"]))]
+
+      true ->
+        []
+    end
+  end
+
+  # A body below 0 takes no blow's loss, so it could never die (loka-vduxr.21).
+  defp hp_fault(%{"minimum" => minimum, "start" => start}) when minimum < 0 or start < 0,
+    do: "BODY_BELOW_ZERO"
+
+  defp hp_fault(value), do: value_fault(value)
+
+  defp value_fault(value), do: if(!start_in_bounds?(value), do: "RESOURCE_SPEC_INVALID")
 
   defp start_in_bounds?(value),
     do: value["minimum"] <= value["start"] and value["start"] <= value["maximum"]
@@ -247,7 +264,7 @@ defmodule Loka.Content.Resources do
   end
 
   defp validated(rel, steps, contract, value) do
-    case Contracts.validate(contract, value) do
+    case Contracts.detailed(contract, value) do
       :ok -> []
       {:error, es} -> schema(rel, steps, value, es)
     end

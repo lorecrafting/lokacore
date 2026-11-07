@@ -133,7 +133,17 @@ test('wisp attempts compose to their literal answers', () => {
     assert.deepEqual(validate('ConditionView', { ...permanent, duration }), [
       { path: '/ends_at', code: 'missing_property' },
     ]);
-    const optional = ['per_tick', 'ends_at', 'duration', 'next_tick_at', 'kind'];
+    // A status with several ticks (loka-kgd.209) lists them in place of resource and per_tick.
+    const { resource: _r, per_tick: _p, ...multi } = view;
+    const ticks = [
+      { resource: 'hp', per_tick: 1 },
+      { resource: 'mv', per_tick: 2 },
+    ];
+    assert.deepEqual(validate('ConditionView', { ...multi, ticks }), []);
+    assert.deepEqual(validate('ConditionView', { ...multi, ticks: [{ resource: 'hp' }] }), [
+      { path: '/ticks/0/per_tick', code: 'missing_property' },
+    ]);
+    const optional = ['resource', 'per_tick', 'ends_at', 'duration', 'next_tick_at', 'kind'];
     for (const field of Object.keys(view).filter((f) => !optional.includes(f))) {
       const partial: Record<string, unknown> = { ...view };
       delete partial[field];
@@ -148,6 +158,37 @@ test('wisp attempts compose to their literal answers', () => {
     assert.deepEqual(validate('ConditionView', { ...view, duration: 0 }), [
       { path: '/duration', code: 'below_minimum' },
     ]);
+  });
+
+  // Breaks (loka-x6t.135): a cooling action or spell word projecting an end without its length (or
+  // the reverse), a zero length, or an end on an available entry.
+  test('a cooldown end and length come together on unavailable actions and spell words only', () => {
+    const action = {
+      available: false,
+      action_key: 'pray',
+      label: 'actions.pray',
+      target: { kind: 'none' },
+      input: [],
+      reason: { code: 'cooldown' },
+    };
+    const word = { word: 'lux', available: false, reason: { code: 'cooldown' } };
+    for (const [contract, v] of [
+      ['AdvertisedAction', action],
+      ['SpellWord', word],
+    ] as const) {
+      assert.deepEqual(validate(contract, { ...v, ends_at: 30, duration: 30 }), [], contract);
+      assert.deepEqual(validate(contract, { ...v, ends_at: 30 }), [
+        { path: '/duration', code: 'missing_property' },
+      ]);
+      assert.deepEqual(validate(contract, { ...v, duration: 30 }), [
+        { path: '/ends_at', code: 'missing_property' },
+      ]);
+      assert.deepEqual(validate(contract, { ...v, ends_at: 30, duration: 0 }), [
+        { path: '/duration', code: 'below_minimum' },
+      ]);
+      const { reason: _, ...open } = { ...v, available: true };
+      assert.notDeepEqual(validate(contract, { ...open, ends_at: 30, duration: 30 }), [], contract);
+    }
   });
 
   // Breaks: a compiled status definition missing one field, or with a zero duration or cadence,
@@ -172,8 +213,9 @@ test('wisp attempts compose to their literal answers', () => {
       },
     };
     assert.deepEqual(validate('StatusDefinition', def), []);
-    // per_tick may be omitted with modifies (row 2c); the compiler and loader require it otherwise.
-    for (const field of Object.keys(def).filter((f) => f !== 'per_tick')) {
+    // per_tick may be omitted with modifies (row 2c), resource beside ticks (loka-kgd.209); the
+    // compiler and loader require them otherwise.
+    for (const field of Object.keys(def).filter((f) => f !== 'per_tick' && f !== 'resource')) {
       const partial: Record<string, unknown> = { ...def };
       delete partial[field];
       assert.deepEqual(validate('StatusDefinition', partial), [

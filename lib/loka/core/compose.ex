@@ -156,7 +156,7 @@ defmodule Loka.Core.Compose do
          ctx
        ) do
     cond do
-      not Loka.Core.ComposeFood.valid?(op, elem(ctx, 0)) ->
+      not Loka.Core.ComposeFood.valid?(op, elem(ctx, 0), elem(ctx, 2)) ->
         {:error, "precondition_failed"}
 
       read(t, ctx) != op["source_id"] ->
@@ -224,7 +224,7 @@ defmodule Loka.Core.Compose do
             id,
             room,
             op["writer_group"],
-            get_in(elem(ctx, 0), ["jobs", op["job_id"], "due_time"]),
+            Loka.Core.ComposeJob.occurrence(elem(ctx, 0), op),
             ctx
           )
         end,

@@ -55,7 +55,7 @@ words remain in the cartridge; Book owns layout and navigation.
 | Inspect, take, equip or use an item/container | Item detail; an open container's `InsidePage` ([`Menu.tsx`](../mobile/app/book/Menu.tsx)), ordinary item → inside detail route ([rule](system/book-ui.md#item-details-and-takedrop)) | Exact item/custody, Look inside, local Close to the item page, contents parent return, current actions and load refusal. |
 | Read a notice or a book | Readable/notice detail | Confirmed Read on entry when specified, no duplicate Read, saved text and parent return. |
 | Fight or flee | Combat foreground page | Combat-only response set, isolated log, closure and restored World route. |
-| Continue a current modal scene or chapter | `ScenePage`/`ChapterPage` | Confirmed continuation or acknowledgement; no premature consequence. |
+| Continue a current modal scene, or a chapter card under a screen reader (otherwise the card turns itself and a tap skips) | `ScenePage`/`ChapterPage` | Confirmed continuation or acknowledgement; no premature consequence. |
 | Resume a bed dream | [`DreamPage.tsx`](../mobile/app/book/DreamPage.tsx), ordinary bed → dream detail route | Saved cursor/choice, local Close to bed, Resume after reopen and ordinary World access ([rule](system/book-ui.md#chapters-scenes-and-recovery)). |
 | Use, give or cast with a second thing | Pick list on the target's or the held thing's page ([rule](system/book-ui.md#item-details-and-takedrop)) | Rows only from GameView pairs, option hidden when empty, pick returns to World, refused pick keeps the page. |
 | Show room travel or status | World/status shell | Confirmed room, legal exits, current time/status and no optimistic move. |
@@ -70,7 +70,8 @@ it. Do not create a new screen merely because a mechanic has a new name.
 ## Design tokens
 
 [`tokens.ts`](../mobile/app/book/tokens.ts) is the single source of the Book's colours, fonts,
-type styles, spacing, sizes, radius, opacity, motion and sound. Its values are the
+type styles, spacing, sizes, radius, opacity, motion and sound. Its `chrome` export is the editor's, never drawn in the Book
+([editor chrome rulings](design/editor-chrome-rulings.md)). Its values are the
 [Chapter 1 mock's](design/ui-exploration/chapter-one-playable.html) base page with every effect
 off, consolidated; the [Tokens story](../mobile/app/stories/Tokens.stories.tsx) renders them live.
 
@@ -98,19 +99,27 @@ off, consolidated; the [Tokens story](../mobile/app/stories/Tokens.stories.tsx) 
   size and line height each rounded): read them through `useType()`. Every Book `Text` sets
   `allowFontScaling={false}`.
 - **Space, size, radius.** Margins, gaps and padding come from `space`; touch, card, rule
-  and minimap sizes from `size`; corners from `radius`. `Tap`'s bleed, below only, is
+  (`size.experienceRule`) and minimap sizes from `size`; corners from `radius`. `Tap`'s bleed, below only, is
   `size.touch` − the scaled `type.body.lineHeight`, never negative: 16 px at Standard, 12, 8
   and 2 px at Large, Larger and the cap, so a body line keeps a 44 px hit area with no visible
   padding. Map drawing geometry
   (`MapDrawing`, `DiscoveredMap` layout, `joystick`) is exempt: its numbers are a drawing,
   not spacing.
+- **Experience rule.** `size.experienceRule` (2 px) under the status row: `line` track, `fg` fill.
+  A gain or loss moves over `motion.dry`. A level: full over `motion.dry`, `warning` for
+  `motion.settle.hold`, then `fg` at the new fraction over `motion.dry`.
 - **Focus.** On web, keyboard focus draws a `size.focus` `action` outline `size.focus` outside the
   focused element, on `:focus-visible` only (the mock's rule): a tap or a click draws no ring; a
   Tab does, and so does an arriving page's title focus after keyboard use. One document-wide rule
   (`useFocusRing`, recoloured by the Book's shown palette), never a per-component style; a device
   draws no ring.
-- **Motion and sound.** Only the plain state changes in `motion` and the page turn's sound;
-  no decorative animation. `motion.palette` is the slow cross-fade between palettes (light
+- **Under-ink layers.** A layer that stays under the ink (`opacity.spirit`, `opacity.reverie`, `opacity.fatal`, `opacity.faint`, `opacity.glow`) keeps every
+  text role at 4.5:1 at its peak in every palette it shows on and on a same-polarity mid-blend of two. Only one shows at a time, highest first:
+  a [treatment's](system/book-ui.md#book-treatments) layer (spirit or reverie, never both), the fatal hold, the low-health vignette, the lamp glow; together they would break the 4.5:1 rule.
+  The fatal hold's rim (`opacity.bloodshot`, a `size.bloodshot.spread` band then `size.bloodshot.blur`) counts with it at the page margin (`space.page`), where the ink starts.
+- **Motion and sound.** Only the effects named in
+  [Effects, sound and haptics](system/book-ui.md#effects-sound-and-haptics); no other decorative
+  animation. `motion.palette` is the slow cross-fade between palettes (light
   changes need more than `motion.fade`). Text stays readable through a change: every frame
   keeps each text role at least 4.5:1 on `bg` and `card`. So a palette change cross-fades
   only when ink and paper keep their polarity (ink darker than paper in both palettes, or
@@ -122,6 +131,28 @@ off, consolidated; the [Tokens story](../mobile/app/stories/Tokens.stories.tsx) 
   `lum(fg) < lum(bg)` differs between the shown palette and the target. `motion.meteor` is the
   Night sky's one shooting star; `nightSky.star` its colour. The mock's other Effects-panel
   effects and its "Archive, not in v1" group have no tokens and wait for their own owner decisions.
+- **Effect tokens.** Press: `motion.press`; a lifted card blends `line` into `card` at
+  `opacity.press` and rises `size.rule`; an ink press goes from `action` to `fg`. Ink drying:
+  `motion.dry` from `dim` to the line's colour; a narrated event starts `motion.dry.lag` later.
+  Status icon: `motion.pop` from scale `motion.pop.from`; expiry `motion.fade`. Item pop: rises
+  `motion.pop.rise` over `motion.pop`, holds `hold`, leaves over `out` (`outEasing`). Gilt: `warning`
+  for `motion.settle.hold`, then `motion.settle` to the line's colour. Running head:
+  `motion.dry` across, `motion.settle` to `dim` then out. Chapter card: `motion.card.auto` before it turns itself, `motion.card`, blur sigma
+  `blurFrom` to `blurTo`, each of label, title and rule `stagger` apart. Sound, `mix` and `haptic`
+  hold levels and kinds; the sound table names each sound's haptic. Queue: small cues of one key merge
+  within `mix.coalesce`; `motion.flash.gap` is the Flash limit.
+- **Level wash.** `opacity.wash` in `warning` under the ink over `motion.flash`, on every theme. Reduced motion: `opacity.washStill`. No swell.
+- **Blow wash.** `opacity.wash` under the ink over `motion.flash`: `action` on `light` and `dawn`,
+  `danger` on `dusk` and `dark` (amber `action` reads as lamplight, not harm). The page scales to
+  `motion.flash.swell` at the peak. Reduced motion: `opacity.washStill`, no swell. The hp value dries in the same role and back to `fg`. Exemption from the 4.5:1
+  rule above, for the wash's half second only: at its peak `fg` stays above 7:1 and `action` and
+  `danger` above 5:1, while `dim` and `warning` dip to about 3.8:1 (opacity 0.08 would keep them
+  at 4.5:1 and barely show). The level wash shares this exemption for its half second, in `warning`: at its peak `fg` stays above 7:1, `action` and `danger` above 4.5:1, while `dim` dips to about 3.75:1 and `warning` to about 3.6:1 over a held layer.
+- **Lightning.** The second exemption from the 4.5:1 rule, for at most 700 ms: at `opacity.afterimage`, `fg` stays above 7:1 and `action` and `danger` above 5:1, while `dim` dips to 4.25:1 and `warning` to 4.03:1 on dusk, and `warning` to 3.95:1 on dark. No other role falls below 4.5:1. It draws with no other held layer under it.
+- **Room sound and sky.** Bed cross-fade `motion.bed.duration`; exploration gap `sound.explore.gap`; lightning stays `motion.flash.gap` from a wash; wind corner `motion.flutter`; the light is `color.light.bg` at `opacity.afterimage`, up over 60 ms, away over 1200 ms.
+- **Falling.** The held wash is oxblood (`color.light.action`) on every paper at `opacity.fatal.day` on light and dawn and `opacity.fatal.night` on dusk and dark, still (no pulse, no fade), with a bloodshot rim at the screen's edges: `opacity.bloodshot`, a solid `size.bloodshot.spread` band feathered in over `size.bloodshot.blur`, held with the wash; with Flashes off it rises over `motion.settle`, under reduced motion it is set at once. The sound is `sound.death`. The spirit state's layer is `spirit.day` on light and dawn and `spirit.night` on dusk and dark, at `opacity.spirit`, set with the page turn and faded out over `motion.palette` at the rise; its bed plays through `mix.muffle` until the rise.
+- **Reverie.** `reverie.day` at `opacity.reverie.day` on light and dawn, `reverie.night` at `opacity.reverie.night` on dusk and dark, set with the turn; the line rises from the paper to `fg` over `motion.reverie`, `motion.reverie.lag` after the page lands; Continue then shows over `motion.settle`. No sound.
+- **Fight music.** Stinger `sound.fightIn`, loop `sound.fightLoop` (`gap` is the fight gap), fanfare `sound.fightWon`, blow dealt `sound.impact`. A blow taken dips music by `mix.dip` with `mix.duck`'s times. Foe falling: the loop cuts over `motion.quick`; a fall-away fades over `motion.palette`.
 
 ## Component catalogue
 
@@ -139,6 +170,7 @@ a new component needs a real consumer, its comment and its line here in the same
 
 | Component | File | Story |
 |---|---|---|
+| `Blow` | `book/Blow.tsx` | CombatPage |
 | `Body` | `book/Body.tsx` | RoomPage |
 | `RoomPage` | `book/Body.tsx` | RoomPage |
 | `Book` | `book/Book.tsx` | Live |
@@ -146,12 +178,26 @@ a new component needs a real consumer, its comment and its line here in the same
 | `Chip` | `book/Chip.tsx` | Chip |
 | `Row` | `book/Chip.tsx` | Chip |
 | `ReadingSize` | `book/Chip.tsx` | Chip |
+| `EffectSettings` | `book/Chip.tsx` | Chip |
+| `Foot` | `book/Combat.tsx` | CombatPage |
 | `Combat` | `book/Combat.tsx` | CombatPage |
+| `CreditsPage` | `book/CreditsPage.tsx` | SectionPages |
+| `DeadPage` | `book/DeadPage.tsx` | DeadPage |
 | `DiscoveredMap` | `book/DiscoveredMap.tsx` | MapPage |
 | `DreamPage` | `book/DreamPage.tsx` | ChapterPages |
 | `DreamResume` | `book/DreamPage.tsx` | NoticePage |
+| `ExperienceRule` | `book/ExperienceRule.tsx` | ExperienceRule |
 | `Footer` | `book/Footer.tsx` | Footer |
 | `Tip` | `book/Footer.tsx` | Tip |
+| `GiltLine` | `book/GiltLine.tsx` | LogLines |
+| `Gradient` | `book/Gradient.tsx` | UnderInk |
+| `HapticPulse` | `book/HapticPulse.tsx` | HapticPulse |
+| `Hotbar` | `book/Hotbar.tsx` | CombatPage |
+| `HotbarList` | `book/Hotbar.tsx` | CombatPage |
+| `HotbarGlyph` | `book/HotbarGlyph.tsx` | CombatPage |
+| `ItemPop` | `book/ItemPop.tsx` | LogLines |
+| `Leaf` | `book/Leaf.tsx` | CombatPage |
+| `LevelWash` | `book/LevelWash.tsx` | LevelWash |
 | `MapDrawing` | `book/MapDrawing.tsx` | Footer |
 | `ContentsPage` | `book/Menu.tsx` | SectionPages |
 | `ThingPage` | `book/Menu.tsx` | ItemPage |
@@ -161,14 +207,23 @@ a new component needs a real consumer, its comment and its line here in the same
 | `NpcPage` | `book/Npc.tsx` | NpcPage |
 | `NpcDetail` | `book/Npc.tsx` | NpcPage |
 | `PageTurn` | `book/PageTurn.tsx` | PageTurn |
+| `RightWord` | `book/Riddle.tsx` | Riddle |
 | `Riddle` | `book/Riddle.tsx` | Riddle |
 | `LetterTile` | `book/Riddle.tsx` | LetterTile |
+| `RunningHead` | `book/RunningHead.tsx` | Page |
 | `SayField` | `book/SayField.tsx` | SayField |
+| `ScenePage` | `book/ScenePage.tsx` | ChapterPages |
+| `Scene` | `book/ScenePage.tsx` | ChapterPages |
 | `ShelfPage` | `book/Shelf.tsx` | NpcPage |
 | `StatusLine` | `book/Status.tsx` | StatusLine |
+| `StatusGlyph` | `book/StatusGlyph.tsx` | StatusIcon |
 | `StatusIcons` | `book/StatusIcon.tsx` | StatusIcon |
+| `Ring` | `book/StatusIcon.tsx` | StatusIcon |
 | `Tooltip` | `book/StatusIcon.tsx` | StatusIcon |
+| `Storm` | `book/Storm.tsx` | Storm |
 | `Text` | `book/Text.tsx` | Note |
+| `Unavailable` | `book/Unavailable.tsx` | ActionCard |
+| `UnderInk` | `book/UnderInk.tsx` | UnderInk |
 | `ActionCard` | `book/actions.tsx` | ActionCard |
 | `PickLists` | `book/actions.tsx` | PickList |
 | `Cards` | `book/actions.tsx` | ActionCard |
@@ -179,24 +234,23 @@ a new component needs a real consumer, its comment and its line here in the same
 | `Note` | `book/lines.tsx` | Note |
 | `LogLines` | `book/lines.tsx` | LogLines |
 | `AwayRecap` | `book/lines.tsx` | AwayRecap |
-| `Here` | `book/lines.tsx` | RoomPage |
 | `Heard` | `book/lines.tsx` | Heard |
 | `Fault` | `book/lines.tsx` | Live |
 | `NoticePage` | `book/notices.tsx` | NoticePage |
 | `Tap` | `book/pages.tsx` | VerbLine |
-| `RunningHead` | `book/pages.tsx` | Page |
 | `Control` | `book/pages.tsx` | Control |
 | `Page` | `book/pages.tsx` | Page |
 | `PageFoot` | `book/pages.tsx` | PageFoot |
 | `SectionTitle` | `book/pages.tsx` | Page |
+| `Here` | `book/people.tsx` | RoomPage |
 | `CharacterPage` | `book/sections.tsx` | SectionPages |
 | `AncestryPage` | `book/sections.tsx` | SectionPages |
 | `CarryingPage` | `book/sections.tsx` | SectionPages |
 | `MapPage` | `book/sections.tsx` | MapPage |
 | `SettingsPage` | `book/sections.tsx` | SectionPages |
 | `ChapterPage` | `book/sections.tsx` | ChapterPages |
-| `ScenePage` | `book/sections.tsx` | ChapterPages |
 | `SkillDetails` | `book/skills.tsx` | SectionPages |
+| `SkillsPage` | `book/skills.tsx` | SectionPages |
 | `Professions` | `book/skills.tsx` | SectionPages |
 | `RaiseCards` | `book/skills.tsx` | SectionPages |
 | `ItemDetails` | `book/skills.tsx` | ItemPage |
@@ -220,6 +274,17 @@ mixed in one list; pending.
 dotted underline at the platform's thickness (solid where the platform has no dotted line; no
 thickness token, since no platform's `Text` sets one); linked, or plain prose when no detail is
 projected.
+
+**Author-mode marks** (no component; laid over the Book from `mobile/app/author/` at `?dev=1`,
+never in `mobile/app/book/`; behaviour: [Book UI](system/book-ui.md#author-mode-dev-only), reasons:
+[rulings](design/prose-in-the-book-rulings.md)). Existing tokens only, in the Book's current palette.
+The prose field: the line's own type role at the reading size, its own wrap and width, `fg` on
+`card`, the focus ring (`size.focus`, `action`), caret `action`, browser selection; its caption and
+any no-field note `type.label` in `dim` on `card`, the note's buttons (Add here's fields) `action`, no
+border. Unconfirmed words: a static wavy underline in `warning`
+(never dotted: that is the fixture link). A `~` line: a `size.speechBar` bar in `warning` in the
+left page margin over the line's full height, `action` on the landed line. The changed-on-disk
+notice: `type.label` in `warning`. Worst pair: `warning` on `card`, 4.75 (light).
 
 Not adopted from the mock (no live consumer): the text drawer and its command chips, topic
 chips and scene pick cards. The mock's shop price rows are not adopted either: a stock, sale or service row is an
@@ -249,11 +314,11 @@ There is no second CSS or WebGL curl.
   longer than that.
 - **Reduced motion.** When the system asks for reduced motion, the pages cross-fade over
   `motion.fade` instead, with no curl.
-- **Sound.** The paper page-turn sound plays on every page turn at `sound.pageTurn.volume`,
+- **Sound.** The paper page-turn sound (`sound.pageTurn`) plays on every page turn,
   including the reduced-motion cross-fade; only the Sound setting silences it. It is on
-  by default; Settings has a Sound on/off control kept on the device. Until a short recorded
-  CC0 page-turn sample (under 1 s, bundled) is found and replaces it, the mock's synthesised
-  sound plays, as the [PageTurn story](../mobile/app/stories/PageTurn.stories.tsx) does.
+  by default; Settings has a Sound on/off control kept on the device. Samples are human-made,
+  placeholders too ([owner decision](decisions/owner-decision-human-made-content-2026-10-31.md));
+  a synthesised sound never ships, and with no sample the turn is silent.
 
 ## Delivery cadence
 

@@ -11,7 +11,7 @@ defmodule Loka.Core.RegistriesTest do
   @invariants JSON.decode!(File.read!("protocol/invariants.json"))
   @capabilities JSON.decode!(File.read!("protocol/capability_registry.json"))
   @lock_kat JSON.decode!(File.read!("protocol/fixtures/capability_lock_hash.json"))
-  @cartridge_kat JSON.decode!(File.read!("protocol/fixtures/cartridge_hash.json"))
+  @cartridge_kat JSON.decode!(File.read!("protocol/fixtures/cartridge_facts_hash.json"))
 
   test "the registry lists exactly the ErrorCode codes, each entry valid" do
     for entry <- @registry,
@@ -309,8 +309,8 @@ defmodule Loka.Core.RegistriesTest do
   end
 
   # Breaks if the encoder mishandles non-ASCII text or nested definition maps, or if the
-  # frozen contracts drift from the hello subset.
-  test "the hello cartridge encodes and hashes to the independent known answer" do
+  # frozen contracts drift from the compiled cartridge.
+  test "the facts cartridge encodes and hashes to the independent known answer" do
     %{"value" => cartridge, "canonical" => canonical, "sha256" => sha} = @cartridge_kat
     assert Contracts.validate("CompiledCartridge", cartridge) == :ok
     assert Loka.Core.Canonical.encode(cartridge) == {:ok, canonical}

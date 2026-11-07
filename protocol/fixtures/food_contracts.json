@@ -14,18 +14,6 @@
         "narration": "narration.eat_apple"
       }
     },
-    "eat": {
-      "contract": "CommandPayload",
-      "variant": {
-        "field": "type",
-        "value": "eat"
-      },
-      "value": {
-        "type": "eat",
-        "actor_id": "10000000-0000-4000-8000-000000000001",
-        "item_id": "20000000-0000-4000-8000-000000000001"
-      }
-    },
     "item": {
       "contract": "ItemDefinition",
       "value": {
@@ -56,6 +44,18 @@
           "label": "action.eat",
           "narration": "narration.eat_apple"
         }
+      }
+    },
+    "consume": {
+      "contract": "CommandPayload",
+      "variant": {
+        "field": "type",
+        "value": "consume"
+      },
+      "value": {
+        "type": "consume",
+        "actor_id": "10000000-0000-4000-8000-000000000001",
+        "item_id": "20000000-0000-4000-8000-000000000001"
       }
     }
   },
@@ -111,13 +111,13 @@
       "valid": false
     },
     {
-      "name": "eat valid",
-      "base": "eat",
+      "name": "consume valid",
+      "base": "consume",
       "valid": true
     },
     {
-      "name": "eat missing type",
-      "base": "eat",
+      "name": "consume missing type",
+      "base": "consume",
       "path": [
         "type"
       ],
@@ -125,8 +125,8 @@
       "valid": false
     },
     {
-      "name": "eat missing actor_id",
-      "base": "eat",
+      "name": "consume missing actor_id",
+      "base": "consume",
       "path": [
         "actor_id"
       ],
@@ -134,8 +134,8 @@
       "valid": false
     },
     {
-      "name": "eat missing item_id",
-      "base": "eat",
+      "name": "consume missing item_id",
+      "base": "consume",
       "path": [
         "item_id"
       ],
@@ -143,8 +143,8 @@
       "valid": false
     },
     {
-      "name": "eat closed",
-      "base": "eat",
+      "name": "consume closed",
+      "base": "consume",
       "path": [
         "extra"
       ],
@@ -275,7 +275,7 @@
     },
     {
       "name": "Eat item typed",
-      "base": "eat",
+      "base": "consume",
       "path": [
         "item_id"
       ],
@@ -284,7 +284,7 @@
     },
     {
       "name": "Eat actor typed",
-      "base": "eat",
+      "base": "consume",
       "path": [
         "actor_id"
       ],

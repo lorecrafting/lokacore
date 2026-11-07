@@ -9,7 +9,7 @@ import {
   type EntityId,
   type TargetResolution,
 } from '../src/contracts.gen.ts';
-import { newWorld, step, stepElapsed, type Cartridge, type World } from '../src/index.ts';
+import { newWorld, step, stepElapsed, stepDev, type Cartridge, type World } from '../src/index.ts';
 import { resolve } from '../src/commands/target.ts';
 import { append, line, lookupWords } from './obs.ts';
 import { which } from './text.ts';
@@ -53,7 +53,7 @@ export const header = (r: Run) =>
 
 /**
  * Decides `command` against the run and advances it. Accepted: committed at the next revision
- * with its events; rejected (no receipt before R6) and fault: commit unavailable, not_applicable.
+ * with its events; rejected without a receipt and fault: commit unavailable, not_applicable.
  * RNG draws are not collected yet (unavailable, not_collected). A budget fault's limit goes to
  * diagnostics as evaluation.budget_exceeded (04 §5.4) when `measured`, so a replay, whose ids
  * repeat the run's, adds none.
@@ -65,15 +65,49 @@ export function decide(r: Run, command: Command, measured = true) {
   return evaluated(r, command, { decision, world, limit }, micros, measured);
 }
 
-/** Replay-only dispatch; its run was bound by the complete trace preflight. */
-export function decideReplay(r: Run, command: Command) {
+/**
+ * Replay-only dispatch; its run was bound by the complete trace preflight. `at`: the recorded
+ * revision it was decided against; a host's coalesced ticks leave gaps (save.md). `receipted`: the
+ * entry was recorded committed, so a rejection takes the form of a host that stores its receipt
+ * (ADR-075 §4).
+ */
+export function decideReplay(r: Run, command: Command, at = r.revision, receipted = false) {
+  if (command.payload.type === 'elapsed' && at > r.revision) r.revision = at;
   if (command.payload.type === 'elapsed' && command.payload.run_id !== r.ids.run_id)
     throw new Error('elapsed run differs from trace header');
   const next =
     command.payload.type === 'elapsed'
       ? stepElapsed(r.world, command, r.revision + 1)
-      : step(r.world, command, r.revision + 1);
-  return evaluated(r, command, next, 0, false);
+      : command.payload.type.startsWith('dev_') // a preview trace holds accepted cheats
+        ? stepDev(r.world, command, r.revision + 1)
+        : step(r.world, command, r.revision + 1);
+  const out = evaluated(r, command, next, 0, false);
+  if (receipted && out.decision.kind === 'rejected')
+    out.trace.data.commit = {
+      state: 'committed',
+      revision: r.revision,
+      events: [],
+      effect_ids: [],
+    };
+  return out;
+}
+
+/**
+ * A trace entry replayed: recorded committed, a rejection keeps its stored receipt's form. A
+ * failed or unknown entry is decided but not adopted, and an unknown one leaves its ordinal to the
+ * follow-up that resolves it; its commit is the recorded one (ADR-075 §4, loka-vduxr.42).
+ */
+export function replayEntry(
+  r: Run,
+  e: { ids: { revision: number }; data: { command: Command; commit: { state: string } } },
+) {
+  const { state } = e.data.commit;
+  if (state !== 'failed' && state !== 'unknown')
+    return decideReplay(r, e.data.command, e.ids.revision, state === 'committed');
+  const out = decideReplay({ ...r }, e.data.command, e.ids.revision);
+  if (state === 'failed') r.ordinal += 1;
+  out.trace.data.commit = e.data.commit; // the host's storage fact, which no input decides
+  return out;
 }
 
 function evaluated(

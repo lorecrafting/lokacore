@@ -13,7 +13,7 @@
             "type": {
               "const": "bool"
             },
-            "default": {
+            "default": {"description":"Value before any assignment.",
               "type": "boolean"
             }
           },
@@ -30,14 +30,14 @@
             "type": {
               "const": "enum"
             },
-            "values": {
+            "values": {"description":"The keys the fact may hold.",
               "type": "array",
               "items": {
                 "$ref": "action.schema.json#/$defs/Key"
               },
               "minItems": 1
             },
-            "default": {
+            "default": {"description":"Value before any assignment; one of values.",
               "$ref": "action.schema.json#/$defs/Key"
             }
           },
@@ -55,13 +55,13 @@
             "type": {
               "const": "int"
             },
-            "minimum": {
+            "minimum": {"description":"Lowest value allowed, inclusive.",
               "type": "integer"
             },
-            "maximum": {
+            "maximum": {"description":"Highest value allowed, inclusive.",
               "type": "integer"
             },
-            "default": {
+            "default": {"description":"Value before any assignment.",
               "type": "integer"
             }
           },
@@ -105,14 +105,14 @@
         "key": {
           "$ref": "action.schema.json#/$defs/Key"
         },
-        "version": {
+        "version": {"description":"The version of the fact's type.",
           "type": "integer",
           "minimum": 1
         },
-        "value_type": {
+        "value_type": {"description":"The fact's type and default value.",
           "$ref": "#/$defs/FactType"
         },
-        "scopes": {
+        "scopes": {"description":"The scope kinds allowed. This kernel accepts exactly one, `player` or `instance`.",
           "type": "array",
           "items": {
             "enum": [
@@ -132,7 +132,7 @@
           "description": "Toolbox row FD4: a pair fact between two NPCs, one value per ordered pair (the subject NPC toward the with NPC), stored with subject_id and with_id. Needs per_subject and scopes exactly [instance] (world state).",
           "const": true
         },
-        "meaning": {
+        "meaning": {"description":"What the fact means, for authors. The rules do not read it.",
           "type": "string",
           "minLength": 1
         }

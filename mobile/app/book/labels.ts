@@ -4,11 +4,17 @@
 // nothing, so the e2e runner can load it. lint/rules/mobile-book-labels.yml lists these words too;
 // lint/rules/mobile-book-english.yml keeps a page's English here.
 export const LABEL = {
+  itemPop: (names: string[]) => names.map((n) => `+ ${n}`).join(', '),
   leave: 'Leave',
   leaveConversation: 'Leave the conversation',
+  back: 'Back',
   backToWorld: 'Back to World',
+  letGo: 'Let go', // a death's Combat page foot; owner-approved 2026-11-02 (loka-kgd.204)
+  rise: 'Rise', // the spirit state's one card; owner-approved 2026-11-04 (loka-kgd.205)
+  secondsLeft: (n: number) => (n === 1 ? '1 second' : `${n} seconds`), // the rise card's web description; PM-approved 2026-11-04
   backToContents: 'Back to Contents',
   backToBoard: 'Back to board',
+  backToSettings: 'Back to Settings',
   close: 'Close',
   resumeDream: 'Resume dream',
   gotIt: 'Got it',
@@ -41,7 +47,7 @@ export const LABEL = {
   notHere: 'Not here',
   // The away recap's heading (toolbox row W27; wording pending designer, loka-x6t.14).
   awayRecap: 'While you were away',
-  // The word field's sends (the Realm's room speech, loka-evzt); the Character page's Spells.
+  // The word field's sends (the Realm's room speech, loka-evzt); the Skills page's Spells.
   say: 'Say',
   shout: 'Shout',
   cast: 'Cast',
@@ -50,7 +56,14 @@ export const LABEL = {
   spells: 'Spells',
   // The Contents section of held and worn things (owner 2026-10-15, loka-x6t.55).
   inventory: 'Inventory',
-  // The Reading size setting (docs/system/book-ui.md#world-and-status-entry, loka-x6t.42).
+  // The effect settings (docs/system/book-ui.md, Effects, sound and haptics).
+  sound: 'Sound',
+  music: 'Music',
+  haptics: 'Haptics',
+  flashes: 'Flashes',
+  credits: 'Credits',
+  on: 'On',
+  off: 'Off',
   readingSize: 'Reading size',
   readingStandard: 'Standard',
   readingLarge: 'Large',
@@ -61,17 +74,22 @@ export const LABEL = {
   giveAnItem: 'Give an item…',
   giveTo: 'Give to…',
   castASpell: 'Cast a spell…',
-  castOn: 'Cast on…', // a Character Spells line's list of the aimed spell's targets (loka-x6t.109.5)
+  castASpellOn: (foe: string) => `Cast a spell on ${foe}…`, // a Combat foe's list, its projected name
+  hotbar: '~', // the Combat hotbar's group name (book-ui.md, Combat hotbar); words to come from the owner
+  wordCast: (word: string) => `${word}, cast`, // a spell word's card and hotbar slot name (skills.tsx, Hotbar.tsx)
+  hotbarOpener: '~', // its fourth slot, which opens the skill and spell list; words to come from the owner
+  castOn: 'Cast on…', // a Skills page Spells line's list of the aimed spell's targets (loka-x6t.109.5)
   // The NPC page's Talk and shop cards, the shop page's Sell card (owner picks mvlrlvappy4w, mvlymuams73l).
   talk: 'Talk',
   trade: 'Trade',
   sell: 'Sell',
   yourOrder: 'Your order',
-  // A foe's definite article on the Combat page, "the goblin" (loka-6qi).
+  // A foe's definite article on the Combat page, "Cast a spell on the goblin…" (loka-6qi).
   the: 'the',
   // Page titles and the Contents lines (Menu.tsx, sections.tsx, journal.tsx; loka-x6t.61).
   contents: 'Contents',
   character: 'Character',
+  skills: 'Skills',
   map: 'Map',
   journal: 'Journal',
   settings: 'Settings',
@@ -124,4 +142,9 @@ export const COUNT: readonly string[] = [
   'nine',
 ];
 // An up or down way's place word: "above", "below" ("The door below is locked.").
+// A key the Book must never show raw when a cartridge has not authored it.
+export const UNAUTHORED: Record<string, string> = {
+  'place.dark': "It's too dark to see...",
+  'combat.sanctuary': LABEL.notHere,
+};
 export const AT: Record<string, string> = { up: 'above', down: 'below' };

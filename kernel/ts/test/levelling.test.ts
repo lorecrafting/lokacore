@@ -1,3 +1,4 @@
+// size: allow 681, the levelling sampler walks and the level-up refill share one compiled cartridge and kill helper
 // Toolbox row 4 on the compiled levelling sampler: rats grant 10 experience each, level 2 at 30
 // grants one point, Raise spends it, and the quest reward grants 20 (mechanics.md row 4).
 import assert from 'node:assert/strict';
@@ -9,14 +10,30 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { test } from 'node:test';
 import { INSTALLED, loadCartridge, newWorld, step, stepElapsed } from '../src/index.ts';
-import type { Cartridge, World } from '../src/runtime/decision.ts';
+import { bodyOf, type Cartridge, type World } from '../src/runtime/decision.ts';
 import { elapsedCommandId } from '../src/foundation/id_source.ts';
 import { encode } from '../src/foundation/canonical.ts';
 import { resolve } from '../src/commands/invocation.ts';
 import { derived } from '../src/mechanics/attribute/shared.ts';
-import { oneWrite } from '../src/mechanics/levelling/shared.ts';
+import type { Base } from '../src/mechanics/fact.ts';
+import type {
+  CharacterId,
+  DefinitionRef,
+  DeltaOp,
+  DomainEvent,
+  Key,
+  Text,
+  ReactionRule,
+} from '../src/contracts.gen.ts';
+import { key } from '../src/foundation/compose.ts';
+import { resourceRef } from '../src/mechanics/resource.ts';
+import { levelsReached, levelUp, oneWrite } from '../src/mechanics/levelling/shared.ts';
 import { decide } from '../src/mechanics/attribute/rule.ts';
+import { closing, say } from '../src/mechanics/death/lines.ts';
+import { type Joins, runDelayed } from '../src/mechanics/delayed.ts';
+import { sequence } from '../src/mechanics/reaction.ts';
 import { gameView } from '../src/view/view.ts';
+import { validate } from '../src/foundation/validate.ts';
 import { ctx } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-levelling-sampler-'));
@@ -35,6 +52,14 @@ const loaded = loadCartridge(artifact, INSTALLED);
 assert.ok(loaded.ok, JSON.stringify(loaded));
 const content = loaded.cartridge as Cartridge;
 const LEVEL_UP = 'levelling.level_up';
+const shown = (level: number, experience: number, from: number, next: number, unspent: number) => ({
+  level,
+  experience,
+  from,
+  next,
+  unspent,
+  level_up: LEVEL_UP,
+});
 const attr = (key: string) => ({
   cartridge_id: 'levelling_sampler',
   cartridge_version: '0.0.1',
@@ -54,9 +79,14 @@ function play(w: World, p: object, action?: string) {
   return r;
 }
 function wait(w: World, seconds: number) {
+  const r = elapse(w, seconds);
+  assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));
+  return r;
+}
+function elapse(w: World, seconds: number) {
   const run_id = `aaaaaaaa-0000-4000-8000-${String(++n).padStart(12, '0')}`;
   const until = w.state.clock + seconds;
-  const r = stepElapsed(
+  return stepElapsed(
     w,
     {
       id: elapsedCommandId(run_id, w.context, w.state.clock, until) as never,
@@ -65,8 +95,6 @@ function wait(w: World, seconds: number) {
     } as never,
     n,
   );
-  assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));
-  return r;
 }
 const narration = (r: { decision: object }) =>
   ((r.decision as { narration?: { key: string }[] }).narration ?? []).map((t) => t.key);
@@ -110,9 +138,9 @@ const hp = (w: World) => {
 // point, or the level-up line is dropped from the killing step (or emitted by an earlier kill).
 test('three rat kills reach level 2 with one point and narrate the level-up once', () => {
   const { two, third, w } = cull();
-  assert.deepEqual(two.levelling, { level: 1, experience: 20, next: 30, unspent: 0 });
+  assert.deepEqual(two.levelling, shown(1, 20, 0, 30, 0));
   assert.ok(!two.actions.some((a) => a.action_key === 'raise_attribute'));
-  assert.deepEqual(gameView(w).levelling, { level: 2, experience: 30, next: 100, unspent: 1 });
+  assert.deepEqual(gameView(w).levelling, shown(2, 30, 30, 100, 1));
   assert.equal(narration(third).filter((k) => k === LEVEL_UP).length, 1);
 });
 
@@ -126,7 +154,7 @@ test('Raise STR spends the point, raises the derived damage by 1 and is then ref
   assert.equal(narration(raised).includes(LEVEL_UP), false);
   assert.equal(damage(raised.world), 1);
   const view = gameView(raised.world);
-  assert.deepEqual(view.levelling, { level: 2, experience: 30, next: 100, unspent: 0 });
+  assert.deepEqual(view.levelling, shown(2, 30, 30, 100, 0));
   assert.equal(view.attributes!.find((a) => a.attribute.key === 'str')!.value, 11);
   assert.ok(!view.actions.some((a) => a.action_key === 'raise_attribute'));
   const command = {
@@ -158,24 +186,217 @@ test('resolving the den quest grants 20 experience; after two kills it narrates 
     play(w, { type: 'accept_quest', quest: { ...attr('cull'), kind: 'quest' } }, 'cull');
   const den = (w: World) => play(accept(w).world, { type: 'move', direction: 'west' });
   const quest = den(fresh());
-  assert.deepEqual(gameView(quest.world).levelling, {
-    level: 1,
-    experience: 20,
-    next: 30,
-    unspent: 0,
-  });
+  assert.deepEqual(gameView(quest.world).levelling, shown(1, 20, 0, 30, 0));
   assert.equal(narration(quest).includes(LEVEL_UP), false);
   let w = play(fresh(), { type: 'move', direction: 'east' }).world;
   w = kill(kill(w, 'rat_a').world, 'rat_b').world;
   w = play(w, { type: 'move', direction: 'west' }).world;
   const up = den(w);
-  assert.deepEqual(gameView(up.world).levelling, {
-    level: 2,
-    experience: 40,
-    next: 100,
-    unspent: 1,
-  });
+  assert.deepEqual(gameView(up.world).levelling, shown(2, 40, 30, 100, 1));
   assert.ok(narration(up).includes(LEVEL_UP));
+});
+
+/** Two rats dead, the third engaged, and the body's hp row forged to `value`. */
+function bitten(value: number, c: Cartridge = content, age = 0) {
+  let w = play(fresh(c), { type: 'move', direction: 'east' }).world;
+  w = kill(kill(w, 'rat_a').world, 'rat_b').world;
+  if (age) w = wait(w, age).world; // the clock must pass `age` for the row's `at` to stay valid
+  const row = key({ kind: 'resource', entity_id: w.body, resource: resourceRef(w, 'hp') });
+  return {
+    ...w,
+    state: {
+      ...w.state,
+      resources: {
+        ...w.state.resources,
+        [row]: { value, at: w.state.clock - age, rate: 1, remainder: 0 },
+      },
+    },
+  };
+}
+const hpOps = (r: { decision: object; world: World }) =>
+  (r.decision as { delta: { ops: any[] } }).delta.ops.filter(
+    (o) => o.op === 'resource.adjust' && o.entity_id === r.world.body && o.resource.key === 'hp',
+  );
+const LEVEL_TWO = 'levelling.level_two';
+
+// Breaks: the level_two refill writes nothing, is left in writer group 0 (a composition fault),
+// stops at the wrong value, or carries no `at` (the settled regen is refused against the base clock).
+test('level 2 refills hp in the killing step', () => {
+  const w = bitten(3);
+  assert.deepEqual(hp(w), [3, 10]);
+  const third = kill(w, 'rat_c');
+  assert.deepEqual(hp(third.world), [10, 10]);
+  assert.deepEqual(narration(third).includes(LEVEL_TWO), true);
+  const [op, ...rest] = hpOps(third);
+  assert.deepEqual(rest, []);
+  assert.equal(op.from, 3);
+  assert.equal(op.to, 10);
+  assert.notEqual(op.writer_group, 0);
+  assert.deepEqual(validate('GameView', gameView(third.world)), []);
+});
+
+// Breaks: the op carries no `at`, so the composer folds from the base clock and refuses a `from`
+// holding the regen settled inside the killing window.
+test('the refill counts a regen tick settled before the death', () => {
+  const [op] = hpOps(kill(bitten(3, content, 3599), 'rat_c'));
+  assert.equal(op.from, 4);
+  assert.equal(op.to, 10);
+});
+
+// Breaks: a full pool writes a no-op row, or the narrate step depends on the refill having moved.
+test('level 2 at full hp writes no hp op and still tells', () => {
+  const third = kill(bitten(10), 'rat_c');
+  assert.deepEqual(hpOps(third), []);
+  assert.ok(narration(third).includes(LEVEL_TWO));
+});
+
+// Breaks: the refill does not saturate (to: past the maximum), or a second step on one pool starts
+// again from the row instead of the first step's result, and the composer refuses it.
+test('two refills of one pool compose and stop at the maximum', () => {
+  const c = structuredClone(content);
+  const rule = Object.values(c.reactions!).find((r: any) => r.key === 'level_two') as any;
+  const adjust = rule.steps.find((s: any) => s.op === 'resource.adjust');
+  rule.steps.push({ ...adjust, by: -4 }, { ...adjust, by: 2 });
+  const third = kill(bitten(1, c), 'rat_c');
+  assert.deepEqual(
+    hpOps(third).map((o) => [o.from, o.to]),
+    [
+      [1, 10],
+      [10, 6],
+      [6, 8],
+    ],
+  );
+  assert.deepEqual(hp(third.world), [8, 10]);
+});
+
+const events = (r: { decision: object }) =>
+  (r.decision as { events: { id: string; causation_id: string; position: number; payload: any }[] })
+    .events;
+const levels = (r: { decision: object }) =>
+  events(r).flatMap((e) => (e.payload.type === 'level_reached' ? [e.payload.level] : []));
+const lines = (r: { decision: object }) => (r.decision as { narration: object[] }).narration;
+const GAINED = 'levelling.gained';
+/** A fresh world whose stored row already holds `experience`. */
+function holding(experience: number, c: Cartridge = content) {
+  const w = fresh(c);
+  const row = { experience, allocated: {} };
+  return { ...w, state: { ...w.state, levelling: { [w.character]: row } } };
+}
+/** One kill of a rat worth `worth` from a stored row of `experience`. */
+function strike(experience: number, worth: number) {
+  const c = variant((l) => l.kills.forEach((k: any) => (k.experience = worth)));
+  return kill(play(holding(experience, c), { type: 'move', direction: 'east' }).world, 'rat_a');
+}
+
+// Breaks: a refill in its own writer group after the round's bite faults conflicting_write, so an
+// ordinary level-up on an even round (the NPC strikes first) loses the whole command.
+test('a level-up refill after a bite in the killing round joins the round', () => {
+  const c = structuredClone(content) as any;
+  c.world.levelling.kills.forEach((k: any) => (k.experience = 1000));
+  const rat = c.npcs['levelling_sampler@0.0.1:npc/rat_a'];
+  Object.assign(rat.hp, { maximum: 8, start: 8 });
+  rat.attack.chance = 100;
+  const w = play(play(holding(0, c), { type: 'move', direction: 'east' }).world, {
+    type: 'attack',
+    target_id: fresh(c).entityIds['levelling_sampler@0.0.1:npc/rat_a'],
+  }).world;
+  const r = elapse(wait(w, 150).world, 150); // even round: the rat strikes first
+  assert.equal(r.decision.kind, 'accepted', JSON.stringify(r.decision));
+  assert.deepEqual(hp(r.world), [10, 10]);
+  assert.deepEqual(
+    hpOps(r).map((o) => [o.from, o.to]),
+    [
+      [9, 8],
+      [8, 10],
+    ],
+  );
+});
+
+// Breaks: no level_reached from a credited kill, it lands before the round's own events, its
+// rule runs in a later proposal or not at all, or the gained line follows the level-up line.
+test('the third kill places level_reached after the death and its rule fires in the proposal', () => {
+  const { third } = cull();
+  // The level line explains the level rule's, so it reads first (book-ui.md, A level is never dropped).
+  assert.deepEqual(lines(third).slice(-3), [
+    { key: GAINED, bindings: { amount: 10 } },
+    { key: LEVEL_UP },
+    { key: 'levelling.level_two' },
+  ]);
+  const all = events(third);
+  const reached = all.filter((e) => e.payload.type === 'level_reached');
+  const character_id = third.world.character;
+  assert.deepEqual(
+    reached.map((e) => e.payload),
+    [{ type: 'level_reached', character_id, level: 2 }],
+  );
+  const died = all.find((e) => e.payload.type === 'entity_died')!;
+  assert.ok(reached[0]!.position > died.position);
+  const fact = all.find(
+    (e) => e.payload.type === 'fact_changed' && e.payload.fact.key === 'second_wind',
+  )!;
+  assert.equal(fact.causation_id, reached[0]!.id);
+  assert.equal(fact.payload.new, true);
+  assert.deepEqual(validate('DecisionResult', third.decision), []);
+});
+
+// Breaks: a gain within one level emits an event, the gained line needs a level, or its amount
+// reads the row after the write.
+test('a quest reward within a level tells the gain and emits no event', () => {
+  const accept = play(
+    holding(30),
+    { type: 'accept_quest', quest: { ...attr('cull'), kind: 'quest' } },
+    'cull',
+  );
+  const r = play(accept.world, { type: 'move', direction: 'west' });
+  assert.deepEqual(lines(r).slice(-1), [{ key: GAINED, bindings: { amount: 20 } }]);
+  assert.deepEqual(levels(r), []);
+});
+
+// Breaks: spending a point, a levelling write that adds nothing, tells a gain of 0.
+test('raising an attribute tells no gain', () => {
+  assert.ok(!narration(raise(cull().w, 'str')).includes(GAINED));
+});
+
+// Breaks: a character with no row yet counts from anything but 0, so a first threshold at 1 is missed.
+test('a first grant from no row crosses a threshold at 1', () => {
+  const c = variant((l) => (l.thresholds = [1, 30, 100]));
+  const r = kill(play(fresh(c), { type: 'move', direction: 'east' }).world, 'rat_a');
+  assert.deepEqual(levels(r), [2]);
+});
+
+// Breaks: the threshold compare is < instead of <=, or one below it counts.
+test('a grant landing exactly on 100 reaches level 3; landing on 99 does not', () => {
+  assert.deepEqual([levels(strike(30, 70)), levels(strike(30, 69))], [[3], []]);
+});
+
+// Breaks: one event per write instead of per threshold, descending levels, a second level-up
+// line, or a filter that ignores the level so a rule fires for each event.
+test('one grant crossing two thresholds gives two events in order and one line', () => {
+  const r = strike(29, 71);
+  assert.deepEqual(levels(r), [2, 3]);
+  const keys = narration(r);
+  assert.equal(keys.filter((k) => k === LEVEL_UP).length, 1);
+  assert.deepEqual(lines(r).slice(-4), [
+    { key: GAINED, bindings: { amount: 71 } },
+    { key: LEVEL_UP },
+    { key: 'levelling.level_two' },
+    { key: 'levelling.level_three' },
+  ]);
+});
+
+// Breaks: from is the next threshold (thresholds[r]) or goes missing at level 1 or the top.
+test('the view carries the threshold of the current level, validated, at every level', () => {
+  assert.deepEqual(gameView(fresh()).levelling, shown(1, 0, 0, 30, 0));
+  const after = gameView(cull().w);
+  assert.deepEqual(after.levelling, shown(2, 30, 30, 100, 1));
+  assert.deepEqual(validate('GameView', after), []);
+  assert.deepEqual(gameView(holding(120)).levelling, {
+    level: 3,
+    experience: 120,
+    from: 100,
+    unspent: 2,
+    level_up: LEVEL_UP,
+  });
 });
 
 /** The sampler with its loaded levelling declaration changed by `change`. */
@@ -189,7 +410,7 @@ function variant(change: (l: any) => void) {
 // cartridge does not list still grants experience.
 test('killing an NPC that kills does not list leaves experience unchanged', () => {
   const { w } = cull(variant((l) => (l.kills = l.kills.filter((k: any) => k.npc.key !== 'rat_c'))));
-  assert.deepEqual(gameView(w).levelling, { level: 1, experience: 20, next: 30, unspent: 0 });
+  assert.deepEqual(gameView(w).levelling, shown(1, 20, 0, 30, 0));
 });
 
 // Breaks (#344 review, finding 2): unspent ignores points_per_level (one point per level).
@@ -236,13 +457,102 @@ test('a kill that also resolves a rewarding quest writes experience once and lev
     r.decision.delta.ops.flatMap((o) => (o.op === 'levelling.set' ? [[o.expected, o.value]] : [])),
     [[null, { experience: 30, allocated: {} }]],
   );
-  assert.deepEqual(gameView(r.world).levelling, {
-    level: 2,
-    experience: 30,
-    next: 100,
-    unspent: 1,
-  });
+  assert.deepEqual(gameView(r.world).levelling, shown(2, 30, 30, 100, 1));
   assert.equal(narration(r).filter((k) => k === LEVEL_UP).length, 1);
+});
+
+// Breaks: the gained line and level_reached read each write instead of the proposal's fold, so a
+// grant on top of a loss tells only its last step or re-crosses a threshold already held.
+test('folded writes: gained sums the proposal, a loss and regrant or no levelling reaches no level', () => {
+  const w = holding(35);
+  const write = (from: number, to: number) => ({
+    op: 'levelling.set' as const,
+    writer_group: 1,
+    character_id: w.character,
+    expected: { experience: from, allocated: {} },
+    value: { experience: to, allocated: {} },
+  });
+  assert.deepEqual(levelUp(w, w.character, [write(35, 45), write(45, 55)]), [
+    { key: GAINED, bindings: { amount: 20 } },
+  ]);
+  const none = () => assert.fail('no event, no id');
+  const base = {} as Base; // unread: neither call builds an event
+  assert.deepEqual(levelsReached(w, [write(35, 25), write(25, 35)], base, none), []);
+  const off = { ...w, cartridge: { ...content, world: {} } };
+  assert.deepEqual(levelsReached(off, [write(0, 200)], base, none), []);
+});
+
+// Breaks: a level rule's own fact and next level lose their order after one another, or are
+// caused by anything but the level_reached the rule answers.
+test('a level rule that writes a fact and grants: both caused by its event, fact first', () => {
+  const c = structuredClone(content) as any;
+  const rule = Object.values<any>(c.reactions).find((r) => r.on.level === 2);
+  rule.steps.push({ op: 'experience.grant', amount: 70 });
+  const all = events(cull(c).third);
+  const reached = all.filter((e) => e.payload.type === 'level_reached');
+  assert.deepEqual(
+    reached.map((e) => e.payload.level),
+    [2, 3],
+  );
+  const fact = all.find((e) => e.payload.type === 'fact_changed')!;
+  assert.equal(reached[1]!.causation_id, reached[0]!.id);
+  assert.equal(fact.causation_id, reached[0]!.id);
+  assert.ok(fact.position < reached[1]!.position);
+});
+
+// Breaks: level_reached keeps the doer as its actor, so a grant to B inside A's command runs B's
+// level rule for A and writes A's fact (the Realm checklist's Reactions item).
+test('level_reached is attributed to the character who levelled, not the doer', () => {
+  const w = holding(0);
+  const other = 'b0000000-0000-4000-8000-000000000002' as CharacterId;
+  const write = {
+    op: 'levelling.set' as const,
+    writer_group: 1,
+    character_id: other,
+    expected: null,
+    value: { experience: 30, allocated: {} },
+  };
+  const base = { actor_id: w.character } as Base;
+  const [e] = levelsReached(w, [write], base, () => 'e');
+  assert.equal(e!.actor_id, other);
+});
+
+// Breaks: level_reached, or the line it shares with fact_changed, queues one deeper than its
+// sequence, so a chain of level rules hits the reaction_depth budget at the wrong level.
+test('a chain of level rules runs to reaction_depth 32 and faults one past it', () => {
+  const chain = (top: number) => {
+    const c = structuredClone(content) as any;
+    c.world.levelling.thresholds = Array.from({ length: 40 }, (_, i) => 30 + i);
+    for (const [key, r] of Object.entries<any>(c.reactions)) {
+      if (r.on.level) delete c.reactions[key];
+    }
+    for (let level = 2; level <= top; level++) {
+      c.reactions[`chain_${level}`] = {
+        on: { event: 'level_reached', level },
+        steps: [{ op: 'experience.grant', amount: 1 }],
+      };
+    }
+    const w = play(holding(20, c), { type: 'move', direction: 'east' }).world;
+    const target_id = w.entityIds['levelling_sampler@0.0.1:npc/rat_a'];
+    return elapse(play(w, { type: 'attack', target_id }).world, 150);
+  };
+  const edge = chain(33); // level L's rule runs at depth L - 1
+  assert.equal(edge.decision.kind, 'accepted', JSON.stringify(edge.decision));
+  assert.equal(levels(edge).at(-1), 34);
+  const past = chain(34);
+  assert.deepEqual(past.decision, { kind: 'fault', code: 'budget_exceeded' });
+  assert.equal(past.limit, 'reaction_depth');
+});
+
+// Breaks: level_reached's subject is its character_id, not the body, so an event.emit in a level
+// rule (or a status) is about a character id instead of the levelled body.
+test('a level rule is about the levelled character body', () => {
+  const c = structuredClone(content) as any;
+  const rule = Object.values<any>(c.reactions).find((r) => r.on.level === 2);
+  rule.steps = [{ op: 'event.emit', event: 'anything' }];
+  const { third, w } = cull(c);
+  const emitted = events(third).find((e) => e.payload.type === 'custom_event')!;
+  assert.equal(emitted.payload.subject_id, bodyOf(w, w.character));
 });
 
 // Breaks: several credited kills in one decision (fatal groups 1 and 2, not reachable in play
@@ -263,4 +573,109 @@ test('one levelling write per character keeps the last value and the first expec
     oneWrite([set(1, a, null, 10), other, set(1, b, 5, 15), set(2, a, 10, 20), set(3, a, 20, 40)]),
     [other, set(1, b, 5, 15), set(3, a, null, 40)],
   );
+});
+
+// Breaks: a delayed refill ignores a pool written earlier in the same due batch by a job that holds
+// no body, so the composer faults a second group on the pool.
+test('a delayed refill joins the group that wrote its pool earlier in the batch', () => {
+  const w = bitten(3);
+  const earlier = {
+    op: 'resource.adjust',
+    writer_group: 5,
+    entity_id: w.body,
+    resource: resourceRef(w, 'hp'),
+  } as unknown as DeltaOp;
+  const job: DefinitionRef = { ...resourceRef(w, 'hp'), kind: 'reaction', key: 'level_two' as Key };
+  const steps = { n: 0 };
+  const joins: Joins = {
+    holders: new Map(),
+    group: 7,
+    deliveries: 0,
+    steps,
+    ops: [earlier],
+    events: [],
+  };
+  const row = { job, actor_id: w.character, due_time: w.state.clock };
+  const ran = runDelayed(w, { id: id() }, id(), row, id, steps, joins);
+  assert.equal(ran.kind, 'accepted');
+  const ops = (ran as unknown as { delta: { ops: any[] } }).delta.ops;
+  const refill = ops.find((o) => o.op === 'resource.adjust')!;
+  assert.equal(refill.writer_group, 5);
+});
+
+// Breaks: a fact write that changes nothing takes a causal position, leaving a gap before the event
+// after it (only a change gets a fact_changed to fill that position).
+test('an unchanged fact write takes no position', () => {
+  const w = fresh();
+  const rule: ReactionRule = {
+    key: 'unchanged' as Key,
+    on: { event: 'custom_event' },
+    steps: [
+      {
+        op: 'fact.assign',
+        fact: { ...resourceRef(w, 'hp'), kind: 'fact', key: 'second_wind' as Key },
+        value: false,
+      },
+      { op: 'event.emit', event: 'anything' as Key },
+    ],
+  };
+  const cause = {
+    id: id(),
+    logical_time: w.state.clock,
+    position: 1,
+    payload: { type: 'custom_event' },
+  } as unknown as DomainEvent;
+  const ran = sequence(w, w.character, rule, cause, 0, { n: 0 }, id);
+  assert.equal(ran?.kind, 'accepted');
+  const [emitted] = (ran as unknown as { events: { position: number }[] }).events;
+  assert.equal(emitted!.position, 1);
+});
+
+// Breaks (book-ui.md, A level is never dropped; loka-g5hh.2.11): a level_reached rule that says
+// nothing still pins the level lines ahead of a later rule's line, so they no longer come last.
+test('a silent level rule leaves the level lines at the end, after a later line', () => {
+  const c = structuredClone(content) as any;
+  const rule = Object.values<any>(c.reactions).find((r) => r.on.level === 2);
+  rule.steps = rule.steps.filter((s: any) => s.op === 'fact.assign');
+  c.reactions.later = {
+    key: 'later',
+    on: { event: 'fact_changed', fact: { ...rule.steps[0].fact } },
+    steps: [{ op: 'narrate', text: 'levelling.level_three' }],
+  };
+  const { third } = cull(c);
+  assert.deepEqual(
+    lines(third)
+      .slice(-3)
+      .map((t: any) => t.key),
+    ['levelling.level_three', GAINED, LEVEL_UP],
+  );
+});
+
+// Breaks: another character's level pins the actor's level lines mid-receipt ahead of later lines;
+// or a death's penalty line jumps ahead of the death's own lines.
+test("level lines move up only for the actor's level; a penalty line stays last", () => {
+  const w = holding(50);
+  const reached = (character_id: string) =>
+    ({ payload: { type: 'level_reached', character_id, level: 2 } }) as unknown as DomainEvent;
+  const at = (character_id: string) => {
+    const p: { narration: Text[]; levelAt?: number } = { narration: [{ key: 'a' } as Text] };
+    say(p, w.character, reached(character_id), [{ key: 'b' } as Text]);
+    return p.levelAt;
+  };
+  assert.equal(at(w.character), 1);
+  assert.equal(at('someone'), undefined);
+  const death = { penalty: { experience: { narration: 'lost' } } };
+  const dying = {
+    ...w,
+    cartridge: { ...content, world: { ...content.world, death } },
+  } as unknown as World;
+  const fall: DeltaOp = {
+    op: 'levelling.set',
+    writer_group: 1,
+    character_id: w.character,
+    expected: { experience: 50, allocated: {} },
+    value: { experience: 45, allocated: {} },
+  };
+  const p = { events: [], narration: [{ key: 'tick' }, { key: 'died' }] as Text[], levelAt: 0 };
+  assert.deepEqual(closing(dying, w.character, [fall], p), [...p.narration, { key: 'lost' }]);
 });

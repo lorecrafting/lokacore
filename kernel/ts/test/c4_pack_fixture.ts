@@ -30,6 +30,8 @@ function base(c: any, start = 64800, wander_interval = 3600) {
   combat.interval = 5;
   combat.player_attack = { chance: 100, damage_min: 1, damage_max: 1 };
   delete combat.allies;
+  // these rows pin the alternating order and plain lines, not Diku rounds (loka-kgd.197)
+  for (const k of ['initiative', 'tiers', 'conditions']) delete combat[k];
 }
 
 /** The controlled goblins as a plain population: no pack block, 150-second combat rounds. */
@@ -64,7 +66,7 @@ export const h1 = spawned(plain, 1);
 export const h2 = spawned(plain, 2);
 export const home = plain.roomIds[`${prefix}:room/goblin_pit`] as never;
 export const nest = plain.roomIds[`${prefix}:room/drill_yard`] as never;
-export const shrine = plain.roomIds[`${prefix}:room/crossroads_inn`] as never;
+export const shrine = plain.roomIds[`${prefix}:room/wayside_shrine`] as never;
 
 export function fixture(start?: number, wander_interval?: number) {
   const w = genesis(undefined, start, wander_interval);

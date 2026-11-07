@@ -4,19 +4,19 @@ import type {
   ElapsedStatus,
   Projection,
 } from '../../packages/game-view/session.ts';
-import type { Pulse } from './elapsed.ts';
+import { CatchUpRefusedError, type Pulse } from './elapsed.ts';
 // The local TypeScript implementation of GameSession (packages/game-view/session.ts): a bundled
 // cartridge played through the real local authority. It allocates invocation ids and the actor,
 // resends an unconfirmed attempt unchanged, and owns open and Start over. It says nothing in words:
 // the app's presenter does, from the views, the replies and the cartridge text (docs/decisions/
 // owner-decision-presenter-split-2026-10-02.md). It adds no mechanics.
-import type { Key } from '../../../kernel/ts/src/contracts.gen.ts';
+import type { ContinuationId, Key } from '../../../kernel/ts/src/contracts.gen.ts';
 import { gameView, INSTALLED, loadCartridge, newWorld } from '../../../kernel/ts/src/index.ts';
 export { INSTALLED, KERNEL_ID } from '../../../kernel/ts/src/index.ts'; // the app names its build and dev save with them
 import type { Cartridge } from '../../../kernel/ts/src/index.ts';
 import type { Failed, Game, GameSession, Intent, Reply } from '../../packages/game-view/session.ts';
 import { openStory, type Host } from './authority.ts';
-import { corrupt, type Db } from './store.ts';
+import { corrupt, unreadable, type Db } from './store.ts';
 import {
   sessionInvoke,
   SESSION_ID_PREFIX as ID_PREFIX,
@@ -28,14 +28,14 @@ export type Bundled = { canonical: string; sha256: string };
 
 // The release's own fresh world: the context and seed of every save made before c1-host (whose
 // pin names no context).
-const CONTEXT = '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f';
-const SEED = [1, 2, 3, 4];
+export const CONTEXT = '0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f';
+export const SEED = [1, 2, 3, 4];
 
 // The build's commit, its random source (lineage.test.ts proves the app path passes it; tests
 // without one play the template world), its ids and its clock.
-type HostPart = Pick<Host, 'newId' | 'latency' | 'kernel_version' | 'random' | 'time'>;
+type HostPart = Pick<Host, 'newId' | 'latency' | 'kernel_version' | 'random' | 'time' | 'dev'>;
 
-function cartridgeOf(bundled: Bundled): Cartridge {
+export function cartridgeOf(bundled: Bundled): Cartridge {
   const artifact = `{"cartridge":${bundled.canonical},"content_hash":"${bundled.sha256}"}`;
   const loaded = loadCartridge(new TextEncoder().encode(artifact), INSTALLED);
   if (!loaded.ok) throw new Error(`cartridge did not load: ${JSON.stringify(loaded)}`);
@@ -73,7 +73,7 @@ function checked(story: Extract<ReturnType<typeof openStory>, { kind: 'open' }>)
     if (last?.lines.some((t) => typeof (t as { key?: unknown } | null)?.key !== 'string'))
       throw new Error('malformed JSON: a narration line without a key');
   } catch (e) {
-    if (!(e instanceof SyntaxError) && !/malformed JSON/.test(String(e))) throw e; // I/O may leave an intact save
+    if (!unreadable(e)) throw e; // I/O or a bug of ours may leave an intact save
     throw refusal(e);
   }
 }
@@ -95,19 +95,21 @@ export function openGame(db: Db, bundled: Bundled, host: HostPart) {
   checked(story);
   return managedGame(story, cartridge, db);
 }
-
-function managedGame(
-  story: Extract<ReturnType<typeof openStory>, { kind: 'open' }>,
-  cartridge: Cartridge,
-  db: Db,
-) {
+const terminal = (reply: Reply) => reply.kind !== 'pending' && reply.kind !== 'catching_up';
+type Open = Extract<ReturnType<typeof openStory>, { kind: 'open' }>;
+const authorTools = (story: Open) => ({
+  entityIds: () => story.world().entityIds,
+  roomIds: () => story.world().roomIds,
+  facts: () => story.world().state.facts ?? {},
+  dialogueOf: (continuation: string) =>
+    story.world().state.choices?.[continuation as ContinuationId]?.source.key, // a replay note names it
+  trace: () => story.trace(), // the author column replays these
+});
+function managedGame(story: Open, cartridge: Cartridge, db: Db) {
   const held: SessionAttempt = { catching: false, sent: lastId(db) };
   const listeners = new Set<(update: GameSubscription) => void>();
-  const emit = (update: GameSubscription) => {
-    for (const listener of listeners) listener(update);
-  };
+  const emit = (update: GameSubscription) => listeners.forEach((l) => l(update));
   const projection = (): Projection => ({ view: gameView(story.world()), token: story.token() });
-  const terminal = (reply: Reply) => reply.kind !== 'pending' && reply.kind !== 'catching_up';
   let attempting = false;
   const attempt = (): Reply => {
     const outer = attempting; // a listener may re-enter attempt while this one drains
@@ -134,6 +136,7 @@ function managedGame(
   return Object.assign(game, {
     newGame: story.newGame,
     pulse: pulseOf(story, projection, before, emit, pending, attempt),
+    ...authorTools(story),
   });
 }
 
@@ -162,6 +165,7 @@ function sharedGame(
     text: (key) => cartridge.text[key as Key],
     lastNarration: (command_id) => (unsettled() ? undefined : story.narration(command_id)),
     chronicle: () => story.chronicle(),
+    opener: (encounter_id) => (unsettled() ? undefined : story.opener(encounter_id)),
   };
 }
 
@@ -191,11 +195,11 @@ function pulseOf(
             reply,
           });
         const status = statusOf(reply);
-        emit({ kind: 'state', projection: projection(), status });
+        emit({ kind: 'state', projection: projection(), status, resumed: mode === 'resume' });
         return status;
       }
       const status = story.pulse(mode, run);
-      emit({ kind: 'state', projection: projection(), status });
+      emit({ kind: 'state', projection: projection(), status, resumed: mode === 'resume' });
       return status;
     } catch (e) {
       const status = statusOfError(e);
@@ -221,11 +225,9 @@ function attemptStory(
 const statusOfError = (e: unknown): ElapsedStatus =>
   e instanceof ElapsedRecoveryError && e.kind === 'stale_view'
     ? { kind: 'replaced' }
-    : {
-        kind: 'error',
-        message: (e as Error).message,
-        ...(e instanceof ElapsedRecoveryError ? { reason: 'save_corrupt' as const } : {}),
-      };
+    : e instanceof ElapsedRecoveryError || e instanceof CatchUpRefusedError
+      ? { kind: 'error', reason: 'save_corrupt', message: e.message }
+      : { kind: 'error', message: (e as Error).message };
 
 const statusOf = (reply: Reply): ElapsedStatus =>
   reply.kind === 'pending' || reply.kind === 'catching_up'

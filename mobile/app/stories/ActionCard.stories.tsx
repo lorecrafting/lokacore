@@ -24,6 +24,17 @@ export const Short: Story = {
   },
 };
 
+// Breaks: an already asked option stops answering the press instead of only dimming, or the name stops saying so.
+export const Asked: Story = {
+  args: { asked: true },
+  play: async ({ args, canvas, userEvent }) => {
+    await userEvent.click(
+      canvas.getByRole('button', { name: 'Ask about the ferry, already chosen' }),
+    );
+    await expect(args.press).toHaveBeenCalledOnce();
+  },
+};
+
 export const TwoLineLabel: Story = {
   args: {
     b: button('Ask Bram the ferryman whether the causeway will be passable before nightfall'),
@@ -58,5 +69,18 @@ export const Unavailable: Story = {
     await waitFor(() => expect(card).toHaveTextContent(/^Buy a lantern\s+It's sold out\.$/));
     await expect(canvasElement.querySelector('[aria-live]')).toHaveTextContent("It's sold out.");
     await expect(card).toHaveAccessibleName(/^Buy a lantern\s+It's sold out\.$/);
+  },
+};
+
+// Breaks (book-ui.md, Spirit state): the waiting rise card is not disabled, or a press shows a
+// reason, or the web lacks the seconds left as its description (react-native-web drops a button's value).
+export const Waiting: Story = {
+  render: () => <ActionCard label="Rise" wait={{ seconds: 10, left: 4, fraction: 0.4 }} />,
+  play: async ({ canvas, userEvent }) => {
+    const card = canvas.getByRole('button', { name: 'Rise' });
+    await expect(card).toHaveAccessibleDescription('4 seconds');
+    await expect(card).toHaveAttribute('aria-disabled', 'true');
+    await userEvent.click(card);
+    await expect(card).toHaveTextContent(/^Rise$/);
   },
 };

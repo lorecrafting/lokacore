@@ -109,35 +109,37 @@
   },
   "known_npcs": [
    {
-    "id": "21f61dc2-0501-8853-a8ff-88ed5dbd71b7",
-    "name": "npc.clerk_b.short"
+    "id": "1ff34115-09bf-88cc-94fc-be3e623e9a19",
+    "name": "npc.hob.short"
    },
    {
-    "id": "73868cdd-0749-8a27-877e-1059c7fcbd74",
+    "id": "3924002c-1621-899b-a2b3-c34d2c4cdcf1",
     "name": "npc.merchant.short"
    },
    {
-    "id": "84fd3cbf-5a89-8680-bea7-cf44e790ff8c",
-    "name": "npc.guard.short"
+    "id": "65d77be3-068c-8eff-a84e-8b17a5777bcc",
+    "name": "npc.clerk_b.short"
    },
    {
-    "id": "a1a7315c-1753-8b62-a1a1-e42cb54b3446",
+    "id": "6b2b9c4f-6781-82f4-a079-908def5908f6",
     "name": "npc.smith.short"
    },
    {
-    "id": "b0abb6c3-7896-807a-a308-5f6ee0ddd150",
+    "id": "6c939a35-4efc-8a5c-8bc7-00f4c42bdfc2",
     "name": "npc.chandler.short"
    },
    {
     "id": "b303069b-00e7-8e90-9241-9392c7c6bd7d",
-    "name": "npc.hob.short"
+    "name": "npc.guard.short"
    }
   ],
   "levelling": {
    "level": 1,
    "experience": 0,
+   "from": 0,
    "next": 30,
-   "unspent": 0
+   "unspent": 0,
+   "level_up": "levelling.level_up"
   },
   "skills": [
    {
@@ -344,22 +346,22 @@
      "title": "room.market_row.title",
      "entities": [
       {
-       "id": "b0abb6c3-7896-807a-a308-5f6ee0ddd150",
+       "id": "6c939a35-4efc-8a5c-8bc7-00f4c42bdfc2",
        "name": "npc.chandler.short",
        "kind": "npc"
       },
       {
-       "id": "21f61dc2-0501-8853-a8ff-88ed5dbd71b7",
+       "id": "65d77be3-068c-8eff-a84e-8b17a5777bcc",
        "name": "npc.clerk_b.short",
        "kind": "npc"
       },
       {
-       "id": "84fd3cbf-5a89-8680-bea7-cf44e790ff8c",
+       "id": "b303069b-00e7-8e90-9241-9392c7c6bd7d",
        "name": "npc.guard.short",
        "kind": "npc"
       },
       {
-       "id": "73868cdd-0749-8a27-877e-1059c7fcbd74",
+       "id": "3924002c-1621-899b-a2b3-c34d2c4cdcf1",
        "name": "npc.merchant.short",
        "kind": "npc"
       }
@@ -460,7 +462,7 @@
   ],
   "entities": [
    {
-    "id": "a1a7315c-1753-8b62-a1a1-e42cb54b3446",
+    "id": "6b2b9c4f-6781-82f4-a079-908def5908f6",
     "name": "npc.smith.short",
     "words": {
      "article": "the",
@@ -560,7 +562,7 @@
         "quoted_price"
        ],
        "target_ids": [
-        "a1a7315c-1753-8b62-a1a1-e42cb54b3446"
+        "6b2b9c4f-6781-82f4-a079-908def5908f6"
        ],
        "available": false,
        "reason": {
@@ -604,7 +606,7 @@
         "quoted_price"
        ],
        "target_ids": [
-        "a1a7315c-1753-8b62-a1a1-e42cb54b3446"
+        "6b2b9c4f-6781-82f4-a079-908def5908f6"
        ],
        "available": false,
        "reason": {
@@ -648,7 +650,7 @@
         "quoted_price"
        ],
        "target_ids": [
-        "a1a7315c-1753-8b62-a1a1-e42cb54b3446"
+        "6b2b9c4f-6781-82f4-a079-908def5908f6"
        ],
        "available": false,
        "reason": {
@@ -662,7 +664,7 @@
     ]
    },
    {
-    "id": "07ad588e-b649-82d6-95ed-118cbf97e8f2",
+    "id": "8cc7de14-8a90-8e87-86ec-1c743f77e9ee",
     "name": "item.ore_01.short",
     "words": {
      "article": "a",
@@ -687,7 +689,7 @@
     ]
    },
    {
-    "id": "286a9781-0c21-8be9-88f3-edf8d1a50c34",
+    "id": "5bf18294-67a8-81c3-b59c-296b88fad837",
     "name": "item.ore_02.short",
     "words": {
      "article": "a",
@@ -712,7 +714,7 @@
     ]
    },
    {
-    "id": "c0cb9608-9c13-82b3-9d76-a4202ff015f5",
+    "id": "a43af65e-41c7-895b-ac08-3360dac98cc2",
     "name": "item.ore_03.short",
     "words": {
      "article": "a",
@@ -737,7 +739,7 @@
     ]
    },
    {
-    "id": "8cc7de14-8a90-8e87-86ec-1c743f77e9ee",
+    "id": "bbcf44ff-8b4a-8113-88d7-fdf1821b0432",
     "name": "item.ore_04.short",
     "words": {
      "article": "a",
@@ -782,6 +784,12 @@
   ],
   "position": "standing",
   "journal": [],
+  "spell_words": [
+   {
+    "word": "mend",
+    "available": true
+   }
+  ],
   "time": 25200,
   "calendar_status": {
    "day": 1,
@@ -793,7 +801,7 @@
    "season": "spring",
    "tide": "high"
   },
-  "recap_after": 90000,
+  "recap_after": 86400,
   "resources": [
    {
     "resource": {
@@ -817,18 +825,6 @@
     "current": 10,
     "maximum": 10,
     "band": "ready",
-    "tone": "normal"
-   },
-   {
-    "resource": {
-     "cartridge_id": "toolbox_showcase",
-     "cartridge_version": "0.0.1",
-     "kind": "resource",
-     "key": "hunger"
-    },
-    "current": 10,
-    "maximum": 10,
-    "band": "fed",
     "tone": "normal"
    },
    {
@@ -866,25 +862,23 @@
     "maximum": 100,
     "band": "purse_empty",
     "tone": "danger"
-   },
-   {
-    "resource": {
-     "cartridge_id": "toolbox_showcase",
-     "cartridge_version": "0.0.1",
-     "kind": "resource",
-     "key": "thirst"
-    },
-    "current": 10,
-    "maximum": 10,
-    "band": "quenched",
-    "tone": "normal"
    }
-  ]
+  ],
+  "revival": {
+   "lines": [
+    "death.revival.1",
+    "death.revival.2",
+    "death.revival.3",
+    "death.revival.4",
+    "death.revival.5"
+   ],
+   "seconds": 10
+  }
  },
  "stack": [
   {
    "kind": "thing",
-   "id": "a1a7315c-1753-8b62-a1a1-e42cb54b3446"
+   "id": "6b2b9c4f-6781-82f4-a079-908def5908f6"
   }
  ],
  "log": [

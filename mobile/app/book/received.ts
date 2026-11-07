@@ -3,6 +3,7 @@
 import type { Game, GameView, Reply } from '../../packages/game-view/session.ts';
 import { cast, comings, lineText, lineWords, replyLine, spoken, used } from './words.ts';
 import { things } from './item-pages.ts';
+import { skillChanges } from './skillChange.ts';
 import {
   arrived,
   closing,
@@ -18,6 +19,7 @@ import {
 } from './logs.ts';
 import type { Button } from './presenter.ts';
 import { commandOf } from './buttons.ts';
+import { fall } from './spirit.ts';
 
 type Say = (key: string) => string;
 
@@ -123,13 +125,23 @@ const routedLines = (
 
 type Accepted = Extract<Extract<Reply, { kind: 'saved' }>['decision'], { kind: 'accepted' }>;
 
+export const telling = ({ payload: e }: Accepted['events'][number]) =>
+  (e.type === 'entity_died' && !e.victim_definition) ||
+  e.type === 'action_completed' ||
+  (e.type === 'custom_event' && e.event.key === 'lever');
+
 // The receipt's retained narration, read back from storage when the reply carried any.
-function retainedNarration(game: Game, s: Logs, reply: Reply, accepted?: Accepted) {
+export function retainedNarration(game: Game, s: Logs, reply: Reply, accepted?: Accepted) {
   const command_id =
     reply.kind === 'saved' ? (reply.command_id ?? accepted?.events[0]?.causation_id) : undefined;
-  return accepted?.narration?.length && (command_id || accepted.outcome !== 'riddle_wrong')
-    ? savedNarration(game, s, command_id)
-    : undefined;
+  const lines = !!accepted?.narration?.length;
+  // A death may have no line, and so no retained narration; the Book still falls (book-ui.md, Falling).
+  // So may a lever or a scripted action: read for its record's deed only.
+  const last =
+    lines || accepted?.events.some(telling) ? savedNarration(game, s, command_id) : undefined;
+  if (last?.died) fall(s, last.command_id);
+  if (last?.lever || last?.opened || last?.missed) s.deed = last;
+  return lines && (command_id || accepted.outcome !== 'riddle_wrong') ? last : undefined;
 }
 
 // A press's item and listener names, for its fallback line (fallbackLine below).
@@ -183,14 +195,11 @@ function conversationLines(
 }
 
 // A skill the reply taught or raised narrates itself (book-ui.md Line placement, loka-lsqi).
-const skillEvents = (was: GameView, now: GameView, text: Say): DetailLine[] =>
-  (was.skills ? (now.skills ?? []) : []).flatMap((n): DetailLine[] => {
-    const w = was.skills!.find((k) => k.skill.key === n.skill.key && k.skill.kind === n.skill.kind);
-    const name = text(n.label);
-    if (n.acquired && !w?.acquired) return [{ text: `You learn ${name}.`, event: true }];
-    if (w?.acquired && (n.level ?? 0) > (w.level ?? 0))
-      return [{ text: `Your ${name} improves.`, event: true }];
-    return [];
+export const skillEvents = (was: GameView, now: GameView, text: Say): DetailLine[] =>
+  skillChanges(was, now).map(({ name, skill, key }) => {
+    const label = text(skill.label);
+    const composed = name === 'skill_learned' ? `You learn ${label}.` : `Your ${label} improves.`;
+    return { text: key ? text(key) : composed, event: true, gilt: true };
   });
 
 // Where the reply's lines go: a corpse pickup, the receipt's or button's detail, or a Read target.

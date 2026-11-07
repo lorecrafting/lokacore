@@ -13,5 +13,5 @@ all() { printf 'code=true\nsim_walk=true\n'; exit 0; }
 [ "${1-}" = push ] || all
 base=$(git merge-base origin/main HEAD 2>/dev/null) && files=$(git diff --no-renames --name-only "$base" HEAD) && [ -n "$files" ] || all
 has() { printf '%s\n' "$files" | grep -qE "$1" && echo true || echo false; }
-echo "code=$(printf '%s\n' "$files" | grep -qvE '^(docs|\.beads)/' && echo true || has '^docs/(spec|system|blocks|archive/(spec|decisions))/|^docs/.*(\.jsonl?$|\.gen\.)|^docs/(BOOK-UI-COMPONENTS|CHECKS|MECHANICS-TOOLBOX|ROADMAP|web-preview)\.md$')"
+echo "code=$(printf '%s\n' "$files" | grep -qvE '^(docs|\.beads)/' && echo true || has '^docs/(spec|system|blocks|archive/(spec|decisions))/|^docs/.*(\.jsonl?$|\.gen\.)|^docs/(BOOK-UI-COMPONENTS|CHECKS|MECHANICS-TOOLBOX|ROADMAP|web-preview|guides/dialogue-cookbook)\.md$')"
 echo "sim_walk=$(has '^(kernel/ts/(src|play)|lib|cartridges|protocol|mobile/app|config|\.github)/|^kernel/ts/(test/(sim|read)|package)|^docs/spec/conformance/|^mix\.(exs|lock)$|^bin/(loka|ci_changes\.sh)$')"

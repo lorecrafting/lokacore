@@ -1,5 +1,7 @@
 # Showcase plan 1: hub, body, world and social districts
 
+> Reference only: agent-written plan; any room, NPC or line text in it is placeholder. Never ships as written; the owner writes shipped prose ([rule](../decisions/owner-decision-human-made-content-2026-10-31.md)).
+
 District brief for `cartridges/toolbox_showcase` ([showcase](../SHOWCASE.md), Beads `loka-y6yg`),
 written by Fable for an Opus developer to build and an Opus reviewer to check against. Base: `main`
 plus batch M6 (PR #363). It uses only installed mechanics; every field named here has a sampler
@@ -20,7 +22,7 @@ Two developer slices, one PR each:
    statuses, garments, the hub inn, the Fell Road and Tidewater Steps, their tests.
 2. **Slice B: social.** Low Wardle: facts, NPCs, dialogues, the letter quest and scene, Tam's
    schedule and rumour, codex, pick and force, the recap threshold; it also adds Wat's letter
-   dialogue (`dialogues/wat_letter.json`) to the shepherd slice A created.
+   dialogue (`areas/fell_road/dialogues/wat_letter.json`) to the shepherd slice A created.
 
 Pins: one kernel test per district (`kernel/ts/test/showcase_body.test.ts`, `showcase_world.test.ts`,
 `showcase_social.test.ts`) walking the guided steps below and asserting each expected outcome, plus
@@ -37,16 +39,15 @@ of world id and day, [row 31](../system/mechanics.md#derived-sky-weather-season-
   tags, description_variant, variety, knowledge, scripted_action, check, skills, attributes, liquid,
   readable, topics, quest, dialogue, scene, barrier, death, position, commerce, behavior
   (schedules) and combat (the Warden's `attack` and `engage`); the compiler names any missing one).
-- `entry`: `crossroads_inn`; `world.death.shrine`: `crossroads_inn`.
+- `entry`: `crossroads_inn`; `world.death.shrine`: `wayside_shrine` (loka-kgd.206; up from `shore_steps`).
 - `time_policy`: `real_elapsed`, rate 50, `recap_after_minutes` 30 (slice B adds the field;
   `recap_sampler/cartridge.json`).
 - `calendar`: start 25200 (07:00 day 1), 3600 units per hour, 24 hours, 4 subdivisions;
   `weather` `clear` 2, `frost` 1, `rain` 1 (`wet`), `gale` 1, `heat` 1, `drought` 1
-  (`exposure_sampler`, `needs_sampler`); `season` period 345600 (four days, so winter is day 4): `spring` 0,
+  (`exposure_sampler`; `drought` is the showcase's own); `season` period 345600 (four days, so winter is day 4): `spring` 0,
   `summer` 86400, `autumn` 172800, `winter` 259200; `tide` period 43200: `low` 0, `high` 21600;
   `lunar` period 345600: `new` 0, `full` 172800 (`sky_sampler`, `time_sampler`).
-- Pools: `hp` 1..10 start 10 gain 0; `mv` 0..100 start 100; `hunger` and `thirst` 0..10 start 10,
-  each with its own band words (`needs_sampler/resources.json`); `pennies` 0..100 start 10, the
+- Pools: `hp` 1..10 start 10 gain 0; `mv` 0..100 start 100; `pennies` 0..100 start 10, the
   shop currency (`standing_sampler/resources.json`).
 - Attributes: `str` 10, `dex` 10, `cha` 6 (`persuade_sampler/attributes.json`).
 - `world.derived.carry_grams`: base `carry.max_grams` 5000, term `str` per_point 1000, pivot 10
@@ -55,16 +56,17 @@ of world id and day, [row 31](../system/mechanics.md#derived-sky-weather-season-
   (`persuade_sampler`, `barrier_sampler`).
 - Statuses ([row 1](../system/mechanics.md#status-effects-over-time-toolbox-row-1),
   [row 2c](../system/mechanics.md#status-modifiers-toolbox-row-2c); `exposure_sampler/statuses`,
-  `buffs_sampler/statuses`, `needs_sampler`): `chilled`, `soaked`, `windburnt`, `overheated`
-  each hp -1 every 7200 for 9000; `hungry` hunger -1 every 3600 and `thirsty` thirst -1
-  every 3600, both permanent until bread or water cures them (loka-rn3b); `parched` thirst -1 every 1800 for 5400; `might` modifies str +3 for 3600,
+  `buffs_sampler/statuses`, `fed_sampler/statuses`, `areas/fell_road/statuses/parched.json`): `chilled`, `soaked`, `windburnt`, `overheated`
+  each hp -1 every 7200 for 9000; `parched` mv -10 every 1800 for 5400; `well_fed` hp +1 and
+  mv +5 every 1200 for 3600 (a cooked meal's `applies` lasts 7200); `refreshed` mv +5 every 600
+  for 1800; `might` modifies str +3 for 3600,
   no `per_tick`; `inspired` modifies dex +2 for 1800, no `per_tick`.
-- Liquids: `water` cures `thirsty` and `parched`; `draught` (the potion kind, `drank {kind}`
+- Liquids: `water` cures `parched` and applies `refreshed`; `draught` (the potion kind, `drank {kind}`
   reaction applies `might`; `buffs_sampler/liquids/potion.json`).
 
 ## Hub: the Crossroads Inn (slice A)
 
-One room, `crossroads_inn`, the entry and the death shrine. Exits: north `fell_gate` (body), east
+One room, `crossroads_inn`, the entry (the death shrine is `wayside_shrine`, loka-kgd.206). Exits: north `fell_gate` (body), east
 `shore_steps` (world); slice B adds south `village_green` (social) when that room exists, so
 slice A builds alone; west is reserved for the combat district (no exit yet; the sign says so).
 
@@ -80,10 +82,10 @@ slice A builds alone; west is reserved for the combat district (no exit yet; the
   > signpost like this one. A fourth road, west, is not cut yet. Nothing here is a trap: when a
   > door will not open, the words in the room say why.
 
-- **waterskin** (vessel, 4 units of `water`, `needs_sampler`) and a **loaf** (edible, `mv` +5,
-  cures `hungry`, `needs_sampler/items/bread.json`) on the bar.
+- **waterskin** (vessel, 4 units of `water`, `fed_sampler`) and a **loaf** (edible, `mv` +5,
+  applies `well_fed` as `fed_sampler/items/bread.json` does) on the bar.
 
-Expected: a new character starts here at 07:00 day 1 with hp 10, hunger 10, thirst 10, str 10,
+Expected: a new character starts here at 07:00 day 1 with hp 10, mv 100, str 10,
 dex 10, cha 6, pennies 10; the room lists two exits in slice A and three once slice B lands;
 before 06:00 Hob's name reads the asleep variant.
 
@@ -109,8 +111,8 @@ what to wear ([trap 12](../MECHANICS-TOOLBOX.md#traps)).
 > The Fell Road. North of here the moor is open to the sky. Go up in frost, rain, gale or heat
 > without the right garment from these pegs and your body pays by the hour, and a long enough bill
 > is paid with your life; come back under this
-> roof and it stops on its own. The climb makes you hungry and thirsty: Wat's hut, east on the
-> top, has bread and a trough. Orla's still room, west, has a draught that makes you strong for an
+> roof and it stops on its own. A meal leaves you well fed and mending faster, a drink leaves you
+> refreshed: Wat's hut, east on the top, has bread and a trough. Orla's still room, west, has a draught that makes you strong for an
 > hour (try the quern), and a lute (try the knucklebones after a song). The fold, east of here,
 > is the same sky with everything on one shelf.
 
@@ -132,10 +134,8 @@ what to wear ([trap 12](../MECHANICS-TOOLBOX.md#traps)).
   and `clock_hour`), each `when all(sky {weather}, has_tag {tag: exposed, subject: room}, not
   wearing {tag})`: frost/`warm`/`chilled`, rain/`waterproof`/`soaked`, gale/`windproof`/`windburnt`,
   heat/`cool`/`overheated` (`exposure_sampler/reactions`). Dry: `drought` with no garment leaf,
-  applying `parched` (`needs_sampler`). `entity_entered_room` requires a `room`, so `the_fold`
+  applying `parched`, a drought weather debuff on `mv`, not a need (`areas/fell_road/reactions/parched_*.json`). `entity_entered_room` requires a `room`, so `the_fold`
   gets its own five entry rules; the five `clock_hour` rules name no room and serve both.
-- Needs: reaction on `entity_entered_room` into `fell_top` applying `hungry` and `thirsty` (two
-  steps, one rule; `needs_sampler`).
 - Potion: reaction `on {event: drank, kind: draught}` applies `might` (`buffs_sampler/reactions/potion.json`).
 - Song: scripted action `play_song` at `hearth` (policy `has_item lute`, success emits a custom event as the
   sampler does, `tip`: "A song reaches whoever is in the room with you."); reactions on
@@ -152,18 +152,18 @@ Day 1 is a frost day in the test's world; the day 2 branch is rain.
 | # | Step | Expected | Matrix cells |
 |---|---|---|---|
 | 1 | In `fell_gate`, read `sign_body`. | The text above; no topic granted. | |
-| 2 | North to `fell_top` at 07:00 with no garment worn. | `chilled` applied (its applied line); Character page shows the condition; `hungry` and `thirsty` applied in the same receipt; the room's frost variant shows. | statuses x reactions; sky x exposure x equipment |
-| 3 | Wait to 09:00 (two game hours, 7200). | One chilled tick: hp 9; hunger 8 and thirst 8 after two need ticks; the 08:00 `clock_hour` refreshed `chilled` silently (no second applied line). | statuses x reactions |
+| 2 | North to `fell_top` at 07:00 with no garment worn. | `chilled` applied (its applied line); Character page shows the condition; the room's frost variant shows. | statuses x reactions; sky x exposure x equipment |
+| 3 | Wait to 09:00 (two game hours, 7200). | One chilled tick: hp 9; the 08:00 `clock_hour` refreshed `chilled` silently (no second applied line). | statuses x reactions |
 | 4 | South to `fell_gate` at 09:00; wait to 11:30. | No refresh under the roof: the 09:00 refresh set the end to 11:30 (32400 + 9000); the 11:00 tick puts hp at 8; at 11:30 the expired line, with no cure. The developer pins these two times from row 1's refresh rule in the test. | |
 | 5 | Wear `cloak`, north to `fell_top`. | Nothing applies (the `not wearing warm` leaf fails); the frost variant still shows. | sky x exposure x equipment |
 | 6 | Same step on a rain day wearing only the cloak, then wearing the oilskin. | `soaked` applies with the cloak; nothing with the oilskin. | sky x exposure x equipment |
 | 7 | Stand on `fell_top` across 08:00 on the frost day. | Wat arrives at 08:00; the `wat_frost` rule chills him (no player line, [row G3](../system/mechanics.md#statuses-on-npcs-and-things-toolbox-row-g3)); his description reads the shivering variant; at 09:00 he leaves for the hut; at 10:00 his tick puts him at hp 9; at 10:30 the variant stops. | NPC status x variants x schedule |
-| 8 | East to `shepherd_hut`; eat `hut_loaf`; drink from `trough_skin`. | Eat ends `hungry` (mv rises by up to 5, never past 100; the hunger pool is unchanged); Drink ends `thirsty`; both conditions leave the Character page. | statuses x reactions |
+| 8 | East to `shepherd_hut`; eat `hut_loaf`; drink from `trough_skin`. | Eat applies `well_fed` (mv rises by up to 5, never past 100; then hp +1 and mv +5 every 1200 until it wears off at 3600); Drink applies `refreshed` (mv +5 every 600, gone at 1800); each shows on the Character page while it lasts. | statuses x reactions |
 | 9 | West to `still_room`; take `quern`. | Refused: 7000 g over the 5000 g carry. | potion x derived carry |
 | 10 | Drink from `cask`; take `quern`. | `might` applied; Character page str 13; carry 8000 g; the take succeeds. A second dose at once moves the end, never stacks (str stays 13). | potion x derived carry |
 | 11 | `throw_bones` before any song. | Failure line (dex 10 < 11). | |
 | 12 | `play_song` (holding the lute), then `throw_bones`. | Song line plus the tip once; `inspired` on the player and on Orla (her humming variant); dex reads 12; the throw passes. 1800 later both expire. | statuses x reactions |
-| 13 | Drought day: `fell_top`. | `parched` applied; a drink from the trough skin ends it; the next `clock_hour` on the moor applies it again. | sky x exposure x equipment |
+| 13 | Drought day: `fell_top`. | `parched` applied and drains mv; a drink from the trough skin ends it; the next `clock_hour` on the moor applies it again. | sky x exposure x equipment |
 
 Sandbox `the_fold`: everything above in one exposed room: wear any mix of garments and watch
 which condition lands by the day's weather; drink, play, shove the Drover (passes only under
@@ -182,7 +182,7 @@ Rows: 10, 11, 30, 31, W6, W7.
 
 | Room | Tags | Exits | Holds |
 |---|---|---|---|
-| `shore_steps` (sign; the shingle) | none (no world room is `exposed`, so the body's `clock_hour` drains never land here) | west `crossroads_inn`, north `cliff_path`, east `sea_cave` through barrier `tidegate`, south `tide_pools` | detail `sign_world`; `net` (item, `description_variants` on `sky {weather: rain}`: "sodden"); detail `horizon` |
+| `shore_steps` (sign; the shingle) | none (no world room is `exposed`, so the body's `clock_hour` drains never land here) | west `crossroads_inn`, north `cliff_path`, east `sea_cave` through barrier `tidegate`, south `tide_pools`, up `wayside_shrine` (the death shrine; the keeper NPC) | detail `sign_world`; `net` (item, `description_variants` on `sky {weather: rain}`: "sodden"); detail `horizon` |
 | `cliff_path` | none | south `shore_steps`, north `cliff_top` | **Idony** |
 | `cliff_top` | none | south `cliff_path`, down `smugglers_stair` (climb face `{item: rope, damage: 3, fell}`), east `tide_pools` through barrier `moon_door` | `rope` |
 | `smugglers_stair` | none | up `cliff_top` (plain), down `sea_cave` (plain) | nothing |
@@ -303,11 +303,10 @@ track climbs `up` from the green. The `hall_cupboard` exit is east of `moot_hall
   Barrier `toll_gate` `opens_when fact_compare warden_lets_pass true`; reaction `gate_lifted` on
   `fact_changed warden_lets_pass` (when true) opens it with `barrier.set` (row W22), so the pass
   opens the gate (loka-y6yg.13).
-  The manifest's `world.combat.player_attack` is `chance 0`: the engagement holds and neither side
-  lands a hit, so waiting it out never kills the Warden and the talk path to `toll_gate` stays open
-  (flee, mend the standing, talk). A later weapon, `hit_chance` term or combat district that lets
-  the player hit must keep the Warden alive another way; `showcase_social.test.ts` social 2-3 fails
-  otherwise.
+  The manifest's `world.combat.player_attack` was `chance 0`, so waiting it out never killed the
+  Warden. Diku rounds (Beads `loka-kgd.197`) raised it to 50: the unarmed blow can now kill him, so
+  social 2-3 seeds each round to a miss and the talk path to `toll_gate` (flee, mend the standing,
+  talk) holds only if the player flees in time ([combat district](combat-district.md#the-worldcombat-constraint)).
 - **Tam**: `room: warden_gate`; `daily_schedule` 10 `mill`, 11 `[{when: sky {weather: rain},
   room: church, goal: "Tam makes for the church porch out of the rain."}, village_green]`,
   15 `warden_gate` (`schedule_sampler/npcs/maud.json`).
@@ -371,7 +370,7 @@ world whose day 1 is rain (Tam visits the mill every day, so on a later day Nell
 |---|---|---|---|
 | 1 | Read `sign_social`; buy bread from Nell. | Costs 4; standing 0, Nell wary. | disposition x commerce x dialogue |
 | 2 | Talk to the Reeve: `help`. | Standing 1; Nell friendly; bread now 2; Nell's shelf shows the price. | disposition x commerce x dialogue |
-| 3 | Talk to the Reeve: `wrong` twice. | Standing -1 then -2 (clamped); Nell refuses to trade and to talk (`invalid_state`, the shelf's reason); walking east the Warden's engage line opens an encounter (hp 5, chance 0: no damage; Flee or wait; the combat district owns the rest). | disposition x commerce x dialogue |
+| 3 | Talk to the Reeve: `wrong` twice. | Standing -1 then -2 (clamped); Nell refuses to trade and to talk (`invalid_state`, the shelf's reason); walking east the Warden's engage line opens an encounter (hp 5; the Warden's chance 0 deals no damage; Flee or wait; the combat district owns the rest). | disposition x commerce x dialogue |
 | 4 | Fresh world: give the Warden the apple; `wrong` twice; walk east. | Warden trust 1, so no engagement; Nell still hostile. Give Nell the apple instead in another run: her trust 1, the gift reaction names no NPC and lands on whoever holds it. | |
 | 5 | Fresh world: Talk to the Warden: `lean`. | Failure line, conversation closes, intimidate use 1 (level 1). Talk again: `lean` passes (1 ≥ 1), use 2 (level 2), `warden_lets_pass` true; `toll_gate` swings open (no Open step). (`reason` passes at once: cha 6 ≥ 5.) | rumour x dialogue check x codex (the practice half) |
 | 6 | East; `pick_strongbox`. | First pick fails (level 0 < 1), second passes; the lid opens; take `mill_ledger`, read it: Lore lists "The mill". | pick x force x skill growth |
@@ -382,7 +381,7 @@ world whose day 1 is rain (Tam visits the mill every day, so on a later day Nell
 | 11 | At 19:30 day 1, north to the inn, north to the fell with no cloak (frost); wait to 21:30. | `chilled` applies with 15000 left; its first tick at 21:30 puts hp at 9 with 7800 left (deadline 23:40 day 1); the Journal shows both the condition and the time left. | deadlines x exposure |
 | 12 | East to Wat before 60000: `deliver`. | The letter moves to Wat; quest resolved with outcome `deliver`; story point reached; scene `letter_read` runs (two lines, acknowledge); on its end standing +1; the Journal shows the `deliver` outcome text. `burn` instead: outcome `burn`, scene `letter_ash`, standing -2, Wat keeps nothing. | scenes x dialogue x reactions |
 | 13 | Fresh world: accept, then wait 60000. | `quest_failed late`; `letter_late` true; standing -1; the Reeve's description reads the cold variant; the Journal shows the `late` text and no time left. | quests x deadlines x hints |
-| 14 | Accept at 07:00 day 1 standing on the green, then an elapsed settlement of three real hours (150 game hours; the host settles it in steps, not one `wait`). | The next page opens with one collapsed recap block grouping the settlement's World-log lines: "Tam arrives." (11:00 each day) and "Tam leaves." (15:00 each day), each with its count; no goal line (it shows only in the room he leaves) and no deadline line (the deadline job narrates nothing; the quest's `late` text is in the Journal and `letter_late` is true). Two real minutes away shows no block. The recap is Book-side, so the pin is an app test beside `mobile/app/book/recap.test.ts`, not the kernel test; the kernel test pins only `recap_after` and the facts. | deadlines x schedules x away recap |
+| 14 | Accept at 07:00 day 1 standing on the green, then an elapsed settlement of three real hours of open session (150 game hours; the host settles it in steps, not one `wait`). Time closed is capped at one in-game day (save.md, Away cap): the same recap, of that day. | The next page opens with one collapsed recap block grouping the settlement's World-log lines: "Tam arrives." (11:00 each day) and "Tam leaves." (15:00 each day), each with its count; no goal line (it shows only in the room he leaves) and no deadline line (the deadline job narrates nothing; the quest's `late` text is in the Journal and `letter_late` is true). Two real minutes away shows no block. The recap is Book-side, so the pin is an app test beside `mobile/app/book/recap.test.ts`, not the kernel test; the kernel test pins only `recap_after` and the facts. | deadlines x schedules x away recap |
 
 Sandbox `moot_hall`: Bess's shop, praise and insult to swing the standing and her prices, a check
 that passes (`boast`), a check practice never beats (`lean` 3), a box to pick, a cupboard to

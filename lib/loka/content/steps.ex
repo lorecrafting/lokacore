@@ -24,7 +24,8 @@ defmodule Loka.Content.Steps do
     "npc.move" => {"entity_entered_room", @r},
     "population.suppress" => {nil, @r},
     "experience.grant" => {nil, @r},
-    "narrate" => {nil, @r},
+    "end_talk" => {nil, @r},
+    "narrate" => {nil, %{reaction: :any, choice: :any}},
     "emote" => {nil, @r},
     "item.move" => {nil, @r},
     "population.spawn" => {nil, @r},
@@ -33,7 +34,7 @@ defmodule Loka.Content.Steps do
     "status.cure" => {nil, %{reaction: :any, action: :any}},
     "damage" => {nil, %{action: :any}},
     "light.ignite" => {nil, %{action: :any}},
-    "resource.adjust" => {nil, %{action: :any}},
+    "resource.adjust" => {nil, %{action: :any, reaction: :any}},
     "build" => {nil, %{action: ~w(direction structure), service: :any}},
     "skill.acquire" => {nil, %{choice: :any}},
     "topic.grant" => {nil, %{choice: :any}},
@@ -53,6 +54,13 @@ defmodule Loka.Content.Steps do
 
   @doc "The registered ops (step.schema.json Step's branches)."
   def ops, do: Map.keys(@ops)
+
+  @doc "Each op's contexts, sorted; kernel/ts/play/step_contexts.json is its copy for the panel."
+  def contexts,
+    do:
+      Map.new(@ops, fn {op, {_, cs}} ->
+        {op, cs |> Map.keys() |> Enum.map(&to_string/1) |> Enum.sort()}
+      end)
 
   @doc """
   `steps` (a list, or one step such as a service's benefit) at `path` of `rel` in `context`

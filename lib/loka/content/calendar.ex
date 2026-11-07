@@ -18,6 +18,7 @@ defmodule Loka.Content.Calendar do
       cuts(calendar["solar"], day, ["calendar", "solar"], invalid, false) ++
       tables(calendar, subdivision, invalid) ++
       schedules(defs["npc"], hours, invalid) ++
+      template_schedules(defs["npc"]) ++
       Loka.Content.Schedules.check(m, defs) ++
       windows(nodes, hours, invalid) ++
       sky(calendar, nodes, invalid)
@@ -116,6 +117,16 @@ defmodule Loka.Content.Calendar do
         {key, _} <- Map.get(npc, "daily_schedule", %{}),
         String.to_integer(key) >= hours,
         do: invalid.(at(rel, ["daily_schedule", key]))
+  end
+
+  # A spawn template has no body at the start of play, so no schedule can move it.
+  defp template_schedules(npcs) do
+    for {key, {rel, _, %{"spawn_template" => true, "daily_schedule" => _}}} <- npcs,
+        do:
+          diag("SCHEMA_VIOLATION", at(rel, ["daily_schedule"]), %{
+            "why" => "template_schedule",
+            "key" => key
+          })
   end
 
   defp windows(nodes, hours, invalid) do

@@ -1,0 +1,28 @@
+{
+  "keywords": [
+    "loaf",
+    "bread"
+  ],
+  "name": "item.hut_loaf.short",
+  "room_line": "item.hut_loaf.room",
+  "description": "item.hut_loaf.description",
+  "location": {
+    "in": "room",
+    "room": "shepherd_hut"
+  },
+  "mass_grams": 200,
+  "edible": {
+    "resource": "mv",
+    "amount": 5,
+    "label": "action.eat",
+    "narration": "narration.eat_hut_loaf",
+    "applies": [
+      "well_fed"
+    ]
+  },
+  "words": {
+    "bare": "item.hut_loaf.bare",
+    "article": "a",
+    "plural": "item.hut_loaf.plural"
+  }
+}

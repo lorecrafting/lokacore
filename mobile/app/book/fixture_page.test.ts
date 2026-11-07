@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { nodes, words } from './__tests__/polish-book.test.ts';
 import { buttonsOf } from './buttons.ts';
-import { intentOf } from './model.ts';
+import { group, intentOf } from './model.ts';
 
 const TEXT: Record<string, string> = {
   'room.loft.title': 'Loft',
@@ -115,4 +115,29 @@ test('a refused Read draws its reason on the notice page', async () => {
   const { page } = await draw({}, undefined, [read]);
   const card = page.find((n) => n.props?.accessibilityLabel === 'Read');
   assert.equal(card?.props.accessibilityHint, 'Too dark to read.');
+});
+
+// Break (loka-vx2v): a quest offer on an NPC missing from the NPC's page, labelled with the NPC's
+// name, drawn on the World card, or sending the NPC as a target.
+test('a quest offer naming an NPC is a card on that page under its authored label', () => {
+  const offer = {
+    action_key: 'lantern',
+    label: 'quest.lantern.accept',
+    target: { kind: 'entity', scopes: ['room_occupants'] },
+    target_ids: [],
+    input: [],
+    available: true,
+  };
+  const view = {
+    exits: [],
+    actions: [],
+    inventory: [],
+    entities: [{ id: 'bram', kind: 'npc', name: { key: 'npc.bram' }, actions: [offer] }],
+  } as any;
+  const text = (key: string) => (key === 'quest.lantern.accept' ? 'Carry the lantern' : 'Bram');
+  const books = group(buttonsOf(view, text, text) as any);
+  const [card] = books.on('bram');
+  assert.equal(card?.label, 'Carry the lantern');
+  assert.equal(books.place.length, 0);
+  assert.deepEqual(intentOf(card!), { action_key: 'lantern', target_ids: [], input: {} });
 });

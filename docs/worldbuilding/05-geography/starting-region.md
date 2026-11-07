@@ -1,5 +1,7 @@
 # The starting region
 
+> Reference only: agent-drafted worldbuilding text (not the owner's words). Never ships as written; the owner writes shipped prose ([rule](../../decisions/owner-decision-human-made-content-2026-10-31.md)).
+
 Status: draft. Area: [Geography: worlds, lands, climate, travel](../README.md#05-geography). Canon tier: draft (owner-directed 2026-10-16).
 
 **Purpose.** The region where the new world's first chapter happens, in enough detail to replace the Ashmere village.

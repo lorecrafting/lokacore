@@ -58,7 +58,7 @@ defmodule Loka.ContentZoneTest do
              {"DUPLICATE_DEFINITION", "reactions/wanderer_hall", %{}}
            ]
 
-    for zones <- ["priory", [1], ["Priory!"]] do
+    for zones <- ["priory", [1], ["Priory!"], nil] do
       assert refused(@codex, [{"rooms/hall.json", &Map.put(&1, "zones", zones)}]) ==
                [{"SCHEMA_VIOLATION", "rooms/hall.zones", %{"error" => "invalid_type"}}]
     end

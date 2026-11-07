@@ -1,12 +1,12 @@
-// size: allow 320, the exported components' doc comments (BOOK-UI-COMPONENTS.md, Component catalogue)
+// size: allow 340, the exported components' doc comments (BOOK-UI-COMPONENTS.md, Component catalogue)
 // The Book draws GameView through its presenter; App injects the shell.
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { SafeAreaView, View } from 'react-native';
 import { Text } from './Text.tsx';
 import type { Game } from '../../packages/game-view/session.ts';
-import { Combat } from './Combat.tsx';
 import { Footer } from './Footer.tsx';
 import { StatusLine } from './Status.tsx';
+import type { RuleDrawn } from './ExperienceRule.tsx';
 import {
   group,
   POSITION_ACTIONS,
@@ -18,7 +18,7 @@ import {
   type Hint,
   type Page,
 } from './model.ts';
-import { usePaletteCurve } from './fade.ts';
+import { usePaletteCurve, useReducedMotion } from './fade.ts';
 import {
   PaletteContext,
   paletteOf,
@@ -28,19 +28,18 @@ import {
   useType,
   type Palette,
 } from './palette.ts';
-import {
-  readingFactor,
-  readingType,
-  type Reading,
-  type ReadingStep,
-  type ReadingStore,
-} from './reading.ts';
+import type { Effects, Reading } from './reading.ts';
+import { riffles } from './cueDiff.ts';
+import { useCueSounds } from './useCueSounds.ts';
+import { Leaf } from './Leaf.tsx';
+import { useSettings, type SettingStores } from './useSettings.ts';
 import { color, size, space } from './tokens.ts';
 import { Fault, Heard } from './lines.tsx';
 import { presenter, type Button, type DetailLine } from './presenter.ts';
-import { Body } from './Body.tsx';
+import { footContext } from './UnderInk.tsx';
 import { NightSky } from './NightSky.tsx';
 import { LABEL } from './labels.ts';
+import { HapticPulse } from './HapticPulse.tsx';
 import { PageTurn } from './PageTurn.tsx';
 import {
   firstPages,
@@ -53,12 +52,11 @@ import {
 } from './updates.ts';
 
 /** What the phone shell injects: its confirm step and its first-run store (react-native-web has none). */
-export type Shell = {
+export type Shell = SettingStores & {
   confirm: (go: () => void) => void;
   learned: Hint;
   recovered?: (healthy: boolean) => void;
   subscribed?: (on: boolean) => void; // whether the Book sees every update (the away recap waits)
-  reading?: ReadingStore & { fontScale: () => number }; // and the system font scale
 };
 
 // Actions retain valid detail pages; leaving a room closes them. A pending retry keeps its
@@ -69,17 +67,19 @@ export type BookProps = {
   startOver: () => string | undefined; // a start over that failed and kept the game: why
 };
 
-function pressBook(p: BookProps, pr: Presenter, s: BookState, b: Button, detail?: string) {
+export function pressBook(p: BookProps, pr: Presenter, s: BookState, b: Button, detail?: string) {
   const restoring =
     s.restoreInvocation.current === p.game.pendingInvocation()
       ? s.restoreInvocation.current
       : undefined;
   const stale = !!b.token && !p.game.pending() && b.token !== p.game.view().token;
+  const fell = pr.screen().died;
   pr.press(b, detail);
   if (stale && !pr.recovered()) return s.redraw((n) => n + 1);
   const after = pr.screen(),
     before = s.current.current;
-  let next = pagesAfter(before.stack, before.view, after.view);
+  const died = !!after.dead && fell !== after.died; // as updates.ts: the dead page clears the stack
+  let next = died ? [] : pagesAfter(before.stack, before.view, after.view);
   if (
     restoring &&
     s.restoreInvocation.current === restoring &&
@@ -100,12 +100,22 @@ function pressBook(p: BookProps, pr: Presenter, s: BookState, b: Button, detail?
     npcPage(before.stack.at(-1), before.view) ||
     ['shelf', 'sale'].includes(before.stack.at(-1)?.kind ?? '') ||
     POSITION_ACTIONS.includes(b.command ?? b.action_key);
-  if (next === before.stack && inline && !before.view.scene && !after.view.scene)
-    s.redraw((n) => n + 1);
-  else {
-    s.setStack(next);
-    s.setFlip((f) => ({ turn: f.turn + 1, dir: 1 }));
-  }
+  s.setStack(next);
+  const fresh = died && !before.stack.length; // the World page changes in place
+  if (fresh || (next === before.stack && inline && !before.view.scene && !after.view.scene))
+    return s.redraw((n) => n + 1);
+  const riffle = riffles(b.command, before.view, after.view, fell !== after.died);
+  s.setFlip((f) => ({ turn: f.turn + 1, dir: 1, riffle }));
+}
+
+// The spirit state's clock: a redraw as its next line dries or its next second passes; Rise ends it.
+function useSpirit(pr: Presenter, s: Screen['spirit'], redraw: (f: (n: number) => number) => void) {
+  useEffect(() => {
+    if (s?.next === undefined) return;
+    const id = setTimeout(() => redraw((n) => n + 1), s.next);
+    return () => clearTimeout(id);
+  }, [s]); // a fresh object each screen: re-armed on every draw
+  return () => (pr.rise(), redraw((n) => n + 1));
 }
 
 /**
@@ -116,7 +126,7 @@ function pressBook(p: BookProps, pr: Presenter, s: BookState, b: Button, detail?
 export default function Book(p: BookProps) {
   const [pr] = useState(() => presenter(p.game));
   const [stack, setStack] = useState(() => firstPages(pr.screen()));
-  const [flip, setFlip] = useState({ turn: 0, dir: 1 as 1 | -1 });
+  const [flip, setFlip] = useState<ViewProps['flip']>({ turn: 0, dir: 1 });
   const [, redraw] = useState(0);
   const [talkingOn, talkOn] = useState<Page>();
   const screen = pr.screen();
@@ -124,7 +134,6 @@ export default function Book(p: BookProps) {
   const current = useRef({ stack, view: screen.view });
   current.current = { stack, view: screen.view };
   const state = { current, restoreInvocation, setStack, setFlip, redraw };
-  useUpdates(p, pr, state);
   const go = (next: Page[], dir: 1 | -1) => {
     pr.leaveCombat(); // every turn leaves an ended Combat page (its foot is the only one shown)
     const view = pr.screen().view;
@@ -135,7 +144,6 @@ export default function Book(p: BookProps) {
   };
   const press = (b: Button, detail?: string) => pressBook(p, pr, state, b, detail);
   const refused = (line: DetailLine) => (screen.log.push(line), redraw((n) => n + 1));
-  const startOver = () => p.shell.confirm(() => (pr.startOverFailed(p.startOver()), go([], 1)));
   return (
     <BookView
       palette={useBookPalette(paletteOf(screen.view.calendar_status?.solar), usePaletteCurve())}
@@ -145,39 +153,55 @@ export default function Book(p: BookProps) {
       go={go}
       press={press}
       refused={refused}
-      startOver={startOver}
+      startOver={() => p.shell.confirm(() => (pr.startOverFailed(p.startOver()), go([], 1)))}
+      rise={useSpirit(pr, screen.spirit, redraw)}
       shell={p.shell}
       talkingOn={talkingOn}
       talkOn={talkOn}
-      reading={useReading(p.shell)}
+      {...useSettings(p.shell)}
+      {...useUpdates(p, pr, state)}
     />
   );
-}
-
-// The Reading size the player chose on Settings, scaled by the system font scale.
-function useReading(shell: Shell): Reading {
-  const [step, setStep] = useState(() => shell.reading?.get() ?? 'standard');
-  const choose = (s: ReadingStep) => (setStep(s), shell.reading?.set(s));
-  return { step, choose, type: readingType(readingFactor(step, shell.reading?.fontScale() ?? 1)) };
 }
 
 type ViewProps = {
   palette: Palette;
   screen: Screen;
   stack: Page[];
-  flip: { turn: number; dir: 1 | -1 };
+  flip: { turn: number; dir: 1 | -1; riffle?: boolean };
+  resumes?: number; // returns from the background so far: the view that settles one plays no cues
   go: (pages: Page[], dir: 1 | -1) => void;
   press: (b: Button, detail?: string) => void;
   refused: (line: DetailLine) => void;
   startOver: () => void;
+  rise: () => void; // the spirit state's end (book-ui.md, Spirit state)
   shell: Shell;
   talkingOn?: Page; // Body's conversation latch (Body.tsx), held above PageTurn's remount
   talkOn?: (page?: Page) => void;
   reading?: Reading; // none: the Storybook's Reading global (the TypeContext above)
+  effects?: Effects;
 };
 
 // A wide screen centres the page column, at most size.column, on the paper (book-ui.md, Page column).
 const frame = { flex: 1, flexDirection: 'row', justifyContent: 'center' } as const;
+export const chapterCard = (s: ViewProps['screen'], page?: ViewProps['stack'][number]) =>
+  !s.view.combat &&
+  !s.ended &&
+  !s.dead &&
+  !s.view.scene && // Body draws these two over the chapter page
+  !s.view.ancestry_choices &&
+  page?.kind === 'chapter' &&
+  !!s.view.chapter;
+
+const routes = (p: ViewProps, g: ReturnType<typeof group>) => ({
+  ...p,
+  g,
+  open: (page: Page) => p.go([...p.stack, page], 1),
+  walk: (d: string) => p.press(g.exits.find((e) => e.direction === d)!.button),
+  world: () => p.go([], -1),
+  back: () => p.go(p.stack.slice(0, -1), -1),
+});
+
 /**
  * The Book's frame: page turn, body, footer, status icons and status line, and the fault, pending
  * and catching-up states.
@@ -188,36 +212,27 @@ const frame = { flex: 1, flexDirection: 'row', justifyContent: 'center' } as con
  * - Story: RecoveryPages.stories.tsx
  */
 export function BookView(p: ViewProps) {
+  const [foot, setFoot] = useState(0);
+  useCueSounds(p.screen, p.flip.turn, p.resumes, p.flip.riffle);
   const shown = useType();
   const g = group(p.screen.buttons);
   const page = p.stack.at(-1);
-  const ctx = {
-    ...p,
-    g,
-    open: (page: Page) => p.go([...p.stack, page], 1),
-    walk: (d: string) => p.press(g.exits.find((e) => e.direction === d)!.button),
-    world: () => p.go([], -1),
-    back: () => p.go(p.stack.slice(0, -1), -1),
-  };
+  const ctx = routes(p, g);
   return (
     <PaletteContext value={p.palette}>
       <TypeContext value={p.reading?.type ?? shown}>
         <SafeAreaView style={{ ...frame, backgroundColor: p.palette.bg }}>
           <View style={{ flex: 1, maxWidth: size.column }}>
-            <PageTurn turn={p.flip.turn} dir={p.flip.dir} paper={p.palette.bg}>
-              {p.screen.view.combat || p.screen.ended ? (
-                <Combat screen={p.screen} g={g} press={p.press} world={ctx.world} />
-              ) : (
-                <Body
-                  {...ctx}
-                  page={page}
-                  talkOn={p.talkOn ?? (() => {})}
-                  chapterDone={() => p.go(p.stack.slice(0, -1), 1)}
-                />
-              )}
-            </PageTurn>
-            <Bottom {...ctx} page={page} />
+            <footContext.Provider value={foot}>
+              <PageTurn {...p.flip} paper={p.palette.bg} card={chapterCard(p.screen, page)}>
+                <Leaf {...ctx} page={page} />
+              </PageTurn>
+            </footContext.Provider>
+            <View onLayout={(e) => setFoot(e.nativeEvent.layout.height)}>
+              <Bottom {...ctx} page={page} />
+            </View>
             <Heard said={p.screen.said} />
+            <HapticPulse />
           </View>
           {p.palette.bg === color.dark.bg && <NightSky />}
         </SafeAreaView>
@@ -241,11 +256,16 @@ type BottomProps = {
 
 function Bottom(p: BottomProps) {
   const [c, t] = [usePalette(), useType()];
+  const ruleDrawn = useRef<RuleDrawn['current']>(undefined);
   const { view, text, pending, fault, ended } = p.screen;
   const shut = !!view.combat || !!ended;
   const nav = !p.page && !view.ancestry_choices && !view.scene && !shut;
   const detail = !shut && detailPage(p.page);
   if (detail && !pending && !p.screen.catchingUp && !fault) return null;
+  // Dead, the page shows only Let go (the dead page and the spirit state, Rise, catching up
+  // included): no status line (owner 2026-11-04). A fault ends both (spirit.ts haunt, fallen).
+  const fell = p.screen.dead || (p.screen.fell && !p.screen.catchingUp);
+  if ((p.screen.spirit || !!p.screen.treatment || fell) && !fault) return null;
   return (
     <View
       style={{
@@ -258,7 +278,7 @@ function Bottom(p: BottomProps) {
       }}
     >
       {nav && navigation(p)}
-      {!view.ancestry_choices && !detail && statusLine(p)}
+      {!view.ancestry_choices && !detail && statusLine(p, ruleDrawn)}
       {detail && pending && (
         <Text style={{ ...t.small, color: c.dim }}>{LABEL.saveNotConfirmed}</Text>
       )}
@@ -269,7 +289,7 @@ function Bottom(p: BottomProps) {
 }
 
 // The status line under the footer.
-function statusLine(p: BottomProps) {
+function statusLine(p: BottomProps, ruleDrawn: RuleDrawn) {
   const { view, text, pending, ended } = p.screen;
   // A tap on the position line acts only on the open World page.
   const position = !p.page && !view.scene && !ended && nextPosition(view.position, p.g.position);
@@ -281,6 +301,7 @@ function statusLine(p: BottomProps) {
       bleeding={view.bleeding}
       conditions={view.conditions}
       position={view.position}
+      rule={view.levelling && { levelling: view.levelling, drawn: ruleDrawn }}
       text={text}
       locked={!!view.scene || !!view.combat || !!ended || p.page?.kind === 'chapter'}
       openPosition={position ? () => p.press(position) : undefined}
@@ -297,6 +318,7 @@ function navigation(p: BottomProps) {
   return (
     <Footer
       keyboardEnabled={!pending && !fault && !p.screen.catchingUp}
+      room={view.place.id}
       exits={view.exits}
       text={text}
       go={p.walk}

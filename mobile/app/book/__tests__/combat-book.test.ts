@@ -62,6 +62,7 @@ export function nodes(element: any): any[] {
     if (element.type.name === 'Footer') return [element];
     if (element.type.name === 'Heard') return [element]; // the live region: not page text
     if (element.type.name === 'PageTurn') return [element, ...nodes(element.props.children)];
+    (globalThis as any)[Symbol.for('combat-scope')] = element.type.name;
     return nodes(element.type(element.props));
   }
   return [element, ...nodes(element.props?.children)];
@@ -101,7 +102,7 @@ export const view = (extra = {}) =>
       { direction: 'north', available: true },
       { direction: 'west', available: false, reason: { code: 'exit_locked' } },
     ],
-    combat: { encounter_id: 'fight', opponent_id: 'rat', name: 'npc.rat' },
+    combat: { encounter_id: 'fight', opponent_id: 'rat', name: 'npc.rat', interval: 150 },
     ...extra,
   }) as unknown as GameView;
 export const game = (current: GameView): Game => ({
@@ -110,6 +111,12 @@ export const game = (current: GameView): Game => ({
   pending: () => false,
   pendingInvocation: () => undefined,
   subscribe: () => () => {},
-  text: (key) => ({ 'npc.rat': 'a marsh rat', 'combat.result': 'The marsh rat falls.' })[key],
+  text: (key) =>
+    ({
+      'npc.rat': 'a marsh rat',
+      'combat.result': 'The marsh rat falls.',
+      'combat.title_you_attack': 'You attack {target}!',
+    })[key],
   lastNarration: () => undefined,
+  opener: () => ({ npc_id: 'rat', player: true }),
 });

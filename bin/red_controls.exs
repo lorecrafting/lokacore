@@ -1,3 +1,4 @@
+# size: allow 381, one table per gate; the editor gate plants one file per control
 # Red controls plant violations, require checks to fail, and clean their own files.
 # Refuse occupied paths before planting; exclusive creation closes the race. AST: ast-grep test.
 root = Path.expand("..", __DIR__)
@@ -35,6 +36,34 @@ ruleless =
     (entry["commands"] || []) == [] and not File.exists?(Path.join(root, rule)) and
       not Map.has_key?(row, "implemented_in") and not Map.has_key?(row, "spec")
   end) || raise("no unimplemented ruleless capability for feature red control")
+
+# Toolbox page controls: one docs/features.json row changed, planted at tmp/red-toolbox-<name>.json.
+toolbox =
+  for {name, key, change, expect} <- [
+        {"summary", "movement", &Map.delete(&1, "summary"), "movement@1: missing summary"},
+        {"sampler", "bleed", &Map.put(&1, "sampler", "rooms_sampler"),
+         "bleed@1: sampler rooms_sampler: does not require bleed"},
+        {"stale", "movement", &Map.put(&1, "summary", "Planted."),
+         "TOOLBOX.gen.md is out of date"},
+        {"declares", "light", &Map.put(&1, "declares", ["rooms.nosuch"]),
+         ~s(light@1: declares "rooms.nosuch": no such source-schema path)},
+        {"reason", "dev", &Map.put(&1, "declares", "engine-only: "), "dev@1: missing declares"},
+        {"no-sampler", "movement", &Map.delete(&1, "sampler"), "movement@1: missing sampler"},
+        {"cartridge", "movement", &Map.put(&1, "sampler", "nope"),
+         "sampler nope: no such cartridge"},
+        {"district", "movement", &Map.put(&1, "showcase", "areas/nope"),
+         "areas/nope: no such district"},
+        {"root", "movement", &Map.put(&1, "showcase", "areas/"), "movement@1: missing showcase"},
+        {"requires", "emote", &Map.put(&1, "showcase", "areas/hub"), "does not require emote"},
+        {"anchor", "dev", &Map.put(&1, "mechanics", "#nope"),
+         "dev@1: mechanics #nope: no such heading"}
+      ] do
+    file = "tmp/red-toolbox-#{name}.json"
+    planted = JSON.encode!(Map.put(rows, key, change.(rows[key])))
+
+    {"toolbox page: #{name}", %{file => planted}, ~w(elixir bin/toolbox_page.exs --check #{file}),
+     expect}
+  end
 
 controls = [
   {"boundary: web reaches store (only platform may)",
@@ -131,6 +160,33 @@ controls = [
   {"features: a transcript added without regenerating the feature map",
    %{"cartridges/details_sampler/transcripts/skill.jsonl" => ""},
    ~w(elixir bin/features.exs --check), "docs/features.gen.md is out of date"},
+  {"toolbox page: a scene treatment with no Book treatments row",
+   %{
+     "tmp/red-toolbox-treatments.md" =>
+       root
+       |> Path.join("docs/MECHANICS-TOOLBOX.md")
+       |> File.read!()
+       |> String.replace(~r/^\| `reverie` .*\n/m, "")
+   }, ~w(elixir bin/toolbox_page.exs --check docs/features.json tmp/red-toolbox-treatments.md),
+   "treatment:reverie: no row in the Book treatments table"},
+  {"toolbox page: a Book treatment sampler that does not exist",
+   %{
+     "tmp/red-toolbox-sampler.md" =>
+       String.replace(
+         File.read!(Path.join(root, "docs/MECHANICS-TOOLBOX.md")),
+         "rope_reverie.json`",
+         "nope.json`"
+       )
+   }, ~w(elixir bin/toolbox_page.exs --check docs/features.json tmp/red-toolbox-sampler.md),
+   "treatment:reverie: no sampler"},
+  {"toolbox page: a done toolbox row missing from the page",
+   %{
+     "tmp/red-toolbox-done.json" =>
+       JSON.encode!([
+         %{"id" => "X1", "state" => "done", "title" => "Planted", "status" => "done"}
+       ])
+   }, ~w(elixir bin/toolbox_page.exs --check docs/features.json docs/MECHANICS-TOOLBOX.md
+      tmp/red-toolbox-done.json), "TOOLBOX.gen.md is out of date"},
   {"transcripts: a walk_ transcript whose replay differs",
    %{
      "cartridges/toolbox_showcase/transcripts/walk_red.jsonl" =>
@@ -140,6 +196,98 @@ controls = [
        |> String.replace(~s("direction":"west"), ~s("direction":"north"), global: false)
    }, ~w(node --test kernel/ts/test/transcripts.test.ts), "walk_red.jsonl: replay differs"}
 ]
+
+# Editor gate controls (toolbox_page.exs): a planted registry, baseline or main's baseline, each
+# at tmp/red-editor-<name>.*; the files not planted are the committed ones.
+editor_registry = "tools/author-panel/src/edit/registry.json"
+editor_baseline = "test/loka/editor_generic_baseline.txt"
+editor = JSON.decode!(File.read!(Path.join(root, editor_registry)))
+base = File.read!(Path.join(root, editor_baseline))
+card = &Map.put(editor, "services.name", Map.put(editor["services.name"], "edit", &1))
+# a card unregistered: its rows generic again (as services.name is), not in the shrunk baseline
+uncard = fn re ->
+  Map.new(editor, &if(elem(&1, 0) =~ re, do: {elem(&1, 0), editor["services.name"]}, else: &1))
+end
+
+world = ~r/^(cartridge|resources|attributes|populations|transports|barriers)\./
+
+editor_controls =
+  for {name, planted, expect} <- [
+        # the walker reaches the ambient fields emote@1 declares (loka-8ghm), under if/then/else
+        {"rooms-ambient", %{registry: Map.delete(editor, "rooms.ambient")},
+         "rooms.ambient: no create surface"},
+        {"npcs-ambient", %{registry: Map.delete(editor, "npcs.ambient")},
+         "npcs.ambient: no create surface"},
+        {"items-ambient", %{registry: Map.delete(editor, "items.ambient")},
+         "items.ambient: no create surface"},
+        {"treatment", %{registry: Map.delete(editor, "treatment:reverie")},
+         "treatment:reverie: no create surface"},
+        {"stale", %{registry: Map.put(editor, "rooms.nosuch", editor["rooms.name"])},
+         "rooms.nosuch: no such source-schema path"},
+        {"component", %{registry: card.("nope.tsx")}, "services.name: no edit surface"},
+        {"unlisted", %{baseline: String.replace(base, "services.name.edit\n", "")},
+         "services.name.edit: generic but not in the baseline"},
+        {"room-card", %{registry: uncard.(~r/^rooms\./)},
+         "rooms.name.edit: generic but not in the baseline"},
+        {"npc-card", %{registry: uncard.(~r/^npcs\./)},
+         "npcs.name.edit: generic but not in the baseline"},
+        {"item-card", %{registry: uncard.(~r/^items\./)},
+         "items.name.edit: generic but not in the baseline"},
+        {"quest-card", %{registry: uncard.(~r/^quests\./)},
+         "quests.name.edit: generic but not in the baseline"},
+        {"dialogue-card", %{registry: uncard.(~r/^dialogues\./)},
+         "dialogues.name.edit: generic but not in the baseline"},
+        {"world-card", %{registry: uncard.(world)},
+         "cartridge.title.edit: generic but not in the baseline"},
+        {"rules-block",
+         %{registry: uncard.(~r/^(actions\.(policy|check)|reactions\.(on|when|steps))$/)},
+         "reactions.on.edit: generic but not in the baseline"},
+        {"combat-schedule-blocks",
+         %{registry: uncard.(~r/^(npcs\.(hp|attack|daily_schedule)|items\.weapon)$/)},
+         "npcs.daily_schedule.edit: generic but not in the baseline"},
+        {"action-card", %{registry: uncard.(~r/^actions\./)},
+         "actions.cooldown.edit: generic but not in the baseline"},
+        {"reaction-card", %{registry: uncard.(~r/^reactions\./)},
+         "reactions.zone.edit: generic but not in the baseline"},
+        {"scene-card", %{registry: uncard.(~r/^(scenes\.treatment|treatment:reverie)$/)},
+         "scenes.treatment.edit: generic but not in the baseline"},
+        {"escape", %{registry: card.("../App.tsx")}, "services.name: no edit surface"},
+        {"bespoke", %{registry: card.("RedCard.tsx"), card: ""},
+         "services.name.edit: no longer generic"},
+        {"grown", %{main: String.replace(base, "services.name.edit\n", "")},
+         "services.name.edit: not in main's baseline"}
+      ] do
+    files =
+      for {k, v} <- planted,
+          into: %{},
+          do: {
+            if(k == :card,
+              do: "tools/author-panel/src/edit/RedCard.tsx",
+              else: "tmp/red-editor-#{name}.#{k}"
+            ),
+            if(is_map(v), do: JSON.encode!(v), else: v)
+          }
+
+    at = &if(planted[&1], do: "tmp/red-editor-#{name}.#{&1}", else: &2)
+
+    {"editor gate: #{name}", files,
+     ~w(elixir bin/toolbox_page.exs --check docs/features.json docs/MECHANICS-TOOLBOX.md
+        docs/toolbox.gen.json) ++
+       [
+         at.(:registry, editor_registry),
+         at.(:baseline, editor_baseline),
+         at.(:main, editor_baseline)
+       ], expect}
+  end
+
+# main's baseline unreadable (a path main lacks): --check raises instead of skipping shrink-only
+unread =
+  {"editor gate: main unreadable", %{"tmp/red-editor-unread.baseline" => base},
+   ~w(elixir bin/toolbox_page.exs --check docs/features.json docs/MECHANICS-TOOLBOX.md
+      docs/toolbox.gen.json #{editor_registry} tmp/red-editor-unread.baseline),
+   "cannot read origin/main:tmp/red-editor-unread.baseline"}
+
+controls = controls ++ toolbox ++ editor_controls ++ [unread]
 
 for {_, files, _, _} <- controls, {rel, _} <- files do
   if File.exists?(Path.join(root, rel)),

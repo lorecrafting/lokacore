@@ -1,5 +1,7 @@
 # Showcase plan 7: the traps district
 
+> Reference only: agent-written plan; any room, NPC or line text in it is placeholder. Never ships as written; the owner writes shipped prose ([rule](../decisions/owner-decision-human-made-content-2026-10-31.md)).
+
 District brief for `cartridges/toolbox_showcase` ([showcase](../SHOWCASE.md), Beads `loka-y6yg.19`),
 written by Fable for an Opus developer and an Opus reviewer. Base: `main` after PR #403. Only
 installed mechanics: rows 12 (traps), W21 (fear), 26 (puzzles), 1 and G6 (a status with a cue),
@@ -34,7 +36,7 @@ cellars." (`combat-district.md`'s `sign_combat` text; combat 1 pins the key, not
   `duration` 600, `tick_every` 60, `resource` hp, `fear: true`, no `per_tick`, label "Afraid".
 - Skill `disarm`: growth `[1]`, empty qualification (`traps_sampler/skills/disarm.json`). Not
   hidden: nothing in this district is an elite profession.
-- Liquid `bitters`: `cures: [poisoned]` (`needs_sampler` `water`'s shape).
+- Liquid `bitters`: `cures: [poisoned]` ([liquid effect declarations](../system/cartridge.md#liquid-effect-declarations)).
 - Facts: `plate_found` (player bool); `plate_sprung`, `plate_disarmed` (instance bool); `lever_stage`
   (instance int 0..3); `wheel_1`, `wheel_2`, `wheel_3` (instance int 0..10); `cellar_found`
   (player), `cellar_sprung`, `cellar_disarmed` (instance) for the sandbox (`traps_sampler/facts.json`,

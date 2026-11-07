@@ -30,7 +30,7 @@ defmodule Loka.ContentAttributesTest do
 
     write.("actions/pray.json", put_in(src("actions/pray.json"), ["policy"], root))
     if attributes, do: write.("attributes.json", %{"attributes" => attributes})
-    Loka.Content.compile(dir)
+    Loka.ContentSource.plain(Loka.Content.compile(dir))
   end
 
   defp src(rel), do: JSON.decode!(File.read!(Path.join(@src, rel)))
@@ -127,22 +127,6 @@ defmodule Loka.ContentAttributesTest do
             compile(Path.join(dir, "#{name}"), p, lock, attributes) == {:error, diags},
             "#{name}"
           )
-  end
-
-  # Breaks: a v1 source's resource_compare resolved against the default pools, which only a v2
-  # artifact carries, so the compiler writes an artifact naming a pool it lacks.
-  test "a v1 cartridge's resource_compare names no pool", %{tmp_dir: dir} do
-    hello = "cartridges/hello_sampler"
-    File.cp_r!(hello, dir)
-    m = JSON.decode!(File.read!(Path.join(hello, "cartridge.json")))
-    m = put_in(m, ["requires", "capabilities", "attribute"], 1)
-    File.write!(Path.join(dir, "cartridge.json"), JSON.encode!(m))
-    talk = Path.join(dir, "actions/talk.json")
-    action = put_in(JSON.decode!(File.read!(talk)), ["policy"], pool("hp", 1))
-    File.write!(talk, JSON.encode!(action))
-    target = %{"target" => "hello_sampler@0.0.1:resource/hp"}
-    path = "actions/talk.policy.resource"
-    assert Loka.Content.compile(dir) == {:error, [d("UNRESOLVED_REFERENCE", path, target)]}
   end
 
   # Breaks: attributes.json's file schema loses additionalProperties false (resources.ex

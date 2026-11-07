@@ -1,4 +1,4 @@
-import type { EntityId } from '../../contracts.gen.ts';
+import type { DomainEvent, EntityId } from '../../contracts.gen.ts';
 import type { World } from '../../runtime/decision.ts';
 import { level, resourceRef } from '../resource.ts';
 import { KernelError } from '../../foundation/error.ts';
@@ -24,3 +24,12 @@ export const npcsIn = (w: World, rooms: readonly string[]) =>
         living(w, id),
     )
     .sort(cmp) as EntityId[];
+
+/** loka-kgd.105: the bodies an `entity_died` after `cause` names; they hold none of its statuses
+ * (a dead NPC takes none anyway; the player's body lives on, returned by the death). */
+export const diedAfter = (events: readonly DomainEvent[], cause: DomainEvent) =>
+  new Set(
+    events.flatMap((e) =>
+      e.payload.type === 'entity_died' && e.position > cause.position ? [e.payload.victim_id] : [],
+    ),
+  );

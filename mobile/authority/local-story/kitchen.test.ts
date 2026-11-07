@@ -127,7 +127,7 @@ test('the stew Eat survives reopen, failed and lost COMMIT and replay; a forged 
       p.sql.exec(
         'PRAGMA foreign_keys=ON; CREATE TABLE parent(id PRIMARY KEY); CREATE TABLE child(id REFERENCES parent DEFERRABLE INITIALLY DEFERRED)',
       );
-    const eat = invoke('eat', [stew]);
+    const eat = invoke('consume', [stew]);
     p.fault.kind = kind;
     p.fault.armed = true;
     assert.equal(story.invoke(eat).kind, 'pending', kind);

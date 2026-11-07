@@ -1,3 +1,4 @@
+# size: allow 309, death@1 decay adds its job binding (loka-kgd.203)
 defmodule Loka.Core.ComposeEncounter do
   @moduledoc "Portable encounter and bound-job lifecycle over composition's current rows."
   alias Loka.Core.Int
@@ -207,7 +208,7 @@ defmodule Loka.Core.ComposeEncounter do
         {:ok,
          Map.take(
            op,
-           ~w(job due_time encounter_id quest_instance_id actor_id water_generation water_body_id bleed_body_id bleed_generation crow_member_id crow_generation crow_phase)
+           ~w(job due_time encounter_id quest_instance_id actor_id water_generation water_body_id bleed_body_id bleed_generation crow_member_id crow_generation crow_phase corpse_id)
          )
          |> Map.put("status", "pending")}
     end
@@ -244,6 +245,10 @@ defmodule Loka.Core.ComposeEncounter do
     op["encounter_id"] != nil and row["encounter_id"] == op["encounter_id"]
   end
 
+  # death@1 decay: bound by the corpse only.
+  defp binding?(%{"corpse_id" => _} = op), do: decay_binding?(op)
+  defp binding?(%{"job" => %{"kind" => "decay"}} = op), do: decay_binding?(op)
+
   defp binding?(op) do
     cond do
       op["crow_member_id"] != nil or op["crow_generation"] != nil or op["crow_phase"] != nil ->
@@ -256,6 +261,11 @@ defmodule Loka.Core.ComposeEncounter do
       true ->
         other_binding?(op)
     end
+  end
+
+  defp decay_binding?(op) do
+    op["corpse_id"] != nil and get_in(op, ["job", "kind"]) == "decay" and
+      Enum.all?(Map.keys(op), &(&1 in ~w(op writer_group job_id job due_time corpse_id)))
   end
 
   defp crow_binding?(op) do

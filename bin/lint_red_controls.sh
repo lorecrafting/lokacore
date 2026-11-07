@@ -6,7 +6,7 @@ cd "$(dirname "$0")/.."
 case "${1-}" in '') core_only=0 ;; --core-only) core_only=1 ;; *) echo "unknown option: $1" >&2; exit 2 ;; esac
 # Mobile plants are .tsx and the kernel plant is .ts, so both file types are proven covered.
 planted="lib/loka/core/red_control.ex kernel/ts/src/red_control.ts kernel/ts/src/foundation/red_control.ts kernel/ts/test/red_control.test.ts"
-[ "$core_only" -eq 1 ] || planted="$planted mobile/app/.storybook/picker/red_control.tsx mobile/packages/ui/red_control.tsx mobile/features/story/red_control.tsx mobile/features/realm/red_control.tsx mobile/authority/local-story/red_control.ts mobile/app/book/red_control.tsx"
+[ "$core_only" -eq 1 ] || planted="$planted mobile/app/.storybook/picker/red_control.tsx mobile/packages/ui/red_control.tsx mobile/features/story/red_control.tsx mobile/features/realm/red_control.tsx mobile/authority/local-story/red_control.ts mobile/app/book/red_control.tsx tools/author-panel/src/flow_red_control.tsx"
 mkdir -p lib/loka/core
 cp kernel/ts/src/runtime/world.ts kernel/ts/src/runtime/world.ts.red
 cp kernel/ts/src/mechanics/movement/rule.ts kernel/ts/src/mechanics/movement/rule.ts.red
@@ -69,6 +69,9 @@ echo 'export const learnedLine = (label: string) => `${label}: learned`;' >> mob
 echo 'export const card = <ActionCard b={b} press={press} />;' >> mobile/app/book/DiscoveredMap.tsx
 # A Where card back on the Map page (mobile-book-map-page-no-actions).
 echo 'function MapPage() { return <ActionCard b={b} press={press} />; }' >> mobile/app/book/sections.tsx
+echo 'export const v = { duration: 300 };' >> mobile/app/book/sections.tsx
+# The editor: a titled Flow chip, a literal stroke, a bare zoom number.
+printf '%s\n' 'export const C = <button data-ref={c.id} title={c.name} />;' "export const P = <path stroke='red' />;" 'export const z = { zoom: 0.5 };' > tools/author-panel/src/flow_red_control.tsx
 fi
 if [ "$core_only" -eq 1 ]; then
   out=$(ast-grep scan --error --filter '^(elixir-kernel-pure|ts-.*)$' lib/loka/core kernel/ts/src kernel/ts/test 2>&1)
@@ -78,7 +81,7 @@ fi
 status=0
 # Rules and their test cases both name the ids, so a deleted rule file is reported too.
 for rule in $(ls lint/rules lint/tests | sed -nE 's/(-test)?\.yml$//p' | sort -u); do
-  [ "$core_only" -eq 0 ] || { case "$rule" in mobile-*) continue ;; esac; }
+  [ "$core_only" -eq 0 ] || { case "$rule" in mobile-* | author-panel-*) continue ;; esac; }
   if printf '%s' "$out" | grep -q "error\[$rule\]"; then echo "ok   $rule"; else echo "FAIL $rule not reported"; status=1; fi
 done
 if sh bin/check_as_never.sh >/dev/null; then echo "FAIL check_as_never passed the planted cast"; status=1; else echo "ok   check_as_never"; fi

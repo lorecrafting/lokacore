@@ -38,52 +38,6 @@
         }
       ]
     },
-    "hunger": {
-      "minimum": 0,
-      "maximum": 10,
-      "start": 10,
-      "gain": 0,
-      "bands": [
-        {
-          "at_percent": 50,
-          "key": "fed",
-          "tone": "normal"
-        },
-        {
-          "at_percent": 25,
-          "key": "peckish",
-          "tone": "warning"
-        },
-        {
-          "at_percent": 0,
-          "key": "starving",
-          "tone": "danger"
-        }
-      ]
-    },
-    "thirst": {
-      "minimum": 0,
-      "maximum": 10,
-      "start": 10,
-      "gain": 0,
-      "bands": [
-        {
-          "at_percent": 50,
-          "key": "quenched",
-          "tone": "normal"
-        },
-        {
-          "at_percent": 25,
-          "key": "dry",
-          "tone": "warning"
-        },
-        {
-          "at_percent": 0,
-          "key": "thirst_parched",
-          "tone": "danger"
-        }
-      ]
-    },
     "pennies": {
       "minimum": 0,
       "maximum": 100,

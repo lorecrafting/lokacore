@@ -54,16 +54,23 @@ defmodule Loka.Content.Refs do
         s = "#{ref["cartridge_id"]}@#{ref["cartridge_version"]}:#{ref["kind"]}/#{ref["key"]}"
         [diag("UNRESOLVED_REFERENCE", at(rel, steps ++ [field]), %{"target" => s})]
 
-      {_, _, %{"value_type" => t}} when is_map_key(n, "value") or is_map_key(n, "equals") ->
-        v = if is_map_key(n, "value"), do: "value", else: "equals"
-
-        if typed?(n[v], t),
-          do: [],
-          else: [diag("FACT_TYPE_MISMATCH", at(rel, steps ++ [v]))]
+      {_, _, %{"value_type" => t}} ->
+        mistyped(rel, steps, n, t)
 
       _ ->
         []
     end
+  end
+
+  defp mistyped(rel, steps, n, t) do
+    for {v, ok?} <- [
+          {"value", &typed?(&1, t)},
+          {"equals", &typed?(&1, t)},
+          {"at_least", fn _ -> n["op"] != "fact_at_least" or match?(%{"type" => "int"}, t) end}
+        ],
+        is_map_key(n, v),
+        not ok?.(n[v]),
+        do: diag("FACT_TYPE_MISMATCH", at(rel, steps ++ [v]))
   end
 
   @doc """

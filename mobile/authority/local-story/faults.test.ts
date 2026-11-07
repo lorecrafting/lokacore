@@ -487,12 +487,13 @@ test('process kill before and after elapsed COMMIT leaves entirely prior or next
     assert.deepEqual(elapsedCheckpoint(sql), {
       wall_ms: mode === 'before' ? 10000 : 2602000,
       remainder: 0,
-      target: mode === 'before' ? 64800 : 194400,
+      target: mode === 'before' ? 64800 : 194400, // the child's open-play pulse is not capped
     });
     sql.close();
     const b = elapsedHost(path, { wall: 2602000, mono: 2592000 });
-    assert.equal(b.game.view().view.time, 194400);
-    assert.equal(elapsedReceipts(b.sql), 4);
+    // 43.2 real minutes closed credit the capped day; debt already committed stands.
+    assert.equal(b.game.view().view.time, mode === 'before' ? 151200 : 194400);
+    assert.equal(elapsedReceipts(b.sql), mode === 'before' ? 3 : 4);
     b.sql.close();
   }
 });

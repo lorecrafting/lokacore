@@ -1,3 +1,4 @@
+// size: allow 322, corpse names bind their victim (loka-kgd.203), the author hook (loka-vduxr.51, .53, wfrgk.19)
 // The app's own words for the kernel's codes (R6P Polish): what an accepted outcome says in the log
 // and what a refusal reason says. A raw code is never shown as an answer; a code with no words here
 // gets none (an outcome) or its code with spaces (a reason).
@@ -10,15 +11,21 @@ import type {
   Reply,
 } from '../../packages/game-view/session.ts';
 import type { DetailLine } from './logs.ts';
-import { emoteSentence, lineSentence } from '../../packages/game-view/line_words.ts';
+import {
+  emoteForm,
+  emoteSentence,
+  fillSlots,
+  lineSentence,
+  victimWords,
+} from '../../packages/game-view/line_words.ts';
 import { things } from './item-pages.ts';
 import { levelWords } from './pick.ts';
-import { AT } from './labels.ts';
+import { AT, UNAUTHORED } from './labels.ts';
 
 // A text key's words, and an action label's. ponytail: the cartridge has no text for most action
 // labels yet, so a label shows the key's last word, capitalised as the texted labels are.
 export const sayers = (g: Game): { text: Say; label: Say } => ({
-  text: (key) => g.text(key) ?? (key === 'place.dark' ? "It's too dark to see..." : key),
+  text: (key) => g.text(key) ?? UNAUTHORED[key] ?? key,
   label: (key) =>
     g.text(key) ??
     key
@@ -111,12 +118,12 @@ export const doorSentence = (x: { direction: string; door?: { state: string } })
     : undefined;
 export const refusedSentence = ({ code, cause }: Refusal) =>
   (cause && SENTENCE[cause]) ?? SENTENCE[code];
-// The word of each RefusalCause (protocol/error.schema.json; book/reasons.test.ts): it names the
-// one reason a shared code stands for, so it goes before the code's word.
+// Each RefusalCause's word (protocol/error.schema.json; book/reasons.test.ts), ahead of its code's word.
 const CAUSE: Record<string, string> = {
   not_standing: 'not standing',
   cursed: 'it will not come off',
   cannot_be_hurt: 'cannot be hurt',
+  sanctuary: 'sanctuary', // the reason's word; its sentence is the message key
 };
 export const lower = (s: string) => s.charAt(0).toLowerCase() + s.slice(1);
 export const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
@@ -164,9 +171,9 @@ export const withoutHeading = <T extends { key: string }>(lines: readonly T[], v
 
 // A known NPC's or visible entity's name, worded.
 const nameOf = (view: GameView, id: unknown, text: Say) => {
-  const name =
-    view.known_npcs?.find((n) => n.id === id)?.name ?? view.entities.find((n) => n.id === id)?.name;
-  return name && text(name);
+  const e = view.entities.find((n) => n.id === id);
+  const name = view.known_npcs?.find((n) => n.id === id)?.name ?? e?.name;
+  return name && victimWords(text, e ?? {}, name);
 };
 
 // One narration line's words: an engine key from the shared table (packages/game-view/line_words.ts), in the
@@ -174,6 +181,17 @@ const nameOf = (view: GameView, id: unknown, text: Say) => {
 // A skipped combat turn (loka-x6t.30) names its status from engine line combat.skipped, actorless when
 // the player skipped; an NPC's emote (G9) words from the view's emote table; a liquid line adds its
 // level (pick.ts levelWords). A bound speaker's quotation reads `Nell says [to you], "..."` (book-ui.md).
+// The author preview's hook (panel.tsx; never set in a release): a line as shown (an engine line too), bound
+// or joined, with its text key, so an Alt-click on it names its source; `made` keeps each such line's
+// composition, so an open conversation re-words its lines when the author's words change (loka-wfrgk.19).
+export const worded: {
+  note?: (words: string, key: string) => void;
+  made?: Map<string, () => string>;
+} = {};
+export const noted = (words: string, key: string, again?: () => string) => {
+  worded.note?.(words, key);
+  if (again) worded.made?.set(words, again);
+};
 export const lineWords = (
   t: { key: string; bindings?: Record<string, unknown>; participants?: Record<string, unknown> },
   text: Say,
@@ -186,17 +204,23 @@ export const lineWords = (
     id === undefined ? undefined : nameOf(view, id, text) || (was && nameOf(was, id, text));
   const id = t.participants?.actor;
   const actor = named(id);
-  const word = (v: unknown) => text(String(v));
-  const told =
-    (actor && emoteSentence(t, view.emotes, word, actor)) ||
-    lineSentence(t, word, actor, wield ? WIELD[t.key] : undefined);
+  // A corpse participant's short (`put ... in the corpse of {victim}`) names its victim.
+  const cast = Object.values(t.participants ?? {});
+  const word = (v: unknown) =>
+    victimWords(text, view.entities.find((e) => e.name === v && cast.includes(e.id)) ?? {}, `${v}`);
+  const emote = actor && emoteSentence(t, view.emotes, word, actor);
+  const told = emote || lineSentence(t, word, actor, wield ? WIELD[t.key] : undefined);
+  if (told) worded.note?.(told, (emote && emoteForm(t, view.emotes)) || t.key);
   if (told) return told;
   if (t.key !== 'combat.skipped') {
-    const said = text(t.key) + levelWords(t, text, view, was);
+    const said = fillSlots(text(t.key), t.bindings, word) + levelWords(t, text, view, was);
     const speaker = named(t.participants?.speaker);
-    return speaker && /^["“][^"“”]*["”]$/.test(said)
-      ? `${cap(speaker)} says${actor ? '' : ' to you'}, ${said}`
-      : said;
+    const shown =
+      speaker && /^["“][^"“”]*["”]$/.test(said)
+        ? `${cap(speaker)} says${actor ? '' : ' to you'}, ${said}`
+        : said;
+    noted(shown, t.key, () => lineWords(t, text, view, was));
+    return shown;
   }
   const who = id === undefined ? 'You are' : actor ? `${actor} is` : 'They are';
   return sentence(`${who} too ${text(String(t.bindings?.status))} to do anything.`);
@@ -231,12 +255,10 @@ function answer(
   if (r.kind !== 'saved') return UNDONE[r.kind] ?? `(${r.kind}${'code' in r ? ` ${r.code}` : ''})`;
   const d = r.decision;
   if (d.kind === 'rejected') {
-    // a refused line, as a refused drag (model.ts `refused`)
-    return {
-      kind: 'refused',
-      reason: reasonOf(d.error),
-      text: refusedSentence(d.error) ?? `You can't do that—${reasonOf(d.error)}.`, // prose, no colon (Line placement)
-    };
+    const authored = d.error.message && message(d.error.message, text);
+    // a refused line, as a refused drag (model.ts `refused`); prose, no colon (Line placement)
+    const fallback = refusedSentence(d.error) ?? `You can't do that—${reasonOf(d.error)}.`;
+    return { kind: 'refused', reason: reasonOf(d.error), text: authored ?? fallback };
   }
   if (d.kind === 'fault') return '';
   if (d.outcome === 'located' && d.location) {
@@ -297,3 +319,4 @@ export const expeditionLine = (
       ? `Next you go ${e.direction} to ${text(e.next_title)}.`
       : `Your next checkpoint is ${text(e.next_title)}.`
     : '';
+export const ASKED = ', already chosen'; // after an asked option's label (book-ui.md)

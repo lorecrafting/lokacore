@@ -24,8 +24,8 @@ import { fact, positionOf, standing } from '../position/shared.ts';
 import { assigned } from '../fact.ts';
 import { allyOf, npcRef, participantsPresent } from './shared.ts';
 import { eligible, flight, next, packPlan } from './behavior.ts';
-import { attack, prefix } from './round_attack.ts';
-import { packRound, successor, narrate } from './round_flow.ts';
+import { attack, playerFirst, prefix } from './round_attack.ts';
+import { packRound, successor, told } from './round_flow.ts';
 import { suppressed } from '../population/shared.ts';
 import { settled as crowSettled } from '../crow/behavior.ts';
 
@@ -37,12 +37,16 @@ export type Round = {
   events: CombatEvent[];
   rng: RngState;
   draws: number;
+  /** Raw draws the round may spend: eight, grown by each multi-swing opportunity (swings.ts). */
+  budget: number;
   position: number;
   steps: { n: number };
   due_time: number;
   notes: Text[];
   /** Toolbox row 17: the player's opportunity this round was a shot; the foe's is skipped. */
   shot?: boolean;
+  /** loka-kgd.200: a multi-swing attack's swing and hit counts, by its index in `events`. */
+  volleys?: Record<number, { count: number; hits: number }>;
 };
 
 /** Current encounter occurrence only; an obsolete callback has no gameplay result. */
@@ -51,7 +55,22 @@ export function currentRound(world: World, job_id: JobId, job: JobRow) {
   return row && row.status === 'open' && row.job_id === job_id ? row : undefined;
 }
 
-// size: allow 46, one due round checks suppression before existing attack and crow settlement delivery
+/** Diku rounds (loka-kgd.197): Attack's round 1, now, after its opening ops, on a job never scheduled. */
+export function openingRound(
+  world: World,
+  opened: readonly DeltaOp[],
+  command: Pick<Command, 'id'>,
+  job_id: JobId,
+  job: JobRow['job'],
+  encounter_id: EncounterId,
+  mint: Mint,
+  steps: { n: number },
+) {
+  const now: JobRow = { job, due_time: world.state.clock, status: 'pending', encounter_id };
+  return roundSequence(prefix(world, opened), command, job_id, now, mint, steps, true);
+}
+
+// size: allow 48, one due round checks suppression before existing attack and crow settlement delivery; an Attack opening (loka-kgd.197)
 export function roundSequence(
   world: World,
   command: Pick<Command, 'id'>,
@@ -59,15 +78,18 @@ export function roundSequence(
   job: JobRow,
   mint: Mint,
   steps = { n: 0 },
+  opening = false,
 ) {
   const row = currentRound(world, job_id, job);
   if (!row) return accepted<never>(world, 'job_ran', [], []);
   const encounter_id = job.encounter_id!;
   const r: Round = {
-    ops: [{ op: 'job.complete', writer_group: 0, job_id }],
+    // an Attack's opening round (loka-kgd.197) runs on a job that was never scheduled
+    ops: opening ? [] : [{ op: 'job.complete', writer_group: 0, job_id }],
     events: [],
     rng: world.state.rng,
     draws: 0,
+    budget: 8,
     position: 0,
     steps,
     due_time: job.due_time,
@@ -93,8 +115,7 @@ export function roundSequence(
   ordinaryRound(world, command, job, row, encounter_id, r, close, mint);
   if (r.ops.some((op) => op.op === 'encounter.close'))
     r.ops.push(...crowSettled(prefix(world, r.ops, job.due_time), row.npc_id, mint));
-  const narration = [...narrate(world, row, r.events, r.shot), ...r.notes];
-
+  const narration = told(world, row, r);
   const timed = r.ops.map((op) => (op.op === 'resource.adjust' ? { ...op, at: job.due_time } : op));
   return accepted(world, 'job_ran', timed, r.events, narration, r.rng);
 }
@@ -112,7 +133,9 @@ function ordinaryRound(
   if (!participantsPresent(world, row)) r.ops.push(close);
   else {
     const helper = allyOf(world, row);
-    const order = row.round % 2 ? [row.body_id, row.npc_id] : [row.npc_id, row.body_id];
+    const order = playerFirst(world, row, r)
+      ? [row.body_id, row.npc_id]
+      : [row.npc_id, row.body_id];
     for (const attacker of helper ? [...order, helper] : order) {
       const at = prefix(world, r.ops, r.due_time);
       if (!participantsPresent(at, row) || at.state.encounters![encounter_id].status !== 'open')

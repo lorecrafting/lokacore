@@ -10,6 +10,124 @@ of closed work are deleted once their lesson is folded, and linked by permalink
 Reviews before R2 live in the [legacy repository](https://github.com/lorecrafting/lokacore-v2-legacy)
 (commit `997a7a8`, `docs/rewrite-v3/reviews/`).
 
+- [Review: ruled batch 3, map least zoom, second death waits, author note margin, Hotbar story words](2026-11-06-ruled-batch-3-review.md): **CHANGES REQUIRED**
+- [Review: engine follow-ups (loka-vduxr.35, loka-vduxr.78, loka-wfrgk.51, loka-kgd.220)](2026-11-06-engine-followups-review.md): **CHANGES REQUIRED**
+- [Review: Editor walk P2 (PR #686, loka-wfrgk.61-.64, .67-.71, .80)](2026-11-06-editor-walk-p2-review.md): **APPROVE WITH NOTES**
+- [Review: editor walk P1, dev save survives edits, palette New for every kind, Delete refused while named](2026-11-06-editor-walk-p1-review.md): **APPROVE WITH NOTES**
+- [Review: editor walk C, schedule hour kinds, status duration, one-way Undo, last variant, Run fights](2026-11-06-editor-walk-c-review.md): **CHANGES REQUIRED**
+- [Review: Editor P2 follow-ups (PR #688, loka-wfrgk.84.1, .88, .90, .93)](2026-11-06-editor-p2-followups-review.md): **APPROVE**
+- [Review: editor nit batch B2, story list, Flow and picker nits](2026-11-06-editor-nits-b2-review.md): **APPROVE WITH NOTES**
+- [Review: editor nit batch B, cards, lint and content-report nits](2026-11-06-editor-nits-b-review.md): **CHANGES REQUIRED**
+- [Review: Editor nit batch A, map, shell and Book death-page fixes (PR #677)](2026-11-06-editor-nits-a-review.md): **CHANGES REQUIRED**
+- [Review: editor gaps, Story beats, room detail, New outline, set delete, add-menu gates and seeds](2026-11-06-editor-gaps-review.md): **APPROVE**
+- [Review: author panel, palette Undo brings back a palette Delete](2026-11-06-editor-delete-undo-review.md): **APPROVE**
+- [Review: editor coverage A, CRUD matrix, card round-trip, route-caller tests](2026-11-06-editor-coverage-a-review.md): **APPROVE**
+- [Review: editor world picker and New world (loka-vduxr.65)](2026-11-05-world-picker-review.md): **APPROVE WITH NOTES**
+- [Review: Story map S2, the List view and Trace in the map slot (PR #646, loka-wfrgk.18.2)](2026-11-05-story-map-s2-review.md): **APPROVE WITH NOTES**
+- [Review: Story map S1, the story model (PR #620, loka-wfrgk.18)](2026-11-05-story-map-s1-review.md): **APPROVE WITH NOTES**
+- [Review: author panel lint covers .scene and .cut (PR #630, loka-vduxr.50)](2026-11-05-scene-lint-review.md): **CHANGES REQUIRED**
+- [Review: Story map S3, the Flow graph in the left slot (loka-wfrgk.18.7)](2026-11-05-s3-flow-review.md): **CHANGES REQUIRED**
+- [Review: retire hunger and thirst (PR #618, loka-vduxr.61)](2026-11-05-retire-hunger-review.md): **APPROVE WITH NOTES**
+- [Review: resident `mix loka.compile --serve` for the editor (loka-wfrgk.16)](2026-11-05-resident-compiler-review.md): **APPROVE WITH NOTES**
+- [Review: replay of failed and unknown commits, and a test hang (PR #627, loka-vduxr.42, loka-votey)](2026-11-05-replay-failed-unknown-review.md): **CHANGES REQUIRED**
+- [Review: author panel smoke in Chrome, `mutate-covers` (loka-wfrgk.41)](2026-11-05-panel-smoke-review.md): **APPROVE WITH NOTES**
+- [Review: scene@1 opening scene, `on {start: true}` (PR #622, loka-g5hh.3)](2026-11-05-opening-scene-review.md): **APPROVE WITH NOTES**
+- [Review: a death outside a fight shows the dead page, then Let go (PR #634, loka-kgd.210)](2026-11-05-offfight-death-review.md): **CHANGES REQUIRED**
+- [Review: `bin/loka new --extends <key>` (PR #659, loka-wfrgk.45)](2026-11-05-new-extends-review.md): **CHANGES REQUIRED**
+- [Review: an open conversation re-words an edited line; stale `~` map by line count (PR #625, loka-wfrgk.19)](2026-11-05-loka-wfrgk.19-review.md): **APPROVE WITH NOTES**
+- [Review: hotbar engine data, cooldown end and length, round interval (PR #658, loka-x6t.135)](2026-11-05-hotbar-engine-data-review.md): **APPROVE WITH NOTES**
+- [Review: generic inspector card fits on long text keys (loka-wfrgk.40)](2026-11-05-generic-card-overflow-review.md): **APPROVE**
+- [Review: fix batch (loka-kgd.219, loka-wfrgk.55, loka-wfrgk.44, loka-wfrgk.49)](2026-11-05-fix-batch-674-review.md): **CHANGES REQUIRED**
+- [Review: Editor E5, prose in the Book (PR #617, loka-vduxr.53)](2026-11-05-editor-e5-prose-review.md): **APPROVE WITH NOTES**
+- [Review: editor drag a template into a room (loka-wfrgk.13)](2026-11-05-editor-drag-template-review.md): **CHANGES REQUIRED**
+- [Review: Editor E6e, World inspector card (PR #651, loka-wfrgk.8)](2026-11-05-e6e-world-review.md): **CHANGES REQUIRED**
+- [Review: Editor E6d.2 Scene cards, `.scene` lines via `/set` (loka-wfrgk.50)](2026-11-05-e6d2-scene-cards-review.md): **APPROVE**
+- [Review: Editor E6d part one, Quest and Dialogue cards (PR #669, loka-wfrgk.6)](2026-11-05-e6d-story-review.md): **CHANGES REQUIRED**
+- [Review: Editor E6c part two, Reaction and Action inspector cards (PR #668, loka-wfrgk.46)](2026-11-05-e6c2-reaction-action-review.md): **CHANGES REQUIRED**
+- [Review: Editor E6c part one, Rules block (PR #660, loka-wfrgk.5)](2026-11-05-e6c-rules-review.md): **CHANGES REQUIRED**
+- [Review: Editor E6b.2, bespoke Combat and Schedule blocks (PR #672, loka-wfrgk.42)](2026-11-05-e6b2-combat-schedule-review.md): **CHANGES REQUIRED**
+- [Review: Editor E6b, NPC and Item inspector cards (PR #656, loka-wfrgk.4)](2026-11-05-e6b-npc-item-review.md): **CHANGES REQUIRED**
+- [Review: Editor E6a, Room inspector card and the Book's add-here (PR #649, loka-wfrgk.3)](2026-11-05-e6a-room-review.md): **CHANGES REQUIRED**
+- [Review: Editor E4b, generic inspector card on rjsf 6 (PR #645, loka-wfrgk.12)](2026-11-05-e4b-generic-card-review.md): **CHANGES REQUIRED**
+- [Review: Editor E4a, edit model, schema walker, registry and strict gate (PR #642, loka-wfrgk.11)](2026-11-05-e4a-edit-model-review.md): **APPROVE WITH NOTES**
+- [Review: Editor E3b, map edits in the left column (PR #644, loka-wfrgk.7)](2026-11-05-e3b-map-edits-review.md): **CHANGES REQUIRED**
+- [Review: Editor E3a, the always-on map (PR #641, loka-vduxr.52)](2026-11-05-e3a-map-review.md): **CHANGES REQUIRED**
+- [Review: Editor E2, the three-column shell (PR #631, loka-wfrgk.10)](2026-11-05-e2-shell-review.md): **CHANGES REQUIRED**
+- [Review: Editor E2 shell, fix round and owner walk (PR #631, loka-wfrgk.10)](2026-11-05-e2-shell-fable-review.md): **APPROVE WITH NOTES**
+- [Review: dialogue warnings match Talk (loka-vduxr.32, loka-69yuw)](2026-11-05-dialogue-warning-parity-review.md): **APPROVE WITH NOTES**
+- [Review: Dialogue choice tree on the Dialogue card (loka-wfrgk.53)](2026-11-05-dialogue-choice-tree-review.md): **CHANGES REQUIRED**
+- [Review: dev cheat Set level and attribute points (loka-x6t.137 part 2)](2026-11-05-dev-set-level-review.md): **APPROVE WITH NOTES**
+- [Review: death and level bug batch (PR #623; loka-3tc7, loka-g5hh.2.11, loka-dbtxr (a))](2026-11-05-death-level-bugs-review.md): **CHANGES REQUIRED**
+- [Review: one cartridge format, drop v1 and `Topics.grants/2` (PR #635, loka-9x5y, loka-1b68q)](2026-11-05-compiler-one-format-review.md): **APPROVE WITH NOTES**
+- [Review: combat title names who started the fight (PR #621, loka-kgd.207)](2026-11-05-combat-title-review.md): **APPROVE**
+- [Review: Combat hotbar, the Inked strip under the Combat page (loka-x6t.136)](2026-11-05-combat-hotbar-review.md): **APPROVE WITH NOTES**
+- [Review: Area layout S3, layout lint and `bin/loka new --area` (PR #624, loka-vduxr.58.3)](2026-11-05-area-layout-s3-review.md): **APPROVE WITH NOTES**
+- [Second review: revival contract and save effect, PR #599 (loka-kgd.206)](2026-11-04-wayside-shrine-revival-second-review.md): **APPROVE WITH NOTES**
+- [Review: world.death.revival and the Wayside Shrine keeper, PR #599 (loka-kgd.206)](2026-11-04-wayside-shrine-review.md): **APPROVE**
+- [Review: generated toolbox page, PR #612 (loka-vduxr.59)](2026-11-04-toolbox-page-review.md): **APPROVE WITH NOTES**
+- [Review: Book treatments T1 (spirit extracted, reverie added), PR #611 (loka-wfrgk.9)](2026-11-04-t1-book-treatments-review.md): **APPROVE WITH NOTES**
+- [Review: status line icons, PR #613 (loka-15g, loka-kgd.7)](2026-11-04-status-line-icons-review.md): **APPROVE WITH NOTES**
+- [Review: status icons below the line, smaller, drawn with Skia, PR #616 (loka-x6t.134)](2026-11-04-status-icons-review.md): **APPROVE**
+- [Design review: the Book's spirit state, PR #604 (loka-kgd.205)](2026-11-04-spirit-state-design-review.md): **CHANGES REQUIRED**
+- [Review: one consume command and one effect block, PR #605 (loka-kgd.209)](2026-11-04-loka-kgd.209-consume-review.md): **APPROVE**
+- [Review: Editor E1 write path, PR #610 (loka-wfrgk.2, vduxr.51, vduxr.53 `/edit`)](2026-11-04-e1-write-path-review.md): **APPROVE**
+- [Review: corpses name their victim, decay and spill, PR #593 (loka-kgd.203)](2026-11-04-corpses-review.md): **APPROVE**
+- [Second review: corpse decay save and delta contract, PR #593 (loka-kgd.203)](2026-11-04-corpse-decay-second-review.md): **CHANGES REQUIRED**
+- [Second review: consume contract and save effect, PR #605 (loka-kgd.209)](2026-11-04-consume-one-effect-second-review.md): **APPROVE WITH NOTES**
+- [Review: Combat round two, PR #596 (loka-kgd.202 a and b)](2026-11-04-combat-round-two-review.md): **APPROVE WITH NOTES**
+- [Review: area layout S2, showcase in area folders, PR #609 (loka-vduxr.58.2)](2026-11-04-area-layout-s2-review.md): **APPROVE**
+- [Review: area layout S1, the compiler reads area folders, PR #603 (loka-vduxr.58.1)](2026-11-04-area-folders-s1-review.md): **APPROVE WITH NOTES**
+- [Review: ambient emotes, PR #614 (loka-8ghm)](2026-11-04-ambient-emotes-review.md): **APPROVE WITH NOTES**
+- [Review: Swings, PR #591 (loka-kgd.200)](2026-11-02-swings-review.md): **APPROVE**
+- [Review: opt-in Diku rounds, PR #590 (loka-kgd.197)](2026-11-02-diku-rounds-review.md): **APPROVE**
+- [Second review: writer follow-ups, PR #568 (loka-vduxr.27, .22, .28)](2026-11-01-writer-followups-second-review.md): **CHANGES REQUIRED**
+- [Review: writer errors, PR #585 (loka-vduxr.45)](2026-11-01-writer-errors-review.md): **CHANGES REQUIRED**
+- [Review: trace refused replay, PR #580 (loka-vduxr.41)](2026-11-01-trace-refused-replay-review.md): **CHANGES REQUIRED**
+- [Second review: skill ranks, PR #570 (loka-g5hh.2.3)](2026-11-01-skill-ranks-second-review.md): **APPROVE WITH NOTES**
+- [Review: skill ranks, PR #570 (loka-g5hh.2.3)](2026-11-01-skill-ranks-review.md): **APPROVE WITH NOTES**
+- [Sanctuary refusal cause: second-opinion contract review](2026-11-01-sanctuary-refusal-second-review.md): **CHANGES REQUIRED**
+- [Review: sanctuary refusal, PR #577 (loka-g5hh.2.9)](2026-11-01-sanctuary-refusal-review.md): **APPROVE WITH NOTES**
+- [Rush B2 level-up moment contract: second review](2026-11-01-rush-b2-moment-second-review.md): **APPROVE WITH NOTES**
+- [Review: level-up rush B2, the level moment, PR #575 (loka-g5hh.2.6, loka-xpk3n)](2026-11-01-rush-b2-moment-review.md): **APPROVE WITH NOTES**
+- [Second opinion: unattackable NPCs, PR #550 (loka-w9id, kernel_api 1.135)](2026-11-01-loka-w9id-second-review.md): **APPROVE WITH NOTES**
+- [Review: unattackable NPCs, PR #550 (loka-w9id, kernel_api 1.135)](2026-11-01-loka-w9id-review.md): **APPROVE WITH NOTES**
+- [Review: sleeper at hp floor wakes, mutate.sh per-mutant limit, PR #567 (loka-vduxr.15, kernel_api 1.142)](2026-11-01-loka-vduxr15-review.md): **APPROVE**
+- [Review: writer follow-ups, PR #568 (loka-vduxr.27, .22, .28)](2026-11-01-loka-vduxr.27-writer-followups-review.md): **APPROVE WITH NOTES**
+- [Second opinion: scene branching, PR #557 (loka-vduxr.26, kernel_api 1.142)](2026-11-01-loka-vduxr.26-scene-branching-second-review.md): **APPROVE WITH NOTES**
+- [Review: scene branching (loka-vduxr.26)](2026-11-01-loka-vduxr.26-scene-branching-review.md): **APPROVE**
+- [Second opinion: escort separation, PR #555 (loka-vduxr.23, kernel_api 1.137)](2026-11-01-loka-vduxr.23-escort-separation-second-review.md): **APPROVE WITH NOTES**
+- [Review: dialogue cookbook and the asked marker, PR #560 (loka-vduxr.12, kernel_api 1.138)](2026-11-01-loka-vduxr.12-dialogue-patterns-review.md): **APPROVE WITH NOTES**
+- [Second review: `asked` contract, PR #560 (loka-vduxr.12)](2026-11-01-loka-vduxr.12-asked-contract-second-review.md): **APPROVE**
+- [Second opinion: away catch-up cap, PR #569 (loka-qhvgq, kernel_api 1.144)](2026-11-01-loka-qhvgq-second-review.md): **APPROVE WITH NOTES**
+- [Review: away catch-up cap, PR #569 (loka-qhvgq, kernel_api 1.144)](2026-11-01-loka-qhvgq-review.md): **CHANGES REQUIRED**
+- [Review: level-up refill, PR #566 (loka-g5hh.2.2, kernel_api 1.142)](2026-11-01-loka-g5hh.2.2-review.md): **APPROVE WITH NOTES**
+- [Level-up E2: second review (PR #566)](2026-11-01-level-up-e2-second-review.md): **APPROVE WITH NOTES**
+- [Review: level rush, PR #582](2026-11-01-level-rush-review.md): **APPROVE WITH NOTES**
+- [Second review: fast cold open, PR #574 (loka-vduxr.34)](2026-11-01-fast-open-second-review.md): **APPROVE WITH NOTES**
+- [Review: open a save without replaying its receipts, PR #574 (loka-vduxr.34)](2026-11-01-fast-open-review.md): **APPROVE WITH NOTES**
+- [Review: lawful escort parting, PR #555 (loka-vduxr.23, kernel_api 1.137)](2026-11-01-escort-separation-review.md): **APPROVE WITH NOTES**
+- [Second opinion: effects batch 2 PR C, room sound, exposed, deeds, and a live play (loka-xz76e.6, kernel_api 1.138)](2026-11-01-effects-batch-2-c-second-review.md): **APPROVE WITH NOTES**
+- [Review: effects batch 2 PR C, room beds, music, storm, wind, lever, latch, ending (loka-xz76e.6, kernel_api 1.138)](2026-11-01-effects-batch-2-c-review.md): **APPROVE WITH NOTES**
+- [Dialogue sitting and end_talk contract: second review](2026-11-01-dialogue-sitting-second-review.md): **APPROVE WITH NOTES**
+- [Review: dialogue sitting, end_talk, scene from a choice, PR #576 (loka-vduxr.11)](2026-11-01-dialogue-sitting-review.md): **APPROVE WITH NOTES**
+- [Second opinion: dialogue entry contract and in-progress play, PR #556 (loka-vduxr.25, loka-vduxr.14)](2026-11-01-dialogue-entry-second-review.md): **APPROVE WITH NOTES**
+- [Review: dialogue entry (loka-vduxr.25, loka-vduxr.14)](2026-11-01-dialogue-entry-review.md): **APPROVE WITH NOTES**
+- [Dev cheats: second opinion (PR #546, loka-vduxr.6)](2026-11-01-dev-cheats-second-review.md): **APPROVE**
+- [Second review: coalesced clock-only receipts, PR #578 (loka-vduxr.37)](2026-11-01-coalesce-elapsed-second-review.md): **APPROVE WITH NOTES**
+- [Review: clock-only ticks extend one receipt, PR #578 (loka-vduxr.37)](2026-11-01-coalesce-elapsed-review.md): **APPROVE WITH NOTES**
+- [Second-opinion review: quest offer names its fixture or NPC, PR #529 (loka-vx2v, kernel_api 1.129)](2026-10-31-loka-vx2v-second-opinion.md): **APPROVE WITH NOTES**
+- [Review: quest offer names its fixture or NPC, PR #529 (loka-vx2v, kernel_api 1.129)](2026-10-31-loka-vx2v-review.md): **APPROVE WITH NOTES**
+- [Second review: cartridge fault batch, PR #545 (loka-vduxr.7, save behaviour)](2026-10-31-loka-vduxr.7-cartridge-faults-second-review.md): **APPROVE WITH NOTES**
+- [Review: cartridge fault batch, PR #545 (loka-vduxr.7, kernel_api 1.134)](2026-10-31-loka-vduxr.7-cartridge-faults-review.md): **APPROVE WITH NOTES**
+- [Second opinion: open-time catch-up refusal (loka-k3b5)](2026-10-31-loka-k3b5-second-review.md): **APPROVE**
+- [Review: open-time catch-up refusal offers Start over (loka-k3b5, PR #541)](2026-10-31-loka-k3b5-review.md): **APPROVE WITH NOTES**
+- [Second opinion: level reached emission in `join`, PR #538 (loka-g5hh.2 E1, kernel_api 1.131)](2026-10-31-loka-g5hh.2-e1-level-reached-second-review.md): **APPROVE**
+- [Review: level reached event, level filter, gained line, view from, PR #538 (loka-g5hh.2 E1, kernel_api 1.131)](2026-10-31-loka-g5hh.2-e1-level-reached-review.md): **APPROVE**
+- [Review: dev-only go-to-room and set-fact, PR #546 (loka-vduxr.6, kernel_api 1.133)](2026-10-31-dev-cheats-review.md): **APPROVE WITH NOTES**
+- [Second opinion: catch-up folds saturated permanent status ticks, PR #535 (loka-sgqk, kernel_api 1.130)](2026-10-31-catch-up-fold-second-review.md): **APPROVE WITH NOTES**
+- [Review: catch-up folds saturated permanent status ticks, PR #535 (loka-sgqk, kernel_api 1.130)](2026-10-31-catch-up-fold-review.md): **APPROVE**
+- [Branching dialogue engine, second opinion on save behaviour (loka-vduxr.10)](2026-10-31-branching-dialogue-second-b-review.md): **APPROVE WITH NOTES**
+- [Branching dialogue engine, independent review (loka-vduxr.10 slice 1)](2026-10-31-branching-dialogue-review.md): **APPROVE WITH NOTES**
 - [Review: NPC condition band in GameView, PR #515 (loka-ysbt, kernel_api 1.123)](2026-10-30-ysbt-npc-condition-review.md): **APPROVE**
 - [Review: an NPC with no hp of its own cannot be hurt, PR #518 (loka-xyyd, kernel_api 1.126)](2026-10-30-xyyd-unhurtable-review.md): **APPROVE**
 - [Review: NPC moods, PR #507 (loka-x6t.71)](2026-10-30-x6t71-moods-review.md): **APPROVE**

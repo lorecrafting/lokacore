@@ -1,0 +1,157 @@
+defmodule Loka.ContentSceneFilesTest do
+  use ExUnit.Case, async: true
+
+  alias Loka.Content.Source
+
+  @dir "cartridges/speech_sampler"
+  @prompt ~s(The elder leans close. "The ward fails at the new moon.")
+  @json %{
+    "npc" => "elder",
+    "keyword" => "ward",
+    "prompt" => %{"prose" => @prompt},
+    "roles" => %{"elder" => %{"role" => "npc", "npc" => "elder"}},
+    "choices" => %{
+      "thank_her" => %{
+        "label" => %{"prose" => "Thank her"},
+        "narration" => %{"prose" => "The elder nods."}
+      }
+    }
+  }
+  @scene """
+  npc: elder
+
+  elder: #{@prompt}
+  - Thank her
+    elder: The elder nods.
+  """
+
+  # Breaks (docs/system/cartridge.md, Source shortcuts, gate): the scene's lowering differs in any
+  # byte from the dialogue JSON it stands for, or its same-key JSON file (the keyword) is not
+  # merged over it.
+  test "a sampler dialogue as a scene compiles byte-identical to its JSON form" do
+    dir = Loka.ContentSource.copy(@dir)
+
+    moved =
+      {"areas/village.json",
+       &update_in(&1, ["dialogues"], fn d -> Map.delete(d, "elder_ward") end)}
+
+    json_form = [moved, {"text.json", %{}}, {"dialogues/elder_ward.json", @json}]
+    assert {:ok, bytes, []} = Loka.ContentSource.compile(dir, json_form)
+    assert bytes =~ "Thank her"
+
+    File.mkdir_p!(Path.join(dir, "scenes"))
+    File.write!(Path.join(dir, "scenes/elder_ward.scene"), @scene)
+
+    scene_form =
+      List.replace_at(json_form, 2, {"dialogues/elder_ward.json", %{"keyword" => "ward"}})
+
+    assert Loka.ContentSource.compile(dir, scene_form) == {:ok, bytes, []}
+  end
+
+  @moduletag :tmp_dir
+
+  # Breaks: `when:` lowers to another policy, `gives:` to another effect or giver, a second
+  # speech line is dropped, a choice key differs from its label's words, or a bad line (an
+  # effect before any choice, another speaker, a repeated choice) is not named by file and line.
+  test "when: and gives: lower; bad lines are named by number", %{tmp_dir: tmp} do
+    File.mkdir_p!(Path.join(tmp, "dialogues"))
+    File.mkdir_p!(Path.join(tmp, "scenes"))
+
+    File.write!(
+      Path.join(tmp, "dialogues/maud.scene"),
+      "npc: maud\nwhen: met_maud\n\nmaud: line one\nmaud: line two: aside\n- Take it.\n  maud: line three\n  gives: bowl\n"
+    )
+
+    File.write!(
+      Path.join(tmp, "scenes/bad.scene"),
+      "npc: maud\ngives: bowl\nmaud: line one\nbram: line two\n- Go\n- Go\n"
+    )
+
+    {files, diags} = Source.load(tmp)
+
+    maud = %{
+      "npc" => "maud",
+      "roles" => %{
+        "maud" => %{"role" => "npc", "npc" => "maud"},
+        "bowl" => %{"role" => "item", "item" => "bowl"}
+      },
+      "policy" => %{"op" => "fact_compare", "fact" => "met_maud", "equals" => true},
+      "prompt" => "dialogue.maud.prompt",
+      "choices" => %{
+        "take_it" => %{
+          "label" => "dialogue.maud.choices.take_it.label",
+          "narration" => "dialogue.maud.choices.take_it.narration",
+          "receive" => %{"item" => "bowl", "from" => "maud"}
+        }
+      }
+    }
+
+    assert {"dialogues/maud.scene", {:dialogue, "maud", []}, maud} in files
+
+    {"text.json", :text, text} = List.keyfind(files, "text.json", 0)
+
+    assert %{
+             "dialogue.maud.prompt" => "line one\nline two: aside",
+             "dialogue.maud.choices.take_it.label" => "Take it.",
+             "dialogue.maud.choices.take_it.narration" => "line three"
+           } = text
+
+    assert Enum.map(diags, &{&1["code"], &1["path"], &1["data"]}) == [
+             {"SCHEMA_VIOLATION", ~s("scenes/bad.scene"),
+              %{
+                "line" => 2,
+                "text" => "gives: bowl",
+                "why" => "gives_outside_choice",
+                "npc" => "maud"
+              }},
+             {"SCHEMA_VIOLATION", ~s("scenes/bad.scene"),
+              %{
+                "line" => 4,
+                "text" => "bram: line two",
+                "why" => "wrong_speaker",
+                "npc" => "maud"
+              }},
+             {"SCHEMA_VIOLATION", ~s("scenes/bad.scene"),
+              %{"line" => 6, "text" => "- Go", "why" => "repeated_choice", "npc" => "maud"}}
+           ]
+  end
+
+  # Breaks: two `- ~` choices share one key, or one shares a real label's (`- Todo 3`) key
+  # (one is lost, or refused as a repeat), or a `- ~`
+  # is refused in dev; a scene with no words before its first choice, or with no choice, lowers
+  # silently and fails later at a dialogue path with no line; or one whose same-key JSON supplies
+  # them is refused, or told the JSON overwrites words the scene never wrote.
+  test "`- ~` choices keep apart; a missing prompt or choice is named at npc:", %{tmp_dir: tmp} do
+    File.mkdir_p!(Path.join(tmp, "scenes"))
+
+    File.write!(
+      Path.join(tmp, "scenes/todo.scene"),
+      "npc: maud\nmaud: ~\n- ~\n  maud: ~\n- ~\n  maud: ~\n- Todo 3\n  maud: ~\n"
+    )
+
+    File.write!(Path.join(tmp, "scenes/mute.scene"), "npc: maud\n- Go\n  maud: ok\n")
+    File.write!(Path.join(tmp, "scenes/shut.scene"), "\nnpc: maud\nmaud: hello\n")
+    # The same-key JSON supplies what lent and kept leave out: neither is refused, nor an overlap.
+    File.write!(Path.join(tmp, "scenes/lent.scene"), "npc: maud\n- Go\n  maud: ok\n")
+    File.write!(Path.join(tmp, "scenes/kept.scene"), "npc: maud\nmaud: hello\n")
+    File.mkdir_p!(Path.join(tmp, "dialogues"))
+    File.write!(Path.join(tmp, "dialogues/lent.json"), ~s({"prompt":{"prose":"Well?"}}))
+
+    File.write!(
+      Path.join(tmp, "dialogues/kept.json"),
+      ~s({"choices":{"go":{"label":{"prose":"Go"},"narration":{"prose":"Off."}}}})
+    )
+
+    {files, diags} = Source.load(tmp)
+
+    {_, _, todo} = List.keyfind(files, "scenes/todo.scene", 0)
+    assert Enum.sort(Map.keys(todo["choices"])) == ["todo_3", "todo__3", "todo__5"]
+
+    assert Enum.map(diags, &{&1["path"], &1["data"]}) == [
+             {~s("scenes/mute.scene"),
+              %{"line" => 1, "text" => "npc: maud", "why" => "no_prompt", "npc" => "maud"}},
+             {~s("scenes/shut.scene"),
+              %{"line" => 2, "text" => "npc: maud", "why" => "no_choices", "npc" => "maud"}}
+           ]
+  end
+end

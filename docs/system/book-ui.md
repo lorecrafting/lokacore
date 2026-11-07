@@ -49,11 +49,20 @@ The scrolling World page is, top to bottom, and nothing else:
 
 No loose actions, verbs, asides, chips, cards, notes or other blocks. An action lives on a
 fixture, person or item detail page; an action with no fixture, person or item target is not
-drawn, and content must give it one. On hold: a skill check (perception, lore) may add a sentence,
+drawn, and content must give it one. A quest offer draws on its target's page, reading its authored label. On hold: a skill check (perception, lore) may add a sentence,
 fixture or furniture to the description paragraph itself, never a block of its own. The minimap
 and joystick, the status line and the say field sit outside the scrolling page and keep their own
 rules below. A passage below that draws anything else on the World page is superseded; where the
 Book still draws it, the passage names the Beads item that removes it.
+
+One exception (owner, 2026-10-31): the `+ item` pop, one aria-hidden transient under the log's last
+line after a pickup or a buy, reserving no layout, not in the record, in the small type. Its words are
+the view's item names, two items on one line, a long name wrapping, and a page turn removes it. The
+log follows to its end, so the pop is seen on a full page. It does not rise under reduced motion. The
+log line stays the record.
+
+Under-ink layers (night sky, lamp glow, low-health vignette, lightning, wind flutter) are paper, not
+parts: they draw no block, hold no words and take no touch.
 
 ## World and status entry
 
@@ -97,8 +106,7 @@ loose items share 'a' or 'an' the same way, written again when the word changes 
 orange are here.'; owner 2026-10-23), and written again on a name ending in the same word as the one before it ('A stick and a stick are here.'; 'A cowering goblin and a goblin are here.'; owner 2026-10-30);
 same-kind entities with a plural collapse into one link, 'two crows', count words to
 nine, digits after; the link opens the first member, and after Take the sentence recounts ('Five eggs are here.'), so
-every member stays reachable (PM ruling 2026-10-23); a name without words draws as its `name`. Combat foe lines take the definite
-form, one line per foe. Every entity that is not an
+every member stays reachable (PM ruling 2026-10-23); a name without words draws as its `name`. Every entity that is not an
 NPC or player goes in the item sentence, so none is dropped or listed twice. Each name is
 its own inline link named "<name>, open" that opens its detail (a tap, or Enter or Space on a keyboard); the commas, "and" and "are here."
 are not pressable. An item's Take option appears only when currently offered; an NPC or
@@ -113,7 +121,8 @@ projects authentic Look under the
 [sampler capability repair](../decisions/owner-decision-sampler-development-look-2026-10-03.md).
 Cartridges that do not offer Look retain a fixed text title.
 Only the body scrolls, so description and entities may leave view while the title stays visible.
-World scrolls to its end as its log grows, as a person's page does.
+World scrolls to its end as its log grows, as a person's page does, while the reader is at the end; a
+reader scrolled up to an earlier line stays put until they press anywhere on the page, which follows its own result.
 Standalone exit directions, adjacent-sight listings and redundant navigation/
 Look headings are omitted using structured outcome/TextKeys, never English matching. Under the owner's
 explicit per-room clearing direction, the World event log scopes
@@ -121,7 +130,7 @@ to the actual room: after a confirmed accepted action changes place, clear the o
 before adding genuine new movement/quest/authored consequences. The room shown is the one the
 committed receipt places the player in, never the exit's destination: an arrest (a wanted player
 walking in on an arresting guard) turns the World page to the cell, and its log carries the move's
-lines in receipt order (arrest line, then the reaction's charge). A death outside a combat round (a bleed or drain tick, in a press or an elapsed settlement) is the same: the World page turns to the recovery room and its cleared log opens with the death receipt's lines in receipt order (the tick, `world.death.narration.player_died`, the penalty line, `world.death.narration.woke`), never dropped by the room change; such a settlement ends any away-recap holding, its earlier held lines go with the old room's log, and its own lines never enter a recap (Beads `loka-3w3q`, `loka-x6t.26`). Each narration record of a
+lines in receipt order (arrest line, then the reaction's charge). A death outside a combat round (a bleed or drain tick, drowning, in a press or an elapsed settlement) first shows the [dead page](#effects-sound-and-haptics) in the room the player died in, its log kept and ending with the death receipt's lines in receipt order (the tick, the fall line, the penalty line, `world.death.narration.woke`); only Let go turns the World page to the recovery room, whose cleared log opens with those same lines, never dropped by the room change, or holds them in the spirit state when the view carries `revival` (owner 2026-11-05, option B, paraphrased; loka-kgd.210). Such a settlement ends any away-recap holding, its earlier held lines go with the old room's log, and its own lines never enter a recap (Beads `loka-3w3q`, `loka-x6t.26`). Each narration record of a
 receipt is its own log line, in record order; the Book never joins records into one line, and
 the `words.ts` outcome word ("Time passes.") draws only for a receipt with no narration at all
 (pass-1 UO). No card, note or banner. Attempts, pending/refused/stale
@@ -135,11 +144,11 @@ the scrolling body, with status beneath it, inside the existing safe area.
 A projected Read place action keeps its exact detail target and authored label and follows
 the canonical [notice-detail rules](#notice-board-details).
 
-The enabled status/resources tap opens Contents. It lists exactly **Character**, **Inventory**, **Map**, **Journal**, **Settings**. There is no Menu button or extra World navigation
+The enabled status/resources tap opens Contents. It lists exactly **Character**, **Skills**, **Inventory**, **Map**, **Journal**, **Settings**. There is no Menu button or extra World navigation
 row. Character shows existing projected resources and position, without unrelated index links.
 Inventory separates held items from worn slots; Journal uses projected quest text;
 Settings retains Start over and its confirmation/error handling, and holds the
-[page-turn sound](../BOOK-UI-COMPONENTS.md#page-turn) on/off control. Contents and every
+[Sound, Music, Haptics and Flashes](#effects-sound-and-haptics) on/off controls. Contents and every
 section it opens draw no status line (owner, 2026-10-30, loka-8lpm; the [page foot](#detail-page-order)
 rule). A section opened from Contents returns with **Back to Contents** (one page back), and Contents
 returns with **Back to World**; a section opened another way (Character from a status icon, the map
@@ -219,12 +228,12 @@ a [shop line](#npc-dialogue-and-action-details) not afforded, a blocked exit, a 
 [Action card](../BOOK-UI-COMPONENTS.md) reading its plain label, never `label: reason`. A permanent
 refusal, one the player cannot change, hides its card: its reason is on the hidden list beside
 `reasonSentence` ([reasons.ts](../../mobile/app/book/reasons.ts), `hides`; today an Attack on a person who
-cannot be hurt), and the card returns as its ordinary card once the action turns available. A worn
+cannot be hurt), and the card returns as its ordinary card once the action turns available. An Attack in a sanctuary is the deliberate exception (owner, 2026-11-01): the player cannot change it, but it teaches a rule of the world and a vanishing core verb can look like a bug, so on an attackable NPC's page, sitting or standing, the card stays gray with one authored sentence, the text key `combat.sanctuary`, the same for every sanctuary, as its hint and its logged refusal. A worn
 item's Take (`not_present`) stays hidden as before. The shown card is
 exposed as disabled, stays focusable and pressable, and carries its reason sentence as its hint; once
 pressed its accessible name is its shown text, the label then the reason sentence (label in name), and the
 hint is dropped, so the reason is read once.
-A press sends nothing to the engine: the card grays (the Note style) and shows the reason beneath
+A press sends nothing to the engine (a sanctuary's Attack excepted, so its refusal is logged): the card grays (the Note style) and shows the reason beneath
 the label as one sentence (`reasonSentence`:
 `It's too heavy to carry.`, `You can't afford it.`, `You can't do that here.`, with no reason
 `You can't do that.`, otherwise the [novel-prose](#line-placement) fallback), which its own polite region reads once. The card follows
@@ -417,7 +426,7 @@ Read. Room changes prune these routes; elapsed-only redraws retain them. Scene/c
 precedence and live action freshness apply unchanged. These local pages add no pause,
 deadline extension or persisted transcript. On cold reopen, the resolved Read target from
 the existing committed receipt restores its message once to that notice’s detail history
-and its visible detail route after the chapter Continue. A board child restores its parent
+and its visible detail route after the chapter card. A board child restores its parent
 board beneath it. This creates no command or receipt. A missing current-room target restores
 no notice route; scene/combat precedence still applies. Ordinary unclassified narration
 continues to follow the existing World recovery rule.
@@ -499,7 +508,7 @@ no past conversation log on a fresh visit to the page or after Leave the convers
 history. Answering (a `choose` press) puts that page **in conversation**, and it stays so after a one-reply
 answer closes the kernel choice: the choice's options sit immediately after the latest
 chronological dialogue/event entry **inside** the scrolling content; no Talk card and no other
-action card shows; the foot is a single **Leave the conversation**. Action and dialogue choice labels are bare imperatives without a trailing period (an ellipsis is not a period); a quoted spoken line keeps its punctuation. Content lint refuses an authored choice that only leaves (a Leave or Close label with no effect beyond its narration) in a talk with more than one choice; the page's own Leave control ends the talk (loka-x6t.21). A talk has one exit, the foot (owner, 2026-10-30, loka-512o): an authored choice whose whole label is the Book's **Leave** or **Close** is never drawn among the choices; Leave the conversation sends that choice itself, so its narration and effects stand. The conversation belongs to
+action card shows; the foot is a single **Leave the conversation**. An option the view marks `asked` (one already taken) keeps its card and press; its words take the note style in italic, and its accessible name adds the words.ts asked words after the label. Action and dialogue choice labels are bare imperatives without a trailing period (an ellipsis is not a period); a quoted spoken line keeps its punctuation. Content lint refuses an authored choice that only leaves (a Leave or Close label with no effect beyond its narration) in a talk with more than one choice; the page's own Leave control ends the talk (loka-x6t.21). A talk has one exit, the foot (owner, 2026-10-30, loka-512o): an authored choice whose whole label is the Book's **Leave** or **Close** is never drawn among the choices; Leave the conversation sends that choice itself, so its narration and effects stand. The conversation belongs to
 that page visit (the Book's latch, not the NPC): leaving the page any other way (Contents, Map,
 Back to World) ends it, and reopening the person shows their actions again. This supersedes the
 viewport-bottom dock. The ordinary long log remains scrollable, and newly appended results keep
@@ -525,6 +534,8 @@ and honest save/error UI; a retry keeps its original context. Without a matching
 conversation on the page, sends no engine verb and preserves any unmatched saved choice. Routine `choice_closed` fallback narration is suppressed
 structurally; meaningful authored/quest consequences and genuine errors remain. Sections retain
 Back to World. Item Leave remains local navigation.
+
+[Branching dialogue](mechanics.md#branching-dialogue) on the conversation page: an option whose condition fails is not drawn, and a card gone stale is refused `invalid_state` and redrawn. A reply that leads on draws the next prompt and its options after the reply; the foot stays Leave the conversation. When a reply leads on to the same person's earlier options, their prompt draws again as authored. When nothing is left, the talk ends after the reply and the page keeps the reply. A hand-off to someone else in the room turns the page to that person, who then speaks; a hand-off to someone in another room ends the talk after the reply.
 
 An absent pending speaker uses its actual continuation without invented NPC data. World draws no
 control for it: the choice waits on the speaker's page, the conversation page opens on a reopen,
@@ -613,12 +624,12 @@ The option is an Action card that sends nothing: a press opens its list in the p
 
 A row press (or Enter on a focused row) sends that pair under [live action freshness](#live-action-freshness); nothing sends while an action is pending, and the list stays as it is. A confirmed accepted pick closes the detail page back to World and adds the receipt's authored narration to the World log once; without narration the Book writes one line from [`words.ts`](../../mobile/app/book/words.ts) with the original projected names: **You give an apple to the farmer.** (Give), **You douse the cart with the bucket.** (a use pair: the scripted action's authored label, first letter lowercased, then target and tool), **You cast lux on the cart.** (a spell). The existing [Announcements](#announcements) region reads it; the list adds no live region of its own. A refused pick keeps the page, closes the list, returns focus to the option, and the refusal shows as a refused line in that page's history; a stale pick redraws and nothing acts. An item the pick consumes follows the [consumed-item](#item-details-and-takedrop) line rule, which already ends in World. Put keeps its concrete pair button.
 
-**Aimed spells off the target's page** (owner 2026-10-23, loka-x6t.109.5; PM approved as built 2026-10-23). The Character page's Spells block draws one pick option per aimed spell the GameView offers on some target, labelled with the spell's label and **Cast on…** ("Flamma, cast on…"); its rows are that spell's targets, labelled with each target's projected name, a refused one an [unavailable](#unavailable-actions) row (`The lantern`), and an accepted pick turns to World with its line as above. During a live fight each foe line on the Combat page draws that foe's **Cast a spell…** option; an accepted pick stays on Combat while the fight goes on, and its narration goes to the combat log, never the World log. When the foe dies its option goes with it. Open item: with two foes, the two options read alike (the foe's name is in each row's accessible name, not the option's).
+**Aimed spells off the target's page** (owner 2026-10-23, loka-x6t.109.5; PM approved as built 2026-10-23). The Skills page's Spells block draws one pick option per aimed spell the GameView offers on some target, labelled with the spell's label and **Cast on…** ("Flamma, cast on…"); its rows are that spell's targets, labelled with each target's projected name, a refused one an [unavailable](#unavailable-actions) row (`The lantern`), and an accepted pick turns to World with its line as above. During a live fight the Combat page draws each live foe's option last among its cards, naming the foe by its projected name (**Cast a spell on the goblin…**, owner 2026-11-02, loka-kgd.204); an accepted pick stays on Combat while the fight goes on, and its narration goes to the combat log, never the World log. When the foe dies its option goes with it. Open item: two foes of one name read alike.
 
 **Equipment and skills.** A weapon's or shield's page shows its projected slot, attack or block
 figures ("2–4 damage", or "2 damage" when the two are equal) and skill requirement, read from the projection, never renderer literals or inferred
 names; a carried weapon is visibly distinct from a wielded one, and a description grants no use.
-How Character shows learned skills is the [skill tree rule](#skill-tree-details).
+How the Skills page shows learned skills is the [skill tree rule](#skill-tree-details).
 A worn item a curse holds on keeps Remove in its list as an [unavailable card](#unavailable-actions)
 whose press shows the engine's reason as its sentence; the Book never hides it.
 An item's authored `equip` words name its Wear and Remove buttons and their lines ("Wield the
@@ -666,11 +677,13 @@ storage, travel and other quest actions remain available under their normal rule
 
 A declared chapter opens a title page on launch and on index change, once per presenter session.
 A modal scene takes precedence: only its persisted current line, offered Continue and the
-[running head](../BOOK-UI-COMPONENTS.md#component-catalogue) appear;
+[running head](../BOOK-UI-COMPONENTS.md#component-catalogue) appear (a scene's [treatment](#book-treatments) may hide more);
 ordinary details, Leave/Back, Contents and position controls are hidden or disabled. A chapter
-title page shows its chapter label, title, Continue and the running head only: no Back to World, and Contents and position are
-locked as in a scene. A chapter
-title reached with a scene waits until that scene ends. Chapter Continue dismisses presentation
+title page shows its chapter label, title and the running head only: no Back to World, and Contents and position are
+locked as in a scene. It turns itself about 4 s from appearing; a tap anywhere
+skips, and its clock pauses while the app is in the background. With a screen reader active it keeps an
+explicit Continue and does not turn itself. The theme cut plays into the next page; it fades out as it ends. A chapter
+title reached with a scene waits until that scene ends. Dismissing the card is presentation
 only. Same-room ordinary updates do not repeat or drop the chapter title.
 
 A once-only choice before play (the ancestry choice) sends the exact offered invocation and is
@@ -707,6 +720,19 @@ the permitted Start over (loka-x6t.25).
 boundaries live in [session](../../mobile/packages/game-view/session.ts),
 [app](../../mobile/app/App.tsx) and [save error](../../mobile/app/SaveError.tsx).
 
+A cartridge's ending is its last scene, then its last declared chapter's title page; the Book adds no ending page and no words of its own.
+
+## Book treatments
+
+A treatment is a named, designed whole the Book draws over a host: a cartridge selects one by name and sets only its bounded parameters, never a colour, a layer, a timing or a combination of parts ([owner decision](../decisions/owner-decision-authoring-editor-plan-2026-11-04.md#book-treatments); [rulings](../design/book-treatments-rulings.md)). Each is designed once, here, for contrast in every palette, reduced motion, Flashes off and a screen reader; its parts are the Book's kit. Its layer takes the top slot of the [under-ink chooser](../BOOK-UI-COMPONENTS.md#design-tokens), so no fatal hold, vignette or glow shows with it, and two treatments never show at once. A new treatment, or a parameter on one, is a designer ruling with its contrast numbers, never a cartridge's.
+
+| Treatment | Hosts | Parameters | Spec |
+|---|---|---|---|
+| `spirit` | revival, implicitly (not selectable on a scene: its kit needs revival's lines and seconds) | none (`lines` and `seconds` are revival's data) | [Spirit state](#effects-sound-and-haptics) |
+| `reverie` | a modal scene's optional `treatment` | none | below |
+
+**Reverie.** A scene told as a bright dream (owner 2026-11-04, paraphrased: bright and luminous, only Continue, lines at their own pace, silence). **Look.** A held under-ink layer inside the page column, set with the turn onto the scene's first line and gone with the turn off its last, in every mode: ivory by day and dawn, pale gold at dusk and night; every text role keeps 4.5:1 (its look and timing are in the [catalogue](../BOOK-UI-COMPONENTS.md#design-tokens)). Still: no breathing, no glow. Storm draws no light on it. The night sky stays as the hour draws it. **What shows.** Only the scene's current line, in the ink as plain prose, and Continue. The running head, the status row and the whole footer (catching up included) are not drawn. **Pacing.** Every line turns the page, as in any scene. The line starts a moment after the page lands and rises slowly from the paper to full ink; Continue's place is kept from the start and settles in once the line is full, until then not drawn, not pressable and not focusable. A tap anywhere on the page before then completes the line and shows Continue at once and sends nothing; only Continue advances, and the Book never advances by itself. Reduced motion and Flashes off: the same, since a slow opacity rise is neither motion nor a flash. Backgrounded, the arrival pauses; a reopen lands on the current line and it arrives again. **Screen reader.** The line and Continue show at once; the page's title focus lands on the line and reads it once; Continue's name is its label. **Continue.** The engine's offered button and its label, drawn as the scene's [ContinueButton](../BOOK-UI-COMPONENTS.md#component-catalogue), solid; the press keeps its selection haptic. **Sound.** Silence: on the turn into the reverie the room's bed, weather and any music fade out over the bed cross-fade; nothing plays inside it, its page turns and Continue included; the next page's bed opens over the bed cross-fade after the turn out. **Ends.** A fault shows the scene plain with the footer's fault, as the spirit state does; the scene's own precedence is unchanged.
+
 ## Text clarity
 
 Scrolling content must remain readable with the existing authored text, fonts and fixed title.
@@ -724,7 +750,176 @@ form on every press; its " (N times)" count is visual only ([line placement](#li
 reads "<reason>, <sentence>". History, redraws, page turns and a reopen are never read again. A
 repeated line is read again. Condition changes arrive as log narration, so they are read the same
 way. The region is text only, so motion settings do not apply to it. The one exception is an
-[unavailable card](#unavailable-actions)'s own polite region: its press sends nothing and writes no log line, so it reads its sentence there.
+[unavailable card](#unavailable-actions)'s own polite region: its press sends nothing and writes no log line, so it reads its sentence there. A sanctuary's gray Attack alone sends its press: the engine refuses it, the world does not change, and the refused line in the log tells the player and is read, not the card's region.
+
+## Effects, sound and haptics
+
+Values, roles and the wash's contrast exemption: the catalogue's
+[design tokens](../BOOK-UI-COMPONENTS.md#design-tokens). An effect names which thing changed; none
+delays a tap, moves text the eye is on, or reaches the live region.
+
+**Press.** A pressable answers on press-in, before the command returns: an action card and a
+letter tile lift; a Control, Continue, the page foot, a Tap and an entity name change ink; the
+Contents button, a status icon and a map place thin; a chip lifts and, once chosen, holds its
+pressed colour. The map's level arrows have no press look, nor has the say field's shield, which
+only closes. An unavailable card does not lift; its reason dries. A press gives the selection haptic
+on commit, never on press-in, so a scroll stays silent; a Tap, the Contents button, a status icon
+and a map place give none. A chip's comes after its choice applies, so turning Haptics off is silent.
+
+**Ink drying.** A line entering the log in this redraw dries in; a narrated event follows its line
+by a beat. A refused line dries like any other, a repeat's count does not re-dry, an away recap
+dries once, and history never does. Under reduced motion a line dries as a plain cross-fade.
+
+**Status icon.** A status arriving scales up in its icon, and one ending fades. A permanent status
+has no arrival effect. Under reduced motion an arriving icon just appears.
+
+**Running head.** A changed objective cross-fades. A resolved one settles to secondary ink, then
+out, and the next dries in; a failed one fades through secondary ink, then out.
+
+**Blow wash.** A hit point loss during combat washes the paper once under the ink, and the hit point
+value dries in the wash's colour and back, with the thud and the heavy haptic. The page swells 1.5%
+at the wash's peak, with no layout change or reflow (owner, 2026-10-31). Reduced motion halves the
+wash and removes the swell; Flashes off removes both, leaving the value, thud and haptic.
+
+**Falling.** The player's death is a committed fact from the receipt, never a view diff, a rendered line or a room name. It is one S4: pending cues clear, music and beds cut at once, and one heavy haptic is the last thing felt: in a fight the thud's own, which is never cut; outside one, the death cue's. In a fight the fatal blow's wash falls to the fatal hold (the reddest the dim and warning ink bear at 4.5:1; its look is in the [catalogue](../BOOK-UI-COMPONENTS.md)) and holds there, still, with no pulse and no fade, until the page turns; the screen's edges hold a deeper bloodshot red, feathered inward and gone before the page margins, so no ink sits on it (owner 2026-11-02, loka-kgd.204; Flashes off: no peak, the hold rises over the settle time; reduced motion: the same still edges, the half wash, no swell, over the hold set at once). A death outside a fight has no blow, so no peak: the fatal hold and edges arrive with the turn to the dead page below and rise over the settle time, in every mode (reduced motion: set at once). The death sound plays once (for now the book's close: no Falling cue is recorded yet). There is no countdown: the held red says the player is dead, and the closed Combat page's one foot, or the dead page's, reads **Let go** ([Closure](#live-combat-response-m6-a)), which goes to World as Back to World does, or, when the view carries `revival`, to the Spirit state below. Waking has no chord: the page lands on the palette of the current in-game hour, because death does not move the clock, and the current room's bed returns. No palette change marks the fall. ([Designer rulings](../design/effects-batch-2-rulings.md).)
+
+**Dead page.** A player death outside a fight (a bleed, drain or status tick, drowning; in a press or an elapsed settlement) shows the same death as a fight's closed Combat page, on the World page (owner 2026-11-05, option B, paraphrased; loka-kgd.210). A death whose receipt closes an encounter, whatever killed, is the Combat page's ([Closure](#live-combat-response-m6-a)), never this. **Where.** The World page of the room the player died in, its title kept from the view before the death receipt (as the Combat page keeps its encounter title), though the receipt has already moved the player: the recovery room is not drawn until Let go. **What shows.** The room title; the room's log, kept, ending with the death receipt's lines in receipt order (the tick, the death line, the penalty line, the waking line), as the Combat page shows every closing line (a later receipt's lines wait, unread, for Let go); and one foot control, **Let go** (`LABEL.letGo`). The room's paragraphs are not drawn, and, as in the spirit state, the status row, running head, minimap and joystick, say field and Contents button are not drawn, catching up included. **The death line.** The receipt's own fall line, no new words: `world.death.narration.player_died` (default `world.combat.narration.player_died`), or `world.water.drowned` for a drowning. **Look and sound.** Falling above: the fatal hold and edges, held still until the page turns; one heavy haptic from the death cue; music and beds cut. **Turn.** From any page, World, a detail or conversation, Map, Journal, Character or Contents, the Book turns to the dead page with the death; already on that room's World page, the page does not turn and the layout changes in place. Focus goes to the title; the live region reads the death lines once. **A second death** before Let go (a tick in the room the player now is in) changes nothing on the page: title, log and lines stay the first death's, and its receipt's lines wait, unread, with every later line; its cue and haptic play as any death's (Falling), the held red already there with no new peak (loka-kgd.218). **Let go.** Local, no engine verb: the turn to the World page of the room the player is now in, through the existing room-change flow, its log cleared then opened with every waiting line in receipt order (both deaths' after two; World and status entry); with `revival`, into the Spirit state below, its held lines starting at the receipt's. **A scene or chapter.** World time runs in scenes ([owner rules](owner-rules.md)), so a tick can kill inside one; a scene's progress survives death ([save](save.md)). The dead page shows first; Let go then shows the scene or chapter card the view carries, and the spirit state does not begin (as a scene arriving ends it). **Reopen.** Nothing is stored: a reopen before Let go shows the World page of the recovery room, solid, as after a Combat closure. A fault ends the dead page the same way.
+
+**Spirit state.** Built (loka-kgd.205); its open items settled 2026-11-04 ([rulings](../design/spirit-state-rulings.md)). Only when the view carries [`revival`](mechanics.md#death1--corpse-custody-and-same-body-return-m5-b-foundation) (else Let go goes to World as above), Let go, from the Combat page or the dead page, turns to the World page of the room the player is now in, in the spirit state. Its clock starts when that page lands, in wall-clock time, never from the receipt; nothing is stored. **Look.** A held under-ink layer, the highest in the chooser, so no fatal hold, vignette or glow shows with it: the spirit blue (pale by day and dawn, deep at dusk and night; its look is in the catalogue) under the page's ink, its foot included, inside the page column, never over the night sky; every text role keeps 4.5:1 ([tokens](../BOOK-UI-COMPONENTS.md#design-tokens)). It arrives with the page turn, set, in every mode; still, with no breathing. Opaque cards stay solid. Storm draws no light on it. **What shows.** The room title, its paragraphs drawn as plain prose (no link looks, nothing pressable), the log, and in the foot one Action card, the rise card, the Book's only control. The status row (line, icons, experience rule), running head, minimap and joystick, say field and Contents button are not drawn. **Lines.** The return receipt's lines (the waking line, a greeting) and any line arriving meanwhile are held, as the away recap holds lines, and go to the log in order at the rise. The revival lines dry into the log one by one: with n lines over `seconds`, line k (from 0) at k × `seconds` / (n − 1) after the page lands, so the first is at once and the last at zero (one line: at once); they stay in the log after the rise and are read once by the live region as log lines. **The rise card.** Before zero it is the unavailable form, its label plain, with the [status icon's](#conditions-details) countdown ring at its leading edge draining from full to empty over `seconds` (steps under reduced motion); a press sends nothing, gives warning and reads no sentence. At zero the ring is gone and the card is available; the Book does not rise on its own. Focus on the card stays on it; focus anywhere else does not move, so zero makes no announcement of its own (the last revival line marks it). Its accessible name is its label, the same at every tick; before zero it is disabled with the whole seconds remaining as its value (on the web, where a button carries no value, as its description: "4 seconds", "1 second"), read when focus lands, never announced per tick. **Rise.** A press sends nothing (no engine verb) and gives the selection haptic. The layer fades out over the palette cross-fade time (a plain fade under reduced motion; Flashes off the same, being no flash); the page does not turn; every hidden control returns at once, with no arrival effect; the held lines go to the log; focus goes to the room title. **Sound.** The room's bed returns on landing through `mix.muffle` and opens over the bed cross-fade at the rise; no other cue; thunder stays muffled. **Interruptions.** Backgrounded, the clock runs on: on return the page shows what is due then, its due lines in order, each drying once. A reopen shows the World page solid, its unplayed lines gone. An encounter, a chapter or a scene arriving ends the state at once, solid, with the held lines logged and the rest of the revival dropped. Catching up keeps the spirit layout (no joystick, no status line); a fault ends the state the same way, and the normal Book shows with it.
+
+**Fight music.** A fight's opening plays a stinger into a lean loop on the music bus, and beds go silent; a fight within the fight gap of the last, or a reopened one, plays the loop alone. A foe falling cuts the loop into a short fanfare, then the room's bed returns. Flight or a quiet end lets the loop fall away with no fanfare. Death cuts it (Falling). A blow dealt plays one impact under the music; the player's own miss, read from the receipt's attack event, plays one whisper; a blow that moves no band, a dodge and a block add no sound, until events can tell them apart, and never from a rendered line.
+
+**Beds.** Each room plays its tag's one loop on the ambience bus, or `wild`, or silence; the same tag across rooms carries on, a new tag cross-fades, and the background stops it. S3 and S4 sounds duck it; the paper turn does not.
+
+**Exploration music.** The first entry since launch to a tag may play its one piece, at most once in a long gap. Waking in a room spends its tag's piece: only the bed returns. It never loops, plays out, lowers beds by `mix.bedUnderMusic`, and only a fight, a chapter or death cuts it.
+
+**Level wash.** A level washes the paper once under the ink in the gilt colour, on whatever page shows, with no swell. It covers what `Page` draws, foot included; the running head and status row sit outside `Page` and stay unwashed, on every page. It shares the Flash limit with the blow wash; when both land together the level has it and the blow keeps value, thud and haptic. Reduced motion halves it; Flashes off removes it, leaving the gilt line, sound, haptic and experience rule.
+
+**A level is never dropped.** A level arriving while an S3 plays takes the pending slot from any other S3. A level in the same view as a foe falling leads: its note and haptic come first, the fight-won haptic yields, and the fanfare waits out the settle hold. The engine's level line comes before a `level_reached` reaction's own line, so an ability is named after the level that opened it. A page turn or a chapter card in the same beat holds a pending level until it ends, and a page curl holds the level's haptic to the curl's end. A `level_reached` rule whose `when` fails or that says nothing leaves the level line at the end.
+
+**Flash limit.** At most one full-page luminance change per second, never three in any second; a
+later blow or level in that second keeps the value, thud and haptic, so a flurry never peaks twice in a second.
+Flashes and reduced motion are separate.
+
+**Chapter card.** Over the leaving page's picture, blurred, the card's label, title and rule dry in
+one after another. The theme cut plays with the medium haptic. With no picture (reduced motion, a
+failed or late snapshot) there is no blur and the label, title and rule appear together; the cut
+stays. Only a chapter index change plays this, once as [Chapters](#chapters-scenes-and-recovery) says.
+The card goes without its paper only while that picture lies under it; leaving, it has its own paper,
+so its ink never shows over the next page. It does not curl in, so its haptic comes with the cut.
+
+**Gilt.** A line that marks the player's own gain arrives gilded and settles to its own ink: a
+skill learned or improved, or a level, recognised by `levelling.level_up` and never by its words, in the log; a quest resolved, on its Journal title at the Journal's next
+opening, once. The Character page's level line stays gilt while points wait to be spent. No failure
+is gilt, and gilt is never the only sign. Reduced motion is a plain fade in the line's own ink.
+
+**Lamp glow.** While a flame is lit and the shown palette is dusk or dark, a glow sits at the page's
+lower outer corner, in the dark palette's action colour fading out over 40% of the page width, in
+over the palette cross-fade, out over the settle. Away from an exposed room it flickers; reduced
+motion holds it steady. It lights no sound and no haptic. It is under the ink, draws no block, takes
+no touch and is no part of the room page's anatomy.
+
+**Map ink.** A room or link new since the Map last showed draws on over the settle; silent. The
+first opening after launch draws nothing. Reduced motion: it appears.
+
+**Page life.** A new choice's answers lift in one after another, never again on a redraw; under
+reduced motion they appear together. A person arriving in the room dries in; one leaving fades, takes
+no touch while fading, then the paragraph closes; both silent. At the danger hit point band a
+vignette of the ink colour breathes at the page's edges up to the faint opacity (steady under reduced
+motion), silent. A right riddle answer stays in its place in the warning colour for a held moment,
+then settles, with one note; a wrong one sends the tiles back, silent, never gilt. On a night page
+two groups of stars twinkle in opposed phase (still under reduced motion). A dream's page carries a
+faint dusk tint. A travel, known by the sent expedition's confirmed room change, turns five quick
+sweeps over one snapshot with one riffle and a light haptic after it (one fade under reduced motion).
+Under-ink layers draw no block and take no touch.
+
+**First times.** The first pickup, first quest and first level of a playthrough are one step
+stronger: the warning colour held for a moment on the line that says so, one tier louder, one haptic step up. The view alone decides:
+empty hands and worn before a pickup, an empty journal before a quest, level 1 before a level.
+Nothing is saved for it.
+
+**Event sounds.** A sound marks what the hand did or how the player's story moved, never what the
+world did. Pressed or moved: the page turn, a pickup flick (a take that turns the page plays the flick alone,
+and a buy plays coin instead, so one action is one sound), coin, a blow's thud. The story: level, new skill, quest resolved, quest failed, skill
+improved (rate limited), quest gained, the chapter cut, and a tick when a debuff lands on the
+player, since it marks the player's own state (a buff is silent). **Silent:**
+hint change, knowledge, fact,
+rumour and reputation, a new map room, a generic narrated event, saves, loading, errors, empty
+states, senses, status ticks and expiry, and an NPC's background life.
+
+**Haptics.** The kind for each event sits in the catalogue's tokens; refused and unavailable give
+warning, a save error or fault gives error once. Never two within the shortest gap. A haptic due
+during a curl is dropped, not held: its sound has already played, and a buzz after the curl reads as
+a second event. Reduced motion leaves them on. Web uses the browser's vibration where supported, the
+device build is a silent stub until mobile resumes, and no device proof is required before then.
+A preview or Storybook build also marks each haptic with a pulse: a ring round the Book column,
+outside the page turn, naming the kind, taking no touch or focus and hidden from screen readers. A
+player's build never has it.
+
+**Settings.** Sound, Music, Haptics and Flashes follow the Reading size and precede Start over, in
+that row pattern, each on by default and kept on the device, not in the save. Sound and Haptics
+preview themselves on change; Music and Flashes do not. Music governs every piece of music: the theme cut, fight music and exploration music. Sound governs every other sound, beds and weather included. Turning either off stops what it governs at once; turning Music on again during a fight starts the loop, nothing else. Reduced motion follows the system,
+with no control of its own.
+
+A Credits row after Flashes opens a read-only child page, one line for each distinct credit in the
+sound manifest, with Back to Settings.
+
+**Queue.** One chapter or death interrupts and clears the queue. One large cue plays with one
+pending, and a third of the same key replaces the pending one. Small cues of one key coalesce into
+one. A page turn cancels the leaving page's effects; the arriving page's start after its picture
+deadline. A merged cue fires once.
+
+**Storm.** On an exposed World page in a storm, at random 20 to 60 s apart and never within the Flash limit's gap of a wash, an under-ink layer of the light palette's paper rises and leaves; thunder follows 1 to 3 s after, with a heavy haptic only on a room entry's first. Reduced motion or Flashes off keep the thunder and draw no light. Indoors there is no light and the thunder and weather layer pass through `mix.muffle`, no haptic.
+
+**Wind.** On an exposed World page, on the change to wind and once per room entry, the top outer corner's paper lifts twice; no ink moves, nothing under reduced motion.
+
+**Lever and latch.** A lever's completion is one clunk and a medium haptic, without page motion. An exit newly shown dries in the Footer, with a latch and a light haptic only when the player's own action opened it. Both read the event, never a label. A lever is a cartridge's authored custom event with the key `lever`.
+
+## Author mode (dev only)
+
+The `?dev=1` dev-cartridge page only ([author preview](cartridge.md#author-preview)); no player
+rule above changes, and nothing here is drawn by a component in `mobile/app/book/`: it is laid
+over the Book from `mobile/app/author/`, with its words there too. Looks: [author-mode marks](../BOOK-UI-COMPONENTS.md#component-catalogue);
+reasons and limits: [prose in the Book rulings](../design/prose-in-the-book-rulings.md).
+
+- **Edit in place.** A click plays. A double-click on a line's words (not on a link or card in it)
+  turns that line into a field in its place, nothing reflowing, the double-clicked word selected,
+  captioned `<file>:<line>  Enter saves · Esc cancels`. It holds the source words unbound (slots
+  and `~` as written; a speaker-joined line only its quoted words). One line, soft-wrapped: Enter
+  or leaving the field saves, Esc cancels and returns focus to the line, no break is ever
+  inserted, a pasted break or tab is a space, unchanged words write nothing, an empty field stays
+  open saying `Empty. Write ~ to leave it unwritten.`
+- **Confirming.** The new words show at once; nothing marks the line while the compile runs. A
+  refused compile marks the line unconfirmed (accessible name adds `unconfirmed`) until a good
+  compile, and the console badge reads `The Book shows unconfirmed words (N)`, listing each
+  line's `file:line` and refusal.
+- **Put it back.** Cmd-Z (Ctrl-Z) outside a text field undoes this page's last prose edit; each
+  press goes one further back; no redo; nothing left says `Nothing of yours to put back.` Inside
+  a field it is the field's own undo. A refused put-back says `<file> changed since; not put back.`
+- **`~` lines** carry a margin mark (accessible name adds `still to write`); the line is
+  unchanged. `]` and `[` walk the page's `~` lines (wrapping), `}` and `{` every editable line;
+  the landed line scrolls into view and takes focus, and Enter opens its field. The jump never
+  leaves the page; elsewhere is the console's Still to write list. Counts are in the console:
+  `~ 2 of 5 here · 41 in cartridge`. No key fires in a text field (the say field too) or with a
+  modifier, Cmd-Z aside; the keys work from the Book frame and the panel.
+- **Changed on disk (409).** The field keeps the draft; under it: `Changed on disk since you
+  opened it.`, their words, and Keep mine (writes the draft over their line, found again) or Take
+  theirs; only Open source when their line is not found exactly once. It opens unasked when a
+  pushed change alters the field's line.
+- **Hold** shows in the panel header (a toggle and `Held · N waiting`), never in the Book;
+  leaving the page releases a Hold it set.
+- **No field.** A double-click on a line that is not words opens nothing; a note under it, in a
+  row of its own (the lines below move down by its height while it shows and back when it goes,
+  with no motion; a note never covers a line, loka-wfrgk.39), until the next click or key, read politely: `A choice label is its key. Alt-click opens the scene.`,
+  `The engine writes this line.`, else `Not a line of words. Alt-click opens its source.`
+- **Add here** (E6a, #649). While the panel's selection is a room, a click on that room's line in the
+  Book (the line the panel's `select` marks) shows the no-field note under it: `Add here`, then one
+  button per registry field the room lacks, in the panel's order; nothing when it lacks none. It is
+  the same note ([author-mode marks](../BOOK-UI-COMPONENTS.md#component-catalogue)) and lasts until
+  the next click or key. A pick is the panel's card writing that field's least valid value (a text key is `~`; a
+  key or choice the author must make is only revealed, not written), undone by the card's Undo, and
+  asks for no second note. Nothing is added from the Book without a pick.
+- Nothing here animates (the scroll to a landed line is instant under reduced motion).
 
 ## Future boundaries
 
@@ -792,36 +987,45 @@ offer under ordinary freshness; an old view never promises rescue, and expiry re
 
 An attackable present NPC offers deliberate Attack. An active encounter automatically opens
 and foregrounds its own full Book page, like dialogue, including when another ordinary page
-or menu was open and when reopening a saved encounter. The page names the opponent, shows
-committed combat narration, and renders only currently available Stand, directionless Flee
-and Look actions as complete typed invocations. The shared kernel ActionSet also permits Scan;
-its existing phone presentation deferral remains. The combat restriction is applied after all
+or menu was open and when reopening a saved encounter. The page shows
+committed combat narration, and renders only currently available Stand and directionless Flee actions as complete typed
+invocations. The kernel still permits Look and Scan in a fight; the page offers neither (Look:
+owner 2026-11-04; the [hotbar](#combat-hotbar) holds skills and spell words, not Look). The combat restriction is applied after all
 ordinary contributions, so no blocked action or alias is exposed by a hidden ordinary page.
 Attack initiates combat from the NPC page; it is not usable again during an open encounter
 and is not shown on the combat page.
 Flee lets the engine choose a random currently legal exit; success shows the actual resulting
-room. All offered combat actions appear as a vertical dialogue-style list below the log inside
-the same ScrollView, not a fixed strip. No unavailable or future skill actions are invented. World time continues
+room. Stand, Flee, a bandage and each foe's pick lists appear as a vertical dialogue-style list below the log inside
+the same ScrollView; the player's skills and untargeted spell words are the page's one fixed strip, the
+[Combat hotbar](#combat-hotbar) (owner 2026-11-05). No unavailable or future skill actions are invented. World time continues
 while the combat page is open.
+
+**Rounds.** The page follows its newest line as other growing pages do (Page: it follows the end
+while the reader is there; a reader scrolled up to an earlier round stays put until they press), so a round's lines
+land in view above the action cards. Each round's lines (one committed receipt: an elapsed round,
+or one press's receipt) are one block at the log's line pitch with no gap between lines, and rounds stand apart by one
+blank line (one log line height; owner 2026-11-04), as the prompt line parts rounds in a MUD log; no rule glyph, heading
+or words mark a round.
 
 Combat takes precedence over ordinary navigation until the encounter closes. **Opening.** The
 receipt that opens an encounter (a move's or Sleep's `engage`, Attack, a cast's fight-back)
 draws all of its narration in the combat log (and the World log), so the page opens with the engage line as its
-first log line; the opponent block always shows, so the page is never blank. The opponent block
-leads with the opponent lines, each the name and its hp band phrase joined by " — " ("the
-raider — hurt", the cartridge's `band.<key>` words the status line uses; no number, the hp
-band stays on the locked status line; the opponent's band is a GameView field, engine slice
-loka-y6yg.49); the target suffix follows the name, before the dash ("the raider (your target) — hurt"). Your own bleeding and condition lines draw nowhere on the Combat page: they stay
-on the status line and Character, so a reader never takes your hunger for the raider's
+first log line, which names the foe ("You attack a boar!" / "A boar attacks you!", loka-kgd.202). The
+page title names who opened the fight, in the cartridge's words (`combat.title_you_attack` {target},
+`combat.title_attacks_you` {attacker}, each bound to the foe's short name as the engage line binds it; owner 2026-11-02, loka-kgd.204 notes: "title like 'You attack
+a boar!' / 'A boar attacks you!'"; loka-kgd.207). It is kept for the encounter, its closed page too, and
+reads **Combat** when the opener is unknown (an old save, a fallen pack opener after a reload, a
+cartridge without the keys or the foe's name words). Nothing else names the foe above the log: no foe
+name, band phrase or target line (owner 2026-11-02, loka-kgd.204); the log opens the page, and each live foe's **Cast a spell on** list ("Cast a spell on the goblin…") comes last among the cards. Your own bleeding and condition lines draw nowhere on the Combat page: they stay
+on the status icon row and Character, so a reader never takes your wound for the raider's
 (pass-1 C2b, as loka-x6t.15). **Closure.** On
 every committed closure (opponent death, player death and inn return, successful Flee, any
-other end) the Combat page stays the shown page, as a one-reply conversation does: its opponent
-block of names only, without the band phrase or the target suffix (nothing is left to aim at), its log ending with the closing
+other end) the Combat page stays the shown page, as a one-reply conversation does: its log ending with the closing
 lines (every line of the closing receipt, whatever its key), no action cards, and one foot Control
-[**Back to World**](../BOOK-UI-COMPONENTS.md#component-catalogue) (the existing label; no
-new words). The status line stays locked as during the fight. The tap is local (no engine verb)
-and shows the World page of the room the player is now in (the inn after death, the room fled
-to) through the existing room-change flow. Time runs meanwhile; later ambient and room lines go to
+[**Back to World**](../BOOK-UI-COMPONENTS.md#component-catalogue), or **Let go** when the
+receipt says the player died ([Falling](#effects-sound-and-haptics); owner-approved label 2026-11-02). The status line and its icons are hidden while Let go shows (owner 2026-11-04); after a fight you survived it stays locked as during the fight. The tap is local (no engine verb)
+and shows the World page of the room the player is now in (the return room after death, in the
+[spirit state](#effects-sound-and-haptics) when the view carries `revival`; the room fled to) through the existing room-change flow. Time runs meanwhile; later ambient and room lines go to
 the World log. A new encounter replaces the ended page; nothing is stored, so reopening a save
 after a closure shows the World. A pending save keeps the confirmed
 encounter and existing retry behavior; a refusal remains visible on the combat page. The UI
@@ -835,8 +1039,10 @@ structured committed receipt metadata (an encounter present after the receipt th
 pre-command view lacked, or gone after it), never rendered prose; ordinary room events draw
 only in the World log even when delivered in the same receipt as combat, except the closing receipt,
 whose lines all draw on the ended page too (the arrival room's description after a Flee or inn
-return reads there, once). This replaces the earlier
-persistent bottom strip; see the [owner combat-page decision](../decisions/owner-decision-m6-a-combat-pane-2026-10-04.md).
+return reads there, once). This replaced the earlier
+persistent action strip ([owner combat-page decision](../decisions/owner-decision-m6-a-combat-pane-2026-10-04.md));
+the [Combat hotbar](#combat-hotbar) (owner 2026-11-05) brings back a strip for skills and spell words only, and the
+cards stay in the scroll.
 
 A committed dodge or block reads once from the structured attack result and authored text; a
 miss has its own line. During an encounter a held item's legal combat use (a bandage on a bleed)
@@ -858,7 +1064,7 @@ and typed save-corrupt handling remain in force.
 
 ## Conditions details
 
-GameView `conditions` lists every active [status](mechanics.md#status-effects-over-time-toolbox-row-1) on the body with its authored label, end, next tick and per-tick change; `bleeding` keeps its own field and lines. A condition label is authored lowercase, like a position word (`poisoned`, `blessed`); an icon's tooltip and name show it as authored and the Character page capitalises it as it does the position. A condition's line is the label, the time remaining and the signed per-tick amount with its pool key, joined by " · " ("poisoned · 4m remaining · -1 HP each 60s"); a permanent condition has no time part, one without a tick no amount, and the sign is always in the text. A duration or cadence under two minutes shows in seconds ("40s"), under two hours in whole minutes ("60m"), otherwise in whole hours ("12h", "24h"; never "1440m"; pass-1 UN). The bleeding line uses the same durations ("bleeding · 6m remaining · 1 HP each 60s"). The Character page lists each line, its label capitalised, after the bleeding line; the Combat page draws none of them ([combat rule](#live-combat-response-m6-a)). The status icon row shows one round icon per condition, buffs and debuffs told apart by their look, five icons then a +N disc; a tap opens Character; the Character page keeps the full list. The row sits above the status line, in condition order; a hold (a hover or keyboard focus on web) shows the label and time joined by ", " ("fed, 48m remaining"), and an icon's name adds the polarity and the action ("fed, 48m remaining, buff, opens Character"; no polarity for a neutral condition; "+1 more, opens Character" for the disc). While the status line is locked the icons are named pictures, not buttons, dim like the Contents button (the neutral look). A timed icon wears a countdown ring round its disc: a track and an arc for the share of its duration still to run ([look](../../mobile/app/book/StatusIcon.tsx)), clockwise from 12 o'clock, recomputed from projected time; between updates the arc drains linearly to its new share over the real time since the last update, at most 1 s (display only; presentation keeps no gameplay clock), and jumps without motion on first show and on a refresh; under reduced motion it steps; while locked the ring dims with its icon ([look](../../mobile/app/book/StatusIcon.tsx)) and still drains; at its end only the track shows, and a permanent condition has no ring. Icon glyphs are placeholders until loka-x6t.63. The presenter reads projected state and never computes or writes an effect, tick or cure; applied, tick and expired lines come from their receipts' narration and appear once. No new control: a cure is the ordinary Eat of a held item whose `cures` lists the condition.
+GameView `conditions` lists every active [status](mechanics.md#status-effects-over-time-toolbox-row-1) on the body with its authored label, end, next tick and per-tick change; `bleeding` keeps its own field and lines. A condition label is authored lowercase, like a position word (`poisoned`, `blessed`); an icon's tooltip and name show it as authored and the Character page capitalises it as it does the position. A condition's line is the label, the time remaining and the signed per-tick amount with its pool key, joined by " · " ("poisoned · 4m remaining · -1 HP each 60s"); a permanent condition has no time part, one without a tick no amount, and the sign is always in the text. A duration or cadence under two minutes shows in seconds ("40s"), under two hours in whole minutes ("60m"), otherwise in whole hours ("12h", "24h"; never "1440m"; pass-1 UN). The bleeding line uses the same durations ("bleeding · 6m remaining · 1 HP each 60s"). The Character page lists each line, its label capitalised, after the bleeding line; the Combat page draws none of them ([combat rule](#live-combat-response-m6-a)). The status icon row shows one round icon per condition and one for bleeding, buffs and debuffs told apart by their look; a tap opens Character; the Character page keeps the full list. Bleeding is an icon, never text on the status line, with the debuff look; its tip is the label and time ("bleeding, 37s remaining"), its name the bleeding line's parts joined by ", " then the polarity and action ("bleeding, 37s remaining, 1 HP each 60s, debuff, opens Character"), and it has no ring until `bleeding` carries a duration (never back-computed). Up to six icons show; seven or more show five and a +N disc, on every width. The row sits below the status line and its experience rule, centred, and takes no height while no icon shows; bleeding first, then debuffs, neutral and buffs, each group in condition order, so the threats stay in view ([rulings](../design/status-line-rulings.md)); a hold (a hover or keyboard focus on web) shows the label and time joined by ", " ("fed, 48m remaining"), and an icon's name adds the polarity and the action ("fed, 48m remaining, buff, opens Character"; no polarity for a neutral condition; the disc's hold shows the hidden labels in row order and its name lists them, "+2 more, fed, refreshed, opens Character"). The row adds no announcement: a new condition is read once by its log narration. An arrival behind the disc gets no pop, an icon revealed from behind it appears without the pop, and an icon pushed behind it leaves without the expiry fade, which marks an ending only. While the status line is locked the icons are named pictures, not buttons, dim like the Contents button (the neutral look). A timed icon wears a countdown ring round its disc: a track and an arc for the share of its duration still to run ([look](../../mobile/app/book/StatusIcon.tsx)), clockwise from 12 o'clock, recomputed from projected time; between updates the arc drains linearly to its new share over the real time since the last update, at most 1 s (display only; presentation keeps no gameplay clock), and jumps without motion on first show and on a refresh; under reduced motion it steps; while locked the ring dims with its icon ([look](../../mobile/app/book/StatusIcon.tsx)) and still drains; at its end only the track shows, and a permanent condition has no ring. Each icon is a drawing of what the status is, keyed by its label, to the frame in StatusIcons' doc comment ([look](../../mobile/app/book/StatusIcon.tsx)); a label with no drawing shows its polarity's fallback ([rulings](../design/status-line-rulings.md#below-the-line-smaller-drawn-loka-x6t134)). The presenter reads projected state and never computes or writes an effect, tick or cure; applied, tick and expired lines come from their receipts' narration and appear once. No new control: a cure is the ordinary Eat of a held item whose `cures` lists the condition.
 
 ## Away recap
 
@@ -879,7 +1085,9 @@ One row per mechanic whose Book rendering is a short rule: worn affects, display
 
 ## Levelling details
 
-GameView `levelling` carries `{level, experience, next, unspent}` from [experience and levelling](mechanics.md#experience-and-levelling-toolbox-row-4) (`next` absent at the top level), and `attributes` values already include allocated points, so a spent point reads as the attribute itself ("STR 11"), with no separate line. Everything shows on the Character page; the status line adds nothing. After the ancestry line: "Level 2", or with unspent points "Level 2, 1 point to spend", "Level 2, 2 points to spend" (plural by count). Last line of the resource block, plain like pennies with no band: "xp  30 / 50" (the next threshold), "xp  120" at the top level. Last block before the foot: one Action card per authored attribute, "Raise STR", "Raise CON" and so on, each sending the one offered `raise_attribute` action with that attribute as its input; the cards show only while the action is offered (a point to spend) and go with the last point, never a disabled card. A Raise follows ordinary freshness, pending-save fencing and receipt replay; a pending save shows as the foot's **save not confirmed** line, so the page adds no note of its own. A level-up is the receipt's authored line once in the log, at the end of that step's lines, with no banner; the level line, xp line, attribute values and derived lines change together when the receipt is confirmed. The presenter never counts experience, levels or points.
+The level-up rush is ruled in [level-rush-rulings](../design/level-rush-rulings.md).
+
+GameView `levelling` carries `{level, experience, from, next, unspent, level_up}` from [experience and levelling](mechanics.md#experience-and-levelling-toolbox-row-4) (`from` the threshold of the current level, `next` absent at the top level; the `gained` line is a Log line like the level-up line), and `attributes` values already include allocated points, so a spent point reads as the attribute itself ("STR 11"), with no separate line. Everything shows on the Character page, except the experience rule: a thin rule under the status row, no number and not read aloud (owner, 2026-10-31). It fills on a gain and falls with no flash on a loss. A level, one or more, runs it to full, holds it gilt, then returns it to the new fraction. Reduced motion cuts its width. A launch's first draw does not animate; returning from a page without the status line runs it from the value last drawn. After the ancestry line: "Level 2", or with unspent points "Level 2, 1 point to spend", "Level 2, 2 points to spend" (plural by count). Last line of the resource block, plain like pennies with no band: "xp  30 / 50" (the next threshold), "xp  120" at the top level. Last block before the foot: one Action card per authored attribute, "Raise STR", "Raise CON" and so on, each sending the one offered `raise_attribute` action with that attribute as its input; the cards show only while the action is offered (a point to spend) and go with the last point, never a disabled card. A Raise follows ordinary freshness, pending-save fencing and receipt replay; a pending save shows as the foot's **save not confirmed** line, so the page adds no note of its own. A level-up is the receipt's authored line once in the log, before a `level_reached` reaction's own line, else at the end of that step's lines, with no banner; the level line, xp line, attribute values and derived lines change together when the receipt is confirmed. The presenter never counts experience, levels or points.
 
 ## Lore details
 
@@ -906,6 +1114,71 @@ The GameView may offer these; the Book draws no control for them, on any page:
 Any other World-level action (a door verb or an action with no target) with no control fails the
 Book harness's stranded-verb check, which lists this section (`UNDRAWN_VERBS`).
 
+## Combat hotbar
+
+The Combat page's one fixed strip (owner 2026-11-05, paraphrased: Inked style, fixed at the page's bottom,
+four slots, author order for v1, the list from the last slot, no captions). Its look is the
+[Inked icon style guide](../design/icon-style-guide.md); this section is what it holds and does.
+
+**Why a strip here and cards everywhere else.** The [combat-page decision](../decisions/owner-decision-m6-a-combat-pane-2026-10-04.md)
+put every action in the scroll because a card carries a target and a reason sentence and belongs beside the line
+it answers. A skill or an untargeted spell word has neither: it is the same press every round, and the player's hand
+rests on it while the log grows. So the hotbar is fixed under the scroll on the Combat page only; Stand, Flee, a
+bandage and each foe's **Cast a spell on…** list stay cards in the scroll ([Live combat response](#live-combat-response-m6-a)),
+and no other page gets a strip. The scroll ends above the strip, so its last card and the newest line are never
+under it.
+
+**Slots.** Four, left to right, in the GameView's order (the cartridge's authoring order; configurable later,
+loka-x6t.111). They fill from the player's offered untargeted scripted actions (the GameView `actions` with no
+target that are not the page's own verbs: stand, flee, bandage, cast, look, scan, move), then the untargeted
+learned words of `spell_words`, available or [unavailable](#unavailable-actions) alike (a barred skill keeps its
+place; a vanished one gives it up). The first three take the first three slots; the fourth is the opener. A slot
+with nothing to hold shows the style guide's empty form: not focusable, no name, so the row keeps its positions.
+No skill and no word: no strip (the page is as before the hotbar). An aimed spell (cartridge `aimed`) is never a
+slot: it stays in its target's **Cast a spell on…** list ([Word bar](#word-bar)).
+
+**The opener.** The fourth slot opens the skill and spell list (loka-x6t.110) over the cards as a
+[PickList](../BOOK-UI-COMPONENTS.md): every untargeted skill and spell word, slots included, each in its ActionCard
+form (available, or unavailable with its reason sentence), in the same order. It shares the page's one-open-list
+state, so opening it closes a foe's list and the reverse; it opens at the scroll's end and the page follows it.
+The opener is never barred or cooling; with nothing beyond the three slots it still opens (the list is the
+long form of the strip, with the words the strip omits). Escape or a second press closes it.
+
+**A press.** Ready: sends the slot's invocation as its card would (the scripted action; or the GameView's
+wordless twin of Cast with that word); the receipt's lines land in the log and the page keeps the strip. Barred:
+exposed disabled, still focusable and pressable; the press sends nothing and shows the slot's `reasonSentence`
+once, as an unavailable card does. Cooling: barred until the cooldown ends; the engine refuses an early press
+(action `cooldown`), and the Book never lets one through to be refused.
+
+**Cooldown timing.** The wedge shows the share of the cooldown already elapsed and reaches full ink at the end;
+the presenter keeps no clock and projects from the confirmed view's `time`, as the condition ring does
+(ConditionView `ends_at`, `duration`). The GameView gives the same pair on the slot's entry: an AdvertisedAction or
+SpellWord refused `cooldown` carries `ends_at` and `duration` (kernel_api 1.159, [protocol](protocol.md#gameview);
+the pair is together or absent, and absent when the end would overflow), and CombatView carries the round
+`interval`. The wedge's share is `(time - (ends_at - duration)) / duration`, clamped to 0..1. A cooling entry with
+no pair (the overflow case) shows the barred form with its reason word. The Book never estimates a cooldown from
+the cartridge or from the last press.
+
+**Rounds left (designer, 2026-11-05, loka-x6t.138).** No visible count anywhere: not in the glyph frame (no digit,
+[icon style guide](../design/icon-style-guide.md#grid)), no caption or badge under the slot (owner 2026-11-05: no
+captions), no count on the opener's list rows. The wedge is the slot's only visible clock, read as the condition
+ring is: a share, not a number. The count exists only as the cooling slot's
+`accessibilityValue`: `min` 0, `max` `ceil(duration / interval)`, `now` `ceil((ends_at - time) / interval)`, so a
+screen reader says the slot's name, its reason word and "n of m". A ready slot, a barred slot and a cooling entry
+with no pair carry no value.
+
+**Keyboard and screen reader.** The strip is one group named by its label key (a `LABEL` key, proposed:
+`LABEL.hotbar`), after the scroll's last card in the Tab order; slots left to right; empty slots skipped; Enter or
+Space presses; the opener's list takes Tab, Shift-Tab, Enter, Space and Escape as a PickList does. Each slot is a
+button named by its action's text (the key's words, no caption); a barred or cooling slot adds its reason word
+to the name and exposes disabled, as [unavailable actions](#unavailable-actions) do. A cooldown ending is silent (no
+announcement; the ink is back); a refused press reads its reason sentence once in the polite region, as cards do.
+
+**Word bar and chips.** No chip row in the game-world pane (owner 2026-10-23); the hotbar is the only in-fight
+place a spell word is cast from, and the Skills page's **Spells** section ([Word bar](#word-bar)) is unchanged
+outside a fight. Spell words cast from the hotbar follow the Word bar's send rule; their lines land in the Combat log.
+loka-x6t.69's engaged-state chips are superseded by the hotbar.
+
 ## Word bar
 
 The World page has no Word block (owner, mvl9qy5ut2x2). Saying is never a chip row (owner,
@@ -914,16 +1187,18 @@ while the GameView offers `say` or `shout` (owner, loka-evzt 2026-10-30, paraphr
 conversation icon until the online Realm). Whisper is hidden on every page until loka-x6t.115
 (owner pick mvlrlvappy4w, 2026-10-23).
 
-A spell word is cast from the Character page. While `cast` is offered, its **Spells** section
+A spell word is cast from the Skills page. While `cast` is offered, its **Spells** section
 (under that section title) lists each learned untargeted spell word of the GameView's
 `spell_words` as an [ActionCard](../BOOK-UI-COMPONENTS.md) `word, cast` (`lux, cast`), the
 castable ones first, then each refused one in its [unavailable](#unavailable-actions) form; an
 unlearned word is never listed; no word, no Spells section. A press sends the GameView's wordless
 twin of Cast with that word; an accepted cast turns to World, where its line lands
-([Line placement](#line-placement)), as an aimed pick does; a refused press stays on Character.
+([Line placement](#line-placement)), as an aimed pick does; a refused press stays on Skills.
 An aimed spell (cartridge `aimed`, loka-x6t.109) is never a Spells line: the GameView offers it
 on each admitted target's entry (`command: cast`, `target_ids: [target]`) and the Book lists it in
 that page's **Cast a spell…** pick list ([World](#world-and-status-entry), owner 2026-10-23).
+In a fight the same untargeted words also fill the [Combat hotbar](#combat-hotbar)'s slots and its
+opener's list, with the same send; the Skills page's section is unchanged.
 
 The one-word field ([SayField](../../mobile/app/book/SayField.tsx)) is kept, with no opener, for
 the Realm's room speech; its rules (sends, the bad-word Note, chips that only fill, closing) are
@@ -938,6 +1213,8 @@ word anywhere; only its writer sees it.
 
 ## Skill tree details
 
-Skills without a profession draw one line each: the label, then " — learned" with no requirement, or while its projected `qualified` is false " — learned, unqualified. <requirement>" (pass-1 H3). After the xp line and before the Raise cards, each profession in first-listed order is a SectionTitle, then its listed boxes in GameView order: acquired as body text "Whittling, level 2 — learned" (", level N" only when projected; no requirement: a qualified learned box has nothing left to meet) or, while its projected `qualified` is false, "Whittling, level 2 — learned, unqualified. <requirement>" (pass-1 H3); an NPC's teach card for a learned skill is the GameView's unavailable action and draws as an [unavailable card](#unavailable-actions), never dropped (pass-1 R2); locked as a Note "Carving — locked. <requirement>"; any other unacquired box as a Note "Joinery — not learned. <requirement>" (the same Note). The Book draws only listed skills: a hidden box and an empty profession draw nothing. After the Raise cards comes the [Spells](#word-bar) section, while a spell word is refused.
+On the Skills page, skills without a profession draw one line each: the label, then " — learned" with no requirement, or while its projected `qualified` is false " — learned, unqualified. <requirement>" (pass-1 H3). After them, each profession in first-listed order is a SectionTitle, then its listed boxes in GameView order: acquired as body text "Whittling, level 2 — learned" (", level N" only when projected; no requirement: a qualified learned box has nothing left to meet) or, while its projected `qualified` is false, "Whittling, level 2 — learned, unqualified. <requirement>" (pass-1 H3); an NPC's teach card for a learned skill is the GameView's unavailable action and draws as an [unavailable card](#unavailable-actions), never dropped (pass-1 R2); locked as a Note "Carving — locked. <requirement>"; any other unacquired box as a Note "Joinery — not learned. <requirement>" (the same Note). The Book draws only listed skills: a hidden box and an empty profession draw nothing. After the professions comes the [Spells](#word-bar) section, when the Word bar draws one. With no skill, profession or Spells section the page draws one Note, the same line Character draws when nothing is known. It opens from Contents, returns as Journal does and draws no status line; the status icon still opens Character.
+
+A row with a projected `rank` reads "<label> — <rank label>" in place of ", level N". One skill says one line per reply. Taught: its `learned`, else its rank's `reached`, else "You learn X." A rise on a taught skill: its rank's `reached`, else "Your X improves." A rise on an untaught skill: its rank's `reached`, else nothing. A skill first shown untaught says nothing. The sound follows the line.
 
 An NPC's lesson line names the teacher while the skill is open to learn: "Aldous teaches Blade." while its projected `qualified` is true, else "Aldous teaches Blade. <requirement>". A locked skill reads "You cannot learn Blade yet. <requirement>"; a learned one "You know Blade." with no requirement (nothing is left to meet, pass-2), or while unqualified "You know Blade but cannot use it yet. <requirement>"; the reply that taught it adds the narrated event "You learn Blade." in place (loka-x6t.24; second-person prose, never a colon label, loka-lsqi).

@@ -65,7 +65,7 @@ session, `mise exec -- npm run storybook:lan` serves every interface, so a phone
 opens `http://<this computer's LAN address>:6006` (and reaches `/mcp` too). The toolbar picks the
 palette and a phone viewport. `mise exec -- npm run storybook:smoke` type-checks, builds and runs
 every story headless (render, play function, axe at error level); CI runs it in `book-e2e.yml`
-([checks](CHECKS.md)). Install its browser once with `mise exec -- npx playwright install chromium`.
+([checks](CHECKS.md)). It and the other Storybook scripts launch the installed stable Google Chrome (Playwright's `chrome` channel), not Playwright's bundled Chromium, which lags Chrome's security fixes; without Chrome, install it from google.com/chrome or with `mise exec -- npx playwright install chrome`.
 The `Live` stories run the real Book over the local authority, restored from a checkpoint save
 (`stories/routes.ts`, written by `npm run stories:views`); they need the dev server's isolation
 headers (and a secure context: `localhost`, not a LAN address), so the smoke skips them. `mise exec -- npm run storybook:live` starts a dev server on a free

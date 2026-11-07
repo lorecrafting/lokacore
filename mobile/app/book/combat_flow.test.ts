@@ -1,11 +1,16 @@
 // Combat narration and encounter lifecycle over controlled Book boundary inputs (the harness:
-// __tests__/combat-book.test.ts).
+// __tests__/mounted.ts).
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import type { Game, GameView } from '../../packages/game-view/session.ts';
-import { Book, game, nodes, view, words } from './__tests__/combat-book.test.ts';
-import { CONTENTS, control } from './__tests__/control.test.ts';
+import type { Game } from '../../packages/game-view/session.ts';
+import { game, view } from './__tests__/combat-book.test.ts';
+import { CONTENTS } from './__tests__/control.test.ts';
+import { logMark } from './logs.ts';
 import { presenter } from './presenter.ts';
+import { validate } from '../../authority/local-story/__tests__/validate.ts';
+import { mounted } from './__tests__/mounted.ts';
+
+const TITLE = 'You attack a marsh rat!';
 
 // Break: a dead combat opponent is narrated both as killed and as leaving the room.
 test('committed opponent death narrates once through the existing subscription', () => {
@@ -44,132 +49,103 @@ test('committed opponent death narrates once through the existing subscription',
   assert.deepEqual(p.screen().log, ['The bell rings.', 'The marsh rat falls.', 'A door creaks.']);
 });
 
-// Real Book state/effect routing over controlled committed Game projections; no native layout claim.
-function mounted(initial: GameView, recovered?: ReturnType<Game['lastNarration']>) {
-  let current = initial,
-    revision = 1,
-    last = recovered,
-    pending = false;
-  let respond: () => any = () => ({ kind: 'stale_view' });
-  let listener: ((event: any) => void) | undefined;
-  const state: any[] = [],
-    effects: (() => void)[] = [];
-  let slot = 0;
-  const projection = () => ({ view: current, token: `view:${revision}` });
-  const g: Game = {
-    ...game(initial),
-    view: projection,
+// Breaks: a round's miss comes on the clock with no press, and its whisper never reaches the cues.
+test('a round on the clock hands its miss to the cues', () => {
+  let current = view(),
+    token = 'view:1';
+  let last: ReturnType<Game['lastNarration']>;
+  const p = presenter({
+    ...game(current),
+    view: () => ({ view: current, token }),
     lastNarration: () => last,
-    text: (key) =>
-      ({
-        'room.title': 'The cellar',
-        'road.title': 'The road',
-        'shrine.title': 'The shrine',
-        'npc.rat': 'a marsh rat',
-        'combat.hit': 'You strike the marsh rat.',
-        'combat.result': 'The marsh rat falls.',
-        'combat.flee': 'You escape to the road.',
-        'combat.death': 'You wake at the shrine.',
-        'road.crows': 'Crows lift off the road.',
-      })[key],
-    invoke: () => respond(),
-    pending: () => pending,
-    pendingInvocation: () => (pending ? 'reservation' : undefined),
-    subscribe: (f) => (
-      (listener = f),
-      f({ kind: 'state', projection: projection(), status: { kind: 'ready' } }),
-      () => {
-        listener = undefined;
-      }
-    ),
+  });
+  const round = (record: object) => {
+    last = record as never;
+    token += '+';
+    p.update({ kind: 'state', projection: { view: current, token }, status: { kind: 'ready' } });
   };
-  (globalThis as any)[Symbol.for('combat-state')] = (initial: any) => {
-    const i = slot++;
-    if (!(i in state)) state[i] = typeof initial === 'function' ? initial() : initial;
-    return [
-      state[i],
-      (next: any) => {
-        state[i] = typeof next === 'function' ? next(state[i]) : next;
-      },
-    ];
+  round({ command_id: 'hit', lines: [] });
+  assert.equal(p.screen().deed, undefined);
+  const miss = { command_id: 'miss', lines: [], missed: true };
+  round(miss);
+  assert.equal(p.screen().deed, miss);
+});
+
+// Breaks: two rounds' lines run together on the Combat page, or one round splits (book-ui.md,
+// Live combat response).
+test('each round on the clock begins its own block of the combat log', () => {
+  let current = view(),
+    token = 'view:1';
+  let last: ReturnType<Game['lastNarration']>;
+  const p = presenter({
+    ...game(current),
+    text: (key) => ({ 'combat.a': 'A.', 'combat.b': 'B.' })[key],
+    view: () => ({ view: current, token }),
+    lastNarration: () => last,
+  });
+  const round = (command_id: string) => {
+    last = {
+      command_id,
+      lines: [{ key: 'combat.a' }, { key: 'combat.b' }],
+      combat_lines: [0, 1],
+    } as never;
+    token += '+';
+    p.update({ kind: 'state', projection: { view: current, token }, status: { kind: 'ready' } });
+    p.update({ kind: 'state', projection: { view: current, token }, status: { kind: 'ready' } });
   };
-  (globalThis as any)[Symbol.for('combat-effect')] = (f: () => any, deps: any[]) => {
-    const i = slot++,
-      before = state[i];
-    if (before && deps.every((d, j) => Object.is(d, before.deps[j]))) return;
-    effects.push(() => {
-      before?.cleanup?.();
-      state[i] = { deps, cleanup: f() };
-    });
-  };
-  const draw = () => {
-    slot = 0;
-    const root = Book({
-      game: g,
-      shell: { confirm: (f) => f(), learned: { get: () => true } as never },
-      startOver: () => undefined,
-    });
-    effects.splice(0).forEach((f) => f());
-    return nodes(root);
-  };
-  const texts = () =>
-    draw()
-      .filter((n) => n.type === 'Text')
-      .map(words);
-  return {
-    texts,
-    footer: () => draw().some((n) => n.type?.name === 'Footer'),
-    tap: (shown: string | RegExp) => control(draw(), shown).props.onPress(),
-    // `fight`: a line told before `line`, the room reached's arrival (loka-glj8).
-    publish: (next: GameView, line?: string, fight?: string) => {
-      current = next;
-      revision++;
-      if (line)
-        last = {
-          command_id: `commit-${revision}`,
-          lines: [...(fight ? [{ key: fight }] : []), { key: line }],
-          combat_lines: fight ? [0, 1] : [0],
-          ...(fight && { arrival: 1 }),
-        } as never;
-      listener?.({ kind: 'state', projection: projection(), status: { kind: 'ready' } });
-    },
-    answer: (reply: any, next = current, line?: string, ambient?: string, arrival?: number) => {
-      respond = () => {
-        current = next;
-        revision++;
-        pending = reply.kind === 'pending';
-        if (line)
-          last = {
-            command_id: `commit-${revision}`,
-            lines: [{ key: line }, ...(ambient ? [{ key: ambient }] : [])],
-            combat_lines: [0],
-            ...(arrival && { arrival }),
-          } as never;
-        return reply;
-      };
-    },
-    close: () => state.forEach((s) => s?.cleanup?.()),
-  };
-}
+  round('one');
+  round('two');
+  const lines = p.screen().combatLog;
+  assert.deepEqual(lines, ['A.', 'B.', 'A.', 'B.']);
+  // The one boundary inside the log: between the rounds, none within one.
+  assert.deepEqual(
+    logMark(lines).rounds.filter((n) => n < lines.length),
+    [2],
+  );
+});
+
+// Breaks: a death that closes no fight (bled out on the clock) shows an earlier fight's closed page,
+// or its Back to World, instead of the dead page (book-ui.md, Dead page).
+test('a death after a closed fight shows the dead page, not the closed fight', () => {
+  const rat = { encounter_id: 'fight', opponent_id: 'rat', name: 'npc.rat', interval: 150 };
+  const h = mounted(view({ combat: undefined }));
+  try {
+    h.publish(
+      view({ combat: { ...rat, active_opponents: [{ id: 'rat', name: 'npc.rat' }] } }),
+      'combat.hit',
+    );
+    assert.ok(h.texts().includes(TITLE));
+    h.publish(view({ combat: undefined }), 'combat.result');
+    assert.ok(h.texts().includes('Back to World'));
+    h.die(view({ combat: undefined }), ['bleed.tick', 'death.fell', 'combat.death']);
+    const t = h.texts();
+    assert.ok(t.includes('You wake at the shrine.') && t.includes('Let go'));
+    assert.equal(t.includes('Back to World') || t.includes(TITLE), false);
+    h.tap('Let go');
+    assert.equal(h.texts().includes(TITLE), false);
+  } finally {
+    h.close();
+  }
+});
 
 // Breaks: a closure jumps straight to the World (its closing lines unseen), the ended page keeps
 // action cards, the footer or an open status line, or Back to World leaves the Combat page.
-test('confirmed encounter foregrounds another page; closure keeps Combat until Back to World', () => {
+test('confirmed encounter foregrounds another page; closure keeps Combat until its foot', () => {
   for (const ending of ['closed', 'opponent_dead', 'player_dead']) {
     const h = mounted(view({ combat: undefined }));
     try {
       h.tap(CONTENTS);
       h.tap('Settings');
       assert.ok(h.texts().includes('Settings'));
-      const rat = { encounter_id: 'fight', opponent_id: 'rat', name: 'npc.rat' };
+      const rat = { encounter_id: 'fight', opponent_id: 'rat', name: 'npc.rat', interval: 150 };
       h.publish(
         view({ combat: { ...rat, active_opponents: [{ id: 'rat', name: 'npc.rat' }] } }),
         'combat.hit',
       );
-      assert.ok(h.texts().includes('Combat'));
+      assert.ok(h.texts().includes(TITLE));
       assert.ok(h.texts().includes('You strike the marsh rat.'));
       assert.equal(h.texts().includes('Back to World'), false); // a live encounter has no foot
-      assert.ok(h.texts().includes('a marsh rat (your target)'));
+      assert.ok(!h.texts().some((t) => t.startsWith('a marsh rat')), 'no foe line (loka-kgd.204)');
       assert.equal(h.texts().includes('Settings'), false);
       h.publish(
         view({
@@ -193,20 +169,22 @@ test('confirmed encounter foregrounds another page; closure keeps Combat until B
         ending === 'player_dead' ? 'combat.hit' : undefined,
       );
       const ended = h.texts();
-      assert.ok(ended.includes('Combat') && ended.includes('a marsh rat'), ending);
-      assert.equal(ended.includes('a marsh rat (your target)'), false); // nothing is left to aim at
+      assert.ok(ended.includes(TITLE) && !ended.some((t) => t.startsWith('a marsh rat')), ending);
       if (ending !== 'closed')
         assert.ok(
           ended.includes(
             ending === 'player_dead' ? 'You wake at the shrine.' : 'The marsh rat falls.',
           ),
         );
-      assert.equal(ended.filter((t) => t === 'Back to World').length, 1);
+      // A death's page closes on Let go alone, a fight's on Back to World (book-ui.md, Falling).
+      const [foot, not] =
+        ending === 'player_dead' ? ['Let go', 'Back to World'] : ['Back to World', 'Let go'];
+      assert.equal(ended.filter((t) => t === foot).length, 1, ending);
       assert.equal(h.footer(), false);
-      for (const shut of [CONTENTS, 'sitting', 'Stand', 'Flee'])
+      for (const shut of [CONTENTS, 'sitting', 'Stand', 'Flee', not])
         assert.throws(() => h.tap(shut), undefined, `${ending}: ${shut}`);
-      h.tap('Back to World');
-      assert.equal(h.texts().includes('Combat'), false);
+      h.tap(foot);
+      assert.equal(h.texts().includes(TITLE), false);
       // The fight's lines stay in the room log; a death's room change clears the cellar's, and
       // its own receipt's fight lines stay on the Combat page: the shrine opens at woke (loka-glj8).
       const kept = {
@@ -251,15 +229,15 @@ test('Attack opens its committed page; pending and refused Flee stay until commi
     h.tap('A marsh rat');
     h.answer(accepted('attacked', 'combat.hit'), fighting, 'combat.hit');
     h.tap('Attack a marsh rat');
-    assert.ok(h.texts().includes('Combat'));
+    assert.ok(h.texts().includes(TITLE));
     assert.equal(h.texts().filter((s) => s === 'You strike the marsh rat.').length, 1);
     h.answer({ kind: 'pending' });
     h.tap('Flee');
-    assert.ok(h.texts().includes('Combat'));
+    assert.ok(h.texts().includes(TITLE));
     assert.ok(h.texts().includes('save not confirmed'));
     h.answer({ kind: 'saved', decision: { kind: 'rejected', error: { code: 'exit_locked' } } });
     h.tap('Flee');
-    assert.ok(h.texts().includes('Combat'));
+    assert.ok(h.texts().includes(TITLE));
     assert.ok(h.texts().includes("You can't do that—locked."));
     const road = view({
       combat: undefined,
@@ -269,7 +247,7 @@ test('Attack opens its committed page; pending and refused Flee stay until commi
     // lands in the World log instead of the ended Combat page (book-ui.md, Closure).
     h.answer(accepted('fled', 'combat.flee'), road, 'combat.flee', 'road.crows', 1);
     h.tap('Flee');
-    assert.ok(h.texts().includes('Combat'));
+    assert.ok(h.texts().includes(TITLE));
     const shown = h.texts();
     const escape = shown.indexOf('You escape to the road.');
     assert.ok(
@@ -277,7 +255,7 @@ test('Attack opens its committed page; pending and refused Flee stay until commi
       JSON.stringify(shown),
     );
     h.tap('Back to World');
-    assert.equal(h.texts().includes('Combat'), false);
+    assert.equal(h.texts().includes(TITLE), false);
     assert.ok(h.texts().includes('The road'));
     // Break (loka-glj8): the flight's line leaves the fight room's page for the road; the road's
     // room log opens at its arrival line (here the crows); the cellar's lines went with its room.
@@ -298,7 +276,7 @@ test('reopening an encounter restores the combat page and last committed narrati
     combat_lines: [0],
   } as never);
   try {
-    assert.ok(h.texts().includes('Combat'));
+    assert.ok(h.texts().includes(TITLE));
     assert.equal(h.texts().filter((s) => s === 'You strike the marsh rat.').length, 1);
   } finally {
     h.close();
@@ -316,7 +294,7 @@ test('reopening after escape or either death never restores combat into the Worl
     } as never);
     try {
       assert.ok(h.texts().includes('The cellar'));
-      assert.equal(h.texts().includes('Combat'), false, key);
+      assert.equal(h.texts().includes(TITLE), false, key);
       assert.equal(
         h
           .texts()
@@ -404,4 +382,111 @@ test('a flight into another fight opens the room log at its arrival line', () =>
     p.screen().log.filter((l) => l.includes('south')),
     ['You run in from the south.'],
   );
+});
+
+// Breaks (book-ui.md, Spirit state): Rise works before zero or comes on its own, the revival lines
+// lose their pace, the waking line shows (or is read) before the rise or out of order, focus is
+// pulled to the card at zero or lost from it, its seconds left missing on the web, catching up
+// draws the bottom row, or a fault, encounter, scene or chapter arriving leaves the spirit state up.
+test('a death with revival lands in the spirit state until Rise', () => {
+  const clock = Date.now;
+  let now = 0;
+  Date.now = () => now;
+  const shrine = {
+    combat: undefined,
+    place: {
+      id: 'shrine',
+      title: { key: 'shrine.title' },
+      description: { key: 'shrine.description' },
+    },
+    revival: { lines: ['rev.1', 'rev.2', 'rev.3'], seconds: 10 },
+  };
+  const id = '00000000-0000-4000-8000-000000000000'; // the harness's ids are not schema ids
+  const { combat: _, ...wire } = view({
+    ...shrine,
+    actor_id: id,
+    place: { ...shrine.place, id },
+    entities: [{ id, kind: 'npc', name: 'npc.rat', actions: [] }],
+  });
+  assert.deepEqual(validate('GameView', wire), []);
+  const rat = { encounter_id: 'fight', opponent_id: 'rat', name: 'npc.rat', interval: 150 };
+  const died = () => {
+    const h = mounted(view({ combat: undefined }));
+    h.texts(); // mounts the subscription
+    h.publish(
+      view({ combat: { ...rat, active_opponents: [{ id: 'rat', name: 'npc.rat' }] } }),
+      'combat.hit',
+    );
+    assert.ok(h.texts().includes(TITLE));
+    h.publish(view(shrine), 'combat.death', 'combat.hit');
+    assert.doesNotMatch(h.said(), /wake/); // read once, at the rise
+    now = 0;
+    h.tap('Let go');
+    return h;
+  };
+  const shown = (h: ReturnType<typeof mounted>) =>
+    h.texts().filter((t) => ['Dark.', 'A bell.', 'Breath.', 'You wake at the shrine.'].includes(t));
+  try {
+    const h = died();
+    assert.deepEqual(shown(h), ['Dark.']);
+    assert.equal(h.footer(), false); // the bottom row is not drawn
+    assert.throws(() => h.tap('Rise')); // the unavailable form until zero
+    now = 4999;
+    assert.deepEqual(shown(h), ['Dark.']);
+    now = 5000;
+    assert.deepEqual(shown(h), ['Dark.', 'A bell.']);
+    now = 9999;
+    assert.throws(() => h.tap('Rise'));
+    const card = (e: typeof h) => e.node((n) => n.props?.accessibilityLabel === 'Rise').props;
+    const waiting = card(h);
+    waiting.onFocus(); // the reader sits on the waiting card
+    const attrs: Record<string, string> = {}; // on the web the seconds left are its description
+    waiting.ref({ setAttribute: (k: string, v: string) => (attrs[k] = v) });
+    assert.equal(attrs['aria-description'], '1 second');
+    assert.deepEqual(shown(h), ['Dark.', 'A bell.']);
+    now = 60_000; // no rise at zero
+    assert.deepEqual(shown(h), ['Dark.', 'A bell.', 'Breath.']);
+    waiting.onBlur(); // the waiting card leaves at zero: not a move away
+    let focused = 0; // the card is new at zero: focus held on it moves to it, once
+    const ready = (e: typeof h) => e.control('Rise').props.ref({ focus: () => focused++ });
+    [1, 2].forEach(() => ready(h));
+    assert.equal(focused, 1);
+    h.tap('Rise');
+    assert.equal(h.said(), 'You wake at the shrine.');
+    assert.deepEqual(shown(h), ['Dark.', 'A bell.', 'Breath.', 'You wake at the shrine.']);
+    assert.equal(h.texts().includes('Rise'), false);
+    assert.notEqual(h.footer(), false); // it returns at the rise
+    h.close();
+    const elsewhere = died(); // focus moved off the card: zero moves none
+    card(elsewhere).onFocus();
+    card(elsewhere).onBlur();
+    now = 60_000;
+    ready(elsewhere);
+    assert.equal(focused, 1);
+    elsewhere.close();
+    for (const [end, extra] of Object.entries({
+      combat: { combat: { ...rat, active_opponents: [{ id: 'rat', name: 'npc.rat' }] } },
+      scene: { scene: { index: 1, line: 'road.crows' } },
+      chapter: { chapter: { index: 1, title: 'chapter.first' } },
+    })) {
+      const e = died();
+      e.publish(view({ ...shrine, ...extra }));
+      e.publish(view(shrine)); // and ends: the World page again
+      if (end !== 'scene') e.tap('Back to World'); // the ended fight's or the chapter's page
+      assert.ok(shown(e).includes('You wake at the shrine.'), end);
+      assert.equal(e.texts().includes('Rise'), false, end);
+      e.close();
+    }
+    const caught = died();
+    caught.publish(view(shrine), undefined, undefined, { kind: 'catching_up' });
+    assert.equal(caught.footer(), false); // catching up keeps the spirit layout
+    assert.ok(caught.texts().includes('Rise'));
+    caught.publish(view(shrine), undefined, undefined, { kind: 'fault', code: 'x' });
+    assert.ok(shown(caught).includes('You wake at the shrine.')); // a fault ends it
+    assert.equal(caught.texts().includes('Rise'), false);
+    assert.notEqual(caught.footer(), false);
+    caught.close();
+  } finally {
+    Date.now = clock;
+  }
 });

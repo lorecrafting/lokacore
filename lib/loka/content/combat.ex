@@ -18,9 +18,8 @@ defmodule Loka.Content.Combat do
   defp put_ref(settings, path, f),
     do: if(get_in(settings, path), do: update_in(settings, path, f), else: settings)
 
-  @spec check(map() | nil, map(), {term(), map()}, {term(), map() | :unknown} | nil) :: [map()]
+  @spec check(map() | nil, map(), {term(), map()}, {term(), map() | :unknown}) :: [map()]
   def check(nil, _, _, _), do: []
-  def check(_, _, _, nil), do: []
 
   def check(m, defs, {_, settings}, {_, text}) do
     combat = get_in(settings, ["world", "combat"])
@@ -41,7 +40,37 @@ defmodule Loka.Content.Combat do
     if(get_in(settings, ["world", "death"]), do: [], else: [bad("cartridge.world.death")]) ++
       requirements(m) ++
       profile(combat["player_attack"], "cartridge.world.combat.player_attack") ++
-      narration(combat, text)
+      narration(combat, text) ++
+      cuts("tiers", combat["tiers"] || [], text) ++
+      cuts("conditions", combat["conditions"] || [], text)
+  end
+
+  # Diku rounds: each tier's or condition's keys resolve, and its cut falls strictly below the one before.
+  defp cuts(field, rows, text) do
+    path = ["world", "combat", field]
+
+    for {row, i} <- Enum.with_index(rows),
+        d <- unresolved(row, path ++ [i], text) ++ unordered(rows, row, i, path),
+        do: d
+  end
+
+  defp unresolved(_row, _path, :unknown), do: []
+
+  defp unresolved(row, path, text) do
+    for {f, key} <- Map.delete(row, "at_percent"), not is_map_key(text, key) do
+      diag("UNRESOLVED_REFERENCE", at("cartridge.json", path ++ [f]), %{"target" => key})
+    end
+  end
+
+  defp unordered(rows, row, i, path) do
+    if i > 0 and row["at_percent"] >= Enum.at(rows, i - 1)["at_percent"],
+      do: [
+        diag("SCHEMA_VIOLATION", at("cartridge.json", path ++ [i, "at_percent"]), %{
+          "error" => "invalid_value",
+          "why" => "tiers_unordered"
+        })
+      ],
+      else: []
   end
 
   # Toolbox row 6b: each ally is an authored NPC with an attack; allies need their narration.
@@ -66,11 +95,17 @@ defmodule Loka.Content.Combat do
         do: bad(at("cartridge.json", path ++ ["narration", field]))
       )
 
+  # An ally only strikes the opponent, so its engage line never plays (loka-w9id).
   defp ally({_, _, %{"attack" => _} = npc}, path),
-    do: if(npc["spawn_template"], do: [bad(path)], else: [])
+    do: engage_unused(npc, path) ++ if(npc["spawn_template"], do: [bad(path)], else: [])
 
   defp ally({_, _, _}, path), do: [bad(path)]
   defp ally(_, _), do: []
+
+  defp engage_unused(%{"disposition" => %{"engage" => _}}, path),
+    do: [Map.put(diag("ALLY_ENGAGE_UNUSED", path, %{}), "severity", "warning")]
+
+  defp engage_unused(_, _), do: []
 
   # Toolbox rows G8 and 22a: the group's member, stay and fight facts are bool pair facts;
   # members strike as allies, so combat needs the ally
@@ -129,14 +164,28 @@ defmodule Loka.Content.Combat do
   # Toolbox row 17: a ranged weapon names a known ammo pool, and its shots need their narration.
   defp shots(combat, m, defs) do
     ranged =
-      for {_, {rel, _, %{"weapon" => %{"ranged" => r}}}} <- defs["item"] || %{}, do: {rel, r}
+      for {_, {rel, _, %{"weapon" => %{"ranged" => r} = w}}} <- defs["item"] || %{},
+          do: {rel, r, w["attack"]}
 
     for(
-      {rel, r} <- ranged,
-      error <- reference(rel, ["weapon", "ranged"], {"ammo", "resource"}, r, m, defs),
+      {rel, r, attack} <- ranged,
+      error <-
+        reference(rel, ["weapon", "ranged"], {"ammo", "resource"}, r, m, defs) ++
+          one_shot(rel, attack),
       do: error
     ) ++ if(ranged == [], do: [], else: ranged_requirements(combat))
   end
+
+  # Swings (loka-kgd.200): a shot is one swing; its ammo and lines tell one blow.
+  defp one_shot(rel, %{"attacks" => n}) when n > 1,
+    do: [
+      diag("SCHEMA_VIOLATION", at(rel, ["weapon", "attack", "attacks"]), %{
+        "error" => "invalid_value",
+        "why" => "ranged_swings"
+      })
+    ]
+
+  defp one_shot(_, _), do: []
 
   defp ranged_requirements(combat) do
     for(
@@ -196,8 +245,14 @@ defmodule Loka.Content.Combat do
 
   defp credit_npc(c, path, m, defs) do
     case resolve(c["npc"], "npc", m, defs) do
-      {_, _, n} ->
-        if(n["attack"], do: [], else: [bad(at("cartridge.json", path ++ ["npc"]))]) ++
+      {rel, _, n} ->
+        npc_at = at("cartridge.json", path ++ ["npc"])
+
+        if(n["attack"], do: [], else: [bad(npc_at)]) ++
+          if(n["unattackable"],
+            do: [Loka.Content.Standing.unattackable_foe(npc_at, rel)],
+            else: []
+          ) ++
           if(not is_tuple(resolve(c["room"], "room", m, defs)) or n["room"] == c["room"],
             do: [],
             else: [bad(at("cartridge.json", path ++ ["room"]))]

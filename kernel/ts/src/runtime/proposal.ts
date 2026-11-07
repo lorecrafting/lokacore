@@ -1,6 +1,6 @@
 import { enteredActors, knowledgeLast, record } from '../mechanics/knowledge/shared.ts';
 import { vary } from '../mechanics/alternates.ts';
-// size: allow 346, typed quest reactions, deadline pairing and group merging share FIFO admission
+// size: allow 361, typed quest reactions, deadline pairing and group merging share FIFO admission; ambient lines read the advanced state
 // Proposal admission, FIFO composition and adoption (04 §5.1-§5.4); runtime/world.ts routes commands here.
 import { populationDeadlinePairs } from './proposal_deadlines.ts';
 import { apply } from './apply.ts';
@@ -17,9 +17,11 @@ import { allocator, event, type Mint, type Steps, type World } from './decision.
 import { factChanged, type Base } from '../mechanics/fact.ts';
 import { jobCommandId } from '../foundation/id_source.ts';
 import { begun, earned, stamp } from '../mechanics/quest/lifecycle.ts';
-import { diedAfter, sequence, triggered } from '../mechanics/reaction.ts';
-import { oneWrite } from '../mechanics/levelling/shared.ts';
-import { closing } from '../mechanics/death/lines.ts';
+import { sequence, triggered } from '../mechanics/reaction.ts';
+import { levelsReached, oneWrite, quiet } from '../mechanics/levelling/shared.ts';
+import { poolWriters } from '../mechanics/resource.ts';
+import { partings } from '../mechanics/escort/shared.ts';
+import { closing, say } from '../mechanics/death/lines.ts';
 import * as schedule from '../mechanics/schedule/rule.ts';
 import { cmp } from '../foundation/validate.ts';
 import { currentRound } from '../mechanics/combat/round.ts';
@@ -27,11 +29,12 @@ import { handoffGroup, sightHandoff } from './proposal_sight.ts';
 import { joinEarlier, joinTail, queueHour, queueScheduled, type Due } from './proposal_hours.ts';
 import { merge, statusGroup, unsaid } from '../mechanics/status/job.ts';
 import { moverGroups } from '../mechanics/containment/job.ts';
-import { farewell } from './proposal_farewell.ts';
+import { closedByOpener, farewell } from './proposal_farewell.ts';
 import { admit, type Admitted } from './proposal_admit.ts';
 export { admit, ownerOf, type Admitted } from './proposal_admit.ts';
 import { deathCredit } from '../mechanics/combat/credit.ts';
 import { dropped as crowDrop, taken as crowTake } from '../mechanics/crow/behavior.ts';
+import { ambient } from '../mechanics/emote/ambient.ts';
 
 // limit: a budget_exceeded fault's exhausted limit, a side value never in the result (04 §5.4).
 export { adopt, type Stepped } from './proposal_adopt.ts';
@@ -55,7 +58,9 @@ type P = {
   applied: number;
   rng: World['state']['rng'];
   narration: Text[];
-  holders: Map<string, number>; // each status holder's, reaction fact row's writer group (G3)
+  levelAt?: number; // the narration's length when a rule answering the actor's level_reached first spoke
+  wokeAt?: number; // the narration's length when the first player's entity_died was delivered
+  holders: Map<string, number>; // each status holder's, reaction fact row's, written pool's writer group
   // Each item the root command moved: its writer group (hs-1). ponytail: merge and joinEarlier do
   // not relabel it; pass it to their maps once a root command both moves an item and advances time.
   roots: ReadonlyMap<string, number>;
@@ -66,7 +71,7 @@ export const BUDGET = { kind: 'fault', code: 'budget_exceeded' } as Admitted;
  * Each sequence gets one writer group; event positions are global, allocators causal.
  * now() lazily applies the prefix and retains hydration/RNG for real later consumers.
  */
-// size: allow 41, root, jobs and deliveries compose in one place; hs-1 adds the root moves' groups
+// size: allow 42, root, jobs and deliveries compose in one place; hs-1 adds the root moves' groups; ambient lines follow the closing
 export function propose(
   world: World,
   root: Admitted,
@@ -94,10 +99,11 @@ export function propose(
   };
   const base = { ...cause(p, world.state.clock, command.id), actor_id: command.payload.actor_id };
   let failed = join(p, root.delta.ops, root.events, base, 0, mint) ?? react(p) ?? jobs(p, root);
-  failed ??= farewell(p, () => now(p));
+  const told: Text[] = [];
+  failed ??= farewell(p, () => now(p)) ?? parting(p) ?? ambience(p, told);
   if (failed) return { decision: failed, ...(p.limit && { limit: p.limit }) };
   const ops = oneWrite(p.ops);
-  p.narration = closing(world, command.payload.actor_id, ops, p.events, p.narration);
+  p.narration = [...closing(world, command.payload.actor_id, quiet(command, ops), p), ...told];
   return {
     decision: {
       ...root,
@@ -109,8 +115,32 @@ export function propose(
   };
 }
 
-// The proposal so far, composed lazily (only a job, a delivery or an acquisition's quests read
-// it), or its fault. After the advance, the rest composes from the base clock with the advance
+// Last, on the final state: the decision's own writes (a death, a mover, a quest end) may part a
+// following escort (escort@1), and no later command can then fault on it. Only rows already
+// following: a start or Rejoin in this decision wrote its row, so the next decision's sweep parts it.
+function parting(p: P): Admitted | undefined {
+  const held = Object.values(p.world.state.escorts ?? {}).flatMap((e) =>
+    e?.status === 'following' ? [e.actor_id] : [],
+  );
+  // Composing here would name a lazy limit before adopt's whole-proposal order (04 §5.4).
+  if (!held.length) return;
+  const at = now(p);
+  if (!('cartridge' in at)) return at;
+  p.ops.push(...partings(at, held, ++p.group));
+}
+
+// emote@1's ambient lines on the advanced state (mechanics.md#ambient-emotes); none compose without it.
+function ambience(p: P, told: Text[]): Admitted | undefined {
+  if (!p.world.cartridge.lock.capabilities.emote) return;
+  if (!p.ops.some((o) => o.op === 'time.advance')) return;
+  const at = now(p);
+  if (!('cartridge' in at)) return at;
+  const { actor_id } = p.command.payload;
+  told.push(...ambient(at, actor_id, p.world.state.clock, at.state.clock, p.steps));
+}
+
+// The proposal so far, composed lazily (only a job, a delivery, an acquisition's quests or a held
+// escort read it), or its fault. After the advance, the rest composes from the base clock with the advance
 // replayed, so a job's op `at` its due time lies inside the advance; a write conflicting with an
 // earlier slice still faults only in adopt.
 function now(p: P): World | Admitted {
@@ -144,7 +174,7 @@ function join(
   const earns = p.world.cartridge.quests && evs.some((e) => e.payload.type === 'item_acquired');
   const before = earns ? now(p) : p.world;
   if (!('cartridge' in before)) return before;
-  p.ops.push(...begun(p.world, own, base.logical_time, p.ops, m));
+  p.ops.push(...begun(p.world, closedByOpener(p.ops, own), base.logical_time, p.ops, m));
   const actors = enteredActors(p.world, own);
   if (actors.size) {
     const at = now(p);
@@ -156,7 +186,8 @@ function join(
   const quests = earns ? Object.entries(before.state.quests ?? {}) : [];
   const active = new Map(quests.map(([i, q]) => [i, q.state === 'active']));
   const assigns = own.filter((o) => o.op === 'fact.assign') as Assign[];
-  for (const e of factChanged(base, m, assigns, evs)) {
+  const facts = factChanged(base, m, assigns, evs);
+  for (const e of [...facts, ...levelsReached(p.world, quiet(p.command, own), base, m)]) {
     const placed = { ...e, position: p.events.length + 1, correlation_id: base.correlation_id };
     const x = placed.payload;
     if (x.type === 'quest_activated' || x.type === 'quest_resolved')
@@ -177,6 +208,7 @@ const cause = (p: P, logical_time: number, id: string) => ({
 
 function creditDelivery(p: P, next: Queued): Admitted | undefined {
   if (next.cause.payload.type !== 'entity_died') return;
+  if (!next.cause.payload.victim_definition) p.wokeAt ??= p.narration.length;
   const at = now(p);
   if (!('cartridge' in at)) return at;
   const credit = deathCredit(at, next.cause, p.ops, p.events, p.command);
@@ -219,7 +251,7 @@ function react(p: P, ran = false): Admitted | undefined {
     }
     const crow = crowDelivery(p, next);
     if (crow) return crow;
-    const dead = diedAfter(p.events, next.cause); // once per delivery
+    const events = [...p.events]; // once per delivery
     for (const rule of triggered(p.world, next.cause)) {
       const at = now(p);
       if (!('cartridge' in at)) return at;
@@ -231,7 +263,7 @@ function react(p: P, ran = false): Admitted | undefined {
         p.group + 1,
         p.steps,
         next.mint,
-        { holders: p.holders, dead, ran, roots: p.roots },
+        { holders: poolWriters(p.ops, p.holders), events, ran, roots: p.roots },
       );
       const depth = next.depth + 1;
       p.limit = over({ deliveries: ++p.deliveries, reaction_depth: depth, query_steps: p.steps.n });
@@ -239,7 +271,7 @@ function react(p: P, ran = false): Admitted | undefined {
       if (!own) continue;
       const delivered = admit('reaction', own);
       if (delivered.kind !== 'accepted') return delivered;
-      p.narration.push(...(delivered.narration ?? []));
+      say(p, p.command.payload.actor_id, next.cause, delivered.narration);
       p.group++;
       const base = cause(p, next.cause.logical_time, next.cause.id);
       const failed = join(p, delivered.delta.ops, delivered.events, base, depth, next.mint);
@@ -268,7 +300,7 @@ function jobs(p: P, root: Admitted & { kind: 'accepted' }): Admitted | undefined
       payload: { type: 'run_job', job_id: job_id as JobId },
     } as const;
     const m = allocator(at, run);
-    const ran = admit('schedule', schedule.decideAt(at, run, m, undefined, due_time, tick, p));
+    const ran = admit('schedule', schedule.decideAt(at, run, m, undefined, due_time, tick, p, due));
     if (ran.kind !== 'accepted') return ran;
     if ((p.limit = queueHour(due, job_id, ran) ?? over({ deliveries: p.deliveries })))
       return BUDGET;

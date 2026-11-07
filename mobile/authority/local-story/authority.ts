@@ -9,14 +9,16 @@ import type { World } from '../../../kernel/ts/src/runtime/decision.ts';
 import { INSTALLED, newWorld } from '../../../kernel/ts/src/runtime/world.ts';
 import { corrupt, identityOf, load, reconcile, replace } from './store.ts';
 import type { Db, Meta } from './store.ts';
-import { chronicle, narration } from './narration.ts';
+import { chronicle } from './chronicle.ts';
+import { narration } from './narration.ts';
+import { opener } from './combat-receipt.ts';
 import { adopt, ids, token } from './save.ts';
 import type { Story } from './save.ts';
 import type { ElapsedStatus } from '../../packages/game-view/session.ts';
-import { ClockDriver, type Clocks, type Pulse } from './elapsed.ts';
+import { CatchUpRefusedError, ClockDriver, type Clocks, type Pulse } from './elapsed.ts';
 import { ElapsedRecoveryError, changedRun, formatProblem } from './elapsed-store.ts';
 import { invoke, cancel } from './invocation.ts';
-import { catchUp } from './trace.ts';
+import { catchUp, traceRows } from './trace.ts';
 import { elapsed, fenced, type Elapsed } from './delivery.ts';
 
 /** A committed outcome, new or replayed (03 §14): the decision and the revision it left. */
@@ -55,6 +57,7 @@ export type Host = {
   time?: Clocks;
   latency?: { host: HostKind; now: () => number }; // ms; each NEW decision's (11 §13), else none
   random?: (words: Uint32Array) => Uint32Array;
+  dev?: boolean; // the author preview (`?dev=1`) and `bin/loka check`; a release never sets it
 };
 const SAVE_FORMAT = 'loka-save-v2';
 
@@ -64,7 +67,7 @@ const SAVE_FORMAT = 'loka-save-v2';
  * the save's lineage and the world's character; its actor is the character. Not opened, nothing
  * written: a newer format (`unsupported_save_format`, checked first; the player updates the app,
  * 10 §§31-32), and, offering only the player's new game (settled as any; reopen once `replaced`),
- * an uninstalled pin (`pinned_release_missing`, 10 §32) or a corrupt save (`save_corrupt`, OFF-07). `invoke` takes one ActionInvocation: malformed or
+ * an uninstalled pin (`pinned_release_missing`, 10 §32) or a corrupt save (`save_corrupt`, OFF-07; also a refused catch-up, `opened`). `invoke` takes one ActionInvocation: malformed or
  * another actor's gets no receipt; a known invocation replays its receipt (altered intent, or a
  * response that is not a DecisionResult, is a conflict) before anything is resolved against the current world; a NEW one with a host view
  * token (`view:<run>:<revision>`) other than `token()` is `stale_view` (04 §16; other tokens are only admission
@@ -98,7 +101,7 @@ export function openStory(db: Db, releases: readonly [Release, ...Release[]], ho
     if (!release || (saved && saved.pin!.kernel_api !== INSTALLED.kernel_api))
       return refuse({ kind: 'pinned_release_missing' as const, pinned: saved!.pin!, installed });
     const base = saved ? pinned(release, saved.pin!) : drawn(release, host);
-    const loaded = base && load(db, base, () => first(release.content_hash, base, host));
+    const loaded = base && load(db, base, () => first(release.content_hash, base, host), host.dev);
     if (!loaded) return refuse({ kind: 'save_corrupt' as const });
     Object.assign(s, { fresh: base, ...loaded });
     s.recoveryHeader = undefined;
@@ -110,13 +113,28 @@ export function openStory(db: Db, releases: readonly [Release, ...Release[]], ho
   return opened(s);
 }
 
+// The rows the author column replays; absorbed ticks defer their entry, so catch up first.
+function trace(s: Story) {
+  if (s.behind) s.behind = !catchUp(s.db, ids(s), s.fresh.context);
+  return traceRows(s.db);
+}
+
 function opened(s: Story) {
+  s.behind = true; // a first resume tick's entry must follow what the last process left unwritten
   let changed = (_status: ElapsedStatus) => {};
   const driver =
     s.world.cartridge.manifest.time_policy && s.host.time
       ? new ClockDriver(s, s.host.time, (status) => changed(status))
       : undefined;
-  driver?.pulse('resume', s.meta.run_id);
+  try {
+    // With an away recap the Book must see all of the catch-up, so the gap waits for its first pulse.
+    if (!s.elapsed || !s.world.cartridge.manifest.time_policy?.recap_after_minutes)
+      driver?.pulse('resume', s.meta.run_id);
+  } catch (e) {
+    if (!(e instanceof CatchUpRefusedError)) throw e;
+    s.behind = true; // Start over's best-effort trace catch-up still runs
+    return { kind: 'save_corrupt' as const, newGame: () => newGame(s) };
+  }
   s.behind = !catchUp(s.db, ids(s), s.fresh.context);
   // world() is not fenced: while `pending` it is the prior revision, which the UI shows as pending.
   return {
@@ -126,17 +144,17 @@ function opened(s: Story) {
     beforeToken: () => s.beforeToken ?? token(s),
     clockStatus: () => driver?.state() ?? { kind: 'ready' as const },
     invoke: (value: unknown) => invoke(s, value, driver),
-    onAdvance: (listener: typeof changed) => {
-      changed = listener;
-    },
+    onAdvance: (listener: typeof changed) => void (changed = listener),
     requestResume: (expected: string) => driver?.requestResume(expected),
     pulse: (mode: Pulse, expected: string) =>
       driver?.pulse(mode, expected) ?? { kind: 'ready' as const },
     elapsed: (evidence: Elapsed) => elapsed(s, evidence),
+    trace: () => trace(s),
     runId: () => s.meta.run_id,
     newGame: () => newGame(s),
     narration: (command_id?: string) => narration(s, command_id),
     chronicle: () => chronicle(s),
+    opener: (encounter_id: string) => opener(s, encounter_id),
     token: () => token(s), // the view freshness token of the world() now shown
   };
 }

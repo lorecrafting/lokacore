@@ -1,0 +1,10 @@
+{
+  "keywords": [
+    "keeper",
+    "old"
+  ],
+  "name": "npc.keeper.short",
+  "room_line": "npc.keeper.room",
+  "description": "npc.keeper.description",
+  "room": "wayside_shrine"
+}

@@ -3,14 +3,13 @@ import type { Meta, StoryObj } from '@storybook/react-native-web-vite';
 import { expect, userEvent, within } from 'storybook/test';
 import { NpcDetail, NpcPage } from '../book/Npc.tsx';
 import { ShelfPage } from '../book/Shelf.tsx';
-import { isCard, pageStory } from './screen.tsx';
+import { isCard, pageStory, settled } from './screen.tsx';
 import NpcChoiceView from './views/npc-choice.json';
 import NpcShopView from './views/npc-shop.json';
 import NpcServicesView from './views/npc-services.json';
 import NpcClosedView from './views/npc-closed.json';
 import NpcShelfView from './views/npc-shelf.json';
 import NpcSilentView from './views/npc-silent.json';
-import { View } from 'react-native';
 import { LABEL } from '../book/labels.ts';
 
 const meta: Meta = {
@@ -31,7 +30,7 @@ export const Choice: StoryObj = {
   name: 'Choice',
   // Breaks: the Map's "Ask where the Reeve is" (known_npcs) leaks onto her own page.
   play: async ({ canvas }) => {
-    await canvas.findByText(/Take the letter to Wat/);
+    await settled(canvas, /Take the letter to Wat/);
     await expect(canvas.queryByText(/^Ask where/)).toBeNull();
   },
 };
@@ -168,32 +167,6 @@ export const WornItem: StoryObj = {
     await canvas.findByRole('heading', { name: 'A wool cloak' });
     await expect(canvas.queryByRole('button', { name: /take|lift/i })).toBeNull();
     await expect(canvas.queryByText(/holding it|not here/i)).toBeNull();
-  },
-};
-// Breaks: a grayed Attack on an hp-less person, or none on one with hp (loka-3751; book-ui.md).
-const refused = { available: false, reason: { code: 'invalid_target', cause: 'cannot_be_hurt' } };
-const attack = (offer: object, band?: string) => {
-  const actions = [{ action_key: 'attack', label: 'action.attack', ...offer }];
-  const view = { ...NpcChoiceView.view, choice: undefined, entities: reeveWith({ band, actions }) };
-  return pageStory({ ...NpcChoiceView, view });
-};
-const panes = [attack(refused), attack({ available: true }, 'ready')];
-export const AttackHidden: StoryObj = {
-  ...panes[0],
-  args: { words: { 'action.attack': 'Attack' } },
-  render: (args, ctx) => (
-    <>
-      {panes.map((s, i) => (
-        <View key={i} testID={`pane${i}`}>
-          {s.render!(args, ctx)}
-        </View>
-      ))}
-    </>
-  ),
-  name: 'No Attack on an NPC that cannot be hurt',
-  play: async ({ canvas }) => {
-    await within(canvas.getByTestId('pane1')).findByRole('button', { name: /^Attack/ });
-    await expect(canvas.getAllByRole('button', { name: /^Attack/ })).toHaveLength(1);
   },
 };
 export const Shop: StoryObj = { ...pageStory(NpcShopView), name: 'Shop' };

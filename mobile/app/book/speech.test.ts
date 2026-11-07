@@ -2,7 +2,8 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 
 import { view } from './__tests__/combat-book.test.ts';
-import { lineWords } from './words.ts';
+import { rendered } from './logs.ts';
+import { lineWords, worded } from './words.ts';
 
 const SAY: Record<string, string> = {
   'npc.r': 'Reeve Hal',
@@ -11,6 +12,9 @@ const SAY: Record<string, string> = {
   nods: 'Nell nods.',
   tagged: '"Fine," Nell says.',
   curly: '“Well?”',
+  takes: 'You take the {item}.',
+  'item.recovered': 'You find your things.',
+  'item.pack': 'your pack',
 };
 const say = (k: string) => SAY[k] ?? k;
 const v = view({
@@ -34,4 +38,26 @@ test('a line wholly one quotation reads as its named speaker saying it to you', 
   // A bystander reading someone else's (a named actor's) conversation is not addressed.
   const seen = lineWords({ key: 'quoted', participants: { actor: 'rat', speaker: 'r' } }, say, v);
   assert.equal(seen, 'Reeve Hal says, "Well, stranger?"');
+});
+
+// Break (loka-vduxr.51): a bound or speaker-joined line is shown in words no `text()` call
+// returned, so an Alt-click on it in the author preview finds no text key.
+test('each worded line reaches the author hook with its text key, bound and joined too', (t) => {
+  const noted: [string, string][] = [];
+  worded.note = (shown, key) => noted.push([shown, key]);
+  t.after(() => (worded.note = undefined));
+  words('quoted', 'r');
+  lineWords({ key: 'takes', bindings: { item: 'rope' } }, say, v);
+  // Break (E5): an engine line or a recovered line's whole words never noted, so a double-click
+  // on it finds no key and says nothing.
+  lineWords({ key: 'item.dropped', bindings: { item: 'npc.rat' } }, say, v);
+  const recovered = { key: 'item.recovered', bindings: { item: 'item.pack' } };
+  rendered({ lines: [recovered] } as never, v, say, false);
+  assert.deepEqual(noted, [
+    ['Reeve Hal says to you, "Well, stranger?"', 'quoted'],
+    ['You take the rope.', 'takes'],
+    ['You drop the rat.', 'item.dropped'],
+    ['You find your things.', 'item.recovered'],
+    ['You find your things. your pack.', 'item.recovered'],
+  ]);
 });

@@ -1,7 +1,9 @@
-// Toolbox rows G13 and W25 (dry) on the compiled needs sampler: 3600 units an hour, 24 a day;
-// weather clear / drought, weight 1 each. Entering the track applies hungry and thirsty (1 point an
-// hour for a day); on a drought day the exposed flats apply parched (1 thirst every 1800 for 5400,
-// refreshed each hour). Bread cures hungry; a Drink of water cures thirsty and parched.
+// Status drains, liquid cures and W8 on the drain fixture, a test-only cartridge kept from the
+// retired rows G13 and W25 dry (owner 2026-11-04, loka-vduxr.61; no shipped cartridge has a need
+// pool): 3600 units an hour, 24 a day; weather clear / drought, weight 1 each. Entering the track
+// applies hungry and thirsty (1 point an hour for a day); on a drought day the exposed flats apply
+// parched (1 thirst every 1800 for 5400, refreshed each hour). Bread cures hungry; a Drink of water
+// cures thirsty and parched.
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
@@ -20,7 +22,7 @@ const scratch = mkdtempSync(join(tmpdir(), 'loka-needs-sampler-'));
 let artifact: Uint8Array;
 try {
   const file = join(scratch, 'artifact.json');
-  execFileSync('mix', ['loka.compile', 'cartridges/needs_sampler', file], {
+  execFileSync('mix', ['loka.compile', 'test/fixtures/drain_cartridge', file], {
     cwd: fileURLToPath(new URL('../../../', import.meta.url)),
     stdio: 'pipe',
   });
@@ -84,9 +86,9 @@ test('the track drains hunger and thirst an hour at a time; bread and a drink en
   assert.deepEqual(labels(w), ['condition.hungry', 'condition.thirsty']);
   w = wait(w, 3 * HOUR);
   assert.deepEqual([pool(w, 'hunger'), pool(w, 'thirst')], [7, 7]);
-  w = play(w, { type: 'eat', item_id: id(w, 'bread') });
+  w = play(w, { type: 'consume', item_id: id(w, 'bread') });
   assert.deepEqual(labels(w), ['condition.thirsty']);
-  w = play(w, { type: 'drink', vessel_id: id(w, 'waterskin') });
+  w = play(w, { type: 'consume', item_id: id(w, 'waterskin') });
   assert.equal(labels(w), undefined);
   w = wait(w, 9 * HOUR);
   assert.deepEqual([pool(w, 'hunger'), pool(w, 'thirst')], [7, 7]);
@@ -118,7 +120,7 @@ test('a dry day on the flats drains thirst until a drink, and never past the poo
   w = wait(w, 2 * HOUR);
   assert.equal(pool(w, 'thirst'), 6);
   w = play(w, { type: 'move', direction: 'south' });
-  w = play(w, { type: 'drink', vessel_id: id(w, 'waterskin') });
+  w = play(w, { type: 'consume', item_id: id(w, 'waterskin') });
   assert.equal(labels(w), undefined);
   w = wait(w, 6 * HOUR);
   assert.equal(pool(w, 'thirst'), 6);
@@ -161,6 +163,6 @@ test('a permanent hungry ticks past the day until bread cures it', () => {
   assert.deepEqual(labels(w), ['condition.hungry']);
   assert.deepEqual(hungry(), { ...view, next_tick_at: t0 + 31 * HOUR });
   assert.equal(pool(w, 'hunger'), 0);
-  w = play(w, { type: 'eat', item_id: id(w, 'bread') });
+  w = play(w, { type: 'consume', item_id: id(w, 'bread') });
   assert.equal(labels(w), undefined);
 });

@@ -286,6 +286,20 @@ test('bounded saves refuse forged rows and wrong receipts without deleting progr
     assert.equal(a.reopen().kind, 'save_corrupt', mutate.toString());
     a.sql.close();
   }
+  // A one-time quest's sitting binds to its row even with row and receipt forged together.
+  const a = setup();
+  a.start();
+  a.submit('EDIT');
+  const row = a.row();
+  const forged = a.sql
+    .prepare('UPDATE receipt SET response=replace(response,?,?) WHERE response LIKE ?')
+    .run(row.quest_instance_id, bram, `%${a.view().choice!.continuation_id}%`);
+  assert.ok(forged.changes >= 2);
+  a.sql
+    .prepare("UPDATE state_row SET value=? WHERE section='choices' AND key=?")
+    .run(JSON.stringify({ ...row, quest_instance_id: bram }), a.view().choice!.continuation_id);
+  assert.equal(a.reopen().kind, 'save_corrupt');
+  a.sql.close();
 });
 
 // Breaks: a stored answer, choice, command id, outcome evidence or participant binding that no

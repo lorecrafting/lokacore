@@ -1,4 +1,5 @@
 // Separate committed combat history from ordinary room/detail narration.
+import type { Spirit } from './spirit.ts';
 import type {
   Game,
   GameView,
@@ -10,7 +11,7 @@ import type {
 import type { Button } from './presenter.ts';
 import { cueLine } from './model.ts';
 import { LABEL } from './labels.ts';
-import { lineText, lineWords, withoutHeading } from './words.ts';
+import { lineText, lineWords, withoutHeading, worded } from './words.ts';
 type Say = (key: string) => string;
 
 // One log line per narration record, then the cue (book-ui.md, Live action freshness; pass-1 UO):
@@ -43,14 +44,21 @@ export const rendered = (
   withoutHeading(
     (last?.lines ?? []).filter((_, i) => !!last?.combat_lines?.includes(i) === combat),
     view,
-  ).map((line) => fullLine(line, text, view, was));
+  ).map((line): DetailLine => {
+    const words = fullLine(line, text, view, was);
+    // By its key, never its words: a cartridge chooses both (book-ui.md, Gilt).
+    return line.key === view.levelling?.level_up
+      ? { text: words, level: true, first: was?.levelling?.level === 1 }
+      : words;
+  });
 
 // A refused line (a barred exit) leads with its reason tag (LogLines's doc comment); a quiet line
 // keeps its structured identity and count, `text` with " (N times)" once merged (logLines); an away
 // recap (recap.ts) holds its settlement's lines, `text` its heading.
 export type DetailLine =
   | string
-  | { text: string; event: true }
+  | { text: string; event: true; gilt?: true }
+  | { text: string; level: true; first: boolean }
   | { kind: 'refused'; reason: string; text: string }
   | { quiet: string; plain: string; times: number; text: string }
   | { recap: string[]; text: string };
@@ -64,6 +72,8 @@ export type Logs = {
   status: ElapsedStatus;
   recovered?: boolean;
   narrationId?: string;
+  deed?: NarrationRecord; // the last press whose events the cues read (book-ui.md, Lever and latch)
+  died?: string; // the command of the last death read, the cue bus's edge (book-ui.md, Falling)
   confirmedRead?: string;
   returnWorld?: boolean | 'section';
   returnDetail?: string;
@@ -71,9 +81,16 @@ export type Logs = {
   open?: string;
   merged?: string[]; // quiet lines merged since the last screen, read again by the live region
   fault?: string;
+  title?: { id: string; said?: string }; // the Combat page's: a page turn remounts the page (combat-title.ts)
   // An open elapsed settlement's held World entries, one per line.
   away?: { from: number; log: string[] };
   ended?: GameView['combat']; // a closed encounter's page, until Back to World (book-ui.md, Closure)
+  fell?: GameView['combat']; // the encounter the player died in: its page closes on Let go
+  closing?: boolean; // this view closed a fight (resetLogs), so a death in it is that fight's
+  woke?: number; // where the last death's return receipt starts in the log (spirit.ts, end): held in the spirit state
+  spirit?: Spirit; // the spirit state, from Let go to the rise (spirit.ts)
+  room?: { title: string; log: DetailLine[] }; // the room this view left, with its log (resetLogs): a death outside a fight keeps it
+  down?: Logs['room'] & { to?: number }; // the dead page's (book-ui.md, Dead page): the room died in, until Let go (spirit.ts)
   noted?: Set<string>; // the cue lines logged this room visit
 };
 
@@ -112,6 +129,39 @@ export function logLines(s: Logs, lines: DetailLine[], page?: DetailLine[], quie
   (s.merged ??= []).push(plain);
 }
 
+// Each log's lines by a number that never shifts: `gone` counts the lines dropped from its front, and
+// `drawn` is the first number no page has drawn yet, so a page return or a trim re-dries nothing and
+// a quiet merge, in place, is not new (LogLines). `rounds` holds the numbers that begin a receipt's
+// lines, so the combat log draws each round as its own block (book-ui.md, Live combat response).
+const marks = new WeakMap<
+  readonly DetailLine[],
+  { gone: number; drawn: number; rounds: number[] }
+>();
+export const logMark = (lines: readonly DetailLine[]) => {
+  const mark = marks.get(lines) ?? { gone: 0, drawn: 0, rounds: [] };
+  marks.set(lines, mark);
+  return mark;
+};
+export const markDrawn = (lines: readonly DetailLine[]) => {
+  const mark = logMark(lines);
+  mark.drawn = mark.gone + lines.length;
+};
+export const dropLines = (lines: DetailLine[], count = lines.length) => {
+  const n = Math.max(count, 0);
+  const mark = logMark(lines);
+  mark.gone += n;
+  mark.rounds = mark.rounds.filter((r) => r > mark.gone);
+  return lines.splice(0, n);
+};
+// The next lines pushed begin a new round (one receipt, one press or one update).
+export const newRound = (lines: readonly DetailLine[]) => {
+  const mark = logMark(lines);
+  const next = mark.gone + lines.length;
+  if (next > mark.gone && mark.rounds.at(-1) !== next) mark.rounds.push(next);
+};
+
+export const trimLog = (lines: DetailLine[]) => dropLines(lines, lines.length - 200);
+
 export function restoredLogs(game: Game, text: Say): Logs {
   const last = game.lastNarration();
   const { view } = game.view();
@@ -145,13 +195,14 @@ export function restoredLogs(game: Game, text: Say): Logs {
       ),
     );
   s.log.push(...cueLines(s, view, text));
+  [s.log, s.combatLog, ...s.details.values()].forEach(markDrawn); // history never dries
   return s;
 }
 
 // Each sense cue is one plain World line the first time it shows in a room visit (book-ui.md,
-// Sense cues details); one that stops and comes back is not logged again.
+// Sense cues details); one that stops and comes back is not logged again; none on the dead page.
 export function cueLines(s: Logs, view: GameView, text: Say) {
-  return (view.cues ?? []).flatMap((c) => {
+  return (s.down ? [] : (view.cues ?? [])).flatMap((c) => {
     const line = cueLine(c, text);
     if ((s.noted ??= new Set()).has(line)) return [];
     s.noted.add(line);
@@ -169,17 +220,19 @@ export function savedNarration(game: Game, s: Logs, command_id?: string) {
 
 export function resetLogs(s: Logs, now: GameView) {
   const was = s.projection.view;
+  s.room = undefined; // staying, a death's dead page is this room (spirit.ts fall)
   if (was.place.id !== now.place.id) {
-    s.log.length = 0;
+    markDrawn((s.room = { title: was.place.title.key, log: dropLines(s.log) }).log); // drawn: no dry
     s.noted = new Set();
     s.away = undefined; // held lines belong to the room left, as its log
   }
-  if (now.combat && now.combat.encounter_id !== was.combat?.encounter_id) s.combatLog.length = 0;
-  if (was.combat && !now.combat) s.ended = was.combat;
+  if (now.combat && now.combat.encounter_id !== was.combat?.encounter_id) dropLines(s.combatLog);
+  s.closing = !!was.combat && !now.combat;
+  if (s.closing) s.ended = was.combat;
 }
 
 // A closing receipt's lines all end the fight on its Combat page, whatever their key (book-ui.md,
-// Closure); so do a spell's cast in the fight (a foe line's Cast a spell…, loka-x6t.109.5).
+// Closure); so do a spell's cast in the fight (a foe's Cast a spell…, loka-x6t.109.5).
 export const closing = (
   last: NarrationRecord,
   was: GameView,
@@ -202,9 +255,10 @@ function fullLine(
   was?: GameView,
 ): string {
   const sentence = lineWords(line, text, view, was);
-  if (line.key === 'item.recovered' && typeof line.bindings?.item === 'string')
-    return `${sentence} ${text(line.bindings.item)}.`;
-  return sentence;
+  if (line.key !== 'item.recovered' || typeof line.bindings?.item !== 'string') return sentence;
+  const full = `${sentence} ${text(line.bindings.item)}.`;
+  worded.note?.(full, line.key);
+  return full;
 }
 
 export function detailLines(s: Logs, id: string) {
@@ -228,14 +282,14 @@ export function visit(s: Logs, open: (string | undefined)[]) {
 // Leave the conversation: a fresh history; an open choice's waits for its close to commit.
 export function leaveLog(s: Logs, id: string, open: boolean) {
   if (open) s.left = id;
-  else s.details.get(id)?.splice(0);
+  else dropLines(s.details.get(id) ?? []);
 }
 
 // The committed close of that Leave (its close_choice, or the talk's authored exit) empties the
 // history before the reply's own lines; a refused one keeps the question.
 export function closedLog(s: Logs, accepted: boolean) {
   if (s.retry?.button.label !== LABEL.leaveConversation || !s.left) return;
-  if (accepted) s.details.get(s.left)?.splice(0);
+  if (accepted) dropLines(s.details.get(s.left) ?? []);
   s.left = undefined;
 }
 

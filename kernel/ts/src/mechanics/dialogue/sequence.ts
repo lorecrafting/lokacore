@@ -70,6 +70,8 @@ function choiceStep(
       return adjusted(world, actor, run, { ...step, subject: speaker });
     case 'fact.assign':
       return assigned(world, actor, run, { ...step, subject: speaker });
+    case 'narrate': // its line is the answer's (rule.ts replies)
+      return run;
     default:
       throw new KernelError('precondition_failed');
   }

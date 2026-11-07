@@ -1,10 +1,8 @@
 // size: allow 450, reaction@1 keeps its total trigger SUBJECT table and filters (row FD5: witness) beside the one delivery sequence (row FD1: or its delayed job; quest.activate split out for hs-1)
-// reaction@1 (capability_registry.json; reaction.schema.json ReactionRule; 21 §3.4, §11; 06
-// §14; 04 §5.2): the rules an event triggers and one delivery's explicit sequence. proposal.ts
-// propose runs the FIFO queue, numbers the writer groups and counts the budgets.
+// reaction@1 (reaction.schema.json ReactionRule): the rules an event triggers and one delivery's
+// explicit sequence. proposal.ts propose runs the queue, numbers writer groups and counts budgets.
 import type {
   CharacterId,
-  CommandId,
   DefinitionRef,
   DeltaOp,
   DomainEvent,
@@ -20,12 +18,14 @@ import {
   accepted,
   actorOf,
   bodyOf,
+  byCause,
   event,
   refString,
   type Decision,
   type Mint,
   type World,
 } from '../runtime/decision.ts';
+import { leave } from './dialogue/selection.ts';
 import { bounded, durable, npcPair, paired, subjective, targetOf, value } from './fact.ts';
 import { KernelError } from '../foundation/error.ts';
 import { holds } from './policy.ts';
@@ -36,8 +36,9 @@ import { cmp } from '../foundation/validate.ts';
 import { suppress } from './population/shared.ts';
 import { specOf, statusStep } from './status/shared.ts';
 import { grant } from './levelling/shared.ts';
+import { pooled } from './resource.ts';
 import { saturate } from '../foundation/int.ts';
-import { npcsIn } from './death/shared.ts';
+import { diedAfter, npcsIn } from './death/shared.ts';
 import { setBarrier } from './barrier/react.ts';
 import { moved } from './containment/react.ts';
 import { replenishStep } from './containment/job.ts';
@@ -47,8 +48,7 @@ import { spawn } from './population/react.ts';
 import { isTold, told } from './emote/line.ts';
 
 type On = ReactionRule['on'];
-// Each trigger filter (W1; reaction.schema.json): true when the event's payload field equals it.
-// A field means the same payload field in every event kind that declares it.
+// Each trigger filter (W1; reaction.schema.json): true when the event's same-named payload field equals it.
 type Match = (w: World, want: any, p: any, e: DomainEvent) => boolean;
 // Null-safe: a player's entity_died carries no victim_definition.
 const ref =
@@ -82,6 +82,7 @@ export const FILTERS: Record<string, Match> = {
   hit: equal('hit'),
   status: ref('status'),
   word: equal('word'),
+  level: equal('level'),
   loudness: equal('loudness'),
   topic: ref('topic'), // row FD7
   answered: equal('answered'),
@@ -126,7 +127,7 @@ const ACTIVATES = ['quest_resolved', 'rested', 'entity_entered_room'];
 type Delivery = {
   holders?: Map<string, number>;
   roots?: ReadonlyMap<string, number>; // the root command's item moves' groups (hs-1)
-  dead?: ReadonlySet<EntityId>;
+  events?: readonly DomainEvent[]; // the proposal's so far, as the delivery began
   fired?: boolean;
   ran?: boolean;
 };
@@ -144,7 +145,7 @@ export function sequence(
   group: number,
   steps: { n: number },
   mint: Mint,
-  { holders = new Map(), dead = new Set(), fired = false, ran = false, roots }: Delivery = {},
+  { holders = new Map(), events: prior = [], fired = false, ran = false, roots }: Delivery = {},
 ): Decision<EventPayload['type']> | undefined {
   const [actor, npc, trigger] = deliveryActor(world, cause, root);
   if (!actor) return { kind: 'fault', code: 'precondition_failed' };
@@ -155,9 +156,8 @@ export function sequence(
   const own = { holders, set: {}, applied: new Set<string>(), doors: new Map(), seen: new Set() };
   const [ops, events, narration]: [DeltaOp[], DomainEvent[], Text[]] = [[], [], []];
   let [position, gained] = [0, 0]; // gained: one levelling write per rule (no row race)
-  const by = { id: cause.id as string as CommandId, payload: { actor_id: actor } };
   const emit = (payload: EventPayload, actor_id = actor) =>
-    events.push(event(then, { ...by, payload: { actor_id } }, mint, ++position, payload));
+    events.push(event(then, byCause(cause, actor_id), mint, ++position, payload));
   for (const step of rule.steps) {
     if (step.op === 'quest.activate') {
       if (!activate(world, rule, actor, !!npc, step.quest, own.seen, group, ops, mint, emit))
@@ -171,7 +171,7 @@ export function sequence(
     } else if (step.op === 'status.apply' || step.op === 'status.cure') {
       const body = bodyOf(then, actor);
       if (!body) return { kind: 'fault', code: 'precondition_failed' };
-      const on = holdersOf(then, step, cause, body, dead);
+      const on = holdersOf(then, step, cause, body, diedAfter(prior, cause));
       const r = statusStep(then, step, on, body, group, own, mint, emit, sight(then, actor, steps));
       ops.push(...r.ops);
       narration.push(...r.narration);
@@ -179,25 +179,32 @@ export function sequence(
       ops.push(...setBarrier(then, step, cause, about.subject, group, own, emit)); // row W22
     } else if (step.op === 'item.move' || step.op === 'npc.move') {
       ops.push(...moved(then, step, actor, about, group, ops, holders, emit)); // rows 41, FD5
-    } else if (step.op === 'population.spawn') ops.push(...spawn(then, step, group, ops, mint));
+    } else if (step.op === 'population.spawn')
+      ops.push(...spawn(then, step, group, ops, mint, holders));
     else if (step.op === 'replenish.run') {
       const refill = replenishStep(then, step.replenish, group, steps, holders, roots); // hs-1
       if (typeof refill === 'string') return { kind: 'fault', code: refill };
       ops.push(...refill);
-    } else if (step.op === 'experience.grant') gained = saturate(gained + step.amount);
+    } else if (step.op === 'end_talk') ops.push(...leave(then, actor, group));
+    else if (step.op === 'experience.grant') gained = saturate(gained + step.amount);
     else if (isTold(step)) narration.push(...told(then, actor, step, about));
-    else if (step.op !== 'event.emit') {
-      const assigned = assignment(world, actor, step, group, own, cause);
-      if (assigned) ops.push(assigned);
-      if (assigned && assigned.expected !== assigned.value) position++;
-    } else if (about.subject) emit(custom(world, step, about.subject)); // none without a body
+    else if (step.op === 'resource.adjust')
+      ops.push(...pooled(then, actor, step, group, ops, holders, prior));
+    else if (step.op !== 'event.emit')
+      position += recorded(ops, assignment(world, actor, step, group, own, cause));
+    else if (about.subject) emit(custom(world, step, about.subject)); // none without a body
   }
   ops.push(...grant(then, actor, gained, group));
   return accepted(world, 'reacted', ops, events, narration.length ? narration : undefined);
 }
 
-// One quest.activate step: false when the trigger starts no quests; nothing for an NPC delivery or
-// a quest already started (by an earlier step too).
+// Keeps a fact write; a change takes a causal position (its fact_changed).
+function recorded(ops: DeltaOp[], assigned: ReturnType<typeof assignment>) {
+  if (assigned) ops.push(assigned);
+  return assigned && assigned.expected !== assigned.value ? 1 : 0;
+}
+
+// One quest.activate step: false when none start; nothing for an NPC delivery or an already started quest.
 function activate(
   world: World,
   rule: ReactionRule,
@@ -218,15 +225,6 @@ function activate(
   emit(started.payload);
   return true;
 }
-
-/** loka-kgd.105: the bodies an `entity_died` after `cause` names; they hold none of its statuses
- * (a dead NPC takes none anyway; the player's body lives on, returned by the death). */
-export const diedAfter = (events: readonly DomainEvent[], cause: DomainEvent) =>
-  new Set(
-    events.flatMap((e) =>
-      e.payload.type === 'entity_died' && e.position > cause.position ? [e.payload.victim_id] : [],
-    ),
-  );
 
 // The payload field naming each event's subject (docs/system/mechanics.md reaction@1 table), or
 // 'doer': its subject, like a fact_changed without subject_id, is the delivery character's body. A status
@@ -256,6 +254,7 @@ const SUBJECT: { [K in On['event']]: keyof Extract<EventPayload, { type: K }> | 
   filled: 'doer',
   poured: 'doer',
   item_dropped: 'doer',
+  level_reached: 'doer',
   shooed: 'doer',
   quest_activated: 'doer',
   quest_failed: 'doer',

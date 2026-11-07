@@ -41,17 +41,10 @@ export function liquidActions(
   const ids = Object.keys(world.liquidSpecs);
   if (ids.length > LIMITS.selector_cardinality) throw new KernelError('budget_exceeded');
   const result: AdvertisedAction[] = [];
-  const offers = (
-    p: Extract<CommandPayload, { type: 'fill' | 'pour' | 'drink' }>,
-    ids: EntityId[],
-  ) =>
+  const offers = (p: Extract<CommandPayload, { type: 'fill' | 'pour' }>, ids: EntityId[]) =>
     Object.values(set)
       .filter((a) => a.command === p.type)
       .map((a) => shown(world, p, ids, a, set, steps));
-  if (!source) {
-    const p = { type: 'drink', actor_id: actor, vessel_id: id as EntityId } as const;
-    result.push(...offers(p, [id as EntityId]));
-  }
   for (const candidate of ids) {
     if (++steps.n > LIMITS.query_steps) throw new KernelError('budget_exceeded');
     if (candidate === id || !eligible(world, body, candidate as EntityId, steps)) continue;
@@ -66,7 +59,7 @@ export function liquidActions(
 
 function shown(
   world: World,
-  p: Extract<CommandPayload, { type: 'fill' | 'pour' | 'drink' }>,
+  p: Extract<CommandPayload, { type: 'fill' | 'pour' }>,
   target_ids: EntityId[],
   a: Offered,
   set: ActionSet,
@@ -88,7 +81,7 @@ function shown(
   return code ? { ...offer, available: false, reason: { code } } : { ...offer, available: true };
 }
 
-function eligible(world: World, body: EntityId, id: EntityId, steps: Steps): boolean {
+export function eligible(world: World, body: EntityId, id: EntityId, steps: Steps): boolean {
   const code = vesselUsable(world, body, id, steps);
   if (code === 'budget_exceeded' || code === 'containment_cycle' || code === 'precondition_failed')
     throw new KernelError(code);

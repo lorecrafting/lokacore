@@ -8,7 +8,7 @@ defmodule Loka.Content.Behaviours do
   faults; Source builds the diagnostics, so this module never calls Source.
   """
 
-  alias Loka.Content.Params
+  alias Loka.Content.{Areas, Params}
   alias Loka.Core.Contracts
 
   @typedoc "A loaded file, `{relative path, kind, decoded value}` (Loka.Content.Source.load/1)."
@@ -29,7 +29,7 @@ defmodule Loka.Content.Behaviours do
   # name => {params, [{rel, steps, rule, value}]}; a refused or undecodable behaviour stays known,
   # with params nil and no rules, so its holders add no second cause.
   defp rules({rel, {_, name, steps}, %{} = value}) do
-    extra = unknown({rel, steps}, value)
+    extra = file_name({rel, name, steps}) ++ unknown({rel, steps}, value)
     {rs, bad} = reactions({rel, steps ++ ["reactions"]}, value["reactions"])
     {params, wrong} = params({rel, steps}, value)
 
@@ -41,6 +41,13 @@ defmodule Loka.Content.Behaviours do
 
   defp rules({_, {_, name, _}, :invalid}), do: {{name, {nil, []}}, []}
   defp rules({rel, {_, name, steps}, _}), do: {{name, {nil, []}}, [invalid_type({rel, steps})]}
+
+  # The compiler checks every other kind's key; a behaviour leaves before that.
+  defp file_name({rel, name, steps}) do
+    if name =~ ~r/^[a-z][a-z0-9_]{0,63}$/,
+      do: [],
+      else: [{"SCHEMA_VIOLATION", {rel, steps}, %{"error" => "pattern_mismatch"}}]
+  end
 
   defp unknown({rel, steps}, value),
     do:
@@ -107,7 +114,21 @@ defmodule Loka.Content.Behaviours do
 
   defp attach(_, {nil, _}, _, _), do: {[], []}
 
-  defp attach({{_, with}, i}, {params, rs}, holder, {rel, steps}) do
+  # A behaviour with no reactions copies nothing, so its area is not checked.
+  defp attach({{name, _}, i} = a, {_, [{from, _, _, _} | _]} = b, holder, {rel, steps} = at) do
+    case Areas.crossed(rel, from) do
+      nil ->
+        fill(a, b, holder, at)
+
+      area ->
+        data = %{"why" => "area_crossing", "target" => "behaviours/" <> name, "area" => area}
+        {[], [{"SCHEMA_VIOLATION", {rel, steps ++ [i]}, data}]}
+    end
+  end
+
+  defp attach(a, b, holder, at), do: fill(a, b, holder, at)
+
+  defp fill({{_, with}, i}, {params, rs}, holder, {rel, steps}) do
     case Params.check(with, params) do
       [] ->
         {for(r <- rs, do: copy(r, holder, Map.put(with, "holder", holder))), []}

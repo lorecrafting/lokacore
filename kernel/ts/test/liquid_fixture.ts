@@ -17,7 +17,7 @@ const skin = (key: string, keywords: string[]) => ({
 
 function liquid(c: any) {
   light(c);
-  for (const cap of ['liquid', 'readable']) {
+  for (const cap of ['liquid', 'food', 'readable']) {
     c.manifest.requires.capabilities[cap] = 1;
     c.lock.capabilities[cap] = 1;
   }

@@ -1,0 +1,19 @@
+{
+  "name": "room.church.title",
+  "description": "room.church.description",
+  "sound": "church",
+  "exits": {
+    "east": {
+      "to": "village_green"
+    }
+  },
+  "details": {
+    "lectern": {
+      "aliases": [
+        "lectern"
+      ],
+      "description": "detail.lectern",
+      "title": "detail.lectern.title"
+    }
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "on": {
+    "event": "level_reached",
+    "level": 2
+  },
+  "steps": [
+    {
+      "op": "narrate",
+      "text": "levelling.level_two"
+    },
+    {
+      "op": "fact.assign",
+      "fact": "second_wind",
+      "value": true
+    },
+    {
+      "op": "resource.adjust",
+      "resource": "hp",
+      "by": 2147483647
+    }
+  ]
+}

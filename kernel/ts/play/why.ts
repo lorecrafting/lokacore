@@ -4,27 +4,22 @@
 // leaves; on demand one scripted action's or dialogue's policy. A report for authors, not a check.
 import { readFileSync } from 'node:fs';
 import { relative } from 'node:path';
-import type {
-  CharacterId,
-  Command,
-  DecisionResult,
-  Policy,
-  ReactionRule,
-} from '../src/contracts.gen.ts';
+import type { Command, DecisionResult, Policy, ReactionRule } from '../src/contracts.gen.ts';
 import { encode, type Json } from '../src/foundation/canonical.ts';
 import { INSTALLED, loadCartridge, type Cartridge, type World } from '../src/index.ts';
 import { primaryTarget } from '../src/commands/action_input.ts';
 import { cmp } from '../src/foundation/validate.ts';
-import { holds } from '../src/mechanics/policy.ts';
+import { holds, read } from '../src/mechanics/policy.ts';
 import { FILTERS } from '../src/mechanics/reaction.ts';
 import { refString } from '../src/runtime/decision.ts';
 import { marked, replay } from './coverage.ts';
 import { ROOT } from './obs.ts';
 import { replayRecords } from './replay.ts';
-import { decideReplay, start, type Run } from './run.ts';
+import { replayEntry, start, type Run } from './run.ts';
 
 type Trace = ReturnType<typeof replayRecords>;
-type Asked = { action?: string; dialogue?: string };
+// now: read the asked policy on the world after the step, as the author panel asks about what could be done next.
+type Asked = { action?: string; dialogue?: string; now?: true };
 const leaves = (p: Policy): Policy[] =>
   p.op === 'all' || p.op === 'any'
     ? p.items.flatMap(leaves)
@@ -45,14 +40,12 @@ class Usage extends Error {}
 
 /** The explanation of step `ordinal` of `trace` (cartridge.md Rule explainer lists the evidence). */
 export function why(c: Cartridge, trace: Trace, ordinal: number, on: Asked = {}) {
-  const { entries } = trace;
-  if (!Number.isInteger(ordinal) || ordinal < 1 || ordinal > entries.length)
-    throw new Usage(`ordinal ${ordinal} is not in 1..${entries.length}`);
+  const entry = entryAt(trace, ordinal);
   const { cartridge, ruleOf } = marked(c);
   const r = prefix(cartridge, trace, ordinal);
-  const command: Command = entries[ordinal - 1]!.data.command;
+  const command: Command = entry.data.command;
   const before = r.world;
-  const decide = (cart: Cartridge) => step(r, cart, command, ordinal);
+  const decide = (cart: Cartridge) => step(r, cart, entry, ordinal);
   const d = decide(cartridge);
   const rules = cartridge.reactions ?? {};
   const probe = `coverage.m${Object.keys(rules).length}`; // no rule's, and never authored (marked)
@@ -76,14 +69,26 @@ export function why(c: Cartridge, trace: Trace, ordinal: number, on: Asked = {})
         fired: said(d, (key) => ruleOf(key) === ref),
         ...(rule.when && { when: annotate(rule.when, (i) => ({ held: held(ref, i) })) }),
       })),
-    ...asked(c, on, before, command),
+    ...asked(
+      c,
+      on,
+      on.now ? prefix(cartridge, trace, ordinal + 1).world : before,
+      on.now ? null : primaryTarget(command.payload), // the last command's is not the next one's
+    ),
   };
 }
 
-// Step `ordinal` decided on a copy of `r` (decideReplay advances the Run it is given) with `cart`.
-function step(r: Run, cart: Cartridge, command: Command, ordinal: number) {
-  const d = decideReplay({ ...r, world: { ...r.world, cartridge: cart } }, command).decision;
-  // closing() (mechanics/death/lines.ts:22) cuts narration to 64 lines: a cut marker is unknown
+// The last row at `ordinal`: an unknown commit's follow-up repeats it with the outcome (ADR-075 §4).
+function entryAt({ entries }: Trace, ordinal: number) {
+  const e = entries.filter((e) => e.data.ordinal === ordinal).at(-1);
+  if (!e) throw new Usage(`ordinal ${ordinal} is not in 1..${entries.at(-1)?.data.ordinal ?? 0}`);
+  return e;
+}
+
+// Step `ordinal` (`e`) decided on a copy of `r` (replay advances the Run it is given) with `cart`.
+function step(r: Run, cart: Cartridge, e: Trace['entries'][number], ordinal: number) {
+  const d = replayEntry({ ...r, world: { ...r.world, cartridge: cart } }, e).decision;
+  // closing() (mechanics/death/lines.ts:28) cuts narration to 64 lines: a cut marker is unknown
   if (d.kind === 'accepted' && (d.narration?.length ?? 0) >= 64)
     throw new Error(`narration cap reached at ordinal ${ordinal}`);
   return d;
@@ -101,7 +106,7 @@ function prefix(cartridge: Cartridge, trace: Trace, ordinal: number) {
     head.ids.seed,
     head.ids.kernel_version,
   );
-  for (const e of entries.slice(0, ordinal - 1)) decideReplay(r, e.data.command);
+  for (const e of entries) if (e.data.ordinal < ordinal) replayEntry(r, e);
   return r;
 }
 
@@ -120,42 +125,48 @@ const causes = (rule: ReactionRule, d: DecisionResult, before: World) =>
       ),
     }));
 
-// The policies asked for, on the world before the step: a scripted action's target is the command's,
+// The policies asked for, on `world` (by default the world before the step): a scripted action's target is the command's,
 // a dialogue's its authored NPC (dialogue/selection.ts:93; ponytail: not a choose row's bound
 // speaker, dialogue/shared.ts:93; read speakerOf once a fixture binds a speaker other than the npc).
-const asked = (c: Cartridge, on: Asked, before: World, command: Command) => ({
+const asked = (c: Cartridge, on: Asked, world: World, target: string | null | undefined) => ({
   ...(on.action !== undefined && {
-    action: policy(c.scripted_actions, on.action, before, command, () =>
-      primaryTarget(command.payload),
-    ),
+    action: policy(c.scripted_actions, on.action, world, () => target),
   }),
   ...(on.dialogue !== undefined && {
-    dialogue: policy(
-      c.dialogues,
-      on.dialogue,
-      before,
-      command,
-      (x) => before.entityIds[refString(x.npc)],
-    ),
+    dialogue: policy(c.dialogues, on.dialogue, world, (x) => world.entityIds[refString(x.npc)]),
   }),
 });
 
+// Whether admission reads this leaf at the action's target (mechanics/policy.ts: read, tagsOf,
+// statusActive, and target_present).
+const readsTarget = (p: Policy) =>
+  p.op === 'target_present' ||
+  (p.op === 'status_active' && p.subject === 'target') ||
+  ((p.op === 'fact_compare' || p.op === 'fact_at_least') && !!p.subject && !p.npc && !p.item) ||
+  (p.op === 'has_tag' && !p.item && !p.barrier && !p.room && p.subject !== 'room');
+
 // The definition keyed `key`, its policy's leaves read on `world` as admission reads them; no
-// policy, none (it holds).
+// policy, none (it holds). A null target is not chosen yet: a leaf that reads it holds 'depends'.
 function policy<D extends { key: string; policy?: Policy }>(
   defs: Readonly<Record<string, D>> | undefined,
   key: string,
   world: World,
-  command: Command,
-  target: (d: D) => string | undefined,
+  target: (d: D) => string | null | undefined,
 ) {
   const [rule, d] = Object.entries(defs ?? {}).find(([, x]) => x.key === key) ?? [];
   if (!d) throw new Usage(`no definition keyed ${key}`);
-  const ctx = () => ({ target: target(d) as never, steps: { n: 0 } });
-  const actor = (command.payload as { actor_id: CharacterId }).actor_id; // scripted actions' and talk's commands carry one
+  const ctx = () => ({ target: (target(d) ?? undefined) as never, steps: { n: 0 } });
+  const actor = world.character; // not the last command's: `run_job` has none
   const root = d.policy;
   if (!root) return { rule };
-  const at = (i: number) => ({ holds: holds(world, actor, leaves(root)[i]!, ctx()) });
+  const at = (i: number) => {
+    const leaf = leaves(root)[i]!;
+    if (target(d) === null && readsTarget(leaf)) return { holds: 'depends' };
+    return {
+      holds: holds(world, actor, leaf, ctx()),
+      ...(leaf.op === 'fact_compare' && { now: read(world, actor, leaf, ctx().target) ?? null }),
+    };
+  };
   return { rule, policy: annotate(root, at) };
 }
 

@@ -21,9 +21,8 @@ defmodule Loka.Content.Theft do
 
   def settings(settings, _), do: settings
 
-  @spec check(map() | nil, map(), {term(), map()}, {term(), map() | :unknown} | nil) :: [map()]
+  @spec check(map() | nil, map(), {term(), map()}, {term(), map() | :unknown}) :: [map()]
   def check(nil, _, _, _), do: []
-  def check(_, _, _, nil), do: []
 
   def check(m, defs, {_, %{"world" => %{"theft" => t}}}, {_, text}) do
     refs =

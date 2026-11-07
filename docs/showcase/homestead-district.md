@@ -1,5 +1,7 @@
 # Showcase plan 4: the Homestead district
 
+> Reference only: agent-written plan; any room, NPC or line text in it is placeholder. Never ships as written; the owner writes shipped prose ([rule](../decisions/owner-decision-human-made-content-2026-10-31.md)).
+
 District brief for `cartridges/toolbox_showcase` ([showcase](../SHOWCASE.md), Beads `loka-y6yg.19`),
 written by Fable for an Opus developer and an Opus reviewer. Base: `main` after PR #403 (Homestead
 batches A and B merged in #402 and its predecessor; the toolbox table still reads `in progress` for
@@ -45,7 +47,7 @@ One build slice per district, in owner order: 4 Homestead, 5 economy and law, 6 
 **They run in sequence, never in parallel:** every slice edits `cartridge.json` (capabilities,
 `world`, `speech`), `resources.json`, `facts.json`, `text.json`, `layout.json`, the hub sign
 text and `protocol/fixtures/toolbox_showcase_hash.json`; plans 5 and 6 both edit
-`rooms/crossroads_inn.json`. Each slice branches from `main` after the previous one merges. A
+`areas/hub/rooms/crossroads_inn.json`. Each slice branches from `main` after the previous one merges. A
 slice's kernel test file is its own; the hub pin in `showcase_body.test.ts` (exit count) changes
 in plans 5 and 6 only.
 
@@ -218,7 +220,7 @@ Per-player: every skill, `regard`, `gifted_*`, `traded_knife`, `owns_plot`, `own
 [seam 9](../decisions/owner-decision-realm-seams-2026-10-13.md#the-seams)'s known gap, stated here,
 not solved), the fish, logs and sticks, the hens (a per-world population; Realm audience `public`).
 Delays are logical units (300, 600, 3600, 43200, 86400, 172800); no device clock; the e2e advances
-time through the dev panel's control (`?dev=1`, [builders guide](../BUILDERS-GUIDE.md)) or its
+time through the dev panel's control (`?dev=1`, [writing the game](../guides/writing-the-game.md)) or its
 `Date.now` override, never a player verb.
 
 ## Pins the build writes

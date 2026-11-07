@@ -7,7 +7,8 @@ import { test } from 'node:test';
 import { narration } from './narration.ts';
 import type { Story } from './save.ts';
 
-// Break: background combat shares an ambient receipt and loses line routing on a cold reopen.
+// Break: background combat shares an ambient receipt and loses line routing on a cold reopen, or a
+// later round's tier and condition lines go to the World log (loka-kgd.202: only narration keys routed).
 test('committed combat line indices come from pinned keys and structured receipt events', () => {
   const folder = mkdtempSync(join(tmpdir(), 'loka-narration-'));
   const path = join(folder, 'save.db');
@@ -23,7 +24,11 @@ test('committed combat line indices come from pinned keys and structured receipt
         character: 'player',
         cartridge: {
           world: {
-            combat: { narration: { player_hit: 'authored.strike', npc_died: 'authored.fall' } },
+            combat: {
+              narration: { player_hit: 'authored.strike', npc_died: 'authored.fall' },
+              tiers: [{ at_percent: 50, npc_hit: 'authored.maul' }],
+              conditions: [{ at_percent: 75, text: 'authored.cuts' }],
+            },
             death: { narration: { woke: 'authored.woke' } },
           },
         },
@@ -38,6 +43,8 @@ test('committed combat line indices come from pinned keys and structured receipt
       { key: 'authored.strike' },
       { key: 'door' },
       { key: 'authored.fall' },
+      { key: 'authored.maul' },
+      { key: 'authored.cuts' },
     ];
     const decision = {
       kind: 'accepted',
@@ -49,10 +56,18 @@ test('committed combat line indices come from pinned keys and structured receipt
     sql
       .prepare('INSERT INTO receipt(command_id, response, scope, revision) VALUES (?, ?, ?, ?)')
       .run('round', JSON.stringify(decision), 'story/lineage/player', 1);
-    assert.deepEqual(narration(story()), { command_id: 'round', lines, combat_lines: [1, 3] });
+    assert.deepEqual(narration(story()), {
+      command_id: 'round',
+      lines,
+      combat_lines: [1, 3, 4, 5],
+    });
     sql.close();
     sql = new DatabaseSync(path);
-    assert.deepEqual(narration(story()), { command_id: 'round', lines, combat_lines: [1, 3] });
+    assert.deepEqual(narration(story()), {
+      command_id: 'round',
+      lines,
+      combat_lines: [1, 3, 4, 5],
+    });
     // The same text key without a combat occurrence remains an ordinary authored room event.
     sql.prepare('UPDATE receipt SET response = ?').run(JSON.stringify({ ...decision, events: [] }));
     assert.deepEqual(narration(story()), { command_id: 'round', lines });
@@ -144,4 +159,142 @@ test('committed combat line indices come from pinned keys and structured receipt
     sql.close();
     rmSync(folder, { recursive: true, force: true });
   }
+});
+
+// Breaks: an NPC's death reads as the player's, or a death with no authored line never reaches the Book
+// (no player-facing line may be needed for the wash and the wake); a reopen would then miss it too.
+test('a receipt says died only for the player, with or without lines', () => {
+  const sql = new DatabaseSync(':memory:');
+  const story = {
+    db: {
+      isInTransactionSync: () => sql.isTransaction,
+      getFirstSync: (query: string, scope: string) => sql.prepare(query).get(scope),
+    },
+    meta: { lineage_id: 'lineage' },
+    world: { character: 'player', cartridge: { world: {} } },
+  } as unknown as Story;
+  sql.exec(
+    "CREATE TABLE receipt(command_id TEXT, response TEXT, scope TEXT, revision INTEGER, command TEXT DEFAULT 'null')",
+  );
+  const put = (payload: object, narration: object[]) => {
+    sql.exec('DELETE FROM receipt');
+    sql
+      .prepare('INSERT INTO receipt(command_id, response, scope, revision) VALUES (?, ?, ?, ?)')
+      .run(
+        'c',
+        JSON.stringify({
+          kind: 'accepted',
+          outcome: 'waited',
+          delta: { ops: [] },
+          events: [{ payload }],
+          narration,
+        }),
+        'story/lineage/player',
+        1,
+      );
+    return narration;
+  };
+  const player = { type: 'entity_died', entity_id: 'player' };
+  const npc = { ...player, victim_definition: 'wolf' };
+  const lines = [{ key: 'authored.fall' }];
+  put(player, lines);
+  assert.deepEqual(narration(story), { command_id: 'c', lines, died: true });
+  put(player, []);
+  assert.deepEqual(narration(story), { command_id: 'c', lines: [], died: true });
+  put(npc, lines);
+  assert.deepEqual(narration(story), { command_id: 'c', lines });
+  put(npc, []);
+  assert.equal(narration(story), undefined);
+  sql.close();
+});
+
+// Breaks: a lever reads a label instead of its event, a latch or a miss never reaches the record, a
+// landed blow or a foe's miss sounds as the player's, a miss compares the character id with the attack's
+// body id, a barrier the world moved in a wait sounds as the player's latch, a round on the clock loses
+// its miss, a clock receipt or a reopen plays a lever, or a deed with no authored line is dropped.
+test('a receipt names the deed from its events, with no lines needed', () => {
+  const sql = new DatabaseSync(':memory:');
+  const story = {
+    db: {
+      isInTransactionSync: () => sql.isTransaction,
+      getFirstSync: (query: string, ...args: string[]) => sql.prepare(query).get(...args),
+    },
+    meta: { lineage_id: 'lineage' },
+    world: { character: 'player', body: 'body', cartridge: { world: {} } },
+  } as unknown as Story;
+  sql.exec(
+    "CREATE TABLE receipt(command_id TEXT, response TEXT, scope TEXT, revision INTEGER, command TEXT DEFAULT '{}')",
+  );
+  const put = (payload: object | object[], type = 'open', narration: object[] = []) => {
+    sql.exec('DELETE FROM receipt');
+    const response = {
+      kind: 'accepted',
+      delta: { ops: [] },
+      events: [payload].flat().map((p) => ({ payload: p })),
+      narration,
+    };
+    sql
+      .prepare(
+        'INSERT INTO receipt(command_id, response, scope, revision, command) VALUES (?, ?, ?, ?, ?)',
+      )
+      .run(
+        'c',
+        JSON.stringify(response),
+        'story/lineage/player',
+        1,
+        JSON.stringify({ payload: { type } }),
+      );
+  };
+  const rows: [object | object[], object | undefined][] = [
+    [{ type: 'custom_event', event: { key: 'lever' } }, { lever: true }],
+    [{ type: 'custom_event', event: { key: 'bell' } }, undefined],
+    [{ type: 'action_completed', action_key: 'pull' }, { opened: true }],
+    [{ type: 'barrier_changed', barrier: 'gate' }, { opened: true }],
+    [{ type: 'attack_result', hit: false, attacker_id: 'body' }, { missed: true }],
+    [{ type: 'attack_result', hit: true, attacker_id: 'body' }, undefined],
+    [{ type: 'attack_result', hit: false, attacker_id: 'wolf' }, undefined],
+    // Breaks: a second swing that landed still whispers, or an ally's blow swallows the miss.
+    [
+      [
+        { type: 'attack_result', hit: false, attacker_id: 'body' },
+        { type: 'attack_result', hit: true, attacker_id: 'body' },
+      ],
+      undefined,
+    ],
+    [
+      [
+        { type: 'attack_result', hit: false, attacker_id: 'body' },
+        { type: 'attack_result', hit: true, attacker_id: 'gil' },
+      ],
+      { missed: true },
+    ],
+  ];
+  for (const [payload, deed] of rows) {
+    put(payload);
+    assert.deepEqual(
+      narration(story, 'c'),
+      deed && { command_id: 'c', lines: [], ...deed },
+      JSON.stringify(payload),
+    );
+  }
+  put({ type: 'barrier_changed', barrier: 'gate' }, 'unlock');
+  assert.deepEqual(narration(story, 'c'), { command_id: 'c', lines: [], opened: true });
+  for (const verb of ['wait', 'close', 'lock']) {
+    put({ type: 'barrier_changed', barrier: 'gate' }, verb);
+    assert.equal(narration(story, 'c'), undefined, `${verb}: shows no exit`);
+  }
+  const line = [{ key: 'player_miss' }];
+  put({ type: 'attack_result', hit: false, attacker_id: 'body' }, 'wait', line);
+  assert.deepEqual(narration(story), { command_id: 'c', lines: line, missed: true }, 'the clock');
+  for (const payload of [
+    { type: 'custom_event', event: { key: 'lever' } },
+    { type: 'action_completed', action_key: 'pull' },
+    { type: 'barrier_changed', barrier: 'gate' },
+  ]) {
+    put(payload, 'open', line);
+    assert.deepEqual(narration(story), { command_id: 'c', lines: line }, 'no press, no deed');
+  }
+  put({ type: 'custom_event', event: { key: 'lever' } });
+  assert.equal(narration(story), undefined, 'a reopen plays no deed again');
+  sql.close();
 });

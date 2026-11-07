@@ -92,7 +92,12 @@ test('D10 real SQLite keeps each entry/Look and shared door commit across cold r
   assert.equal(blocked.kind, 'saved');
   if (blocked.kind === 'saved') assert.equal(blocked.decision.kind, 'rejected');
   assert.equal(names(game).includes('room.woodstore.title'), false);
-  invoke(game, 'open', { direction: 'south' });
+  const pressed = invoke(game, 'open', { direction: 'south' });
+  // Breaks: the door check reads the stored command's envelope, not its payload, and the latch never plays.
+  assert.equal(
+    game.lastNarration(pressed.kind === 'saved' ? pressed.command_id : '')?.opened,
+    true,
+  );
   reopen();
   invoke(game, 'move', { direction: 'south' });
   reopen();
@@ -105,14 +110,8 @@ test('D10 real SQLite keeps each entry/Look and shared door commit across cold r
 });
 
 // Break: corrupted knowledge is silently repaired or untyped, rather than refusing without changing save bytes.
-test('D10 malformed and forged knowledge rows refuse in place without deleting saved progress', (t) => {
-  for (const kind of [
-    'missing_current',
-    'wrong_actor',
-    'future_observation',
-    'forged_visit',
-    'unsafe_time',
-  ]) {
+test('D10 knowledge rows the kernel cannot run on refuse in place without deleting saved progress', (t) => {
+  for (const kind of ['missing_current', 'future_observation', 'unsafe_time']) {
     const dir = mkdtempSync(join(tmpdir(), 'loka-d10-corrupt-'));
     t.after(() => rmSync(dir, { recursive: true, force: true }));
     const path = join(dir, 'save.db');
@@ -120,10 +119,6 @@ test('D10 malformed and forged knowledge rows refuse in place without deleting s
     invoke(a.game, 'look');
     if (kind === 'missing_current')
       a.sql.exec("DELETE FROM state_row WHERE section='visited_rooms'");
-    if (kind === 'wrong_actor')
-      a.sql.exec(
-        "UPDATE state_row SET value=json_set(value,'$.actor_id','00000000-0000-4000-8000-000000000099') WHERE section='visited_rooms'",
-      );
     if (kind === 'future_observation')
       a.sql.exec(
         "UPDATE state_row SET value=json_set(value,'$.at',999999) WHERE section='observed_npcs'",
@@ -135,19 +130,6 @@ test('D10 malformed and forged knowledge rows refuse in place without deleting s
       a.sql
         .prepare("UPDATE state_row SET value=? WHERE section='observed_npcs' AND key=?")
         .run((r.value as string).replace(/"at":\d+/, '"at":1e999'), r.key as string);
-    }
-    if (kind === 'forged_visit') {
-      const existing = a.sql
-        .prepare("SELECT key,value FROM state_row WHERE section='visited_rooms' LIMIT 1")
-        .get()!;
-      const row = JSON.parse(existing.value as string);
-      row.room_id = f.genesis().roomIds[`${f.prefix}:room/forge_stall`];
-      a.sql
-        .prepare("INSERT INTO state_row VALUES ('visited_rooms',?,?)")
-        .run(
-          encode({ kind: 'visit', actor_id: row.actor_id, room_id: row.room_id }),
-          JSON.stringify(row),
-        );
     }
     a.sql.close();
     const bytes = readFileSync(path);

@@ -222,3 +222,44 @@ test('each sense cue is one log line, once per room visit, after the narration',
   assert.deepEqual(show(yard), []);
   assert.deepEqual(show(here()), cues);
 });
+
+// Breaks: a queued chapter inherits the card before it, its clock spent; or a chapter card outranks
+// a scene (book-ui.md Chapters), whose unmount is what stops the clock.
+test('a card is its chapter index, and a scene takes its place', async () => {
+  const { Body } = await import('./Body.tsx');
+  const { ChapterPage } = await import('./sections.tsx');
+  const inner = (more: object) => {
+    const screen = presenter(game(() => ({ ...forge(), ...more }) as GameView)).screen();
+    const nop = () => {};
+    const body = (Body as any)({
+      screen,
+      page: { kind: 'chapter' },
+      g: group(screen.buttons),
+      press: nop,
+    });
+    const page = body.props.children.at(-1);
+    return page.type(page.props);
+  };
+  const chapter = (index: number) => ({ chapter: { index, title: 'smith.name' } });
+  assert.equal(inner(chapter(1)).type, ChapterPage);
+  assert.equal(inner(chapter(1)).key, '1');
+  assert.equal(inner(chapter(2)).key, '2');
+  const scene = { scene: { id: 's', lines: [], current: 0 } };
+  assert.notEqual(inner({ ...chapter(1), ...scene }).type, ChapterPage);
+});
+
+// Breaks: the World page's opaque paper sits over the sky, so lightning and the wind fold never show
+// (book-ui.md, Storm).
+test('the paper lies under the sky and the World page draws none above it', async () => {
+  const { Leaf } = await import('./Leaf.tsx');
+  const { Storm } = await import('./Storm.tsx');
+  const screen = presenter(game(() => forge())).screen();
+  const leaf = (Leaf as any)({ screen, g: group(screen.buttons), flip: { turn: 0 }, stack: [] });
+  assert.ok(leaf.props.style.backgroundColor, 'the leaf is the paper');
+  assert.equal(leaf.props.children[0].type, Storm, 'the sky is first, under the ink');
+  const opaque = (await world(forge())).filter((n) => {
+    const { flex, backgroundColor } = Object.assign({}, ...[n.props?.style].flat());
+    return flex === 1 && backgroundColor;
+  });
+  assert.deepEqual(opaque, [], 'nothing on the World page covers the sky');
+});

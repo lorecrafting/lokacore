@@ -11,10 +11,12 @@ import {
   positioned,
 } from './combat_fixture.ts';
 import { step, gameView } from '../src/index.ts';
+import { validate } from '../src/foundation/validate.ts';
 import { key } from '../src/foundation/compose.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
 import { positionOf } from '../src/mechanics/position/shared.ts';
 import { engaged } from '../src/mechanics/combat/shared.ts';
+import { living } from '../src/mechanics/death/shared.ts';
 import { value } from '../src/mechanics/fact.ts';
 
 const pools = (w: ReturnType<typeof combatWorld>) => [
@@ -117,6 +119,53 @@ test('a surviving sleeper wakes before its remaining opportunity, other position
   }
 });
 
+// The rat's round on a seated body at hp 4 (rng fixed to a hit); `floor` sets the body's hp minimum,
+// `profile` overrides the rat's attack.
+function ratRound(position: 'sleeping' | 'sitting', floor: number, profile?: object) {
+  const one = elapsed(attack(combatWorld()).world, 150);
+  const seated = positioned(one.world, position);
+  const at = key({ kind: 'resource', resource: resourceRef(seated, 'hp'), entity_id: seated.body });
+  const spec =
+    seated.entityResourceSpecs[at] ?? seated.resourceSpecs[key(resourceRef(seated, 'hp'))];
+  const foe = rat(seated);
+  const w = {
+    ...hp(hp(seated, foe, 6), seated.body, 4),
+    entityResourceSpecs: { ...seated.entityResourceSpecs, [at]: { ...spec, minimum: floor } },
+    entities: {
+      ...seated.entities,
+      [foe]: { ...seated.entities[foe], ...(profile && { attack: profile }) },
+    },
+  } as typeof seated;
+  const next = elapsed({ ...w, state: { ...w.state, rng: [12295, 1029, 1029, 25165824] } }, 300, 4);
+  assert.equal(next.decision.kind, 'accepted');
+  return next.world;
+}
+
+// Breaks (loka-vduxr.15): a hit that takes nothing because the sleeper's hp sits at its floor leaves it asleep.
+test('a hit on a sleeper held at its hp floor still wakes it', () => {
+  const next = ratRound('sleeping', 4);
+  assert.deepEqual(pools(next).slice(0, 2), [4, 4]);
+  assert.equal(positionOf(next, next.character), 'standing');
+});
+
+// Breaks: a miss at the hp floor wakes the sleeper (the spec wakes on positive damage).
+test('a miss on a sleeper held at its hp floor leaves it asleep', () => {
+  const next = ratRound('sleeping', 4, { chance: 0, damage_min: 1, damage_max: 1 });
+  assert.equal(positionOf(next, next.character), 'sleeping');
+});
+
+// Breaks: a hit of 0 damage above the floor wakes the sleeper.
+test('a hit for 0 damage above the hp floor leaves the sleeper asleep', () => {
+  const next = ratRound('sleeping', 0, { chance: 100, damage_min: 0, damage_max: 0 });
+  assert.equal(positionOf(next, next.character), 'sleeping');
+});
+
+// Breaks: the floor wake is written for a target that is not asleep.
+test('a hit at the hp floor leaves a sitting body sitting', () => {
+  const next = ratRound('sitting', 4);
+  assert.equal(positionOf(next, next.character), 'sitting');
+});
+
 // Breaks: <= accuracy, skipping accuracy at declared endpoints, damage draw on miss/fixed interval.
 test('accuracy20 misses on roll20; endpoint chances still draw accuracy', () => {
   for (const chance of [0, 20, 100]) {
@@ -167,6 +216,62 @@ test('production hour-boundary recovery precedes damage and Flee preserves the r
     rate: 18,
     remainder: 2700,
   });
+});
+
+// Breaks: a sanctuary refusal stays bare, so the Book cannot grey it with its sentence, or a seated player
+// is refused for standing first and the card appears then vanishes on standing; or a seated
+// player outside a sanctuary is told sanctuary and loses a card they could bring back by standing.
+test('a sanctuary refuses Attack with its cause, sitting or standing; a seat elsewhere stays bare', () => {
+  const w = combatWorld();
+  const calm = (x: typeof w) => ({
+    ...x,
+    rooms: {
+      ...x.rooms,
+      [room(x, 'lantern_cellar')]: { ...x.rooms[room(x, 'lantern_cellar')], sanctuary: true },
+    },
+  });
+  const seated = step(w, command(w, { type: 'sit', actor_id: w.character }), 1).world;
+  const sanctuary = {
+    code: 'invalid_state',
+    cause: 'sanctuary',
+    message: { key: 'combat.sanctuary' },
+  };
+  for (const [before, reason] of [
+    [calm(w), sanctuary],
+    [calm(seated), sanctuary],
+    [seated, { code: 'invalid_state' }],
+  ] as const) {
+    const view = gameView(before);
+    assert.deepEqual(validate('GameView', view), []);
+    const offer = view.entities
+      .find((e) => e.id === rat(w))!
+      .actions.find((a) => a.action_key === 'attack')!;
+    assert.deepEqual([offer.available, 'reason' in offer && offer.reason], [false, reason]);
+    const out = attack(before);
+    assert.ok(out.decision.kind === 'rejected');
+    assert.deepEqual(out.decision.error, reason);
+  }
+  // Breaks: the sanctuary check moves above an earlier refusal, so an hp-less person gets a grey
+  // Attack instead of no card, or a target in another room reads as this room's rule.
+  const unhurt = calm(w);
+  const { hp: _hp, ...bare } = unhurt.entities[rat(w)] as (typeof unhurt.entities)[string] & {
+    hp?: unknown;
+  };
+  const hpless = { ...unhurt, entities: { ...unhurt.entities, [rat(w)]: bare } };
+  const away = room(w, 'drowned_lantern');
+  const remote = {
+    ...w,
+    rooms: { ...w.rooms, [away]: { ...w.rooms[away], sanctuary: true } },
+    state: { ...w.state, containers: { ...w.state.containers, [w.body]: away } },
+  };
+  for (const [before, error] of [
+    [hpless, { code: 'invalid_target', cause: 'cannot_be_hurt' }],
+    [remote, { code: 'not_present' }],
+  ] as const) {
+    const out = attack(before as typeof w);
+    assert.ok(out.decision.kind === 'rejected');
+    assert.deepEqual(out.decision.error, error);
+  }
 });
 
 // Breaks: raw target bypass, repeat/switch Attack allocation, or Attack advertised on noncombat NPC.
@@ -223,25 +328,89 @@ test('admission refuses absent, dead, sanctuary, nonstanding and already engaged
 // Independent Python xoshiro calculation: accuracy3019873350; next seven raws all reject bound2147483649:
 // 2778870678,3218504330,2184986130,3037241175,3032836435,3141722952,3972115460.
 // Ninth raw1913555854 would accept, so resetting the per-call budget incorrectly commits.
+// Two swings (budget 12): raw 9 is the first damage, raw 10 (57 < 75) the second hit, raw 11
+// (913228479) its damage: 11 draws commit; growing the budget after the swings faults at raw 9.
 test('eight raw draws including damage rejections exhaust the whole round atomically', () => {
   const w = combatWorld();
   const settings = w.cartridge.world!.combat!;
-  const controlled = {
+  for (const [attacks, kind] of [
+    [1, 'fault'],
+    [2, 'accepted'],
+  ] as const) {
+    const controlled = {
+      ...w,
+      cartridge: {
+        ...w.cartridge,
+        world: {
+          ...w.cartridge.world,
+          combat: {
+            ...settings,
+            player_attack: { chance: 75, damage_min: 1, damage_max: 2147483649, attacks },
+          },
+        },
+      },
+      state: { ...w.state, rng: [3116826059, 1870624627, 1508195160, 4130000286] },
+    };
+    const begun = attack(controlled).world;
+    const next = elapsed(begun, 150);
+    assert.equal(next.decision.kind, kind);
+    if (kind === 'fault') assert.equal(next.world, begun);
+  }
+});
+
+// Breaks (loka-2lvx): a blow past an NPC's authored hp floor writes a level below its minimum and the
+// round faults evaluator_error; it saturates at the floor, the foe alive, as a spell's damage does.
+test('a blow at an NPC with hp minimum 1 stops at 1 and the fight goes on', () => {
+  const w = combatWorld();
+  const target = key({ kind: 'resource', resource: resourceRef(w, 'hp'), entity_id: rat(w) });
+  const spec = w.entityResourceSpecs[target]!;
+  const floored = {
+    ...w,
+    entityResourceSpecs: { ...w.entityResourceSpecs, [target]: { ...spec, minimum: 1 } },
+  };
+  let at = attack(hp(floored, rat(floored), 2)).world;
+  const seen: number[] = [];
+  for (let n = 1; n <= 8; n++) {
+    const round = elapsed(at, n * 150, n + 1);
+    assert.equal(round.decision.kind, 'accepted', JSON.stringify(round.decision));
+    at = round.world;
+    seen.push(level(at, rat(at), resourceRef(at, 'hp'))!);
+  }
+  assert.deepEqual(seen, [1, 1, 1, 1, 1, 1, 1, 1]);
+  assert.ok(living(at, rat(at)));
+});
+
+// Breaks: the blow capped only at a negative floor passes 0, so death (it fires at 0) never comes.
+test('a killing blow at an NPC with a negative hp minimum stops at 0', () => {
+  const w = combatWorld();
+  const target = key({ kind: 'resource', resource: resourceRef(w, 'hp'), entity_id: rat(w) });
+  const spec = w.entityResourceSpecs[target]!;
+  const combat = w.cartridge.world!.combat!;
+  const below = {
     ...w,
     cartridge: {
       ...w.cartridge,
       world: {
-        ...w.cartridge.world,
+        ...w.cartridge.world!,
         combat: {
-          ...settings,
-          player_attack: { chance: 75, damage_min: 1, damage_max: 2147483649 },
+          ...combat,
+          player_attack: { ...combat.player_attack, chance: 100, damage_min: 4, damage_max: 4 },
         },
       },
     },
-    state: { ...w.state, rng: [3116826059, 1870624627, 1508195160, 4130000286] },
+    entityResourceSpecs: { ...w.entityResourceSpecs, [target]: { ...spec, minimum: -5 } },
   };
-  const begun = attack(controlled).world;
-  const next = elapsed(begun, 150);
-  assert.equal(next.decision.kind, 'fault');
-  assert.equal(next.world, begun);
+  let at = attack(hp(below, rat(below), 1)).world;
+  const losses: number[] = [];
+  for (let n = 1; n <= 20 && living(at, rat(at)); n++) {
+    const round = elapsed(at, n * 150, n + 1);
+    at = round.world;
+    for (const e of (round.decision as any).events ?? [])
+      if (e.payload.type === 'attack_result' && e.payload.target_id === rat(at))
+        losses.push(e.payload.loss);
+  }
+  assert.equal(living(at, rat(at)), false, 'the blow kills');
+
+  assert.equal(Math.max(...losses), 1);
+  assert.equal(level(at, rat(at), resourceRef(at, 'hp')), 0);
 });

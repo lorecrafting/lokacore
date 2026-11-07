@@ -17,7 +17,7 @@ import { level, resourceRef } from '../src/mechanics/resource.ts';
 import { activeStatuses } from '../src/mechanics/status/shared.ts';
 import { sequence } from '../src/mechanics/reaction.ts';
 import { ctx } from './harness.ts';
-import type { Command } from '../src/contracts.gen.ts';
+import type { Command, Key } from '../src/contracts.gen.ts';
 import { resolved } from '../src/commands/actions.ts';
 import { identify, resolve } from '../src/commands/invocation.ts';
 import { check } from '../src/runtime/invariants.ts';
@@ -283,6 +283,70 @@ test('a hostile hp-less NPC never engages; the goblins are calm', () => {
   const old = { ...fought, entities: { ...fought.entities, [guard]: bare } };
   assert.equal(gameView(fought).combat!.band, 'ready');
   assert.equal('band' in gameView(old).combat!, false);
+});
+
+// loka-w9id. Breaks: an `unattackable` NPC keeps its Attack offer, execution admits the attack, the
+// refusal carries a cause (a Book sentence), a flagged NPC with no hp faults, or the flag leaks to
+// a goblin.
+test('an unattackable NPC has no Attack offer and refuses Attack with no cause, with or without hp', () => {
+  for (const hp of [(content as any).npcs['fear_sampler@0.0.1:npc/goblin'].hp, undefined]) {
+    const c = structuredClone(content) as any;
+    Object.assign(c.npcs['fear_sampler@0.0.1:npc/guard'], {
+      attack: { chance: 100, damage_min: 1, damage_max: 1 },
+      unattackable: true,
+      ...(hp && { hp }),
+    });
+    const { w, a } = den(c);
+    const guard = npc(w, 'guard');
+    const view = gameView(w);
+    assert.deepEqual(validate('GameView', view), []);
+    const offer = (target: string) =>
+      view.entities.find((e) => e.id === target)!.actions.find((x) => x.action_key === 'attack');
+    assert.equal(offer(guard), undefined);
+    assert.equal(offer(a)!.available, true);
+    const found = identify('scope', w.character, {
+      invocation_id: id(),
+      actor_id: w.character,
+      action_key: 'attack',
+      target_ids: [guard],
+      input: {},
+    });
+    assert.ok(found.kind === 'identified', JSON.stringify(found));
+    const command = resolve(w, found) as Command;
+    assert.equal(command.payload.type, 'attack');
+    const refused = step(w, command, n, 'attack' as Key);
+    assert.deepEqual(refused.decision, { kind: 'rejected', error: { code: 'invalid_target' } });
+    assert.equal(refused.world, w);
+    const resolves = Object.fromEntries(
+      Object.values(resolved(w, w.character)).map((x) => [x.key, x.command]),
+    );
+    const observation = { view, command, decision: refused.decision, resolves };
+    assert.ok(check('gameview_agrees_with_admission', observation));
+  }
+});
+
+// loka-w9id. Breaks: `hostileAt` stops reading the shared query, so a flagged hostile NPC or a
+// companion (world.combat.allies) opens a fight on entry that no one can answer.
+test('neither an unattackable NPC nor a companion engages on entry; the same NPC otherwise does', () => {
+  const armed = () => {
+    const c = structuredClone(content) as any;
+    Object.assign(c.npcs['fear_sampler@0.0.1:npc/guard'], {
+      attack: { chance: 100, damage_min: 1, damage_max: 1 },
+      hp: c.npcs['fear_sampler@0.0.1:npc/goblin'].hp,
+      disposition: { hostile: { op: 'all', items: [] }, engage: 'npc.guard.short' },
+    });
+    return c;
+  };
+  const fights = (c: any) => Object.keys(den(c).w.state.encounters ?? {}).length;
+  assert.equal(fights(armed()), 1);
+  const flagged = armed();
+  flagged.npcs['fear_sampler@0.0.1:npc/guard'].unattackable = true;
+  assert.equal(fights(flagged), 0);
+  const companion = armed();
+  companion.world.combat.allies = [
+    { kind: 'npc', key: 'guard', cartridge_id: 'fear_sampler', cartridge_version: '0.0.1' },
+  ];
+  assert.equal(fights(companion), 0);
 });
 
 // loka-zvwh. Breaks: the body's own hp entry, unreadable without its row under the regen pool,

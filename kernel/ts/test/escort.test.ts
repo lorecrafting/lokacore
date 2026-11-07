@@ -1,3 +1,4 @@
+// size: allow 520, every escort move, start and Rejoin case shares one setup()
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { gameView, step, type World } from '../src/index.ts';
@@ -337,6 +338,61 @@ test('real fatal combat leaves the child behind and only a bound explicit Rejoin
   assert.equal(relation(a.world()).status, 'completed');
 });
 
+// Breaks: death stops writing separated itself; only a body waking beside the NPC shows it.
+test('a player who dies at the shrine beside the child still separates', () => {
+  const a = setup();
+  a.ready();
+  a.choose('rescue');
+  a.move(...toCellar);
+  const w = a.world();
+  const death = w.cartridge.world!.death!;
+  const shrine = { ...death.shrine, key: 'lantern_cellar' };
+  const world = { ...w.cartridge.world, death: { ...death, shrine } };
+  a.set({ ...hp(w, w.body, 1), cartridge: { ...w.cartridge, world } } as World);
+  a.run({ type: 'attack', target_id: entity(a.world(), 'npc', 'cellar_rat_1') });
+  const fatal = elapsed(a.world(), a.world().state.clock + 150, 100);
+  assert.equal(fatal.decision.kind, 'accepted', JSON.stringify(fatal.decision));
+  assert.equal(fatal.world.state.containers[fatal.world.body], room(w, 'lantern_cellar'));
+  assert.equal(relation(fatal.world).status, 'separated');
+});
+
+// Breaks: the sweep parts a row the same decision just rejoined: two writes, conflicting_write fault.
+test('a Rejoin whose own reaction ends the quest is accepted, and the next Move separates', () => {
+  const a = setup((c) => {
+    const { quest } = c.dialogues[`${prefix}:dialogue/child_rejoin`].choices.rejoin.escort;
+    (c.reactions ??= {})[`${prefix}:reaction/on_rejoin`] = {
+      key: 'on_rejoin',
+      on: { event: 'choice_resolved', choice: 'rejoin' },
+      steps: [{ op: 'quest.fail', quest, outcome: 'home' }],
+    };
+  });
+  a.ready();
+  a.choose('rescue');
+  fallInCellar(a);
+  a.move(...shrineToCellar);
+  a.talk('child');
+  a.choose('rejoin');
+  assert.equal(quest(a.world()).state, 'failed');
+  assert.equal(relation(a.world()).status, 'following');
+  a.move('up');
+  assert.equal(relation(a.world()).status, 'separated');
+  assert.equal(a.world().state.containers[child(a.world())], room(a.world(), 'lantern_cellar'));
+});
+
+// Breaks: earning a quest's objectives mid-walk reads as the quest ending and drops the child.
+test('a quest at objectives_complete keeps its escort following', () => {
+  const a = setup();
+  a.ready();
+  a.choose('rescue');
+  const w = a.world();
+  const [id, row] = homeward(w);
+  const state = { ...row, state: 'objectives_complete' };
+  a.set({ ...w, state: { ...w.state, quests: { ...w.state.quests, [id]: state } } } as World);
+  a.move(...toCellar);
+  assert.equal(relation(a.world()).status, 'following');
+  together(a.world(), 'lantern_cellar');
+});
+
 // Breaks: a forged pending start substitutes a different co-located NPC of the same kind.
 test('an escort choice cannot bind the stranger in place of the authored child', () => {
   const a = setup();
@@ -347,6 +403,33 @@ test('an escort choice cannot bind the stranger in place of the authored child',
   a.choose('rescue', 'invalid_state');
   assert.equal(a.world().state.escorts?.[a.world().character], undefined);
   assert.equal(a.flag('homeward_started'), false);
+});
+
+// Breaks: a start replaces a live relation, and only the retired row may be replaced.
+test('a start refuses while the escort it would replace is still live', () => {
+  const a = setup();
+  a.ready();
+  const before = a.world();
+  a.choose('rescue');
+  const escorts = { [before.character]: relation(a.world()) };
+  a.set({ ...before, state: { ...before.state, escorts } } as World);
+  a.choose('rescue', 'invalid_state');
+});
+
+// Breaks: a start over a following row with no quest row is admitted, and composition faults on it.
+test('a start refuses a following row whose quest is gone until the next Move separates it', () => {
+  const a = setup();
+  a.ready();
+  const before = a.world();
+  a.choose('rescue');
+  const escorts = {
+    [before.character]: {
+      ...relation(a.world()),
+      quest_instance_id: '00000000-0000-4000-8000-000000000001',
+    },
+  };
+  a.set({ ...before, state: { ...before.state, escorts } } as World);
+  a.choose('rescue', 'invalid_state');
 });
 
 // Breaks: Rejoin trusts a surviving relation after its retained original choice no longer binds the same NPC.
@@ -362,4 +445,73 @@ test('Rejoin refuses a relation whose original accepted choice names a different
   assert.deepEqual('reason' in option && option.reason, { code: 'invalid_state' });
   a.choose('rejoin', 'invalid_state');
   assert.equal(relation(a.world()).status, 'separated');
+});
+
+// Breaks (loka-ynfo): a schedule hour reaching a following escort counts as a move the single-NPC
+// body refuses, the job goes unrun, and the next Move faults evaluator_error.
+test('a following escort ignores its schedule hour and still follows the next Move', () => {
+  const a = setup((c) => {
+    c.npcs[`${prefix}:npc/child`].daily_schedule = { '20': ref('room', 'village_green') };
+    c.npcs[`${prefix}:npc/stranger`].daily_schedule = { '20': ref('room', 'well_lane') };
+  });
+  a.ready();
+  a.choose('rescue');
+  a.move('south');
+  const hour = elapsed(a.world(), 72000, 100);
+  assert.equal(hour.decision.kind, 'accepted', JSON.stringify(hour.decision));
+  // Only the escort's own NPC holds still: another's hour still walks it.
+  assert.equal(
+    hour.world.state.containers[entity(hour.world, 'npc', 'stranger')],
+    room(hour.world, 'well_lane'),
+  );
+  assert.equal(
+    hour.world.state.containers[entity(hour.world, 'npc', 'child')],
+    room(hour.world, 'well_lane'),
+  );
+  const moved = step(
+    hour.world,
+    {
+      id: 'dddddddd-0000-4000-8000-000000000099',
+      world_context_id: hour.world.context,
+      payload: { actor_id: hour.world.character, type: 'move', direction: 'south' },
+    } as Command,
+    101,
+  );
+  assert.equal(moved.decision.kind, 'accepted', JSON.stringify(moved.decision));
+  assert.equal(
+    moved.world.state.containers[entity(moved.world, 'npc', 'child')],
+    room(moved.world, 'ferry_landing'),
+  );
+});
+
+// Breaks: a separated escort's NPC still counts as escorting, so its schedule hour never walks it.
+test('a separated escort walks its schedule hour', () => {
+  const a = setup((c) => {
+    c.npcs[`${prefix}:npc/child`].daily_schedule = { '20': ref('room', 'village_green') };
+  });
+  a.ready();
+  a.choose('rescue');
+  fallInCellar(a);
+  assert.equal(relation(a.world()).status, 'separated');
+  const hour = elapsed(a.world(), 72000, 200);
+  assert.equal(hour.decision.kind, 'accepted', JSON.stringify(hour.decision));
+  assert.equal(
+    hour.world.state.containers[entity(hour.world, 'npc', 'child')],
+    room(hour.world, 'village_green'),
+  );
+});
+
+// Breaks: a following row naming a retired quest (a forged or pre-sweep save) faults every Move for
+// good instead of ending as a separation that leaves the NPC behind.
+test('a following escort whose quest row is gone separates on the next Move', () => {
+  const a = setup();
+  a.ready();
+  a.choose('rescue');
+  const w = a.world();
+  const { [relation(w).quest_instance_id]: _gone, ...quests } = w.state.quests!;
+  a.set({ ...w, state: { ...w.state, quests } } as World);
+  a.move('south');
+  const after = a.world();
+  assert.equal(relation(after).status, 'separated');
+  assert.equal(after.state.containers[child(after)], room(after, 'village_green'));
 });

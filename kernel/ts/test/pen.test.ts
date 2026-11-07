@@ -189,7 +189,7 @@ test('each of the six eggs is eaten and raises mv by 2', () => {
     for (const k of inside(w, item(w, 'nest'))) {
       const egg = item(w, k);
       w = withMv(play(w, { type: 'take', item_id: egg }), 90);
-      w = play(w, { type: 'eat', item_id: egg });
+      w = play(w, { type: 'consume', item_id: egg });
       assert.notEqual(w.state.containers[egg], w.body);
       assert.equal(level(w, w.body, resourceRef(w, 'mv')), 92);
       eaten.push(k);

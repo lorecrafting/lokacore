@@ -50,7 +50,7 @@ defmodule Loka.ContentProseTest do
 
     dir = Loka.ContentSource.copy("cartridges/speech_sampler")
     File.write!(Path.join(dir, "text.json"), "{")
-    assert {:error, diags} = Loka.Content.compile(dir)
+    assert {:error, diags} = Loka.ContentSource.plain(Loka.Content.compile(dir))
     assert triples(diags) == [{"INVALID_JSON", "text", %{}}]
   end
 

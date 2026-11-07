@@ -102,7 +102,8 @@ jobs:
           cache: npm
           cache-dependency-path: mobile/app/package-lock.json
       - run: npm ci --no-audit --no-fund
-      - uses: ./.github/actions/chromium
+      # The Storybook scripts launch the runner image's stable Google Chrome (channel 'chrome', loka-kknxt).
+      - run: google-chrome --version
       - run: npm run storybook:smoke
       - run: npm run storybook:live
       - run: npm run storybook:picker

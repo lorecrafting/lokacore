@@ -1,11 +1,18 @@
 // Toolbox row W27, the away recap through the real authority and Book (book-ui.md, Away recap).
 import assert from 'node:assert/strict';
+import { randomUUID } from 'node:crypto';
 import { cpSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { test } from 'node:test';
 import { fileURLToPath } from 'node:url';
 import { compiled } from '../../authority/local-story/__tests__/compiled.ts';
+import {
+  elapsedBundle,
+  elapsedHost,
+  sqliteHost,
+} from '../../authority/local-story/__tests__/elapsed-host.test.ts';
+import { localSession } from '../../authority/local-story/session.ts';
 import { book, words } from './__tests__/polish-book.test.ts';
 import { LABEL } from './labels.ts';
 import { resetLogs, type Logs } from './logs.ts';
@@ -76,6 +83,7 @@ test('a three-hour absence logs one collapsed recap entry at the end, counts by 
   // A press in place logs after the entry, which stays; a room change drops it.
   b.tap('A pebble, open');
   b.tap('Take a pebble');
+  b.tap(`${LABEL.awayRecap}, show`); // the detail page unmounted the room page: closed again
   shown = b.text();
   assert.equal(count(shown, LABEL.awayRecap), 1);
   assert.equal(shown[shown.indexOf(LABEL.awayRecap) + 7], 'You take a pebble.');
@@ -103,11 +111,11 @@ test('a two-minute absence shows no recap: its log is as without the field', () 
 });
 
 // Breaks: the threshold compares with `>` instead of "at least", so an absence of exactly
-// recap_after_minutes (30 real minutes in the sampler) logs instead of collapsing; one second less
-// must still log.
+// the threshold logs instead of collapsing; one second less must still log. The sampler's 30 real
+// minutes lie above the one-day away cap, so the threshold is one day: 28 minutes 48 seconds at rate 50.
 test('an absence of exactly the threshold shows the recap; one second less does not', () => {
-  assert.equal(count(away(30 * 60 * 1000).text(), LABEL.awayRecap), 1);
-  assert.equal(count(away(30 * 60 * 1000 - 1000).text(), LABEL.awayRecap), 0);
+  assert.equal(count(away(1_728_000).text(), LABEL.awayRecap), 1);
+  assert.equal(count(away(1_728_000 - 1000).text(), LABEL.awayRecap), 0);
 });
 
 // Breaks: a second absence before any press replaces the first one's recap, losing its lines; or
@@ -171,7 +179,7 @@ test('a room change drops the held lines and the recap entry; staying keeps them
   const logs = () =>
     ({
       log: [entry],
-      projection: { view: { place: { id: 'hall' } } },
+      projection: { view: { place: { id: 'hall', title: { key: 'hall' } } } },
       away: { from: 0, log: ['a'] },
     }) as unknown as Logs;
   const view = (id: string) => ({ place: { id } }) as GameView;
@@ -257,10 +265,12 @@ function deadly() {
 // Breaks (book-ui.md, World log; loka-x6t.26): a death in an elapsed settlement leaves the World
 // page in the dart room, keeps the old room's lines, drops the death's lines with the room change,
 // or holds them (or the rest of the settlement) into a recap.
-test('a poison death while away opens the hall page on the tick, fall and waking lines', () => {
+test('a poison death while away: the dead page, then the hall page on the tick, fall and waking lines', () => {
   const b = book(deadly() as never, undefined, ids());
   b.go('east');
-  const shown = wait(b, HOURS3).text();
+  assert.equal(wait(b, HOURS3).text()[0], 'Dart Corridor'); // the dead page first (book-ui.md, Dead page)
+  b.tap('Let go');
+  const shown = b.text();
   assert.equal(shown[0], 'Stone Hall', JSON.stringify(shown));
   assert.equal(count(shown, LABEL.awayRecap), 0);
   const at = shown.indexOf(TICK);
@@ -271,4 +281,59 @@ test('a poison death while away opens the hall page on the tick, fall and waking
   );
   assert.equal(count(shown, TICK), 1); // the two earlier ticks went with the dart room's log
   assert.ok(shown.includes('Maud arrives.'), JSON.stringify(shown)); // the rest logs, not recapped
+});
+
+// Breaks (book-ui.md, World log; loka-3tc7): a death in the recovery room itself, with no room
+// change to end the holding, recaps its own fall and waking lines.
+test('a poison death in the recovery room logs its lines, never a recap', () => {
+  const b = book(deadly() as never, undefined, ids());
+  for (const d of ['east', 'west']) b.go(d);
+  const shown = wait(b, HOURS3).text();
+  assert.equal(count(shown, LABEL.awayRecap), 0, JSON.stringify(shown));
+  const at = shown.indexOf('You fall.');
+  assert.deepEqual(
+    shown.slice(at - 1, at + 2),
+    [TICK, 'You fall.', 'You wake.'],
+    JSON.stringify(shown),
+  );
+});
+
+// Breaks: a recap save defers its catch-up past open, so a refused delivery arrives on a pulse as a
+// plain error with no Start over, where opening would have said save_corrupt.
+test('a catch-up refused on a pulse: fault beside Start over, bytes kept, Start over plays', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'loka-refused-'));
+  const path = join(dir, 'save.db');
+  try {
+    const cartridge = elapsedBundle({ recap_after_minutes: 1 });
+    const a = elapsedHost(path, { wall: 10000, mono: 0 }, cartridge);
+    a.sql.exec(
+      `UPDATE state_row SET value = json_set(value, '$.due_time', 64800, '$.job.kind', 'order') WHERE section = 'jobs'`,
+    );
+    a.sql.close();
+
+    const clock = { wall: 10000 + 365 * 86400 * 1000, mono: 0 };
+    const p = sqliteHost(path, clock);
+    const session = localSession(
+      () => p.db,
+      () => assert.fail('a start over keeps the file'),
+      cartridge,
+      { ...p.host, newId: randomUUID },
+    );
+    const game = session.game()!;
+    const b = book(cartridge as never, { ...p, clock, game } as never);
+    assert.ok(!b.labels().includes(LABEL.startOver)); // the deferred open itself succeeded
+    const kept = readFileSync(path);
+
+    const refused = game.pulse('resume');
+    assert.equal(refused.kind === 'error' && refused.reason, 'save_corrupt');
+    assert.ok(b.labels().includes(LABEL.startOver));
+    assert.deepEqual(readFileSync(path), kept);
+
+    assert.equal(session.startOver(), undefined);
+    assert.equal(session.game()!.view().view.time, 64800);
+    assert.equal(session.game()!.pulse().kind, 'ready');
+    p.sql.close();
+  } finally {
+    rmSync(dir, { recursive: true });
+  }
 });

@@ -26,13 +26,14 @@ function invalid(): never {
 
 // size: allow 60, one ordered reconciliation loop joins exact money and custody evidence
 export function commerceSave(fresh: World, world: World, db: Db, meta: Meta, revision: number) {
+  let rows: ReturnType<typeof receipts> | undefined;
   for (const [provider, npc] of Object.entries(world.entities)) {
     if (npc.kind !== 'npc' || !npc.shop) continue;
     const shop = npc.shop,
       spec = world.resourceSpecs[key(shop.resource)];
     const balances = startingBalances(world, shop.resource, spec.start);
     const custody = offerCustody(fresh, shop);
-    for (const { command, decision } of receipts(world, db, meta, revision)) {
+    for (const { command, decision } of (rows ??= receipts(world, db, meta, revision))) {
       const money = decision.delta.ops.filter(
         (o) => o.op === 'resource.adjust' && same(o.resource, shop.resource),
       );
@@ -78,9 +79,8 @@ export function commerceSave(fresh: World, world: World, db: Db, meta: Meta, rev
   }
 }
 
-// A stock offer's items (row W11) are not tracked: receiptHistory recomputes those exchanges, and a
-// trade job may move them. Each item starts with its starting holder: the shop for a clean offer, any
-// NPC for a fence's stolen one (row 33).
+// A stock offer's items (row W11) are not tracked: a trade job may move them. Each item starts with
+// its starting holder: the shop for a clean offer, any NPC for a fence's stolen one (row 33).
 function offerCustody(fresh: World, shop: Shop): Record<string, EntityId> {
   return Object.fromEntries(
     shop.offers
@@ -100,10 +100,12 @@ function startingBalances(world: World, resource: DefinitionRef, start: number) 
   return balances;
 }
 
+// An elapsed row moving no money and no entity changes nothing below; most elapsed rows are that.
 function receipts(world: World, db: Db, meta: Meta, revision: number) {
   const rows = db.getAllSync<Row>(
     `SELECT command_id,actor_id,command,response,revision FROM receipt
-    WHERE scope=? AND json_extract(response,'$.kind')='accepted' ORDER BY revision`,
+    WHERE scope=? AND json_extract(response,'$.kind')='accepted' AND (json_extract(command,'$.payload.type')<>'elapsed'
+      OR instr(response,'entity.transfer') OR instr(response,'resource.adjust')) ORDER BY revision`,
     `story/${meta.lineage_id}/${world.character}`,
   );
   let previous = 0;
@@ -136,8 +138,7 @@ const said = (l: Accepted['narration'], old: string, key: string, actor: EntityI
     [[key, { actor }]],
   );
 
-// Opted Buy quotes and stock offers (row W11) are already recomputed at their original revision by
-// receiptHistory, so only the shape of a stock offer's move is checked here.
+// An opted Buy quote or stock offer (row W11) depends on the count held then: check only its shape.
 function shopReceipt(
   world: World,
   provider: string,
@@ -222,7 +223,6 @@ function custodyEvidence(
 ) {
   const p = command.payload;
   if (p.type === 'buy' || p.type === 'sell') return true; // Its own shop's shopReceipt checks the exchange.
-  // liquidSave already replayed the owned bottom corpse and every original root.
   if (p.type === 'recover_corpse')
     return (
       d.outcome === 'corpse_recovered' &&

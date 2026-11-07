@@ -1,3 +1,4 @@
+// size: allow 516, every reaction step kind shares the green world and delivery harness
 // reaction@1 (Early R7/R8 R; 21 §3.4, §11; 06 §14; 04 §5.2-§5.4): reaction deliveries in the
 // proposal, their writer groups, causal positions and budgets, and the loader's reaction checks.
 // Worlds are the green known answer (protocol/fixtures/cartridge_green_hash.json: 06:00, the
@@ -475,6 +476,26 @@ test('a reaction event.emit on a delivery with no subject emits nothing', () => 
     r.decision.events.map((e) => e.payload.type),
     ['custom_event'],
   );
+});
+
+// Breaks (reaction.ts resource.adjust): a rule whose actor has no body here faults the whole root
+// command, or writes the pool of a body that is not the actor's.
+test('a reaction resource.adjust for an actor with no body writes nothing', () => {
+  const refill = { op: 'resource.adjust', resource: ref('resource', 'hp'), by: 1 } as const;
+  const w = only({ ring: [{ event: 'custom_event', custom: 'ping' }, [refill]] });
+  const OTHER = {
+    id: CMD as CommandId,
+    payload: { actor_id: 'c0ffee00-0000-4000-8000-000000000001' as CharacterId },
+  };
+  const event = {
+    type: 'custom_event',
+    event: ref('event', 'ping'),
+    subject_id: BODY as EntityId,
+  } as const;
+  const root = accepted(w, 'x', [], [{ position: 1, payload: event } as Event<'custom_event'>]);
+  const r = adopt(w, admit('scripted_action', root), OTHER, allocator(w, OTHER), 0);
+  assert.ok(r.decision.kind === 'accepted', JSON.stringify(r.decision));
+  assert.deepEqual(r.decision.delta.ops, []);
 });
 
 // Breaks: custom_event deliveries outside the reaction_depth budget (a rule re-emitting its own

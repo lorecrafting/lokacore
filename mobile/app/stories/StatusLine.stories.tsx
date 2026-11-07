@@ -1,7 +1,9 @@
+// size: allow 400, one story per status-line state the designer ruled; the prologue at 360 px
 // StatusLine: the centred status line under the footer (StatusLine's doc comment).
 import type { Meta, StoryObj } from '@storybook/react-native-web-vite';
 import { View } from 'react-native';
-import { expect, fn, within } from 'storybook/test';
+import { expect, fn } from 'storybook/test';
+import wasm from 'canvaskit-wasm/bin/full/canvaskit.wasm?url';
 import { size, space } from '../book/tokens.ts';
 import type { Pool } from '../book/model.ts';
 import { StatusLine } from '../book/Status.tsx';
@@ -10,13 +12,20 @@ const pool = (key: string, current: number, maximum: number, tone = 'normal') =>
   ({ resource: { key }, current, maximum, tone, band: tone }) as unknown as Pool;
 const rested = [pool('hp', 30, 30), pool('ma', 10, 10), pool('mv', 60, 60)];
 
+// CanvasKit first, so the status icons draw (StatusIcon.stories.tsx).
+const loadSkia = async () => {
+  const { LoadSkiaWeb } = await import('@shopify/react-native-skia/lib/module/web/LoadSkiaWeb');
+  await LoadSkiaWeb({ locateFile: () => wasm });
+};
+
 const meta = {
   title: 'Book/StatusLine',
   component: StatusLine,
+  loaders: [loadSkia],
   args: {
     time: 3,
     resources: rested,
-    text: (key: string) => key,
+    text: (key: string) => key.replace('condition.', ''),
     locked: false,
     pending: false,
     open: fn(),
@@ -26,11 +35,22 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
+// Breaks (the bottom): an empty icon row that keeps a height (status-line-rulings.md, loka-x6t.134).
 export const Plain: Story = {
+  decorators: [
+    (Story) => (
+      <View testID="line">
+        <Story />
+      </View>
+    ),
+  ],
   play: async ({ canvas, args, userEvent }) => {
     // Label in name: the shown text leads, then the hp band and where it goes.
     const name = 'hp 30/30 ma 10/10 mv 60/60; hp normal; opens Contents';
-    await userEvent.click(canvas.getByRole('button', { name }));
+    const bottom = (e: HTMLElement) => e.getBoundingClientRect().bottom;
+    const stats = canvas.getByRole('button', { name });
+    await expect(bottom(canvas.getByTestId('line')) - bottom(stats)).toBeLessThan(1);
+    await userEvent.click(stats);
     await expect(args.open.mock.calls).toEqual([[]]); // the component sends no press event
   },
 };
@@ -113,16 +133,27 @@ export const DangerHp: Story = {
   args: { resources: [pool('hp', 5, 30, 'danger'), ...rested.slice(1)] },
 };
 
+// Bleeding is the first status icon, in the debuff look and without a ring; the line keeps no
+// bleeding text (status-line-rulings.md).
 export const Bleeding: Story = {
   args: {
     bleeding: {
-      label: 'bleeding',
+      label: 'condition.bleeding', // as kernel/ts/src/view/bleed.ts sends it
       ends_at: 40,
       hp_loss: 1,
-      tick_every: 5,
+      tick_every: 60,
       generation: 1,
-      next_tick_at: 5,
+      next_tick_at: 60,
     } as never,
+  },
+  play: async ({ canvas, args, userEvent }) => {
+    const name = 'bleeding, 37s remaining, 1 HP each 60s, debuff, opens Character';
+    const icon = canvas.getByRole('button', { name });
+    await userEvent.hover(icon);
+    await expect(await canvas.findByText('bleeding, 37s remaining')).toBeVisible();
+    await expect(canvas.queryByText(/HP each/)).toBeNull();
+    await userEvent.click(icon);
+    await expect(args.openCharacter).toHaveBeenCalled();
   },
 };
 
@@ -204,10 +235,10 @@ export const Locked: Story = {
 
 export const Pending: Story = { args: { pending: true } };
 
-// The narrowest phone at the Max Reading size with everything on the line: the pools take line
-// two, whole, and position and bleeding truncate on line one (loka-x6t.86).
-// Breaks: the row loses flexWrap (the pools stay on line one and the rest is cut); position or
-// bleeding loses its one line (shrink or numberOfLines gone, so it wraps instead of truncating).
+// The narrowest phone at the Max Reading size with three-digit pools: the pools take line two,
+// whole, and position keeps line one (loka-x6t.86). Bleeding is an icon above, so two-digit pools
+// fit on one line and position no longer needs its ellipsis here.
+// Breaks: the row loses flexWrap (the pools stay on line one and are cut at the edge).
 export const Narrow: Story = {
   globals: { viewport: { value: 'galaxyS25', isRotated: false }, reading: 'Max' },
   args: {
@@ -215,6 +246,7 @@ export const Narrow: Story = {
     position: 'sleeping' as never,
     openPosition: fn(),
     bleeding: Bleeding.args!.bleeding,
+    resources: [pool('hp', 300, 300), pool('ma', 100, 100), pool('mv', 600, 600)],
   },
   play: async ({ canvas, canvasElement }) => {
     const stats = canvas.getByRole('button', { name: /opens Contents$/ });
@@ -223,12 +255,78 @@ export const Narrow: Story = {
       canvasElement.getBoundingClientRect().right,
     );
     await expect(position.getBoundingClientRect().height).toBe(size.touch); // one line
-    const word = within(position).getByText('sleeping');
-    await expect(word.scrollWidth).toBeGreaterThan(word.clientWidth); // cut short by the ellipsis
     // on line two: both boxes bleed, so compare tops (one row: equal; wrapped: about a line lower)
     await expect(stats.getBoundingClientRect().top).toBeGreaterThan(
       position.getBoundingClientRect().top + size.touch / 2,
     );
+  },
+};
+
+// The prologue's five statuses on the narrowest phone (360 px) at the Standard Reading size: five
+// icons below the line, bleeding first, and the line on one line (status-line-rulings.md).
+// Breaks: bleeding back on the line (it wraps the pools), the row above the line, or out of order.
+export const PrologueNarrow: Story = {
+  globals: { viewport: { value: 'galaxyS25', isRotated: false }, reading: 'Standard' },
+  decorators: [
+    (Story) => (
+      <View style={{ paddingHorizontal: space.xl }}>
+        <Story />
+      </View>
+    ),
+  ],
+  args: {
+    calendar: { day: 1, hour: 6, subdivision: 0, solar: 'dawn', lunar: 'full' },
+    position: 'standing' as never,
+    openPosition: fn(),
+    bleeding: Bleeding.args!.bleeding,
+    conditions: [
+      ['condition.fed', 'buff'],
+      ['condition.cold', 'debuff'],
+      ['condition.refreshed', 'buff'],
+      ['condition.tired', 'debuff'],
+    ].map(([label, kind]) => ({ label, kind, resource: 'mv', tick_every: 1800 })) as never,
+  },
+  play: async ({ canvas }) => {
+    const icons = canvas.getAllByRole('button', { name: /, opens Character$/ });
+    await expect(icons.map((b) => b.getAttribute('aria-label')!.split(',')[0])).toEqual([
+      'bleeding',
+      'cold',
+      'tired',
+      'fed',
+      'refreshed',
+    ]);
+    const stats = canvas.getByRole('button', { name: /opens Contents$/ });
+    const position = canvas.getByRole('button', { name: /change position$/ });
+    await expect(
+      Math.abs(stats.getBoundingClientRect().top - position.getBoundingClientRect().top),
+    ).toBeLessThan(size.touch / 2); // one line
+    await expect(icons[0].getBoundingClientRect().top).toBeGreaterThanOrEqual(
+      stats.getBoundingClientRect().bottom,
+    );
+  },
+};
+
+// Six icons, the most the row shows (five and +N take as many), on the narrowest phone: one row
+// inside the 328 px between the footer's padding (status-line-rulings.md: 264 px of boxes).
+// Breaks: a gap or a larger box that wraps the sixth icon or runs it past the padding.
+export const SixNarrow: Story = {
+  ...PrologueNarrow,
+  args: {
+    ...PrologueNarrow.args,
+    conditions: [
+      ...(PrologueNarrow.args!.conditions as never[]),
+      { label: 'condition.soaked', kind: 'debuff', resource: 'mv', tick_every: 1800 },
+    ] as never,
+  },
+  play: async ({ canvas, canvasElement }) => {
+    const icons = canvas.getAllByRole('button', { name: /, opens Character$/ });
+    await expect(icons).toHaveLength(6);
+    const boxes = icons.map((b) => b.getBoundingClientRect());
+    await expect(new Set(boxes.map((b) => b.top)).size).toBe(1); // one row
+    const line = canvas.getByRole('button', { name: /opens Contents$/ }).getBoundingClientRect();
+    const right = canvasElement.getBoundingClientRect().right - space.xl;
+    await expect(boxes[5].right).toBeLessThanOrEqual(right);
+    await expect(line.right).toBeLessThanOrEqual(right);
   },
 };
 

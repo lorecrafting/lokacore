@@ -28,14 +28,15 @@ value['quests'][k('quest', 'lantern')]['journal'] = {
     'abandoned': 'quest.lantern.abandoned', 'outcomes': {'carry': 'quest.lantern.carried'},
 }
 value['quests'][k('quest', 'oar')] = {
-    'key': 'oar', 'title': 'quest.oar.title',
-    'offer': {'label': 'quest.oar.accept'},
+    'key': 'oar', 'name': 'quest.oar.title',
+    'offer': {'label': 'quest.oar.accept',
+              'target': {'kind': 'detail', 'room': ref('room', 'ferry_landing'), 'detail': 'mooring_post'}},
     'objective': {'evidence': 'post_activation_event', 'item_acquired': ref('item', 'oar')},
     'journal': {'active': 'quest.oar.find', 'objectives_met': 'quest.oar.found',
                 'resolved': 'quest.oar.done', 'failed': 'quest.oar.failed', 'abandoned': 'quest.oar.abandoned'},
 }
 value['items'][k('item', 'oar')] = {
-    'key': 'oar', 'keywords': ['oar'], 'short': 'item.oar.short', 'room_line': 'item.oar.room',
+    'key': 'oar', 'keywords': ['oar'], 'name': 'item.oar.short', 'room_line': 'item.oar.room',
     'description': 'item.oar.description', 'location': {'in': 'room', 'room': ref('room', 'ferry_landing')},
 }
 value['text'] = json.loads(Path('cartridges/journal_sampler/text.json').read_text())

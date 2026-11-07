@@ -1,20 +1,25 @@
 // The status line under the footer.
-import type { ReactElement } from 'react';
+import { useEffect, useState, type ReactElement } from 'react';
 import { Pressable, View } from 'react-native';
 import { Text } from './Text.tsx';
+import { ExperienceRule, type ExperienceRuleProps } from './ExperienceRule.tsx';
 import type { GameView } from '../../packages/game-view/session.ts';
-import { bleedingLine, branch, pools, said, sky, toneOf, type Pool } from './model.ts';
+import { branch, pools, said, sky, toneOf, type Pool } from './model.ts';
 import { band, Tap } from './pages.tsx';
 import { LABEL } from './labels.ts';
+import { onCue } from './cues.ts';
+import { Reanimated, useReducedMotion } from './fade.ts';
+import { usePress, useThin } from './press.ts';
 import { StatusIcons } from './StatusIcon.tsx';
-import { usePalette, useType, type Palette, type Type } from './palette.ts';
-import { size, space } from './tokens.ts';
+import { mixInk, usePalette, useType, washInk, type Palette, type Type } from './palette.ts';
+import { motion, size, space } from './tokens.ts';
 
-// The status icon row (StatusIcon.tsx) when any condition is on, then the line: the sky glyph (sun by day, moon by night), the position, bleeding, then
-// the resource button, which shows the condition pools coloured by band when GameView carries them
-// (the room-view status line, an owner-ruled departure) and opens Contents, the index of the
-// existing book sections. Too wide, the pools move to a second line, whole; then the position
-// truncates (polish pick mv1j35ltxddx; loka-x6t.86).
+// The line: the sky glyph (sun by day, moon by night), the position, then the resource button,
+// which shows the condition pools coloured by band when GameView carries them (the room-view
+// status line, an owner-ruled departure) and opens Contents, the index of the existing book
+// sections. Too wide, the pools move to a second line, whole; then the position truncates
+// (polish pick mv1j35ltxddx; loka-x6t.86). Below it and its experience rule, the status
+// icon row (StatusIcon.tsx, bleeding first) when any status is on.
 type StatusProps = {
   time: number;
   // NonNullable: react-docgen reads a bare GameView['x'] as a member-less type that Storybook's arg-type conversion throws on.
@@ -23,6 +28,7 @@ type StatusProps = {
   bleeding?: NonNullable<GameView['bleeding']>;
   conditions?: NonNullable<GameView['conditions']>;
   position?: NonNullable<GameView['position']>;
+  rule?: ExperienceRuleProps;
   text: (key: string) => string;
   locked: boolean;
   pending: boolean;
@@ -64,19 +70,19 @@ const skyText = (p: StatusProps) =>
     .join(' ');
 
 /**
- * A centred line: the sky glyph and weather, position and bleeding, then hp, ma and mv
+ * A centred line: the sky glyph and weather, position, then hp, ma and mv
  * (book-ui.md, World and status entry); no say icon in single-player (book-ui.md, Word bar).
  * - Use: under the footer on every page.
  * - Rules: at most two lines, nothing dropped: too wide, the pools take the second line whole
- *   (the only break falls before hp); still too wide, position and bleeding end in an ellipsis,
- *   the longer giving up more. The glyph and pools never shrink. The pools are one unbreakable
+ *   (the only break falls before hp); bleeding is the first status icon below (book-ui.md
+ *   Conditions details). The glyph and pools never shrink. The pools are one unbreakable
  *   run: no-break spaces as text, never a margin, so the shown words lead the button's name. A
  *   gap, not a dot, sets the pools apart.
  *   Every role scales with the Reading size. The sky glyphs are model.ts `sky`: ink is
  *   the moon's dark side, waxing lit on the right; the glyph's name is the time in words (`day 3,
  *   18:05, dusk, waxing crescent moon`). Position and pools are controls named by the
  *   label-in-name rule.
- * - States: enabled; weather; locked (not pressable); pending ("save not confirmed" under the
+ * - States: enabled; weather; levelling (ExperienceRule under the row); locked (not pressable); pending ("save not confirmed" under the
  *   line); resource tones normal, warning, danger; only pennies (the button says `character`).
  * - Story: StatusLine.stories.tsx
  */
@@ -86,14 +92,6 @@ export function StatusLine(p: StatusProps) {
   const items = leading(c, t, p);
   return (
     <View>
-      {!!p.conditions?.length && (
-        <StatusIcons
-          conditions={p.conditions}
-          time={p.time}
-          text={p.text}
-          open={p.locked ? undefined : p.openCharacter}
-        />
-      )}
       <View style={statusRow}>
         {/* Two wrap units, so the only break falls before the pools. */}
         <View style={{ ...group, ...shrink }}>
@@ -103,6 +101,15 @@ export function StatusLine(p: StatusProps) {
           <Contents {...p} resources={pools(p.resources)} />
         </View>
       </View>
+      {p.rule && <ExperienceRule {...p.rule} />}
+      {/* Mounted when empty too, so the last icon's fade plays. */}
+      <StatusIcons
+        conditions={p.conditions ?? []}
+        bleeding={p.bleeding}
+        time={p.time}
+        text={p.text}
+        open={p.locked ? undefined : p.openCharacter}
+      />
       <View style={{ alignItems: 'center' }}>
         {p.pending && <Text style={{ ...t.small, color: c.dim }}>{LABEL.saveNotConfirmed}</Text>}
       </View>
@@ -110,7 +117,7 @@ export function StatusLine(p: StatusProps) {
   );
 }
 
-// The items before the pools: the sky glyph and weather, then position and bleeding when present.
+// The items before the pools: the sky glyph and weather, then position when present.
 const leading = (c: Palette, t: Type, p: StatusProps) =>
   [
     <Text
@@ -121,15 +128,10 @@ const leading = (c: Palette, t: Type, p: StatusProps) =>
       {skyText(p)}
     </Text>,
     p.position && <Position key="position" value={p.position} open={p.openPosition} />,
-    p.bleeding && (
-      <Text key="bleeding" numberOfLines={1} style={{ ...t.small, color: c.danger }}>
-        {bleedingLine(p.bleeding, p.time, p.text)}
-      </Text>
-    ),
   ].filter(Boolean) as ReactElement[];
 
-// Each " · " belongs to the item after it, so the line never starts with a lone dot; position and
-// bleeding may shrink (they truncate).
+// Each " · " belongs to the item after it, so the line never starts with a lone dot; position may
+// shrink (it truncates).
 const joined = (c: Palette, t: Type, item: ReactElement) => (
   <View key={item.key} style={{ ...group, ...shrink }}>
     <Text aria-hidden style={{ ...t.small, color: c.dim }}>
@@ -141,10 +143,14 @@ const joined = (c: Palette, t: Type, item: ReactElement) => (
 
 // The resources (or "character"), a button that opens Contents; not pressable while locked.
 function Contents(p: StatusProps) {
+  const stung = useStung();
   const c = usePalette();
   const t = useType();
+  const press = usePress();
+  const ink = useThin(press, false);
   return (
     <Pressable
+      {...press.handlers}
       disabled={p.locked}
       accessibilityRole="button"
       // Label in name (book-ui.md): the shown text first (its no-break spaces as spaces), then where it goes.
@@ -152,27 +158,64 @@ function Contents(p: StatusProps) {
       onPress={() => p.open()} // no press event: open takes none
       style={{ minHeight: size.touch, justifyContent: 'center' }}
     >
-      <Text style={{ ...t.small, color: p.locked ? c.dim : c.action }}>
-        {p.resources ? shown(c, t, p.resources, p.locked) : 'character'}
-      </Text>
+      <Reanimated.View style={ink}>
+        <Text style={{ ...t.small, color: p.locked ? c.dim : c.action }}>
+          {p.resources ? shown(c, t, p.resources, p.locked, stung) : 'character'}
+        </Text>
+      </Reanimated.View>
     </Pressable>
   );
+}
+
+// A blow lands in combat, where the line is locked: the sting shows over the locked ink too.
+const inkOf = (c: Palette, r: Pool, locked: boolean, stung: number) => {
+  const ink = locked ? c.dim : band(c, toneOf(r));
+  return r.resource.key === 'hp' && stung ? mixInk(ink, washInk(c), stung) : ink;
+};
+
+// How far the hp value has dried in the wash's colour, 0 to 1, over the blow's beat. On the JS
+// thread: nested Text colours cannot animate on native. Reduced motion: held, without the tween.
+function useStung() {
+  const still = useReducedMotion();
+  const [stung, setStung] = useState(0);
+  useEffect(() => {
+    let frame = 0; // mutate-skip: cancelling frame 0 is a no-op
+    const stop = onCue((cue) => {
+      if (cue.name !== 'hp_loss') return;
+      const { duration, out } = motion.flash;
+      const start = performance.now();
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(function tick() {
+        const at = performance.now() - start;
+        setStung(
+          at >= duration + out
+            ? 0
+            : still
+              ? 1
+              : Math.min(at / duration, (duration + out - at) / out),
+        );
+        if (at < duration + out) frame = requestAnimationFrame(tick);
+      });
+    });
+    return () => (stop(), cancelAnimationFrame(frame));
+  }, [still]);
+  return stung;
 }
 
 // The resources as the status line shows them (band colours per model.ts `toneOf`; dim while
 // locked); its label is model.ts `said`. A figure space between resources and a no-break space
 // within each, as text, not a margin: both are no-break, so the pools never split and the shown
 // words lead the button's name (book-ui.md, Label in name).
-const shown = (c: Palette, t: Type, rs: readonly Pool[], locked: boolean) =>
+const shown = (c: Palette, t: Type, rs: readonly Pool[], locked: boolean, stung: number) =>
   rs.map((r, i) => (
-    <Text key={r.resource.key} style={{ color: locked ? c.dim : band(c, toneOf(r)) }}>
+    <Text key={r.resource.key} style={{ color: inkOf(c, r, locked, stung) }}>
       {i ? '\u2007' : ''}
       <Text style={t.label}>{r.resource.key}</Text>
       {`\u00a0${r.current}/${r.maximum}`}
     </Text>
   ));
 
-// The position word, one line: too wide, it ends in an ellipsis while its label stays whole.
+// The position word, one line.
 function Position(p: { value: NonNullable<GameView['position']>; open?: () => void }) {
   const c = usePalette();
   const words = (

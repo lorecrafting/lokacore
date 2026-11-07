@@ -1,5 +1,22 @@
 {
+  "dev": {
+    "summary": "Author-preview cheats: go to a room and set a fact while testing.",
+    "declares": "engine-only: author preview tooling, never declared in a cartridge",
+    "sampler": "none: author-preview only; any cartridge runs it under the preview",
+    "showcase": "none: author-preview only, not part of play",
+    "spec": "cartridge.md Author preview (owner decision 2026-10-31, A11)",
+    "contracts": ["CommandPayload", "ActionInput"],
+    "fixtures": ["protocol/fixtures/toolbox_showcase_hash.json"],
+    "invariants": ["facts_typed"],
+    "implemented_in": "loka-vduxr.6 go to room and set fact, the author preview only",
+    "no_transcript": "author-preview only: no shipped transcript plays a cheat; dev.test.ts and check.test.ts replay them"
+  },
   "speech": {
+    "summary": "Say, whisper and shout, and NPC answers keyed on asked words.",
+    "declares": ["cartridge.speech", "npcs.ask", "npcs.words"],
+    "sampler": "speech_sampler",
+    "showcase": "areas/hub",
+    "mechanics": "#social-verbs-say-whisper-and-shout-toolbox-row-g9-engine-half",
     "spec": "docs/system/mechanics.md Social verbs (toolbox row G9)",
     "contracts": ["CommandPayload", "EventPayload", "DialogueDefinition", "ReactionRule"],
     "fixtures": ["protocol/fixtures/speech_sampler_hash.json", "protocol/fixtures/invalid.json"],
@@ -7,6 +24,11 @@
     "implemented_in": "Toolbox row G9 engine half (loka-kgd.71): say, whisper and shout one word; one spoken event per hearer, a shout through the G6 walk at depth 1; a keyword opens its dialogue"
   },
   "sense_cue": {
+    "summary": "Sounds, smells and heat that reach the player from rooms, items and NPCs.",
+    "declares": ["rooms.cues", "items.cues", "npcs.cues"],
+    "sampler": "senses_sampler",
+    "showcase": "areas/fell_road",
+    "mechanics": "#sense-cues-sound-smell-and-heat-toolbox-row-g6",
     "spec": "docs/system/mechanics.md Senses (toolbox row G6)",
     "contracts": [
       "Cue",
@@ -25,6 +47,10 @@
     "implemented_in": "Toolbox row G6 senses sampler: cues in GameView with direction, cue_perceived for NPC reactions to scripted action outcomes"
   },
   "movement": {
+    "summary": "Rooms, exits and walking between them, with the map layout.",
+    "declares": ["rooms", "rooms.exits", "layout", "cartridge.world.movement"],
+    "sampler": "rooms_sampler",
+    "showcase": "areas/hub",
     "spec": "21 §5 Place/Room, Connection; 05 §17; 04 §5; 00 §4.1 scan, §4.10",
     "contracts": [
       "RoomDefinition",
@@ -42,6 +68,10 @@
     "implemented_in": "R5 S1 (#34) move; R5 S8 scan"
   },
   "description_variant": {
+    "summary": "Room, item and NPC descriptions that change with facts, time or status.",
+    "declares": ["rooms.variants", "items.description_variants", "npcs.description_variants"],
+    "sampler": "rooms_sampler",
+    "showcase": "areas/tidewater",
     "spec": "21 §6 InspectableDetail, DescriptionVariant; 21 §7 TargetResolution; 04 §14, §17-§18; 00a §12",
     "contracts": [
       "CommandPayload",
@@ -63,6 +93,10 @@
     "implemented_in": "R5 S1 (#34) look; R5 S2 look at a detail; R5 S3 description variants"
   },
   "inspectable_detail": {
+    "summary": "Things in a room's text the player can look at more closely.",
+    "declares": ["rooms.details"],
+    "sampler": "details_sampler",
+    "showcase": "areas/fell_road",
     "spec": "21 §6 InspectableDetail; 14 §R5",
     "contracts": [
       "InspectableDetail",
@@ -81,6 +115,10 @@
     "implemented_in": "R5 S2 details; R5 S3 lock requirement"
   },
   "target_resolution": {
+    "summary": "Matches what the player names to the thing they mean.",
+    "declares": "engine-only: the engine resolves keywords and names the cartridge already declares",
+    "sampler": "rivals_sampler",
+    "showcase": "areas/hub",
     "spec": "21 §7 TargetSpec / TargetResolution; 04 §17-§18",
     "contracts": [
       "TargetSpec",
@@ -91,7 +129,7 @@
       "kernel/ts/src/mechanics/policy.ts"
     ],
     "fixtures": [
-      "protocol/fixtures/cartridge_hash.json"
+      "protocol/fixtures/toolbox_showcase_hash.json"
     ],
     "invariants": [
       "target_candidates_ordered"
@@ -99,6 +137,10 @@
     "implemented_in": "R6P T"
   },
   "policy": {
+    "summary": "Conditions that allow or block an action, choice or exit.",
+    "declares": "engine-only: written inside other declarations (a `policy` or `when` field), never on its own",
+    "sampler": "access_sampler",
+    "showcase": "areas/economy_law",
     "spec": "21 §3.2, §4 Policy; 06 §21",
     "contracts": [
       "Policy"
@@ -115,6 +157,10 @@
     "implemented_in": "R5 S3 all, any, not"
   },
   "fact": {
+    "summary": "Typed facts the world remembers and conditions read.",
+    "declares": ["facts"],
+    "sampler": "facts_sampler",
+    "showcase": "areas/fell_road",
     "spec": "03 §7, §13; 21 §3.9, §4 Fact",
     "contracts": [
       "FactSpec",
@@ -136,6 +182,10 @@
     "implemented_in": "R5 S3 facts in state, fact_compare"
   },
   "resource": {
+    "summary": "Pools such as health and coin that rise, fall and cap.",
+    "declares": ["resources", "npcs.resource_starts"],
+    "sampler": "climb_sampler",
+    "showcase": "areas/homestead",
     "spec": "21 §4 Resource, §7 Cost; 04 §5.3 Resource adjustment, §15 condition bands; 00 §4 amendment, §4.2 Regeneration, §4.3 Resources",
     "contracts": [
       "ResourceSpec",
@@ -161,6 +211,10 @@
     "implemented_in": "R5 S6b default HP/MA/MV pools, scripted action costs and resource.adjust steps, 1 MV per move, hourly regeneration; Early R7/R8 G condition bands in GameView"
   },
   "containment": {
+    "summary": "Where items and NPCs are: rooms, containers, inventories and carry limits.",
+    "declares": ["items", "items.location", "items.container", "items.capacity", "npcs", "npcs.room", "npcs.capacity"],
+    "sampler": "items_sampler",
+    "showcase": "areas/economy_law",
     "spec": "21 §8 Containment; 03 §23; 04 §5.3; 00 §4.4; 00a §5, §12; mechanics.md containment@1 carrying",
     "contracts": [
       "ItemDefinition",
@@ -196,6 +250,10 @@
     "implemented_in": "R5 S4 take, drop, give, has_item, items and NPCs; C1 c1-locks (#135) custody: take through open containers, contents in the GameView; M3 voluntary positive-load Take ceiling from cartridge mass/carry settings, bounded shared rule/projection query"
   },
   "scripted_action": {
+    "summary": "Author-made actions with costs, checks, durations and outcomes.",
+    "declares": ["actions"],
+    "sampler": "recipe_sampler",
+    "showcase": "areas/homestead",
     "spec": "06 §19 ActionSet algebra, §20 ScriptedAction; 21 §7 ScriptedAction / ComposedAction; 05 §28; 04 §5.2; ADR-016; 21 §7 Check, Cost (time); 04 §5.0",
     "contracts": [
       "ScriptedAction",
@@ -222,6 +280,10 @@
     "implemented_in": "R5 S5 ActionSet algebra, perform, fact.assign and event.emit steps; R5 S6a luck check, failure outcome, duration"
   },
   "check": {
+    "summary": "Luck, attribute and skill rolls that pick an outcome.",
+    "declares": ["actions.check", "dialogues.choices.check"],
+    "sampler": "check_sampler",
+    "showcase": "areas/low_wardle",
     "spec": "21 §7 Check; 21 §4 Deterministic RNG; 04 §5.0; 00a check_passed objectives",
     "contracts": [
       "Check",
@@ -242,6 +304,10 @@
     "implemented_in": "R5 S6a luck check in scripted actions, check_passed and check_failed; R5 S6b threshold check on a resource"
   },
   "schedule": {
+    "summary": "NPC daily routines and timed actions.",
+    "declares": ["npcs.daily_schedule", "actions.duration", "cartridge.time_policy"],
+    "sampler": "schedule_sampler",
+    "showcase": "areas/low_wardle",
     "spec": "21 §4 Time; 04 §1, §5.4; 00 §4.2; command.schema.json LogicalTime; numeric-profile.md job CommandId; 06 §13 Behavior/schedule profiles; 21 §10",
     "contracts": [
       "CommandPayload",
@@ -271,6 +337,10 @@
     "implemented_in": "R5 S6a wait, time_window; Early R7/R8 S durable jobs, the due-job drain of every explicit advance (wait, a scripted action's duration), run_job and its job CommandId; an NPC's daily location schedule"
   },
   "barrier": {
+    "summary": "Doors, gates and locks that block an exit until opened.",
+    "declares": ["barriers", "rooms.locks", "items.barrier", "items.locks"],
+    "sampler": "barrier_sampler",
+    "showcase": "areas/economy_law",
     "spec": "21 §5 Connection, Barrier; 05 §17, §25; 04 §5.3 Lifecycle transition, §7, §19; 00 §4.1 (amendment 2026-10-03: an item site)",
     "contracts": [
       "BarrierDefinition",
@@ -308,6 +378,10 @@
     "implemented_in": "R5 S7 open, close, lock, unlock, barrier_state, closed and locked exits; C1 c1-locks (#135) a barrier on an item (container lid), the door verbs by target_id"
   },
   "quest": {
+    "summary": "Quests with one objective each, an offer, a deadline and journal lines.",
+    "declares": ["quests", "dialogues.quest", "dialogues.choices.accept"],
+    "sampler": "quest_sampler",
+    "showcase": "areas/magic",
     "spec": "06 §1, §2, §3 Objective credit/causation policy, §4, §5, §43; 04 §5.2; 03 §12",
     "contracts": [
       "QuestDefinition",
@@ -339,6 +413,10 @@
     "implemented_in": "Early R7/R8 Q offered quest, accept_quest, current_state and post_activation_event objectives, resolution for a choice, quest_state, journal; C1 c1-journal (#138) selected lifecycle and outcome journal text"
   },
   "calendar": {
+    "summary": "Days, seasons and the clock that conditions read.",
+    "declares": ["cartridge.calendar"],
+    "sampler": "ambient_sampler",
+    "showcase": "areas/tidewater",
     "spec": "21 §4 Time; command.schema.json LogicalTime",
     "contracts": [
       "Calendar",
@@ -356,6 +434,10 @@
     "implemented_in": "Early R7/R8 S the start time of a fresh world; units stay the kernel's fixed ones"
   },
   "reaction": {
+    "summary": "Rules that fire on events and run steps; NPC behaviours.",
+    "declares": ["reactions", "behaviours", "items.behaviours", "npcs.behaviours"],
+    "sampler": "reactions_sampler",
+    "showcase": "areas/fell_road",
     "spec": "21 §3.4, §11; 06 §14; 04 §5.2-§5.4, §9",
     "contracts": [
       "ReactionRule",
@@ -379,6 +461,10 @@
     "implemented_in": "Early R7/R8 R reaction rules on fact_changed and entity_entered_room, a when policy, fact.assign consequences, delivered FIFO in the proposal under the deliveries, events and reaction_depth budgets"
   },
   "narration": {
+    "summary": "The engine's own lines around commands (arrivals, refusals, prompts).",
+    "declares": "engine-only: the engine writes these lines; a cartridge words them through its text file",
+    "sampler": "none: narration is engine prose every cartridge runs; no cartridge declares the capability since hello_sampler was retired",
+    "showcase": "none: every room shows it; no one district owns it",
     "spec": "06 §43; 04 §5.2 steps 7-8, §15; 21 §4 NarrationSpec",
     "contracts": [
       "Text",
@@ -398,6 +484,10 @@
     "implemented_in": "Early R7/R8 N a scripted action narration's participants (the actor, an NPC or item) pinned to EntityIds in the committed line, so redisplay and receipt replay never resolve them again"
   },
   "dialogue": {
+    "summary": "Conversations with bounded choices (not a free graph), conditions, payments and hand-overs.",
+    "declares": ["dialogues"],
+    "sampler": "access_sampler",
+    "showcase": "areas/low_wardle",
     "spec": "06 §17, §18, §33, §37, §38, §43; 04 §5.3 Choice/continuation resolution; 21 §20; 03 §14; 23 §3; mechanics.md Chapters (C1 slice 9)",
     "contracts": [
       "DialogueDefinition",
@@ -434,6 +524,10 @@
     "implemented_in": "Early R7/R8 D1 talk, choose and close_choice: one durable choice per actor bound to EntityIds, custody and presence revalidated, consequences, hand-over and quest resolution in one decision, pinned narration; Early R7/R8 D2 story points: a choice a cartridge story point names emits story_point_reached, the local authority's pending report; C1 c1-chapters derived chapter markers"
   },
   "attribute": {
+    "summary": "Character attributes, ancestries and derived values.",
+    "declares": ["attributes", "cartridge.ancestries", "cartridge.world.derived", "npcs.attributes"],
+    "sampler": "npc_attr_sampler",
+    "showcase": "areas/homestead",
     "spec": "06 §21 (amendment 2026-10-03); 00 §4.3 (amendment 2026-10-03)",
     "contracts": [
       "AttributeSpec",
@@ -454,7 +548,12 @@
     "implemented_in": "C1 c1-attributes (#133) attributes with starting values (content); stat_compare and resource_compare; toolbox row 2 derived hit, damage and carry (loka-kgd.3) and hp maximum (loka-kgd.8)"
   },
   "emote": {
-    "spec": "docs/system/mechanics.md NPC emotes (G9); docs/system/cartridge.md Emote declarations",
+    "summary": "Social gestures between the player and NPCs.",
+    "declares": ["emotes", "rooms.ambient", "npcs.ambient", "items.ambient"],
+    "sampler": "emote_sampler",
+    "showcase": "none: the showcase cartridge does not require emote",
+    "mechanics": "#npc-emotes-g9",
+    "spec": "docs/system/mechanics.md NPC emotes (G9), Ambient emotes; docs/system/cartridge.md Emote declarations, Ambient declarations",
     "contracts": [
       "EmoteDefinition",
       "ReactionRule",
@@ -462,6 +561,7 @@
     ],
     "modules": [
       "kernel/ts/src/mechanics/emote/line.ts",
+      "kernel/ts/src/mechanics/emote/ambient.ts",
       "lib/loka/content/emotes.ex"
     ],
     "fixtures": [
@@ -471,6 +571,10 @@
     "implemented_in": "Toolbox row G9 NPC half (loka-kgd.193 slice A): the emote table and the reaction emote step; NPCs cower and bow in emote_sampler"
   },
   "equipment": {
+    "summary": "Wearing and wielding items in slots, with their effects.",
+    "declares": ["items.equip", "items.slot", "items.affects"],
+    "sampler": "wear_sampler",
+    "showcase": "areas/combat",
     "spec": "21 §8 Equipment (amendment 2026-10-03); 00 §4.4 (amendment 2026-10-03)",
     "contracts": [
       "SlotKey",
@@ -496,6 +600,10 @@
     "implemented_in": "C1 c1-equipment (#134) twelve slots as holders in the body; wear and remove; toolbox row 3 finger slot (two) and item affects (loka-kgd.10)"
   },
   "position": {
+    "summary": "Standing, sitting and lying, and what each allows.",
+    "declares": "engine-only: the engine keeps posture; dialogue choices set it through `sitting`",
+    "sampler": "position_sampler",
+    "showcase": "areas/hub",
     "spec": "21 §28 position@1 (amendment 2026-10-03); 00 §4.3 Positions (amendment 2026-10-03)",
     "contracts": [
       "CommandPayload",
@@ -520,6 +628,10 @@
     "implemented_in": "C1 c1-position (#137) stand, sit, rest and sleep; move needs standing"
   },
   "scene": {
+    "summary": "Scripted scenes that take control for a few steps.",
+    "declares": ["scenes"],
+    "sampler": "scene_sampler",
+    "showcase": "areas/fell_road",
     "spec": "06 §35/§37 modal text subset (amendment 2026-10-03); 21 §3.6; 00a §9; mechanics.md scene@1",
     "contracts": [
       "SceneDefinition",
@@ -547,6 +659,10 @@
     "implemented_in": "C1 c1-scenes-modal: modal narrate/await_ack/end; story-point start once, persisted line, continue-only admission and scene_ended"
   },
   "death": {
+    "summary": "Dying, the corpse and returning to the same body.",
+    "declares": ["cartridge.world.death", "cartridge.world.death_credit"],
+    "sampler": "decay_sampler",
+    "showcase": "areas/combat",
     "spec": "docs/system/mechanics.md death@1; docs/system/protocol.md durable corpse creation (M5-B)",
     "contracts": [
       "EntityIdentity",
@@ -572,6 +688,10 @@
     "implemented_in": "M5-B corpse/shrine foundation; M6-A live fatal producer, durable custody and same-body return"
   },
   "combat": {
+    "summary": "Fights: attacks, weapons, damage, resistances and kill credit.",
+    "declares": ["cartridge.world.combat", "npcs.attack", "npcs.hp", "npcs.resistances", "items.weapon"],
+    "sampler": "encounter_sampler",
+    "showcase": "areas/combat",
     "spec": "docs/system/mechanics.md combat@1 first live encounter; docs/system/protocol.md encounters and due-time resource settlement",
     "contracts": [
       "EncounterRow",
@@ -604,6 +724,10 @@
     "implemented_in": "M6-A first live cellar fight: deliberate Attack, timed rounds, Stand/Flee, death and exact preacceptance rat credit"
   },
   "readable": {
+    "summary": "Books, signs and letters the player can read.",
+    "declares": ["items.readable"],
+    "sampler": "codex_sampler",
+    "showcase": "areas/low_wardle",
     "spec": "system/mechanics.md readable@1; system/protocol.md GameView; system/cartridge.md Source layout; docs/system/mechanics.md#d2-held-books-and-public-priory-selected-contract",
     "contracts": [
       "InspectableDetail",
@@ -620,6 +744,10 @@
     "implemented_in": "M12-A ordinary notice Read; D2 exact held-item writing and idempotent topic lowering"
   },
   "escort": {
+    "summary": "An NPC follows the player for a wage until delivered.",
+    "declares": ["dialogues.choices.escort"],
+    "sampler": "escort_sampler",
+    "showcase": "none: the showcase cartridge does not require escort",
     "spec": "docs/system/mechanics.md escort@1; docs/system/protocol.md Typed escort relation",
     "contracts": [
       "EscortRelation",
@@ -641,6 +769,11 @@
     "implemented_in": "Q2-C rescue (TypeScript)"
   },
   "commerce": {
+    "summary": "Shops with stock, prices and buying and selling.",
+    "declares": ["npcs.shop"],
+    "sampler": "prices_sampler",
+    "showcase": "areas/economy_law",
+    "mechanics": "#pegs-immediate-shop-b3-selected-contract",
     "spec": "docs/system/mechanics.md B3; docs/system/protocol.md Shop composition",
     "contracts": [
       "Shop",
@@ -663,6 +796,11 @@
     "implemented_in": "B3 finite Peg Buy/Sell (TypeScript)"
   },
   "light": {
+    "summary": "Dark rooms, light sources and fuel.",
+    "declares": ["rooms.dark", "rooms.dark_description", "items.fuel"],
+    "sampler": "sky_sampler",
+    "showcase": "areas/magic",
+    "mechanics": "#b4-light-and-darkness-selected-contract",
     "spec": "docs/system/mechanics.md B4 light and darkness; docs/system/protocol.md Fuel composition",
     "contracts": [
       "FuelRow",
@@ -682,6 +820,11 @@
     "implemented_in": "B4 useful light"
   },
   "skill": {
+    "summary": "Skills that grow with use, ranks, prerequisites and lessons.",
+    "declares": ["skills"],
+    "sampler": "skills_sampler",
+    "showcase": "areas/combat",
+    "mechanics": "#skill-growth-and-opposed-checks-toolbox-rows-5-and-g5",
     "spec": "docs/system/mechanics.md C1 training and armed defense; docs/system/protocol.md Training and defense composition",
     "contracts": [
       "SkillDefinition",
@@ -703,6 +846,11 @@
     "implemented_in": "C1 Tobin lessons and actual equipped sword/dodge/shield combat (local implementation; independent review pending)"
   },
   "patrol": {
+    "summary": "A paid watch route the player walks in order.",
+    "declares": ["quests.patrol", "dialogues.choices.patrol"],
+    "sampler": "patrol_sampler",
+    "showcase": "none: the showcase cartridge does not require patrol",
+    "mechanics": "#s3-finite-watch-patrol-c2-selected-contract",
     "spec": "docs/system/mechanics.md#s3-finite-watch-patrol-c2-selected-contract",
     "contracts": [
       "PatrolRelation",
@@ -727,6 +875,11 @@
     "implemented_in": "TypeScript story semantics; Elixir and TypeScript portable composition"
   },
   "population": {
+    "summary": "Spawning, wandering and capped NPC groups.",
+    "declares": ["populations"],
+    "sampler": "encounter_sampler",
+    "showcase": "areas/homestead",
+    "mechanics": "#population-plans-reading-populations-toolbox-row-w12",
     "spec": "docs/system/mechanics.md C3 Living hounds; docs/system/protocol.md Spawned bundles and population composition; docs/system/cartridge.md C3 hound population and loot (retired, at 9b94cb5f); docs/system/mechanics.md D8 crow scavenging",
     "contracts": [
       "PopulationPlan",
@@ -762,6 +915,11 @@
     "implemented_in": "C3 Living hounds: TypeScript story semantics and portable Elixir/TypeScript composition"
   },
   "topic": {
+    "summary": "Lore topics the player learns and deduces in the codex.",
+    "declares": ["topics"],
+    "sampler": "codex_sampler",
+    "showcase": "areas/low_wardle",
+    "mechanics": "#lore-codex-and-deduction-toolbox-row-46",
     "spec": "docs/system/mechanics.md S4 all-hours Wisp; docs/system/protocol.md Bounded sitting and topic composition",
     "contracts": [
       "TopicDefinition",
@@ -781,6 +939,11 @@
     "implemented_in": "B6 declared Ward knowledge and public Aldric consumer; D2 held books compose Ward and Bell"
   },
   "liquid": {
+    "summary": "Liquids, vessels, drinking and filling.",
+    "declares": ["liquids", "items.vessel"],
+    "sampler": "fed_sampler",
+    "showcase": "areas/magic",
+    "mechanics": "#b7-well-and-waterskin-selected-contract",
     "spec": "docs/system/mechanics.md B7; docs/system/protocol.md Liquid composition",
     "contracts": [
       "LiquidDefinition",
@@ -810,6 +973,11 @@
     "implemented_in": "B7 finite Well Lane source and two waterskins (TypeScript; portable liquid.set twins)"
   },
   "service": {
+    "summary": "Paid NPC services such as healing or lodging.",
+    "declares": ["services", "npcs.services"],
+    "sampler": "escrow_sampler",
+    "showcase": "areas/homestead",
+    "mechanics": "#b8-mauds-immediate-services-selected-contract",
     "spec": "docs/system/mechanics.md B8; docs/system/protocol.md Immediate service composition",
     "contracts": [
       "ServiceDefinition",
@@ -835,6 +1003,11 @@
     "implemented_in": "B8 exact Maud room, meal and finite B7 ale services"
   },
   "transport": {
+    "summary": "Paid travel and fast travel between places.",
+    "declares": ["transports"],
+    "sampler": "fast_travel_sampler",
+    "showcase": "none: the showcase cartridge does not require transport",
+    "mechanics": "#fast-travel-toolbox-row-32",
     "spec": "docs/system/mechanics.md D1; docs/system/protocol.md Ferry transport composition",
     "contracts": [
       "TransportDefinition",
@@ -861,6 +1034,11 @@
     "implemented_in": "D1 paid ferry, owned-corpse waiver and bound free swim lesson; release pin provisional"
   },
   "food": {
+    "summary": "Eating food and its effects.",
+    "declares": ["items.edible"],
+    "sampler": "fed_sampler",
+    "showcase": "areas/homestead",
+    "mechanics": "#d4-homes-finite-apples-and-eat-selected-contract",
     "spec": "docs/system/mechanics.md D4; docs/system/protocol.md Held-food composition",
     "contracts": [
       "CommandPayload",
@@ -890,6 +1068,11 @@
     "implemented_in": "D4 finite held-food Eat with terminal custody over published C3/D1"
   },
   "bleed": {
+    "summary": "Bleeding wounds that drain over time and bandages that stop them.",
+    "declares": ["bleeds", "items.bandage"],
+    "sampler": "bleed_sampler",
+    "showcase": "none: the showcase cartridge does not require bleed",
+    "mechanics": "#c5-hound-bleeding-and-bandage-selected-contract",
     "spec": "docs/system/mechanics.md C5 hound bleeding and bandage; docs/system/protocol.md Bleed and bandage composition",
     "contracts": [
       "BleedRow",
@@ -918,6 +1101,11 @@
     "implemented_in": "Chapter 1 C5 one hound bleed, exact held bandage cure and managed elapsed replay; provisional release pin"
   },
   "status": {
+    "summary": "Timed status effects that modify, block or tick.",
+    "declares": ["statuses"],
+    "sampler": "status_sampler",
+    "showcase": "areas/traps",
+    "mechanics": "#status-effects-over-time-toolbox-row-1",
     "spec": "docs/system/mechanics.md Status effects over time (toolbox row 1); docs/system/protocol.md Status composition",
     "contracts": [
       "StatusRow",
@@ -946,6 +1134,11 @@
     "implemented_in": "Toolbox row 1 status sampler: timed statuses, ticks, expiry, cure by Eat and fatal return"
   },
   "water": {
+    "summary": "Water depths, swimming and recovering a drowned corpse.",
+    "declares": ["cartridge.world.water"],
+    "sampler": "water_sampler",
+    "showcase": "none: the showcase cartridge does not require water",
+    "mechanics": "#d6-water-depths-and-owned-corpse-recovery-selected-contract",
     "spec": "docs/system/mechanics.md D6 water depths and owned-corpse recovery; docs/system/protocol.md Water movement and corpse selection",
     "contracts": [
       "WaterSettings",
@@ -978,6 +1171,11 @@
     "implemented_in": "D6 provisional TypeScript water semantics; portable Elixir/TypeScript occupancy and bound-job composition"
   },
   "expedition": {
+    "summary": "Timed journeys a quest sends the player on.",
+    "declares": ["quests.expedition"],
+    "sampler": "expedition_sampler",
+    "showcase": "none: the showcase cartridge does not require expedition",
+    "mechanics": "#c6-s27-night-in-the-marsh-selected-contract",
     "spec": "docs/system/mechanics.md C6 S27 Night in the Marsh; docs/system/protocol.md Expedition composition; docs/system/save.md Expedition recovery",
     "contracts": [
       "ExpeditionAttempt",
@@ -1007,6 +1205,11 @@
     "implemented_in": "C6 candidate v041/API1.36 over published D9 v040: ordered marsh route, optional shelter, immediate retry, fatal recovery and one bounded reward; publication pending final review"
   },
   "knowledge": {
+    "summary": "Discovered places, the map and observations the player has made.",
+    "declares": ["layout"],
+    "sampler": "hidden_sampler",
+    "showcase": "areas/hub",
+    "mechanics": "#d10-discovered-places-observations-and-knock-selected-contract",
     "spec": "docs/system/mechanics.md D10 discovered places, observations and Knock; docs/system/protocol.md Knowledge and Knock composition; docs/system/save.md Discovered-place and observation recovery",
     "contracts": [
       "VisitedRoom",
@@ -1040,6 +1243,11 @@
     "implemented_in": "D10 candidate v042/API1.37: committed actor-owned visits and visible NPC observations, truthful Map/Where; independent source review pending"
   },
   "tag": {
+    "summary": "Property tags on rooms, items and barriers that policies read.",
+    "declares": ["rooms.tags", "items.tags", "barriers.tags"],
+    "sampler": "tags_sampler",
+    "showcase": "areas/homestead",
+    "mechanics": "#property-tags-and-the-policy-leaf-set-toolbox-row-g1",
     "spec": "docs/system/mechanics.md property tags and the policy leaf set (toolbox row G1)",
     "contracts": [
       "Tag",
@@ -1063,6 +1271,11 @@
     "implemented_in": "toolbox row G1 (loka-kgd.17): tags on item, barrier and room definitions; has_tag"
   },
   "alternates": {
+    "summary": "Narration variety: alternate lines and visit tiers.",
+    "declares": ["cartridge.alternates"],
+    "sampler": "variety_sampler",
+    "showcase": "areas/hub",
+    "mechanics": "#narration-variety-and-visit-tiers-toolbox-row-w7",
     "spec": "docs/system/mechanics.md narration variety and visit tiers (toolbox row W7)",
     "contracts": [
       "CompiledCartridge",
@@ -1087,6 +1300,11 @@
     "implemented_in": "toolbox row W7 (loka-kgd.29): narration alternates by command-id hash; visited_count"
   },
   "construction": {
+    "summary": "Building, furnishing and razing rooms on a site.",
+    "declares": ["structures", "rooms.site", "cartridge.world.construction"],
+    "sampler": "build_sampler",
+    "showcase": "areas/homestead",
+    "mechanics": "#built-rooms-toolbox-row-s2-foundation",
     "spec": "docs/system/cartridge.md Structure and site declarations (Built rooms S1)",
     "contracts": [
       "StructureDefinition",

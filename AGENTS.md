@@ -58,9 +58,9 @@ Keep lessons in area files; link here only when relevant to all work.
 - For CI, hooks, skip rules or randomized tests, read [check lessons](docs/lessons/checks.md).
 - For PM work, read [PM lessons](docs/lessons/pm.md).
 - Before drafting or reviewing a district or area plan, read the [area authoring checklist](docs/guides/area-authoring.md).
-- Before writing or reviewing cartridge source, read the [Builders' Guide](docs/BUILDERS-GUIDE.md):
-  use its compile-time shortcuts instead of repeated JSON, and check content with `coverage.ts`
-  and `why.ts`.
+- Read the [toolbox page](docs/TOOLBOX.gen.md) before requesting a mechanic, the
+  [Builders' Guide](docs/BUILDERS-GUIDE.md#cartridge-layout) before writing, reviewing or moving cartridge source:
+  shortcuts, not repeated JSON; verify via `coverage.ts`/`why.ts`.
 
 **All work**
 - Read documents once per agent; [exceptions](docs/decisions/owner-decision-read-once-docs-2026-10-05.md).
@@ -140,16 +140,16 @@ On the M1 run only the tests your diff touches; hosted CI on the pushed head is 
 
 - First reads per role:
   - developer, reviewer, designer: its `.claude/agents/` file and the [workflow core](docs/WORKFLOW.md) sections it names;
-  - PM: the workflow, [PM.md](docs/PM.md) (Beads, merge per step 7) and [the PM handoff](docs/HANDOFF.md), which each PM session starts and ends with: next steps, owner rules, open questions.
+  - one session working directly ([lean default](docs/WORKFLOW.md#lean-default)) or a PM: the workflow, [PM.md](docs/PM.md) (Beads, merge per step 7) and [the PM handoff](docs/HANDOFF.md), which each session starts and ends with: next steps, owner rules, open questions.
 - Book UI code follows the [agent rules](docs/BOOK-UI-COMPONENTS.md#agent-rules-for-book-ui-code).
-- The World page holds only the [room page anatomy](docs/system/book-ui.md#room-page-anatomy): title, description, people, items, log.
+- The World page holds only the [room page anatomy](docs/system/book-ui.md#room-page-anatomy): title, description, people, items, log; its one exception is the transient `+ item` pop.
 - A new screen or action names its template and patterns from the [interaction patterns](docs/design/interaction-patterns.md) first; what fits none goes to the owner.
 - Update [Book UI](docs/system/book-ui.md) per mechanic ([designer](docs/decisions/owner-decision-designer-role-2026-10-07.md)-approved); fix UI defects now ([workflow](docs/WORKFLOW.md#book-interaction-delivery)).
 - Toolchain: pinned in `mise.toml`; run `mise exec -- <cmd>`.
 - After cloning, run `git config core.hooksPath .githooks`; `--no-verify` only with the owner's OK; fix the cause instead.
 - Reviews are independent ([records](docs/reviews/README.md)): a fresh agent that authored
   none of the work ([owner ruling](docs/system/owner-rules.md#process));
-  who reviews what: [the workflow](docs/WORKFLOW.md).
+  only an engine change gets one: [lean default](docs/WORKFLOW.md#lean-default).
 - Each fact lives in one place; other docs link to it rather than restate it.
 - Follow [token hygiene](docs/WORKFLOW.md#token-hygiene).
 - Expected failing readiness probes need no fix.

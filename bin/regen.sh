@@ -25,6 +25,7 @@ touched() {
 }
 
 m mix do compile + loka.source_schema >/dev/null # one VM: schemas/source/ from the source contracts (loka-tp02)
+python3 bin/source_reference.py >/dev/null # docs/reference/*.gen.md from schemas/source/
 # containers_* derive from the frozen inputs; the three of current cartridges (containers_cartridge_*) must
 # also equal a live compile (test/loka/content_{items,locks,sampler}_test.exs), so the compile below runs after.
 if touched '^(test/loka/cartridge_containers_hash\.py|protocol/fixtures/(cartridge_(items|locks|sampler)_|sampler_v|reward_storage_))'; then
@@ -69,6 +70,7 @@ m elixir bin/contracts.exs
 (cd kernel/ts && LOKA_WRITE_GEN=1 m node --test --test-reporter=dot test/state_sections.test.ts >/dev/null)
 m elixir bin/contracts.exs # the System graph reads docs/state-sections.gen.json
 m elixir bin/features.exs
+m elixir bin/toolbox_page.exs
 sh bin/review_index.sh
 (cd mobile/app && LOKA_WRITE_GEN=1 m node --test --test-reporter=dot catalogue.test.ts >/dev/null) # docs/BOOK-UI-COMPONENTS.md index
 if touched '^(mobile/|kernel/ts/src/|protocol/)'; then (cd mobile/app && m npm run -s stories:views); fi

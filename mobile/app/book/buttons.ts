@@ -1,6 +1,8 @@
+// size: allow 302, corpse names bind their victim (loka-kgd.203)
 // GameView's offered actions as the book's buttons: place, door, held-item, notice, travel,
 // dream, shop, service, transport and conversation answers, each with its exact intent.
 import type { GameView } from '../../packages/game-view/session.ts';
+import { victimWords } from '../../packages/game-view/line_words.ts';
 import { dreamButtons } from './dreams.ts';
 import { things } from './item-pages.ts';
 import { corpseButtons, serviceButtons, shopButtons, transportButtons } from './offers.ts';
@@ -67,7 +69,7 @@ const toButton =
     label: `${label(a.label)}${name}`,
     action_key: a.action_key,
     ...(a.command && { command: a.command }),
-    ...(['read', 'refuel', 'pour', 'drink'].includes(commandOf(a)) && id && { detail_id: id }),
+    ...(['read', 'refuel', 'pour'].includes(commandOf(a)) && id && { detail_id: id }),
     target_ids: a.target_ids ? [...a.target_ids] : id ? [id] : [],
     input: {},
   });
@@ -84,7 +86,7 @@ export function buttonsOf(v: GameView, label: Say, text: Say): Press[] {
       })),
   );
   const projected = things(v);
-  const names = new Map(projected.map((e) => [e.id, e.name]));
+  const names = new Map(projected.map((e) => [e.id, victimWords(text, e, e.name)]));
   return [
     ...(v.ancestry_choices ?? []).map((a) => ({
       label: label(a.label),
@@ -154,7 +156,7 @@ export const knownWords = (v: GameView) => [
   ]),
 ];
 // Say, shout, cast and each whisper without a word: the live twins of every typed word
-// (actionContext): the Realm's word field, the Character page's spell cards and the NPC page's Whisper send them.
+// (actionContext): the Realm's word field, the Skills page's spell cards and the NPC page's Whisper send them.
 function wordButtons(v: GameView, text: Say): Press[] {
   if (wordless(v)) return [];
   const offered = (key: string) => v.actions.some((a) => a.action_key === key && a.available);
@@ -207,9 +209,13 @@ export const other = (
 const pickRows = (row: Press, reason: string, ids: string[]) =>
   ids.map((id) => ({ ...row, pick: reason ? { reason } : {}, detail_id: id }));
 
-// An offer a held thing's page draws: offered, an aimed spell (refused, its row), or a resting use pair.
+// An offer a held thing's page draws: offered, an aimed spell (refused, its row), a sanctuary's grey
+// Attack (book-ui.md, Unavailable actions), or a resting use pair.
 const held = (a: ReturnType<typeof things>[number]['actions'][number], id: string) =>
-  a.available || commandOf(a) === 'cast' || (!!other(a, id) && a.reason?.code === 'cooldown');
+  a.available ||
+  commandOf(a) === 'cast' ||
+  a.reason?.cause === 'sanctuary' ||
+  (!!other(a, id) && a.reason?.code === 'cooldown');
 
 function heldButtons(
   v: GameView,
@@ -228,6 +234,10 @@ function heldButtons(
       .flatMap((a) => {
         // An aimed spell is a Cast a spell… row on its target, an unavailable `Lux` row when refused (pick.ts).
         if (commandOf(a) === 'cast') return pickRows(button(a, ''), why(a, text), [e.id]);
+        // An action naming its own target (a quest offer): the card reads its label, on this page.
+        if (a.target_ids?.length === 0) return { ...button(a, ''), detail_id: e.id };
+        if (!a.available && a.reason?.cause === 'sanctuary')
+          return { ...button(a, '', e.id), refused: why(a, text) };
         const two = other(a, e.id);
         // the Book never shows a thing the view does not project (PM ruling, loka-x6t.109.4)
         if (two)
@@ -236,11 +246,11 @@ function heldButtons(
             : [];
         const destination = a.target_ids?.[1] && names.get(a.target_ids[1]);
         const join = JOIN[commandOf(a)] ?? 'in';
-        const offered = button(
-          a,
-          ` ${text(e.name)}${destination ? ` ${join} ${text(destination)}` : ''}`,
-          e.id,
-        );
+        const offered = {
+          ...button(a, ` ${names.get(e.id)}${destination ? ` ${join} ${destination}` : ''}`, e.id),
+          // A vessel's Consume is a Drink (loka-kgd.209): its log reads on the vessel, as Drink's did.
+          ...(commandOf(a) === 'consume' && 'liquid' in e && e.liquid && { detail_id: e.id }),
+        };
         return a.action_key === 'bandage' && v.bleeding
           ? { ...offered, input: { effect_generation: v.bleeding.generation } }
           : offered;
@@ -265,7 +275,7 @@ function noticeButtons(
           (a.target.kind === 'none' || a.target_ids?.length),
       )
       .map((a) => ({
-        ...button(a, a.target_ids?.[1] ? ` ${text(names.get(a.target_ids[1]) ?? '')}` : ''),
+        ...button(a, a.target_ids?.[1] ? ` ${names.get(a.target_ids[1]) ?? ''}` : ''),
         ...(a.input.includes('method') && { input: { method: 'careful' } }),
         ...(a.command === 'expedition' && { input: expeditionInput(v, a.input) }),
         detail_id: n.id,

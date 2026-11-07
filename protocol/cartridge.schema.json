@@ -4,476 +4,345 @@
   "description": "The compiled cartridge, its artifact file and the compiler and loader diagnostics (05 §8, §11, §12, §20; 08 §6; 14 §R4). R4 minimal: the frozen kinds only; rooms, NPCs, schedules, quests, dialogue, assets and localization join with their features, under a new format tag.",
   "$defs": {
     "CompiledCartridge": {
-      "description": "The semantic payload a cartridge hash covers (05 §11 'Hash domains and attestations'): the manifest with its compatibility requirements, the exact capability lock (exactly requires.capabilities until a registry dependency exists; the loader rejects a difference with LOCK_MANIFEST_MISMATCH), and the normalized definitions of the frozen kinds, each map keyed by DefinitionRefString so canonical key order orders it. A key's cartridge_id and cartridge_version are the manifest's id and version and its last segment is the definition's key; the compiler guarantees this and the loader rejects a mismatch (ARTIFACT_DEFINITION_KEY_MISMATCH); the subset cannot express it. format is the hash domain tag and selects the variant. Compatibility (PM ruling, R5 S1 review A7/F3): adding an OPTIONAL field to an existing definition kind, or an optional new definition map, keeps the tag, because an artifact without it keeps its bytes, hash and meaning; a change in the meaning or requirement of an existing field (a field made required, removed or reinterpreted) takes a new tag. Loaders stay fail-closed: an older loader rejects a field it does not know as UNKNOWN_FIELD, and kernel_api ranges govern which loader a cartridge needs. No certificate, signature, package or catalog field belongs here (CAR-10). In R4 the authored cartridge.json is exactly the CartridgeManifest object form (kernel_api as {at_least, below}, capabilities as key to version); the string forms (\">=1.3 <2.0\", key@version) are not accepted yet.",
-      "oneOf": [
-        {
-          "type": "object",
-          "properties": {
-            "format": {
-              "type": "string",
-              "const": "loka-cartridge-v1"
-            },
-            "manifest": {
-              "$ref": "manifest.schema.json#/$defs/CartridgeManifest"
-            },
-            "lock": {
-              "$ref": "capability.schema.json#/$defs/CapabilityLock"
-            },
-            "facts": {
-              "description": "The cartridge's fact declarations, keyed by DefinitionRefString of kind fact.",
-              "type": "object",
-              "propertyNames": {
-                "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):fact/[a-z][a-z0-9_]{0,63}$"
-              },
-              "additionalProperties": {
-                "$ref": "fact.schema.json#/$defs/FactSpec"
-              }
-            },
-            "actions": {
-              "description": "The cartridge's action definitions, keyed by DefinitionRefString of kind action.",
-              "type": "object",
-              "propertyNames": {
-                "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):action/[a-z][a-z0-9_]{0,63}$"
-              },
-              "additionalProperties": {
-                "$ref": "action.schema.json#/$defs/ActionDefinition"
-              }
-            }
-          },
-          "required": [
-            "format",
-            "manifest",
-            "lock",
-            "facts",
-            "actions"
-          ],
-          "additionalProperties": false,
-          "description": "loka-cartridge-v1 (R4): the frozen kinds of R4 only."
+      "description": "The semantic payload a cartridge hash covers (05 §11 'Hash domains and attestations'): the manifest with its compatibility requirements, the exact capability lock (exactly requires.capabilities until a registry dependency exists; the loader rejects a difference with LOCK_MANIFEST_MISMATCH), and the normalized definitions of the frozen kinds, each map keyed by DefinitionRefString so canonical key order orders it. A key's cartridge_id and cartridge_version are the manifest's id and version and its last segment is the definition's key; the compiler guarantees this and the loader rejects a mismatch (ARTIFACT_DEFINITION_KEY_MISMATCH); the subset cannot express it. format is the hash domain tag, loka-cartridge-v2; loka-cartridge-v1, the frozen kinds of R4 without rooms, an entry or text, is retired, and the loader rejects it as UNKNOWN_FORMAT. Compatibility (PM ruling, R5 S1 review A7/F3): adding an OPTIONAL field to an existing definition kind, or an optional new definition map, keeps the tag, because an artifact without it keeps its bytes, hash and meaning; a change in the meaning or requirement of an existing field (a field made required, removed or reinterpreted) takes a new tag. Loaders stay fail-closed: an older loader rejects a field it does not know as UNKNOWN_FIELD, and kernel_api ranges govern which loader a cartridge needs. No certificate, signature, package or catalog field belongs here (CAR-10). In R4 the authored cartridge.json is exactly the CartridgeManifest object form (kernel_api as {at_least, below}, capabilities as key to version); the string forms (\">=1.3 <2.0\", key@version) are not accepted yet.",
+      "type": "object",
+      "properties": {
+        "format": {
+          "type": "string",
+          "const": "loka-cartridge-v2"
         },
-        {
+        "manifest": {
+          "$ref": "manifest.schema.json#/$defs/CartridgeManifest"
+        },
+        "lock": {
+          "$ref": "capability.schema.json#/$defs/CapabilityLock"
+        },
+        "facts": {
+          "description": "The cartridge's fact declarations, keyed by DefinitionRefString of kind fact.",
           "type": "object",
-          "properties": {
-            "format": {
-              "type": "string",
-              "const": "loka-cartridge-v2"
-            },
-            "manifest": {
-              "$ref": "manifest.schema.json#/$defs/CartridgeManifest"
-            },
-            "lock": {
-              "$ref": "capability.schema.json#/$defs/CapabilityLock"
-            },
-            "facts": {
-              "description": "The cartridge's fact declarations, keyed by DefinitionRefString of kind fact.",
-              "type": "object",
-              "propertyNames": {
-                "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):fact/[a-z][a-z0-9_]{0,63}$"
-              },
-              "additionalProperties": {
-                "$ref": "fact.schema.json#/$defs/FactSpec"
-              }
-            },
-            "actions": {
-              "description": "The cartridge's action definitions, keyed by DefinitionRefString of kind action.",
-              "type": "object",
-              "propertyNames": {
-                "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):action/[a-z][a-z0-9_]{0,63}$"
-              },
-              "additionalProperties": {
-                "$ref": "action.schema.json#/$defs/ActionDefinition"
-              }
-            },
-            "rooms": {
-              "description": "The cartridge's rooms, keyed by DefinitionRefString of kind room (never empty: entry names one of them).",
-              "type": "object",
-              "propertyNames": {
-                "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):room/[a-z][a-z0-9_]{0,63}$"
-              },
-              "additionalProperties": {
-                "$ref": "room.schema.json#/$defs/RoomDefinition"
-              }
-            },
+          "propertyNames": {
+            "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):fact/[a-z][a-z0-9_]{0,63}$"
+          },
+          "additionalProperties": {
+            "$ref": "fact.schema.json#/$defs/FactSpec"
+          }
+        },
+        "actions": {
+          "description": "The cartridge's action definitions, keyed by DefinitionRefString of kind action.",
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):action/[a-z][a-z0-9_]{0,63}$"
+          },
+          "additionalProperties": {
+            "$ref": "action.schema.json#/$defs/ActionDefinition"
+          }
+        },
+        "rooms": {
+          "description": "The cartridge's rooms, keyed by DefinitionRefString of kind room (never empty: entry names one of them).",
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):room/[a-z][a-z0-9_]{0,63}$"
+          },
+          "additionalProperties": {
+            "$ref": "room.schema.json#/$defs/RoomDefinition"
+          }
+        },
+        "items": {
+          "description": "The cartridge's items, keyed by DefinitionRefString of kind item; absent when it has none (R5 S4, an optional map: the tag stays).",
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):item/[a-z][a-z0-9_]{0,63}$"
+          },
+          "additionalProperties": {
+            "$ref": "entity.schema.json#/$defs/ItemDefinition"
+          }
+        },
+        "npcs": {
+          "description": "The cartridge's NPCs, keyed by DefinitionRefString of kind npc; absent when it has none (R5 S4, an optional map: the tag stays).",
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):npc/[a-z][a-z0-9_]{0,63}$"
+          },
+          "additionalProperties": {
+            "$ref": "entity.schema.json#/$defs/NpcDefinition"
+          }
+        },
+        "scripted_actions": {
+          "description": "The cartridge's scripted actions (action.schema.json ScriptedAction), keyed by DefinitionRefString of kind action; absent when it has none (R5 S5, an optional map: the tag stays).",
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):action/[a-z][a-z0-9_]{0,63}$"
+          },
+          "additionalProperties": {
+            "$ref": "action.schema.json#/$defs/ScriptedAction"
+          }
+        },
+        "resources": {
+          "description": "The cartridge's resources (resource.schema.json ResourceSpec), keyed by DefinitionRefString of kind resource; absent when it has none (R5 S6b, an optional map: the tag stays). The compiler adds the default pools hp, ma and mv, resource@1 and schedule@1 (wait, so an exhausted body can regenerate) to every cartridge; an artifact without them (older or hand-built) has no pools, and its moves cost nothing.",
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):resource/[a-z][a-z0-9_]{0,63}$"
+          },
+          "additionalProperties": {
+            "$ref": "resource.schema.json#/$defs/ResourceSpec"
+          }
+        },
+        "attributes": {
+          "description": "The cartridge's attributes (AttributeSpec), keyed by DefinitionRefString of kind attribute; absent when it has none (C1 c1-attributes, an optional map: the tag stays). Its kind and the policy leaves stat_compare and resource_compare need attribute@1 in the lock.",
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):attribute/[a-z][a-z0-9_]{0,63}$"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/AttributeSpec"
+          }
+        },
+        "ancestries": {
+          "description": "Authored once-only character choices (attribute@1), keyed by choice Key.",
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[a-z][a-z0-9_]{0,63}$"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/AncestrySpec"
+          }
+        },
+        "entry": {
+          "description": "The room a new run's player starts in (00a §12 manifest entry); a room of this cartridge.",
+          "$ref": "identity.schema.json#/$defs/DefinitionRef"
+        },
+        "text": {
+          "$ref": "text.schema.json#/$defs/TextCatalog"
+        },
+        "alternates": {
+          "description": "Narration variety (alternates@1, toolbox row W7): a text key's alternates, each a key of the text catalog; a committed narration line with that key shows one of the key and its alternates, chosen by a hash of the command id and the key (mechanics.md narration variety), never the authority RNG.",
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[a-z][a-z0-9_.]{0,127}$"
+          },
+          "additionalProperties": {
+            "type": "array",
+            "minItems": 1,
             "items": {
-              "description": "The cartridge's items, keyed by DefinitionRefString of kind item; absent when it has none (R5 S4, an optional map: the tag stays).",
-              "type": "object",
-              "propertyNames": {
-                "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):item/[a-z][a-z0-9_]{0,63}$"
-              },
-              "additionalProperties": {
-                "$ref": "entity.schema.json#/$defs/ItemDefinition"
-              }
-            },
-            "npcs": {
-              "description": "The cartridge's NPCs, keyed by DefinitionRefString of kind npc; absent when it has none (R5 S4, an optional map: the tag stays).",
-              "type": "object",
-              "propertyNames": {
-                "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):npc/[a-z][a-z0-9_]{0,63}$"
-              },
-              "additionalProperties": {
-                "$ref": "entity.schema.json#/$defs/NpcDefinition"
-              }
-            },
-            "scripted_actions": {
-              "description": "The cartridge's scripted actions (action.schema.json ScriptedAction), keyed by DefinitionRefString of kind action; absent when it has none (R5 S5, an optional map: the tag stays).",
-              "type": "object",
-              "propertyNames": {
-                "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):action/[a-z][a-z0-9_]{0,63}$"
-              },
-              "additionalProperties": {
-                "$ref": "action.schema.json#/$defs/ScriptedAction"
-              }
-            },
-            "resources": {
-              "description": "The cartridge's resources (resource.schema.json ResourceSpec), keyed by DefinitionRefString of kind resource; absent when it has none (R5 S6b, an optional map: the tag stays). The compiler adds the default pools hp, ma and mv, resource@1 and schedule@1 (wait, so an exhausted body can regenerate) to every v2 cartridge; an artifact without them (older or hand-built) has no pools, and its moves cost nothing.",
-              "type": "object",
-              "propertyNames": {
-                "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):resource/[a-z][a-z0-9_]{0,63}$"
-              },
-              "additionalProperties": {
-                "$ref": "resource.schema.json#/$defs/ResourceSpec"
-              }
-            },
-            "attributes": {
-              "description": "The cartridge's attributes (AttributeSpec), keyed by DefinitionRefString of kind attribute; absent when it has none (C1 c1-attributes, an optional map: the tag stays). Its kind and the policy leaves stat_compare and resource_compare need attribute@1 in the lock.",
-              "type": "object",
-              "propertyNames": {
-                "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):attribute/[a-z][a-z0-9_]{0,63}$"
-              },
-              "additionalProperties": {
-                "$ref": "#/$defs/AttributeSpec"
-              }
-            },
-            "ancestries": {
-              "description": "Authored once-only character choices (attribute@1), keyed by choice Key.",
-              "type": "object",
-              "propertyNames": {
-                "pattern": "^[a-z][a-z0-9_]{0,63}$"
-              },
-              "additionalProperties": {
-                "$ref": "#/$defs/AncestrySpec"
-              }
-            },
-            "entry": {
-              "description": "The room a new run's player starts in (00a §12 manifest entry); a room of this cartridge.",
-              "$ref": "identity.schema.json#/$defs/DefinitionRef"
-            },
-            "text": {
-              "$ref": "text.schema.json#/$defs/TextCatalog"
-            },
-            "alternates": {
-              "description": "Narration variety (alternates@1, toolbox row W7): a text key's alternates, each a key of the text catalog; a committed narration line with that key shows one of the key and its alternates, chosen by a hash of the command id and the key (mechanics.md narration variety), never the authority RNG.",
-              "type": "object",
-              "propertyNames": {
-                "pattern": "^[a-z][a-z0-9_.]{0,127}$"
-              },
-              "additionalProperties": {
-                "type": "array",
-                "minItems": 1,
-                "items": {
-                  "$ref": "text.schema.json#/$defs/TextKey"
-                }
-              }
-            },
-            "barriers": {
-              "description": "The cartridge's barriers, keyed by DefinitionRefString of kind barrier; absent when it has none (R5 S7, an optional map: the tag stays).",
-              "type": "object",
-              "propertyNames": {
-                "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):barrier/[a-z][a-z0-9_]{0,63}$"
-              },
-              "additionalProperties": {
-                "$ref": "room.schema.json#/$defs/BarrierDefinition"
-              }
-            },
-            "quests": {
-              "description": "The cartridge's quests, keyed by DefinitionRefString of kind quest; absent when it has none (Early R7/R8 Q, an optional map: the tag stays).",
-              "type": "object",
-              "propertyNames": {
-                "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):quest/[a-z][a-z0-9_]{0,63}$"
-              },
-              "additionalProperties": {
-                "$ref": "quest.schema.json#/$defs/QuestDefinition"
-              }
-            },
-            "dialogues": {
-              "description": "The cartridge's dialogues, keyed by DefinitionRefString of kind dialogue; absent when it has none (Early R7/R8 D1, an optional map: the tag stays).",
-              "type": "object",
-              "propertyNames": {
-                "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):dialogue/[a-z][a-z0-9_]{0,63}$"
-              },
-              "additionalProperties": {
-                "$ref": "dialogue.schema.json#/$defs/DialogueDefinition"
-              }
-            },
-            "story_points": {
-              "description": "The cartridge's story points (23 §3), keyed by DefinitionRefString of kind story_point; absent when it has none (Early R7/R8 D2, an optional map: the tag stays).",
-              "type": "object",
-              "propertyNames": {
-                "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):story_point/[a-z][a-z0-9_]{0,63}$"
-              },
-              "additionalProperties": {
-                "$ref": "#/$defs/StoryPointDefinition"
-              }
-            },
-            "reactions": {
-              "description": "The cartridge's reaction rules, keyed by DefinitionRefString of kind reaction; absent when it has none (Early R7/R8 R, an optional map: the tag stays).",
-              "type": "object",
-              "propertyNames": {
-                "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):reaction/[a-z][a-z0-9_]{0,63}$"
-              },
-              "additionalProperties": {
-                "$ref": "reaction.schema.json#/$defs/ReactionRule"
-              }
-            },
-            "calendar": {
-              "$ref": "#/$defs/Calendar"
-            },
-            "world": {
-              "$ref": "#/$defs/WorldSettings"
-            },
-            "speech": {
-              "description": "Word bar S2 (speech@1): phrases, the cartridge's static say words, each a speech@1 Word, offered to every actor with no fact gate; GameView projects them as phrases. In source it is cartridge.json's speech, beside world.",
-              "type": "object",
-              "properties": {
-                "phrases": {
-                  "type": "array",
-                  "minItems": 1,
-                  "items": {
-                    "$ref": "action.schema.json#/$defs/Word"
-                  }
-                }
-              },
-              "required": [
-                "phrases"
-              ],
-              "additionalProperties": false
-            },
-            "chapters": {
-              "description": "Optional ordered chapter markers; absent preserves earlier cartridge bytes and meaning.",
-              "type": "array",
-              "minItems": 1,
-              "items": {
-                "$ref": "#/$defs/Chapter"
-              }
-            },
-            "scenes": {
-              "description": "Optional modal scene definitions, owned by scene@1, keyed by scene DefinitionRefString.",
-              "type": "object",
-              "propertyNames": {
-                "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):scene/[a-z][a-z0-9_]{0,63}$"
-              },
-              "additionalProperties": {
-                "$ref": "scene.schema.json#/$defs/SceneDefinition"
-              }
-            },
-            "skills": {
-              "description": "Declared topics and their mapped player knowledge facts.",
-              "type": "object",
-              "propertyNames": {
-                "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):skill/[a-z][a-z0-9_]{0,63}$"
-              },
-              "additionalProperties": {
-                "$ref": "#/$defs/SkillDefinition"
-              }
-            },
-            "topics": {
-              "description": "Declared topics and their mapped player knowledge facts.",
-              "type": "object",
-              "propertyNames": {
-                "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):topic/[a-z][a-z0-9_]{0,63}$"
-              },
-              "additionalProperties": {
-                "$ref": "#/$defs/TopicDefinition"
-              }
-            },
-            "liquids": {
-              "type": "object",
-              "propertyNames": {
-                "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):liquid/[a-z][a-z0-9_]{0,63}$"
-              },
-              "additionalProperties": {
-                "$ref": "liquid.schema.json#/$defs/LiquidDefinition"
-              }
-            },
-            "populations": {
-              "type": "object",
-              "propertyNames": {
-                "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):population/[a-z][a-z0-9_]{0,63}$"
-              },
-              "additionalProperties": {
-                "$ref": "cartridge.schema.json#/$defs/PopulationPlan"
-              }
-            },
-            "replenish": {
-              "description": "Replenish (toolbox row 19b, docs/system/mechanics.md Replenish): scheduled moves of conserved items from a reserve holder to a target holder up to a cap, keyed by DefinitionRefString of kind replenish.",
-              "type": "object",
-              "propertyNames": {
-                "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):replenish/[a-z][a-z0-9_]{0,63}$"
-              },
-              "additionalProperties": {
-                "$ref": "cartridge.schema.json#/$defs/ReplenishPlan"
-              }
-            },
-            "services": {
-              "type": "object",
-              "propertyNames": {
-                "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):service/[a-z][a-z0-9_]{0,63}$"
-              },
-              "additionalProperties": {
-                "$ref": "service.schema.json#/$defs/ServiceDefinition"
-              }
-            },
-            "transports": {
-              "type": "object",
-              "propertyNames": {
-                "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):transport/[a-z][a-z0-9_]{0,63}$"
-              },
-              "additionalProperties": {
-                "$ref": "transport.schema.json#/$defs/TransportDefinition"
-              }
-            },
-            "bleeds": {
-              "type": "object",
-              "additionalProperties": {
-                "$ref": "cartridge.schema.json#/$defs/BleedDefinition"
-              }
-            },
-            "emotes": {
-              "description": "NPC emotes (G9, emote@1, docs/system/mechanics.md NPC emotes): the cartridge's emote table, keyed by DefinitionRefString of kind emote; a reaction's emote step plays one.",
-              "type": "object",
-              "propertyNames": {
-                "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):emote/[a-z][a-z0-9_]{0,63}$"
-              },
-              "additionalProperties": {
-                "$ref": "cartridge.schema.json#/$defs/EmoteDefinition"
-              }
-            },
-            "statuses": {
-              "type": "object",
-              "additionalProperties": {
-                "$ref": "cartridge.schema.json#/$defs/StatusDefinition"
-              }
-            },
-            "structures": {
-              "type": "object",
-              "propertyNames": {
-                "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):structure/[a-z][a-z0-9_]{0,63}$"
-              },
-              "additionalProperties": {
-                "$ref": "cartridge.schema.json#/$defs/StructureDefinition"
-              }
-            },
-            "layout": {
-              "type": "array",
-              "items": {
-                "$ref": "cartridge.schema.json#/$defs/MapPosition"
-              },
-              "minItems": 1
-            }
-          },
-          "required": [
-            "format",
-            "manifest",
-            "lock",
-            "facts",
-            "actions",
-            "rooms",
-            "entry",
-            "text"
-          ],
-          "additionalProperties": false,
-          "description": "loka-cartridge-v2 (R5 slice 1): v1 plus rooms, the entry room and the default-locale text catalog. The compiler emits v2 exactly when the source has rooms, an entry or a text catalog, so a cartridge without rooms keeps its v1 bytes and hash."
-        }
-      ],
-      "examples": [
-        {
-          "format": "loka-cartridge-v1",
-          "manifest": {
-            "api_version": "loka/v3",
-            "id": "hello_sampler",
-            "version": "0.0.1",
-            "title": "Hello Sampler",
-            "requires": {
-              "kernel_api": {
-                "at_least": "1.0",
-                "below": "2.0"
-              },
-              "content_schema": 1,
-              "rule_ir": 1,
-              "capabilities": {
-                "movement": 1,
-                "containment": 1,
-                "inspectable_detail": 1,
-                "description_variant": 1,
-                "equipment": 1,
-                "fact": 1,
-                "policy": 1,
-                "target_resolution": 1,
-                "narration": 1,
-                "quest": 1,
-                "dialogue": 1,
-                "topic": 1,
-                "check": 1,
-                "schedule": 1
-              },
-              "client_features": []
-            },
-            "supported_profiles": [
-              "offline_private"
-            ]
-          },
-          "lock": {
-            "format": "loka-capability-lock-v1",
-            "capabilities": {
-              "movement": 1,
-              "containment": 1,
-              "inspectable_detail": 1,
-              "description_variant": 1,
-              "equipment": 1,
-              "fact": 1,
-              "policy": 1,
-              "target_resolution": 1,
-              "narration": 1,
-              "quest": 1,
-              "dialogue": 1,
-              "topic": 1,
-              "check": 1,
-              "schedule": 1
-            }
-          },
-          "facts": {
-            "hello_sampler@0.0.1:fact/village_arrived": {
-              "key": "village_arrived",
-              "version": 1,
-              "value_type": {
-                "type": "bool",
-                "default": false
-              },
-              "scopes": [
-                "instance"
-              ],
-              "meaning": "The lantern was fetched for Bram; the village green reads differently."
-            }
-          },
-          "actions": {
-            "hello_sampler@0.0.1:action/talk": {
-              "key": "talk",
-              "name": "actions.talk",
-              "target": {
-                "kind": "entity",
-                "scopes": [
-                  "room_occupants"
-                ]
-              },
-              "command": "talk",
-              "priority": 100,
-              "input": [],
-              "policy": {
-                "op": "target_present"
-              },
-              "accessibility": "actions.talk.a11y"
+              "$ref": "text.schema.json#/$defs/TextKey"
             }
           }
         },
+        "barriers": {
+          "description": "The cartridge's barriers, keyed by DefinitionRefString of kind barrier; absent when it has none (R5 S7, an optional map: the tag stays).",
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):barrier/[a-z][a-z0-9_]{0,63}$"
+          },
+          "additionalProperties": {
+            "$ref": "room.schema.json#/$defs/BarrierDefinition"
+          }
+        },
+        "quests": {
+          "description": "The cartridge's quests, keyed by DefinitionRefString of kind quest; absent when it has none (Early R7/R8 Q, an optional map: the tag stays).",
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):quest/[a-z][a-z0-9_]{0,63}$"
+          },
+          "additionalProperties": {
+            "$ref": "quest.schema.json#/$defs/QuestDefinition"
+          }
+        },
+        "dialogues": {
+          "description": "The cartridge's dialogues, keyed by DefinitionRefString of kind dialogue; absent when it has none (Early R7/R8 D1, an optional map: the tag stays).",
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):dialogue/[a-z][a-z0-9_]{0,63}$"
+          },
+          "additionalProperties": {
+            "$ref": "dialogue.schema.json#/$defs/DialogueDefinition"
+          }
+        },
+        "story_points": {
+          "description": "The cartridge's story points (23 §3), keyed by DefinitionRefString of kind story_point; absent when it has none (Early R7/R8 D2, an optional map: the tag stays).",
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):story_point/[a-z][a-z0-9_]{0,63}$"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/StoryPointDefinition"
+          }
+        },
+        "reactions": {
+          "description": "The cartridge's reaction rules, keyed by DefinitionRefString of kind reaction; absent when it has none (Early R7/R8 R, an optional map: the tag stays).",
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):reaction/[a-z][a-z0-9_]{0,63}$"
+          },
+          "additionalProperties": {
+            "$ref": "reaction.schema.json#/$defs/ReactionRule"
+          }
+        },
+        "calendar": {
+          "$ref": "#/$defs/Calendar"
+        },
+        "world": {
+          "$ref": "#/$defs/WorldSettings"
+        },
+        "speech": {
+          "description": "Word bar S2 (speech@1): phrases, the cartridge's static say words, each a speech@1 Word, offered to every actor with no fact gate; GameView projects them as phrases. In source it is cartridge.json's speech, beside world.",
+          "type": "object",
+          "properties": {
+            "phrases": {
+              "description": "The words every player can say, as chips in the say bar.",
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "action.schema.json#/$defs/Word"
+              }
+            }
+          },
+          "required": [
+            "phrases"
+          ],
+          "additionalProperties": false
+        },
+        "chapters": {
+          "description": "Optional ordered chapter markers; absent preserves earlier cartridge bytes and meaning.",
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/Chapter"
+          }
+        },
+        "scenes": {
+          "description": "Optional modal scene definitions, owned by scene@1, keyed by scene DefinitionRefString.",
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):scene/[a-z][a-z0-9_]{0,63}$"
+          },
+          "additionalProperties": {
+            "$ref": "scene.schema.json#/$defs/SceneDefinition"
+          }
+        },
+        "skills": {
+          "description": "Declared topics and their mapped player knowledge facts.",
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):skill/[a-z][a-z0-9_]{0,63}$"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/SkillDefinition"
+          }
+        },
+        "topics": {
+          "description": "Declared topics and their mapped player knowledge facts.",
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):topic/[a-z][a-z0-9_]{0,63}$"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/TopicDefinition"
+          }
+        },
+        "liquids": {
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):liquid/[a-z][a-z0-9_]{0,63}$"
+          },
+          "additionalProperties": {
+            "$ref": "liquid.schema.json#/$defs/LiquidDefinition"
+          }
+        },
+        "populations": {
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):population/[a-z][a-z0-9_]{0,63}$"
+          },
+          "additionalProperties": {
+            "$ref": "cartridge.schema.json#/$defs/PopulationPlan"
+          }
+        },
+        "replenish": {
+          "description": "Replenish (toolbox row 19b, docs/system/mechanics.md Replenish): scheduled moves of conserved items from a reserve holder to a target holder up to a cap, keyed by DefinitionRefString of kind replenish.",
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):replenish/[a-z][a-z0-9_]{0,63}$"
+          },
+          "additionalProperties": {
+            "$ref": "cartridge.schema.json#/$defs/ReplenishPlan"
+          }
+        },
+        "services": {
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):service/[a-z][a-z0-9_]{0,63}$"
+          },
+          "additionalProperties": {
+            "$ref": "service.schema.json#/$defs/ServiceDefinition"
+          }
+        },
+        "transports": {
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):transport/[a-z][a-z0-9_]{0,63}$"
+          },
+          "additionalProperties": {
+            "$ref": "transport.schema.json#/$defs/TransportDefinition"
+          }
+        },
+        "bleeds": {
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):bleed/[a-z][a-z0-9_]{0,63}$"
+          },
+          "additionalProperties": {
+            "$ref": "cartridge.schema.json#/$defs/BleedDefinition"
+          }
+        },
+        "emotes": {
+          "description": "NPC emotes (G9, emote@1, docs/system/mechanics.md NPC emotes): the cartridge's emote table, keyed by DefinitionRefString of kind emote; a reaction's emote step plays one.",
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):emote/[a-z][a-z0-9_]{0,63}$"
+          },
+          "additionalProperties": {
+            "$ref": "cartridge.schema.json#/$defs/EmoteDefinition"
+          }
+        },
+        "statuses": {
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):status/[a-z][a-z0-9_]{0,63}$"
+          },
+          "additionalProperties": {
+            "$ref": "cartridge.schema.json#/$defs/StatusDefinition"
+          }
+        },
+        "structures": {
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):structure/[a-z][a-z0-9_]{0,63}$"
+          },
+          "additionalProperties": {
+            "$ref": "cartridge.schema.json#/$defs/StructureDefinition"
+          }
+        },
+        "layout": {
+          "type": "array",
+          "items": {
+            "$ref": "cartridge.schema.json#/$defs/MapPosition"
+          },
+          "minItems": 1
+        }
+      },
+      "required": [
+        "format",
+        "manifest",
+        "lock",
+        "facts",
+        "actions",
+        "rooms",
+        "entry",
+        "text"
+      ],
+      "additionalProperties": false,
+      "examples": [
         {
           "format": "loka-cartridge-v2",
           "manifest": {
@@ -597,98 +466,6 @@
       "additionalProperties": false,
       "examples": [
         {
-          "content_hash": "fe17f082e3f22187e008b34491af5ed1b053fdc4615058ce47011ee0180d84f2",
-          "cartridge": {
-            "format": "loka-cartridge-v1",
-            "manifest": {
-              "api_version": "loka/v3",
-              "id": "hello_sampler",
-              "version": "0.0.1",
-              "title": "Hello Sampler",
-              "requires": {
-                "kernel_api": {
-                  "at_least": "1.0",
-                  "below": "2.0"
-                },
-                "content_schema": 1,
-                "rule_ir": 1,
-                "capabilities": {
-                  "movement": 1,
-                  "containment": 1,
-                  "inspectable_detail": 1,
-                  "description_variant": 1,
-                  "equipment": 1,
-                  "fact": 1,
-                  "policy": 1,
-                  "target_resolution": 1,
-                  "narration": 1,
-                  "quest": 1,
-                  "dialogue": 1,
-                  "topic": 1,
-                  "check": 1,
-                  "schedule": 1
-                },
-                "client_features": []
-              },
-              "supported_profiles": [
-                "offline_private"
-              ]
-            },
-            "lock": {
-              "format": "loka-capability-lock-v1",
-              "capabilities": {
-                "movement": 1,
-                "containment": 1,
-                "inspectable_detail": 1,
-                "description_variant": 1,
-                "equipment": 1,
-                "fact": 1,
-                "policy": 1,
-                "target_resolution": 1,
-                "narration": 1,
-                "quest": 1,
-                "dialogue": 1,
-                "topic": 1,
-                "check": 1,
-                "schedule": 1
-              }
-            },
-            "facts": {
-              "hello_sampler@0.0.1:fact/village_arrived": {
-                "key": "village_arrived",
-                "version": 1,
-                "value_type": {
-                  "type": "bool",
-                  "default": false
-                },
-                "scopes": [
-                  "instance"
-                ],
-                "meaning": "The lantern was fetched for Bram; the village green reads differently."
-              }
-            },
-            "actions": {
-              "hello_sampler@0.0.1:action/talk": {
-                "key": "talk",
-                "name": "actions.talk",
-                "target": {
-                  "kind": "entity",
-                  "scopes": [
-                    "room_occupants"
-                  ]
-                },
-                "command": "talk",
-                "priority": 100,
-                "input": [],
-                "policy": {
-                  "op": "target_present"
-                },
-                "accessibility": "actions.talk.a11y"
-              }
-            }
-          }
-        },
-        {
           "content_hash": "c72b59ac7353dcf055438427dcaa59bcb1c2474058531aab5686116d16e7b671",
           "cartridge": {
             "format": "loka-cartridge-v2",
@@ -797,7 +574,7 @@
       ]
     },
     "StoryPointDefinition": {
-      "description": "A story point the cartridge declares (23 §3; 03 §26; Early R7/R8 D2), keyed in CompiledCartridge.story_points by DefinitionRefString of kind story_point, its event story_point_reached owned by dialogue@1: its key, the report's story point (account.schema.json StoryPointReport), and outcomes, at least one (a compiler check: the subset has no minProperties), each reached by its rule-owned trigger: the choice of a dialogue (choose emits story_point_reached after choice_resolved in that decision's root sequence). A trigger site feeds one outcome of one story point (DUPLICATE_DEFINITION), and its dialogue resolves a quest (OUTCOME_MISMATCH otherwise), so a choice reaches it once. In source it is no file: the compiler derives it from each dialogue choice's story_point \"<key>/<outcome>\" and each scene's on_end.",
+      "description": "A story point the cartridge declares (23 §3; 03 §26; Early R7/R8 D2), keyed in CompiledCartridge.story_points by DefinitionRefString of kind story_point, its event story_point_reached owned by dialogue@1: its key, the report's story point (account.schema.json StoryPointReport), and outcomes, at least one (a compiler check: the subset has no minProperties), each reached by its rule-owned trigger: the choice of a dialogue (choose emits story_point_reached after choice_resolved in that decision's root sequence). A trigger site feeds one outcome of one story point (DUPLICATE_DEFINITION), and reaching it ends the talk, so the choice has no then or then_failed (OUTCOME_MISMATCH otherwise). In source it is no file: the compiler derives it from each dialogue choice's story_point \"<key>/<outcome>\" and each scene's on_end.",
       "type": "object",
       "properties": {
         "key": {
@@ -874,29 +651,29 @@
       ],
       "type": "object",
       "properties": {
-        "name": {
+        "name": {"description":"Text key of the choice's label.",
           "$ref": "text.schema.json#/$defs/TextKey"
         },
-        "description": {
+        "description": {"description":"Text key of the choice's description.",
           "$ref": "text.schema.json#/$defs/TextKey"
         },
-        "attribute": {
+        "attribute": {"description":"The attribute this choice raises at birth, by modifier.",
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
         },
-        "modifier": {
+        "modifier": {"description":"Added to the attribute's starting value; at least 1.",
           "type": "integer",
           "minimum": 1
         },
-        "skill": {
+        "skill": {"description":"A skill granted at birth, without learning; it may not have a prerequisite.",
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
         },
-        "faction": {
+        "faction": {"description":"A fact set when the choice is made.",
           "type": "object",
           "properties": {
-            "fact": {
+            "fact": {"description":"The fact; it must be player-scoped.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "value": {
+            "value": {"description":"The value the fact is set to.",
               "type": "integer"
             }
           },
@@ -906,7 +683,7 @@
           ],
           "additionalProperties": false
         },
-        "dark_sight": {
+        "dark_sight": {"description":"When true, the character sees in the dark.",
           "const": true
         }
       },
@@ -945,19 +722,19 @@
       "description": "calendar@1: authored logical units per hour, hours per day, displayed subdivisions, and optional ordered solar/lunar cuts. Cut starts are inclusive; the compiler checks order, cycle bounds and schedule/window hours (lib/loka/content/calendar.ex). Toolbox row 31 adds the season and tide cycles and the weather table (one weighted entry per calendar day, chosen by a hash of the world id and the day).",
       "type": "object",
       "properties": {
-        "start": {
+        "start": {"description":"The logical time a new world begins at.",
           "type": "integer",
           "minimum": 0
         },
-        "units_per_hour": {
+        "units_per_hour": {"description":"Logical time units in one hour; the three unit fields are given together.",
           "type": "integer",
           "minimum": 1
         },
-        "hours_per_day": {
+        "hours_per_day": {"description":"Hours in one day.",
           "type": "integer",
           "minimum": 1
         },
-        "subdivisions_per_hour": {
+        "subdivisions_per_hour": {"description":"Parts the status line splits an hour into; must divide units_per_hour.",
           "type": "integer",
           "minimum": 1
         },
@@ -1027,11 +804,11 @@
       "description": "A repeating cycle of ordered cuts in logical time units (lunar; season and tide, toolbox row 31): the phase at time t is the last cut at or before ((t - origin) mod period); the first cut starts at 0.",
       "type": "object",
       "properties": {
-        "period": {
+        "period": {"description":"Length of the cycle in logical units.",
           "type": "integer",
           "minimum": 1
         },
-        "origin": {
+        "origin": {"description":"The time at which the cycle is at its start (position 0).",
           "type": "integer",
           "minimum": 0
         },
@@ -1070,16 +847,16 @@
       "description": "One weather of a calendar's weather table (toolbox row 31): each calendar day takes one entry with probability weight / total weight, by a hash of the world id and the day, never the authority RNG. wet: an exposed room's flame will not light (light@1 ignite). Phases are unique in the table.",
       "type": "object",
       "properties": {
-        "phase": {
+        "phase": {"description":"The weather's name, lowercase letters, digits and underscores; unique in the table.",
           "type": "string",
           "pattern": "^[a-z][a-z0-9_]*$"
         },
-        "weight": {
+        "weight": {"description":"Its chance relative to the other entries: weight over the sum of all weights; 1 to 1000.",
           "type": "integer",
           "minimum": 1,
           "maximum": 1000
         },
-        "wet": {
+        "wet": {"description":"When true, an exposed flame will not light in this weather.",
           "type": "boolean"
         }
       },
@@ -1100,11 +877,11 @@
       "description": "An inclusive phase start within one authored solar day or lunar period.",
       "type": "object",
       "properties": {
-        "at": {
+        "at": {"description":"Logical units into the solar day (or the cycle) at which this phase starts; the first cut of a cycle is 0.",
           "type": "integer",
           "minimum": 0
         },
-        "phase": {
+        "phase": {"description":"The phase's name, lowercase letters, digits and underscores.",
           "type": "string",
           "pattern": "^[a-z][a-z0-9_]*$"
         }
@@ -1131,7 +908,7 @@
       ]
     },
     "DiagnosticCode": {
-      "description": "A diagnostic code: a closed set, one code per distinct cause (08 §6: repair loops read codes and data, never prose). INVALID_JSON: a source file is not JSON (RFC 8259, UTF-8); in the loader, the artifact is not UTF-8 or fails the canonical decoder (loka-numeric-v1), duplicate keys included, path empty, data {}; DUPLICATE_KEY: an object in a source file repeats a key (Elixir's JSON keeps the first silently, so the compiler checks it); UNKNOWN_FIELD: a field outside the registered schema (05 §5); the validator's unknown_property; in the loader, path the validator's, data {}; SCHEMA_VIOLATION: any other schema error; a dialogue without a choice is too_few_items at its choices, a story point without an outcome at its outcomes, and a quest journal's empty hints object at its hints (the subset has no minProperties); data.error is its ErrorCode (error_registry.json); a v2 source (rooms, an entry or text.json) without an entry is missing_property at cartridge.entry; in the loader, path the validator's; MISSING_MANIFEST: the cartridge has no cartridge.json (05 §3); path is cartridge; DUPLICATE_DEFINITION: two definitions in one cartridge have one DefinitionRef (03 §2, 05 §4; other cartridges' refs differ, CAR-01), or a scripted action's key is an action's of the cartridge or a registered command type (an engine verb's), one ActionSet identity with two definitions (06 §19), path the scripted action (actions/ring_bell), data {}; or a dialogue's key is a registered command type's, an action's, a scripted action's or a quest's (its talk is one ActionSet identity), path the dialogue (dialogues/bram), data {}; or a dialogue role is named actor (the actor is always a participant), path the role (dialogues/bram.roles.actor), data {}; or a dialogue choice's story_point or a scene's on_end claims a story point outcome an earlier site already claims, path that later site (dialogues/bram.choices.carry.story_point or scenes/bell_rung.on_end), data {}; or two scripted actions' checks have one key, one check DefinitionRef with two definitions (step.schema.json Check), path each such scripted action's check (actions/pick_lock.check), data {}; or a scripted action's check and a dialogue choice's (step.schema.json Check, toolbox row 14), or two choices' checks, have one key, path each such check (dialogues/guard.choices.persuade.check), data {}; FACT_NAME_COLLISION: two authored fact names map to one key after each . becomes _ (owner decision, IMPORT.md); FACT_DEFAULT_INVALID: a fact default is outside its enum values or int bounds (fact.schema.json FactType); UNRESOLVED_REFERENCE: a reference names no definition (CAR-02, A10); an exit's to or the entry names no room of this cartridge (05 §17), or, in v2, a room's title or description, a detail's description (path rooms/well_lane.details.bucket.description) or a description variant's (rooms/well_lane.variants[0].description) or an action's label or accessibility, or an item's or NPC's short, room_line, room-line variant or description has no text catalog entry; an item's location or an NPC's room names no definition of that kind in this cartridge; an exit's barrier names no barrier of this cartridge (path rooms/cell.exits.east.barrier), or an item's barrier none (path items/trunk.barrier, data {target}), or a barrier's key_item no item of it (barriers/cell_door.key_item), or a barrier's short has no text catalog entry; a scripted action's target room names no room of this cartridge, or its detail no detail of that room (data {target} the detail key), a scripted action's fact.assign fact no fact of it, or its label or narration has no text catalog entry; a reaction's trigger filter naming a definition (fact, room, quest, item, victim npc, story_point, barrier, scene, liquid kind), or a fact.assign fact of its steps, names no such definition of this cartridge (path reactions/gossip.on.fact); a dialogue's npc or quest, a role's npc or item, or a fact.assign fact or the accept of a choice names no definition of that kind in this cartridge, its npc is none of its npc roles (path dialogues/bram.npc, data {target} the npc), or a choice's hand_over item names no item role or its to no npc role (path dialogues/bram.choices.leave.hand_over.to, data {target} the role name), or a dialogue's prompt or a choice's label or narration has no text catalog entry (path dialogues/bram.choices.carry.narration); a quest's title, offer label or journal stage or outcome text has no text catalog entry (paths quests/lantern.offer.label, quests/lantern.journal.active, quests/lantern.journal.outcomes.carry, data {target}), or its objective's item_acquired names no item of this cartridge (path quests/lantern.objective.item_acquired); a key of a room's action contribution names no registered command, action or scripted action of this cartridge (data {target} the key, path rooms/belfry.actions[0].actions[1]); a stat_compare's attribute or a resource_compare's resource names no attribute or resource of this cartridge (path the member, actions/pray.policy.attribute, data {target}); or a touch link in the catalog string of a room's, detail's, variant's, item's or NPC's text names no target: a link's target is the detail, item or NPC it names, a link without a target key in a detail's, item's or NPC's own text is that thing itself, and a target key names a detail of the room (in a room's or its details' text), an item or an NPC of the cartridge, so a link without one in a room's own text has none (data target is then the link as written), data {target} (the DefinitionRefString or the TextKey), path the reference (rooms/ferry_landing.exits.north.to, cartridge.entry, rooms/ferry_landing.title, actions/talk.label); CONTAINMENT_CYCLE: an item's location leads, through the items it starts in, back to itself (invariant containment_acyclic), path its location's item member (items/satchel.location.item), data {}; CAPACITY_EXCEEDED: more items start in an item or NPC than its capacity (invariant containment_acyclic), path its capacity (items/satchel.capacity), data {capacity, held}; TOUCH_LINK_MISSING (compiler only, severity warning, the build succeeds): a room's description or one of its description variants has no touch link to one of the room's details, or an item's or NPC's room line or one of its room-line variants has none to that item or NPC (owner decision 2026-09-25, Q3; text.schema.json TextCatalog), path the text key's member (rooms/ferry_landing.variants[0].description, items/lantern.room_line), data {target} (the detail, item or NPC key); UNREACHABLE_DETAIL: a room's detail's first alias, which names it when a lookup is ambiguous, is also an alias of another detail of that room, or has an empty word or starts with at, the, a or an, so no lookup picks it by that name (room.schema.json InspectableDetail), path the detail (rooms/ferry_landing.details.lamp_post), data {}; UNKNOWN_COMMAND: an action's command is not in the command registry (action.schema.json ActionDefinition), or is run_job, which is authority-internal and never built from an invocation (04 §1); FACT_TYPE_MISMATCH: a fact_compare value, a scripted action's fact.assign value in any outcome, or a reaction's or dialogue choice's fact.assign value, is not of the fact's type (06 §21: typed policy AST), path the value (actions/ring_bell.outcomes.success.steps[0].value); UNKNOWN_CAPABILITY: a key in requires.capabilities is not registered at that version (A10, Gate R4); SERVER_ONLY_CAPABILITY: an offline_private cartridge requires a server_only capability (05 §6, C4); KERNEL_API_RANGE_INVALID: the kernel_api range is empty or reversed, at_least not below below (05 §3; a malformed version string is SCHEMA_VIOLATION); PINNED_VERSION_UNSUPPORTED: content_schema or rule_ir is a version the compiler or installed kernel does not implement (05 §3; both implement 1 now), data {field, declared, supported}; in the loader, path .cartridge.manifest.requires.<field>; UNDECLARED_CAPABILITY: a definition uses a command, event or policy op (a scripted action step uses the event it produces: fact.assign fact_changed, event.emit custom_event; a reaction uses its trigger's event, on.event, and each fact.assign's fact_changed, path its op; a story point uses story_point_reached, path its first claim in path order, a choice's story_point or a scene's on_end), or is of a definition kind (a room, a room's detail, a room's or detail's description variant, a scripted action, a barrier, a reaction, a dialogue, an attribute), whose owning capability (capability_registry.json) the manifest does not require (05 §6), path the room or barrier file for a room or barrier, attributes.<key> for an attribute, rooms/<key>.details.<detail> for a detail, rooms/<key>.variants[i] or rooms/<key>.details.<detail>.variants[i] for a variant, data {capability} (the owner's key), suggested_capabilities [its key@version]; NESTING_TOO_DEEP: the compiled artifact would nest a definition deeper than the canonical depth limit (loka-numeric-v1), data {maximum}; the author's file is valid JSON, so this is not INVALID_JSON, while the loader reports a too-deep artifact as INVALID_JSON; ARTIFACT_TOO_LARGE: the artifact file exceeds ArtifactSize, checked before decoding, path empty, data {bytes, maximum}; UNKNOWN_FORMAT: the artifact's cartridge.format is absent or neither loka-cartridge-v1 nor loka-cartridge-v2, path .cartridge.format, data {}; CONTENT_HASH_MISMATCH: content_hash differs from the hash of cartridge (05 §11, CAR-05), path .content_hash, data {declared, computed}; ARTIFACT_DEFINITION_KEY_MISMATCH: a definition map key's cartridge_id or cartridge_version differs from the manifest's id or version, or its key from the definition's key (a kind other than its map's fails the propertyNames pattern, SCHEMA_VIOLATION); the schema cannot express this check; path the map member (.cartridge.facts[\"...\"]), one diagnostic per differing field, data {field, declared, expected} with field cartridge_id, cartridge_version or key; LOCK_MANIFEST_MISMATCH: lock.capabilities differs from manifest.requires.capabilities for a key, which in R4 must be equal (path .cartridge.lock.capabilities.<key> even when the lock lacks it, data {capability, required, locked}, the absent side omitted); a registry-dependency closure will change this rule under a new format tag; CAPABILITY_NOT_INSTALLED: the lock names a key@version the installed kernel lacks (05 §6), path .cartridge.lock.capabilities.<key>, data {capability: key@version}; KERNEL_API_UNSUPPORTED: the installed kernel_api is outside the manifest's range (05 §3), path .cartridge.manifest.requires.kernel_api, data {installed}; FACT_SCOPE_UNSUPPORTED: loader only; the installed kernel cannot read a fact of these scopes: the TypeScript kernel hosts one private world, which has a player (the actor's CharacterId) and an instance (its WorldContextId) but no party or realm, and fact_compare names no scope, so it reads a fact at the one scope the fact allows; a fact whose scopes are not exactly one of player or instance fails, path .cartridge.facts[\"...\"].scopes, data {}; a per_subject fact (toolbox row W2: an entity or pair fact) is keyed by a subject too, so it may be named only by a fact_compare's, fact.assign's or fact.adjust's fact, a reaction's fact_changed trigger or world.group's member, stay or fight (toolbox rows G8 and 22a, read at each NPC) or world.mount's riding (row 43b, read at each mount NPC), path any other reference to it; a fact_compare of one names exactly one of subject, npc or item, path the leaf; a subject, npc or item on a fact_compare or reaction fact.assign of any other fact, a second one, or an npc that is a spawn template, path that member; CLIENT_FEATURE_UNSUPPORTED: the installed app lacks a required client feature (CAR-07), path .cartridge.manifest.requires.client_features[i], data {feature}. EMPTY_TIME_WINDOW: a time_window policy node's from equals its to, a window that never holds (policy.schema.json), path the node (actions/ring.policy), data {}; OUTCOME_MISMATCH: a scripted action with a check has no failure outcome, or one without a check has one (action.schema.json ScriptedAction), path the scripted action's outcomes (actions/pry_lid.outcomes), data {}; or a dialogue choice claims a story point outcome but its dialogue resolves no quest, so the choice could reach it again (StoryPointDefinition), path the choice's story_point (dialogues/bram.choices.carry.story_point), data {}; or a dialogue choice's check (toolbox row 14) is on a choice with a field other than label, narration, steps, availability and check, or a skill.acquire step, or in a dialogue with a quest or riddle, path the check (dialogues/guard.choices.persuade.check), data {}; or a dialogue choice's accept is in a dialogue that resolves a quest (accepting would resolve it), path the accept (dialogues/bram_offer.choices.accept.accept), or on a choice with a hand_over (activation and acquisition in one decision conflict), path the hand_over (dialogues/bram_offer.choices.accept.hand_over), data {}; RESOURCE_SPEC_INVALID: a resource's bounds are reversed or its start is outside them (resource.schema.json ResourceSpec), path the resource (resources.resources.hp), data {}; or a condition band table (resource.schema.json BandTable) has cuts not strictly descending, a last cut other than 0 or a repeated key, path the table (resources.resources.mv.bands, cartridge.world.bands), data {}. BARRIER_MISMATCH: an exit with a barrier and its reciprocal face (its destination's exit in the opposite compass direction, when that leads back to its room; a connection's identity is its room and direction) do not name the same barrier, or the reciprocal face is missing (21 §5 Barrier: both faces reference one state; 05 §25 coherent connections; one-sided barriers are not yet declarable), path the exit (rooms/cell.exits.east), each face that has a barrier or faces one reported, data {}; or an item's barrier is also named by an exit or another item (21 §5 as amended by c1-locks: an item's barrier has one site), path each such item's barrier (items/trunk.barrier), data {}. BARRIER_UNREACHABLE_KEY: a locked barrier on an exit of a room reachable from the entry, or on an item in reach (a container's lid, c1-locks), has a key that never comes within reach, or no key_item (05 §17 reachability): rooms are reached from the entry through exits without a barrier or whose barrier starts open, closed, or locked with a key already in reach, and an item is in reach when it starts in a reached room or inside an item in reach whose barrier is absent, not locked, or locked with its key in reach (initial states and locations only: no scripted actions, facts or NPCs; so a key inside its own locked chest, or two chests holding each other's keys, is reported); a key_item that names no item is UNRESOLVED_REFERENCE instead; path the barrier (barriers/cell_door), data {}. Also (toolbox row W22, Beads loka-kgd.96) a reaction barrier.set step with to locked whose named barrier, or any barrier carrying its tag, has no key_item, path the step's to (reactions/fire.steps[1].to), data {}. RESERVED_FACT: under position@1 the engine owns the fact position (the compiler adds it, cartridge.md Compiler; only rules/position.ts writes it): in the compiler, an authored fact named position, path facts.facts.position, or a fact.assign of it in a scripted action outcome, a reaction's steps or a dialogue choice's steps, path the step's fact (actions/nap.outcomes.success.steps[0].fact, reactions/gossip.steps[0].fact, dialogues/bram.choices.leave.steps[0].fact); data {}; reading it (fact_compare, a reaction's on.fact) is allowed, and without position@1 a fact named position is the cartridge's own. A scripted action's cost, threshold check or resource.adjust step whose resource names no resource of the cartridge is UNRESOLVED_REFERENCE at that resource member (actions/pick_lock.costs[0].resource), data {target}; so is world.movement.cost's resource (cartridge.world.movement.cost.resource), and an authored band key without a band.<key> catalog entry is UNRESOLVED_REFERENCE at the key (resources.resources.mv.bands[0].key, cartridge.world.bands[0].key), data {target} the text key. The loader checks an artifact in this order and stops at the first stage that fails, before any save mutation (CAR-07), reporting the first of that stage's diagnostics in list order (Diagnostic): ArtifactSize (ARTIFACT_TOO_LARGE); canonical decode (INVALID_JSON); cartridge.format (UNKNOWN_FORMAT); CartridgeArtifact (UNKNOWN_FIELD, SCHEMA_VIOLATION); content_hash (CONTENT_HASH_MISMATCH); definition keys (ARTIFACT_DEFINITION_KEY_MISMATCH); lock against requirements (LOCK_MANIFEST_MISMATCH); the installed kernel and app (CAPABILITY_NOT_INSTALLED, FACT_SCOPE_UNSUPPORTED, KERNEL_API_UNSUPPORTED, PINNED_VERSION_UNSUPPORTED, CLIENT_FEATURE_UNSUPPORTED). The loader re-checks the content_schema and rule_ir pins: the artifact crosses a trust boundary. The enum is unchanged: the compiler emits every other code (KERNEL_API_RANGE_INVALID included) and the loader trusts a hash-valid artifact's references and rules, so a dangling reference or containment cycle there is a runtime error (cartridge.md Artifact and loader). Chapters: chapter 0 with story_point or outcome is UNKNOWN_FIELD at that member, data {}; a later chapter without story_point is SCHEMA_VIOLATION at that member, data {error: missing_property}; an unresolved title, story_point or outcome is UNRESOLVED_REFERENCE at that member, data {target} the text key, full reference string or outcome key. A counted trigger whose quest and choice id are also named by another dialogue is OUTCOME_MISMATCH at cartridge.chapters[i].story_point (compiler), data {}. Only selected outcomes count, otherwise all do (mechanics.md Chapters). Scene definitions resolve their story-point outcome and narrate text, reject duplicate on at each colliding scenes/<key>.on, and enforce ordered steps with SCHEMA_VIOLATION not_in_enum at first misplaced steps[i].type; scene_<key> facts are RESERVED_FACT at facts.facts.scene_<key> or the existing scripted action/reaction/dialogue write-site paths. See mechanics.md scene@1 and cartridge.md Compiler. INVALID_TIME_POLICY: an opted-in real_elapsed scripted action declares nonzero duration; path its duration, data {}; or a quest journal declares hints (real minutes) without time_policy.profile real_elapsed, path the hints member (quests/find_key.journal.hints), data {}. VISITS_UNRECORDED (compiler only, severity warning, the build succeeds): a policy uses visited_count but requires.capabilities lacks knowledge@1, so no visit is recorded and the leaf never holds (mechanics.md narration variety), path cartridge.requires.capabilities, data {}, suggested_capabilities [knowledge@1]. HOSTILE_QUEST_SPEAKER (compiler only, severity warning, the build succeeds): a dialogue whose npc declares disposition.hostile has a choice with accept, hand_over, receive or escort, which that NPC refuses while hostile (mechanics.md Standing and disposition), path the dialogue's npc, data {}. SITE_EXIT_CONFLICT: a room's site names a compass direction in which the room authors an exit, so a building there would face an existing exit (cartridge.md Structure and site declarations), path the direction (rooms/lane.site.directions[0]), data {}; and a site's structure that names no structure of the cartridge is UNRESOLVED_REFERENCE at it (rooms/lane.site.structures[0]), data {target}.",
+      "description": "A diagnostic code: a closed set, one code per distinct cause (08 §6: repair loops read codes and data, never prose). INVALID_JSON: a source file is not JSON (RFC 8259, UTF-8); in the loader, the artifact is not UTF-8 or fails the canonical decoder (loka-numeric-v1), duplicate keys included, path empty, data {}; DUPLICATE_KEY: an object in a source file repeats a key (Elixir's JSON keeps the first silently, so the compiler checks it); UNKNOWN_FIELD: a field outside the registered schema (05 §5); the validator's unknown_property; in the loader, path the validator's, data {}; SCHEMA_VIOLATION: any other schema error; a dialogue without a choice is too_few_items at its choices, a story point without an outcome at its outcomes, and a quest journal's empty hints object at its hints (the subset has no minProperties); data.error is its ErrorCode (error_registry.json); a source without an entry is missing_property at cartridge.entry; in the loader, path the validator's; MISSING_MANIFEST: the cartridge has no cartridge.json (05 §3); path is cartridge; DUPLICATE_DEFINITION: two definitions in one cartridge have one DefinitionRef (03 §2, 05 §4; other cartridges' refs differ, CAR-01), or a scripted action's key is an action's of the cartridge or a registered command type (an engine verb's), one ActionSet identity with two definitions (06 §19), path the scripted action (actions/ring_bell), data {}; or a dialogue's key is a registered command type's, an action's, a scripted action's or a quest's (its talk is one ActionSet identity), path the dialogue (dialogues/bram), data {}; or a dialogue role is named actor (the actor is always a participant), path the role (dialogues/bram.roles.actor), data {}; or a dialogue choice's story_point or a scene's on_end claims a story point outcome an earlier site already claims, path that later site (dialogues/bram.choices.carry.story_point or scenes/bell_rung.on_end), data {}; or two scripted actions' checks have one key, one check DefinitionRef with two definitions (step.schema.json Check), path each such scripted action's check (actions/pick_lock.check), data {}; or a scripted action's check and a dialogue choice's (step.schema.json Check, toolbox row 14), or two choices' checks, have one key, path each such check (dialogues/guard.choices.persuade.check), data {}; FACT_NAME_COLLISION: two authored fact names map to one key after each . becomes _ (owner decision, IMPORT.md); FACT_DEFAULT_INVALID: a fact default is outside its enum values or int bounds (fact.schema.json FactType); UNRESOLVED_REFERENCE: a reference names no definition (CAR-02, A10); an exit's to or the entry names no room of this cartridge (05 §17), or a room's title or description, a detail's description (path rooms/well_lane.details.bucket.description) or a description variant's (rooms/well_lane.variants[0].description) or an action's label or accessibility, or an item's or NPC's short, room_line, room-line variant or description has no text catalog entry; an item's location or an NPC's room names no definition of that kind in this cartridge; an exit's barrier names no barrier of this cartridge (path rooms/cell.exits.east.barrier), or an item's barrier none (path items/trunk.barrier, data {target}), or a barrier's key_item no item of it (barriers/cell_door.key_item), or a barrier's short has no text catalog entry; a scripted action's target room names no room of this cartridge, or its detail no detail of that room (data {target} the detail key), a scripted action's fact.assign fact no fact of it, or its label or narration has no text catalog entry; a reaction's trigger filter naming a definition (fact, room, quest, item, victim npc, story_point, barrier, scene, liquid kind), or a fact.assign fact of its steps, names no such definition of this cartridge (path reactions/gossip.on.fact); a dialogue's npc or quest, a role's npc or item, or a fact.assign fact or the accept of a choice names no definition of that kind in this cartridge, its npc is none of its npc roles (path dialogues/bram.npc, data {target} the npc), or a choice's hand_over item names no item role or its to no npc role (path dialogues/bram.choices.leave.hand_over.to, data {target} the role name), or a dialogue's prompt or a choice's label or narration has no text catalog entry (path dialogues/bram.choices.carry.narration); a quest's title, offer label or journal stage or outcome text has no text catalog entry (paths quests/lantern.offer.label, quests/lantern.journal.active, quests/lantern.journal.outcomes.carry, data {target}), or its objective's item_acquired names no item of this cartridge (path quests/lantern.objective.item_acquired); a key of a room's action contribution names no registered command, action or scripted action of this cartridge (data {target} the key, path rooms/belfry.actions[0].actions[1]); a stat_compare's attribute or a resource_compare's resource names no attribute or resource of this cartridge (path the member, actions/pray.policy.attribute, data {target}); or a touch link in the catalog string of a room's, detail's, variant's, item's or NPC's text names no target: a link's target is the detail, item or NPC it names, a link without a target key in a detail's, item's or NPC's own text is that thing itself, and a target key names a detail of the room (in a room's or its details' text), an item or an NPC of the cartridge, so a link without one in a room's own text has none (data target is then the link as written), data {target} (the DefinitionRefString or the TextKey), path the reference (rooms/ferry_landing.exits.north.to, cartridge.entry, rooms/ferry_landing.title, actions/talk.label); CONTAINMENT_CYCLE: an item's location leads, through the items it starts in, back to itself (invariant containment_acyclic), path its location's item member (items/satchel.location.item), data {}; CAPACITY_EXCEEDED: more items start in an item or NPC than its capacity (invariant containment_acyclic), path its capacity (items/satchel.capacity), data {capacity, held}; TOUCH_LINK_MISSING (compiler only, severity warning, the build succeeds): a room's description or one of its description variants has no touch link to one of the room's details, or an item's or NPC's room line or one of its room-line variants has none to that item or NPC (owner decision 2026-09-25, Q3; text.schema.json TextCatalog), path the text key's member (rooms/ferry_landing.variants[0].description, items/lantern.room_line), data {target} (the detail, item or NPC key); UNREACHABLE_DETAIL: a room's detail's first alias, which names it when a lookup is ambiguous, is also an alias of another detail of that room, or has an empty word or starts with at, the, a or an, so no lookup picks it by that name (room.schema.json InspectableDetail), path the detail (rooms/ferry_landing.details.lamp_post), data {}; UNKNOWN_COMMAND: an action's command is not in the command registry (action.schema.json ActionDefinition), or is run_job, which is authority-internal and never built from an invocation (04 §1); FACT_TYPE_MISMATCH: a fact_compare value, a scripted action's fact.assign value in any outcome, or a reaction's or dialogue choice's fact.assign value, is not of the fact's type (06 §21: typed policy AST), path the value (actions/ring_bell.outcomes.success.steps[0].value); UNKNOWN_CAPABILITY: a key in requires.capabilities is not registered at that version (A10, Gate R4); SERVER_ONLY_CAPABILITY: an offline_private cartridge requires a server_only capability (05 §6, C4); KERNEL_API_RANGE_INVALID: the kernel_api range is empty or reversed, at_least not below below (05 §3; a malformed version string is SCHEMA_VIOLATION); PINNED_VERSION_UNSUPPORTED: content_schema or rule_ir is a version the compiler or installed kernel does not implement (05 §3; both implement 1 now), data {field, declared, supported}; in the loader, path .cartridge.manifest.requires.<field>; UNDECLARED_CAPABILITY: a definition uses a command, event or policy op (a scripted action step uses the event it produces: fact.assign fact_changed, event.emit custom_event; a reaction uses its trigger's event, on.event, and each fact.assign's fact_changed, path its op; a story point uses story_point_reached, path its first claim in path order, a choice's story_point or a scene's on_end), or is of a definition kind (a room, a room's detail, a room's or detail's description variant, a scripted action, a barrier, a reaction, a dialogue, an attribute), whose owning capability (capability_registry.json) the manifest does not require (05 §6), path the room or barrier file for a room or barrier, attributes.<key> for an attribute, rooms/<key>.details.<detail> for a detail, rooms/<key>.variants[i] or rooms/<key>.details.<detail>.variants[i] for a variant, data {capability} (the owner's key), suggested_capabilities [its key@version]; NESTING_TOO_DEEP: the compiled artifact would nest a definition deeper than the canonical depth limit (loka-numeric-v1), data {maximum}; the author's file is valid JSON, so this is not INVALID_JSON, while the loader reports a too-deep artifact as INVALID_JSON; ARTIFACT_TOO_LARGE: the artifact file exceeds ArtifactSize, checked before decoding, path empty, data {bytes, maximum}; UNKNOWN_FORMAT: the artifact's cartridge.format is absent or not loka-cartridge-v2, path .cartridge.format, data {}; CONTENT_HASH_MISMATCH: content_hash differs from the hash of cartridge (05 §11, CAR-05), path .content_hash, data {declared, computed}; ARTIFACT_DEFINITION_KEY_MISMATCH: a definition map key's cartridge_id or cartridge_version differs from the manifest's id or version, or its key from the definition's key (a kind other than its map's fails the propertyNames pattern, SCHEMA_VIOLATION); the schema cannot express this check; path the map member (.cartridge.facts[\"...\"]), one diagnostic per differing field, data {field, declared, expected} with field cartridge_id, cartridge_version or key; LOCK_MANIFEST_MISMATCH: lock.capabilities differs from manifest.requires.capabilities for a key, which in R4 must be equal (path .cartridge.lock.capabilities.<key> even when the lock lacks it, data {capability, required, locked}, the absent side omitted); a registry-dependency closure will change this rule under a new format tag; CAPABILITY_NOT_INSTALLED: the lock names a key@version the installed kernel lacks (05 §6), path .cartridge.lock.capabilities.<key>, data {capability: key@version}; KERNEL_API_UNSUPPORTED: the installed kernel_api is outside the manifest's range (05 §3), path .cartridge.manifest.requires.kernel_api, data {installed}; FACT_SCOPE_UNSUPPORTED: loader only; the installed kernel cannot read a fact of these scopes: the TypeScript kernel hosts one private world, which has a player (the actor's CharacterId) and an instance (its WorldContextId) but no party or realm, and fact_compare names no scope, so it reads a fact at the one scope the fact allows; a fact whose scopes are not exactly one of player or instance fails, path .cartridge.facts[\"...\"].scopes, data {}; a per_subject fact (toolbox row W2: an entity or pair fact) is keyed by a subject too, so it may be named only by a fact_compare's, fact.assign's or fact.adjust's fact, a reaction's fact_changed trigger or world.group's member, stay or fight (toolbox rows G8 and 22a, read at each NPC) or world.mount's riding (row 43b, read at each mount NPC), path any other reference to it; a fact_compare of one names exactly one of subject, npc or item, path the leaf; a subject, npc or item on a fact_compare or reaction fact.assign of any other fact, a second one, or an npc that is a spawn template, path that member; CLIENT_FEATURE_UNSUPPORTED: the installed app lacks a required client feature (CAR-07), path .cartridge.manifest.requires.client_features[i], data {feature}. EMPTY_TIME_WINDOW: a time_window policy node's from equals its to, a window that never holds (policy.schema.json), path the node (actions/ring.policy), data {}; OUTCOME_MISMATCH: a scripted action with a check has no failure outcome, or one without a check has one (action.schema.json ScriptedAction), path the scripted action's outcomes (actions/pry_lid.outcomes), data {}; or a dialogue choice claims a story point outcome but its dialogue resolves no quest, so the choice could reach it again (StoryPointDefinition), path the choice's story_point (dialogues/bram.choices.carry.story_point), data {}; or a dialogue choice's check (toolbox row 14) is on a choice with a field other than label, narration, steps, availability and check, or a skill.acquire step, or in a dialogue with a quest or riddle, path the check (dialogues/guard.choices.persuade.check), data {}; or a dialogue choice's accept is in a dialogue that resolves a quest (accepting would resolve it), path the accept (dialogues/bram_offer.choices.accept.accept), or on a choice with a hand_over (activation and acquisition in one decision conflict), path the hand_over (dialogues/bram_offer.choices.accept.hand_over), data {}; RESOURCE_SPEC_INVALID: a resource's bounds are reversed or its start is outside them (resource.schema.json ResourceSpec), path the resource (resources.resources.hp), data {}; or a condition band table (resource.schema.json BandTable) has cuts not strictly descending, a last cut other than 0 or a repeated key, path the table (resources.resources.mv.bands, cartridge.world.bands), data {}. BARRIER_MISMATCH: an exit with a barrier and its reciprocal face (its destination's exit in the opposite compass direction, when that leads back to its room; a connection's identity is its room and direction) do not name the same barrier, or the reciprocal face is missing (21 §5 Barrier: both faces reference one state; 05 §25 coherent connections; one-sided barriers are not yet declarable), path the exit (rooms/cell.exits.east), each face that has a barrier or faces one reported, data {}; or an item's barrier is also named by an exit or another item (21 §5 as amended by c1-locks: an item's barrier has one site), path each such item's barrier (items/trunk.barrier), data {}. BARRIER_UNREACHABLE_KEY: a locked barrier on an exit of a room reachable from the entry, or on an item in reach (a container's lid, c1-locks), has a key that never comes within reach, or no key_item (05 §17 reachability): rooms are reached from the entry through exits without a barrier or whose barrier starts open, closed, or locked with a key already in reach, and an item is in reach when it starts in a reached room or inside an item in reach whose barrier is absent, not locked, or locked with its key in reach (initial states and locations only: no scripted actions, facts or NPCs; so a key inside its own locked chest, or two chests holding each other's keys, is reported); a key_item that names no item is UNRESOLVED_REFERENCE instead; path the barrier (barriers/cell_door), data {}. Also (toolbox row W22, Beads loka-kgd.96) a reaction barrier.set step with to locked whose named barrier, or any barrier carrying its tag, has no key_item, path the step's to (reactions/fire.steps[1].to), data {}. RESERVED_FACT: under position@1 the engine owns the fact position (the compiler adds it, cartridge.md Compiler; only rules/position.ts writes it): in the compiler, an authored fact named position, path facts.facts.position, or a fact.assign of it in a scripted action outcome, a reaction's steps or a dialogue choice's steps, path the step's fact (actions/nap.outcomes.success.steps[0].fact, reactions/gossip.steps[0].fact, dialogues/bram.choices.leave.steps[0].fact); data {}; reading it (fact_compare, a reaction's on.fact) is allowed, and without position@1 a fact named position is the cartridge's own. A scripted action's cost, threshold check or resource.adjust step whose resource names no resource of the cartridge is UNRESOLVED_REFERENCE at that resource member (actions/pick_lock.costs[0].resource), data {target}; so is world.movement.cost's resource (cartridge.world.movement.cost.resource), and an authored band key without a band.<key> catalog entry is UNRESOLVED_REFERENCE at the key (resources.resources.mv.bands[0].key, cartridge.world.bands[0].key), data {target} the text key. The loader checks an artifact in this order and stops at the first stage that fails, before any save mutation (CAR-07), reporting the first of that stage's diagnostics in list order (Diagnostic): ArtifactSize (ARTIFACT_TOO_LARGE); canonical decode (INVALID_JSON); cartridge.format (UNKNOWN_FORMAT); CartridgeArtifact (UNKNOWN_FIELD, SCHEMA_VIOLATION); content_hash (CONTENT_HASH_MISMATCH); definition keys (ARTIFACT_DEFINITION_KEY_MISMATCH); lock against requirements (LOCK_MANIFEST_MISMATCH); the installed kernel and app (CAPABILITY_NOT_INSTALLED, FACT_SCOPE_UNSUPPORTED, KERNEL_API_UNSUPPORTED, PINNED_VERSION_UNSUPPORTED, CLIENT_FEATURE_UNSUPPORTED). The loader re-checks the content_schema and rule_ir pins: the artifact crosses a trust boundary. The enum is unchanged: the compiler emits every other code (KERNEL_API_RANGE_INVALID included) and the loader trusts a hash-valid artifact's references and rules, so a dangling reference or containment cycle there is a runtime error (cartridge.md Artifact and loader). Chapters: chapter 0 with story_point or outcome is UNKNOWN_FIELD at that member, data {}; a later chapter without story_point is SCHEMA_VIOLATION at that member, data {error: missing_property}; an unresolved title, story_point or outcome is UNRESOLVED_REFERENCE at that member, data {target} the text key, full reference string or outcome key. A counted trigger whose quest and choice id are also named by another dialogue is OUTCOME_MISMATCH at cartridge.chapters[i].story_point (compiler), data {}. Only selected outcomes count, otherwise all do (mechanics.md Chapters). Scene definitions resolve their story-point outcome and narrate text, reject duplicate on at each colliding scenes/<key>.on, and enforce ordered steps with SCHEMA_VIOLATION not_in_enum at first misplaced steps[i].type; scene_<key> facts are RESERVED_FACT at facts.facts.scene_<key> or the existing scripted action/reaction/dialogue write-site paths. See mechanics.md scene@1 and cartridge.md Compiler. INVALID_TIME_POLICY: an opted-in real_elapsed scripted action declares nonzero duration; path its duration, data {}; or a quest journal declares hints (real minutes) without time_policy.profile real_elapsed, path the hints member (quests/find_key.journal.hints), data {}. VISITS_UNRECORDED (compiler only, severity warning, the build succeeds): a policy uses visited_count but requires.capabilities lacks knowledge@1, so no visit is recorded and the leaf never holds (mechanics.md narration variety), path cartridge.requires.capabilities, data {}, suggested_capabilities [knowledge@1]. HOSTILE_QUEST_SPEAKER (compiler only, severity warning, the build succeeds): a dialogue whose npc declares disposition.hostile has a choice with accept, hand_over, receive or escort, which that NPC refuses while hostile (mechanics.md Standing and disposition), path the dialogue's npc, data {}. ALLY_ENGAGE_UNUSED (compiler only, severity warning, the build succeeds): an NPC in world.combat.allies has a disposition.engage line, which an ally never plays, path the allies entry, data {}. ENTRY_INVALID (error): a speaker has more than one dialogue with entry true, or a keyword dialogue has it, path the dialogue's entry, data {}. ENTRY_GUESSED (compiler only, severity warning, the build succeeds): Talk opens data.target only by inference (a loop tie, the first key with no condition, or, joined by ' or ', the free links a failed entry leads to, up to the first that always opens, and past them to what they lead to when none does; mechanics.md Branching dialogue), path the dialogue's npc. ENTRY_UNUSED (compiler only, severity warning): data.target never opens because its speaker has an entry dialogue and nothing that opens leads to it, path the dialogue's npc. FALL_THROUGH_SPENT (compiler only, severity warning): data.target has a when and its only free way on shuts itself once taken, with no other Talk for the speaker, path the dialogue's policy. SITTING_SPENT (compiler only, severity warning): every choice of a hub is once per sitting, so the last one closes the talk, path the dialogue's choices. HUB_SHUT (compiler only, severity warning): a plain answer of a hub sets a fact so its own when fails, with no then, check or patrol, so the hub reopens with every choice refused and only closing works (behavior.ts hub; mechanics.md Branching dialogue), path the choice (dialogues/jailer.choices.pay), data {target} the dialogue key. RETURN_CLOSED (compiler only, severity warning): a then back to data.target comes after a choice sets the fact its when reads, so going back closes the talk, path the dialogue's policy. LOOP_SPEAKER and SPEAKER_ELSEWHERE (compiler only, severity warning): a speaker reached only through a then loop, and a then to a speaker in another room, path the dialogue. SITE_EXIT_CONFLICT: a room's site names a compass direction in which the room authors an exit, so a building there would face an existing exit (cartridge.md Structure and site declarations), path the direction (rooms/lane.site.directions[0]), data {}; and a site's structure that names no structure of the cartridge is UNRESOLVED_REFERENCE at it (rooms/lane.site.structures[0]), data {target}.",
       "enum": [
         "INVALID_JSON",
         "DUPLICATE_KEY",
@@ -1166,13 +943,25 @@
         "EMPTY_TIME_WINDOW",
         "OUTCOME_MISMATCH",
         "RESOURCE_SPEC_INVALID",
+        "BODY_BELOW_ZERO",
+        "REACTION_DRAINS_BODY",
         "BARRIER_MISMATCH",
         "BARRIER_UNREACHABLE_KEY",
         "RESERVED_FACT",
         "INVALID_TIME_POLICY",
         "VISITS_UNRECORDED",
         "HOSTILE_QUEST_SPEAKER",
-        "SITE_EXIT_CONFLICT"
+        "ALLY_ENGAGE_UNUSED",
+        "SITE_EXIT_CONFLICT",
+        "SPEAKER_ELSEWHERE",
+        "LOOP_SPEAKER",
+        "ENTRY_INVALID",
+        "ENTRY_GUESSED",
+        "ENTRY_UNUSED",
+        "RETURN_CLOSED",
+        "FALL_THROUGH_SPENT",
+        "SITTING_SPENT",
+        "HUB_SHUT"
       ],
       "examples": [
         "UNRESOLVED_REFERENCE",
@@ -1181,7 +970,7 @@
       ]
     },
     "Diagnostic": {
-      "description": "A structured diagnostic (08 §6; 05 §8: every compile stage emits them). severity is error, which fails the build, except for a warning (TOUCH_LINK_MISSING, VISITS_UNRECORDED, HOSTILE_QUEST_SPEAKER), which the compiler reports beside the artifact. message_key is diagnostics. followed by the code in lowercase; data carries the code's facts as strings and integers; suggested_capabilities lists capability pins that would fix it (the key@version form requires uses), possibly none. A list of diagnostics is in one deterministic order (05 §8, CAR-04): by path, then code, comparing UTF-8 bytes, then by the canonical encoding of the whole diagnostic; an identical diagnostic appears once.",
+      "description": "A structured diagnostic (08 §6; 05 §8: every compile stage emits them). severity is error, which fails the build, except for a warning (TOUCH_LINK_MISSING, VISITS_UNRECORDED, HOSTILE_QUEST_SPEAKER, ALLY_ENGAGE_UNUSED, SPEAKER_ELSEWHERE, LOOP_SPEAKER, ENTRY_GUESSED, ENTRY_UNUSED, FALL_THROUGH_SPENT, RETURN_CLOSED, OUTCOME_MISMATCH, and the SCHEMA_VIOLATION whose data.why is cut_scene_line), which the compiler reports beside the artifact. message_key is diagnostics. followed by the code in lowercase; data carries the code's facts as strings and integers; suggested_capabilities lists capability pins that would fix it (the key@version form requires uses), possibly none. A list of diagnostics is in one deterministic order (05 §8, CAR-04): by path, then code, comparing UTF-8 bytes, then by the canonical encoding of the whole diagnostic; an identical diagnostic appears once.",
       "type": "object",
       "properties": {
         "severity": {
@@ -1280,7 +1069,7 @@
       "description": "The cartridge's world settings (owner decision world parameters; 00 §4 and 04 §15 as amended 2026-10-02), each optional with an engine default: movement.cost, what a move costs the body (movement@1; default 1 mv when the cartridge declares mv), its resource a pool of this cartridge (UNRESOLVED_REFERENCE otherwise); movement.terrain, the percent each destination room tag scales that cost by (row 43a; default none); movement without cost, or with terrain; bands, the condition band table of every pool without its own (resource.schema.json BandTable; default the 04 §15 table). An optional field of loka-cartridge-v2: the tag stays, and the compiler writes it only when the source authors it. In source it is cartridge.json's world, beside entry.",
       "type": "object",
       "properties": {
-        "movement": {
+        "movement": {"description":"What a move costs the body, and how destination room tags scale it.",
           "type": "object",
           "properties": {
             "cost": {
@@ -1301,14 +1090,14 @@
           },
           "additionalProperties": false
         },
-        "bands": {
+        "bands": {"description":"The condition band table of every pool without its own. Default: the engine's table.",
           "$ref": "resource.schema.json#/$defs/BandTable"
         },
         "carry": {
           "description": "Opts into the voluntary Take ceiling (docs/system/mechanics.md containment@1); every item must author mass_grams. No engine default.",
           "type": "object",
           "properties": {
-            "max_grams": {
+            "max_grams": {"description":"The Take ceiling, in grams.",
               "type": "integer",
               "minimum": 0
             }
@@ -1353,7 +1142,7 @@
                 "maximum": 2147483647
               }
             },
-            "per_level": {
+            "per_level": {"description":"What each level above 1 adds to the slot's budget. Read only by the power report.",
               "type": "integer",
               "minimum": 0,
               "maximum": 2147483647
@@ -1369,7 +1158,7 @@
           "description": "Opts into experience and levelling (docs/system/mechanics.md experience and levelling, toolbox row 4; attribute@1). thresholds are the strictly increasing experience totals that reach levels 2, 3 and so on; points_per_level the attribute points each level grants; kills the experience a credited kill of each NPC definition grants; level_up the receipt line when a decision reaches a new level. Every number is the cartridge's.",
           "type": "object",
           "properties": {
-            "thresholds": {
+            "thresholds": {"description":"Strictly increasing experience totals that reach levels 2, 3 and so on.",
               "type": "array",
               "minItems": 1,
               "items": {
@@ -1378,21 +1167,21 @@
                 "maximum": 2147483647
               }
             },
-            "points_per_level": {
+            "points_per_level": {"description":"Attribute points each level grants.",
               "type": "integer",
               "minimum": 1,
               "maximum": 2147483647
             },
-            "kills": {
+            "kills": {"description":"The experience a credited kill of each NPC definition grants.",
               "type": "array",
               "minItems": 1,
               "items": {
                 "type": "object",
                 "properties": {
-                  "npc": {
+                  "npc": {"description":"The NPC definition.",
                     "$ref": "identity.schema.json#/$defs/DefinitionRef"
                   },
-                  "experience": {
+                  "experience": {"description":"Experience granted per credited kill.",
                     "type": "integer",
                     "minimum": 1,
                     "maximum": 2147483647
@@ -1405,8 +1194,12 @@
                 "additionalProperties": false
               }
             },
-            "level_up": {
+            "level_up": {"description":"The receipt line when a decision reaches a new level.",
               "$ref": "text.schema.json#/$defs/TextKey"
+            },
+            "gained": {
+              "$ref": "text.schema.json#/$defs/TextKey",
+              "description": "The line telling the experience a proposal added, binding amount."
             }
           },
           "required": [
@@ -1432,20 +1225,20 @@
         "water": {
           "$ref": "water.schema.json#/$defs/WaterSettings"
         },
-        "bell_cue": {
+        "bell_cue": {"description":"A line told in the listed rooms when the fact turns true.",
           "type": "object",
           "properties": {
-            "fact": {
+            "fact": {"description":"The bool fact whose change to true triggers the line.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "rooms": {
+            "rooms": {"description":"The rooms where it is told, to anyone there.",
               "type": "array",
               "minItems": 1,
               "items": {
                 "$ref": "identity.schema.json#/$defs/DefinitionRef"
               }
             },
-            "text": {
+            "text": {"description":"Text key of the line.",
               "$ref": "text.schema.json#/$defs/TextKey"
             }
           },
@@ -1460,26 +1253,26 @@
           "description": "Toolbox rows G8, 22a and 22b: member, stay and fight each name a bool pair fact read at each NPC; wage pays every member amount of a conserved resource each `every` clock units (docs/system/cartridge.md#group-declarations).",
           "type": "object",
           "properties": {
-            "member": {
+            "member": {"description":"A bool pair fact, read at each NPC: this NPC is in the player's group.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "stay": {
+            "stay": {"description":"A bool pair fact, read at each NPC: the hireling order to stay.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "fight": {
+            "fight": {"description":"A bool pair fact, read at each NPC: the hireling order to fight.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "wage": {
+            "wage": {"description":"Pays each group member from the player's purse on a schedule; a member who cannot be paid leaves the group.",
               "type": "object",
               "properties": {
-                "resource": {
+                "resource": {"description":"The conserved resource paid.",
                   "$ref": "identity.schema.json#/$defs/DefinitionRef"
                 },
-                "amount": {
+                "amount": {"description":"How much of the resource each member is paid.",
                   "type": "integer",
                   "minimum": 1
                 },
-                "every": {
+                "every": {"description":"Clock units between payments.",
                   "type": "integer",
                   "minimum": 1
                 }
@@ -1501,7 +1294,7 @@
           "description": "Toolbox row 43b: riding names a bool pair fact, per subject and scoped to player, read at each NPC with a mount declaration; such an NPC carries its rider (docs/system/cartridge.md#mount-declarations).",
           "type": "object",
           "properties": {
-            "riding": {
+            "riding": {"description":"A bool pair fact, per subject and scoped to player: the player rides this NPC.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             }
           },
@@ -1514,29 +1307,29 @@
           "description": "Toolbox row W13 (mechanics.md Tracks and trails): a trail is fresh while now minus its time is below fresh_for (logical seconds); a passed track check appends leads[<exit>], one per direction some room's exit uses.",
           "type": "object",
           "properties": {
-            "fresh_for": {
+            "fresh_for": {"description":"A trail is fresh while now minus its time is below this, in logical seconds.",
               "type": "integer",
               "minimum": 1
             },
-            "leads": {
+            "leads": {"description":"What a passed track check appends, per direction some room's exit uses.",
               "type": "object",
               "properties": {
-                "north": {
+                "north": {"description":"Appended when the trail leads north.",
                   "$ref": "text.schema.json#/$defs/TextKey"
                 },
-                "south": {
+                "south": {"description":"Appended when the trail leads south.",
                   "$ref": "text.schema.json#/$defs/TextKey"
                 },
-                "east": {
+                "east": {"description":"Appended when the trail leads east.",
                   "$ref": "text.schema.json#/$defs/TextKey"
                 },
-                "west": {
+                "west": {"description":"Appended when the trail leads west.",
                   "$ref": "text.schema.json#/$defs/TextKey"
                 },
-                "up": {
+                "up": {"description":"Appended when the trail leads up.",
                   "$ref": "text.schema.json#/$defs/TextKey"
                 },
-                "down": {
+                "down": {"description":"Appended when the trail leads down.",
                   "$ref": "text.schema.json#/$defs/TextKey"
                 }
               },
@@ -1553,25 +1346,25 @@
           "description": "Toolbox rows 33 and 34 (mechanics.md Theft, fence and witnessed offense): take may lift an item a living NPC in the actor's room directly holds. The victim notices when the actor's level in skill is below the victim's value of attribute (absent: 0); every other living NPC there that is not blind and the actor's body is not concealed from also sees. Containment alone sets the per_subject instance bool fact stolen true on the item; a seen theft emits custom_event noticed (subject: the thief's body) and says narration.seen, an unseen one narration.unseen.",
           "type": "object",
           "properties": {
-            "skill": {
+            "skill": {"description":"The victim notices when the actor's level in this skill is below the victim's attribute.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "attribute": {
+            "attribute": {"description":"The victim's attribute compared with the actor's skill level. Absent: 0.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "stolen": {
+            "stolen": {"description":"The per_subject instance bool fact set true on a stolen item.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "noticed": {
+            "noticed": {"description":"Key of the custom event emitted when a theft is seen.",
               "$ref": "action.schema.json#/$defs/Key"
             },
-            "narration": {
+            "narration": {"description":"Text keys told after a theft.",
               "type": "object",
               "properties": {
-                "seen": {
+                "seen": {"description":"Told when the theft is noticed.",
                   "$ref": "text.schema.json#/$defs/TextKey"
                 },
-                "unseen": {
+                "unseen": {"description":"Told when nobody notices the theft.",
                   "$ref": "text.schema.json#/$defs/TextKey"
                 }
               },
@@ -1595,7 +1388,7 @@
           "description": "Built rooms S1 (construction@1): max_total, the most structures built in this world at once.",
           "type": "object",
           "properties": {
-            "max_total": {
+            "max_total": {"description":"The most structures built in this world at once.",
               "type": "integer",
               "minimum": 1
             }
@@ -1609,10 +1402,10 @@
           "description": "Toolbox rows W15 and FD9 (mechanics.md Recognition and earned titles): the player's displayed name, the text key name, varied by name_variants (TextVariants, first match wins; subject target is the player's body). GameView projects it as actor_name.",
           "type": "object",
           "properties": {
-            "name": {
+            "name": {"description":"Text key of the player's displayed name.",
               "$ref": "text.schema.json#/$defs/TextKey"
             },
-            "name_variants": {
+            "name_variants": {"description":"Variants of the name; the first match wins, with the player's body as subject target.",
               "$ref": "entity.schema.json#/$defs/TextVariants"
             }
           },
@@ -1650,13 +1443,13 @@
       "description": "An ordered chapter marker (mechanics.md Chapters): name is a catalog key; only chapter 0 lacks a story_point, and it has no outcome. Later chapters name a story point and optionally one of its outcome keys (checked at the reference stage).",
       "type": "object",
       "properties": {
-        "name": {
+        "name": {"description":"Text key of its name.",
           "$ref": "text.schema.json#/$defs/TextKey"
         },
-        "story_point": {
+        "story_point": {"description":"The story point that opens it; only chapter 0 lacks one.",
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
         },
-        "outcome": {
+        "outcome": {"description":"One outcome key of that story point.",
           "$ref": "action.schema.json#/$defs/Key"
         }
       },
@@ -1684,19 +1477,19 @@
       "description": "One stat's attribute bonus (docs/system/mechanics.md derived stats): floor(sum of per_point * (value - pivot) over terms / divisor), rounded toward minus infinity; value is the player's attribute as attribute@1 reads it. Every number is the cartridge's; divisor defaults to 1.",
       "type": "object",
       "properties": {
-        "terms": {
+        "terms": {"description":"The attributes that make up the bonus; each adds per_point times (the attribute's value minus pivot).",
           "type": "array",
           "minItems": 1,
           "items": {
             "type": "object",
             "properties": {
-              "attribute": {
+              "attribute": {"description":"The attribute read.",
                 "$ref": "identity.schema.json#/$defs/DefinitionRef"
               },
-              "per_point": {
+              "per_point": {"description":"Bonus added per point of the attribute above pivot (below it, taken away).",
                 "$ref": "resource.schema.json#/$defs/ResourceInt"
               },
-              "pivot": {
+              "pivot": {"description":"The attribute value at which this term adds nothing.",
                 "$ref": "resource.schema.json#/$defs/ResourceInt"
               }
             },
@@ -1708,7 +1501,7 @@
             "additionalProperties": false
           }
         },
-        "divisor": {
+        "divisor": {"description":"The sum of the terms is divided by this, rounded down; default 1.",
           "type": "integer",
           "minimum": 1,
           "maximum": 2147483647
@@ -1736,27 +1529,58 @@
         }
       ]
     },
+    "Revival": {
+      "type": "object",
+      "description": "loka-kgd.206: what a client shows a player between death and waking: the lines in order, over seconds of wall-clock time. Presentation only; the kernel restores the body at once and exposes this as GameView.revival.",
+      "properties": {
+        "lines": {"description":"The revival lines, shown in order.",
+          "type": "array",
+          "items": {
+            "$ref": "text.schema.json#/$defs/TextKey"
+          },
+          "minItems": 1,
+          "maxItems": 16
+        },
+        "seconds": {"description":"How long the client takes to show every line.",
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 600
+        }
+      },
+      "required": [
+        "lines",
+        "seconds"
+      ],
+      "additionalProperties": false,
+      "examples": [{"lines": ["death.revival.1", "death.revival.2"], "seconds": 10}]
+    },
     "DeathSettings": {
       "type": "object",
       "properties": {
-        "player_corpse": {
+        "player_corpse": {"description":"Corpse template for a player.",
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
         },
-        "npc_corpse": {
+        "npc_corpse": {"description":"Corpse template for an NPC, unless its population names its own.",
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
         },
-        "shrine": {
+        "npc_corpse_decay": {"description":"Logical units from an NPC's death until its corpse decays: direct items spill to the room, the corpse leaves play. Omitted: never.",
+          "type": "integer", "minimum": 1
+        },
+        "player_corpse_decay": {"description":"Logical units from a player's death until the corpse decays, as npc_corpse_decay.",
+          "type": "integer", "minimum": 1
+        },
+        "shrine": {"description":"The room a dead player's body returns to.",
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
         },
-        "restore": {
+        "restore": {"description":"The values the dead body's pools are set to.",
           "type": "object",
           "properties": {
-            "hp": {
+            "hp": {"description":"HP after death; capped at the body's HP maximum.",
               "type": "integer",
               "minimum": 1,
               "maximum": 2147483647
             },
-            "mv": {
+            "mv": {"description":"Movement after death; capped at the body's movement maximum.",
               "type": "integer",
               "minimum": 0,
               "maximum": 2147483647
@@ -1772,15 +1596,15 @@
           "type": "object",
           "description": "What a player's death costs (toolbox row 47). experience: the body loses floor(experience * percent / 100), never below the threshold of its current level, and narration is told once; it needs world.levelling. items: corpse (the default) moves what the body held into the corpse; kept leaves it on the body.",
           "properties": {
-            "experience": {
+            "experience": {"description":"Experience lost on death; needs world.levelling.",
               "type": "object",
               "properties": {
-                "percent": {
+                "percent": {"description":"The body loses floor(experience * percent / 100), never below its current level's threshold.",
                   "type": "integer",
                   "minimum": 1,
                   "maximum": 100
                 },
-                "narration": {
+                "narration": {"description":"Told once when experience is lost.",
                   "$ref": "text.schema.json#/$defs/TextKey"
                 }
               },
@@ -1790,7 +1614,7 @@
               ],
               "additionalProperties": false
             },
-            "items": {
+            "items": {"description":"corpse (the default) moves what the body held into the corpse; kept leaves it on the body.",
               "enum": [
                 "corpse",
                 "kept"
@@ -1803,14 +1627,17 @@
           "type": "object",
           "description": "A player's death lines outside a combat round (loka-3w3q). player_died: the fall line a bleed or status tick death tells after its tick line (default world.combat.narration.player_died; a drowning tells world.water.drowned instead). woke: told once after every player death, combat included, after the penalty line.",
           "properties": {
-            "player_died": {
+            "player_died": {"description":"The fall line a bleed or status tick death tells after its tick line.",
               "$ref": "text.schema.json#/$defs/TextKey"
             },
-            "woke": {
+            "woke": {"description":"Told once after every player death, after the penalty line.",
               "$ref": "text.schema.json#/$defs/TextKey"
             }
           },
           "additionalProperties": false
+        },
+        "revival": {
+          "$ref": "#/$defs/Revival"
         }
       },
       "required": [
@@ -1854,55 +1681,82 @@
         "player_attack": {
           "$ref": "entity.schema.json#/$defs/AttackProfile"
         },
-        "interval": {
+        "interval": {"description":"Clock units between combat rounds.",
           "type": "integer",
           "minimum": 1
         },
-        "sleep_multiplier": {
+        "sleep_multiplier": {"description":"Multiplies an NPC's damage against a sleeping player.",
           "type": "integer",
           "minimum": 1
         },
-        "flee_multiplier": {
+        "flee_multiplier": {"description":"Multiplies the move cost of a body that is engaged.",
           "type": "integer",
           "minimum": 1
         },
-        "narration": {
+        "narration": {"description":"Text keys told in combat rounds.",
           "type": "object",
           "properties": {
-            "player_hit": {
+            "player_hit": {"description":"Told when the player's attack hits.",
               "$ref": "text.schema.json#/$defs/TextKey"
             },
-            "player_miss": {
+            "player_miss": {"description":"Told when the player's attack misses.",
               "$ref": "text.schema.json#/$defs/TextKey"
             },
-            "npc_hit": {
+            "npc_hit": {"description":"Told when an NPC's attack hits the player.",
               "$ref": "text.schema.json#/$defs/TextKey"
             },
-            "npc_miss": {
+            "npc_miss": {"description":"Told when an NPC's attack misses the player.",
               "$ref": "text.schema.json#/$defs/TextKey"
             },
-            "ally_hit": {
+            "ally_hit": {"description":"Told when an ally's strike hits.",
               "$ref": "text.schema.json#/$defs/TextKey"
             },
-            "ally_miss": {
+            "ally_miss": {"description":"Told when an ally's strike misses.",
               "$ref": "text.schema.json#/$defs/TextKey"
             },
-            "shot_hit": {
+            "shot_hit": {"description":"Told when a ranged first strike hits. Required when any item declares weapon.ranged.",
               "$ref": "text.schema.json#/$defs/TextKey"
             },
-            "shot_miss": {
+            "shot_miss": {"description":"Told when a ranged first strike misses. Required when any item declares weapon.ranged.",
               "$ref": "text.schema.json#/$defs/TextKey"
             },
-            "player_died": {
+            "player_volley": {"description":"Swings (loka-kgd.200): the summary line before the player's strike line when its profile makes more than one swing and some but not all hit, and more than one; binds count and hits. No key, no line.",
               "$ref": "text.schema.json#/$defs/TextKey"
             },
-            "npc_died": {
+            "player_volley_all": {"description":"Swings (loka-kgd.200): the summary line before the player's strike line when its profile makes more than one swing and every one hit; binds count and hits. No key, no line.",
               "$ref": "text.schema.json#/$defs/TextKey"
             },
-            "dodge": {
+            "player_volley_one": {"description":"Swings (loka-kgd.200): the summary line before the player's strike line when its profile makes more than one swing and exactly one hit; binds count and hits. No key, no line.",
               "$ref": "text.schema.json#/$defs/TextKey"
             },
-            "block": {
+            "npc_volley": {"description":"Swings (loka-kgd.200): the summary line before an NPC's strike line when its profile makes more than one swing and some but not all hit, and more than one; binds count and hits. No key, no line.",
+              "$ref": "text.schema.json#/$defs/TextKey"
+            },
+            "npc_volley_all": {"description":"Swings (loka-kgd.200): the summary line before an NPC's strike line when its profile makes more than one swing and every one hit; binds count and hits. No key, no line.",
+              "$ref": "text.schema.json#/$defs/TextKey"
+            },
+            "npc_volley_one": {"description":"Swings (loka-kgd.200): the summary line before an NPC's strike line when its profile makes more than one swing and exactly one hit; binds count and hits. No key, no line.",
+              "$ref": "text.schema.json#/$defs/TextKey"
+            },
+            "ally_volley": {"description":"Swings (loka-kgd.200): the summary line before an ally's strike line when its profile makes more than one swing and some but not all hit, and more than one; binds count and hits. No key, no line.",
+              "$ref": "text.schema.json#/$defs/TextKey"
+            },
+            "ally_volley_all": {"description":"Swings (loka-kgd.200): the summary line before an ally's strike line when its profile makes more than one swing and every one hit; binds count and hits. No key, no line.",
+              "$ref": "text.schema.json#/$defs/TextKey"
+            },
+            "ally_volley_one": {"description":"Swings (loka-kgd.200): the summary line before an ally's strike line when its profile makes more than one swing and exactly one hit; binds count and hits. No key, no line.",
+              "$ref": "text.schema.json#/$defs/TextKey"
+            },
+            "player_died": {"description":"Told when the player falls in a combat round; also the default fall line for tick deaths.",
+              "$ref": "text.schema.json#/$defs/TextKey"
+            },
+            "npc_died": {"description":"Told when an NPC falls in a combat round.",
+              "$ref": "text.schema.json#/$defs/TextKey"
+            },
+            "dodge": {"description":"Told when the player dodges.",
+              "$ref": "text.schema.json#/$defs/TextKey"
+            },
+            "block": {"description":"Told when a shield blocks.",
               "$ref": "text.schema.json#/$defs/TextKey"
             }
           },
@@ -1916,13 +1770,13 @@
           ],
           "additionalProperties": false
         },
-        "dodge": {
+        "dodge": {"description":"Percent chance to dodge an enemy attack that would otherwise hit; absent means no dodge.",
           "type": "object",
           "properties": {
-            "skill": {
+            "skill": {"description":"The skill that must be usable for a dodge.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "chance": {
+            "chance": {"description":"Percent chance of dodging.",
               "type": "integer",
               "minimum": 0,
               "maximum": 100
@@ -1943,6 +1797,41 @@
           "type": "array",
           "items": {
             "$ref": "identity.schema.json#/$defs/DefinitionRef"
+          },
+          "minItems": 1
+        },
+        "initiative": {
+          "description": "Opts into Diku rounds (docs/system/mechanics.md, Diku rounds): each round draws initiative for which side strikes first, Attack resolves round 1 at once, and the combat narration binds {attacker} and {target}.",
+          "const": true
+        },
+        "tiers": {
+          "description": "Damage tiers (docs/system/mechanics.md, Diku rounds), highest at_percent first: a hit whose hp loss reaches at_percent of the target's hp maximum is told with the first such tier's key for that perspective instead of the plain hit key.",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "at_percent": {"description": "The percent of the target's hp maximum a hit's loss must reach.", "type": "integer", "minimum": 1, "maximum": 100},
+              "player_hit": {"description": "Told for the player's hit at this tier.", "$ref": "text.schema.json#/$defs/TextKey"},
+              "npc_hit": {"description": "Told for the foe's hit at this tier.", "$ref": "text.schema.json#/$defs/TextKey"},
+              "ally_hit": {"description": "Told for the ally's hit at this tier.", "$ref": "text.schema.json#/$defs/TextKey"},
+              "shot_hit": {"description": "Told for a ranged first strike's hit at this tier.", "$ref": "text.schema.json#/$defs/TextKey"}
+            },
+            "required": ["at_percent"],
+            "additionalProperties": false
+          },
+          "minItems": 1
+        },
+        "conditions": {
+          "description": "Condition lines (docs/system/mechanics.md, Diku rounds), highest at_percent first: after each round, the first row the player's living foe's hp reaches is told, binding {target}.",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "at_percent": {"description": "The percent of the foe's hp range it must reach.", "type": "integer", "minimum": 1, "maximum": 100},
+              "text": {"description": "The line told, binding {target}.", "$ref": "text.schema.json#/$defs/TextKey"}
+            },
+            "required": ["at_percent", "text"],
+            "additionalProperties": false
           },
           "minItems": 1
         }
@@ -2034,13 +1923,13 @@
     "DeathCredit": {
       "type": "object",
       "properties": {
-        "npc": {
+        "npc": {"description":"The attackable NPC.",
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
         },
-        "room": {
+        "room": {"description":"Its authored room.",
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
         },
-        "fact": {
+        "fact": {"description":"The player Boolean fact with false default.",
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
         }
       },
@@ -2080,10 +1969,10 @@
         "key": {
           "$ref": "action.schema.json#/$defs/Key"
         },
-        "name": {
+        "name": {"description":"Text key of its display name.",
           "$ref": "text.schema.json#/$defs/TextKey"
         },
-        "requirement": {
+        "requirement": {"description":"Its display requirement text.",
           "$ref": "text.schema.json#/$defs/TextKey"
         },
         "qualification": {
@@ -2106,6 +1995,31 @@
         "profession": {
           "$ref": "text.schema.json#/$defs/TextKey",
           "description": "Homestead hs-14 (docs/system/book-ui.md Skill tree details): the profession heading this skill is listed under on the Character page."
+        },
+        "learned": {
+          "$ref": "text.schema.json#/$defs/TextKey",
+          "description": "Level-up rush (docs/system/mechanics.md Skill ranks): the authored line for acquiring this skill; GameView carries the key and the presenter tells it."
+        },
+        "ranks": {
+          "description": "Level-up rush (docs/system/mechanics.md Skill ranks): one entry per level, ranks[i] naming level i + 1. Needs growth and exactly growth.length + 1 entries; the compiler enforces both.",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "$ref": "text.schema.json#/$defs/TextKey",
+                "description": "Text key of this rank's name."
+              },
+              "reached": {
+                "$ref": "text.schema.json#/$defs/TextKey",
+                "description": "Text key of the line for reaching this rank."
+              }
+            },
+            "required": [
+              "name"
+            ],
+            "additionalProperties": false
+          }
         },
         "hidden": {
           "const": true,
@@ -2148,10 +2062,10 @@
         "key": {
           "$ref": "action.schema.json#/$defs/Key"
         },
-        "name": {
+        "name": {"description":"Text key of its name.",
           "$ref": "text.schema.json#/$defs/TextKey"
         },
-        "fact": {
+        "fact": {"description":"The player Boolean knowledge fact it maps to.",
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
         }
       },
@@ -2182,7 +2096,7 @@
         "key": {
           "$ref": "action.schema.json#/$defs/Key"
         },
-        "items": {
+        "items": {"description":"The items moved on each due run.",
           "type": "array",
           "items": {
             "$ref": "identity.schema.json#/$defs/DefinitionRef"
@@ -2190,23 +2104,23 @@
           "minItems": 1,
           "maxItems": 64
         },
-        "from": {
+        "from": {"description":"Where the items are taken from.",
           "$ref": "entity.schema.json#/$defs/ItemLocation"
         },
-        "to": {
+        "to": {"description":"Where the items are put; filled until it holds cap of them.",
           "$ref": "entity.schema.json#/$defs/ItemLocation"
         },
-        "cap": {
+        "cap": {"description":"Stop moving once the destination holds this many of the items.",
           "type": "integer",
           "minimum": 1,
           "maximum": 64
         },
-        "count": {
+        "count": {"description":"The most items moved per run, lowest entity id first.",
           "type": "integer",
           "minimum": 1,
           "maximum": 64
         },
-        "every": {
+        "every": {"description":"Seconds between runs, counted from the previous due time.",
           "type": "integer",
           "minimum": 1
         }
@@ -2231,13 +2145,13 @@
         "key": {
           "$ref": "action.schema.json#/$defs/Key"
         },
-        "npc": {
+        "npc": {"description":"The NPC each member is copied from.",
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
         },
-        "item": {
+        "item": {"description":"Item copied into each member's hands at birth. Needed unless the plan has a scavenge block, which then forbids it.",
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
         },
-        "corpse": {
+        "corpse": {"description":"Corpse template for members; overrides world.death.npc_corpse.",
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
         },
         "member_role": {
@@ -2247,10 +2161,10 @@
           ],
           "description": "Origin role of each member; default hunter. Its directly held item has role loot."
         },
-        "home": {
+        "home": {"description":"The room members are born in. It must be one of the two rooms in area, and the NPC template must sit in it.",
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
         },
-        "area": {
+        "area": {"description":"The two rooms members wander between. They must be different rooms joined by exits in both directions, with no barrier on either exit.",
           "type": "array",
           "items": {
             "$ref": "identity.schema.json#/$defs/DefinitionRef"
@@ -2258,34 +2172,34 @@
           "minItems": 2,
           "maxItems": 2
         },
-        "cap": {
+        "cap": {"description":"Most members alive at once: the number of slots.",
           "type": "integer",
           "minimum": 1,
           "maximum": 64
         },
-        "day_target": {
+        "day_target": {"description":"Members wanted by day. 0: only a population.spawn step fills the plan.",
           "type": "integer",
           "minimum": 0,
           "maximum": 64
         },
-        "night_target": {
+        "night_target": {"description":"Members wanted by night. 0: only a population.spawn step fills the plan.",
           "type": "integer",
           "minimum": 0,
           "maximum": 64
         },
-        "night_start": {
+        "night_start": {"description":"Hour night begins.",
           "type": "integer",
           "minimum": 0
         },
-        "night_end": {
+        "night_end": {"description":"Hour night ends: night is hour >= night_start or hour < night_end.",
           "type": "integer",
           "minimum": 0
         },
-        "replacement_delay": {
+        "replacement_delay": {"description":"Clock units after a member dies before its slot is refilled. At least wander_interval.",
           "type": "integer",
           "minimum": 1
         },
-        "wander_interval": {
+        "wander_interval": {"description":"Clock units between wander opportunities.",
           "type": "integer",
           "minimum": 1
         },
@@ -2295,10 +2209,10 @@
           "minimum": 1,
           "maximum": 100
         },
-        "scavenge": {
+        "scavenge": {"description":"Makes members carry loose items along a corridor to a nest. The plan must then have no item field.",
           "type": "object",
           "properties": {
-            "items": {
+            "items": {"description":"Items members will pick up: loose in a room, not containers, and allowed to be given away. At most 8.",
               "type": "array",
               "items": {
                 "$ref": "identity.schema.json#/$defs/DefinitionRef"
@@ -2306,7 +2220,7 @@
               "minItems": 1,
               "maxItems": 8
             },
-            "drop_rooms": {
+            "drop_rooms": {"description":"Rooms where members pick up a listed item lying on the floor. Each must be on the corridor.",
               "type": "array",
               "items": {
                 "$ref": "identity.schema.json#/$defs/DefinitionRef"
@@ -2314,10 +2228,10 @@
               "minItems": 1,
               "maxItems": 8
             },
-            "nest": {
+            "nest": {"description":"Container item in the last corridor room where members leave what they carried. It must have room left.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "corridor": {
+            "corridor": {"description":"Rooms a carrying member walks through, in order, ending at the nest room. It must include home, and each step needs an open exit both ways.",
               "type": "array",
               "items": {
                 "$ref": "identity.schema.json#/$defs/DefinitionRef"
@@ -2325,26 +2239,26 @@
               "minItems": 2,
               "maxItems": 16
             },
-            "interval": {
+            "interval": {"description":"Clock units between each step of a member's pickup or carry.",
               "type": "integer",
               "minimum": 1
             },
-            "narration": {
+            "narration": {"description":"Text keys told at each stage of scavenging.",
               "type": "object",
               "properties": {
-                "carrying": {
+                "carrying": {"description":"Shown on a member's entry while it is carrying an item to the nest.",
                   "$ref": "text.schema.json#/$defs/TextKey"
                 },
-                "acquired": {
+                "acquired": {"description":"Told when a member picks the item up.",
                   "$ref": "text.schema.json#/$defs/TextKey"
                 },
-                "delivered": {
+                "delivered": {"description":"Told when a member puts the item in the nest.",
                   "$ref": "text.schema.json#/$defs/TextKey"
                 },
-                "fallback": {
+                "fallback": {"description":"Told when a member cannot finish (the nest is full or the way is blocked) and drops the item where it stands.",
                   "$ref": "text.schema.json#/$defs/TextKey"
                 },
-                "shoo": {
+                "shoo": {"description":"Told when the player shoos a carrying member and it drops the item.",
                   "$ref": "text.schema.json#/$defs/TextKey"
                 }
               },
@@ -2368,24 +2282,24 @@
           ],
           "additionalProperties": false
         },
-        "pack": {
+        "pack": {"description":"Makes the members of this plan fight the player as a pack, with helpers and flight.",
           "type": "object",
           "properties": {
-            "flight_below_percent": {
+            "flight_below_percent": {"description":"A member flees when its hp is below this percent of its maximum (1 to 100). Frightened members flee too.",
               "type": "integer",
               "minimum": 1,
               "maximum": 100
             },
-            "flight_fare": {
+            "flight_fare": {"description":"Must be 0. Nothing reads it.",
               "const": 0
             },
-            "narration": {
+            "narration": {"description":"Text keys told as the pack fights and flees.",
               "type": "object",
               "properties": {
-                "helper_joined": {
+                "helper_joined": {"description":"Told when another member joins a fight already under way.",
                   "$ref": "text.schema.json#/$defs/TextKey"
                 },
-                "enemy_fled": {
+                "enemy_fled": {"description":"Text key per exit direction, told when a member flees through that exit. Every direction leading out of an area room needs one.",
                   "type": "object",
                   "propertyNames": {
                     "pattern": "^(north|south|east|west|up|down)$"
@@ -2394,10 +2308,10 @@
                     "$ref": "text.schema.json#/$defs/TextKey"
                   }
                 },
-                "primary_changed": {
+                "primary_changed": {"description":"Told when the member the player is fighting changes.",
                   "$ref": "text.schema.json#/$defs/TextKey"
                 },
-                "pack_withdrew": {
+                "pack_withdrew": {"description":"Told when the fight ends with no pack member left in it.",
                   "$ref": "text.schema.json#/$defs/TextKey"
                 }
               },
@@ -2417,14 +2331,14 @@
           ],
           "additionalProperties": false
         },
-        "sight": {
+        "sight": {"description":"Makes prey members flee a player who stays in their room. Only for member_role prey.",
           "type": "object",
           "properties": {
-            "delay": {
+            "delay": {"description":"Clock units after the player and a member are in the same room before the member flees, if the player is still there.",
               "type": "integer",
               "minimum": 1
             },
-            "narration": {
+            "narration": {"description":"Text key per exit direction, told when the member flees that way. Every direction leading out of an area room needs one.",
               "type": "object",
               "propertyNames": {
                 "pattern": "^(north|south|east|west|up|down)$"
@@ -2554,34 +2468,34 @@
         "key": {
           "$ref": "action.schema.json#/$defs/Key"
         },
-        "duration": {
+        "duration": {"description":"How long it lasts, in seconds.",
           "type": "integer",
           "minimum": 1,
           "maximum": 2147483647
         },
-        "tick_every": {
+        "tick_every": {"description":"Seconds between ticks.",
           "type": "integer",
           "minimum": 1,
           "maximum": 2147483647
         },
-        "hp_loss": {
+        "hp_loss": {"description":"HP lost per tick.",
           "type": "integer",
           "minimum": 1,
           "maximum": 2147483647
         },
-        "narration": {
+        "narration": {"description":"Text told as the bleed starts, repeats, ticks and ends.",
           "type": "object",
           "properties": {
-            "applied": {
+            "applied": {"description":"Text told when the bleed first starts on a body.",
               "$ref": "text.schema.json#/$defs/TextKey"
             },
-            "refreshed": {
+            "refreshed": {"description":"Text told when the bleed is applied again while already active.",
               "$ref": "text.schema.json#/$defs/TextKey"
             },
-            "tick": {
+            "tick": {"description":"Text told on a tick that costs hit points.",
               "$ref": "text.schema.json#/$defs/TextKey"
             },
-            "expired": {
+            "expired": {"description":"Text told when the bleed ends by running out.",
               "$ref": "text.schema.json#/$defs/TextKey"
             }
           },
@@ -2610,10 +2524,10 @@
         "key": {
           "$ref": "action.schema.json#/$defs/Key"
         },
-        "name": {
+        "name": {"description":"Text key of the name of the room this structure becomes.",
           "$ref": "text.schema.json#/$defs/TextKey"
         },
-        "description": {
+        "description": {"description":"Text key of the description of the room this structure becomes.",
           "$ref": "text.schema.json#/$defs/TextKey"
         },
         "variants": {
@@ -2624,7 +2538,7 @@
           "minItems": 1,
           "maxItems": 16
         },
-        "tags": {
+        "tags": {"description":"Tags the built room carries, as on a room.",
           "type": "array",
           "minItems": 1,
           "maxItems": 16,
@@ -2632,7 +2546,7 @@
             "$ref": "entity.schema.json#/$defs/Tag"
           }
         },
-        "locks": {
+        "locks": {"description":"Rules for the built room; enter is the policy a mover must meet to come in.",
           "type": "object",
           "properties": {
             "enter": {
@@ -2641,15 +2555,15 @@
           },
           "additionalProperties": false
         },
-        "max_per_owner": {
+        "max_per_owner": {"description":"The most rooms of this structure one character may own at once; an order past it is refused.",
           "type": "integer",
           "minimum": 1,
           "maximum": 1000
         },
-        "weathering": {
+        "weathering": {"description":"The status the room gets when it is raised and again when mended.",
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
         },
-        "ruin": {
+        "ruin": {"description":"The status a mend cures; mending is refused unless the room has it.",
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
         }
       },
@@ -2684,16 +2598,16 @@
         "key": {
           "$ref": "action.schema.json#/$defs/Key"
         },
-        "others": {
+        "others": {"description":"Text key of the line every reader but the target reads.",
           "$ref": "text.schema.json#/$defs/TextKey"
         },
-        "to": {
+        "to": {"description":"The forms with a target.",
           "type": "object",
           "properties": {
-            "others": {
+            "others": {"description":"Text key for the other readers.",
               "$ref": "text.schema.json#/$defs/TextKey"
             },
-            "you": {
+            "you": {"description":"Text key for the target.",
               "$ref": "text.schema.json#/$defs/TextKey"
             }
           },
@@ -2751,13 +2665,37 @@
           ],
           "description": "Logical seconds, or permanent (toolbox row W8): no expiry and no job, kept by the same-body return, ended only by a cure; a permanent status that declares per_tick ticks until cured, with no ends_at (loka-rn3b)."
         },
-        "tick_every": {
+        "tick_every": {"description":"Seconds between ticks.",
           "type": "integer",
           "minimum": 1,
           "maximum": 2147483647
         },
-        "resource": {
+        "resource": {"description":"The pool per_tick changes; omitted only beside ticks (compiler SCHEMA_VIOLATION).",
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
+        },
+        "ticks": {
+          "description": "loka-kgd.209: several pools one tick changes, each by its signed per_tick (never 0), in place of resource and per_tick (compiler SCHEMA_VIOLATION beside either).",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "resource": {
+                "$ref": "identity.schema.json#/$defs/DefinitionRef"
+              },
+              "per_tick": {
+                "type": "integer",
+                "minimum": -2147483647,
+                "maximum": 2147483647
+              }
+            },
+            "required": [
+              "resource",
+              "per_tick"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 1,
+          "maxItems": 16
         },
         "per_tick": {
           "type": "integer",
@@ -2765,16 +2703,16 @@
           "maximum": 2147483647,
           "description": "Signed; never 0, required unless modifies, fear, blocks, allows, resistances, perception, concealment or movement is present or duration is permanent (compiler SCHEMA_VIOLATION)."
         },
-        "name": {
+        "name": {"description":"Text key of its name.",
           "$ref": "text.schema.json#/$defs/TextKey"
         },
-        "narration": {
+        "narration": {"description":"Text told as the status is applied, ticks and ends.",
           "type": "object",
           "properties": {
-            "applied": {
+            "applied": {"description":"Text told when the status is applied.",
               "$ref": "text.schema.json#/$defs/TextKey"
             },
-            "tick": {
+            "tick": {"description":"Text told on each tick of the status.",
               "$ref": "text.schema.json#/$defs/TextKey"
             },
             "expired": {
@@ -2871,14 +2809,14 @@
         "perception": {
           "type": "object",
           "properties": {
-            "sight": {
+            "sight": {"description":"Changes what the holder sees: blind (every room is dark), dark_sight (sees in an unlit room) or see_invisible (sees holders of an invisible status).",
               "enum": [
                 "blind",
                 "dark_sight",
                 "see_invisible"
               ]
             },
-            "hearing": {
+            "hearing": {"description":"deaf: no sound cue reaches the holder.",
               "enum": [
                 "deaf"
               ]
@@ -2897,10 +2835,10 @@
         "pierced_by": {
           "type": "object",
           "properties": {
-            "skill": {
+            "skill": {"description":"The skill whose level the seer's attribute value must beat to see through the concealment.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "attribute": {
+            "attribute": {"description":"The attribute whose value the seer needs; it is compared with the holder's skill level.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             }
           },
@@ -2916,7 +2854,6 @@
         "key",
         "duration",
         "tick_every",
-        "resource",
         "name",
         "narration"
       ],
@@ -2925,20 +2862,20 @@
     "MapPosition": {
       "type": "object",
       "properties": {
-        "room": {
+        "room": {"description":"The room drawn.",
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
         },
-        "x": {
+        "x": {"description":"Integer drawing coordinate.",
           "type": "integer",
           "minimum": -2147483648,
           "maximum": 2147483647
         },
-        "y": {
+        "y": {"description":"Integer drawing coordinate.",
           "type": "integer",
           "minimum": -2147483648,
           "maximum": 2147483647
         },
-        "z": {
+        "z": {"description":"Integer drawing coordinate.",
           "type": "integer",
           "minimum": -2147483648,
           "maximum": 2147483647

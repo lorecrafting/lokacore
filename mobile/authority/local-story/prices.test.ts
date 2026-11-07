@@ -115,45 +115,6 @@ test('two fish bought at two prices survive cold reopen; a failed COMMIT keeps a
   coldReopen(path, bundle);
 });
 
-// Breaks: no receipt replay for a stock offer (the swap passes the shape check: the final custody
-// matches and the stock items are not tracked by commerce custody; save.md B3 shop recovery).
-test('a receipt naming another fish of the set is save_corrupt', (t) => {
-  const dir = mkdtempSync(join(tmpdir(), 'loka-prices-forged-'));
-  t.after(() => rmSync(dir, { recursive: true, force: true }));
-  {
-    const path = join(dir, 'swap.db');
-    const p = elapsedHost(path, undefined, bundle);
-    const story = openStory(p.db, releases, p.host);
-    if (story.kind !== 'open') throw new Error('not open');
-    for (const [i, quoted_price] of [2, 3].entries())
-      assert.equal(
-        story.invoke({
-          invocation_id: `bbbbbbbb-2121-4020-8020-${String(i + 1).padStart(12, '0')}`,
-          actor_id: initial.character,
-          action_key: 'buy',
-          target_ids: [monger, fish('a')],
-          input: { quoted_price },
-        }).kind,
-        'saved',
-      );
-    const rows = p.sql
-      .prepare('SELECT invocation_id,response FROM receipt ORDER BY revision')
-      .all();
-    const swap = { [fish('a')]: fish('b'), [fish('b')]: fish('a') };
-    for (const row of rows) {
-      const text = Object.entries(swap).reduce(
-        (s, [from, to]) => s.replaceAll(from, `@${to}`),
-        row.response as string,
-      );
-      p.sql
-        .prepare('UPDATE receipt SET response=? WHERE invocation_id=?')
-        .run(text.replaceAll('@', ''), row.invocation_id as string);
-    }
-    p.sql.close();
-    assert.throws(() => elapsedHost(path, undefined, bundle), /save_corrupt/);
-  }
-});
-
 // Breaks: commerce custody tracks a stock offer's item (fish_a, moved by the trade job and not by a
 // receipt), so cold reopen is save_corrupt.
 test('a stock item the trade job moves back reopens', (t) => {

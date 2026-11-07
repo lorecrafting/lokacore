@@ -19,10 +19,12 @@ import {
   type World,
 } from '../../authority/local-story/__tests__/declared-host.test.ts';
 import { validate } from '../../authority/local-story/__tests__/validate.ts';
+import { fadeStub } from './__tests__/fade-stub.ts';
 
 const ts = createRequire(import.meta.url)('typescript');
 registerHooks({
   resolve(specifier, context, next) {
+    if (specifier === './fade.ts') return fadeStub;
     if (specifier === 'react') return { url: 'test:declared-react', shortCircuit: true };
     return specifier === 'react-native'
       ? { url: 'test:declared-native', shortCircuit: true }
@@ -38,7 +40,7 @@ registerHooks({
         format: 'module',
         shortCircuit: true,
         source:
-          "export const Pressable='Pressable',Text='Text',TextInput='TextInput',View='View',ScrollView='ScrollView',AccessibilityInfo={};",
+          "export const Pressable='Pressable',Text='Text',TextInput='TextInput',View='View',ScrollView='ScrollView',AccessibilityInfo={},Animated={};",
       };
     if (!url.endsWith('.tsx')) return next(url, context);
     return {
@@ -91,10 +93,8 @@ const spellPoolBesideMa = (w: World) => {
 
 for (const [name, bytes] of artifacts()) {
   const w = open(bytes);
-  // hello_sampler is a text-only greeting with no entry room; any other cartridge must open.
   if (!w) {
-    test(`${name} has no entry room only if it is hello_sampler`, () =>
-      assert.equal(name, 'hello_sampler'));
+    test(`${name} opens at its entry room`, () => assert.fail('no world'));
     continue;
   }
   const c = w.cartridge;

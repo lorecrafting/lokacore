@@ -61,7 +61,6 @@ const TARGETS: Readonly<Record<string, readonly string[]>> = {
   use_transport: ['endpoint_id'],
   fill: ['source_id', 'vessel_id'],
   pour: ['source_id', 'receiver_id'],
-  drink: ['vessel_id'],
   look: ['target_id'],
   where: ['target_id'],
   read: ['target_id'],
@@ -75,7 +74,7 @@ const TARGETS: Readonly<Record<string, readonly string[]>> = {
   perform: ['target_id', 'item_id'],
   buy: ['provider_id', 'item_id'],
   sell: ['provider_id', 'item_id'],
-  eat: ['item_id'],
+  consume: ['item_id'],
   bandage: ['item_id'],
   take: ['item_id'],
   drop: ['item_id'],
@@ -91,6 +90,18 @@ const TARGETS: Readonly<Record<string, readonly string[]>> = {
   lock: ['target_id'],
   unlock: ['target_id'],
 };
+
+/** A dev@1 invocation as its Command (input as is, no targets); only a dev host calls this. */
+export function resolveDev(
+  world: World,
+  { invocation: i, command_id }: Identified,
+): Command | { kind: 'rejected'; error: { code: ErrorCode } } {
+  const payload = { type: i.action_key, actor_id: i.actor_id, ...i.input };
+  const command = { id: command_id, world_context_id: world.context, payload };
+  return i.target_ids.length || validate('Command', command).length
+    ? rejected('unsupported_capability')
+    : (command as Command);
+}
 
 /**
  * A NEW invocation as the typed Command its action in the actor's current ActionSet resolves to

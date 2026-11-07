@@ -7,6 +7,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { gameView } from '../src/index.ts';
+import { validate } from '../src/foundation/validate.ts';
 import type { World } from '../src/runtime/decision.ts';
 import { describeEntity } from '../src/mechanics/description_variant/rule.ts';
 import { level, resourceRef } from '../src/mechanics/resource.ts';
@@ -45,8 +46,8 @@ test('hub: a new character starts in the inn at 07:00 day 1 with the planned poo
   const w = fresh(BODY);
   assert.equal(w.state.clock, AT_SEVEN);
   assert.equal(w.state.containers[w.body], w.roomIds[ref('room', 'crossroads_inn')]);
-  const pools = ['hp', 'hunger', 'thirst', 'pennies'].map((k) => pool(w, k));
-  assert.deepEqual(pools, [10, 10, 10, 10]);
+  const pools = ['hp', 'mv', 'pennies'].map((k) => pool(w, k));
+  assert.deepEqual(pools, [10, 100, 10]);
   assert.deepEqual(
     ['str', 'dex', 'cha'].map((k) => attribute(w, k)),
     [10, 10, 6],
@@ -74,28 +75,24 @@ test('body 1: the Fell Road signpost reads its text and grants no topic', () => 
   assert.deepEqual(r.lines, ['readable.sign_body']);
 });
 
-// Breaks: the frost rule or the needs rule is missing or reads the wrong weather or room.
-test('body 2: the bare fell on a frost day chills, starves and parches in one receipt', () => {
+// Breaks: the frost rule is missing or reads the wrong weather or room, or a climb drains a need
+// again (loka-kgd.209 dropped the hunger and thirst pools).
+test('body 2: the bare fell on a frost day chills, and only chills, in one receipt', () => {
   const r = go(atGate, 'north');
-  for (const k of ['chilled', 'hungry', 'thirsty'])
-    assert.ok(r.lines.includes(`narration.${k}.applied`), JSON.stringify(r.lines));
-  assert.deepEqual(labels(r.world), ['condition.chilled', 'condition.hungry', 'condition.thirsty']);
+  assert.ok(r.lines.includes('narration.chilled.applied'), JSON.stringify(r.lines));
+  assert.deepEqual(labels(r.world), ['condition.chilled']);
   assert.equal(place(r.world), 'room.fell_top.frost');
   w = r.world;
 });
 
-// Breaks: the hourly refresh repeats the applied line, a tick lands at the wrong time or the
-// needs tick at the wrong rate.
-test('body 3: two hours on the fell: one chill tick, two need ticks, a silent refresh', () => {
+// Breaks: the hourly refresh repeats the applied line or a tick lands at the wrong time.
+test('body 3: two hours on the fell: one chill tick, a silent refresh', () => {
   const r = wait(w, 9 * HOUR);
-  assert.deepEqual(
-    [pool(r.world, 'hp'), pool(r.world, 'hunger'), pool(r.world, 'thirst')],
-    [9, 8, 8],
-  );
+  assert.equal(pool(r.world, 'hp'), 9);
   assert.ok(!r.lines.includes('narration.chilled.applied'), JSON.stringify(r.lines));
   w = r.world;
   // Wat arrived at 08:00 with the bare player on the moor: only his own frost rule's chill, none
-  // of the player's needs or other drains (his `immune` list).
+  // of the player's other drains (his `immune` list).
   const wat = id(w, 'npc', 'wat');
   const his = Object.entries(w.state.statuses ?? {}).filter(
     ([k, r]) => r.active && k.includes(wat),
@@ -158,22 +155,59 @@ test('body 7: Wat arrives at 08:00, is chilled, leaves at 09:00, ticks at 10:00,
   assert.equal(line(x), 'npc.wat.description');
 });
 
-// Breaks: bread or water ends the wrong status, or bread feeds the hunger pool instead of mv;
-// hungry or thirsty is timed again and lapses on its own within a day (loka-rn3b).
-test('body 8: in the hut bread ends hungry and water ends thirsty', () => {
+// Breaks: bread applies no well fed or it ticks one pool only, water applies no refreshed, or
+// either buff lasts the wrong span (statuses/well_fed.json: hp +1 and mv +5 every 1800 for 3600,
+// the loaf restores mv 5; refreshed.json: mv +5 every 900 for 1800), or a receipt's events skip
+// or repeat a position (a drink's status_applied follows its drank). Body 9 starts in the hut.
+test('body 8: in the hut bread leaves you well fed and water refreshed', () => {
   w = go(w, 'east').world;
-  const unfed = wait(w, w.state.clock + DAY + HOUR).world;
-  assert.deepEqual(labels(unfed), ['condition.hungry', 'condition.thirsty']);
-  const [hunger, mv] = [pool(w, 'hunger'), pool(w, 'mv')];
-  w = play(take(w, 'hut_loaf'), { type: 'eat', item_id: id(w, 'item', 'hut_loaf') }).world;
-  assert.deepEqual([pool(w, 'hunger'), pool(w, 'mv')], [hunger, Math.min(100, mv! + 5)]);
-  assert.deepEqual(labels(w), ['condition.thirsty']);
-  w = play(take(w, 'trough_skin'), {
-    type: 'drink',
-    vessel_id: id(w, 'item', 'trough_skin'),
-  }).world;
-  assert.deepEqual(labels(w), []);
-  w = play(w, { type: 'drop', item_id: id(w, 'item', 'trough_skin') }).world;
+  const at = key({ kind: 'resource', resource: resourceRef(w, 'mv'), entity_id: w.body });
+  const resources = { ...w.state.resources, [at]: { ...w.state.resources![at]!, value: 50 } };
+  const low = take(take({ ...w, state: { ...w.state, resources } }, 'hut_loaf'), 'trough_skin');
+  const t0 = low.state.clock;
+  // Against the same world that only waits, so mv regen and the chill cancel out: [hp, mv] gained.
+  const gain = (x: World, t: number) => {
+    const [a, b] = [wait(x, t0 + t).world, wait(low, t0 + t).world];
+    return ['hp', 'mv'].map((k) => pool(a, k)! - pool(b, k)!);
+  };
+  const eat = play(low, { type: 'consume', item_id: id(low, 'item', 'hut_loaf') });
+  assert.ok(eat.lines.includes('narration.well_fed.applied'), JSON.stringify(eat.lines));
+  const order = (r: typeof eat) =>
+    r.decision.kind === 'accepted'
+      ? r.decision.events.map((e) => [e.payload.type, e.position])
+      : [];
+  assert.deepEqual(order(eat), [['status_applied', 1]]);
+  assert.deepEqual(labels(eat.world), ['condition.well_fed']);
+  const view = gameView(eat.world);
+  assert.deepEqual(validate('GameView', view), []);
+  assert.deepEqual(view.conditions?.[0]?.ticks, [
+    { resource: 'hp', per_tick: 1 },
+    { resource: 'mv', per_tick: 5 },
+  ]);
+  assert.deepEqual(
+    [gain(eat.world, 0), gain(eat.world, 1200), gain(eat.world, 2400), gain(eat.world, 3600)],
+    [
+      [0, 5],
+      [1, 10],
+      [2, 15],
+      [2, 15],
+    ],
+  );
+  assert.ok(wait(eat.world, t0 + 3600).lines.includes('narration.well_fed.expired'));
+  const drink = play(low, { type: 'consume', item_id: id(low, 'item', 'trough_skin') });
+  assert.ok(drink.lines.includes('narration.refreshed.applied'), JSON.stringify(drink.lines));
+  assert.deepEqual(order(drink), [
+    ['drank', 1],
+    ['status_applied', 2],
+  ]);
+  assert.deepEqual(
+    [gain(drink.world, 600), gain(drink.world, 1200)],
+    [
+      [0, 5],
+      [0, 10],
+    ],
+  );
+  assert.deepEqual(labels(wait(drink.world, t0 + 1800).world), []);
 });
 
 // Breaks: world.carry or the derived carry table is missing, or might does not raise str (the
@@ -181,7 +215,7 @@ test('body 8: in the hut bread ends hungry and water ends thirsty', () => {
 test('body 9-10: the quern is too heavy until the draught; a second dose never stacks', () => {
   w = go(go(w, 'west').world, 'west').world;
   assert.equal(refused(w, { type: 'take', item_id: id(w, 'item', 'quern') }), 'too_heavy');
-  const drink = (v: World) => play(v, { type: 'drink', vessel_id: id(v, 'item', 'cask') });
+  const drink = (v: World) => play(v, { type: 'consume', item_id: id(v, 'item', 'cask') });
   const r = drink(take(w, 'cask'));
   assert.ok(r.lines.includes('narration.might.applied'), JSON.stringify(r.lines));
   assert.equal(attribute(r.world, 'str'), 13);
@@ -224,14 +258,17 @@ test('body 12: a song inspires the player and Orla, dex 12 wins the throw; both 
   );
 });
 
-// Breaks: the dry rule is missing, water does not cure parched, or clock_hour skips the dry rule.
+// Breaks: the dry rule is missing, parched does not drain mv, water does not cure parched, or clock_hour skips the dry rule.
 test('body 13: a drought day parches on the fell; a drink ends it; the next hour brings it back', () => {
   let x = wait(atGate, 2 * DAY + AT_SEVEN).world;
   x = go(x, 'north').world;
   assert.ok(labels(x).includes('condition.parched'));
+  const dry = wait(x, x.state.clock + 1800);
+  assert.ok(dry.lines.includes('narration.parched.tick'), JSON.stringify(dry.lines));
+  assert.ok(pool(dry.world, 'mv')! < pool(x, 'mv')!, 'parched drains mv faster than it regens');
   x = take(go(x, 'east').world, 'trough_skin');
   x = go(x, 'west').world;
-  x = play(x, { type: 'drink', vessel_id: id(x, 'item', 'trough_skin') }).world;
+  x = play(x, { type: 'consume', item_id: id(x, 'item', 'trough_skin') }).world;
   assert.ok(!labels(x).includes('condition.parched'));
   x = wait(x, 2 * DAY + 8 * HOUR).world;
   assert.ok(labels(x).includes('condition.parched'));
@@ -242,14 +279,13 @@ test('sandbox: the fold chills on a frost day; the Drover moves only under might
   let x = go(atGate, 'east').world;
   assert.ok(labels(x).includes('condition.chilled'));
   assert.ok(perform(x, 'shove_drover').lines.includes('narration.shove_drover.failure'));
-  x = play(take(x, 'fold_cask'), { type: 'drink', vessel_id: id(x, 'item', 'fold_cask') }).world;
+  x = play(take(x, 'fold_cask'), { type: 'consume', item_id: id(x, 'item', 'fold_cask') }).world;
   assert.ok(perform(x, 'shove_drover').lines.includes('narration.shove_drover.success'));
 });
 
-// Breaks (UK): a pool's normal cut back at 100 (mv 99 or a half-fed belly showing the warning
-// tone) or its warning cut at or above the normal one. Each row: [pool, value, tone], hand-checked
+// Breaks (UK): a pool's normal cut back at 100 (mv 99 showing the warning tone) or its warning cut at or above the normal one. Each row: [pool, value, tone], hand-checked
 // against resources.json (normal from 50%, warning from 25%).
-test('body bands: mv, hunger and thirst read normal from half, warning just below', () => {
+test('body bands: mv reads normal from half, warning just below', () => {
   const w = fresh(BODY);
   const tone = (pool: string, value: number) => {
     const at = key({ kind: 'resource', resource: resourceRef(w, pool), entity_id: w.body });
@@ -261,10 +297,6 @@ test('body bands: mv, hunger and thirst read normal from half, warning just belo
     ['mv', 99, 'normal'],
     ['mv', 50, 'normal'],
     ['mv', 49, 'warning'],
-    ['hunger', 5, 'normal'],
-    ['hunger', 4, 'warning'],
-    ['thirst', 5, 'normal'],
-    ['thirst', 4, 'warning'],
   ];
   for (const [pool, value, want] of rows) assert.equal(tone(pool, value), want, `${pool} ${value}`);
 });

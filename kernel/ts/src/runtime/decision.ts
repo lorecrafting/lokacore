@@ -1,4 +1,4 @@
-// size: allow 325, the closed State row sections include toolbox status, levelling and built rows; actorOf and admitted beside bodyOf; COMPOSES containment (row 33) and food status (hs-5); position movement (row 35); rejected takes a GameError cause (x6t.17); reaction composes scripted_action (C3 D7)
+// size: allow 332, the closed State row sections include toolbox status, levelling and built rows; actorOf and admitted beside bodyOf; COMPOSES containment (row 33) and food status (hs-5); position movement (row 35); rejected takes a GameError cause (x6t.17); reaction composes scripted_action (C3 D7); dev movement (dev@1); byCause beside event
 // What rule modules (mechanics/<capability>/rule.ts) see: the World they read, the typed Rule and
 // Decision contract that limits each capability to its own commands and events
 // (capability_registry.json, through contracts.gen.ts Owned), and pure helpers. The router,
@@ -59,7 +59,7 @@ import { key, type Stored } from '../foundation/compose.ts';
 import { id } from '../foundation/id_source.ts';
 import type { RngState } from '../foundation/rng.ts';
 
-export type Cartridge = Extract<CompiledCartridge, { format: 'loka-cartridge-v2' }>;
+export type Cartridge = CompiledCartridge;
 export type State = {
   readonly visited_rooms?: Readonly<Record<string, VisitedRoom>>;
   readonly observed_npcs?: Readonly<Record<string, ObservedNpc>>;
@@ -216,13 +216,14 @@ export type Mint = () => string;
  * yield over (item_acquired); a seen theft (row 33) reports its notice as scripted_action@1's custom_event, as a reaction's event.emit does (C3 D7);
  * a meal (row hs-5) lands its `applies`. */
 export const COMPOSES = {
+  dev: ['movement'], // go-to-room's entity_entered_room
   expedition: ['quest'],
   transport: ['movement'],
   scripted_action: ['check', 'status', 'death', 'containment'],
-  food: ['status'],
+  food: ['status', 'liquid'],
   // W26 doors; fact: a delayed reaction's fact_changed (row FD1)
   schedule: ['movement', 'combat', 'death', 'quest', 'containment', 'status', 'barrier', 'fact'],
-  combat: ['movement', 'quest'],
+  combat: ['movement', 'quest', 'death'], // Diku rounds' round 1 at Attack can kill (loka-kgd.197)
   dialogue: ['quest', 'containment', 'movement', 'check'],
   movement: ['quest'],
   commerce: ['containment'],
@@ -272,6 +273,12 @@ export function allocator(world: World, command: { readonly id: Command['id'] })
   let ordinal = 0;
   return () => id(world.context, command.id, ordinal++);
 }
+
+/** The `command` argument of `event` for what a domain event caused, not a command. */
+export const byCause = (cause: DomainEvent, actor_id: CharacterId) => ({
+  id: cause.id as string as Command['id'],
+  payload: { actor_id },
+});
 
 /**
  * The DomainEvent at one-based causal `position` (04 §5.2, §8, §11), its id from `mint`, for

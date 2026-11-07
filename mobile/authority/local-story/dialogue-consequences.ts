@@ -47,10 +47,16 @@ export function assignmentEvidence(
   speaker: EntityId,
 ) {
   for (const step of option.steps ?? []) {
-    if (step.op === 'fact.adjust') continue;
+    // Neither sets a fact outright: an adjust is a delta and a narrate only speaks.
+    if (step.op === 'fact.adjust' || step.op === 'narrate') continue;
     const assignment = assignmentOf(s, step);
     if (!assignment) return false;
     const matching = ops.filter((o) => o.op === 'fact.assign' && same(o.fact, assignment.fact));
+    // Two steps writing one fact leave no single op to compare; the kernel folded them.
+    const writers = (option.steps ?? []).filter(
+      (other) => other.op !== 'narrate' && same(writtenFact(s, other), assignment.fact),
+    );
+    if (writers.length > 1) continue;
     const op = matching[0];
     // An entity or pair fact's subject is the speaker (row W2), from the definition, not the receipt.
     const { kind: _, ...target } = targetOf(s.world, row.actor_id, assignment.fact, speaker);
@@ -68,6 +74,9 @@ export function assignmentEvidence(
   }
   return true;
 }
+
+const writtenFact = (s: Story, step: NonNullable<DialogueChoice['steps']>[number]) =>
+  step.op === 'fact.adjust' ? step.fact : assignmentOf(s, step)?.fact;
 
 function assignmentOf(s: Story, step: NonNullable<DialogueChoice['steps']>[number]) {
   if (step.op === 'fact.adjust') return undefined;

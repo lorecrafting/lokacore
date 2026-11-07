@@ -1,0 +1,25 @@
+{
+  "keywords": [
+    "raider"
+  ],
+  "name": "npc.raider.short",
+  "room_line": "npc.raider.room",
+  "description": "npc.raider.description",
+  "room": "gate_yard",
+  "hp": {
+    "minimum": 0,
+    "maximum": 3,
+    "start": 3,
+    "gain": 0
+  },
+  "attack": {
+    "chance": 50,
+    "damage_min": 1,
+    "damage_max": 1,
+    "attacks": 2
+  },
+  "words": {
+    "bare": "npc.raider.bare",
+    "article": "the"
+  }
+}

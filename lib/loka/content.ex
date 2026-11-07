@@ -30,6 +30,14 @@ defmodule Loka.Content do
   @external_resource @registry_path
   @registry @registry_path |> File.read!() |> JSON.decode!()
 
+  @doc "Compile diagnostics as plain lines, located in the source at `dir`."
+  @spec explained([map()], Path.t()) :: [String.t()]
+  defdelegate explained(diags, dir), to: Loka.Content.Explain, as: :lines
+
+  @doc "Compile diagnostics split as `explained/2` places them, for `mix loka.compile --json`."
+  @spec explained_entries([map()], Path.t()) :: [map()]
+  defdelegate explained_entries(diags, dir), to: Loka.Content.Explain, as: :entries
+
   @doc """
   Compiles the source directory into CartridgeArtifact bytes (one canonical JSON document)
   and its warnings (severity warning), or returns its diagnostics, each list in the order
@@ -52,9 +60,118 @@ defmodule Loka.Content do
     end
   end
 
+  @doc """
+  The release check (docs/system/cartridge.md, Still to write): one `placeholder_text` per text
+  key of artifact `bytes` with a line that trims to `~`, at the path of the source under `dir`
+  that wrote it (an inline word's file, else `text.json`), for `explained/2`.
+  """
+  @spec placeholders(binary(), Path.t()) :: [map()]
+  def placeholders(bytes, dir) do
+    for {_key, d} <- held(bytes, dir), do: d
+  end
+
+  @doc """
+  Each `placeholders/2` key => the `file:line` that wrote it, for the author preview's in-Book
+  editor: two `~` lines hold the same words, so only the compile knows which key is whose.
+  """
+  @spec placeholder_lines(binary(), Path.t()) :: %{String.t() => String.t()}
+  def placeholder_lines(bytes, dir) do
+    held = held(bytes, dir)
+    # no `~`, no source index: it is most of a resident preview compile's time
+    index = if held == [], do: %{}, else: Loka.Content.SourceLines.index(dir)
+
+    # an inline `{"prose": "~"}` over lines: its words' own line, not its field's
+    prose =
+      &if(Map.has_key?(index, &1["path"] <> ".prose"),
+        do: "#{&1["path"]}.prose",
+        else: &1["path"]
+      )
+
+    for {key, d} <- held,
+        %{"rel" => rel, "line" => line} when is_binary(rel) <- [
+          Loka.Content.Explain.Place.of(%{d | "path" => prose.(d)}, index)
+        ],
+        into: %{},
+        do: {key, "#{rel}:#{line}"}
+  end
+
+  defp held(bytes, dir) do
+    keys =
+      for {key, text} <- Map.get(JSON.decode!(bytes)["cartridge"], "text", %{}),
+          text |> String.split("\n") |> Enum.any?(&(String.trim(&1) == "~")),
+          into: MapSet.new(),
+          do: key
+
+    written = written(keys, dir)
+
+    for key <- Enum.sort(keys),
+        do:
+          {key,
+           %{
+             "severity" => "error",
+             "code" => "placeholder_text",
+             "path" => Map.get(written, key, Source.at("text.json", [key])),
+             "data" => %{}
+           }}
+  end
+
+  # Each inline word's generated key, at the source path that wrote it (text.json keys stay out).
+  defp written(keys, dir) do
+    inline = MapSet.difference(keys, catalog(dir))
+    # Lowering left each inline word's generated key where the word was written.
+    {files, _} = if inline == MapSet.new(), do: {[], []}, else: Source.load(dir)
+
+    for {rel, kind, value} <- Enum.reverse(files),
+        {key, steps} <- leaves(value, []),
+        key in inline,
+        into: %{},
+        do: {key, Source.at(rel, inside(kind) ++ steps)}
+  end
+
+  defp catalog(dir) do
+    case File.read(Path.join(dir, "text.json")) do
+      {:ok, text} -> text |> JSON.decode!() |> Map.keys() |> MapSet.new()
+      _ -> MapSet.new()
+    end
+  end
+
+  defp leaves(v, at) when is_binary(v), do: [{v, at}]
+  defp leaves(v, at) when is_map(v), do: Enum.flat_map(v, fn {k, x} -> leaves(x, at ++ [k]) end)
+
+  defp leaves(v, at) when is_list(v),
+    do: v |> Enum.with_index() |> Enum.flat_map(fn {x, i} -> leaves(x, at ++ [i]) end)
+
+  defp leaves(_, _), do: []
+
+  # A bundled definition sits at its steps inside the bundle file.
+  defp inside({_, _, steps}) when is_list(steps), do: steps
+  defp inside(_), do: []
+
   @doc "The author-time lint findings for a story cartridge source (Loka.Content.Lint)."
   @spec lint(Path.t()) :: [String.t()]
   defdelegate lint(dir), to: Loka.Content.Lint, as: :run
+
+  @doc "Writes a compiling starter of one source kind into a cartridge (Loka.Content.Starters)."
+  @spec new(Path.t(), String.t(), String.t(), {String.t(), String.t()} | String.t() | nil) ::
+          {:ok, [Path.t()]} | {:error, String.t()}
+  def new(dir, kind, name, from), do: new(dir, kind, name, from, fn _, _ -> :ok end)
+
+  @doc """
+  `new/4` calling `before_write.(path, old bytes or nil)` before each file it writes, its own
+  file in `areas/<area>/` when `place` is `{area, _}` and a child of the abstract `extends` when it
+  is `{_, extends}`;
+  `scene`'s `from` is its NPC (Loka.Content.Starters.Scene).
+  """
+  def new(dir, kind, name, from, before_write, place \\ {nil, nil})
+
+  def new(dir, "scene", key, npc, before_write, {nil, nil}) when is_binary(npc),
+    do: Loka.Content.Starters.Scene.write(dir, key, npc, before_write)
+
+  def new(dir, kind, name, from, before_write, place),
+    do: Loka.Content.Starters.write(dir, kind, name, from, before_write, place)
+
+  @doc "The kinds `new/4` knows."
+  defdelegate kinds(), to: Loka.Content.Starters
 
   @doc "The source JSON Schema files, name => text (Loka.Content.SourceSchema)."
   @spec source_schema() :: %{String.t() => binary()}
@@ -68,10 +185,17 @@ defmodule Loka.Content do
     artifact
   end
 
+  # An undecodable file's definitions are missing, so every other fault would follow from it.
   defp compiled(files, diags, registry) do
-    case Compiler.compile(files, diags, registry) do
-      {:ok, cartridge, warnings} -> {:ok, cartridge, sorted(warnings)}
-      {:error, ds} -> {:error, sorted(ds)}
+    case Enum.filter(diags, &(&1["code"] == "INVALID_JSON")) do
+      [] ->
+        case Compiler.compile(files, diags, registry) do
+          {:ok, cartridge, warnings} -> {:ok, cartridge, sorted(warnings)}
+          {:error, ds} -> {:error, sorted(ds)}
+        end
+
+      undecodable ->
+        {:error, sorted(undecodable)}
     end
   end
 

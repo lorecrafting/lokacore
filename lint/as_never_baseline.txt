@@ -125,7 +125,7 @@
 2 kernel/ts/test/showcase_homestead.test.ts
 1 kernel/ts/test/showcase_magic.test.ts
 2 kernel/ts/test/showcase_social.test.ts
-8 kernel/ts/test/showcase_traps.test.ts
+6 kernel/ts/test/showcase_traps.test.ts
 1 kernel/ts/test/sim.test.ts
 6 kernel/ts/test/sim.ts
 2 kernel/ts/test/sim_mechanics.test.ts

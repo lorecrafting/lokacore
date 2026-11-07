@@ -1,6 +1,6 @@
 // The Book's live updates: each GameView update redraws its pages, restores a remounted pending
 // Read or corpse Take, and turns the page on a terminal result.
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import type { Game, GameSubscription } from '../../packages/game-view/session.ts';
 import type { BookProps } from './Book.tsx';
 import { WORDS } from './buttons.ts';
@@ -79,10 +79,12 @@ const visit = (pr: Presenter, stack: Page[]) => pr.visit(stack.map(detailId));
 
 export function useUpdates(p: BookProps, pr: Presenter, s: BookState) {
   const stack = s.current.current.stack;
+  const resumes = useRef(0);
   useEffect(() => visit(pr, stack), [pr, stack]);
   useEffect(() => {
     let live = true;
     const unsubscribe = p.game.subscribe((update) => {
+      if (update.kind === 'state' && update.resumed) resumes.current++;
       if (live) applyUpdate(p, pr, s, update);
     });
     p.shell.subscribed?.(true);
@@ -92,14 +94,17 @@ export function useUpdates(p: BookProps, pr: Presenter, s: BookState) {
       p.shell.subscribed?.(false);
     };
   }, [p.game, pr, p.shell.recovered]);
+  return { resumes: resumes.current };
 }
 
 function applyUpdate(p: BookProps, pr: Presenter, s: BookState, update: GameSubscription) {
   const { current, setStack, setFlip, redraw } = s;
   const before = current.current;
+  const fell = pr.died();
   const terminal = pr.update(update);
   const after = pr.screen();
-  let next = pagesAfter(before.stack, before.view, after.view);
+  const died = !!after.dead && after.died !== fell; // the dead page, not a fight's close: turn to it from any page
+  let next = died ? [] : pagesAfter(before.stack, before.view, after.view);
   next = restoredCompletion(p, s, update, after, next);
   if (terminal) next = resultPages(next, after);
   if (terminal && update.kind === 'completion')
@@ -109,7 +114,8 @@ function applyUpdate(p: BookProps, pr: Presenter, s: BookState, update: GameSubs
   current.current = { stack: next, view: after.view };
   visit(pr, next);
   setStack(next);
-  if (terminal && next !== before.stack) setFlip((f) => ({ turn: f.turn + 1, dir: 1 }));
+  if ((terminal || died) && next !== before.stack && (!died || before.stack.length))
+    setFlip((f) => ({ turn: f.turn + 1, dir: 1 }));
   redraw((n) => n + 1);
   if (after.pending || after.fault) p.shell.recovered?.(false);
   else if (pr.recovered()) p.shell.recovered?.(true);

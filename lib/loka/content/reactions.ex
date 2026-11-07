@@ -1,6 +1,7 @@
+# size: allow 305, one clause per reaction op; the consequence table reads together
 defmodule Loka.Content.Reactions do
   @moduledoc """
-  Reaction rules in a v2 source (reaction.schema.json ReactionRule; 21 §11; 06 §14):
+  Reaction rules in a source (reaction.schema.json ReactionRule; 21 §11; 06 §14):
   each rule's owner (reaction@1) and its trigger event's owner is required, and each trigger
   filter names a definition of this cartridge. Its steps' ops, owning events and references are
   `Loka.Content.Steps` (context :reaction); this module adds the reaction-only rules. Its `when`
@@ -16,15 +17,15 @@ defmodule Loka.Content.Reactions do
 
   defp all(defs), do: for({_, {rel, [], r}} <- defs["reaction"], do: {rel, r})
 
-  @doc "Diagnostics for the schema-valid reactions of a v2 source with a valid manifest (else none)."
-  @spec check(map() | nil, map(), {term(), map() | :unknown} | nil, [map()]) :: [map()]
-  def check(m, _, v2, _) when m == nil or v2 == nil, do: []
+  @doc "Diagnostics for the schema-valid reactions of a source with a valid manifest (else none)."
+  @spec check(map() | nil, map(), {term(), map() | :unknown}, [map()]) :: [map()]
+  def check(nil, _, _, _), do: []
 
   def check(m, defs, {_, text}, registry) do
     caps = m["requires"]["capabilities"]
     ctx = %{m: m, defs: defs, text: text, kinds: {caps, owners(registry, ["definitions"])}}
     ctx = Map.put(ctx, :events, {caps, owners(registry, ["events"])})
-    Enum.flat_map(all(defs), &rule(&1, ctx))
+    Enum.flat_map(all(defs), &(rule(&1, ctx) ++ timed_status(&1, ctx)))
   end
 
   @filters %{
@@ -57,12 +58,50 @@ defmodule Loka.Content.Reactions do
       steps(rel, Enum.with_index(r["steps"]), on, ctx)
   end
 
+  # The action's completion or its own custom event runs inside it; the status row would start before
+  # a duration's time.advance, which faults at runtime (its own steps: `Loka.Content.ScriptedActions`).
+  # Refuses only a path known to run: `after` writes a job instead; a `when`, a `witness` or a fact_changed
+  # may not fire; a status.apply with no job crosses nothing.
+  defp timed_status({rel, %{"steps" => steps} = r}, %{m: m, defs: defs}) do
+    for {%{"op" => "status.apply"} = step, i} <- Enum.with_index(steps),
+        inside_timed?(r, defs),
+        not Loka.Content.Status.no_job?(step, m, defs) do
+      diag("SCHEMA_VIOLATION", at(rel, ["steps", i]), %{"why" => "duration_status"})
+    end
+  end
+
+  defp inside_timed?(%{"on" => on} = r, defs) do
+    not is_map_key(r, "after") and not is_map_key(r, "when") and not is_map_key(on, "witness") and
+      Enum.any?(
+        for({_, {_, [], %{"duration" => d} = a}} <- defs["scripted_action"] || %{}, d > 0, do: a),
+        &inside?(on, &1)
+      )
+  end
+
+  defp inside?(%{"event" => "action_completed"} = on, action),
+    do: on["action"] in [nil, action["key"]]
+
+  defp inside?(%{"event" => "custom_event", "custom" => custom}, action),
+    do:
+      Enum.any?(action["outcomes"], fn {_, o} ->
+        Enum.any?(o["steps"], &(&1["event"] == custom))
+      end)
+
+  defp inside?(_, _), do: false
+
+  # One rule closes one talk; a second `end_talk` step in it could only be a slip.
+  defp second_end_talk(rel, steps) do
+    ends = for {%{"op" => "end_talk"}, i} <- steps, do: i
+    for i <- Enum.drop(ends, 1), do: diag("DUPLICATE_DEFINITION", at(rel, ["steps", i]))
+  end
+
   # Homestead hs-1: a second replenish.run of one entry in a rule would pick the items the first
   # moved.
   defp steps(rel, steps, on, ctx) do
     runs = for {%{"op" => "replenish.run", "replenish" => k}, i} <- steps, do: {k, i}
 
     Enum.flat_map(steps, &consequence(rel, &1, on, ctx)) ++
+      second_end_talk(rel, steps) ++
       for {{k, i}, n} <- Enum.with_index(runs),
           Enum.any?(Enum.take(runs, n), &(elem(&1, 0) == k)),
           do: diag("DUPLICATE_DEFINITION", at(rel, ["steps", i, "replenish"]))
@@ -90,6 +129,15 @@ defmodule Loka.Content.Reactions do
       _ ->
         []
     end
+  end
+
+  # A subject-bound event delivers to its subject, or past an NPC subject to the doer or the root
+  # actor; a tick's event has only the root. Only a player's own act names whose talk to close.
+  @own_acts ~w(action_completed check_failed check_passed choice_opened choice_resolved story_point_reached)
+  defp consequence(rel, {%{"op" => "end_talk"}, i}, on, _) do
+    if on["event"] in @own_acts,
+      do: [],
+      else: [diag("OUTCOME_MISMATCH", at(rel, ["steps", i, "op"]), %{"why" => "end_talk_event"})]
   end
 
   # loka-kgd.150.2: only a trigger whose subject resolves to a character activates.
@@ -124,6 +172,14 @@ defmodule Loka.Content.Reactions do
       do: [],
       else: [diag("UNRESOLVED_REFERENCE", at(rel, ["steps", i, "text"]), %{"target" => key})]
   end
+
+  # A rule's drain would skip death: hp 0 and no entity_died (the damage mechanisms kill).
+  defp consequence(rel, {%{"op" => "resource.adjust", "by" => by}, i}, _, _) when by < 0,
+    do: [diag("REACTION_DRAINS_BODY", at(rel, ["steps", i, "by"]), %{})]
+
+  # A reaction's refill names a declared resource; an unknown one would throw at play.
+  defp consequence(rel, {%{"op" => "resource.adjust"} = s, i}, _, ctx),
+    do: reference(rel, ["steps", i], "resource", s, ctx.m, ctx.defs)
 
   defp consequence(rel, {%{"op" => "status.apply"} = s, i}, on, ctx),
     do:

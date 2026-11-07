@@ -12,6 +12,7 @@ import { loadCartridge, type Cartridge, type World } from '../src/index.ts';
 import { gameView, holds, INSTALLED, newWorld, step } from '../src/runtime/world.ts';
 import { read } from './read.ts';
 import { validate } from '../src/foundation/validate.ts';
+import { opening } from './opening_fixture.ts';
 
 const equal = (actual: unknown, expected: unknown) =>
   assert.deepEqual(actual === undefined ? undefined : JSON.parse(JSON.stringify(actual)), expected);
@@ -135,6 +136,23 @@ test('fresh scenes keep the same state as their scene-free variant', () => {
   assert.equal(hash(w.state as never), hash(without.state as never));
   assert.equal(Object.hasOwn(w.state, 'facts'), false);
   assert.equal(Object.hasOwn(gameView(w), 'scene'), false);
+});
+
+// Breaks: an answer that reaches a story point in a dialogue with no quest reopens the hub under the
+// modal scene (loka-vduxr.11), or the scene waits for a quest; the other answer must still reopen.
+test('a choice with no quest starts its scene and ends the talk', () => {
+  const noQuest = (c: any) => {
+    const bram = c.dialogues[`${R}:dialogue/bram`];
+    delete bram.quest;
+    bram.choices.stay = {
+      label: bram.choices.carry.label,
+      narration: bram.choices.carry.narration,
+    };
+  };
+  const s = choose(ready(fresh(noQuest)));
+  equal(gameView(s.world).scene, shown(1, 'bell'));
+  assert.equal(gameView(s.world).choice, undefined);
+  assert.ok(gameView(choose(ready(fresh(noQuest)), 'stay').world).choice);
 });
 
 // Breaks: missing start, union rather than replacement, time advance or unadvertised modal refusal.
@@ -296,4 +314,46 @@ test('start needs only scene and never restarts an ended fact or a different out
     assert.ok(
       !s.decision.delta.ops.some((x) => x.op === 'fact.assign' && x.fact.key === 'scene_bell_rung'),
     );
+});
+
+// Breaks: a scene's treatment dropped between definition and view (the Book would draw reverie as a
+// plain page), or put on a view whose scene names none (book-ui.md, Book treatments).
+test('a treated scene carries its treatment into SceneView; the contract refuses an unknown one', () => {
+  const w = invoke(fresh(), 'coil_rope').world;
+  const view = gameView(w);
+  equal(view.scene, {
+    scene: ref('scene', 'rope_reverie'),
+    index: 1,
+    count: 2,
+    line: 'narration.coil_rope.actor',
+    treatment: 'reverie',
+  });
+  assert.deepEqual(validate('GameView', view), []);
+  const dream = { ...view, scene: { ...view.scene!, treatment: 'dream' } };
+  assert.notDeepEqual(validate('GameView', dream), []);
+});
+
+// Breaks: newWorld leaves the opening scene unstarted (play opens on a room page), starts it at a
+// line other than 1, or its last Continue does not end it onto the entry room's page.
+test('an opening scene is the first view and its last Continue lands in the entry room', () => {
+  let w = fresh(opening);
+  const view = gameView(w);
+  equal(view.scene, {
+    scene: ref('scene', 'opening'),
+    line: 'scene.bell_rung.bell',
+    index: 1,
+    count: 2,
+    treatment: 'reverie',
+  });
+  equal(
+    view.actions.map((a) => a.action_key),
+    ['continue'],
+  );
+  assert.deepEqual(validate('GameView', view), []);
+  w = invoke(w, 'continue').world;
+  equal(gameView(w).scene?.line, 'scene.bell_rung.fen');
+  const s = invoke(w, 'continue');
+  equal(s.decision.kind, 'accepted');
+  equal(gameView(s.world).scene, undefined);
+  equal(gameView(s.world).place.title.key, 'room.ferry_landing.title');
 });

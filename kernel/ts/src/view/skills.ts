@@ -51,25 +51,39 @@ function skillView(
   if (concealed(world, actor, skill, steps)) return [];
   const locked = s.prerequisite && !holds(world, actor, s.prerequisite, { steps });
   const st = status(world, actor, skill, steps);
+  const at = s.growth ? level(world, actor, skill) : 0;
+  const rank = s.ranks?.[at - 1]; // none at level 0
   return [
     {
       skill,
       label: s.name,
       requirement: s.requirement,
       ...st,
-      ...(s.growth && { level: level(world, actor, skill) }),
+      ...(s.growth && { level: at }),
       ...(s.prerequisite && { locked: locked! }),
       ...(s.profession && { profession: s.profession }),
+      ...(s.learned && { learned: s.learned }),
+      ...(rank && { rank: { label: rank.name, ...(rank.reached && { reached: rank.reached }) } }),
     },
   ];
 }
 
-/** The player's level, experience, next threshold (absent at the top) and unspent points (row 4). */
+/** The player's level, experience, thresholds around it (next absent at the top), unspent points, level-up line's key (row 4). */
 function levellingView(world: World, actor: CharacterId) {
   const l = levelling(world, actor);
+  const level_up = world.cartridge.world?.levelling?.level_up;
   if (!l) return {};
-  const { level, experience, next, unspent } = l;
-  return { levelling: { level, experience, ...(next !== undefined && { next }), unspent } };
+  const { level, experience, from, next, unspent } = l;
+  return {
+    levelling: {
+      level,
+      experience,
+      from,
+      ...(next !== undefined && { next }),
+      unspent,
+      ...(level_up && { level_up }),
+    },
+  };
 }
 
 /**

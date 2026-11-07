@@ -126,3 +126,30 @@ test('a trade job moves a fish from the fisher to the fishmonger and the price f
   w = play(w, { type: 'wait', until: 28800 });
   assert.deepEqual([held(w, fisher), held(w, monger), row(w).buy.price], [[], ['a', 'c'], 3]);
 });
+
+// Breaks: a shop trades while its keeper stands in another room, or buys a container that holds
+// an item the player may not give away (the protected item would pass to the NPC inside it).
+test('a shop refuses an absent keeper and a sale that would give away a protected item', () => {
+  const w = fresh();
+  const monger = npc(w, 'fishmonger');
+  const away = {
+    ...w,
+    state: { ...w.state, containers: { ...w.state.containers, [monger]: 'elsewhere' } },
+  };
+  assert.deepEqual(press(away as World, 'buy', 2).decision, {
+    kind: 'rejected',
+    error: { code: 'not_present' },
+  });
+
+  const basket = w.entityIds[`${S}:item/basket`]!;
+  const sack = fish(w, 'c'); // the player's fish_c holds a basket marked not-to-give
+  const loaded = {
+    ...w,
+    entities: { ...w.entities, [basket]: { ...w.entities[basket], give_allowed: false } },
+    state: { ...w.state, containers: { ...w.state.containers, [sack]: w.body, [basket]: sack } },
+  } as World;
+  assert.deepEqual(press(loaded, 'sell', 1).decision, {
+    kind: 'rejected',
+    error: { code: 'invalid_state' },
+  });
+});

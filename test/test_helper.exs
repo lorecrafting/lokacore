@@ -18,19 +18,36 @@ defmodule Loka.ContentSource do
 
   @doc """
   Compiles `dir` with `changes` written over it, then restores every changed file. Each
-  change is `{relative path, value}`: a decoded JSON value, `nil` to delete the file, or a
+  change is `{relative path, value}` (an area folder's file by its path under the area): a decoded JSON value, `nil` to delete the file, or a
   function of the file's decoded current value.
   """
   def compile(dir, changes) do
-    saved = for {rel, _} <- changes, into: %{}, do: {rel, File.read(Path.join(dir, rel))}
+    changes = for {rel, change} <- changes, do: {path(dir, rel), change}
+    saved = for {path, _} <- changes, into: %{}, do: {path, File.read(path)}
 
     try do
-      for {rel, change} <- changes, do: write(Path.join(dir, rel), change)
-      Loka.Content.compile(dir)
+      for {path, change} <- changes, do: write(path, change)
+      plain(Loka.Content.compile(dir))
     after
-      for {rel, old} <- saved, do: restore(Path.join(dir, rel), old)
+      for {path, old} <- saved, do: restore(path, old)
     end
   end
+
+  @doc "The one area folder's copy of `rel` (`areas/<area>/<rel>`) under `dir`, else `dir/rel`."
+  def path(dir, rel), do: Path.join(dir, Loka.Content.Starters.home(dir, rel))
+
+  @doc """
+  Drops the hint data (`valid`, `expected`) from a refusal: the hints quote the schema, so a
+  pin that kept them would move with every new field. The explain tests read them directly.
+  """
+  def plain({:error, diags}) do
+    {:error,
+     Enum.map(diags, fn d ->
+       Map.update!(d, "data", &Map.drop(&1, ~w(valid expected fields allowed)))
+     end)}
+  end
+
+  def plain(result), do: result
 
   defp restore(path, {:ok, bytes}), do: File.write!(path, bytes)
   defp restore(path, {:error, :enoent}), do: File.rm_rf!(path)

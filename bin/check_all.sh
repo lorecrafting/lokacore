@@ -23,6 +23,8 @@ m mix format --check-formatted
 m mix compile --warnings-as-errors
 m elixir bin/contracts.exs --check
 m elixir bin/features.exs --check
+m elixir bin/toolbox_page.exs --check
+python3 bin/source_reference.py --check
 m mix xref graph --format cycles --fail-above 0
 m mix xref graph --label compile-connected --fail-above 0
 m mix test
@@ -36,6 +38,8 @@ m elixir bin/check_docs.exs
 m bin/docs_red_controls.sh
 m python3 bin/check_beads_export.py
 m sh bin/beads_red_controls.sh
+m python3 bin/check_sounds.py
+m sh bin/sounds_red_controls.sh
 m sh bin/graph_diff_red_controls.sh
 m sh bin/prose_lint_red_controls.sh
 m sh bin/orphans_red_controls.sh

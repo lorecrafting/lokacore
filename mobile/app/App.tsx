@@ -2,8 +2,9 @@
 // expo-sqlite, or the screen for a save that does not open. The shell owns every phone-only API
 // (SQLite, fonts, Alert, the key-value store) and injects them; the logic is in
 // authority/local-story/session.ts, the drawing in book/ and SaveError.tsx.
+import { hidePulses, tickPulse } from './clock-tick';
 import { useEffect, useRef, useState } from 'react';
-import { Alert, AppState, Button, PixelRatio, Platform, TextInput, View } from 'react-native';
+import { Alert, AppState, PixelRatio, Platform, View } from 'react-native';
 import { getRandomValues, randomUUID } from 'expo-crypto';
 import { useFonts } from 'expo-font';
 import {
@@ -18,7 +19,16 @@ import type { Db } from '../authority/local-story/store.ts';
 import { webDb } from './sqlite-web.ts';
 import Book, { type Shell } from './book/Book.tsx';
 import { hint } from './book/model.ts';
-import { readingSize } from './book/reading.ts';
+import {
+  bootPlace,
+  devClock,
+  frozenClock,
+  played,
+  resetPlace,
+  skew,
+  useAuthorPanel,
+} from './author/panel.tsx';
+import { effectStores, readingSize } from './book/reading.ts';
 import { LABEL } from './book/labels.ts';
 import chapter from '../../protocol/fixtures/toolbox_showcase_hash.json';
 import { SaveError } from './SaveError';
@@ -40,13 +50,13 @@ export const fonts = {
 // save name: web keeps a storage slot per file, so after a content change or a kernel_api bump the pinned-release
 // refusal offers Start over; earlier chapters' saves stay untouched.
 // ponytail: no story picker until the approved release needs one.
-// The author preview (metro.config.js) keeps one save per kernel_api and edited cartridge's hash: an edit starts
-// fresh without re-pinning the release save or meeting pinned_release_missing, and nothing is
-// deleted. ponytail: those dev saves pile up in the browser; clear the site's data to drop them.
+// The author preview (metro.config.js) keeps one save per kernel_api and clock, never the release save: the
+// browser's save pool holds six files, so a save per edit filled it within four edits (loka-wfrgk.58). A
+// dev save pinned to another edit starts over (its file and trace stay) and the place replays.
 const devCartridge = process.env.EXPO_PUBLIC_LOKA_DEV_CARTRIDGE === '1';
 if (devCartridge && !__DEV__) throw new Error('a release build must bundle the pinned chapter');
 const NAME = devCartridge
-  ? `loka-dev-${INSTALLED.kernel_api}-${chapter.sha256.slice(0, 16)}.db`
+  ? `loka-dev${devClock ? '-frozen' : ''}-${INSTALLED.kernel_api}.db` // two clocks never share a save
   : 'loka-showcase.db';
 // The build's kernel version (ADR-075 §3): the commit metro.config.js stamped, always -dirty in a
 // development bundle (it can change after the stamp); no stamp: the zero commit, -dirty.
@@ -58,7 +68,6 @@ const g = globalThis as {
   loka_web_opening?: Promise<ReturnType<typeof localSession>>;
   loka_clock_cleanup?: () => void;
   loka_dev_hash?: string;
-  loka_dev_skew?: number; // ms the dev clock control has moved both host clocks forward
 };
 // An edited cartridge replaces the open game: the cached session still plays the old one.
 if (
@@ -67,7 +76,6 @@ if (
   (g.loka_dev_hash ??= chapter.sha256) !== chapter.sha256
 )
   location.reload();
-const skew = () => g.loka_dev_skew ?? 0;
 const createSession = (open: () => Db) =>
   (g.loka_session ??= localSession(
     open,
@@ -84,8 +92,14 @@ const createSession = (open: () => Db) =>
       latency:
         Platform.OS === 'web' ? undefined : { host: 'hermes_ios', now: () => performance.now() },
       kernel_version,
-      random: getRandomValues,
-      time: { wall: () => Date.now() + skew(), monotonic: () => performance.now() + skew() },
+      // The author preview plays the one seed and frozen clock of `bin/loka check` (no random: the
+      // template world); only its dev clock can move them, so any other dev build keeps real time.
+      ...(devClock
+        ? { time: frozenClock(skew), dev: true } // mutate-skip: preview host wiring; the gate is pinned in dev-cheats.test
+        : {
+            random: getRandomValues,
+            time: { wall: () => Date.now(), monotonic: () => performance.now() },
+          }),
     },
   ));
 let session = g.loka_session;
@@ -105,6 +119,7 @@ const shell: Shell = {
   },
   learned: hint(Storage, 'hint.learned'),
   reading: { ...readingSize(Storage, 'reading.size'), fontScale: () => PixelRatio.getFontScale() },
+  effects: effectStores(Storage),
 };
 
 type Clock = {
@@ -113,6 +128,8 @@ type Clock = {
   draining: boolean;
   booked: boolean; // the Book has subscribed, so it sees the catch-up (away recap, book-ui.md)
   timer?: ReturnType<typeof setTimeout>;
+  ticked?: number;
+  stalled?: boolean;
   cleanup: () => void;
 };
 const current = (c: Clock) => session?.game() === c.game && g.loka_clock_cleanup === c.cleanup;
@@ -129,7 +146,7 @@ function tick(c: Clock) {
   if (!current(c) || !c.active) return;
   const held = c.game.pendingInvocation(),
     draining = c.draining;
-  const status = c.game.pulse(draining ? 'drain' : 'active');
+  const status = c.game.pulse(tickPulse(c, performance.now()));
   if (!current(c) || !c.active) return;
   if (status.kind !== 'ready' && status.kind !== 'catching_up') return cancel(c);
   c.draining = status.kind === 'catching_up';
@@ -137,6 +154,7 @@ function tick(c: Clock) {
 }
 function resume(c: Clock) {
   if (!current(c) || !c.active || !c.booked) return;
+  c.ticked = performance.now(); // a stall before the first tick must still read as one
   const status = c.game.pulse('resume');
   if (!current(c) || !c.active) return;
   c.draining = status.kind === 'catching_up';
@@ -145,11 +163,14 @@ function resume(c: Clock) {
 }
 function transition(c: Clock, active: boolean) {
   if (!current(c) || c.active === active) return;
+  const hide = hidePulses(c, performance.now());
   c.active = active;
   c.draining = false;
+  c.ticked = undefined; // this transition's own pulse settles the gap
+  c.stalled = false;
   cancel(c);
   if (active) resume(c);
-  else c.game.pulse('pause');
+  else for (const pulse of hide) if (current(c)) c.game.pulse(pulse);
 }
 
 type Recovery = { notify?: (healthy: boolean) => void; booked?: boolean; onBooked?: () => void };
@@ -219,6 +240,10 @@ function useWebSession() {
     let live = true;
     g.loka_web_opening.then((opened) => {
       session = opened;
+      const renewed =
+        devCartridge && !opened.game() && opened.failed()?.kind === 'pinned_release_missing';
+      if (renewed) opened.startOver();
+      if (devClock) bootPlace(opened, renewed);
       if (live) redrawBoot((n) => n + 1);
     });
     return () => {
@@ -226,36 +251,6 @@ function useWebSession() {
     };
   }, []);
   return session;
-}
-
-// Author preview only (`?dev=1`; never the pinned save): moves both host clocks forward by game minutes at the
-// cartridge's rate, so the kernel's own elapsed path delivers the time (none before D11 selection).
-const devClock =
-  devCartridge && Platform.OS === 'web' && new URLSearchParams(location.search).get('dev') === '1';
-type Manifest = { manifest: { time_policy?: { rate: number } } };
-function DevClock() {
-  const [minutes, setMinutes] = useState('60');
-  const advance = () => {
-    const rate = (JSON.parse(chapter.canonical) as Manifest).manifest.time_policy?.rate;
-    const m = Number(minutes);
-    if (rate && Number.isSafeInteger(m) && m > 0)
-      g.loka_dev_skew = skew() + Math.ceil((m * 60_000) / rate);
-  };
-  // The dev-only time panel is a tool, not a Book surface, so it keeps raw sizes.
-  return (
-    // ast-grep-ignore: mobile-book-raw-values
-    <View style={{ position: 'absolute', top: 4, right: 4, flexDirection: 'row', gap: 4 }}>
-      <TextInput
-        aria-label="Game minutes"
-        inputMode="numeric"
-        value={minutes}
-        onChangeText={setMinutes}
-        // ast-grep-ignore: mobile-book-raw-values
-        style={{ width: 56, borderWidth: 1, backgroundColor: 'white' }}
-      />
-      <Button title="Advance game minutes" onPress={advance} />
-    </View>
-  );
 }
 
 export default function App() {
@@ -267,33 +262,28 @@ export default function App() {
   const recovered = useRef<Recovery>({});
   const [bookShell] = useState(() => shellFor(recovered));
   useElapsed(game, recovered);
-  if (!activeSession) return null;
-  if (!loaded && !fontError) return null;
   const startOver = () => {
-    const before = activeSession.game();
-    const why = activeSession.startOver();
+    const before = activeSession!.game();
+    const why = activeSession!.startOver();
     // Only a start over that replaced the game opens a fresh book; a failed one keeps this book
     // and its log (which says why), so the log must not restart.
-    if (activeSession.game() !== before) setStarts((n) => n + 1);
-    else redraw({});
+    if (activeSession!.game() !== before) {
+      if (devClock) resetPlace();
+      setStarts((n) => n + 1);
+    } else redraw({});
     return why;
   };
+  useAuthorPanel({ redraw, session: { game: () => activeSession?.game() }, startOver }, game);
+  if (!activeSession) return null;
+  if (!loaded && !fontError) return null;
   if (!game)
     return (
       <SaveError
         failed={activeSession.failed()!}
         startOver={() => shell.confirm(startOver)}
-        // the lock is web-only: a reload reopens the save
         tryAgain={Platform.OS === 'web' ? () => location.reload() : undefined}
+        haptics={shell.effects?.haptics?.get()}
       />
     );
-  const book = <Book key={starts} game={game} shell={bookShell} startOver={startOver} />;
-  return devClock ? (
-    <>
-      {book}
-      <DevClock />
-    </>
-  ) : (
-    book
-  );
+  return <Book key={starts} game={played(game)!} shell={bookShell} startOver={startOver} />;
 }

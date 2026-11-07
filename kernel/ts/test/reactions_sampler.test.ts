@@ -9,7 +9,7 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { test } from 'node:test';
 import { gameView, INSTALLED, loadCartridge, newWorld, step } from '../src/index.ts';
-import { allocator, type Cartridge, type World } from '../src/runtime/decision.ts';
+import { allocator, bodyOf, type Cartridge, type World } from '../src/runtime/decision.ts';
 import { sequence, triggered } from '../src/mechanics/reaction.ts';
 import { statusKey } from '../src/mechanics/status/shared.ts';
 import { ctx } from './harness.ts';
@@ -92,8 +92,26 @@ test('a bone dropped in the yard brings the crow down; in the roost or mid-fight
   const busy = takeDrop(fighting, 'bone');
   assert.equal(busy.decision.kind, 'accepted');
   assert.equal(at(busy.world), roost);
-  const escorts = { [w.character]: { status: 'following', npc_id: crow(w) } };
-  const escort = takeDrop({ ...w, state: { ...w.state, escorts } } as unknown as World, 'bone');
+  const escorts = {
+    [w.character]: {
+      kind: 'escort',
+      actor_id: w.character,
+      body_id: bodyOf(w, w.character),
+      npc_id: crow(w),
+      quest_instance_id: 'q',
+      continuation_id: 'c',
+      choice_id: 'c',
+      status: 'following',
+    },
+  };
+  const quests = { q: { state: 'active' } };
+  // Bound only for the drop: out of the room, the end-of-decision sweep separates it from then on.
+  const bound = {
+    ...taken.world,
+    state: { ...taken.world.state, escorts, quests },
+  } as unknown as World;
+  const escort = act(bound, { type: 'drop', item_id: item(w, 'bone') });
+  assert.equal(escort.decision.kind, 'accepted');
   assert.equal(at(escort.world), roost);
   const statuses = { [`${R}:status/rooted`]: { key: 'rooted', blocks: ['move'] } };
   const held = statusKey(crow(w), { ...ref, key: 'rooted' } as never);

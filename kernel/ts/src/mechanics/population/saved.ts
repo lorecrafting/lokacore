@@ -1,7 +1,8 @@
 import type { DefinitionRef, PopulationSlot } from '../../contracts.gen.ts';
 import { validate } from '../../foundation/validate.ts';
 import { key, same } from '../../foundation/compose.ts';
-import { bodyOf, refString, type JobRow, type World } from '../../runtime/decision.ts';
+import { bodyOf, type JobRow, type World } from '../../runtime/decision.ts';
+import { homeRoom } from '../../runtime/created.ts';
 import { planRef } from './refs.ts';
 
 /** Cold-load the current sight bindings without trusting a job row on its own. */
@@ -63,9 +64,7 @@ function originValid(
     origin.slot === index &&
     origin.generation === slot.generation &&
     same(origin.by, ref) &&
-    world.populationSpecs[key(ref)]!.plan.area.some(
-      (area) => world.roomIds[refString(area)] === world.state.containers[slot.member_id!],
-    )
+    homeRoom(world, ref, world.state.containers[slot.member_id!])
   );
 }
 

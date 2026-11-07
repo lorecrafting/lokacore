@@ -82,11 +82,15 @@ defmodule Loka.ContentTrainingTest do
              carving.(fn _ ->
                [%{"op" => "fact.assign", "fact" => "skill_carving", "value" => true}]
              end)
-           ], {"RESERVED_FACT", "dialogues/carpenter_lessons.choices.carving.steps[0].fact"}},
+           ],
+           {"RESERVED_FACT",
+            "areas/homestead/dialogues/carpenter_lessons.choices.carving.steps[0].fact"}},
           {[carving.(&(&1 ++ &1))],
-           {"SCHEMA_VIOLATION", "dialogues/carpenter_lessons.choices.carving.lesson_payment"}},
+           {"SCHEMA_VIOLATION",
+            "areas/homestead/dialogues/carpenter_lessons.choices.carving.lesson_payment"}},
           {[{"npcs/carpenter.json", &Map.delete(&1, "resource_starts")}],
-           {"SCHEMA_VIOLATION", "dialogues/carpenter_lessons.choices.carving.lesson_payment"}},
+           {"SCHEMA_VIOLATION",
+            "areas/homestead/dialogues/carpenter_lessons.choices.carving.lesson_payment"}},
           {[
              {"cartridge.json",
               fn c ->
@@ -95,14 +99,14 @@ defmodule Loka.ContentTrainingTest do
               end}
            ], {"SCHEMA_VIOLATION", "cartridge.world.combat.narration.dodge"}},
           {[{"items/training_sword.json", &Map.put(&1, "slot", "off_hand")}],
-           {"SCHEMA_VIOLATION", "items/training_sword.weapon"}},
+           {"SCHEMA_VIOLATION", "areas/combat/items/training_sword.weapon"}},
           {[{"items/training_sword.json", &put_in(&1, ["weapon", "attack", "damage_min"], 4)}],
-           {"SCHEMA_VIOLATION", "items/training_sword.weapon"}},
+           {"SCHEMA_VIOLATION", "areas/combat/items/training_sword.weapon"}},
           {[{"items/training_sword.json", &put_in(&1, ["weapon", "skill"], "missing")}],
-           {"UNRESOLVED_REFERENCE", "items/training_sword.weapon.skill"}},
+           {"UNRESOLVED_REFERENCE", "areas/combat/items/training_sword.weapon.skill"}},
           # A block chance belongs on an off-hand item, and a shield needs its block narration.
           {[{"items/training_sword.json", &Map.put(&1, "block_chance", 10)}],
-           {"SCHEMA_VIOLATION", "items/training_sword.block_chance"}},
+           {"SCHEMA_VIOLATION", "areas/combat/items/training_sword.block_chance"}},
           {[{"items/training_sword.json", &Map.put(&1, "block_chance", 10)}],
            {"SCHEMA_VIOLATION", "cartridge.world.combat.narration.block"}},
           {[
@@ -112,7 +116,7 @@ defmodule Loka.ContentTrainingTest do
                 "attribute" => "missing",
                 "at_least" => 10
               })}
-           ], {"UNRESOLVED_REFERENCE", "skills/blade.qualification.attribute"}}
+           ], {"UNRESOLVED_REFERENCE", "areas/combat/skills/blade.qualification.attribute"}}
         ] do
       assert {:error, diags} = Loka.ContentSource.compile(dir, edits)
       assert expected in Enum.map(diags, &{&1["code"], &1["path"]}), inspect(diags)

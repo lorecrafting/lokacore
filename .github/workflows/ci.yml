@@ -61,6 +61,10 @@ jobs:
       - run: mix compile --warnings-as-errors
       - run: elixir bin/contracts.exs --check
       - run: elixir bin/features.exs --check
+      # The editor gate compares the generic list with main's copy (it only shrinks).
+      - run: git fetch --no-tags --depth=1 origin +main:refs/remotes/origin/main
+      - run: elixir bin/toolbox_page.exs --check
+      - run: python3 bin/source_reference.py --check
       - run: mix xref graph --format cycles --fail-above 0
       - run: mix xref graph --label compile-connected --fail-above 0
       - run: mix test
@@ -92,9 +96,11 @@ jobs:
       - run: elixir bin/check_docs.exs
       - run: bin/docs_red_controls.sh
       - run: python3 bin/check_beads_export.py && sh bin/beads_red_controls.sh
+      - run: python3 bin/check_sounds.py && sh bin/sounds_red_controls.sh
       - run: sh bin/graph_diff_red_controls.sh
       - run: sh bin/prose_lint_red_controls.sh
       - run: sh bin/orphans_red_controls.sh
+      - run: sh bin/author_red_controls.sh
       - run: sh bin/ci_timing_red_controls.sh
       - run: sh bin/mutate_diff_red_controls.sh
       # bin/merge_resolve.py calls `mise exec -- elixir`; CI pins the tools itself, so a stub runs
@@ -171,8 +177,17 @@ jobs:
           elixir-version: '1.20.4'
           version-type: strict
       - run: mix deps.get --check-locked
+      # play/compiled.ts (the editor tests) and bin/loka check (each checkpoint replays headless)
+      # compile through `mise exec -- mix`, so a stub runs the command (as book-e2e.yml does).
+      - run: |
+          mkdir -p "$RUNNER_TEMP/bin"
+          printf '#!/bin/sh\nshift 2\nexec "$@"\n' > "$RUNNER_TEMP/bin/mise"
+          chmod +x "$RUNNER_TEMP/bin/mise"
+          echo "$RUNNER_TEMP/bin" >> "$GITHUB_PATH"
       - run: npm ci --no-audit --no-fund && npm run typecheck && npm run test:nosim
         working-directory: kernel/ts
+      - run: |
+          rc=0; for d in cartridges/*/checkpoints; do bin/loka check "${d%/checkpoints}" || rc=1; done; exit $rc
       - run: bin/kernel_red_controls.sh
       - run: node bin/check_ts_size.mjs # loads typescript from kernel/ts
       - run: bin/ts_size_red_controls.sh
@@ -203,6 +218,7 @@ jobs:
           cache-dependency-path: |
             package-lock.json
             mobile/app/package-lock.json
+            tools/author-panel/package-lock.json
       - uses: erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124
         with:
           otp-version: '28.4'
@@ -211,6 +227,20 @@ jobs:
       - run: mix deps.get --check-locked
       - run: npm ci --no-audit --no-fund && npm test
         working-directory: mobile/app
+      # The panel reads the Book's state by its real types; only tsc catches a shape it renders wrongly.
+      - name: Author panel types
+        run: npm ci --no-audit --no-fund && npx tsc -b
+        working-directory: tools/author-panel
+      # The author server runs `mise exec -- mix ...`; the runner has mix on PATH, not mise.
+      - run: |
+          mkdir -p "$RUNNER_TEMP/bin"
+          printf '#!/bin/sh\nshift 2\nexec "$@"\n' > "$RUNNER_TEMP/bin/mise"
+          chmod +x "$RUNNER_TEMP/bin/mise"
+          echo "$RUNNER_TEMP/bin" >> "$GITHUB_PATH"
+      # The real panel in stable Chrome on the showcase: overflow, axe, the Flow budget (test/panel.test.ts).
+      - name: Author panel smoke
+        run: npm test
+        working-directory: tools/author-panel
       - run: npm ci --no-audit --no-fund && git ls-files -z '*.ts' '*.tsx' '*.mjs' '*.js' '*.json' ':(exclude)mobile/**' | xargs -0 npx prettier --check
       - if: failure()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1

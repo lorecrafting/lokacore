@@ -12,6 +12,7 @@ import type {
 import { committedDialogue } from './dialogue-receipt.ts';
 import { checkRow } from './dialogue-save.ts';
 import type { Db, Meta } from './store.ts';
+import { readableOps } from './receipt-history.ts';
 
 export function skillsSave(world: World, db: Db, meta: Meta) {
   if (!Object.keys(world.cartridge.skills ?? {}).length) return;
@@ -49,6 +50,7 @@ function reservedReceipts(world: World, db: Db, scope: string, grants: Map<strin
     scope,
   )) {
     const d = JSON.parse(r.response) as Extract<DecisionResult, { kind: 'accepted' }>;
+    if (!readableOps(d.delta?.ops)) invalid();
     for (const op of d.delta.ops) {
       if (op.op !== 'fact.assign') continue;
       const skill = Object.values(world.cartridge.skills ?? {}).find(

@@ -13,6 +13,7 @@
 // invalid_state, except a crossed-hour sub-step (decideAt `at` later than its due time), which
 // schedules no job when its next hour is crossed too (so its arrival takes the first ordinal).
 // Daily schedules retain their DefinitionRef dispatch; bound encounter jobs use the current occurrence.
+import { runDecay } from '../death/job.ts';
 import { expiry } from '../water/expiry.ts';
 import { expire } from '../quest/job.ts';
 import { roundSequence } from '../combat/round.ts';
@@ -43,9 +44,10 @@ import { assigned, adjusted } from '../fact.ts';
 import { runPopulation } from '../population/shared.ts';
 import { runReplenish } from '../containment/job.ts';
 import { runWage } from '../escort/job.ts';
+import { escorting } from '../escort/shared.ts';
 import { binding as crowBinding, runCrow } from '../crow/behavior.ts';
 import { runBleed } from '../bleed/job.ts';
-import { runStatus } from '../status/job.ts';
+import { runStatus, type Queue } from '../status/job.ts';
 import { moves } from '../status/bars.ts';
 
 import { runSight } from '../population/behavior.ts';
@@ -55,7 +57,21 @@ import { built } from '../service/shared.ts';
 // `at`: the drain's hour for this run; a later listed hour the advance crosses is a sub-step of the
 // row's one run_job, which its first hour completed (scheduledJob, loka-qi0r; runPopulation, loka-6ql4;
 // runStatus, loka-6ztc).
-// size: allow 43, one run_job dispatch over every job kind (row FD1 adds reaction and its joins)
+const KIND_ROUTES = [CLOCK_JOB, 'population', 'replenish', 'wage', 'order', 'reaction'] as const;
+/** Which handler runs a job row; load's refusal (local-story/job-save.ts) reads the same answer. */
+export function jobRoute(row: JobRow) {
+  if (row.water_generation !== undefined) return 'water';
+  if (row.encounter_id) return 'round';
+  if (row.bleed_body_id) return 'bleed';
+  if (row.job.kind === 'status') return 'status';
+  if (row.quest_instance_id) return 'quest';
+  if (row.crow_phase !== undefined) return 'crow';
+  if (row.sight) return 'sight';
+  if (row.corpse_id) return 'decay';
+  return KIND_ROUTES.find((kind) => kind === row.job.kind) ?? 'npc';
+}
+
+// size: allow 44, one run_job dispatch over every job kind (row FD1 adds reaction and its joins)
 export const decideAt = (
   world: World,
   command: Parameters<Rule<'schedule'>>[1],
@@ -64,36 +80,36 @@ export const decideAt = (
   at?: number,
   tick?: number,
   joins?: Joins, // row FD1: the advance's holder groups, for a delayed reaction's run
+  queue?: Queue, // the drain's queue: how far a saturated tick may fold
 ): ReturnType<Rule<'schedule'>> => {
   const { payload } = command;
   if (payload.type === 'run_job') {
     const row = world.state.jobs?.[payload.job_id];
     if (row?.status !== 'pending' && !(row && at !== undefined && at > row.due_time))
       return rejected('invalid_state');
-    if (row.water_generation !== undefined)
-      return expiry(world, command, payload.job_id, row, mint);
-    if (row.encounter_id) return roundSequence(world, command, payload.job_id, row, mint, steps);
-    if (row.bleed_body_id) return runBleed(world, command, payload.job_id, row, mint);
-    if (row.job.kind === 'status')
-      return runStatus(world, command, payload.job_id, row, mint, at, tick);
-    if (row.quest_instance_id) {
+    const route = jobRoute(row);
+    if (route === 'water') return expiry(world, command, payload.job_id, row, mint);
+    if (route === 'round') return roundSequence(world, command, payload.job_id, row, mint, steps);
+    if (route === 'bleed') return runBleed(world, command, payload.job_id, row, mint);
+    if (route === 'status')
+      return runStatus(world, command, payload.job_id, row, mint, at, tick, queue);
+    if (route === 'quest') {
       const d = world.cartridge.quests?.[refString(row.job)]?.deadline;
       return d && !d.fact
         ? expire(world, command, payload.job_id, row, mint)
         : deadlineJob(world, payload.job_id, row);
     }
-    if (row.crow_phase !== undefined)
+    if (route === 'crow')
       return runCrow(world, command, payload.job_id, row, crowBinding(world, payload.job_id), mint);
-    if (row.sight) return runSight(world, payload.job_id, row, steps);
-    if (row.job.kind === CLOCK_JOB) return runClock(world, command, payload.job_id, row, mint);
-    if (row.job.kind === 'population')
-      return runPopulation(world, command, payload.job_id, row, mint, at);
-    if (row.job.kind === 'replenish')
+    if (route === 'sight') return runSight(world, payload.job_id, row, steps);
+    if (route === 'decay') return runDecay(world, payload.job_id, row);
+    if (route === CLOCK_JOB) return runClock(world, command, payload.job_id, row, mint);
+    if (route === 'population') return runPopulation(world, command, payload.job_id, row, mint, at);
+    if (route === 'replenish')
       return runReplenish(world, payload.job_id, row, mint, steps, at ?? row.due_time);
-    if (row.job.kind === 'wage')
-      return runWage(world, payload.job_id, row, mint, at ?? row.due_time);
-    if (row.job.kind === 'order') return orderReady(world, payload.job_id, row, mint, steps, at);
-    if (row.job.kind === 'reaction')
+    if (route === 'wage') return runWage(world, payload.job_id, row, mint, at ?? row.due_time);
+    if (route === 'order') return orderReady(world, payload.job_id, row, mint, steps, at);
+    if (route === 'reaction')
       return runDelayed(world, command, payload.job_id, row, mint, steps, joins); // FD1
     return scheduledJob(world, command, payload.job_id, row, mint, steps, at ?? row.due_time);
   }
@@ -134,7 +150,7 @@ function scheduledJob(
   const { room, goal, walks } = placeOf(world, npc, at, steps);
   const from = world.state.containers[npc];
   // Toolbox row W26: a walking case moves only along a path, re-locking each key passage on it.
-  const still = from === room || !moves(world, npc);
+  const still = from === room || !moves(world, npc) || escorting(world, npc);
   const path = !still && walks ? walkPath(world, npc, from, room, steps) : [];
   // A goal (toolbox row W10) is narration only when the player sees the NPC leave.
   const stays = still || !path;

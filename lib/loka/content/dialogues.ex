@@ -1,21 +1,20 @@
-# size: allow 370, scene-triggered chapter point refs join dialogue trigger checks
+# size: allow 443, scene-triggered chapter point refs join dialogue trigger checks
 defmodule Loka.Content.Dialogues do
   @moduledoc "Compiled dialogue roles, consequences, riddle and chapter trigger checks."
   import Loka.Content.Source, only: [diag: 2, diag: 3, at: 2]
   import Loka.Content.Refs, only: [commands: 0, owners: 2, owned: 3, reference: 6, resolve: 4]
 
-  @doc "Each schema-valid dialogue's policy root, as `{rel, steps, root}`."
+  @doc "Each schema-valid dialogue's policy root, its choices' and their narration variants', as `{rel, steps, root}`."
   @spec conditions(map()) :: [{String.t(), list(), map()}]
-  def conditions(defs),
-    do: for({rel, d} <- all(defs), do: {rel, ["policy"], d["policy"]})
+  def conditions(defs), do: Enum.flat_map(all(defs), &Loka.Content.DialogueLinks.conditions/1)
 
   defp all(defs), do: for({_, {rel, [], d}} <- defs["dialogue"], do: {rel, d})
 
-  @doc "Diagnostics for dialogues, story points and chapter settings of a v2 source (else none)."
-  @spec check(map() | nil, map(), {term(), map() | :unknown} | nil, {term(), map()}, [map()]) :: [
+  @doc "Diagnostics for dialogues, story points and chapter settings of a source with a manifest (else none)."
+  @spec check(map() | nil, map(), {term(), map() | :unknown}, {term(), map()}, [map()]) :: [
           map()
         ]
-  def check(m, _, v2, _, _) when m == nil or v2 == nil, do: []
+  def check(nil, _, _, _, _), do: []
 
   def check(m, defs, {_, text}, {_, settings}, registry) do
     caps = m["requires"]["capabilities"]
@@ -30,7 +29,8 @@ defmodule Loka.Content.Dialogues do
       taken: commands() ++ keys,
       kinds: {caps, owners(registry, ["definitions"])},
       events: {caps, owners(registry, ["events"])},
-      proven: Loka.Content.Hub.proven(defs)
+      proven: Loka.Content.Hub.proven(defs),
+      targets: Loka.Content.Hub.targets(defs)
     }
 
     Enum.flat_map(all(defs), &dialogue(&1, ctx)) ++ wide(defs, settings, ctx)
@@ -39,7 +39,12 @@ defmodule Loka.Content.Dialogues do
   # The cartridge-wide checks: keywords (G9), story points, chapters.
   defp wide(defs, settings, ctx),
     do:
-      Loka.Content.Keywords.check(defs, ctx.events) ++
+      Loka.Content.DialogueLinks.loops(all(defs)) ++
+        Loka.Content.DialogueLinks.entry_checks(
+          all(defs),
+          &Loka.Content.Skills.hidden?(&1, ctx.m, ctx.defs)
+        ) ++
+        Loka.Content.Keywords.check(defs, ctx.events) ++
         story_points(defs, ctx) ++ chapters(Map.get(settings, "chapters", []), ctx)
 
   # Chapters derive only from unambiguous quest-resolving dialogue choices (mechanics.md).
@@ -87,15 +92,36 @@ defmodule Loka.Content.Dialogues do
       counted =
         if is_map_key(c, "outcome"), do: [outcomes[c["outcome"]]], else: Map.values(outcomes)
 
-      if Enum.any?(counted, &ambiguous?(&1, ctx)),
-        do: [diag("OUTCOME_MISMATCH", at("cartridge.json", steps ++ ["story_point"]))],
-        else: []
+      uncountable(counted, at("cartridge.json", steps ++ ["story_point"]), ctx)
+    end
+  end
+
+  defp uncountable(counted, path, ctx) do
+    cond do
+      Enum.any?(counted, &ambiguous?(&1, ctx)) ->
+        [diag("OUTCOME_MISMATCH", path)]
+
+      Enum.any?(counted, &questless?(&1, ctx)) ->
+        [diag("OUTCOME_MISMATCH", path, %{"why" => "chapter_no_quest"})]
+
+      true ->
+        []
     end
   end
 
   defp ambiguous?(t, ctx) do
     if is_map_key(t, "scene"), do: false, else: dialogue_ambiguous?(t, ctx)
   end
+
+  # view/quest_journal.ts counts a chapter by the dialogue's quest; a choice without one never would.
+  defp questless?(%{"dialogue" => r}, ctx) do
+    match?(
+      {_, _, %{"choices" => _} = d} when not is_map_key(d, "quest"),
+      resolve(r, "dialogue", ctx.m, ctx.defs)
+    )
+  end
+
+  defp questless?(_, _), do: false
 
   defp dialogue_ambiguous?(t, ctx) do
     case resolve(t["dialogue"], "dialogue", ctx.m, ctx.defs) do
@@ -109,17 +135,47 @@ defmodule Loka.Content.Dialogues do
     end
   end
 
-  # dialogue@1 owns story_point_reached; a choice's dialogue resolves a quest; a scene-reached
+  # dialogue@1 owns story_point_reached; a choice that reaches one ends the talk; a scene-reached
   # point's marker fact story_point_<key> fits a Key (key at most 52).
   defp story_points(defs, ctx) do
     for {_, {rel, steps, p}} <- defs["story_point"],
-        d <- owned(at(rel, steps), "story_point_reached", ctx.events) ++ outcomes(p, ctx),
+        d <-
+          owned(at(rel, steps), "story_point_reached", ctx.events) ++
+            outcomes(p, at(rel, steps), ctx),
         do: d
   end
 
-  defp outcomes(p, ctx) do
-    for {_, t} <- p["outcomes"], {true, d} <- [site(t, p["key"], ctx)], do: d
+  defp outcomes(p, path, ctx) do
+    case for {_, t} <- p["outcomes"], {true, d} <- [site(t, p["key"], ctx)], do: d do
+      [] -> forked(p, path, ctx)
+      refused -> refused
+    end
   end
+
+  # With no quest to end them, an outcome's choice stays open after another is taken, unless all
+  # of them gate on one fact their steps set and no step of the dialogue sets back.
+  defp forked(p, path, ctx) do
+    outcomes = Map.values(p["outcomes"])
+
+    if map_size(p["outcomes"]) > 1 and Enum.any?(outcomes, &questless?(&1, ctx)) and
+         Enum.reduce(Enum.map(outcomes, &gates(&1, ctx)), &MapSet.intersection/2) == MapSet.new(),
+       do: [diag("OUTCOME_MISMATCH", path, %{"why" => "story_point_two_outcomes"})],
+       else: []
+  end
+
+  defp gates(%{"dialogue" => r, "choice" => c}, ctx) do
+    case resolve(r, "dialogue", ctx.m, ctx.defs) do
+      {_, _, d} ->
+        Loka.Content.Hub.self_gates(get_in(d, ["choices", c]) || %{})
+        |> Enum.reject(&Loka.Content.Hub.reopens?(d, &1))
+        |> MapSet.new()
+
+      _ ->
+        MapSet.new()
+    end
+  end
+
+  defp gates(_, _), do: MapSet.new()
 
   defp site(%{"scene" => s}, key, ctx) do
     {rel, steps, _} = resolve(s, "scene", ctx.m, ctx.defs)
@@ -131,8 +187,23 @@ defmodule Loka.Content.Dialogues do
   defp site(%{"dialogue" => r, "choice" => c}, _, ctx) do
     {rel, steps, d} = resolve(r, "dialogue", ctx.m, ctx.defs)
 
-    {not is_map_key(d, "quest"),
-     diag("OUTCOME_MISMATCH", at(rel, steps ++ ["choices", c, "story_point"]))}
+    o = get_in(d, ["choices", c]) || %{}
+
+    why = point_refusal(o, d)
+
+    {why != nil,
+     diag("OUTCOME_MISMATCH", at(rel, steps ++ ["choices", c, "story_point"]), %{"why" => why})}
+  end
+
+  # The hub's own check never sees these: choice story points are gone by the time it runs. A quest
+  # resolves once; a choice with no quest could reach its point again on every Talk.
+  defp point_refusal(o, d) do
+    cond do
+      o["sitting"] -> "sitting_no_return"
+      o["then"] not in [nil, "end"] or is_map_key(o, "then_failed") -> "story_point_then"
+      d["quest"] || Loka.Content.Hub.self_gated?(o) -> nil
+      true -> "story_point_repeats"
+    end
   end
 
   @doc """
@@ -262,7 +333,8 @@ defmodule Loka.Content.Dialogues do
 
     texts(
       rel,
-      [{steps ++ ["label"], o["label"]}, {steps ++ ["narration"], o["narration"]}],
+      [{steps ++ ["label"], o["label"]}, {steps ++ ["narration"], o["narration"]}] ++
+        Loka.Content.DialogueLinks.variant_texts(steps, o),
       ctx.text
     ) ++
       sequence(rel, steps, o, ctx) ++
@@ -274,7 +346,8 @@ defmodule Loka.Content.Dialogues do
       payment(rel, steps, o, d, ctx) ++
       Loka.Content.Skills.choice(rel, steps, o, d, ctx) ++
       Loka.Content.CheckKinds.choice(rel, steps, o, d, ctx) ++
-      Loka.Content.Hub.choice(rel, steps, o, d, ctx.proven)
+      Loka.Content.Hub.choice(rel, steps, o, d, ctx) ++
+      Loka.Content.DialogueLinks.choice(rel, steps, o, d, ctx)
   end
 
   defp sequence(rel, steps, o, ctx) do
@@ -309,12 +382,26 @@ defmodule Loka.Content.Dialogues do
 
     owned(at(rel, steps), "item_acquired", ctx.events) ++
       transfer_roles(rel, steps, h, d["roles"], "from") ++
+      unheld(rel, steps, h, d["roles"], ctx) ++
       if is_map_key(o, "hand_over"),
         do: [diag("OUTCOME_MISMATCH", at(rel, steps))],
         else: []
   end
 
   defp receive_item(_, _, _, _, _), do: []
+
+  # A scene's `gives:` starts unavailable unless its speaker holds the item; play can move it there.
+  defp unheld(rel, steps, h, roles, ctx) do
+    item = get_in(roles, [h["item"], "item"])
+    npc = get_in(roles, [h["from"], "npc"])
+
+    for true <- [is_binary(rel) and String.ends_with?(rel, ".scene")],
+        {_, _, %{"location" => location}} <- [resolve(item, "item", ctx.m, ctx.defs)],
+        location != %{"in" => "npc", "npc" => npc} do
+      data = %{"item" => item["key"], "holder" => npc["key"]}
+      diag("OUTCOME_MISMATCH", at(rel, steps), data) |> Map.put("severity", "warning")
+    end
+  end
 
   defp payment(rel, steps, %{"payment" => p}, d, ctx) do
     reference(rel, steps ++ ["payment"], {"resource", "resource"}, p, ctx.m, ctx.defs) ++

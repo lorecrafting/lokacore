@@ -36,6 +36,24 @@ Refusals, nothing written:
 | `save_corrupt` | SQLite says the file is not a database or a page is malformed (`store.ts:178`) | yes, but `newGame` throws: the host deletes the file (below) |
 | `pinned_release_missing` | the pin names a release the app does not carry, or a kernel_api other than the installed one | yes, on the newest release |
 
+### What reopen proves
+
+Opening reads the head, the rows and the newest receipt; it replays no receipts (owner decision,
+[fast cold open](../decisions/owner-decision-fast-cold-open-2026-11-01.md)). It refuses a row that
+does not parse or validate, a newest receipt whose id, actor or revision does not bind to the head,
+a head clock behind the newest receipt, and a row the kernel would throw or hang on at the next
+command ([reopen principle](../lessons/storage.md)). A newest response that is no decision, or ops of
+the wrong shape where the deer or skills loader reads them, refuses too. A `TypeError` is never read as a bad save: a bug of ours must not offer to
+wipe one, so another malformed shape only edits reach is a plain fault with the save kept. Any other state row or older receipt that parses opens, whoever
+wrote it: a hand edit, wrong rows from a kernel or writer bug (they now persist and later saves build
+on them), and a stale page from a bad restore (the next action saves on the wrong state). Receipts
+stay written. `receiptHistory` (`receipt-history.ts`) still replays every accepted receipt, in tests
+only (`coldReopen`): that is the one check of rows against receipts, and it runs before ship. A line below that says a receipt
+replay cannot pay, allocate or grant twice is about replaying one invocation, not about opening.
+This section wins over the sections below: where one lists forged, missing or contradictory receipt
+evidence as `save_corrupt`, opening refuses it only if that section's loader still reads the row
+(a commerce reconcile, the newest receipt); otherwise the claim holds for `receiptHistory`.
+
 The session controller adds `save_corrupt` causes with the new game in place after a story
 opens: a world whose first screen cannot be built
 (`mobile/authority/local-story/session.ts:60`), or a receipt response in the story's scope
@@ -56,7 +74,7 @@ SQLite read failures such as locks and I/O errors retain their storage-error han
 valid-JSON response of the wrong shape still opens; its replay is a `conflict`
 ([receipts](#receipts)). Tests: `saves.test.ts` ("an app update reopens a save on its pinned release; new games pin the
 newest", "a save of an unknown format is refused with nothing written and no new game"),
-`recovery.test.ts`, `start_over.test.ts`, `release_pin.test.ts` (the kernel_api pin).
+`recovery.test.ts`, `start_over.test.ts`, `release_pin.test.ts` (the kernel_api pin), `open_catch_up.test.ts`.
 
 During [pre-production development](../decisions/owner-decision-preproduction-compatibility-2026-10-04.md), old release/save
 compatibility is not required. A save opens only when its exact release pin (content hash and kernel_api) is available;
@@ -74,7 +92,11 @@ digest, the resolved Command (null for a rejection before one existed), the revi
 for a rejection) and the DecisionResult. Replay (`mobile/authority/local-story/invocation.ts:50`): a known invocation id
 with the same digest version, a response that validates as a DecisionResult and the same
 intent digest replays `{saved, replay: true}` at its revision without deciding again; any
-other known id is `conflict`. A fault gets no receipt (`:174`). Known answers: `kernel/ts/test/lantern_proof.test.ts`, `mobile/authority/local-story/lantern.test.ts` (the frozen
+other known id is `conflict`. A fault gets no receipt (`:174`). The one exception to a receipt
+staying is a [coalesced tick](#durable-elapsed-sessions)'s clock-only row, which the next such tick replaces: the
+absorbed id stops being known, so retrying that original span decides anew and stores a refused
+receipt, not a replay. No production caller repeats a driver span (`elapsed.ts:142` starts each
+at the current clock). Known answers: `kernel/ts/test/lantern_proof.test.ts`, `mobile/authority/local-story/lantern.test.ts` (the frozen
 Lantern traces and the 11 adverse cases). The latter projects kernel values onto the traces'
 vocabulary by the R6P P4b mapping ([archived ROADMAP](../archive/ROADMAP.md), R6P row) as
 changed by Quest from dialogue: action `activate` is gone; action `talk` with no target is the
@@ -95,7 +117,7 @@ storage unchanged.
 
 `commit` (`commit.ts:27`) writes in one transaction: pending story point reports, and for an
 accepted decision the head (revision, clock, RNG) and the state rows its delta targets wrote,
-then always the receipt. Before `BEGIN` it validates the receipt's response as a DecisionResult,
+then always the receipt, first deleting the row a coalesced tick replaces (`commit.ts:50`). Before `BEGIN` it validates the receipt's response as a DecisionResult,
 the same schema check reopen applies, and throws with nothing written when it is not one
 (loka-kgd.191). `transaction` (`transaction.ts:21`) is `BEGIN IMMEDIATE` … `COMMIT`: true once
 committed; a failed write rolls back and throws; a failed COMMIT, or a ROLLBACK that leaves the
@@ -140,7 +162,7 @@ context and rebuilds wrong ids (dev reinstalls only; no app is released).
 Loading (`store.ts:99`) rebuilds the world from the release's cartridge under the pinned
 `world_context_id`, or from the release's own fresh world when the pin has none (a save from
 before c1-host), plus the rows: the head restores the saved RNG ([10 §31](../archive/spec/10-mobile-commerce-release.md)),
-so a reopen replays the same luck. Reopen refuses a head clock behind the newest committed receipt as `save_corrupt`, bytes unchanged: receipt-history replay (`receipt-history.ts`) must reproduce the head (`head_rollback.test.ts`; loka-b60 tracks cartridges outside today's replay gates). A `world_context_id` that is not a WorldContextId is
+so a reopen replays the same luck. Reopen refuses a head clock behind the newest committed receipt as `save_corrupt`, bytes unchanged: the check compares the head with the newest row only, for every cartridge (`receipt-save.ts`, `head_rollback.test.ts`; [no replay at open](#what-reopen-proves)). A `world_context_id` that is not a WorldContextId is
 `save_corrupt`. Only sections with rows exist, so the state hash matches a headless run
 (`smoke.test.ts`, the Gate R6 reference). Opted recovery player-body rows are required
 and checked at this load boundary against the saved clock and the player's saved/default
@@ -204,9 +226,10 @@ ADR-075 §4, derived, never authority (`trace.ts:1`): a `trace.run` header per r
 and one `trace.command` entry per committed command (decision compacted to outcome, delta
 digest and RNG state; the commit outcome and committed events), written after the gameplay
 transaction in its own; a write failure is swallowed and caught up later from the receipts
-(`:120`). Cap 5000 rows (`:77`): the oldest whole runs other than the current one are deleted;
+(`:124`). A coalesced tick's entry replaces the one it absorbed, in the trace transaction; after a
+death between the two commits, catch-up removes the entry whose receipt is gone. Cap 5000 rows (`:81`): the oldest whole runs other than the current one are deleted;
 a run alone at the cap writes no more and keeps its replayable prefix. `observation` keeps the
-newest 1000 records (`:73`): `evaluation.budget_exceeded` (`save.ts:130`) and, when the
+newest 1000 records (`:76`): `evaluation.budget_exceeded` (`save.ts:130`) and, when the
 host supplies a clock, each NEW decision's `kernel.decision_latency` (`mobile/authority/local-story/invocation.ts:177`).
 
 ## The session controller and the phone
@@ -257,9 +280,52 @@ pins stay refused; no save is retargeted. A managed elapsed session without cloc
 
 Accounting uses exact checked integer arithmetic, retaining fractions and existing target debt.
 Active monotonic samples are floored absolute milliseconds; resume credits positive wall gaps
-once and durably rebases negative gaps without rewind. Each captured horizon settles at the
+once and durably rebases negative gaps without rewind.
+
+**Coalesced ticks.** A driver tick whose decision only moved the clock (accepted `elapsed`, one
+`time.advance` op, no events, effects or narration) replaces the newest receipt in the same transaction
+when this process wrote that receipt from such a tick too, for the same run and context, ending where the
+tick starts, with the same RNG (`coalesced` in `delivery.ts`). Anything else in between, a reopen, a
+fault or a failed COMMIT, inserts as before, so a save gains at most one such row per launch or event. The stored row is what one tick over the whole span decides: its span,
+its `elapsedCommandId`, its digest and op, so an hour of idle costs a row per due job or command, not
+per tick. Rows that carry anything are never touched, so the Chronicle and the narration read the same
+receipts. The head revision still moves per tick (`opened_revision`, view tokens and redraws depend on
+it), so accepted receipts may skip revisions, only before a clock-only row. A trusted `story.elapsed`
+receipt is never absorbed, so its retry replays. An absorbed tick is one write transaction: it writes
+no trace entry, and the next trace write, author `trace()` read or reopen catches up (`traceAfter`,
+`trace`, `catchUp`), which drops the absorbed entry and writes the merged one in commit order. Until
+then the stored trace is a replayable prefix.
+
+**Away cap ([owner ruling](../decisions/owner-decision-away-catch-up-cap-2026-11-01.md)).** A wall-gap
+credit (the first capture after open, and every resume) is at most `manifest.time_policy.away_cap_hours`
+in-game hours of world time (absent: one in-game day of the cartridge's calendar), that many logical
+seconds converted to real milliseconds at `rate`, rounded down (`ClockDriver.capture`, `awayCap` in
+`mechanics/calendar.ts`). The rest of the span is skipped: the logical clock never passes through it, so
+no job comes due and no receipt or job row exists for it. The capture records it only by moving `wall_ms`
+to the sampled wall clock while `target` rises by the capped credit, in the same checkpoint write as any
+other capture. So a crash or failed COMMIT recomputes at most one capped credit from the durable row, and
+replay, which reads receipts and samples no clock, is unchanged. The credit tops retained target debt up
+to the cap, so debt from gaps never exceeds it and repeated returns before a drain ends add nothing; it
+never trims debt.
+
+Opening a save with an authored `recap_after_minutes` and a checkpoint row does not pulse: the gap is
+captured and drained by the first pulse, after the Book has subscribed, so the away recap holds every line
+of the capped stretch. Without a recap threshold, opening drains one turn as before. The recap's span is
+the logical time caught up, at most the cap, and its threshold is clamped to the credit (`view/time.ts`),
+so any absence past the cap shows one recap of the capped stretch, whatever the real length. A delivery
+refused on that first pulse reads as `save_corrupt`, as it would at open.
+
+Active monotonic samples are never capped: a long open session is unaffected and a save grows with time
+actually played. Closed app or hidden tab: a capped wall gap on open or resume. A timer stalled for over
+a minute with the tab still visible (a sleeping laptop, a suspended tab with no visibility event): the
+App's next tick pulses `resume`, so it is a capped wall gap too (`mobile/app/clock-tick.ts`). Device clock
+jump: forward during open play is ignored, since active credit reads the monotonic clock; forward while
+closed is a capped gap; backward credits nothing and rebases. Time-based authoring (`after`, hunger, the
+away recap) sees the capped span only. The dev clock's active pulses are session time.
+
+Each captured horizon settles at the
 earliest pending job boundary, yielding after 16 commits. Already-due jobs/faults surface
-recovery and retain debt. Sampling never extends a reserved input’s finite horizon.
+recovery and retain debt. At load, a changed job row no handler can run (`local-story/job-save.ts`: unknown definition, or an NPC job off its schedule's hours) is `save_corrupt` with the same route. A number canonical JSON refuses is judged by the same rule, not refused for itself: a fractional due time is a refused delivery; past safe integers, a runnable kind never comes due and the save plays. At open, an already-due job or a refused catch-up delivery is `save_corrupt` with the new game in place; the refused step writes nothing, and steps settled before it stay committed. A kernel fault stays a fault with its debt, and a storage failure during catch-up offers no Start over (`open_catch_up.test.ts`). Sampling never extends a reserved input’s finite horizon.
 
 The existing managed resume pulse arms a private driver obligation synchronously before a
 retained player attempt can consume that call. Arming samples no clock or storage. A new
@@ -357,8 +423,7 @@ Built rooms S3: a build commission's order job row carries `actor_id`, the owner
 reads (compose and invariants allow `actor_id` on `order` jobs as on `reaction` jobs). The room
 is minted at completion under the job's command id, so a reopen between order and completion
 mints the same id (`mobile/authority/local-story/built.test.ts`). No new load refusal: a job
-`actor_id` forged to another actor is `save_corrupt` through the receipt replay, which every
-cartridge with services runs (`liquid-save.ts`).
+`actor_id` forged to another actor is not detected at open ([no replay at open](#what-reopen-proves)).
 
 Built rooms S4 ([mechanics.md](mechanics.md#built-rooms-s4-weather-and-mend)): `weathering` and
 `ruin` on a built room are ordinary status rows whose holder is the room id, saved and loaded as
@@ -432,9 +497,10 @@ outcome retain the existing confirmed-disk adoption fence.
 
 The existing state_row table persists actor-keyed escorts through the ordinary changed-row
 transaction. Load validates each typed row against its actor/body, original start ChoiceRow
-and quest instance, original living NPC and physical state. Following requires co-location;
-separated permits player departure or later co-location before explicit Rejoin. Completed
-requires the proven rescued terminal and NPC beside the terminal speaker. Every committed
+and original NPC, whose container must still be a room. It does not read the NPC's life or
+co-location or a repeatable quest's row, nor prove a completed row's quest outcome from it: each is reachable by accepted commands (a repeatable quest's next acceptance deletes the row), and the kernel separates a following escort that loses one
+([escort@1](mechanics.md#escort1)). Separated permits player departure or later co-location before explicit Rejoin. Completed
+requires its own receipt, as every status does; the speaker may die and the NPC may move afterward. Every committed
 intermediate state must reopen and reconcile under the same boundary.
 
 ## Bell choice return recovery
@@ -476,9 +542,8 @@ rescue keeps the message with the original source and requires its original esco
 Branch, quest outcome, status, escort and own committed receipts must agree. The forged
 terminal refusal applies before either selection. Missing/swapped/malformed roles or escort
 rows, cross-branch evidence and impossible locations are typed save_corrupt without repair.
-Own committed start/Rejoin/terminal receipts validate escort effects and derive original NPC
-narration. The latest committed escort transition must match the stored relation; separated
-requires the fatal transition's death event and player-body transfer. Unrelated latest
+Own committed start/Rejoin/terminal receipts must carry an escort transition and derive original NPC
+narration. The latest committed escort transition must match the stored relation. Unrelated latest
 receipts and current room never prove success. Existing rollback,
 unknown-COMMIT fence, exact retries and explicit old-pin refusal remain unchanged.
 
@@ -543,10 +608,11 @@ validity, exact prior count, actor, participants, causal command/receipt and clo
 or resolution, then reconcile with current rows. Close/death/current light changes
 cannot retroactively invalidate a lawful historical answer. Discovery requires
 successful owned Seek evidence; wrong/malformed answers justify no answered fact
-or ward grant. Reconcile topic truth with actual declared grants, including an
-already-known ward, rather than assume S4 is its only possible future source.
-Missing/null/corrupt bounded counts or bindings, forged wrong receipts, unjustified
-facts and pending-at-limit states refuse `save_corrupt` without repair/deletion.
+or ward grant. Reopen does not reconcile topic truth with grants: a fact has other
+lawful writers, so its current value is no evidence of who wrote it
+([principle](../lessons/storage.md)).
+Missing/null/corrupt bounded counts or bindings, forged wrong receipts and
+pending-at-limit states refuse `save_corrupt` without repair/deletion.
 No defaulting a missing counter to zero on load.
 
 Light changes, location changes and death may make the pending answer unavailable;
@@ -586,7 +652,7 @@ acknowledgement and same-invocation replay at bell suppression/resume and
 Study recovery boundaries; input/elapsed stays fenced until reconciliation. The current regular population
 job and its suppression resume job may share one writer group when one advance
 runs both (Beads `loka-dto9`); cold-load must distinguish this bound pair from deer sight
-handoff reuse and continue validating all operations through receipt replay.
+handoff reuse.
 
 ## Commerce and services
 
@@ -603,7 +669,8 @@ resolved and expired branches. For pennies in this chapter, reconcile the actual
 accepted B3 exchanges and the optional S2 payout in saved revision order from the
 authored player, Peg and Aldric starts. Each receipt's exact debit/credit must match
 the balances at *that commit*, its bound participants, price or payout and item/
-quest outcome; the final replayed balances must match the current saved rows.
+quest outcome; the final replayed balances must match the current saved rows. The rows read skip
+an elapsed receipt that moves neither an entity nor a resource.
 An S2 payout receipt may therefore begin after a Buy or end before a later Buy.
 Do not compare its historical `from`/`to` directly with current balances, or
 require a player still to hold the authored start or start-plus-reward. Reject
@@ -615,9 +682,8 @@ leaves the save intact.
 
 A [stock offer](mechanics.md#stock-sensitive-prices-toolbox-row-w11) (toolbox row W11) is
 reconciled the same way except that its Buy quote is not compared with a static price, its
-moved item must be one of the offer's set, and its set is not tracked as offer custody: a
-cartridge with any stock offer replays every accepted receipt at its original revision
-(`receiptHistory`, as an opted discount does), which recomputes each quote from the count held then.
+moved item must be one of the offer's set, and its set is not tracked as offer custody. Each
+quote is computed when the Buy commits and is not recomputed at open.
 
 ### Service recovery
 
@@ -750,16 +816,15 @@ metadata yield typed `save_corrupt` without repair, refill, deletion or repinnin
 A stored lit source whose confirmed fuel has exhausted is lawful; its effective
 state is unlit, and reopening does not restart its interval.
 
-Reconcile accepted fuel-changing receipts in saved revision/clock order from the
+The dev replay reconciles accepted fuel-changing receipts in saved revision/clock order from the
 authored initial rows, binding command ID, actor, exact source/supply IDs and their
 historical custody. Each full prior row and settled replacement must match that
 command's burn/ignite/douse/refill semantics; the resulting stored rows must match
-the current save. Reject a missing debit, fabricated refill, wrong participant,
+the current save. It rejects a missing debit, fabricated refill, wrong participant,
 reordered receipt or unexplained bounded charge as `save_corrupt`. Read historical
 fuel at its commit, not at today's clock; time/custody receipts do not refill rows.
-Reuse the existing accepted-receipt replay through the kernel's pure fuel transition
-at this trust boundary. Its activation includes a declared fuel source or supply,
-including cartridges without a repeated exchange. No second replay writer or
+`receiptHistory` proves this through the kernel's pure fuel transition in tests and dev tooling;
+opening does not run it ([no replay at open](#what-reopen-proves)). No second replay writer or
 additional event ledger is created.
 
 Real SQLite proof covers fresh/unlit, lit, doused, partially refueled, exhausted,
@@ -851,7 +916,7 @@ Reconstruction rejects transfer out, forged entry, mismatched holder or benefit,
 a consumed item restored into circulation, and unsupported pins as typed corruption
 or explicit mismatch, without silent repair/deletion.
 
-Narration reconstruction classifies an accepted Eat as a World result, never a
+Narration reconstruction classifies an accepted Eat (`consume` of an edible item, loka-kgd.209) as a World result, never a
 consumed-item detail. Its saved command must match the receipt command ID and
 actor, typed `eaten` item, same-item body-to-consumed transfer, recovery adjustment
 and that item's authored narration key at the accepted history prefix. Return the
@@ -988,15 +1053,13 @@ reload remains separate from real SQLite transaction/fault evidence.
 
 Persist each of the three plan controls and one-slot rows, immutable deer/hide origins, current sight binding/job, ordinary location/HP/encounter/corpse/custody, last-flight clock, head and receipt with changed rows in one transaction. Validate exact current generation/role/parent, player-entry or population-transfer cause (including the completed historical population control job named by that receipt’s `population.control.expected.job_id`, never a sight-bearing job), and current sight occurrence/due; do not require a historically fled deer to remain in its departure room. Reopen every lawful committed prefix, including pending sight while combat is open, an expired harmless sight job with successor still pending, a surviving round's checked equal-due handoff to flight, death canceling sight, a living fled member, dead slot before/at replacement and old owned hides after replacement.
 
-A forged/duplicate sight binding, wrong role/parent, stale member, illegal transfer, fabricated death/loot, unmatched round-to-sight group/encounter/predecessor/successor/equal-due evidence or missing job/receipt evidence is typed `save_corrupt` without rewriting bytes. Only the matching closure and exact successor cancellation may retain the preceding round writer group; receipt replay cannot widen that exception. Genuine failed COMMIT, unknown committed and absent COMMIT, lost acknowledgement and same-invocation replay resolve the complete prior or next state with no duplicate animal, hide, transfer or job. Preserve explicit release-pin refusal and in-place Start over; do not migrate or delete an owner save silently. Browser refresh is separate evidence from real SQLite fault proof.
+Row checks that do not need history stay `save_corrupt` without rewriting bytes; evidence only a replay could compare is [not checked at open](#what-reopen-proves). Genuine failed COMMIT, unknown committed and absent COMMIT, lost acknowledgement and same-invocation replay resolve the complete prior or next state with no duplicate animal, hide, transfer or job. Preserve explicit release-pin refusal and in-place Start over; do not migrate or delete an owner save silently. Browser refresh is separate evidence from real SQLite fault proof.
 
-Cross-mechanic writer-group authorization is proved by exact accepted-receipt
-replay before deer-specific sight-cause validation. A decreasing group number is
+Cross-mechanic writer-group authorization is not proved at open
+([no replay at open](#what-reopen-proves)). A decreasing group number is
 not itself a deer handoff: the C5 same-body/equal-due round-and-bleed pair may resume
 its group after unrelated population work, which keeps its own group. Reopen that
-legal committed prefix. Forged group assignments, unrelated lower-group writes
-and false deer closure/successor-cancel handoffs still fail exact replay and refuse
-in place without rewriting the save. Deer-specific validation retains the exact
+legal committed prefix. Deer-specific validation retains the exact
 sight job, occurrence and transfer producer checks; it must not reconstruct global
 writer ordering independently of the composing kernel.
 [Reproduction and developer evidence](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/evidence/2026-10-06-deer-bleed-recovery/README.md).
@@ -1063,21 +1126,17 @@ Cold reopen at Start with/without an eligible hound, each cursor, wrong in-footp
 
 Installed [D2](mechanics.md#d2-held-books-and-public-priory-selected-contract) stores
 ordinary custody, schedule locations and B6 typed knowledge facts; it adds no book
-cursor, transcript, topic ledger or snapshot. Reconcile a grant with the exact
-historical Read command/receipt: actor/body, original item and pinned readable/topic
-metadata, lawful held/open-ancestor custody at that revision, causal assignment and
-prior knowledge. A lawful B6 grant also justifies ward; neither source requires the
-other. Already-known Read supplies narration without a new grant. Later Drop, Put,
-lid closure, travel, schedule movement or death cannot invalidate historical Read.
-Current fact truth must agree with the lawful grant history in both directions.
+cursor, transcript, topic ledger or snapshot. A topic fact has other lawful writers
+(B6, ward, a reaction), so reopen does not reconcile it with a historical Read
+([principle](../lessons/storage.md)). Already-known Read supplies narration without a
+new grant. Later Drop, Put, lid closure, travel, schedule movement or death cannot
+invalidate historical Read.
 
 Real SQLite reopen must accept every legal committed intermediate: ground books,
 directly held, open nested holding, closed nested holding, each learned topic,
 already-known reread and later stored/dropped/dead states. Reopen the novice overlap
 and departure, then exercise the next ordinary Read/Talk/move consumer. Missing or
-malformed topic mapping/fact, forged actor/book/source/cause, grant from unheld or
-closed custody, omitted required grant or unjustified knowledge returns typed
-`save_corrupt`, with existing in-place Start over and no silent repair/deletion.
+malformed topic mapping/fact row returns typed `save_corrupt`, with existing in-place Start over and no silent repair/deletion.
 Operational read failures keep their existing storage-error handling.
 
 Failed COMMIT, both committed and absent uncertain-COMMIT outcomes, and lost
@@ -1087,9 +1146,6 @@ custody changes. Retained Read narration routes once to that exact book detail;
 restore its currently reachable parent chain only when projected, with normal
 scene/chapter precedence. An unavailable book yields no invented visible route or
 World/other-book narration fallback. Current-release pin refusal remains explicit.
-Historical replay must also run when readable items are the only content requiring
-it; the isolated gate control is traced in the
-[D2-S1 review](https://github.com/lorecrafting/lokacore/blob/f8513671ea7dd84d681876b2e36850129a4b0564/docs/reviews/2026-10-05-d2-priory-books-save-second-review.md).
 
 ### Discovered-place and observation recovery
 
@@ -1144,10 +1200,8 @@ Confirmed narration restores to the actual bed/dream nesting by committed comman
 identity; when away, retain honest history and Resume availability on legal return,
 never an invented Inn Rooms backdrop or unconfirmed completion.
 
-The consumed source uses the installed revision-ordered accepted-receipt replay,
-already required by the real B8 entitlement producer. It introduces no second
-history checker. Ordinary dialogue/finale validators select dialogue-owned
-choices and leave the scene-owned row to that replay. Continue/Choose narration
+Ordinary dialogue/finale validators select dialogue-owned choices and do not check the
+scene-owned row. Continue/Choose narration
 recovers to the UI-only `dream:<actual bed id>` detail owner from the retained
 scene binding; this is local history routing, not a saved row or invented entity.
 After the ordinary chapter Continue, cold launch stays at World. Resume is offered

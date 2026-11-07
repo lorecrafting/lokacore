@@ -16,7 +16,7 @@ test('the explicit world character sees the default view (the inn: the exits of 
   assert.deepEqual(view, gameView(world));
   assert.equal(view.actor_id, world.character);
   assert.equal(view.place.title.key, 'room.crossroads_inn.title');
-  const room = read('cartridges/toolbox_showcase/rooms/crossroads_inn.json');
+  const room = read('cartridges/toolbox_showcase/areas/hub/rooms/crossroads_inn.json');
   assert.deepEqual(view.exits.map((e) => e.direction).sort(), Object.keys(room.exits).sort());
 });
 

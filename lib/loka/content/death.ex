@@ -29,7 +29,9 @@ defmodule Loka.Content.Death do
       if(death,
         do:
           settings(m, defs, death) ++
-            penalty(death["penalty"], settings, v2) ++ narration(death["narration"], v2),
+            penalty(death["penalty"], settings, v2) ++
+            narration(death["narration"], v2) ++
+            revival(death["revival"], v2) ++ decay(m, death),
         else: []
       )
   end
@@ -41,6 +43,27 @@ defmodule Loka.Content.Death do
     for {field, key} <- words,
         text != :unknown and not is_map_key(text, key),
         do: diag("UNRESOLVED_REFERENCE", "cartridge.world.death.narration." <> field)
+  end
+
+  # loka-kgd.206: every revival line resolves in text.
+  defp revival(nil, _), do: []
+
+  defp revival(%{"lines" => lines}, {_, text}) do
+    for {key, i} <- Enum.with_index(lines),
+        text != :unknown and not is_map_key(text, key),
+        do: diag("UNRESOLVED_REFERENCE", "cartridge.world.death.revival.lines[#{i}]")
+  end
+
+  # Corpse decay (owner decision 2026-11-02): a job whose sink is food@1's consumed holder.
+  defp decay(m, death) do
+    for field <- ~w(npc_corpse_decay player_corpse_decay),
+        is_map_key(death, field),
+        c <- ~w(schedule food),
+        m["requires"]["capabilities"][c] != 1,
+        do:
+          diag("UNDECLARED_CAPABILITY", "cartridge.world.death." <> field, %{"capability" => c}, [
+            c <> "@1"
+          ])
   end
 
   # Toolbox row 47: an experience penalty needs world.levelling and its narration in text.
@@ -148,7 +171,9 @@ defmodule Loka.Content.Death do
   end
 
   defp restoration(defs, d) do
+    # A refused pool has its own line; its restore amount has no numbers to be wrong against.
     for pool <- ~w(hp mv),
+        defs["resource"][pool] != :invalid,
         not restore_valid?(defs["resource"][pool], d["restore"][pool]),
         do: bad("cartridge.world.death.restore." <> pool)
   end

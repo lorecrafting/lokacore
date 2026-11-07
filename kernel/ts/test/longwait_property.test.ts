@@ -15,14 +15,14 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { test } from 'node:test';
-import { INSTALLED, loadCartridge, newWorld, step, stepElapsed } from '../src/index.ts';
+import { gameView, INSTALLED, loadCartridge, newWorld, step, stepElapsed } from '../src/index.ts';
 import type { Cartridge, World } from '../src/runtime/decision.ts';
 import { encode } from '../src/foundation/canonical.ts';
 import { elapsedCommandId } from '../src/foundation/id_source.ts';
 import { units } from '../src/mechanics/calendar.ts';
 import * as patrol from './patrol_fixture.ts';
 import * as water from './water_fixture.ts';
-import { ctx } from './harness.ts';
+import { cmd, ctx } from './harness.ts';
 
 const root = fileURLToPath(new URL('../../../', import.meta.url));
 
@@ -147,8 +147,6 @@ for (const [file, bytes] of artifacts) {
   const loaded = loadCartridge(bytes, INSTALLED);
   assert.ok(loaded.ok, `${file}: ${JSON.stringify(loaded).slice(0, 300)}`);
   const c = loaded.cartridge as Cartridge;
-  // hello_sampler is a text-only greeting with no entry room, so it has no world to advance.
-  if (!c.entry) continue;
   test(`${file}: one long wait equals hourly steps`, () => {
     let w0 = newWorld(c, ctx('3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f'), [1, 2, 3, 4]);
     const ancestry = Object.keys(c.ancestries ?? {})[0];
@@ -160,6 +158,20 @@ for (const [file, bytes] of artifacts) {
           world_context_id: w0.context,
           payload: { type: 'choose_ancestry', actor_id: w0.character, ancestry },
         } as never,
+        seq,
+      );
+      assert.equal(r.decision.kind, 'accepted');
+      w0 = r.world;
+    }
+    // An opening scene (scene@1) admits only Continue, so play it to its end before waiting.
+    for (let s = gameView(w0).scene, i = 0; s; s = gameView(w0).scene, i++) {
+      const r = step(
+        w0,
+        cmd({
+          id: uuid(`dddddd${String(i).padStart(2, '0')}`),
+          world_context_id: w0.context,
+          payload: { type: 'continue', actor_id: w0.character, scene: s.scene, line: s.index },
+        }),
         seq,
       );
       assert.equal(r.decision.kind, 'accepted');

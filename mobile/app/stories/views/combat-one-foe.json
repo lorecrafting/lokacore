@@ -85,8 +85,10 @@
   "levelling": {
    "level": 1,
    "experience": 0,
+   "from": 0,
    "next": 30,
-   "unspent": 0
+   "unspent": 0,
+   "level_up": "levelling.level_up"
   },
   "skills": [
    {
@@ -277,15 +279,38 @@
   "topics": [],
   "combat": {
    "encounter_id": "d8de6604-8212-8c0d-a187-64bf21f91e3c",
-   "opponent_id": "2d75f5bd-a92e-8c56-97b0-652cdbf9ca62",
+   "opponent_id": "b98193c5-44c9-8ea4-9b9d-600c2aa84ebb",
    "name": "npc.boar.short",
    "words": {
     "article": "the",
     "bare": "npc.boar.bare"
    },
-   "band": "ready"
+   "band": "hurt",
+   "interval": 150
   },
+  "conditions": [
+   {
+    "label": "condition.bleeding",
+    "ends_at": 27000,
+    "duration": 1800,
+    "next_tick_at": 26100,
+    "resource": "hp",
+    "per_tick": -1,
+    "tick_every": 900,
+    "kind": "debuff"
+   },
+   {
+    "label": "condition.gored",
+    "resource": "hp",
+    "tick_every": 60,
+    "kind": "debuff"
+   }
+  ],
   "cues": [
+   {
+    "sense": "smell",
+    "text": "cue.blood"
+   },
    {
     "sense": "sound",
     "text": "cue.boar"
@@ -309,12 +334,12 @@
      "title": "room.drill_yard.title",
      "entities": [
       {
-       "id": "385d5416-3de6-82e4-aae0-775164b045c2",
+       "id": "7aa6c88d-bb91-86bf-add6-146962885046",
        "name": "npc.aldous.short",
        "kind": "npc"
       },
       {
-       "id": "f4074819-6c28-8215-a5ce-4c303c2ba4b3",
+       "id": "5aab89ab-7313-80b2-abb0-ad9e96fc2474",
        "name": "item.poultice.short",
        "kind": "item"
       }
@@ -367,7 +392,7 @@
   ],
   "entities": [
    {
-    "id": "2d75f5bd-a92e-8c56-97b0-652cdbf9ca62",
+    "id": "b98193c5-44c9-8ea4-9b9d-600c2aa84ebb",
     "name": "npc.boar.short",
     "words": {
      "article": "the",
@@ -376,10 +401,10 @@
     "description": "npc.boar.description",
     "kind": "npc",
     "actions": [],
-    "band": "ready",
+    "band": "hurt",
     "contents": [
      {
-      "id": "84596f20-3ba6-865a-b243-8ccbae9fc4fb",
+      "id": "7b98f110-721a-8f0b-af5b-eb2bfa6721f6",
       "name": "item.purse.short",
       "words": {
        "article": "a",
@@ -389,10 +414,10 @@
       "description": "item.purse.description",
       "kind": "item",
       "actions": [],
-      "container_id": "2d75f5bd-a92e-8c56-97b0-652cdbf9ca62"
+      "container_id": "b98193c5-44c9-8ea4-9b9d-600c2aa84ebb"
      },
      {
-      "id": "bc3d071f-472b-8655-9e2d-d5d0fe2edc5c",
+      "id": "41059ffe-c281-86f7-bcac-57d83de4493b",
       "name": "item.tusk.short",
       "words": {
        "article": "a",
@@ -402,7 +427,7 @@
       "description": "item.tusk.description",
       "kind": "item",
       "actions": [],
-      "container_id": "2d75f5bd-a92e-8c56-97b0-652cdbf9ca62"
+      "container_id": "b98193c5-44c9-8ea4-9b9d-600c2aa84ebb"
      }
     ]
    }
@@ -427,6 +452,12 @@
   ],
   "position": "standing",
   "journal": [],
+  "spell_words": [
+   {
+    "word": "mend",
+    "available": true
+   }
+  ],
   "time": 25200,
   "calendar_status": {
    "day": 1,
@@ -438,7 +469,7 @@
    "season": "spring",
    "tide": "high"
   },
-  "recap_after": 90000,
+  "recap_after": 86400,
   "resources": [
    {
     "resource": {
@@ -459,22 +490,10 @@
      "kind": "resource",
      "key": "hp"
     },
-    "current": 10,
+    "current": 7,
     "maximum": 10,
-    "band": "ready",
-    "tone": "normal"
-   },
-   {
-    "resource": {
-     "cartridge_id": "toolbox_showcase",
-     "cartridge_version": "0.0.1",
-     "kind": "resource",
-     "key": "hunger"
-    },
-    "current": 10,
-    "maximum": 10,
-    "band": "fed",
-    "tone": "normal"
+    "band": "hurt",
+    "tone": "warning"
    },
    {
     "resource": {
@@ -511,20 +530,18 @@
     "maximum": 100,
     "band": "purse_empty",
     "tone": "danger"
-   },
-   {
-    "resource": {
-     "cartridge_id": "toolbox_showcase",
-     "cartridge_version": "0.0.1",
-     "kind": "resource",
-     "key": "thirst"
-    },
-    "current": 10,
-    "maximum": 10,
-    "band": "quenched",
-    "tone": "normal"
    }
-  ]
+  ],
+  "revival": {
+   "lines": [
+    "death.revival.1",
+    "death.revival.2",
+    "death.revival.3",
+    "death.revival.4",
+    "death.revival.5"
+   ],
+   "seconds": 10
+  }
  },
  "stack": [
   {
@@ -533,8 +550,24 @@
  ],
  "log": [
   "You arrive from the south.",
-  "a boar grunting"
+  "a boar grunting",
+  "You quickly attack and hit 2 times.",
+  "You hit the boar hard.",
+  "The boar has some cuts.",
+  "The boar quickly attacks 2 times and hits once.",
+  "The boar hits you extremely hard.",
+  "The tusk opens a wound; you are bleeding.",
+  "The tusk leaves a scar that will not fade.",
+  "the iron smell of your own blood"
  ],
- "combatLog": [],
+ "combatLog": [
+  "You quickly attack and hit 2 times.",
+  "You hit the boar hard.",
+  "The boar has some cuts.",
+  "The boar quickly attacks 2 times and hits once.",
+  "The boar hits you extremely hard.",
+  "The tusk opens a wound; you are bleeding.",
+  "The tusk leaves a scar that will not fade."
+ ],
  "details": {}
 }

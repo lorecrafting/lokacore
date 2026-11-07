@@ -1,0 +1,32 @@
+{
+  "keywords": [
+    "stew",
+    "hearty"
+  ],
+  "name": "item.stew_hearty_02.short",
+  "room_line": "item.stew_hearty_02.room",
+  "description": "item.stew_hearty_02.description",
+  "mass_grams": 500,
+  "location": {
+    "in": "room",
+    "room": "larder"
+  },
+  "edible": {
+    "resource": "mv",
+    "amount": 10,
+    "label": "action.eat",
+    "narration": "narration.eat_stew_hearty",
+    "applies": [
+      "hearty",
+      {
+        "status": "well_fed",
+        "duration": 7200
+      }
+    ]
+  },
+  "words": {
+    "bare": "item.stew_hearty_02.bare",
+    "article": "a",
+    "plural": "item.stew_hearty_02.plural"
+  }
+}

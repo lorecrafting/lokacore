@@ -158,7 +158,7 @@ test('a resting rod keeps its use as a Use on… note', (t) => {
   const shown = b.text();
   assert.ok(shown.includes('Fish in'), JSON.stringify(shown));
   b.refuse('Fish in');
-  assert.ok(b.text().includes("Fish in\nYou can't do that—not yet."), JSON.stringify(b.text()));
+  assert.ok(b.text().includes("You can't do that—not yet."), JSON.stringify(b.text()));
   // two targets of one resting use (controlled view): one note, not two under one key
   const real = b.game.view.bind(b.game);
   b.game.view = () => {
@@ -182,5 +182,5 @@ test('a resting rod keeps its use as a Use on… note', (t) => {
     }));
     return { ...r, view: { ...r.view, inventory } } as never;
   };
-  assert.ok(b.text().includes("Fish in\nYou can't do that—not yet."), JSON.stringify(b.text()));
+  assert.ok(b.text().includes("You can't do that—not yet."), JSON.stringify(b.text()));
 });

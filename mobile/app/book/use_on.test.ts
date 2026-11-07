@@ -153,9 +153,9 @@ test('a resting pair is an unavailable row; Escape closes the list onto its opti
   const option = () => b.draw().find((n) => n.props.accessibilityLabel === LABEL.useAnItem);
   b.tap(LABEL.useAnItem);
   const focused: string[] = [];
-  option().props.ref.current = { focus: () => focused.push('option') };
+  option().props.ref({ focus: () => focused.push('option') });
   b.refuse('A bucket');
-  assert.ok(b.text().includes("A bucket\nYou can't do that—not yet."), JSON.stringify(b.text()));
+  assert.ok(b.text().includes("You can't do that—not yet."), JSON.stringify(b.text()));
   assert.deepEqual(rows(b), []);
   b.draw()
     .find((n) => n.props.onKeyDown)

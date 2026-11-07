@@ -16,6 +16,8 @@ import { currentStatus } from '../src/mechanics/status/shared.ts';
 import { value } from '../src/mechanics/fact.ts';
 import { check } from '../src/runtime/invariants.ts';
 import { resolved } from '../src/commands/actions.ts';
+import { validate } from '../src/foundation/validate.ts';
+import { level, resourceRef } from '../src/mechanics/resource.ts';
 import { commands, ctx } from './harness.ts';
 
 const scratch = mkdtempSync(join(tmpdir(), 'loka-use-sampler-'));
@@ -153,7 +155,8 @@ test('a burning item in an open crate is neither offered nor quenched', () => {
 });
 
 // Breaks: a pair blocked by the scripted action's cooldown is listed available (or dropped), or its reason
-// differs from the rule's rejection.
+// differs from the rule's rejection; or it projects no cooldown end and length (oiled at 0, cooldown
+// 600: ends 600; loka-x6t.135).
 test('a cooling-down oil pair is listed unavailable with the code the step returns', () => {
   const cooled = structuredClone(content) as Cartridge & { scripted_actions: Record<string, any> };
   cooled.scripted_actions['use_sampler@0.0.1:action/oil'].cooldown = 600;
@@ -167,7 +170,37 @@ test('a cooling-down oil pair is listed unavailable with the code the step retur
     .actions.find((a) => a.action_key === 'oil')!;
   assert.deepEqual([shown.available, shown.target_ids], [false, ids]);
   assert.equal(shown.available === false && shown.reason.code, 'cooldown');
+  assert.deepEqual(shown.available === false && [shown.ends_at, shown.duration], [600, 600]);
+  assert.deepEqual(validate('GameView', gameView(w)), []);
   assert.equal(code(invoke(w, 'oil', ids)), 'cooldown');
+});
+
+// Breaks: a pair refused for another reason projects a cooldown end and length (the view gates the
+// pair on any refusal code, not on cooldown): oiled at 0 with cooldown 600, unpaid at 1000.
+test('an oil pair refused for its cost after the cooldown carries no cooldown end or length', () => {
+  const cooled = structuredClone(content) as Cartridge & { scripted_actions: Record<string, any> };
+  stream.n = 0;
+  let w = newWorld(cooled, ctx('3d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e45'), [1, 2, 3, 4]);
+  const hp = resourceRef(w, 'hp');
+  const oil = cooled.scripted_actions['use_sampler@0.0.1:action/oil'];
+  Object.assign(oil, {
+    cooldown: 600,
+    costs: [{ resource: hp, amount: level(w, w.body, hp)! - 1 }],
+  });
+  w = ok(play(w, { type: 'take', item_id: e(w, 'oilcan') }));
+  const ids = [e(w, 'winch'), e(w, 'oilcan')];
+  w = ok(invoke(w, 'oil', ids));
+  w = { ...w, state: { ...w.state, clock: 1000 } };
+  const view = gameView(w);
+  const shown = view.inventory
+    .find((i) => i.id === ids[1])!
+    .actions.find((a) => a.action_key === 'oil')!;
+  assert.equal(shown.available === false && shown.reason.code, 'insufficient_resource');
+  assert.deepEqual(
+    [shown.available === false && shown.ends_at, 'duration' in shown],
+    [undefined, false],
+  );
+  assert.deepEqual(validate('GameView', view), []);
 });
 
 // Breaks: the tool's liquid or tag is not checked, the target's policy reads no target, or the

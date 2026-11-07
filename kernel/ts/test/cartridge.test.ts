@@ -9,12 +9,12 @@ import { read } from './read.ts';
 
 const bytes = (text: string) => new TextEncoder().encode(text);
 const corpus = read('protocol/fixtures/cartridge_loader.json');
-// The hello and fact v2 fixtures' capabilities, each at version 1.
-const hello =
-  'movement containment inspectable_detail description_variant equipment fact policy target_resolution narration quest dialogue topic check schedule resource';
+// The harvest and fact fixtures' capabilities, each at version 1.
+const caps =
+  'movement containment inspectable_detail description_variant equipment fact policy schedule resource scripted_action skill tag';
 const installed: Installed = {
   kernel_api: INSTALLED.kernel_api,
-  capabilities: Object.fromEntries(hello.split(' ').map((k) => [k, [1]])),
+  capabilities: Object.fromEntries(caps.split(' ').map((k) => [k, [1]])),
   content_schema: 1,
   rule_ir: 1,
   client_features: [],
@@ -49,7 +49,7 @@ const load = (cartridge: any) => {
 // Breaks: the hash is taken over other bytes (the artifact, a re-ordered encoding), or a valid
 // artifact is rejected by some stage.
 test('the known-answer cartridge loads and its hash is the fixture literal', () => {
-  const { canonical, sha256, value } = read('protocol/fixtures/cartridge_hash.json');
+  const { canonical, sha256, value } = read('protocol/fixtures/harvest_sampler_hash.json');
   const artifact = `{"cartridge":${canonical},"content_hash":"${sha256}"}`;
   const result = loadCartridge(bytes(artifact), installed);
   assert.ok(result.ok);
@@ -103,15 +103,20 @@ test('artifact bytes that are not strict UTF-8 are INVALID_JSON', () => {
 // Breaks: a new definition map in the schema (keyed id@version:kind/key) is left out of the loader's
 // key stage, so its map key and definition key may disagree (emotes in #509, populations before it).
 test('every definition map of the cartridge schema is in the key stage', () => {
-  const branches = read('protocol/cartridge.schema.json').$defs.CompiledCartridge.oneOf;
-  const maps = branches.flatMap((b: any) =>
-    Object.entries(b.properties)
-      .filter(([, v]: [string, any]) => /@.*:[a-z_]+\/\[/.test(v.propertyNames?.pattern ?? ''))
-      .map(([k]) => k),
-  );
+  const maps = Object.entries(
+    read('protocol/cartridge.schema.json').$defs.CompiledCartridge.properties,
+  )
+    .filter(([, v]: [string, any]) => /@.*:[a-z_]+\/\[/.test(v.propertyNames?.pattern ?? ''))
+    .map(([k]) => k);
   assert.ok(maps.includes('facts'), 'the schema walk found no map');
   assert.deepEqual(
     maps.filter((m: string) => !DEFINITION_MAPS.includes(m)),
+    [],
+  );
+  // The other way round (loka-k5z4): the key stage parses each key without a guard, so a map in it
+  // without a pattern lets a bad key reach that parse and throw a TypeError, not a diagnostic.
+  assert.deepEqual(
+    DEFINITION_MAPS.filter((m) => !maps.includes(m)),
     [],
   );
 });

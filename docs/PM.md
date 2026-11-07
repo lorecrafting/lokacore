@@ -30,7 +30,7 @@ Report at the end of the slice, not at every step.
    keep [the roadmap](ROADMAP.md) current. The plan marks slices that share no files; the PM may run
    two developers at once on those, each PR with its own fresh reviewer (steps 2 to 7 per slice, [owner decision](decisions/owner-decision-process-speedup-2026-10-03.md)).
    Get the owner's OK on the plan and on any decision that is theirs.
-2. **Brief (PM).** An Opus subagent drafts briefs and stage slice plans so the PM session
+2. **Brief (PM).** Under the [lean default](WORKFLOW.md#lean-default) the session writes its own short plan. When roles are used, an Opus subagent drafts briefs and stage slice plans so the PM session
    stays thin; the PM decides ([owner decision](archive/decisions/owner-decision-review-rules-2026-10-01.md)). Name the branch; do not check it out (the developer does, in its own
    worktree). Spawn `developer` (`model` per the [routing table](WORKFLOW.md#work-routing)) with a self-contained brief: goal, its [lane](WORKFLOW.md#delivery-lanes),
    `docs/system` sections (the clause for each behavior; an archived plan for new work), files in and out of scope, acceptance (which checks and fixtures must
@@ -78,7 +78,7 @@ Step 3 (build and self-review) is in [WORKFLOW](WORKFLOW.md#loop).
 
 Steps 5 and 6 (fix, re-review) are in [WORKFLOW](WORKFLOW.md#loop).
 
-7. **Merge (PM).** Merge with `bin/merge_pr.sh <PR> <beads-id[,...]> ["ROADMAP status: ..."]` (waits on `bin/wait_ci.sh` for the head, merge commit with `--match-head-commit`, then `bin/after_merge.sh`) once the verdict is
+7. **Merge (PM).** Merge with `bin/merge_pr.sh <PR> <beads-id[,...]> ["ROADMAP status: ..."]` (waits on `bin/wait_ci.sh` for the head, merge commit with `--match-head-commit`, then `bin/after_merge.sh`) once, for a PR that gets a review, the verdict is
    APPROVE or APPROVE WITH NOTES with nothing open on the exact pushed head (a small should-fix needs no fix round:
    [WORKFLOW step 6](WORKFLOW.md#small-should-fix)), and `ci.yml` and
    `book-e2e.yml` are green on that head (every push runs them; `--match-head-commit <sha>`;
@@ -129,6 +129,10 @@ An active issue's status stays `in_progress` until the reviewed merge to `main`;
 Keep one PM writer across worktrees/clones; `br` run from any worktree uses the integration
 checkout's database and JSONL, so commit tracker changes from that checkout, not a slice branch.
 A Claude Code session starts with `bin/session_status.sh`, so Beads, not a memory file, holds current status.
+It prints only what the next action depends on: in-progress issues, ready and blocked counts, open PRs, a red nightly,
+orphaned processes, Beads/PR drift, merged or prunable worktrees, stashes and merged `review-<N>` refs (empty sections
+print nothing). `bin/session_status.sh --full` also prints the compaction mode, the housekeeping list, every worktree,
+green nightlies and "no drift".
 When a reviewed brief starts building, the PM marks its ready issue
 `in_progress` with `br update <id> --status in_progress` and keeps its current
 source/review links in the issue. After the source is reviewed and merged to
@@ -229,7 +233,7 @@ an expected saving; at most 5 per retro ([owner decision](decisions/owner-decisi
   and proposes at most 5 cross-session items. The PM prompts it when a gate PR merges.
 - **Beads:** `bin/br_create.sh -l housekeeping --description-file <file>`; `br list -l housekeeping` shows the queue. The owner approves: approved items go
   to the next housekeeping PR, rejected ones to `br close` with the reason.
-- **Reminders:** `bin/session_status.sh` lists open housekeeping issues, prints "Before you clear: ask the
+- **Reminders:** `bin/session_status.sh` counts open housekeeping issues (`--full` lists them), prints "Before you clear: ask the
   PM for handoff + retro", and notes a missed retro when no housekeeping issue is newer than the last
   merge on `origin/main`. The PM reminds the owner of the retro when suggesting a wrap-up or when
   context is large.

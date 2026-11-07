@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { checkpoint, elapsedHost, receipts } from './__tests__/elapsed-host.test.ts';
+import { checkpoint, elapsedBundle, elapsedHost, receipts } from './__tests__/elapsed-host.test.ts';
 import type { GameSubscription, Intent } from '../../packages/game-view/session.ts';
 const LOOK: Intent = { action_key: 'look' as never, target_ids: [], input: {} };
 
@@ -38,7 +38,12 @@ test('resumed wall survives fractional reconciliation and invalid/stale prefligh
 // Breaks: a failed prerequisite candidate freezes A to its old horizon, or prerequisite drain
 // and the new seventeen-boundary horizon share an unbounded turn.
 test('a new reservation waits for its actual resumed horizon and yields after sixteen boundaries', () => {
-  const a = elapsedHost();
+  // A 20-hour day keeps the schedule's hours 6 and 19: at most 14 boundaries fit the cap in 24-hour days.
+  const a = elapsedHost(
+    undefined,
+    undefined,
+    elapsedBundle({ away_cap_hours: 168 }, { units_per_hour: 3600, hours_per_day: 20 }),
+  );
   try {
     a.sql.exec(
       'PRAGMA foreign_keys = ON; CREATE TABLE parent(id INTEGER PRIMARY KEY); CREATE TABLE child(id INTEGER REFERENCES parent(id) DEFERRABLE INITIALLY DEFERRED)',
@@ -59,11 +64,11 @@ test('a new reservation waits for its actual resumed horizon and yields after si
     assert.equal(receipts(a.sql), 0);
     assert.equal(a.game.pulse().kind, 'catching_up');
     assert.equal(a.game.pendingInvocation(), id);
-    assert.equal(a.game.view().view.time, 712800);
+    assert.equal(a.game.view().view.time, 597600);
     assert.equal(receipts(a.sql), 16);
-    assert.deepEqual(checkpoint(a.sql), { wall_ms: 15994001, remainder: 50, target: 864000 });
+    assert.deepEqual(checkpoint(a.sql), { wall_ms: 15994001, remainder: 50, target: 669600 });
     assert.equal(a.game.pulse('drain').kind, 'ready');
-    assert.equal(a.game.view().view.time, 864000);
+    assert.equal(a.game.view().view.time, 669600);
     assert.equal(a.game.pending(), false);
   } finally {
     a.sql.close();

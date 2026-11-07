@@ -11,6 +11,18 @@ their summaries are in [this index at `15c7d41b`](https://github.com/lorecraftin
 What each rule in force says: [owner-rules.md](../system/owner-rules.md). A new record adds one
 dated line below, newest first.
 
+- 2026-11-06 [Owner decision: NPC behaviours](owner-decision-npc-behaviours-2026-11-06.md): NPCs act through the player's own verb rules, a four-layer arbiter, bounded plans, canned behaviours as shortcuts; economy second; slices loka-ni2zd.1-16.
+- 2026-11-04 [Owner decision: the authoring editor plan](owner-decision-authoring-editor-plan-2026-11-04.md): six promises, three-column layout, live agent edits, named Book treatments, strict editor coverage, slice order.
+- 2026-11-04 [Owner decision: cartridge source by world area](owner-decision-area-layout-2026-11-04.md): area folders, the border rule (rooms cross, all else via the root), implicit zones, no area field or key prefix, no new DiagnosticCode.
+- 2026-11-04 [Owner decision: a PR body is the reviewer's brief](owner-decision-pr-body-reviewer-brief-2026-11-04.md): what and why, where to look, tests with their breaks, self-review; no fluff
+- 2026-11-02 [Owner decision: corpses and respawn](owner-decision-corpses-respawn-2026-11-02.md): a corpse names its victim, stays uncarriable, and decays opt-in (items spill, nothing destroyed); prologue numbers for decay and goblin respawn.
+- 2026-11-01 [Owner decision: Diku rounds](owner-decision-diku-rounds-2026-11-01.md): opt-in initiative, round 1 at Attack, named lines, damage tiers and condition lines; the showcase follows LegendMUD wording.
+- 2026-11-01 [Owner decision: fast cold open; no receipt replay at open](owner-decision-fast-cold-open-2026-11-01.md)
+- 2026-11-01 [Owner decision: away catch-up is capped](owner-decision-away-catch-up-cap-2026-11-01.md)
+- 2026-10-31 [Owner decision: authoring readiness and level-up](owner-decision-authoring-readiness-2026-10-31.md): dev-only tools in the author preview, checkpoints as the content gate, the level-up moment.
+- 2026-10-31 [Owner decision: every word the player reads is hand-written; a lowered prose scene format](owner-decision-handwritten-prose-2026-10-31.md)
+- 2026-10-31 [Owner decision: lean workflow for the Pro plan](owner-decision-lean-workflow-2026-10-31.md): one session works directly; independent review only for engine changes.
+- 2026-10-31 [Owner decision: shipped content is human-made; AI writes code](owner-decision-human-made-content-2026-10-31.md)
 - 2026-10-30 [Owner decision: moods, ambient emotes and canned emotes are three builder tools](owner-decision-moods-ambient-emotes-2026-10-30.md)
 - 2026-10-28 [Owner decision: harness patterns (storage, roles, tools, briefs)](owner-decision-harness-patterns-2026-10-28.md)
 - 2026-10-24 [Owner decision: each room speaks from its own point of view](owner-decision-room-point-of-view-2026-10-24.md)

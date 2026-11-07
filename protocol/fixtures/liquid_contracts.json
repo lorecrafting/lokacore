@@ -81,18 +81,6 @@
         "receiver_id": "b0000000-0000-4000-8000-000000000004"
       }
     },
-    "drink": {
-      "contract": "CommandPayload",
-      "variant": {
-        "field": "type",
-        "value": "drink"
-      },
-      "value": {
-        "type": "drink",
-        "actor_id": "b0000000-0000-4000-8000-000000000001",
-        "vessel_id": "b0000000-0000-4000-8000-000000000003"
-      }
-    },
     "filled": {
       "contract": "EventPayload",
       "variant": {
@@ -641,87 +629,6 @@
     {
       "name": "pour-unknown-discriminator",
       "base": "pour",
-      "set": {
-        "type": "unknown_liquid_variant"
-      },
-      "errors": [
-        {
-          "path": "/type",
-          "code": "unknown_variant"
-        }
-      ],
-      "variant_errors": [
-        {
-          "path": "/type",
-          "code": "const_mismatch"
-        }
-      ]
-    },
-    {
-      "name": "drink-valid",
-      "base": "drink",
-      "errors": []
-    },
-    {
-      "name": "drink-missing-type",
-      "base": "drink",
-      "omit": "type",
-      "errors": [
-        {
-          "path": "/type",
-          "code": "missing_property"
-        }
-      ]
-    },
-    {
-      "name": "drink-missing-actor_id",
-      "base": "drink",
-      "omit": "actor_id",
-      "errors": [
-        {
-          "path": "/actor_id",
-          "code": "missing_property"
-        }
-      ]
-    },
-    {
-      "name": "drink-missing-vessel_id",
-      "base": "drink",
-      "omit": "vessel_id",
-      "errors": [
-        {
-          "path": "/vessel_id",
-          "code": "missing_property"
-        }
-      ]
-    },
-    {
-      "name": "drink-closed-fields",
-      "base": "drink",
-      "set": {
-        "extra": 1
-      },
-      "errors": [
-        {
-          "path": "/extra",
-          "code": "unknown_property"
-        }
-      ]
-    },
-    {
-      "name": "drink-non-object",
-      "base": "drink",
-      "replace": null,
-      "errors": [
-        {
-          "path": "",
-          "code": "invalid_type"
-        }
-      ]
-    },
-    {
-      "name": "drink-unknown-discriminator",
-      "base": "drink",
       "set": {
         "type": "unknown_liquid_variant"
       },

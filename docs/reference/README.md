@@ -1,6 +1,8 @@
 # Reference material (informative, not authority)
 
 These explain why decisions were made. They do not override [docs/spec](../spec/IMPORT.md).
+Generated from the schemas: [source kinds](source-kinds.gen.md), [vocabulary](vocabulary.gen.md).
+
 The legacy studies below stay in the archived legacy repository at `997a7a8`; they are not copied here.
 
 - Studies: [12 Evennia lessons](https://github.com/lorecrafting/lokacore-v2-legacy/blob/997a7a8/docs/rewrite-v3/12-evennia-lessons.md),

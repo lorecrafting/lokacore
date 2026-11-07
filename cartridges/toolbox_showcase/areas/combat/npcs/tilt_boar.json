@@ -1,0 +1,35 @@
+{
+  "keywords": [
+    "boar"
+  ],
+  "name": "npc.tilt_boar.short",
+  "room_line": "npc.tilt_boar.room",
+  "description": "npc.tilt_boar.description",
+  "room": "tilt_yard",
+  "hp": {
+    "minimum": 0,
+    "maximum": 8,
+    "start": 8,
+    "gain": 0
+  },
+  "attack": {
+    "chance": 60,
+    "damage_min": 1,
+    "damage_max": 3,
+    "attacks": 2
+  },
+  "drops": [
+    {
+      "item": "tilt_tusk",
+      "chance": 100
+    },
+    {
+      "item": "tilt_purse",
+      "chance": 50
+    }
+  ],
+  "words": {
+    "bare": "npc.tilt_boar.bare",
+    "article": "the"
+  }
+}

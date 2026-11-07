@@ -1,8 +1,6 @@
-// size: allow 310, a press's reply is read in one place: its faults, log lines, warned exit and status
-// The book's words and state over a Game (packages/game-view/session.ts): the offered actions as
-// buttons, the log of what each press said, and who came or went. The engine returns structured
-// results; every sentence here is the app's own (docs/decisions/owner-decision-presenter-split-
-// 2026-10-02.md). Plain TypeScript, so any view can replace the React one. It adds no mechanics.
+// The book's words and state over a Game: the offered actions as buttons, the log of what each
+// press said, and who came or went. The engine returns structured results; every sentence here is
+// the app's own (docs/decisions/owner-decision-presenter-split-2026-10-02.md). No mechanics.
 import type {
   Game,
   GameView,
@@ -13,10 +11,7 @@ import type {
 import { comings, lineText, replyLine, sayers } from './words.ts';
 import { actionContext, buttonsOf, intentOf } from './model.ts';
 
-/**
- * A tappable action: its text and the intent it sends (the session adds id and actor), with the
- * drawn freshness token and action context, revalidated before a fresh press (Book UI).
- */
+/** A tappable action: its text, the intent it sends, its freshness token and context (Book UI). */
 export type Button = {
   label: string;
   action_key: string;
@@ -26,6 +21,7 @@ export type Button = {
   detail_id?: string; // UI owner only; concrete participants retain their wire target contract
   place?: true; // a concrete target offered among GameView's place actions
   pick?: { reason?: string }; // a row of a Pick list (pick.ts); with a reason, its unavailable form
+  refused?: string; // the unavailable form, whose press still sends: the engine's refusal is logged
   token?: string; // none: no freshness check (a test's hand-made button)
   context?: string; // only projected buttons can refresh across an unchanged live update
 };
@@ -47,14 +43,19 @@ import {
   leaveLog,
   logLines,
   narrationLines,
+  newRound,
   quietOf,
   resetLogs,
+  trimLog,
   restoredLogs,
   type Logs,
 } from './logs.ts';
 import { named, received } from './received.ts';
 import { days } from './chronicle.ts';
 import { holding, pressedAway, settle } from './recap.ts';
+import { drawn, end, fall, fallen, haunt, haunting, letGo, unheard, wake } from './spirit.ts';
+import { heard, type Said } from './heard.ts';
+import { keptTitle } from './combat-title.ts';
 
 function background(
   game: Game,
@@ -62,9 +63,7 @@ function background(
   s: Logs,
   text: Say,
 ) {
-  s.status = update.status;
-  s.returnWorld = false;
-  s.returnDetail = undefined;
+  [s.status, s.returnWorld, s.returnDetail] = [update.status, false, undefined];
   if (update.status.kind === 'error') s.fault = update.status.message;
   if (update.status.kind === 'fault') s.fault = `Time stopped: ${update.status.code}`;
   if (update.status.kind === 'replaced') s.fault = 'This game has been replaced; reopen it.';
@@ -72,8 +71,10 @@ function background(
   const was = s.projection.view,
     now = update.projection.view;
   resetLogs(s, now);
-  const away = holding(s, was, now);
-  world(s, away, comings(was, now, text));
+  const away = holding(s, was, now),
+    from = end(s.log);
+  // World entries: to the log, or held by the open settlement (book-ui.md, Away recap).
+  (away?.log ?? s.log).push(...comings(was, now, text));
   s.projection = update.projection;
   let last: ReturnType<Game['lastNarration']>;
   try {
@@ -82,13 +83,9 @@ function background(
     s.fault = (e as Error).message;
     return;
   }
-  if (last && last.command_id !== s.narrationId)
-    narrate(s, closing(last, was, now), was, now, away, text);
-}
-
-// World entries: to the log, or held by the open settlement (book-ui.md, Away recap).
-function world(s: Logs, away: Logs['away'], lines: string[]) {
-  (away?.log ?? s.log).push(...lines);
+  if (last && last.command_id === s.narrationId) return;
+  if (last) narrate(s, closing(last, was, now), was, now, away, text);
+  if (last?.died && s.down?.to === undefined) s.woke = from; // spirit state; a second death: fall
 }
 
 // A new receipt's lines: World (or the open settlement's lines), and its detail or conversation.
@@ -103,12 +100,19 @@ function narrate(
   const [lines, combat] = narrationLines(last, now, text, false, was);
   s.combatLog.push(...combat);
   s.narrationId = last.command_id;
+  if (s.down) s.down.to ??= end(s.log); // the dead page's lines end at the next receipt (spirit.ts)
+  if (last.died) fall(s, last.command_id);
+  if (last.died && away) away.from = Infinity; // a death ends the recap, as a room change does
+  if (last.missed) s.deed = last; // a round's miss comes on the clock (book-ui.md, Fight music)
   const to = last.detail_id
     ? detailLines(s, last.detail_id)
     : now.choice && detailLines(s, now.choice.speaker_id ?? 'conversation');
-  // A room change's fight lines stay on the Combat page; the room log opens at the arrival.
-  if (!last.read)
-    world(s, away, narrationLines(arrived(last), now, text, false, was).flat().map(lineText)); // Read text: its page only
+  // Read text stays on its page, a room change's fight lines on Combat; the log opens at the arrival.
+  if (!last.read) {
+    const said = narrationLines(arrived(last), now, text, false, was).flat();
+    if (away) away.log.push(...said.map(lineText));
+    else s.log.push(...said);
+  }
   // A quiet receipt settled in the background is the room log's only, as when restored.
   if (lines.length && !quietOf(s, last.lines, last.detail_id)) to?.push(...lines);
 }
@@ -134,10 +138,7 @@ function finished(game: Game, reply: Reply, was: GameView, s: Logs, text: Say) {
     warning =
       was.place.id !== now.place.id && was.exits.find((e) => e.direction === direction)?.warning;
   if (!s.fault) s.log.push(...(warning ? [text(warning)] : []), ...cueLines(s, now, text));
-  if (s.fault) {
-    s.returnWorld = false;
-    s.returnDetail = undefined;
-  }
+  if (s.fault) Object.assign(s, { returnWorld: false, returnDetail: undefined });
   s.projection = game.view();
   s.status =
     reply.kind === 'save_corrupt'
@@ -219,35 +220,12 @@ function updated(game: Game, update: GameSubscription, s: Logs, text: Say): bool
   return true;
 }
 
-// What the live region reads (loka-x6t.43, book-ui.md Announcements): the room log's lines new
-// since the last screen, never history or another log; `key` changes per batch, so a repeated
-// line is read again, and a quiet line merged into the last one is read in full each time.
-type Said = { log: number; place: string; key: number; text: string };
-function heard(s: Logs, view: GameView, was: Said | undefined): Said {
-  const now = { log: s.log.length, place: view.place.id };
-  was ??= { ...now, key: 0, text: '' };
-  // A room change empties its log first (resetLogs), so all of it is new.
-  const fresh = [...(s.merged ?? []), ...s.log.slice(now.place === was.place ? was.log : 0)].map(
-    (l) =>
-      typeof l === 'string'
-        ? l
-        : 'reason' in l
-          ? `${l.reason}, ${l.text}`
-          : 'plain' in l
-            ? l.plain
-            : l.text,
-  );
-  s.merged = undefined;
-  return fresh.length ? { ...now, key: was.key + 1, text: fresh.join(' ') } : { ...was, ...now };
-}
-
 function screen(game: Game, s: Logs, label: Say, text: Say, generation: number, was?: Said) {
   const { view, token } = game.view();
-  const said = heard(s, view, was); // before the trim, which drops lines from the front
-  s.log.splice(0, s.log.length - 200);
-  s.combatLog.splice(0, s.combatLog.length - 200);
-  for (const lines of s.details.values()) lines.splice(0, lines.length - 200);
-  said.log = s.log.length;
+  const ghost = haunting(s, Date.now()); // its due lines first, so the live region reads them
+  const said = heard(s, view, was, unheard(s) ?? drawn(s)); // before the trim, which drops lines from the front
+  [s.log, s.combatLog, ...s.details.values()].forEach((lines) => trimLog(lines));
+  said.log = drawn(s) ?? s.log.length;
   const buttons: Button[] = buttonsOf(view, label, text).map((b) => ({
     ...b,
     token,
@@ -255,6 +233,8 @@ function screen(game: Game, s: Logs, label: Say, text: Say, generation: number, 
   }));
   return {
     view,
+    died: s.died,
+    deed: s.deed,
     text,
     label,
     buttons,
@@ -262,6 +242,7 @@ function screen(game: Game, s: Logs, label: Say, text: Say, generation: number, 
     combatLog: s.combatLog,
     said,
     chronicle: () => days(game.chronicle(), view, text), // read when the Journal opens
+    title: keptTitle(s, view.combat, text, game.opener),
     detail: (id: string) => s.details.get(id) ?? [],
     leave: (id: string) => leaveLog(s, id, game.view().view.choice?.speaker_id === id),
     pending: s.status.kind === 'pending' || (s.status.kind === 'error' && game.pending()),
@@ -271,6 +252,9 @@ function screen(game: Game, s: Logs, label: Say, text: Say, generation: number, 
     returnDetail: s.returnDetail,
     confirmedRead: s.confirmedRead,
     ended: s.ended,
+    ...fallen(s, text),
+    spirit: ghost,
+    treatment: s.fault ? undefined : view.scene?.treatment, // a fault shows the scene plain (book-ui.md, Book treatments)
   };
 }
 
@@ -280,6 +264,7 @@ export function presenter(game: Game) {
   const s = restoredLogs(game, text);
   let generation = 0; // Player receipts invalidate old controls even if the context cycles back.
   let said: Said | undefined;
+  const credit = (read: number) => said && (said.log += read); // the dead page read some
   return {
     screen: () => {
       const shown = screen(game, s, label, text, generation, said);
@@ -287,18 +272,25 @@ export function presenter(game: Game) {
       return shown;
     },
     update: (update: GameSubscription) => {
+      newRound(s.combatLog); // one update or press settles at most one receipt: one round
+      const [from, chapter] = [end(s.log), s.projection.view.chapter?.index];
       const terminal = updated(game, update, s, text);
+      if (s.spirit) credit(haunt(s, from, chapter));
       if (terminal && s.recovered) generation++;
       return terminal;
     },
     recovered: () => !!s.recovered,
+    died: () => s.died, // screen() moves the live region's mark: read the death bare
     // A pending retry keeps the original detail, even when retried from the world.
     press: (b: Button, detail?: string) => {
+      newRound(s.combatLog);
       const line = pressed(game, liveButton(game, b, label, text, generation), detail, s, text);
       if (s.recovered) generation++;
       return line;
     },
-    leaveCombat: () => (s.ended = undefined),
+    // ponytail: the spirit clock starts at Let go, a page turn before the page lands (spec: the landing).
+    leaveCombat: () => void (letGo(s, text) && said && (said.log = s.log.length)), // revival: new to the live region
+    rise: () => credit(wake(s)),
     visit: (open: (string | undefined)[]) => visit(s, open),
     startOverFailed(why?: string) {
       if (why !== undefined) s.log.push({ text: `Start over fails. ${why}`, event: true });

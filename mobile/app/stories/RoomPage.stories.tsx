@@ -1,4 +1,5 @@
 // C row Pages, Room (design-input-batch-4-2026-10-09.md 1); routes: stories/routes.ts.
+// size: allow 340, one story per room page state the log can reach
 import type { Meta, StoryObj } from '@storybook/react-native-web-vite';
 import { expect, waitFor } from 'storybook/test';
 import { Body, RoomPage } from '../book/Body.tsx';
@@ -12,8 +13,10 @@ import RoomAtNightView from './views/room-at-night.json';
 import RoomRefusalView from './views/room-refusal.json';
 import senses from '../../../cartridges/senses_sampler/text.json';
 import emoteText from '../../../cartridges/emote_sampler/text.json';
+import ambientText from '../../../cartridges/ambient_emote_sampler/text.json';
 import toolboxText from '../../../cartridges/toolbox_showcase/text.json';
 import { lineWords } from '../book/words.ts';
+import { motion } from '../book/tokens.ts';
 
 const meta: Meta = {
   tags: ['!autodocs'],
@@ -87,6 +90,8 @@ export const AwayRecap: StoryObj = {
     await userEvent.click(heading);
     await expect(canvas.getByText('Maud leaves. (2 times)')).toBeVisible();
     await expect(canvas.getByText('Maud arrives.')).toBeVisible();
+    // The a11y check reads contrast after this: new lines are still drying in until then.
+    await new Promise((done) => setTimeout(done, motion.dry.duration + 2 * motion.dry.lag));
   },
 };
 export const RefusalLine: StoryObj = { ...pageStory(RoomRefusalView), name: 'Refusal line' };
@@ -208,6 +213,34 @@ export const GoblinsCower: StoryObj = {
   },
 };
 
+// Breaks (loka-8ghm, mechanics.md#ambient-emotes): a room, item or NPC ambient line shows its raw
+// key. The sampler's words are placeholders (`~`) until the owner writes them.
+const glancing = {
+  ...RoomNpcsItemsView.view,
+  entities: goblins.slice(0, 1),
+  emotes: [{ key: 'glance', others: 'emote.glance.others' }],
+};
+export const Ambient: StoryObj = {
+  ...pageStory({
+    ...RoomNpcsItemsView,
+    view: glancing,
+    log: [
+      { key: 'room.cave.drip' },
+      { key: 'item.lantern.gutter' },
+      {
+        key: 'emote.performed',
+        bindings: { emote: 'glance' },
+        participants: { actor: goblins[0]!.id },
+      },
+    ].map((line) =>
+      lineWords(line, (k) => (ambientText as Record<string, string>)[k] ?? k, glancing as never),
+    ),
+  }),
+  play: async ({ canvas }) => {
+    await expect(await canvas.findAllByText('~')).toHaveLength(3);
+  },
+};
+
 // Breaks (owner 2026-10-30, W6 moods; PR #507): an NPC's mood name loses its own words (so two
 // afraid goblins split into two links) or merges with the calm goblin of its kind. The calm goblin
 // ends in the same noun, so its article is written again: "and a goblin" (owner 2026-10-30).
@@ -282,5 +315,16 @@ export const LiquidLines: StoryObj = {
     await expect(await canvas.findByText('You drink. The waterskin is empty.')).toBeVisible();
     await expect(canvas.getByText('You drink. The waterskin is half full of water.')).toBeVisible();
     await expect(canvas.getByText('You fill it. The waterskin is full of water.')).toBeVisible();
+  },
+};
+
+// Breaks (book-ui.md, Spirit state): Rise pressable before zero, or any other control drawn.
+export const SpiritState: StoryObj = {
+  ...pageStory(RoomNpcsItemsView, { spirit: { seconds: 10, left: 6, fraction: 0.6, next: 0 } }),
+  name: 'Spirit state',
+  play: async ({ canvas }) => {
+    const rise = await canvas.findByRole('button', { name: LABEL.rise });
+    await expect(rise).toHaveAccessibleDescription('6 seconds'); // only the waiting card has it
+    await expect(canvas.getAllByRole('button')).toEqual([rise]);
   },
 };

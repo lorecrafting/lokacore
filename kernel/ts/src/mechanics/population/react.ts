@@ -16,6 +16,7 @@ export function spawn(
   group: number,
   earlier: readonly DeltaOp[],
   mint: Mint,
+  holders: Map<string, number>,
 ): DeltaOp[] {
   const spec = world.populationSpecs[key(step.plan)];
   if (!spec) return [];
@@ -32,5 +33,7 @@ export function spawn(
   let first = true;
   const own = () => (first ? ((first = false), member) : mint());
   const { ops } = birthSlot(world, member as CommandId, job, free.slot, free.row, own, false);
+  // A later rule's plan move of the newborn joins this write (loka-kgd.159).
+  holders.set(member, group);
   return ops.map((op) => ({ ...op, writer_group: group }));
 }

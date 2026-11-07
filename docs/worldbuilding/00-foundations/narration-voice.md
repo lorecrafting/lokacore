@@ -1,5 +1,7 @@
 # Narration voice
 
+> Reference only: agent-drafted worldbuilding text (not the owner's words). Never ships as written; the owner writes shipped prose ([rule](../../decisions/owner-decision-human-made-content-2026-10-31.md)).
+
 Status: draft. Area: [Foundations: premise, tone, player, canon housekeeping](../README.md#00-foundations). Canon tier: draft (owner-directed 2026-10-16).
 
 **Purpose.** Who narrates, in what person and tense, and how the voice changes with place, skill and state.

@@ -111,7 +111,7 @@ test('a wolf bite leaves a scar that survives death and return, and the salve cu
   assert.deepEqual(scarRow(w, w.body), { active: true, generation: 1 });
   const salve = w.entityIds['scars_sampler@0.0.1:item/salve']!;
   w = play(w, { type: 'take', item_id: salve });
-  w = play(w, { type: 'eat', item_id: salve });
+  w = play(w, { type: 'consume', item_id: salve });
   assert.equal(conditions(w), undefined);
   assert.deepEqual(
     Object.values(w.state.statuses ?? {}).filter((r) => !r.active),

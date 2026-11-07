@@ -1,7 +1,11 @@
 {
   "name": "quest.lantern.title",
   "offer": {
-    "label": "quest.lantern.accept"
+    "label": "quest.lantern.accept",
+    "target": {
+      "kind": "npc",
+      "npc": "bram"
+    }
   },
   "objective": {
     "evidence": "current_state",

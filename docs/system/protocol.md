@@ -64,7 +64,7 @@ storage half):
 4. **Resolve** (`commands/invocation.ts:75`): the action key must be in the actor's current ActionSet,
    else `unsupported_capability`; its `target_ids` fill the Command's slots in order (`:57`:
    look/talk one `target_id`; perform `target_id`, then a use scripted action's held tool as `item_id` ([row G4](mechanics.md#use-x-on-y-toolbox-row-g4)); take/drop one `item_id`; give `item_id`, `recipient_id`);
-   a scripted action fills its key, a quest offer its quest, `close_choice` the pending continuation; an
+   a scripted action fills its key, a quest offer its quest and takes no target (an empty `target_ids` means the action names its own target, whatever its target kind), `close_choice` the pending continuation; an
    input fills its field (`cast`'s `word` names a spell, [row 29a](mechanics.md#spell-cast-admission-toolbox-row-29a)); an
    aimed spell is offered on its target's entry, never in `spell_words`, and its offer fills `word` from its scripted action and `target_id` from `target_ids` (loka-x6t.109); the
    result must validate as a Command.
@@ -91,7 +91,7 @@ storage half):
    event is queued FIFO; a queued `item_acquired` first completes the active quests it earns
    (`kernel/ts/src/mechanics/quest/lifecycle.ts:75`), then each ReactionRule it triggers runs as its own writer group when its
    `when` holds (its write to a status holder or fact row an earlier reaction of the advance wrote
-   joins that reaction's group, [mechanics.md](mechanics.md)) (`mechanics/reaction.ts:25`, `:44`), to quiescence; then, when the root advanced time,
+   joins that reaction's group, and its `resource.adjust` joins the group of any earlier writer of that pool, else of its body's holder, [mechanics.md](mechanics.md)) (`mechanics/reaction.ts:25`, `:44`), to quiescence; then, when the root advanced time,
    each due pending job runs as a `run_job` in `(due_time, job_id)` order with its reactions
    (`runtime/proposal.ts:265`); a job a run schedules due by the target joins that order and runs
    in the same advance, and a run or its reactions writing a target that a run of strictly earlier
@@ -240,7 +240,7 @@ bell-first case, a typed Q2 failure transition without a new event.
 An actor's actions (`composed` in `kernel/ts/src/commands/actions.ts`) are, in order: the engine verbs of the
 capabilities the lock holds (`VERBS` in `kernel/ts/src/commands/verbs.ts`, each with its target kind and input; policy always true), then the
 cartridge's actions, scripted actions, the offers of quests that have one and the actor has no instance
-of, and the talks of dialogues whose speaker is in the room (one per dialogue) (`override`: a cartridge may redefine a verb), then
+of (a targeted offer only while its fixture or living NPC is in the actor's room), and the talks of dialogues whose speaker is in the room (one per dialogue) (`override`: a cartridge may redefine a verb), then
 the room's contributions by ADR-016's operations (union, override, replace, subtract,
 intersect; `apply` in `kernel/ts/src/commands/actions.ts`), then the answers to a pending choice (`choose`, `close_choice`), which no
 ordinary contribution removes; the combat restriction below takes precedence. A scripted action's
@@ -335,7 +335,8 @@ projected current-room detail; the Book draws a fixture link only on that match
 ([book-ui.md fixture rule](book-ui.md#world-and-status-entry)). Bodies stay off the wire.
 
 `gameView` (`kernel/ts/src/view/view.ts:49`) projects, for the player: `actor_id`; `place` (room
-id, title, the description variant whose condition holds, `mechanics/description_variant/rule.ts:26`);
+id, title, the description variant whose condition holds, `mechanics/description_variant/rule.ts:26`;
+optional `sound`, the room's authored bed tag; optional `exposed: true`, from the room's `exposed` tag);
 `exits` in compass order, first checking Move against the actor's composed ActionSet with
 the exit's direction: before ancestry selection, each ordinary Move shows `invalid_state`
 under the [D11 gate](mechanics.md#d11-character-choice-selected-contract), matching Step;
@@ -403,6 +404,16 @@ the name is present either way and no hp number is sent
 (loka-y6yg.49). Composition record: reads the encounter row, the opponent's hp level and spec,
 the band table, `visible` and `living`; writes, events, jobs and save rows: none; no version bump (an
 optional view field, as ConditionView `duration`).
+The `combat` view carries `interval`, the cartridge's `world.combat.interval` that spaces the round jobs
+(`kernel/ts/src/view/combat.ts`), and an offered action or `spell_words` entry refused `cooldown` carries
+`ends_at` (the actor's last admitted attempt plus the scripted action's `cooldown`: the first time admission
+passes again) and `duration` (that `cooldown`), the ConditionView clock pair, for the Book's
+[Combat hotbar](book-ui.md#combat-hotbar). The pair comes from `cooling` beside `admission`
+(`kernel/ts/src/commands/actions.ts`), the check admission itself runs, so the view and the rule cannot
+disagree; it is absent on any other refusal (a policy refusal wins and carries none), and absent while the
+cooldown still refuses when the end would pass 2^53 - 1. Reads: the cooldown row, the scripted action's
+`cooldown`, the clock, the combat settings; writes, events, jobs and save rows: none; kernel_api 1.159
+(loka-x6t.135).
 Each visible living NPC with hp (its own `hp`, the test of `living`) carries in `entities` the `band` key of its `hp` pool by the
 same rule and table, for the Book's Look page; an NPC without hp, an item and the body carry none, and no hp number,
 maximum or tone is sent (loka-ysbt). Reads: the NPC's `hp` level and spec, the band table, `visible`; writes
@@ -458,7 +469,8 @@ run and elapsed payload run before any drawing/execution,
 and selects stepElapsed only on the replay entry. Ordinary commands stay on player step;
 measured=false grants no authority. Generic traces without elapsed keep independent CLI or
 simulator run identity. No clock is sampled. Capped prefixes/nonfresh/fault-rich segment limits
-remain; byte-identical replay and derived receipt recovery remain required.
+remain; byte-identical replay and derived receipt recovery remain required. Each entry is decided at
+its recorded revision: a host's [coalesced ticks](save.md#durable-elapsed-sessions) leave gaps.
 See [save](save.md#durable-elapsed-sessions).
 
 ## Durable corpse creation (M5-B)
@@ -547,9 +559,10 @@ preconditioned escort.transition, plus the authored dialogue effect and escort_s
 policy leaf described in [mechanics](mechanics.md#escort1). Contracts and the compiler
 validate typed IDs/references, role/quest agreement, supported transitions and feature
 minimum. The portable delta composer in both kernels checks full prior-row equality, legal
-status edges and immutable binding. Runtime adoption and changed-row persistence add only
+status edges and immutable binding, except a start on a new quest instance replacing an ended row. Runtime adoption and changed-row persistence add only
 the escorts State section. Choose retains current policy and original-role revalidation.
-Move/Flee and death include escort changes in the same root decision; no new command,
+Move/Flee and death include escort changes in the same root decision, and any decision that
+parts a following escort writes its separation last ([escort@1](mechanics.md#escort1)); no new command,
 transcript, SQLite table, save format or UI mode is added.
 
 <a id="selected-s2-composition-pending-implementation"></a>
@@ -712,7 +725,8 @@ paid, full MV, sold out and unavailable exact payment without changing error cod
 stands for, so a client can tell the player. `not_standing` is a move while the actor is not
 standing (`invalid_state`, position@1); `cursed` is a remove a curse holds on (`invalid_state`,
 equipment@1, loka-x6t.38); `cannot_be_hurt` is an Attack on an NPC that cannot be hurt, today one
-with no hp of its own (`invalid_target`, combat@1, loka-xyyd). The code stays the contract; a
+with no hp of its own (`invalid_target`, combat@1, loka-xyyd); `sanctuary` is an Attack in a sanctuary
+room (`invalid_state`, combat@1, loka-g5hh.2.9), whose error and offer also carry `message {key: "combat.sanctuary"}`, one line for every sanctuary. The code stays the contract; a
 reader that does not know `cause` reads the code alone, and a value without it stays valid.
 The actual bed is an inspectable detail with `bed {title, entitlement}`; its
 local projection emits ordinary targetless Rest and never changes raw Rest admission.
@@ -848,8 +862,8 @@ writer groups, checked arithmetic and query budgets apply.
 ### Liquid composition
 
 `liquid@1` owns only commands
-`fill {actor_id, source_id, vessel_id}`, `pour {actor_id, source_id, receiver_id}`
-and `drink {actor_id, vessel_id}`. Fill's source is a detail; Pour's source is an
+`fill {actor_id, source_id, vessel_id}` and `pour {actor_id, source_id, receiver_id}`;
+Drink is food@1's `consume {actor_id, item_id}` on a vessel ([Consume](mechanics.md#consume-loka-kgd209)), still answered `drank`. Fill's source is a detail; Pour's source is an
 item. ActionInvocation targets retain that exact ordered pair (or Drink's one
 item), with no player-supplied amount, kind or resource benefit. Projection and
 admission share current custody, reach, compatibility, capacity and load checks.
@@ -945,11 +959,11 @@ rewearing and no general remote Take. Malformed custody never creates an offer.
 ### Held-food composition
 
 **D4 consumed subset.** [D4](mechanics.md#d4-homes-finite-apples-and-eat-selected-contract)
-adds `food@1`, command payload `eat {actor_id: CharacterId, item_id: EntityId}`,
+adds `food@1`, command payload `consume {actor_id: CharacterId, item_id: EntityId}` (formerly `eat`; on a vessel it is Drink, [Consume](mechanics.md#consume-loka-kgd209)),
 accepted outcome `eaten` with the exact consumed `item_id: EntityId` in the accepted
 envelope (mandatory for this producer; receipt replay binds it), and immutable optional item metadata
-`edible {resource: DefinitionRef(resource), amount: positive safe integer,
-label: TextKey, narration: TextKey}`. The ActionSet key is `eat`, targeting one
+`edible {resource?: DefinitionRef(resource), amount?: positive safe integer (with `resource`),
+label: TextKey, narration: TextKey, cures?, applies?}`, at least one effect. The ActionSet key is `consume`, targeting one
 exact directly held edible item with no input. Its GameView inventory action
 uses the same pure keyed admission query as execution. Harvest remains the
 installed containment invocation; only its orchard label says Forage.
@@ -1120,7 +1134,9 @@ answer the `target-*` cases of `protocol/fixtures/c4_pack_composition.json`.
 
 For this actual scheduler seam, extend each separately targeted C3 slot with
 nullable `last_flight_at`, initially null and reset to null only on a new generation.
-A successful selected flight sets it to this occurrence's logical clock, checking
+A successful selected flight sets it to this occurrence's logical clock (the round job's due
+time; an Attack's [opening round](mechanics.md#diku-rounds-loka-kgd197) runs on a job never scheduled, so its
+occurrence is the current clock, in both kernels, fixture `opening-round-*`), checking
 the exact plan/slot/generation/member and complete prior row. Fatal slot transitions
 retain that generation's value. Population dispatch skips a living member when
 it is engaged or its last flight equals that dispatch clock. It writes no unchanged

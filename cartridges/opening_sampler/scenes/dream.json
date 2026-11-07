@@ -1,0 +1,23 @@
+{
+  "on": {
+    "start": true
+  },
+  "control": "modal",
+  "treatment": "reverie",
+  "steps": [
+    {
+      "type": "narrate",
+      "text": "scene.dream.first"
+    },
+    {
+      "type": "narrate",
+      "text": "scene.dream.second"
+    },
+    {
+      "type": "await_ack"
+    },
+    {
+      "type": "end"
+    }
+  ]
+}

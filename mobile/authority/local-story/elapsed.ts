@@ -12,7 +12,10 @@ import {
   natural,
 } from './elapsed-store.ts';
 import { needsAncestry } from '../../../kernel/ts/src/commands/actions.ts';
+import { awayCapMs } from '../../../kernel/ts/src/mechanics/calendar.ts';
 import { CLOCK_JOB } from '../../../kernel/ts/src/mechanics/schedule/daily.ts';
+import { folds } from '../../../kernel/ts/src/mechanics/status/job.ts';
+import type { JobId } from '../../../kernel/ts/src/contracts.gen.ts';
 import { adopt, type Story } from './save.ts';
 import { identityOf, persistElapsed, reconcile, transaction } from './store.ts';
 
@@ -58,13 +61,19 @@ function metadata(s: Story, row: Checkpoint): ElapsedStatus {
   return READY;
 }
 
+/** Catch-up cannot settle this save on any retry, unlike a storage failure, which may clear. */
+export class CatchUpRefusedError extends Error {}
+
 function boundary(s: Story, target: number): number {
   let until = target;
-  for (const job of Object.values(s.world.state.jobs ?? {})) {
+  for (const [id, job] of Object.entries(s.world.state.jobs ?? {})) {
     if (job.status !== 'pending') continue;
-    if (job.due_time <= s.world.state.clock) throw new Error('already-due job; recovery required');
+    if (job.due_time <= s.world.state.clock)
+      throw new CatchUpRefusedError('already-due job; recovery required');
     // The calendar job (toolbox row W25) runs in whichever step passes it, once: never a stop.
-    if (job.job.kind !== CLOCK_JOB) until = Math.min(until, job.due_time);
+    // Nor is a saturated tick the kernel will fold (mechanics.md, W8 Catch-up).
+    if (job.job.kind !== CLOCK_JOB && !folds(s.world, id as JobId, job))
+      until = Math.min(until, job.due_time);
   }
   return until;
 }
@@ -108,13 +117,20 @@ export class ClockDriver {
     };
     const resumed = this.resumeNeeded || mode === 'resume';
     // World time starts at D11 selection: before it a capture only re-anchors, crediting nothing.
+    const rate = this.s.world.cartridge.manifest.time_policy!.rate;
+    // Time away: debt never exceeds the away cap, the rest is skipped (save.md). A session stays exact.
+    const owed = Math.ceil((Math.max(0, old.target - this.s.world.state.clock) * 1000) / rate);
+    const away = () =>
+      Math.min(
+        Math.max(0, wall - old.wall_ms),
+        Math.max(0, awayCapMs(this.s.world.cartridge) - owed),
+      );
     const d =
       !this.s.elapsed || needsAncestry(this.s.world, this.s.world.character)
         ? 0
         : !resumed && this.baseline !== undefined
           ? mono - this.baseline
-          : Math.max(0, wall - old.wall_ms);
-    const rate = this.s.world.cartridge.manifest.time_policy!.rate;
+          : away();
     this.candidate = { row: accounted(old, d, rate, wall), mono, pause: mode === 'pause' };
     if (resumed) this.resumeNeeded = false;
   }
@@ -129,7 +145,9 @@ export class ClockDriver {
       row,
     );
     if (reply.kind === 'pending') return { kind: 'pending' };
-    if (reply.kind !== 'saved') throw new Error(`elapsed delivery refused: ${reply.kind}`);
+    if (reply.kind === 'fault') return { kind: 'fault', code: reply.code }; // debt retained
+    if (reply.kind !== 'saved')
+      throw new CatchUpRefusedError(`elapsed delivery refused: ${reply.kind}`);
     const decision =
       reply.decision as unknown as import('../../../kernel/ts/src/contracts.gen.ts').DecisionResult;
     if (decision.kind === 'fault') return { kind: 'fault', code: decision.code };

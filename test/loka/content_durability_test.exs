@@ -27,4 +27,17 @@ defmodule Loka.ContentDurabilityTest do
       assert expected in Enum.map(diags, &{&1["code"], &1["path"]}), inspect(diags)
     end
   end
+
+  # Breaks: a scripted action's attribute check names an attribute the cartridge never declares,
+  # so the check can never be rolled.
+  test "an attribute check must name a declared attribute", %{dir: dir} do
+    edit = {"actions/forge.json", &put_in(&1, ["check", "attribute"], "missing")}
+    assert {:error, diags} = Loka.ContentSource.compile(dir, [edit])
+
+    assert {"UNRESOLVED_REFERENCE", "actions/forge.check.attribute"} in Enum.map(
+             diags,
+             &{&1["code"], &1["path"]}
+           ),
+           inspect(diags)
+  end
 end

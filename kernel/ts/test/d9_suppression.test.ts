@@ -7,7 +7,7 @@ import { apply } from '../src/runtime/apply.ts';
 import { allocator } from '../src/runtime/decision.ts';
 import { key } from '../src/foundation/compose.ts';
 import { bellCue } from '../src/mechanics/bell/cue.ts';
-import { engaged } from '../src/mechanics/combat/shared.ts';
+import { attackRefused, engaged } from '../src/mechanics/combat/shared.ts';
 import { suppress } from '../src/mechanics/population/shared.ts';
 import { deathSequence } from '../src/mechanics/death/sequence.ts';
 import { adjust, level, resourceRef } from '../src/mechanics/resource.ts';
@@ -249,6 +249,16 @@ test('suppression closes an open goblin encounter without reward or deleting the
   );
   assert.deepEqual(closed.world.state.created, attack.world.state.created);
   assert.deepEqual(closed.world.state.facts, attack.world.state.facts);
+  // Breaks: the suppressed-hunter refusal runs ahead of the sanctuary and loses its sentence.
+  const w = closed.world;
+  assert.equal(attackRefused(w, w.character, goblin as EntityId), 'invalid_state');
+  const here = w.state.containers[goblin]!;
+  const peaceful = { ...w, rooms: { ...w.rooms, [here]: { ...w.rooms[here]!, sanctuary: true } } };
+  assert.deepEqual(attackRefused(peaceful, w.character, goblin as EntityId), {
+    code: 'invalid_state',
+    cause: 'sanctuary',
+    message: { key: 'combat.sanctuary' },
+  });
 });
 
 // Breaks: projection treats all rooms as audible or reconstructs a new cue from later fact state.

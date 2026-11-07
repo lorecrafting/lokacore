@@ -1,0 +1,7 @@
+{
+  "steps": [
+    { "intent": { "action_key": "move", "target_ids": [], "input": { "direction": "north" } } },
+    { "advance": 60000 },
+    { "intent": { "action_key": "look", "target_ids": [], "input": {} } }
+  ]
+}
