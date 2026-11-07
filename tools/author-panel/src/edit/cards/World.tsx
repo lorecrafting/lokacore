@@ -7,6 +7,8 @@ import type { FieldProps } from '@rjsf/utils';
 import {
   ROOTS,
   addable,
+  definitionOf,
+  described,
   entered,
   fieldErrors,
   hidden,
@@ -112,7 +114,11 @@ function Settings({ rel, context, diag, named }: Props & { named: Named }) {
       <Header rel={rel} diag={diag} undo={card.undo ? card.back : undefined} />
       {card.refused ? <Refusal boxed>{card.refused}</Refusal> : null}
       <CardForm rel={rel} card={card} context={withNamed} diag={diag} ui={ui} fields={picking} />
-      <AddMenu fields={addable(saved.dir, registry, draft, card.revealed)} reveal={card.reveal} />
+      <AddMenu
+        fields={addable(saved.dir, registry, draft, card.revealed)}
+        reveal={card.reveal}
+        about={(f) => described(defs, definitionOf(defs, saved.dir, draft), f)}
+      />
     </section>
   );
 }

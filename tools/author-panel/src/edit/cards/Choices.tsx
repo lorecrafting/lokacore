@@ -4,7 +4,7 @@
 import { createContext, type ReactNode, useContext, useState } from 'react';
 import type { FieldProps } from '@rjsf/utils';
 import { toFieldPathId } from '@rjsf/utils';
-import { added, minimal, refuseKey, removed } from '../../../../../kernel/ts/play/card.ts';
+import { added, described, minimal, refuseKey, removed } from '../../../../../kernel/ts/play/card.ts';
 import {
   BADGES,
   choiceMenu,
@@ -158,7 +158,11 @@ function ChoiceFields({ k, c, shown, absent }: FieldsProps) {
           <Act onClick={() => drop(f)}>Remove</Act>
         </div>
       ))}
-      <AddMenu fields={caps ? choiceMenu(draft, k, absent, caps, hidden) : []} reveal={reveal} />
+      <AddMenu
+        fields={caps ? choiceMenu(draft, k, absent, caps, hidden) : []}
+        reveal={reveal}
+        about={(f) => described(defs, CHOICE, f)}
+      />
     </>
   );
 }

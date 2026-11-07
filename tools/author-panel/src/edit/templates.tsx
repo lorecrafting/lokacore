@@ -66,7 +66,7 @@ function FieldTemplate(p: FieldTemplateProps) {
             {required && !item ? <Required /> : null}
           </label>
         ) : null}
-        {displayLabel && !item ? description : null}
+        {displayLabel ? description : null}
         {children}
         {errors}
         {help}

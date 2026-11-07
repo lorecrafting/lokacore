@@ -14,7 +14,7 @@ import {
 import type { useDiagnostics } from '../../author.ts';
 import { Input } from '../../components/ui/input.tsx';
 import type { Context } from '../fields.tsx';
-import { adder, Header, useCard, useCartridge } from '../Generic.tsx';
+import { adding, Header, useCard, useCartridge } from '../Generic.tsx';
 import { Refusal } from '../templates.tsx';
 import registry from '../registry.json';
 import { Mechanics, RoomForm, Words } from './Room.tsx';
@@ -69,7 +69,7 @@ export function Entity({ rel, context, diag }: Props) {
       <Mechanics
         card={card}
         menu={menu}
-        add={adder(card, defs, def, context.held)}
+        {...adding(card, defs, def, context.held)}
         fixed={[...WORDS, at, ...required]}
       />
       <RoomForm

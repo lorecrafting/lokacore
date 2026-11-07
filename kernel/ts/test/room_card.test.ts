@@ -1,9 +1,10 @@
-// The Room card's details (play/room_card.ts): every expected answer is a hand-checked literal.
+// The Room card's details and its add menu's descriptions (play/card.ts): every expected answer is a
+// hand-checked literal.
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { test } from 'node:test';
-import { detailed } from '../play/card.ts';
+import { described, detailed } from '../play/card.ts';
 
 const defs = JSON.parse(
   readFileSync(join(import.meta.dirname, '../../../schemas/source/defs.schema.json'), 'utf8'),
@@ -33,4 +34,26 @@ test('a new room detail takes a `~` description and its key as alias; a kept one
   const cased = { details: { Crack: cleft } }; // a key that is no alias leaves the old one out
   assert.deepEqual(detailed(was, cased, defs).details, { Crack: { ...cleft, aliases: [] } });
   assert.deepEqual(detailed(was, { name: 'r' }, defs), { name: 'r' }); // a room with no details
+});
+
+// Break: the add menu shows a bare field name (slice loka-wfrgk.102 B): the field's own description
+// is not read, a `$ref` field's target description is not followed, or the target's wins over its own.
+test('an add menu option reads its field description, else its $ref target description', () => {
+  const planted = {
+    'source.Room': {
+      properties: {
+        lit: { description: 'Light reaches it.' },
+        door: { $ref: '#/$defs/source.Door' },
+        gate: { description: 'Its own words.', $ref: '#/$defs/source.Door' },
+        bare: { type: 'string' },
+      },
+    },
+    'source.Door': { description: 'A way through.' },
+  };
+  assert.equal(described(planted, 'source.Room', 'lit'), 'Light reaches it.');
+  assert.equal(described(planted, 'source.Room', 'door'), 'A way through.');
+  assert.equal(described(planted, 'source.Room', 'gate'), 'Its own words.');
+  assert.equal(described(planted, 'source.Room', 'bare'), undefined);
+  assert.equal(described(planted, 'source.Room', 'treatment:reverie'), undefined); // a registry key, no field
+  assert.equal(described(planted, 'source.Gone', 'lit'), undefined);
 });

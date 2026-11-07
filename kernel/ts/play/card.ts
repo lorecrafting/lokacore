@@ -83,6 +83,11 @@ const deref = (s: Obj, defs: Record<string, Obj>): Obj => {
   const ref = s.$ref as string | undefined;
   return ref ? deref(defs[ref.slice(ref.lastIndexOf('/') + 1)] ?? {}, defs) : s;
 };
+/** Field `f` of definition `def`: its schema description, else its `$ref` target's (the add menu's line). */
+export function described(defs: Record<string, Obj>, def: string, f: string): string | undefined {
+  const s = (defs[def]?.properties as Record<string, Obj> | undefined)?.[f];
+  return s && ((s.description ?? deref(s, defs).description) as string | undefined);
+}
 
 /**
  * The draft after a reload: the reloaded `doc` with the edits from `base` to `now` that were not

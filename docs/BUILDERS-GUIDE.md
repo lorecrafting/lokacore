@@ -177,6 +177,7 @@ says why a rule did or did not run at that step ([rule explainer](system/cartrid
 
 The [toolbox page](TOOLBOX.gen.md) lists every installed mechanic with what it does, what you
 declare, its sampler cartridge and its showcase district; read it before asking for a new mechanic.
-[Mechanics](system/mechanics.md) has the exact behavior.
+[Mechanics](system/mechanics.md) has the exact behavior. The [field guide](FIELD-GUIDE.gen.md) lists each kind's fields
+with what each does, its allowed values and a sampler file that sets it.
 
 Before a district or area plan, read the [area authoring checklist](guides/area-authoring.md).
