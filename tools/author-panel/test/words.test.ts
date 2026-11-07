@@ -87,6 +87,23 @@ test("the generic card's words commit once, on Enter, never per keystroke", asyn
   }
 });
 
+// Breaks: an emptied field posts /edit (a blank line written) instead of refusing with the hint.
+test('an emptied field is refused at the field and nothing is sent', async () => {
+  const page = await open({ right: 420, selection: { kind: 'item', key: 'lute' } });
+  const posts = sent(page);
+  try {
+    const field = page.getByLabel('name words');
+    await shows(field, 'a lute');
+    await field.fill('');
+    await field.blur();
+    await page.getByText('Empty. Write ~ to leave it unwritten.').waitFor();
+    assert.equal(posts.length, 0);
+    assert.equal(await field.inputValue(), '');
+  } finally {
+    await page.close();
+  }
+});
+
 // Breaks: words typed while a save is out are lost (its re-read writes the saved line over them).
 test('the field is read-only while its save is out', async () => {
   const before = readFileSync(TEXT, 'utf8');

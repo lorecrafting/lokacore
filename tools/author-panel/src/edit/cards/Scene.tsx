@@ -51,7 +51,8 @@ function Lines({ lines, context, set }: { lines: Line[]; context: Context; set: 
   return (
     <ol className="grid gap-1 font-mono">
       {lines.map((l) => (
-        <li key={`${l.n}:${l.text}`} className="flex min-w-0 items-center gap-2">
+        // a words line keeps its field (and a draft) when its text changes; a value line remounts
+        <li key={l.key ?? `${l.n}:${l.text}`} className="flex min-w-0 items-center gap-2">
           <span className="w-6 shrink-0 text-right text-muted-foreground">{l.n}</span>
           {l.verb ? (
             <Value line={l} keys={picks(l.verb, context.nodes, context.unlinkable)} set={(value) => set(l, value)} />
