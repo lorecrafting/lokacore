@@ -19,13 +19,12 @@ type Props = {
   sel?: Selection;
   story?: Story;
   diag: ReturnType<typeof useDiagnostics>;
-  edit: (key: string) => void;
   offer: (add: string[]) => void;
   pick?: (s: Selection) => void;
 };
 
 /** The selection's summary: its kind, ref, `~`, diagnostics and links, from GET /story; then its card. */
-export function Inspector({ sel, story, diag, edit, offer, pick }: Props) {
+export function Inspector({ sel, story, diag, offer, pick }: Props) {
   if (!sel)
     return (
       <p className="p-3 text-muted-foreground">
@@ -36,7 +35,7 @@ export function Inspector({ sel, story, diag, edit, offer, pick }: Props) {
   const rel = fileOf(sel, ref, story?.files);
   const { hidden, unlinkable, files } = story ?? {};
   const nodes = reachable(story?.graph.nodes ?? [], story, rel); // every picker offers what the card's file may name
-  const context = { kind: sel.kind, key: sel.key, nodes, edit, hidden, unlinkable, files, open: pick, held: held(story?.graph.edges, ref) };
+  const context = { kind: sel.kind, key: sel.key, nodes, hidden, unlinkable, files, open: pick, held: held(story?.graph.edges, ref) };
   const count = (rows?: Record<string, unknown[]>) => (ref && rows?.[ref]?.length) || 0;
   const unreached =
     !!ref && Object.values(story!.report.unreachable).some((refs) => refs.includes(ref));
