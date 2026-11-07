@@ -1,4 +1,4 @@
-// size: allow 635, one editor's keys, saves, conflicts, add-here and capitalised titles walked over one stubbed page
+// size: allow 645, one editor's keys, saves, conflicts, add-here and capitalised titles walked over one stubbed page
 // E5's in-Book editor (docs/design/prose-in-the-book-rulings.md) in headless Google Chrome, over a
 // page of plain lines and a stubbed /__author route; the Book itself is the walk's (web-preview.md).
 import assert from 'node:assert/strict';
@@ -131,7 +131,12 @@ const capitalised = (key: string, words: string) =>
       const w = window as unknown as { seen: Map<string, string>; said: Map<string, string> };
       const el = document.querySelector('main')!.appendChild(document.createElement('h1'));
       el.dir = 'auto';
-      el.textContent = words.charAt(0).toUpperCase() + words.slice(1);
+      const shown = words.charAt(0).toUpperCase() + words.slice(1),
+        cut = shown.lastIndexOf(' ');
+      const inner = Object.assign(document.createElement('span'), {
+        textContent: shown.slice(0, cut),
+      });
+      el.append(inner, shown.slice(cut)); // a nested Text: a double-click lands on part of the line
       w.seen.set(words, key);
       w.said.set(key, words);
     },
@@ -140,11 +145,12 @@ const capitalised = (key: string, words: string) =>
 
 // Breaks: the lookup matches a drawn line's words exactly only, so a capitalised NPC title says
 // "Not a line of words"; the field shows or saves the capitalised form, not the file's; or the
-// words held while it is open are the capitalised ones, so the key's other uses capitalise too.
+// words held while it is open are the capitalised ones, so the key's other uses capitalise too;
+// or a double-click on a nested part of the line does not climb to the line.
 test("a capitalised title opens its key's field with the file's words; Enter saves that line", async () => {
   await capitalised('npc.stranger.short', 'a hooded stranger');
   answer = (path) => (path.startsWith('/line') ? [200, STRANGER] : [200, { id: 7 }]);
-  await page.locator('h1').dblclick();
+  await page.locator('h1 span').dblclick();
   const field = page.locator('[data-loka-field]');
   assert.equal(await field.textContent(), 'a hooded stranger');
   assert.equal(asked[0].path, '/line?key=npc.stranger.short&words=a%20hooded%20stranger');
