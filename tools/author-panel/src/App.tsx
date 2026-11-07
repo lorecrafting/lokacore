@@ -290,7 +290,7 @@ function command(book: Book, sel: Selection | undefined, pick: (s?: Selection) =
       return mapCommand(i.id, sel?.kind === 'room' ? sel.key : undefined);
     if (i.id === 'delete') return void (sel && drop(sel.key, fileOf(sel, places(sel, story?.graph.nodes ?? []).inspector?.ref, story?.files)));
     if (i.id === 'undo') return void undoDelete(book);
-    if (i.id.startsWith('new-')) return void created(i.id.slice(4)).catch((e: Error) => alert(e.message));
+    if (i.id.startsWith('new-')) return void created(i.id.slice(4));
     const name = i.id === 'go' && sel?.kind === 'room' ? sel.key : prompt('Room key');
     if (name) book.send({ op: 'go_to_room', room: name });
   };

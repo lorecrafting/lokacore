@@ -543,7 +543,7 @@ test("a one-way exit's reverse comes back by Undo on either room's card", async 
 });
 
 // Breaks: palette New sends a kind the server does not know, hides its refusal (loka-wfrgk.60) or
-// asks for a plural key, or Delete sends another file, a row key with a definition file, an unread
+// asks for a key (loka-wfrgk.101), or Delete sends another file, a row key with a definition file, an unread
 // `was`, or hides the refusal.
 test('palette New and Delete send the starter and the selected file; refusals show', async () => {
   const page = await open(QUEST);
@@ -578,12 +578,12 @@ test('palette New and Delete send the starter and the selected file; refusals sh
     .update(readFileSync(join(dir, 'showcase', file)))
     .digest('hex');
   assert.deepEqual(sent, [
-    ['/__author/new', { kind: 'rooms', name: 'zz' }],
+    ['/__author/new', { kind: 'rooms', name: 'room_1' }],
     ['/__author/delete', { file, was }],
     ['/__author/new', { kind: 'outline', name: 'outline' }],
   ]);
   assert.deepEqual(told, ['refused here', 'refused here', `${file}: not found`, 'refused here']);
-  assert.deepEqual(asked, ['New room key']); // the starter is the plural dir
+  assert.deepEqual(asked, []); // a free key, no prompt
   await page.close();
 });
 

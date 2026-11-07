@@ -11,7 +11,8 @@ let posts: object[] = [];
 const picks: object[] = [];
 const g = globalThis as Record<string, unknown>;
 g.alert = () => {};
-g.prompt = () => null;
+let answer: string | null = null;
+g.prompt = () => answer;
 g.fetch = async (url: string, init?: { body?: string }) => {
   if (init?.body) posts.push(JSON.parse(init.body));
   const made = { id: 1, files: ['npcs/npc_3.json'], bytes: '{}', sha256: '' };
@@ -25,22 +26,31 @@ shown.pick = (p: object) => void picks.push(p);
 shown.nodes = [{ kind: 'scene', ref: 'scene/cutscene_1' }];
 
 // Breaks: a palette kind keyed against its own name instead of its graph kind (a cutscene is a
-// `scene` node, so cutscene_1 is reused), templates not skipped for items, an outline renamed.
-test('palette New picks the graph kind, skips templates, and keeps an outline its one name', async () => {
+// `scene` node, so cutscene_1 is reused), templates not skipped for items, an outline or layout renamed,
+// a text key generated (it would merge into a held one) or a cancelled prompt still sent.
+test('palette New picks the graph kind, skips templates, keeps fixed names and asks for a text key', async () => {
   await created('cutscene');
   await created('npcs');
   await created('items');
   await created('outline');
+  await created('layout');
+  await created('behaviours'); // the prompt cancelled
+  answer = 'hello';
+  await created('text');
+  answer = null;
   assert.deepEqual(posts, [
     { kind: 'cutscene', name: 'cutscene_2' },
     { kind: 'npcs', name: 'npc_2' },
     { kind: 'items', name: 'item_2' },
     { kind: 'outline', name: 'outline' },
+    { kind: 'layout', name: 'layout' },
+    { kind: 'text', name: 'hello' },
   ]);
   assert.deepEqual(picks, [
     { kind: 'scene', key: 'cutscene_2' },
     { kind: 'npc', key: 'npc_2' },
     { kind: 'item', key: 'item_2' },
+    { kind: 'text', key: 'hello' },
   ]);
 });
 
