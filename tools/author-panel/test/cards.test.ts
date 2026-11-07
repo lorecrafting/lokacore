@@ -49,3 +49,29 @@ test('a modal scene switched to Opening writes exactly start: true', async () =>
     await page.close();
   }
 });
+
+// Break: a switch to a quest writes a key outside the compiled quests or no outcome (valid_source?,
+// scenes.ex:149-156), or a typed quest outcome never reaches the file (Enter, blur).
+test('a modal scene switched to a quest writes its key and completed, then the typed outcome', async () => {
+  const page = await open({ selection: { kind: 'scene', key: 'letter_ash' } });
+  const file = join(dir, 'showcase/scenes/letter_ash.json');
+  const before = readFileSync(file, 'utf8');
+  const on = () => JSON.parse(readFileSync(file, 'utf8')).on;
+  const until = async (outcome: string) => {
+    for (let t = 0; on().outcome !== outcome && t < 50; t++) await page.waitForTimeout(100);
+  };
+  try {
+    const card = page.getByLabel('scene card');
+    await card.getByLabel('on', { exact: true }).waitFor({ timeout: boot });
+    await card.getByLabel('on', { exact: true }).selectOption('quest');
+    await until('completed');
+    assert.deepEqual(on(), { quest: 'bounty', outcome: 'completed' });
+    await card.getByLabel('outcome', { exact: true }).fill('delivered');
+    await card.getByLabel('outcome', { exact: true }).press('Enter');
+    await until('delivered');
+    assert.deepEqual(on(), { quest: 'bounty', outcome: 'delivered' });
+  } finally {
+    writeFileSync(file, before);
+    await page.close();
+  }
+});
