@@ -132,7 +132,8 @@ const NODE: Record<string, string> = { cutscene: 'scene', areas: 'room' };
 /** The graph kind a starter compiles to (`rooms` → `room`, `statuses` → `status`, `cutscene` → `scene`). */
 export const nodeOf = (kind: string) => NODE[kind] ?? kind.replace(/(us)es$|s$/, '$1');
 /** The starter a Hierarchy kind header's + makes: `room` → rooms (the later of areas and rooms wins). */
-export const STARTER: Record<string, string> = Object.fromEntries(NEW.map((k) => [nodeOf(k), k]));
+// The actions starter writes a scripted action, not the command `action` nodes listed under that header, so it gets no +.
+export const STARTER: Record<string, string> = Object.fromEntries(NEW.filter((k) => k !== 'actions').map((k) => [nodeOf(k), k]));
 /** The Hierarchy's New list: every starter of edit/new.json, by what an author is making. */
 export const GROUPS: [string, string[]][] = [
   ['Places', ['rooms', 'areas', 'barriers', 'transports', 'structures']],

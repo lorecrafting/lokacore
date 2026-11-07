@@ -195,7 +195,13 @@ test('the Hierarchy + lists every starter once, and a kind header`s + makes its 
   );
   assert.deepEqual(shell.GROUPS.flatMap(([, kinds]) => kinds).sort(), [...starters].sort());
   assert.deepEqual(
-    [shell.STARTER.room, shell.STARTER.scene, shell.STARTER.status, shell.STARTER.npc],
-    ['rooms', 'cutscene', 'statuses', 'npcs'],
+    [
+      shell.STARTER.room,
+      shell.STARTER.scene,
+      shell.STARTER.status,
+      shell.STARTER.npc,
+      shell.STARTER.action,
+    ],
+    ['rooms', 'cutscene', 'statuses', 'npcs', undefined],
   );
 });

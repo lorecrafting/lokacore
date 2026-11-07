@@ -129,16 +129,16 @@ const Header = ({ kind, make, label }: Make & { kind: string }) => (
 );
 
 /** Every definition of the last good compile, grouped by kind; a + makes a new one (`make`). */
-export function Hierarchy({ story, picked, here, pick, play, make }: {
+export function Hierarchy({ story, picked, here, pick, play, make, sel }: {
   story?: Story;
   picked?: string;
   here?: string;
   pick: Pick;
   play: (room: string) => void;
   make: (kind: string) => void;
+  sel?: Selection; // the selection `make` runs on (App.tsx), so a + names what it makes
 }) {
   if (!story) return <p className="p-3 text-muted-foreground">Waiting for the watcher.</p>;
-  const sel = picked ? fromRef(picked) : undefined;
   const label = (k: string) => COMMANDS.find((c) => c.id === newCommand(k, sel))!.label; // New item here, in a room
   const kinds = new Map<string, Story['graph']['nodes']>();
   for (const n of story.graph.nodes) kinds.set(n.kind, [...(kinds.get(n.kind) ?? []), n]);
