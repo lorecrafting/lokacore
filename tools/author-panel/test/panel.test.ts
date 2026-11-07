@@ -209,7 +209,7 @@ test('a held edit gives way to its undoing, Undo and a reselect', async () => {
   for (let t = 0; mass() !== 600 && t < 50; t++) await page.waitForTimeout(100);
   await undo.waitFor({ timeout: boot });
   await page.getByRole('button', { name: 'World', exact: true }).click();
-  await page.getByRole('button', { name: 'oilskin', exact: true }).click();
+  await page.getByRole('button', { name: 'oilskin · an oilskin coat', exact: true }).click();
   await undo.waitFor({ timeout: boot }); // the reselected card keeps its last write's Undo
   await field.waitFor({ timeout: boot });
   await set('-1');
