@@ -26,6 +26,7 @@ import {
   names,
 } from './story_counts.ts';
 import { refString } from '../src/runtime/decision.ts';
+import { triggers } from './scene_trigger.ts';
 
 type Dev = { canonical: string; sha256: string };
 type Diagnostic = { rel?: string };
@@ -161,6 +162,7 @@ export function story(source: string, dev: Dev, diagnostics: Diagnostic[]) {
     hidden: hiddenSkills(c), // the cards' add menus and links (allowed.ts, link.ts)
     unlinkable: unlinkable(c),
     shorts: shorts(refs, defs), // what Bind may write
+    triggers: triggers(c, graph.edges), // what a modal scene may start on (Scene.tsx)
   };
 }
 
