@@ -42,7 +42,8 @@ export function cut(bytes: string, op: Op, steps = false): { after: string } | {
   if (steps) return { refused: 'the twin .json carries steps: edit its pages there' };
   const lines = bytes.split('\n');
   const all = blocks(lines);
-  const o = (op ?? {}) as Record<string, any>;
+  const o = (op && typeof op === 'object' ? op : {}) as Record<string, any>;
+  if (Object.keys(o).filter((k) => k !== 'by').length !== 1) return { refused: 'one op per write' };
   const n = 'add' in o ? o.add?.after : (o.remove ?? o.move ?? o.split ?? o.join);
   const i = all.findIndex(([a, b]) => a <= n - 1 && n - 1 <= b);
   if (!Number.isInteger(n) || i < 0) return { refused: `no page at line ${n}` };

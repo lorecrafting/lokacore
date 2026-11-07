@@ -37,7 +37,7 @@ function useSource(rel: string, diag: Props['diag']) {
   useEffect(() => void load(), [load]);
   const outside = diag.changes.find((c) => c.file === rel);
   useEffect(() => {
-    if (file && outside && outside.sha256 !== file.sha256) void load();
+    if (file !== undefined && outside && outside.sha256 !== file?.sha256) void load();
   }, [outside]); // eslint-disable-line react-hooks/exhaustive-deps
   const post = async (path: string, sent: object) => {
     const { ok, told } = await ask(path, sent);
@@ -145,8 +145,9 @@ export function ModalScene({ rel, context, diag }: Props) {
     <div className="grid min-w-0 grid-cols-1 gap-2 px-3 text-xs" aria-label="scene card">
       {/* ponytail: the cut's last op undoes first, then the form's; an order across both needs one stack */}
       <Header rel={rel} diag={diag} undo={cut.back ?? (card.undo ? card.back : undefined)} />
-      {cut.refused || card.refused ? <Refusal boxed>{cut.refused ?? card.refused}</Refusal> : null}
-      <Pages source={cut} steps={'steps' in draft} />
+      {cut.refused ? <Refusal boxed>{cut.refused}</Refusal> : null}
+      {card.refused ? <Refusal boxed>{card.refused}</Refusal> : null}
+      <Pages source={cut} steps={'steps' in (card.saved.doc as Doc)} />
       {modal ? (
         <>
           <Trigger

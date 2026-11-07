@@ -85,7 +85,7 @@ test('/restructure: each page op over every fixture cut changes only its lines; 
 
 // Break: a write over bytes changed since the card read them (a stale `was`, or a `carry` file the
 // card showed that another op since changed), a twin with `steps` whose pages are not the cut's,
-// or a page op on a file that is not a cut.
+// a page op on a file that is not a cut, or an op that is not one op (a 500, or the wrong op run).
 test('/restructure refuses a stale card and writes nothing', async (t) => {
   const { ask, read, plant } = await served(t);
   const bytes = 'A.\n\nB.\n---\n';
@@ -101,8 +101,12 @@ test('/restructure refuses a stale card and writes nothing', async (t) => {
   plant('* A.\n', 'scenes/y.scene');
   const scene = { ...sent, file: 'scenes/y.scene', was: sha256('* A.\n') };
   assert.equal((await ask('/restructure', scene)).status, 400);
+  for (const op of ['join', { remove: null, join: 1 }])
+    assert.equal((await ask('/restructure', { ...sent, op })).status, 400, JSON.stringify(op));
   assert.equal(read(), bytes);
-  assert.equal((await ask('/restructure', sent)).status, 200); // the control: the same op, fresh
+  // the control: the same op, fresh, its carry fresh
+  const room = [{ file: 'rooms/a.json', was: sha256('{}\n') }];
+  assert.equal((await ask('/restructure', { ...sent, carry: room })).status, 200);
 });
 
 // Break: the card offers a remove that leaves no page, or a move that lifts `---` off the end, which

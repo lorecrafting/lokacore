@@ -63,8 +63,7 @@ export function set(
 }
 
 /** POST /restructure (docs/design/scene-structure-rulings.md §3): a `.cut` page op, recomputed from
- * disk. A `.cut` op changes only its file, so a `carry` entry (a file the card showed changing) is a
- * file that differs: 409 with its bytes. */
+ * disk. A `carry` file (one the card showed) changed since its `was` is a 409 with its bytes. */
 export function restructure(
   root: string,
   { file, was, op, carry }: Record<string, any>,
@@ -75,7 +74,10 @@ export function restructure(
   if (!Array.isArray(carry)) refuse(400, 'carry: an array of {file, was}');
   const before = readFileSync(path, 'utf8');
   if (sha256(before) !== was) stale(before);
-  for (const c of carry) stale(readFileSync(guarded(root, c?.file, 'read'), 'utf8'));
+  for (const c of carry) {
+    const bytes = readFileSync(guarded(root, c?.file, 'read'), 'utf8');
+    if (sha256(bytes) !== c.was) stale(bytes);
+  }
   const twin = path.replace(/\.cut$/, '.json');
   let steps = false;
   try {
