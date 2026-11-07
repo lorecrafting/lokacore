@@ -4,83 +4,44 @@ The present only: open work, next steps, owner questions, and standing owner rul
 yet. Rewrite this page in place once per session, at its end; never add dated session sections. History lives in git, Beads and `docs/reviews/`; lessons
 go to [PM lessons](lessons/pm.md) ([harness patterns](decisions/owner-decision-harness-patterns-2026-10-28.md)).
 
-AS OF main after #689; written 2026-11-06 by Claude Code (Opus 5.5), the editor build session (parallel, five agents). `kernel_api` is 1.159 (no contract slice since). Lean default in force since #533.
+AS OF main 9e8757163 (after #702); written 2026-11-07 by Claude Code (Opus 5.5), the world-builder polish session. `kernel_api` is 1.159 (no contract slice since).
 
-## Direction (owner 2026-10-30 to 2026-11-06)
+## Direction (owner 2026-10-30 to 2026-11-07)
 
-- **The prologue is v1** (epic loka-g5hh): a free, complete 3 to 5 hour short story ending on the landing. Outline:
-  [prologue outline](worldbuilding/notes/prologue-outline-2026-10-30.md) (Fable draft, not canon).
-- **The owner is now evaluating the editor by building prologue Part 1** (beats 1 to 9, outline section 7) and sends
-  feedback in the conversation. Start: `bin/author.sh` (watcher, Book preview and panel in one command; with no
-  argument it opens the last world; New world in the world picker makes one), later `bin/author.sh cartridges/<name>`.
-  `bin/loka dev` alone is only the watcher. In the Book: double-click a line, Enter saves, Esc cancels, Cmd-Z puts back
-  (also a palette Delete, #687), `[`/`]` walk `~` lines.
-- **The owner writes every player-facing word** in the prologue ([owner rules](system/owner-rules.md#process)); agents use `~`.
-  Exception: the PM writes the **showcase's** combat, corpse, shrine, resurrection and consumable words and the Book's
-  chrome words when the designer rules them.
-- **Descoping before Pro:** the plan drops to Pro around 2026-11-10; after it: one session, Sonnet for content, reviewers
-  for engine changes, second opinions for save and contract changes. Author-side edge-case guards are nits, not fix rounds.
-- **Agent cap is five** (owner 2026-11-05), counting agents waiting on CI. Never bypass hooks, the load gate or CI; wait
-  for load with a background until-loop (two readings under 7 avoids a refused spawn).
-- **Authoring tool first, then write slowly; no aggressive mechanic expansion; polish** (owner 2026-11-04). Ideas parked
-  at P4 with label `deferred`. **loka-ni2zd** (NPC routines that really gather, sell and feed the economy) is NOT before
-  Pro; the owner designs it in a separate session.
-- **Fable** reviews foundation, trust-boundary, save and contract slices and gives design second opinions; developers are Opus.
-- **Card bar:** a card never offers or writes what the compiler refuses; gates go two ways with the compiler
-  `file:line`; a path leaves the generic baseline only when a bespoke part really draws it.
-- **Developers walk in real Chrome on the final head**, screenshots in their own subfolder of the PM scratchpad, PR body
-  drafts in their own worktree. **PR bodies are the reviewer's brief.**
-- **Hunger and thirst are retired** (loka-vduxr.61). **Death outside a fight**: owner option B (#629/#634).
+- **Pro low-token workflow is in force from 2026-11-07** (owner, ahead of the ~11-10 plan change): one session does small slices itself; at most one developer at a time; a separate reviewer only for engine, save, contract or compiler-facing slices; no mutation runs on editor polish; Sonnet for content.
+- **The prologue is v1** (epic loka-g5hh). The owner is building **Part 1** (beats 1 to 9, [outline](worldbuilding/notes/prologue-outline-2026-10-30.md)) in the editor, in `cartridges/prologue/` (**uncommitted; the owner said not now, 2026-11-07**). Start: `bin/author.sh` (reopens the last world). Restart it after each merge.
+- **The owner writes every player-facing word**; agents use `~`. Polish feedback goes to Beads (under loka-wfrgk), fixes batch on the owner's go; blockers are fixed at once.
+- **Card bar:** a card never offers or writes what the compiler refuses; gates go two ways with the compiler `file:line`.
+- NPC routines (loka-ni2zd) wait for the owner's own design session. Hunger and thirst are retired.
 
-## The editor today (main)
+## Merged this session (#690 to #702)
 
-Three-column shell (Cmd-K over `/find`), map with edits, edit model and gate, generic card with a capability-filtered
-add menu, Book add-here, world picker and New world, resident compiler. Bespoke cards: Room (details save with one Tab,
-optional parts folded), World, NPC/Item with Combat numbers and Schedule, Reaction/Action, Quest, Scene text, Dialogue
-choice tree. Story map S1 to S3 with Add beat in number order and New outline. Palette New for every kind; Delete
-refused while named (names the `file:line`), takes a set's extra files and templates with it, and is undone by Cmd-Z or
-the palette's Undo (#687). Card saves run one at a time; a failed save shows a refusal and keeps the draft (#685).
-Coverage tests (#684): a CRUD matrix over every registry kind, card round-trip, every server route has a caller; GAPS
-rows in `kernel/ts/test/editor_crud.test.ts` name their Beads issue and go red when stale.
-
-Go/no-go walk (this session, main af742b449): GO after #687. Built beats 1 to 3 in a fresh world; lint, Trace, Flow/Map
-open, schedule, status, detail, add beat, failed save and reload all held.
+Card words fields (#690), room Look clears the log (#691), blank world places its room and declares knowledge (#692), `/line` finds a key's own line (#693), autogenerated keys and `key · name` rows plus a server refusal of taken keys (#694), plain field descriptions for Part 1 kinds (#695), scene Trigger row incl. Opening (#696), Add menus with descriptions and `docs/FIELD-GUIDE.gen.md` (#697), Hierarchy New + (#698), story() size fix (#699), map grow handles (#700), capitalised Book lines open their field, shared words open none (#702).
 
 ## In flight at handoff
 
-- Nothing. This session merged 40 PRs (#651 to #689).
+- **PR #701** (design only, loka-wfrgk.100.5): scene structure in the GUI. Owner 2026-11-07: a choice's key is separated from its words (` #<key>` suffix, the card pins the key before rewording) instead of rename; old dev saves past a changed choice may break (accepted). Merge it, then build S1 (`/restructure` + `.cut` pages), S2 (`.scene` lines), S3 (explicit choice keys: compiler grammar, reviewer required).
 
 ## Resume, in order
 
-1. **Owner feedback from the Part 1 build** comes first; file it in Beads, fix blockers. The owner's 2026-10-31
-   Part 1 and NPC rulings are on main's outline (#689).
-2. **Editor P2s:** loka-wfrgk.90 (a click-in edit saves the first keystroke early; cause is the queued
-   `setTimeout(card.commit)` reading late, try field-to-field at CPU throttle 4; #688's attempt was reverted), .94
-   (schedules and details hidden from add menus until World adds the capability), .68 (`bin/loka new` key churn),
-   loka-lvo9i (CI flake: `editor_crud.test.ts:262` sees `play.test.ts:365`'s probe file).
-3. **Coverage PR B** (every schema field reachable, every menu offer compiles, loka-bqnu4; design-table rows each name a
-   test) and a read-only **test-cruft audit** driven by a mutation sweep (tests that kill no mutant).
-4. **P3 editor nits:** loka-wfrgk.84.2, .86.1, .87.1, .89, .91, .92.1, .92.2, .95, .65, .72, .81, .82, .42.x, .43, .47,
-   .53.x, .54, .56, .18.x.
-5. **Engine and design:** loka-kgd.222 (no fall line on an off-fight death, P2, a bug per spec), .221 (dead page
-   rulings), .223 (sim crash at `flows.ts:175`), loka-x6t.141 (designer dead-page text), loka-wfrgk.73 (in-fight death
-   page explains nothing; design question).
+1. Owner feedback from the Part 1 build: file in Beads, fix blockers.
+2. Merge #701; build S1, S2, S3 one at a time.
+3. P1s: loka-wfrgk.94 (schedules and details hidden until World adds them), the key-tagging follow-up under .100 (shared-word lines open their field again), loka-lvo9i (CI flake, hit 3 times), loka-wfrgk.100.4 (card field undo, 409 choices).
+4. Housekeeping PR: loka-ebnu3, jqxb8, grdiq, lvo9i, wfrgk.96, the panel.test.ts:225 flake, and the 2026-11-07 retro items (worktree_setup leaves node_modules empty; after_merge regenerates the system graph; card logic out of .tsx).
+5. P2 editor items filed this session: .97 (writer guide), .98 (author.sh with no world), .99 (stale panel deps, taken ports), the field-guide follow-ups under .102, the map handle placement (designer), `bin/loka new` duplicate keys.
 
 ## Owner calls this session (override any)
 
-- A death outside a fight shows no "You are dead" line: a bug per spec (loka-kgd.222).
-- An encounter arriving during the dead page waits for Let go; a second off-fight death keeps the first death's page
-  (loka-x6t.141, loka-kgd.221).
-- NPC routines (loka-ni2zd) deferred to a separate design session.
-- Hunger and thirst are retired, so prologue beat 9's feast lines are a writing call for the owner.
-- PM calls: deleting a scene does not delete its quest (`taken()` refuses and names the quest); palette Delete is
-  undoable rather than confirmed (no new author words); #688's unproven .90 change was reverted rather than shipped.
+- Everything editable in the GUI (loka-wfrgk.100), scene structure included; choice keys fixed, words free.
+- Autogenerated keys, no rename; names shown beside keys.
+- The easier-to-build batch (.101, .102, .104, .107, .108): done.
+- Look on the room title starts the log over (spec in `docs/system/book-ui.md`).
+- `identity_sampler` stranger edit reverted; `prologue` world stays uncommitted for now.
+- PM calls: a capability gate on New was dropped (each starter adds its own capability, `starters.ex:70/:80`); shared drawn words open no field rather than risk a wrong write; Alt-click with stale words opens nothing (follow-up to say so).
 
 ## Waiting on the owner
 
-- Part 1 build feedback (in the conversation).
-- Older: studio defaults, weapon proficiency shape, store fees, iOS first, the save guarantee, #574 acceptance, #564
-  calls, hosting (12uz). Retro 2026-11-06: loka-ebnu3, jqxb8, grdiq and lvo9i approved for the next housekeeping PR; fs76w closed.
+- Part 1 build feedback. Older: studio defaults, weapon proficiency shape, store fees, iOS first, the save guarantee, #574 acceptance, #564 calls, hosting (12uz).
 
 ## Owner's writing list (prologue; text keys, no prose from agents)
 
