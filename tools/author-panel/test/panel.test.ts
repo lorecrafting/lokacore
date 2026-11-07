@@ -2,7 +2,7 @@
 // `bin/loka dev --watch` on the toolbox showcase, in stable Chrome (the runner image has it, as the
 // Storybook jobs use). A new check: a test() here naming its break, with a red control.
 // bin/mutate_diff.sh runs this file for every panel .tsx line, by this marker: mutate-covers: src
-// size: allow 660, every panel E2E shares harness.ts's one Vite + bin/loka dev server pair and Chrome
+// size: allow 664, every panel E2E shares harness.ts's one Vite + bin/loka dev server pair and Chrome
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { appendFileSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
@@ -193,8 +193,8 @@ test('a dialogue already broken takes the edit that fixes it', async () => {
 
 // Breaks (Generic.tsx useCard, loka-wfrgk.63): a held edit's refusal outliving the edit taken back;
 // Undo rebasing the held draft onto the undone file; reselecting the card dropping its Undo; a
-// refused write clearing the last write's Undo; an error the file already has holding every edit
-// to its field (the #675 rule: only a new error holds).
+// refused write clearing the last write's Undo; a failed save (500 text) not shown; an error the
+// file already has holding every edit to its field (the #675 rule: only a new error holds).
 test('a held edit gives way to its undoing, Undo and a reselect', async () => {
   const page = await open({ right: 420, selection: { kind: 'item', key: 'oilskin' } });
   const file = join(dir, 'showcase/areas/fell_road/items/oilskin.json');
@@ -218,6 +218,10 @@ test('a held edit gives way to its undoing, Undo and a reselect', async () => {
   await page.route('**/__author/change', (r) => r.fulfill({ status: 409, json: 'refused here' }));
   await set('700');
   await page.getByText('refused here').waitFor({ timeout: boot });
+  await page.route('**/__author/change', (r) => r.fulfill({ status: 500, body: 'boom' })); // not JSON
+  await set('800');
+  await page.getByText('"boom" is not valid JSON').waitFor({ timeout: boot }); // shown, not swallowed
+  assert.equal(await field.inputValue(), '800'); // the draft held, not reloaded
   await page.unroute('**/__author/change');
   assert.ok(await undo.isVisible()); // the refused write wrote nothing: the last Undo stands
   await set('-1');

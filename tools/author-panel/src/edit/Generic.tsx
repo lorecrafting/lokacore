@@ -97,7 +97,8 @@ function useFile(rel: string, diag: Diag) {
   // one write at a time, each from the file the last one reloaded: a blur while a write is in flight
   // (a field left for the next one, typed into at once) would send a stale `was`, be refused and dropped
   const queue = useRef(Promise.resolve());
-  const queued = (write: () => Promise<void>) => void (queue.current = queue.current.then(write).catch(console.error));
+  const queued = (write: () => Promise<void>) =>
+    void (queue.current = queue.current.then(write).catch((e) => setRefused(String(e)))); // a 500's text, a dropped connection
   return { saved, draft, setDraft, refused, setRefused, latest, file, load, queued };
 }
 
