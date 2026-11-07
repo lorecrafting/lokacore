@@ -295,12 +295,34 @@ test('a + on a free side of the selected room makes and links a room there and s
     .getByRole('button', { name: 'room_2: new room north', exact: true })
     .waitFor({ timeout: boot });
   assert.equal(await page.getByRole('button', { name: 'room_2: new room down' }).count(), 0); // its exit to room_1
+  await page.evaluate(() => {
+    // record what the panel posts to the Book frame (book.ts sends through contentWindow only)
+    const real = Object.getOwnPropertyDescriptor(HTMLIFrameElement.prototype, 'contentWindow')!;
+    const w = window as unknown as { ops: string[] };
+    w.ops = [];
+    Object.defineProperty(HTMLIFrameElement.prototype, 'contentWindow', {
+      get() {
+        const f = real.get!.call(this) as Window;
+        return {
+          postMessage: (m: { op: string }, o: string) => (w.ops.push(m.op), f.postMessage(m, o)),
+        };
+      },
+    });
+  });
+  await page.getByRole('button', { name: 'room_2: new room north', exact: true }).focus();
+  await page.keyboard.press('Shift+Enter'); // grows; the map's Shift-Enter (play there) never sees it
+  assert.deepEqual(await row('room_3'), { room: 'room_3', x: -3, y: 0, z: 1 });
+  await page
+    .getByRole('button', { name: 'room_3: new room north', exact: true })
+    .waitFor({ timeout: boot }); // compiled: the next page's free key is room_4
+  const ops = await page.evaluate(() => (window as unknown as { ops: string[] }).ops);
+  assert.deepEqual(new Set(ops), new Set(['select'])); // the new room shown, no go_to_room
   await page.close();
   page = await open({ selection: { kind: 'room', key: 'farm_kitchen' } });
   await page
     .getByRole('button', { name: 'farm_kitchen: new room down', exact: true })
     .focus({ timeout: boot });
   await page.keyboard.press('Space');
-  assert.deepEqual(await row('room_3'), { room: 'room_3', x: -4, y: 1, z: -1 });
+  assert.deepEqual(await row('room_4'), { room: 'room_4', x: -4, y: 1, z: -1 });
   await page.close();
 });

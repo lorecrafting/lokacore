@@ -136,6 +136,7 @@ function Plus({ r, dir, at: [x, y, s] }: { r: MapRoom; dir: string; at: [number,
       onKeyDown={(e) => {
         if (e.key !== 'Enter' && e.key !== ' ') return;
         e.preventDefault();
+        e.stopPropagation(); // else the map's own Enter picks, or with Shift plays, the room it had
         grow();
       }}
     >
@@ -165,15 +166,10 @@ function useWheel(svg: React.RefObject<SVGSVGElement | null>, d: DrawProps) {
       const box = el.getBoundingClientRect();
       const moved =
         e.ctrlKey || e.metaKey
-          ? map.zoomAt(
-              now,
-              Math.exp(-e.deltaY / 100),
-              {
-                x: e.clientX - box.left,
-                y: e.clientY - box.top,
-              },
-              least,
-            )
+          ? map.zoomAt(now, Math.exp(-e.deltaY / 100), {
+              x: e.clientX - box.left,
+              y: e.clientY - box.top,
+            }, least)
           : { ...now, x: now.x - e.deltaX, y: now.y - e.deltaY };
       v.set(map.keep(moved, map.bounds(level), size));
     };
