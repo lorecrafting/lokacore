@@ -30,6 +30,7 @@ const edits: (At & { id: number; key: string; draft: string })[] = []; // /edit 
 let unconfirmed = new Set<string>();
 let field: Field | undefined;
 let opening = false; // a /line in flight: a second double-click opens nothing
+let putting = Promise.resolve(); // the Cmd-Z presses, in order
 let landed: HTMLElement | undefined;
 let selected: { kind: string; key: string; add?: string[] } = { kind: '', key: '' }; // the panel's selection: its lines are marked
 let asked = false; // a Book click: the selection's add-here menu shows once the panel offers it
@@ -216,7 +217,7 @@ function onKey(e: KeyboardEvent, inField = typing(e.target), relayed = false) {
   if (asks) return void (e.preventDefault?.(), hooks.tell({ shortcut: asks }));
   if ((e.metaKey || e.ctrlKey) && !e.shiftKey && e.key === 'z' && !inField) {
     e.preventDefault?.();
-    return void putBack();
+    return void (putting = putting.catch(() => {}).then(putBack)); // after the last press: its journal
   }
   const onLanded = relayed || e.target === document.body || e.target === landed; // not a choice's Enter
   if (e.key === 'Enter' && landed && !inField && onLanded) {

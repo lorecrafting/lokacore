@@ -1,4 +1,4 @@
-// size: allow 580, one editor's keys, saves, conflicts and add-here walked over one stubbed page
+// size: allow 585, one editor's keys, saves, conflicts and add-here walked over one stubbed page
 // E5's in-Book editor (docs/design/prose-in-the-book-rulings.md) in headless Google Chrome, over a
 // page of plain lines and a stubbed /__author route; the Book itself is the walk's (web-preview.md).
 import assert from 'node:assert/strict';
@@ -330,12 +330,18 @@ test('Cmd-Z puts back a palette Delete first, then this page`s edit', async () =
     if (body?.id === 9) journal.unshift({ id: 10, what: 'undo delete areas/x.json' });
     return plain(path, body);
   };
-  assert.deepEqual(await told1(() => page.keyboard.press('ControlOrMeta+z')), {
-    note: 'put back areas/x.json',
-  });
-  assert.deepEqual(await told1(() => page.keyboard.press('ControlOrMeta+z')), {
-    note: 'put back a.loka:3',
-  });
+  await page.route(`${ORIGIN}/__author/journal`, (r) => r.abort(), { times: 1 }); // a restart
+  await page.keyboard.press('ControlOrMeta+z');
+  for (let t = 0; !thrown.length && t < 50; t++) await page.waitForTimeout(100);
+  assert.equal(thrown.splice(0).length, 1); // shown as a page error; the next presses still run
+  const n = (await told()).length;
+  await page.keyboard.press('ControlOrMeta+z'); // two presses at once: each takes its own entry
+  await page.keyboard.press('ControlOrMeta+z');
+  await page.waitForFunction((n) => (window as unknown as { told: [] }).told.length > n + 1, n);
+  assert.deepEqual((await told()).slice(n), [
+    { note: 'put back areas/x.json' },
+    { note: 'put back a.loka:3' },
+  ]);
   assert.deepEqual(
     posted('/undo').map((b) => b.id),
     [9, 7],
