@@ -257,7 +257,7 @@ defmodule Loka.Content.Starters.Templates do
   end
 
   # An existing row keeps its coordinates; a new room gets the next x.
-  defp layout(_, c), do: %{"layout.json" => with_rows(c["layout"], c["room_list"])}
+  defp layout(_, c), do: %{"layout.json" => with_rows(c["layout"], c["places"])}
 
   @doc "The rows, the room joined `--from` beside its source, then the next x for each other lack."
   def with_rows(rows, rooms, name \\ nil, from \\ nil) do

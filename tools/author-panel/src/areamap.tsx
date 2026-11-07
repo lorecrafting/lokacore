@@ -172,7 +172,8 @@ function drop(e: React.DragEvent<HTMLDivElement>, p: MapProps, l: Level) {
   const t = e.dataTransfer.getData(DRAGGED);
   const box = e.currentTarget.getBoundingClientRect();
   if (!r && !t) return;
-  if (!l.v.view) return r && edit((ed) => ed.first()); // an empty map has no cells to aim at
+  if (!l.level.length) return r && edit((ed) => ed.first()); // an empty map has no cells to aim at
+  if (!l.v.view) return;
   const at = cellAt(l.v.now.current!, { x: e.clientX - box.left, y: e.clientY - box.top });
   if (r) return edit((ed) => ed.place(r, { ...at, z: l.z }));
   const room = l.level.find((o) => o.at?.x === at.x && o.at?.y === at.y);

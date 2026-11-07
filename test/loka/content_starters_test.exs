@@ -25,11 +25,12 @@ defmodule Loka.ContentStartersTest do
 
   # Breaks: a starter missing a field or capability the compiler requires, or two starters
   # sharing a key (the service's entitlement once took the action's fact, which made it reserved);
-  # a new world's entry room off the map (the panel's first drop had no cell to aim at).
+  # a new world's entry room off the map (no cell to drop on), or its row refused (no knowledge).
   test "a new cartridge with one starter of every kind compiles", %{tmp_dir: tmp} do
     dir = Path.join(tmp, "mine")
     assert {:ok, _} = Starters.write(dir, "cartridge", dir)
     assert read(dir, "layout.json") == [%{"room" => "start", "x" => 0, "y" => 0, "z" => 0}]
+    assert {:ok, _, _} = Loka.Content.compile(dir)
     first = ~w(items npcs resources facts quests)
     rest = (Starters.kinds() -- first) -- ~w(cartridge layout)
 
