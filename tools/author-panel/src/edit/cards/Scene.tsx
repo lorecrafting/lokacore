@@ -1,25 +1,32 @@
 // The Scene cards (docs/rnd/gui-editor-design-2026-11-04.md §4.4, E6d): a `.scene` dialogue's text,
 // line by line, its speakers and links picked in place (POST /set) and its words edited in place;
-// a modal scene's treatment picked from the schema's (its steps' words in the form's words fields).
+// a modal scene's trigger and treatment picked from the compile's and the schema's (its steps' words
+// in the form's words fields).
 import { useCallback, useEffect, useState } from 'react';
 import { refusePick } from '../../../../../kernel/ts/play/card.ts';
 import { picks, sceneLines, type Line } from '../../../../../kernel/ts/play/scene_lines.ts';
+import { type On } from '../../../../../kernel/ts/play/scene_trigger.ts';
 import { ask, type useDiagnostics } from '../../author.ts';
 import { Input } from '../../components/ui/input.tsx';
 import { WordsField, type Context } from '../fields.tsx';
 import { Header, useCard } from '../Generic.tsx';
 import { Refusal } from '../templates.tsx';
 import { RoomForm } from './Room.tsx';
+import { Trigger } from './Trigger.tsx';
 
 type Props = { rel: string; context: Context; diag: ReturnType<typeof useDiagnostics> };
 type Doc = Record<string, unknown>;
+type Source = { bytes: string; sha256: string; text: Record<string, string> };
 
 export function SceneText({ rel, context, diag }: Props) {
-  const [file, setFile] = useState<{ bytes: string; sha256: string; text: Record<string, string> }>();
+  const [file, setFile] = useState<Source>();
   const [undo, setUndo] = useState<string>();
   const [refused, setRefused] = useState<string>();
   const load = useCallback(
-    () => fetch(`/__author/source?file=${encodeURIComponent(rel)}`).then(async (r) => setFile(await r.json())),
+    () =>
+      fetch(`/__author/source?file=${encodeURIComponent(rel)}`).then(async (r) =>
+        setFile(await r.json()),
+      ),
     [rel],
   );
   useEffect(() => void load(), [load]);
@@ -35,12 +42,15 @@ export function SceneText({ rel, context, diag }: Props) {
     await load();
   };
   // the last compile's words (GET /source), then the push's changed ones
-  const lines = sceneLines(rel, file.bytes, 'dialogue', { ...file.text, ...diag.text }, diag.placeholders ?? {});
+  const words = { ...file.text, ...diag.text };
+  const lines = sceneLines(rel, file.bytes, 'dialogue', words, diag.placeholders ?? {});
+  const back = undo ? () => void post('undo', { id: undo }) : undefined;
+  const set: Setter = (l, value) => void post('set', { file: rel, line: l.n, was: l.text, value });
   return (
     <div className="grid min-w-0 grid-cols-1 gap-2 px-3 text-xs" aria-label="scene card">
-      <Header rel={rel} diag={diag} undo={undo ? () => void post('undo', { id: undo }) : undefined} />
+      <Header rel={rel} diag={diag} undo={back} />
       {refused ? <Refusal boxed>{refused}</Refusal> : null}
-      <Lines lines={lines} context={context} set={(l, value) => post('set', { file: rel, line: l.n, was: l.text, value })} />
+      <Lines lines={lines} context={context} set={set} />
     </div>
   );
 }
@@ -55,7 +65,11 @@ function Lines({ lines, context, set }: { lines: Line[]; context: Context; set: 
         <li key={l.key ?? `${l.n}:${l.text}`} className="flex min-w-0 items-center gap-2">
           <span className="w-6 shrink-0 text-right text-muted-foreground">{l.n}</span>
           {l.verb ? (
-            <Value line={l} keys={picks(l.verb, context.nodes, context.unlinkable)} set={(value) => set(l, value)} />
+            <Value
+              line={l}
+              keys={picks(l.verb, context.nodes, context.unlinkable)}
+              set={(value) => set(l, value)}
+            />
           ) : l.key ? (
             <div className="min-w-0 flex-1">
               <WordsField label="" k={l.key} words={l.text.replace(/^\s*\* /, '')} />
@@ -76,7 +90,9 @@ function Value({ line, keys, set }: { line: Line; keys: string[]; set: (value: s
   const refused = refusePick({ kind: line.verb!, keys }, value);
   return (
     <label className="flex min-w-0 flex-1 items-center gap-2">
-      <span className="whitespace-pre text-muted-foreground">{line.text.slice(0, line.text.indexOf(':') + 1)}</span>
+      <span className="whitespace-pre text-muted-foreground">
+        {line.text.slice(0, line.text.indexOf(':') + 1)}
+      </span>
       <Input
         list={list}
         aria-label={`line ${line.n} ${line.verb}`}
@@ -108,6 +124,7 @@ export function ModalScene({ rel, context, diag }: Props) {
   const draft = (card.draft ?? {}) as Doc;
   const defs = (card.saved?.schema as { $defs?: Record<string, never> } | undefined)?.$defs ?? {};
   if (!card.saved) return <p className="px-3 text-xs text-muted-foreground">Loading {rel}</p>;
+  const modal = draft.control === 'modal'; // a presentation-only scene's `on: {rest}` stays the form's
   const pick = (t: string) => {
     const { treatment: _, ...rest } = draft;
     card.change(t ? { ...rest, treatment: t } : rest);
@@ -117,16 +134,38 @@ export function ModalScene({ rel, context, diag }: Props) {
     <div className="grid min-w-0 grid-cols-1 gap-2 px-3 text-xs" aria-label="scene card">
       <Header rel={rel} diag={diag} undo={card.undo ? card.back : undefined} />
       {card.refused ? <Refusal boxed>{card.refused}</Refusal> : null}
-      {draft.control === 'modal' ? (
-        <Treatment value={draft.treatment} of={treatments(defs)} pick={pick} />
+      {modal ? (
+        <>
+          <Trigger
+            on={(draft.on ?? {}) as On}
+            context={context}
+            put={(on) => (card.change({ ...draft, on }), card.commit())}
+          />
+          <Treatment value={draft.treatment} of={treatments(defs)} pick={pick} />
+        </>
       ) : null}
-      <RoomForm rel={rel} card={card} context={context} diag={diag} defs={defs} own={['treatment']} />
+      <RoomForm
+        rel={rel}
+        card={card}
+        context={context}
+        diag={diag}
+        defs={defs}
+        own={modal ? ['treatment', 'on'] : ['treatment']}
+      />
     </div>
   );
 }
 
 /** A modal scene's treatment: none, or one the schema lists. */
-function Treatment({ value, of, pick }: { value: unknown; of: string[]; pick: (t: string) => void }) {
+function Treatment({
+  value,
+  of,
+  pick,
+}: {
+  value: unknown;
+  of: string[];
+  pick: (t: string) => void;
+}) {
   return (
     <label className="flex items-center gap-2">
       <span className="text-muted-foreground">treatment</span>

@@ -59,6 +59,7 @@ const story = (outline: Story['outline']): Story => ({
   files: {},
   bundled: {},
   shorts: [],
+  triggers: { points: {}, actions: {}, taken: {}, named: {} },
 });
 const planted = story({
   parts: ['Arrival', null],
