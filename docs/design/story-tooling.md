@@ -33,8 +33,8 @@ already has, and gives a build order. Doc only; the owner picks, and each pick b
 
 Recommended order: R1, D1, C1, L1, F1, R2 (section 5); decided by the owner 2026-11-07 (section 6). The
 [studio tooling survey](../rnd/studio-tooling-survey-2026-11-07.md) (loka-wfrgk.114) widened the scope to
-engine, protocol and compiler changes; its slices are ruled in section 2b and placed in section 5b, after the
-decided six unless the owner reorders (survey question 1).
+engine, protocol and compiler changes; its slices are ruled in section 2b and placed in section 5b. **Owner 2026-11-07
+(paraphrased): yes to each survey recommendation**, so the build order is R1, W1, D1, K2, C1, L1 + L2, W2, F1 + W4, R2, K1, then W3 and E1 before v1.
 
 ## 1. What the compile already gives
 
@@ -235,8 +235,9 @@ kernel or the Book, except where a row says so.
 
 ### 5b. The survey's slices
 
-After the six above unless the owner reorders ([survey question 1](../rnd/studio-tooling-survey-2026-11-07.md#7-owner-questions)
-proposes R1, W1, D1, K2, C1, L1 + L2, W2, F1 + W4, R2, K1). No protocol or kernel change except E1.
+Owner 2026-11-07 (paraphrased): the survey's order, R1, W1, D1, K2, C1, L1 + L2, W2, F1 + W4, R2, K1
+([survey question 1](../rnd/studio-tooling-survey-2026-11-07.md#7-owner-questions)); the numbers below are the
+survey's rows, not the build order. No protocol or kernel change except E1.
 
 | Order | Slice | Size | Why here | Acceptance |
 |---|---|---|---|---|
