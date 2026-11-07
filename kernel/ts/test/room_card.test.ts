@@ -32,4 +32,5 @@ test('a new room detail takes a `~` description and its key as alias; a kept one
   });
   const cased = { details: { Crack: cleft } }; // a key that is no alias leaves the old one out
   assert.deepEqual(detailed(was, cased, defs).details, { Crack: { ...cleft, aliases: [] } });
+  assert.deepEqual(detailed(was, { name: 'r' }, defs), { name: 'r' }); // a room with no details
 });
