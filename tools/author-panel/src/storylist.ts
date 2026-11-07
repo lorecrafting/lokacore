@@ -2,6 +2,7 @@
 // rows, the arrow keys' moves, which rows a selection or a palette row opens, a trace's rows and
 // the palette's story rows. No React here: tested from kernel/ts/test/author_story.test.ts.
 import { reads } from '../../../kernel/ts/play/reads.ts';
+import type { Triggers } from '../../../kernel/ts/play/scene_trigger.ts';
 import type { MapRoom } from './map.ts';
 import { fromRef, type Item } from './shell.ts';
 
@@ -37,10 +38,12 @@ export type Story = {
   bundled: Record<string, string>; // a bundle member's ref => its areas/<a>.json
   map: MapRoom[];
   words: Record<string, number>; // written words by node (Pacing)
+  names: Record<string, string>; // written name by node, none for `~` (shell.ts `named`)
   choices: Record<string, number>; // choice count by dialogue (Knowledge)
   hidden: string[]; // hidden skills' keys
   unlinkable: Record<string, string>; // dialogue key => the keyword, quest or riddle no then enters
   shorts: string[]; // the short refs a beat may bind (story.ts resolve)
+  triggers: Triggers; // what a modal scene may start on (scene_trigger.ts)
 };
 
 /** The kinds the list holds (design section 4.1); Trace opens on the fact, quest and story point. */

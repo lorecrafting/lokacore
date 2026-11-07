@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type { FieldProps } from '@rjsf/utils';
 import { choices, pickKind, proseKey, refusePick } from '../../../../kernel/ts/play/card.ts';
+import type { Triggers } from '../../../../kernel/ts/play/scene_trigger.ts';
 import { oneLine, saving } from '../../../../mobile/app/author/prose_rules.ts';
 import { Button } from '../components/ui/button.tsx';
 import { Input } from '../components/ui/input.tsx';
@@ -21,6 +22,7 @@ export type Context = {
   put?: (field: string, value: unknown) => void; // writes a field and commits it
   hidden?: string[]; // the story model's (kernel/ts/play/story_counts.ts)
   unlinkable?: Record<string, string>;
+  triggers?: Triggers; // what a modal scene may start on (kernel/ts/play/scene_trigger.ts)
   files?: Record<string, string>; // each node's source file, by ref
   held?: number; // the items placed in the selection (kernel/ts/play/card.ts held)
   open?: (sel: { kind: string; key: string }) => void; // selects another definition's card

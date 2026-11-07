@@ -6,25 +6,22 @@ import type { Change, Story } from './author.ts';
 import { Button } from './components/ui/button.tsx';
 import { Refusal } from './edit/templates.tsx';
 import type { SetLayout } from './columns.tsx';
-import { fromRef, WORLD, type Layout, type Selection } from './shell.ts';
+import { fromRef, named, WORLD, type Layout, type Selection } from './shell.ts';
 import { FlowView } from './flow.tsx';
 import { StoryList } from './storylist.tsx';
 
 type Pick = (s: Selection) => void;
 
-function Row({
-  ref_,
-  picked,
-  here,
-  pick,
-  play,
-}: {
+type RowProps = {
   ref_: string;
+  name?: string;
   picked: boolean;
   here: boolean;
   pick: Pick;
   play?: (room: string) => void;
-}) {
+};
+
+function Row({ ref_, name, picked, here, pick, play }: RowProps) {
   const s = fromRef(ref_)!;
   return (
     <li className={`flex items-center rounded-sm ${picked ? 'bg-accent' : ''}`}>
@@ -34,7 +31,7 @@ function Row({
         className="flex flex-1 items-center gap-1.5 truncate px-2 py-0.5 text-left"
         onClick={() => pick(s)}
       >
-        {s.key}
+        {named(s.key, name)}
         {here ? <MapPin className="text-primary" aria-label="the Book is here" /> : null}
       </button>
       {play ? (
@@ -87,6 +84,7 @@ export function Hierarchy({
               <Row
                 key={n.ref}
                 ref_={n.ref}
+                name={story.names[n.ref]}
                 picked={n.ref === picked}
                 here={n.ref === here}
                 pick={pick}

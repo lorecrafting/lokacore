@@ -19,6 +19,7 @@ import { after, test } from 'node:test';
 import { serve } from '../play/live.ts';
 import { story } from '../play/story.ts';
 import { wordsByNode } from '../play/story_counts.ts';
+import { named } from '../../../tools/author-panel/src/shell.ts';
 
 const root = resolve(import.meta.dirname, '../../..');
 const dir = mkdtempSync(join(tmpdir(), 'loka-story-'));
@@ -57,6 +58,17 @@ put('areas/yard.json', {
     },
   },
 });
+for (const [key, name] of [
+  ['item_1', 'a rock'],
+  ['item_2', '~'],
+])
+  put(`items/${key}.json`, {
+    keywords: [key],
+    name: prose(name),
+    room_line: prose('A thing.'),
+    description: prose('A thing.'),
+    location: { in: 'room', room: 'attic' },
+  });
 const cart = JSON.parse(readFileSync(join(src, 'cartridge.json'), 'utf8'));
 cart.requires.capabilities.knowledge = 1; // layout.json's
 put('cartridge.json', cart);
@@ -226,6 +238,15 @@ test('words by node from the text keys it names; choices by dialogue', () => {
 test('words by node count each named key once and skip a ~ line', () => {
   const defs = new Map([['rooms/a', { name: 'k1', description: 'k1', note: 'k2' }]]);
   assert.deepEqual(wordsByNode(defs, { k1: 'one two', k2: 'three\n~' }), { 'rooms/a': 3 });
+});
+
+// Break: a row showing the text key or `~` for the written name, or a named row the key alone.
+test("a hierarchy row reads 'item_1 · a rock', and the key alone for a ~ name", () => {
+  const { names } = story(src, dev, []);
+  assert.deepEqual(
+    [named('item_1', names[ref('item', 'item_1')]), named('item_2', names[ref('item', 'item_2')])],
+    ['item_1 · a rock', 'item_2'],
+  );
 });
 
 // Break: `then: end` drawn as an edge to a dialogue named end, a `then` dropped, or a

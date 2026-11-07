@@ -52,12 +52,14 @@ const story = (outline: Story['outline']): Story => ({
   },
   map: [],
   words: {},
+  names: {},
   choices: {},
   hidden: [],
   unlinkable: {},
   files: {},
   bundled: {},
   shorts: [],
+  triggers: { points: {}, actions: {}, taken: {}, named: {} },
 });
 const planted = story({
   parts: ['Arrival', null],

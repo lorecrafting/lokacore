@@ -3,7 +3,7 @@
 import { PanelLeftClose, PanelRightClose } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { shortcut } from '../../../mobile/app/author/prose_rules.ts';
-import { kept, mapCommand, shown } from './mapwire.ts';
+import { created, kept, mapCommand, shown } from './mapwire.ts';
 import { ask, checkpoints, drop, undoDelete, story as getStory, useDiagnostics, type Story } from './author.ts';
 import { useBook, type Heard } from './book.ts';
 import { BookStrip } from './centre.tsx';
@@ -180,6 +180,7 @@ function useWiring(
   story?: Story,
 ) {
   const pick = (s?: Selection) => s && set((l) => ({ ...l, selection: s }));
+  shown.pick = pick;
   heard.current.select = (textKey) => pick(fromTextKey(textKey));
   const [add, offer] = useState<string[]>([]); // the selected room's add-here menu, from its card
   const mark = places(layout.selection, []).book;
@@ -251,7 +252,7 @@ export default function App() {
   const { pick, run, offer } = useWiring(book, heard, layout, set, () => setPalette(true), story);
   const s: Shell = { layout, set, story, book, diag, pick, offer };
   const all = (text: Record<string, string>) => [
-    ...items(story?.graph.nodes ?? [], text, diag.placeholders ?? {}),
+    ...items(story?.graph.nodes ?? [], text, diag.placeholders ?? {}, story?.names),
     ...(story ? [...storyItems(story), ...flowItems(story)] : []),
   ];
   return (
@@ -288,10 +289,8 @@ function command(book: Book, sel: Selection | undefined, pick: (s?: Selection) =
       return mapCommand(i.id, sel?.kind === 'room' ? sel.key : undefined);
     if (i.id === 'delete') return void (sel && drop(sel.key, fileOf(sel, places(sel, story?.graph.nodes ?? []).inspector?.ref, story?.files)));
     if (i.id === 'undo') return void undoDelete(book);
-    const kind = i.id.startsWith('new-') ? i.id.slice(4) : undefined;
-    const name = kind === 'outline' ? kind : i.id === 'go' && sel?.kind === 'room' ? sel.key : prompt(kind ? `New ${kind.replace(/(us)es$|s$/, '$1')} key` : 'Room key');
-    if (!name) return;
-    if (kind) void ask('new', { kind, name }).then(({ ok, told }) => ok || alert(String(told)));
-    else book.send({ op: 'go_to_room', room: name });
+    if (i.id.startsWith('new-')) return void created(i.id.slice(4)).catch((e: Error) => alert(e.message));
+    const name = i.id === 'go' && sel?.kind === 'room' ? sel.key : prompt('Room key');
+    if (name) book.send({ op: 'go_to_room', room: name });
   };
 }
