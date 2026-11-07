@@ -54,7 +54,7 @@ defmodule Loka.SystemGraphTest do
   # Breaks: 00a read as 00, §2 linked to the `# 23 — …` title, `§2, §5` losing §5, or a
   # slug that is not GitHub's.
   test "spec citations link the archived spec file at the cited heading" do
-    assert contract("ItemLocation")["spec"] == [
+    assert SystemGraph.cites("Where an item starts (00a §12).", ".") == [
              %{
                "cite" => "00a §12",
                "path" => "docs/archive/spec/00a-chapter-one-content.md#12-hello-world-fixture"

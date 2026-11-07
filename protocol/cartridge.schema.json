@@ -98,7 +98,7 @@
           }
         },
         "ancestries": {
-          "description": "Authored once-only character choices (attribute@1), keyed by choice Key.",
+          "description": "Choices a character makes once, such as an ancestry, each under its own name.",
           "type": "object",
           "propertyNames": {
             "pattern": "^[a-z][a-z0-9_]{0,63}$"
@@ -115,7 +115,7 @@
           "$ref": "text.schema.json#/$defs/TextCatalog"
         },
         "alternates": {
-          "description": "Narration variety (alternates@1, toolbox row W7): a text key's alternates, each a key of the text catalog; a committed narration line with that key shows one of the key and its alternates, chosen by a hash of the command id and the key (mechanics.md narration variety), never the authority RNG.",
+          "description": "Variety for narration: for a text key, other keys to use in its place; each time the line is told, one of them is picked.",
           "type": "object",
           "propertyNames": {
             "pattern": "^[a-z][a-z0-9_.]{0,127}$"
@@ -185,7 +185,7 @@
           "$ref": "#/$defs/WorldSettings"
         },
         "speech": {
-          "description": "Word bar S2 (speech@1): phrases, the cartridge's static say words, each a speech@1 Word, offered to every actor with no fact gate; GameView projects them as phrases. In source it is cartridge.json's speech, beside world.",
+          "description": "Words the player can say anywhere: phrases, offered to every player on the word bar.",
           "type": "object",
           "properties": {
             "phrases": {
@@ -203,7 +203,7 @@
           "additionalProperties": false
         },
         "chapters": {
-          "description": "Optional ordered chapter markers; absent preserves earlier cartridge bytes and meaning.",
+          "description": "Optional chapter markers, in order.",
           "type": "array",
           "minItems": 1,
           "items": {
@@ -719,7 +719,7 @@
       ]
     },
     "Calendar": {
-      "description": "calendar@1: authored logical units per hour, hours per day, displayed subdivisions, and optional ordered solar/lunar cuts. Cut starts are inclusive; the compiler checks order, cycle bounds and schedule/window hours (lib/loka/content/calendar.ex). Toolbox row 31 adds the season and tide cycles and the weather table (one weighted entry per calendar day, chosen by a hash of the world id and the day).",
+      "description": "The game's clock: how many time units make an hour, hours in a day, the parts of the day shown to the player, and optional sun and moon phases. Seasons, tides and a weather table can be added.",
       "type": "object",
       "properties": {
         "start": {"description":"The logical time a new world begins at.",
@@ -738,23 +738,23 @@
           "type": "integer",
           "minimum": 1
         },
-        "solar": {
+        "solar": {"description":"The parts of the day, such as dawn, day, dusk and night, each starting at a time into the day.",
           "type": "array",
           "minItems": 1,
           "items": {
             "$ref": "#/$defs/CalendarCut"
           }
         },
-        "lunar": {
+        "lunar": {"description":"The moon's phases: a repeating cycle with a length and named phases.",
           "$ref": "#/$defs/CalendarCycle"
         },
-        "season": {
+        "season": {"description":"The seasons: a repeating cycle with a length and named phases.",
           "$ref": "#/$defs/CalendarCycle"
         },
-        "tide": {
+        "tide": {"description":"The tides: a repeating cycle with a length and named phases.",
           "$ref": "#/$defs/CalendarCycle"
         },
-        "weather": {
+        "weather": {"description":"The possible weathers. Each day gets one, weighted by each entry's weight; the same world and day always get the same weather.",
           "type": "array",
           "minItems": 1,
           "maxItems": 32,
@@ -801,7 +801,7 @@
       ]
     },
     "CalendarCycle": {
-      "description": "A repeating cycle of ordered cuts in logical time units (lunar; season and tide, toolbox row 31): the phase at time t is the last cut at or before ((t - origin) mod period); the first cut starts at 0.",
+      "description": "A repeating cycle, such as the moon, seasons or tides: a period and the phases it passes through, each starting at a point in the cycle (the first at 0).",
       "type": "object",
       "properties": {
         "period": {"description":"Length of the cycle in logical units.",
@@ -812,7 +812,7 @@
           "type": "integer",
           "minimum": 0
         },
-        "phases": {
+        "phases": {"description":"The named phases in order, each with the time it starts; the first starts at 0.",
           "type": "array",
           "minItems": 1,
           "items": {
@@ -844,7 +844,7 @@
       ]
     },
     "WeatherEntry": {
-      "description": "One weather of a calendar's weather table (toolbox row 31): each calendar day takes one entry with probability weight / total weight, by a hash of the world id and the day, never the authority RNG. wet: an exposed room's flame will not light (light@1 ignite). Phases are unique in the table.",
+      "description": "One kind of weather and its weight: a day gets it with chance weight out of the total. wet stops fires lighting in rooms open to the sky.",
       "type": "object",
       "properties": {
         "phase": {"description":"The weather's name, lowercase letters, digits and underscores; unique in the table.",
@@ -1066,17 +1066,17 @@
       ]
     },
     "WorldSettings": {
-      "description": "The cartridge's world settings (owner decision world parameters; 00 §4 and 04 §15 as amended 2026-10-02), each optional with an engine default: movement.cost, what a move costs the body (movement@1; default 1 mv when the cartridge declares mv), its resource a pool of this cartridge (UNRESOLVED_REFERENCE otherwise); movement.terrain, the percent each destination room tag scales that cost by (row 43a; default none); movement without cost, or with terrain; bands, the condition band table of every pool without its own (resource.schema.json BandTable; default the 04 §15 table). An optional field of loka-cartridge-v2: the tag stays, and the compiler writes it only when the source authors it. In source it is cartridge.json's world, beside entry.",
+      "description": "Settings for the whole world, each optional with a default: what a move costs (movement.cost, by default 1 mv), how room tags change that cost (movement.terrain), and the condition words for any pool without its own (bands).",
       "type": "object",
       "properties": {
         "movement": {"description":"What a move costs the body, and how destination room tags scale it.",
           "type": "object",
           "properties": {
-            "cost": {
+            "cost": {"description":"What one move costs the body, such as 1 movement point.",
               "$ref": "action.schema.json#/$defs/ActionCost"
             },
             "terrain": {
-              "description": "Terrain movement costs (row 43a; docs/system/mechanics.md, Terrain movement costs): a room tag to the percent a move into a room carrying it scales the fare by, applied after status cost_percent, in the room's authored tag order, rounded down each step. The key pattern repeats the entity.schema.json Tag enum, so a Tag added there is refused here until this list follows (fail closed).",
+              "description": "Move cost by room tag, in percent of the usual: 100 leaves it unchanged, 50 halves it and 200 doubles moves into rooms with that tag.",
               "type": "object",
               "propertyNames": {
                 "pattern": "^(air|bed|burnable|chasm|cool|cursed|exposed|forge|fragile|lamp|liquid_holding|marsh|metal|road|rod|rug|sharp|silver|warm|water|waterproof|windproof|wooden)$"
@@ -1094,7 +1094,7 @@
           "$ref": "resource.schema.json#/$defs/BandTable"
         },
         "carry": {
-          "description": "Opts into the voluntary Take ceiling (docs/system/mechanics.md containment@1); every item must author mass_grams. No engine default.",
+          "description": "Opts into the voluntary Take ceiling; every item must author mass_grams. No engine default.",
           "type": "object",
           "properties": {
             "max_grams": {"description":"The Take ceiling, in grams.",
@@ -1108,30 +1108,30 @@
           "additionalProperties": false
         },
         "derived": {
-          "description": "Opts into stats derived from the player's attributes (docs/system/mechanics.md derived stats, toolbox row 2; attribute@1). Each table's bonus is added to the authored number it modifies: hit_chance to the attack profile's chance (clamped 0..100), damage to both damage_min and damage_max (clamped at 0), carry_grams to carry.max_grams (clamped at 0), hp_max to the player body's hp maximum (clamped at the pool minimum). hit_chance and damage need world.combat; carry_grams needs world.carry. An NPC keeps its authored profile unless it declares attributes (toolbox row G3): then hit_chance and damage apply to its attack with its own values.",
+          "description": "Opts into stats derived from the player's attributes. Each table's bonus is added to the authored number it modifies: hit_chance to the attack profile's chance (clamped 0..100), damage to both damage_min and damage_max (clamped at 0), carry_grams to carry.max_grams (clamped at 0), hp_max to the player body's hp maximum (clamped at the pool minimum). hit_chance and damage need world.combat; carry_grams needs world.carry. An NPC keeps its authored profile unless it declares attributes: then hit_chance and damage apply to its attack with its own values.",
           "type": "object",
           "properties": {
-            "hit_chance": {
+            "hit_chance": {"description":"Bonus to the player's chance to hit, by attribute value.",
               "$ref": "cartridge.schema.json#/$defs/DerivedStat"
             },
-            "damage": {
+            "damage": {"description":"Bonus to the player's damage, by attribute value.",
               "$ref": "cartridge.schema.json#/$defs/DerivedStat"
             },
-            "carry_grams": {
+            "carry_grams": {"description":"Bonus to how much the player can carry, in grams, by attribute value.",
               "$ref": "cartridge.schema.json#/$defs/DerivedStat"
             },
-            "hp_max": {
+            "hp_max": {"description":"Bonus to the player's maximum hit points, by attribute value.",
               "$ref": "cartridge.schema.json#/$defs/DerivedStat"
             }
           },
           "additionalProperties": false
         },
         "gear_budget": {
-          "description": "Balance tool 6b (docs/system/cartridge.md item affect declarations; attribute@1): the signed affect total an item in each slot may carry at intended level 1 (per_slot) and what each level above 1 adds (per_level). The engine ignores it at runtime; only the power report reads it.",
+          "description": "For balancing only: how much bonus an item in each slot may carry at level 1 (per_slot), and how much each level above 1 adds (per_level). It does not change play; only the power report reads it.",
           "type": "object",
           "properties": {
             "per_slot": {
-              "description": "Keyed by SlotKey (entity.schema.json), at least one (a compiler check, SCHEMA_VIOLATION too_few_items: the subset has no minProperties); a slot it omits is unbudgeted, never 0.",
+              "description": "The gear budget for each equipment slot, such as head or hands; a slot not listed has no budget.",
               "type": "object",
               "propertyNames": {
                 "pattern": "^(head|neck|body|cloak|arms|hands|finger|waist|legs|feet|wield|off_hand|light)$"
@@ -1155,7 +1155,7 @@
           "additionalProperties": false
         },
         "levelling": {
-          "description": "Opts into experience and levelling (docs/system/mechanics.md experience and levelling, toolbox row 4; attribute@1). thresholds are the strictly increasing experience totals that reach levels 2, 3 and so on; points_per_level the attribute points each level grants; kills the experience a credited kill of each NPC definition grants; level_up the receipt line when a decision reaches a new level. Every number is the cartridge's.",
+          "description": "Opts into experience and levelling. thresholds are the strictly increasing experience totals that reach levels 2, 3 and so on; points_per_level the attribute points each level grants; kills the experience a credited kill of each NPC definition grants; level_up the receipt line when a decision reaches a new level. Every number is the cartridge's.",
           "type": "object",
           "properties": {
             "thresholds": {"description":"Strictly increasing experience totals that reach levels 2, 3 and so on.",
@@ -1209,20 +1209,20 @@
           ],
           "additionalProperties": false
         },
-        "death": {
+        "death": {"description":"What happens when a player or NPC dies: corpses, how long they last and how the player comes back.",
           "$ref": "cartridge.schema.json#/$defs/DeathSettings"
         },
-        "combat": {
+        "combat": {"description":"How fights run: the player's own attack, time between rounds and the lines told.",
           "$ref": "cartridge.schema.json#/$defs/CombatSettings"
         },
-        "death_credit": {
+        "death_credit": {"description":"NPCs whose death is credited to the player: killing one sets a true-or-false player fact.",
           "type": "array",
           "items": {
             "$ref": "cartridge.schema.json#/$defs/DeathCredit"
           },
           "minItems": 1
         },
-        "water": {
+        "water": {"description":"Deep water: who may dive, how long they can stay under before drowning and which rooms connect.",
           "$ref": "water.schema.json#/$defs/WaterSettings"
         },
         "bell_cue": {"description":"A line told in the listed rooms when the fact turns true.",
@@ -1250,7 +1250,7 @@
           "additionalProperties": false
         },
         "group": {
-          "description": "Toolbox rows G8, 22a and 22b: member, stay and fight each name a bool pair fact read at each NPC; wage pays every member amount of a conserved resource each `every` clock units (docs/system/cartridge.md#group-declarations).",
+          "description": "Groups of NPCs: member, stay and fight each name a true-or-false fact read at each NPC; wage pays every member amount of a resource every `every` clock units.",
           "type": "object",
           "properties": {
             "member": {"description":"A bool pair fact, read at each NPC: this NPC is in the player's group.",
@@ -1291,7 +1291,7 @@
           "additionalProperties": false
         },
         "mount": {
-          "description": "Toolbox row 43b: riding names a bool pair fact, per subject and scoped to player, read at each NPC with a mount declaration; such an NPC carries its rider (docs/system/cartridge.md#mount-declarations).",
+          "description": "Riding names a bool pair fact, per subject and scoped to player, read at each NPC with a mount declaration; such an NPC carries its rider.",
           "type": "object",
           "properties": {
             "riding": {"description":"A bool pair fact, per subject and scoped to player: the player rides this NPC.",
@@ -1304,7 +1304,7 @@
           "additionalProperties": false
         },
         "trails": {
-          "description": "Toolbox row W13 (mechanics.md Tracks and trails): a trail is fresh while now minus its time is below fresh_for (logical seconds); a passed track check appends leads[<exit>], one per direction some room's exit uses.",
+          "description": "A trail is fresh while now minus its time is below fresh_for (logical seconds); a passed track check appends leads[<exit>], one per direction some room's exit uses.",
           "type": "object",
           "properties": {
             "fresh_for": {"description":"A trail is fresh while now minus its time is below this, in logical seconds.",
@@ -1343,7 +1343,7 @@
           "additionalProperties": false
         },
         "theft": {
-          "description": "Toolbox rows 33 and 34 (mechanics.md Theft, fence and witnessed offense): take may lift an item a living NPC in the actor's room directly holds. The victim notices when the actor's level in skill is below the victim's value of attribute (absent: 0); every other living NPC there that is not blind and the actor's body is not concealed from also sees. Containment alone sets the per_subject instance bool fact stolen true on the item; a seen theft emits custom_event noticed (subject: the thief's body) and says narration.seen, an unseen one narration.unseen.",
+          "description": "Take may lift an item a living NPC in the actor's room directly holds. The victim notices when the actor's level in skill is below the victim's value of attribute (absent: 0); every other living NPC there that is not blind and the actor's body is not concealed from also sees. Containment alone sets the per_subject instance bool fact stolen true on the item; a seen theft emits custom_event noticed (subject: the thief's body) and says narration.seen, an unseen one narration.unseen.",
           "type": "object",
           "properties": {
             "skill": {"description":"The victim notices when the actor's level in this skill is below the victim's attribute.",
@@ -1385,7 +1385,7 @@
           "additionalProperties": false
         },
         "construction": {
-          "description": "Built rooms S1 (construction@1): max_total, the most structures built in this world at once.",
+          "description": "Building limits: max_total is the most structures that can stand in the world at once.",
           "type": "object",
           "properties": {
             "max_total": {"description":"The most structures built in this world at once.",
@@ -1399,7 +1399,7 @@
           "additionalProperties": false
         },
         "identity": {
-          "description": "Toolbox rows W15 and FD9 (mechanics.md Recognition and earned titles): the player's displayed name, the text key name, varied by name_variants (TextVariants, first match wins; subject target is the player's body). GameView projects it as actor_name.",
+          "description": "The player's name as shown, with optional variants that change it while their condition holds.",
           "type": "object",
           "properties": {
             "name": {"description":"Text key of the player's displayed name.",
@@ -1440,7 +1440,7 @@
       ]
     },
     "Chapter": {
-      "description": "An ordered chapter marker (mechanics.md Chapters): name is a catalog key; only chapter 0 lacks a story_point, and it has no outcome. Later chapters name a story point and optionally one of its outcome keys (checked at the reference stage).",
+      "description": "An ordered chapter marker: name is a catalog key; only chapter 0 lacks a story_point, and it has no outcome. Later chapters name a story point and optionally one of its outcome keys (checked at the reference stage).",
       "type": "object",
       "properties": {
         "name": {"description":"Text key of its name.",
@@ -1474,7 +1474,7 @@
       ]
     },
     "DerivedStat": {
-      "description": "One stat's attribute bonus (docs/system/mechanics.md derived stats): floor(sum of per_point * (value - pivot) over terms / divisor), rounded toward minus infinity; value is the player's attribute as attribute@1 reads it. Every number is the cartridge's; divisor defaults to 1.",
+      "description": "One stat's bonus from attributes: for each term, the attribute's value minus pivot, times per_point; the sum is divided by divisor (default 1) and rounded down.",
       "type": "object",
       "properties": {
         "terms": {"description":"The attributes that make up the bonus; each adds per_point times (the attribute's value minus pivot).",
@@ -1531,7 +1531,7 @@
     },
     "Revival": {
       "type": "object",
-      "description": "loka-kgd.206: what a client shows a player between death and waking: the lines in order, over seconds of wall-clock time. Presentation only; the kernel restores the body at once and exposes this as GameView.revival.",
+      "description": "What the player sees between dying and waking: lines shown in order, over a number of real seconds. It changes nothing in the game.",
       "properties": {
         "lines": {"description":"The revival lines, shown in order.",
           "type": "array",
@@ -1594,7 +1594,7 @@
         },
         "penalty": {
           "type": "object",
-          "description": "What a player's death costs (toolbox row 47). experience: the body loses floor(experience * percent / 100), never below the threshold of its current level, and narration is told once; it needs world.levelling. items: corpse (the default) moves what the body held into the corpse; kept leaves it on the body.",
+          "description": "What dying costs the player. experience: a percent of experience lost, but never below the start of the current level (needs levelling in the world settings). items: corpse (the default) moves what the player held into the corpse; kept leaves it with the player.",
           "properties": {
             "experience": {"description":"Experience lost on death; needs world.levelling.",
               "type": "object",
@@ -1614,7 +1614,7 @@
               ],
               "additionalProperties": false
             },
-            "items": {"description":"corpse (the default) moves what the body held into the corpse; kept leaves it on the body.",
+            "items": {"description":"What happens to what the body held: corpse (the default) moves it into the corpse; kept leaves it on the body.",
               "enum": [
                 "corpse",
                 "kept"
@@ -1625,7 +1625,7 @@
         },
         "narration": {
           "type": "object",
-          "description": "A player's death lines outside a combat round (loka-3w3q). player_died: the fall line a bleed or status tick death tells after its tick line (default world.combat.narration.player_died; a drowning tells world.water.drowned instead). woke: told once after every player death, combat included, after the penalty line.",
+          "description": "A player's death lines outside a combat round. player_died: the fall line a bleed or status tick death tells after its tick line (default world.combat.narration.player_died; a drowning tells world.water.drowned instead). woke: told once after every player death, combat included, after the penalty line.",
           "properties": {
             "player_died": {"description":"The fall line a bleed or status tick death tells after its tick line.",
               "$ref": "text.schema.json#/$defs/TextKey"
@@ -1636,7 +1636,7 @@
           },
           "additionalProperties": false
         },
-        "revival": {
+        "revival": {"description":"What the player sees between dying and waking: lines shown in order, for its seconds.",
           "$ref": "#/$defs/Revival"
         }
       },
@@ -1647,7 +1647,7 @@
         "restore"
       ],
       "additionalProperties": false,
-      "description": "Fixed corpse templates, same-body return room and pool restoration; requires death@1 (docs/system/cartridge.md).",
+      "description": "What happens at death: the corpse made for the player and for NPCs, the room the player wakes in, and how their pools are restored.",
       "examples": [
         {
           "player_corpse": {
@@ -1678,7 +1678,7 @@
     "CombatSettings": {
       "type": "object",
       "properties": {
-        "player_attack": {
+        "player_attack": {"description":"The player's unarmed attack: chance to hit and damage range.",
           "$ref": "entity.schema.json#/$defs/AttackProfile"
         },
         "interval": {"description":"Clock units between combat rounds.",
@@ -1720,31 +1720,31 @@
             "shot_miss": {"description":"Told when a ranged first strike misses. Required when any item declares weapon.ranged.",
               "$ref": "text.schema.json#/$defs/TextKey"
             },
-            "player_volley": {"description":"Swings (loka-kgd.200): the summary line before the player's strike line when its profile makes more than one swing and some but not all hit, and more than one; binds count and hits. No key, no line.",
+            "player_volley": {"description":"Swings: the summary line before the player's strike line when its profile makes more than one swing and some but not all hit, and more than one; binds count and hits. No key, no line.",
               "$ref": "text.schema.json#/$defs/TextKey"
             },
-            "player_volley_all": {"description":"Swings (loka-kgd.200): the summary line before the player's strike line when its profile makes more than one swing and every one hit; binds count and hits. No key, no line.",
+            "player_volley_all": {"description":"Swings: the summary line before the player's strike line when its profile makes more than one swing and every one hit; binds count and hits. No key, no line.",
               "$ref": "text.schema.json#/$defs/TextKey"
             },
-            "player_volley_one": {"description":"Swings (loka-kgd.200): the summary line before the player's strike line when its profile makes more than one swing and exactly one hit; binds count and hits. No key, no line.",
+            "player_volley_one": {"description":"Swings: the summary line before the player's strike line when its profile makes more than one swing and exactly one hit; binds count and hits. No key, no line.",
               "$ref": "text.schema.json#/$defs/TextKey"
             },
-            "npc_volley": {"description":"Swings (loka-kgd.200): the summary line before an NPC's strike line when its profile makes more than one swing and some but not all hit, and more than one; binds count and hits. No key, no line.",
+            "npc_volley": {"description":"Swings: the summary line before an NPC's strike line when its profile makes more than one swing and some but not all hit, and more than one; binds count and hits. No key, no line.",
               "$ref": "text.schema.json#/$defs/TextKey"
             },
-            "npc_volley_all": {"description":"Swings (loka-kgd.200): the summary line before an NPC's strike line when its profile makes more than one swing and every one hit; binds count and hits. No key, no line.",
+            "npc_volley_all": {"description":"Swings: the summary line before an NPC's strike line when its profile makes more than one swing and every one hit; binds count and hits. No key, no line.",
               "$ref": "text.schema.json#/$defs/TextKey"
             },
-            "npc_volley_one": {"description":"Swings (loka-kgd.200): the summary line before an NPC's strike line when its profile makes more than one swing and exactly one hit; binds count and hits. No key, no line.",
+            "npc_volley_one": {"description":"Swings: the summary line before an NPC's strike line when its profile makes more than one swing and exactly one hit; binds count and hits. No key, no line.",
               "$ref": "text.schema.json#/$defs/TextKey"
             },
-            "ally_volley": {"description":"Swings (loka-kgd.200): the summary line before an ally's strike line when its profile makes more than one swing and some but not all hit, and more than one; binds count and hits. No key, no line.",
+            "ally_volley": {"description":"Swings: the summary line before an ally's strike line when its profile makes more than one swing and some but not all hit, and more than one; binds count and hits. No key, no line.",
               "$ref": "text.schema.json#/$defs/TextKey"
             },
-            "ally_volley_all": {"description":"Swings (loka-kgd.200): the summary line before an ally's strike line when its profile makes more than one swing and every one hit; binds count and hits. No key, no line.",
+            "ally_volley_all": {"description":"Swings: the summary line before an ally's strike line when its profile makes more than one swing and every one hit; binds count and hits. No key, no line.",
               "$ref": "text.schema.json#/$defs/TextKey"
             },
-            "ally_volley_one": {"description":"Swings (loka-kgd.200): the summary line before an ally's strike line when its profile makes more than one swing and exactly one hit; binds count and hits. No key, no line.",
+            "ally_volley_one": {"description":"Swings: the summary line before an ally's strike line when its profile makes more than one swing and exactly one hit; binds count and hits. No key, no line.",
               "$ref": "text.schema.json#/$defs/TextKey"
             },
             "player_died": {"description":"Told when the player falls in a combat round; also the default fall line for tick deaths.",
@@ -1789,11 +1789,11 @@
           "additionalProperties": false
         },
         "target_choice": {
-          "description": "Opts into target choice (docs/system/mechanics.md, toolbox row 6a): during a roster encounter the player's attack on another present active member makes it the primary the player strikes.",
+          "description": "Opts into target choice: during a roster encounter the player's attack on another present active member makes it the primary the player strikes.",
           "const": true
         },
         "allies": {
-          "description": "Authored NPCs that fight beside the player (docs/system/mechanics.md, toolbox row 6b, narration ally_hit and ally_miss): the first listed one living in the encounter room strikes the player's target each round, is never an attack target, and its kill credits the player.",
+          "description": "Authored NPCs that fight beside the player: the first listed one living in the encounter room strikes the player's target each round, is never an attack target, and its kill credits the player.",
           "type": "array",
           "items": {
             "$ref": "identity.schema.json#/$defs/DefinitionRef"
@@ -1801,11 +1801,11 @@
           "minItems": 1
         },
         "initiative": {
-          "description": "Opts into Diku rounds (docs/system/mechanics.md, Diku rounds): each round draws initiative for which side strikes first, Attack resolves round 1 at once, and the combat narration binds {attacker} and {target}.",
+          "description": "Opts into Diku rounds: each round draws initiative for which side strikes first, Attack resolves round 1 at once, and the combat narration binds {attacker} and {target}.",
           "const": true
         },
         "tiers": {
-          "description": "Damage tiers (docs/system/mechanics.md, Diku rounds), highest at_percent first: a hit whose hp loss reaches at_percent of the target's hp maximum is told with the first such tier's key for that perspective instead of the plain hit key.",
+          "description": "Damage tiers, highest at_percent first: a hit whose hp loss reaches at_percent of the target's hp maximum is told with the first such tier's key for that perspective instead of the plain hit key.",
           "type": "array",
           "items": {
             "type": "object",
@@ -1822,7 +1822,7 @@
           "minItems": 1
         },
         "conditions": {
-          "description": "Condition lines (docs/system/mechanics.md, Diku rounds), highest at_percent first: after each round, the first row the player's living foe's hp reaches is told, binding {target}.",
+          "description": "Condition lines, highest at_percent first: after each round, the first row the player's living foe's hp reaches is told, binding {target}.",
           "type": "array",
           "items": {
             "type": "object",

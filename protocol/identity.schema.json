@@ -4,7 +4,7 @@
   "description": "Definition identity and runtime identities (03 §2, §3, §6; 05 §4). Each id is its own named type; the types are not interchangeable (03 §6).",
   "$defs": {
     "CartridgeId": {
-      "description": "A cartridge identity (05 §3 id, 05 §4), lowercase snake_case, at most 64 characters.",
+      "description": "A cartridge identity, lowercase snake_case, at most 64 characters.",
       "type": "string",
       "pattern": "^[a-z][a-z0-9_]{0,63}$",
       "examples": [
@@ -13,7 +13,7 @@
       ]
     },
     "ReleaseVersion": {
-      "description": "A release version (05 §3 version, §12): MAJOR.MINOR.PATCH without leading zeros, pre-release or build metadata, at most 64 characters.",
+      "description": "A release version: three whole numbers joined by dots, such as 1.4.0, with no leading zeros and nothing after the last number, at most 64 characters.",
       "type": "string",
       "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$",
       "maxLength": 64,
@@ -23,13 +23,13 @@
       ]
     },
     "DefinitionRef": {
-      "description": "Globally stable, immutable reference to a content definition (03 §2; 05 §4: no global content-key namespace). cartridge_id, kind and key are lowercase snake_case of at most 64 characters; cartridge_version is MAJOR.MINOR.PATCH without leading zeros, pre-release or build metadata.",
+      "description": "A permanent reference to one content definition in one cartridge release. cartridge_id, kind and key are lowercase words joined by underscores, at most 64 characters; cartridge_version is three whole numbers joined by dots, such as 1.4.0, with no leading zeros and nothing after the last number.",
       "type": "object",
       "properties": {
         "cartridge_id": {"description":"The owning cartridge. Lowercase snake_case, at most 64 characters.",
           "$ref": "#/$defs/CartridgeId"
         },
-        "cartridge_version": {"description":"The cartridge version, MAJOR.MINOR.PATCH.",
+        "cartridge_version": {"description":"The cartridge version: three whole numbers joined by dots, such as 1.4.0.",
           "$ref": "#/$defs/ReleaseVersion"
         },
         "kind": {"description":"The definition's kind.",

@@ -11,14 +11,14 @@ Assign a fact.
 | Field | Type | Required | Meaning |
 |---|---|---|---|
 | fact | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The declared fact to set. |
-| item | [DefinitionRef](source-kinds.gen.md#definitionref) |  | The item whose authored instance holds an entity fact. |
-| npc | [DefinitionRef](source-kinds.gen.md#definitionref) |  | The NPC whose authored instance holds an entity fact. |
+| item | [DefinitionRef](source-kinds.gen.md#definitionref) |  | The item holding the fact: the one placed in the world from this definition. |
+| npc | [DefinitionRef](source-kinds.gen.md#definitionref) |  | The NPC holding the fact: the one placed in the world from this definition. |
 | value | [FactValue](source-kinds.gen.md#factvalue) | yes | The new value, of the fact's type. |
-| with | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Toolbox row FD4: an npc_pair fact's second NPC; the step writes at the pair (its subject toward this NPC). |
+| with | [DefinitionRef](source-kinds.gen.md#definitionref) |  | An npc_pair fact's second NPC; the step writes at the pair (its subject toward this NPC). |
 
 ### `fact.adjust`
 
-Toolbox row 15: adds amount to a bounded int fact, clamped to its minimum and maximum, at the subject a fact.assign step writes at.
+Adds amount to a bounded int fact, clamped to its minimum and maximum, at the subject a fact.assign step writes at.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -26,9 +26,11 @@ Toolbox row 15: adds amount to a bounded int fact, clamped to its minimum and ma
 | fact | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The bounded int fact to change. |
 | item | [DefinitionRef](source-kinds.gen.md#definitionref) |  | As fact.assign item. |
 | npc | [DefinitionRef](source-kinds.gen.md#definitionref) |  | As fact.assign npc. |
-| with | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Toolbox row FD4: an npc_pair fact's second NPC; the step writes at the pair (its subject toward this NPC). |
+| with | [DefinitionRef](source-kinds.gen.md#definitionref) |  | An npc_pair fact's second NPC; the step writes at the pair (its subject toward this NPC). |
 
 ### `quest.activate`
+
+Starts a quest.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -36,12 +38,16 @@ Toolbox row 15: adds amount to a bounded int fact, clamped to its minimum and ma
 
 ### `quest.resolve`
 
+Completes a quest with an outcome.
+
 | Field | Type | Required | Meaning |
 |---|---|---|---|
 | outcome | [Key](source-kinds.gen.md#key) | yes | The outcome key it resolves with. |
 | quest | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The quest to resolve. |
 
 ### `quest.fail`
+
+Fails a quest with an outcome.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -59,20 +65,20 @@ Suppress one authored population plan for duration logical seconds from this acc
 
 ### `status.apply`
 
-Reaction: Apply one authored status (toolbox row 1) at the cause's time to the event's subject (a body, NPC or thing, row G3), or to the named item's or (row 42, never with item; not a spawn template) NPC's authored instance, or (row W21, co_present) to every living NPC in the event's room; an active one is refreshed; an NPC or item that declares the status immune takes nothing. Scripted action: Toolbox row 29b (spell scripted actions only, compiler SCHEMA_VIOLATION): start or refresh this status on the named NPC's instance, else on an aimed spell's target, else on the caster's body, as a reaction's status.apply does (status@1: a dead NPC or an immune holder takes nothing; a first application emits status_applied while a reaction listens).
+Starts a status, or refreshes it if already active. In a reaction it lands on the event's subject, the named item or NPC, or every living NPC in the room; in a spell, on the named NPC, the aimed target or the caster. Anything immune to the status is skipped.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| co_present | `true` |  | Toolbox row W21: the status lands on every living NPC in the event's room (its room_id, else the room directly holding the subject; none for a carried or unplaced one), in EntityId order, never on the player's body; an NPC declaring the status immune takes nothing. Never with item or npc (compiler SCHEMA_VIOLATION). |
-| item | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Lands on this item's authored instance. |
-| npc | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Lands on this NPC's authored instance; never with item. |
-| room | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Status reader 9: the status lands on this room of the cartridge, which holds it as any holder does (its tick changes nothing). Never with item, npc or co_present (compiler SCHEMA_VIOLATION). |
+| co_present | `true` |  | Put the status on every living NPC in the room (not the player) instead of one target. |
+| item | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Lands on the item placed in the world from this definition. |
+| npc | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Lands on the NPC placed in the world from this definition; never with item. |
+| room | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Put the status on this room instead of a person or item. |
 | status | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The status to apply. |
-| tag | [Tag](source-kinds.gen.md#tag) |  | Toolbox row W22 (only with co_present): the status lands instead on every item lying directly in the event's room whose definition carries this tag, the event's subject included, in EntityId order; an item declaring the status immune takes nothing. |
+| tag | [Tag](source-kinds.gen.md#tag) |  | With co_present only: put the status on every item lying in the room with this tag instead. |
 
 ### `barrier.set`
 
-Toolbox row W22 (Beads loka-kgd.96, barrier@1): move barrier, or every barrier on an exit of the event's room (its room_id, else the room directly holding the subject) whose definition carries tag, in direction-key order, to state to, from any state and with no key, opens_when or reach check (a burnt or broken door); each legal step on the way (locked, closed, open) is one barrier.transition and one barrier_changed, and a barrier already at to takes nothing. to locked needs the barrier's key_item, every tagged barrier's for tag (compiler BARRIER_UNREACHABLE_KEY at to).
+Force a door, or every door here with this tag, into a state with no key or check, such as a door burnt open. Locking needs the door's key to exist.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -82,7 +88,7 @@ Toolbox row W22 (Beads loka-kgd.96, barrier@1): move barrier, or every barrier o
 
 ### `status.cure`
 
-Reaction: Toolbox row G3 reader 3: end this status when active on the event's subject (the holder a status.apply without item, npc or co_present lands on), as a cure does: no event, no line. Once per holder and status in a rule, shared with status.apply: the first of the two steps on a pair wins. Scripted action: Toolbox row G4: end the scripted action target's active status of this definition, as a cure does (status@1); nothing when it is not active.
+Ends this status where it is active: on the event's subject in a reaction, or on the scripted action's target. No line is shown.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -90,7 +96,7 @@ Reaction: Toolbox row G3 reader 3: end this status when active on the event's su
 
 ### `experience.grant`
 
-Add amount experience to the acting character's levelling row (toolbox row 4), saturating at the ResourceInt maximum; needs world.levelling.
+Give the player this much experience; needs levelling in the world settings.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -104,7 +110,7 @@ Type: object.
 
 ### `item.move`
 
-Toolbox row 41 (decay): when the event's subject is an item not already directly in room and not consumed, transfer it from its current holder to room (one entity.transfer, no event, no line, no capacity or reach check); any other subject takes nothing.
+For decay rules: moves the event's item into room, unless it is already there or used up. Nothing is checked and nothing is told; any other subject is left alone.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -112,7 +118,7 @@ Toolbox row 41 (decay): when the event's subject is an item not already directly
 
 ### `npc.move`
 
-Toolbox row FD5 (loka-kgd.22): jumps the named NPC (else the event's subject when it is an NPC) to room, else the event's room, as a schedule move does (no exit, passage or lock), and emits entity_entered_room at the cause's time. Nothing when the NPC is dead, engaged, a following escort, blocked from moving or already there, no room resolves, or the delivery's character is in a running scene. Settle S4-1: plan (never with npc; room required) moves every living member of that population plan instead, in EntityId order, each as above.
+Moves the named NPC (or the event's subject when it is an NPC) straight to room, or to the event's room, without using exits. With plan instead of npc, moves every living NPC of that population plan. Nothing happens if the NPC is dead, fighting, escorting or already there.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -122,7 +128,7 @@ Toolbox row FD5 (loka-kgd.22): jumps the named NPC (else the event's subject whe
 
 ### `population.spawn`
 
-Toolbox row 37a (phased world events): births one bundle of the population plan into its home, in the highest free slot up to cap, as the plan job's birth does; no free slot births nothing. No RNG draw (the plan's chance and targets govern its own job only).
+For timed world events: adds one group of the population to its home, in a free slot, as the population's own births do. With no free slot nothing is born. No dice are rolled.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -130,7 +136,7 @@ Toolbox row 37a (phased world events): births one bundle of the population plan 
 
 ### `replenish.run`
 
-Homestead hs-1: one run of the replenish entry key's move, as its job's run does (up to count of its items directly in from, lowest EntityId first, until to holds cap or is full), at once: no job completed or scheduled, no event, no line; nothing when nothing fits. Refused on a rule with after.
+Run one restock at once: move items as the named replenish rule would, without waiting.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -138,7 +144,7 @@ Homestead hs-1: one run of the replenish entry key's move, as its job's run does
 
 ### `narrate`
 
-Settle S3-1: appends the authored line text to the delivery's narration, after the lines of the steps before it; no op, no event, no actor or subject read. Allowed with after: a fired rule's line joins its job's lines at the due time.
+Adds the line text to what the player reads, after the lines of earlier steps. Changes nothing in the world.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -146,7 +152,7 @@ Settle S3-1: appends the authored line text to the delivery's narration, after t
 
 ### `emote`
 
-NPC emotes (G9, emote@1, docs/system/mechanics.md NPC emotes): an NPC performs an emote of the cartridge's table. The emoter is npc (an authored instance alive in the delivery's room), else the delivery's subject; to subject names the subject as the target and needs the emote's to forms. Appends one emote.performed line, told only to a reader who sees the emoter; writes nothing, emits no event.
+NPC emotes: an NPC performs an emote from the cartridge's table. The one emoting is npc (the one placed in the world, alive in the delivery's room), else the delivery's subject; to subject makes the subject the target and needs the emote's wording for a target. Adds one emote line to the story, shown only to a reader who sees the one emoting; changes nothing else and sets off nothing.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -156,7 +162,7 @@ NPC emotes (G9, emote@1, docs/system/mechanics.md NPC emotes): an NPC performs a
 
 ### `fact.stamp`
 
-Toolbox row FD1: writes the delivery's logical time into an int fact (no maximum, minimum absent or at most 0) at the subject a fact.assign step writes at, as a fact.assign.
+Writes the delivery's logical time into an int fact (no maximum, minimum absent or at most 0) at the subject a fact.assign step writes at, as a fact.assign.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -174,7 +180,7 @@ Emit a custom event.
 
 ### `damage`
 
-Toolbox row 29b (spell scripted actions only): the named NPC's instance (without npc, an aimed spell's target; an unaimed spell requires npc, compiler SCHEMA_VIOLATION), when alive, loses amount hp of this damage kind after its resistances (row G2), stopping at 0; a loss to 0 runs the death sequence with the caster as killer and credited character, and closes the NPC's encounter when it is the only opponent.
+Spells only: the named NPC (or the spell's target) takes this much damage of this kind, after its resistances; at 0 it dies, killed by the caster.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -184,7 +190,7 @@ Toolbox row 29b (spell scripted actions only): the named NPC's instance (without
 
 ### `light.ignite`
 
-Toolbox row 29b (spell scripted actions only): ignite the named fuel source (without item, an aimed spell's target; an unaimed spell requires item, compiler SCHEMA_VIOLATION) as the ignite verb does (light@1), when the caster holds it and the verb would admit it; otherwise nothing.
+Spells only: light the named fuel source (or the spell's target), as the ignite verb would.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -201,12 +207,12 @@ Adjust a resource of the actor's body by `by`, stopping at its bounds.
 
 ### `build`
 
-Scripted action: Built rooms S6 (detail-target scripted actions only, at most one per outcome, construction@1): raise structure at the scripted action target's room (its site) toward direction for the actor, as a build service does (service.schema.json); success outcome only (the compiler refuses it elsewhere, lib/loka/content/construction.ex). Admission refuses the perform while the build would be refused (service.site_taken, service.construction_full). Service benefit: Built rooms S2 (construction@1): raise structure at site's direction (site required on a service, lib/loka/content/steps.ex). structure is one of site.structures and direction one of site.directions (SCHEMA_VIOLATION invalid_value otherwise). Refused service.site_taken while a built room holds that site direction and service.construction_full at world.construction.max_total. Built rooms S3: fact with escrow (ready_after, no output) makes it a commission: the order sets fact true, moves the inputs to custody and schedules an order job; when due the job raises the room for its owner and sets fact false (refunding the inputs when the site is taken or construction full by then). Cancel (a cancel benefit naming this service) returns the inputs, never the fee.
+Builds structure in direction from the site room, for the actor. In a scripted action it works only on a success outcome; in a service it is a benefit. Refused when that spot is built already or the world's building limit is reached. With fact and escrow it becomes an order: the items are held and the room is built ready_after seconds later; a cancel returns the items but not the fee.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
 | direction | `north` or `south` or `east` or `west` or `up` or `down` | yes | The direction from the site the room is raised toward. |
-| escrow | object |  | Built rooms S3: the first quantity of these directly held items move to the custody room with the order; ready_after seconds later the order job raises the room. |
+| escrow | object |  | The items the player hands over with the order; ready_after seconds later the room is built. |
 | escrow.custody | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The room holding them. |
 | escrow.items | list of [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The item definitions accepted as payment. |
 | escrow.quantity | integer | yes | How many of them move. |
@@ -217,11 +223,15 @@ Scripted action: Built rooms S6 (detail-target scripted actions only, at most on
 
 ### `skill.acquire`
 
+The player learns a skill.
+
 | Field | Type | Required | Meaning |
 |---|---|---|---|
 | skill | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The skill the actor acquires. |
 
 ### `topic.grant`
+
+The player learns a topic they can ask about.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -229,9 +239,11 @@ Scripted action: Built rooms S6 (detail-target scripted actions only, at most on
 
 ### `entitlement`
 
+A service's benefit: the player is now owed something, such as a paid room, recorded in a fact.
+
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| escrow | object |  | Toolbox row 20a: the first quantity of these directly held items move to the custody room with the order. Row 20b: ready_after with output (an item lying in custody) adds a work job a claim waits for; cancel returns the inputs, never the fee. Row kgd.70: output with no ready_after is a barter, handed from custody to the body with the inputs, no job. |
+| escrow | object |  | Items the player hands over with the order; they wait in the custody room. With ready_after and output, the order takes time and is claimed later, and cancelling returns the items but not the fee. With output and no ready_after it is an immediate trade. |
 | escrow.custody | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The room holding them. |
 | escrow.items | list of [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The item definitions accepted as payment. |
 | escrow.output | [DefinitionRef](source-kinds.gen.md#definitionref) |  | The item lying in custody the order hands over. |
@@ -240,6 +252,8 @@ Scripted action: Built rooms S6 (detail-target scripted actions only, at most on
 | fact | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The fact recording the entitlement. |
 
 ### `meal`
+
+A service's benefit: a meal that draws on the provider's stock and restores the body.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -250,6 +264,8 @@ Scripted action: Built rooms S6 (detail-target scripted actions only, at most on
 
 ### `drink`
 
+A service's benefit: a drink served from a vessel that restores the body.
+
 | Field | Type | Required | Meaning |
 |---|---|---|---|
 | amount | integer | yes | How much is restored, up to its maximum. |
@@ -259,6 +275,8 @@ Scripted action: Built rooms S6 (detail-target scripted actions only, at most on
 
 ### `repair`
 
+A service's benefit: repairs the player's wielded weapon.
+
 | Field | Type | Required | Meaning |
 |---|---|---|---|
 | amount | integer | yes | Durability restored, up to its maximum. |
@@ -266,17 +284,23 @@ Scripted action: Built rooms S6 (detail-target scripted actions only, at most on
 
 ### `claim`
 
+A service's benefit: collects the player's ready order.
+
 | Field | Type | Required | Meaning |
 |---|---|---|---|
 | service | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The service whose order is claimed. |
 
 ### `cancel`
 
+A service's benefit: cancels the player's order.
+
 | Field | Type | Required | Meaning |
 |---|---|---|---|
 | service | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The service whose order is cancelled. |
 
 ### `deposit`
+
+A service's benefit: puts the player's money into a shared vault; a fact shows their balance.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -286,6 +310,8 @@ Scripted action: Built rooms S6 (detail-target scripted actions only, at most on
 
 ### `withdraw`
 
+A service's benefit: takes the player's money out of a shared vault.
+
 | Field | Type | Required | Meaning |
 |---|---|---|---|
 | account | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The bounded int player fact mirroring the balance. |
@@ -294,12 +320,12 @@ Scripted action: Built rooms S6 (detail-target scripted actions only, at most on
 
 ### `mend`
 
-Built rooms S4 (construction@1): mend the built room at site's direction. Refused service.nothing_to_mend unless that room's structure ruin status is active on it; otherwise the mend cures ruin and applies the structure's weathering again. site and direction as build's.
+Repairs the built room in direction from the site once it has fallen into ruin. Refused when there is nothing to mend.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
 | direction | `north` or `south` or `east` or `west` or `up` or `down` | yes | As build's direction. |
-| escrow | object |  | The first quantity of these directly held items move to the custody room with the mend (spent at once). |
+| escrow | object |  | The payment for the mend: when the player pays, quantity items of the listed kinds that the player carries move to the custody room. Without that many, the mend is refused. |
 | escrow.custody | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The room holding them. |
 | escrow.items | list of [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The item definitions accepted as payment. |
 | escrow.quantity | integer | yes | How many of them move. |
@@ -307,7 +333,7 @@ Built rooms S4 (construction@1): mend the built room at site's direction. Refuse
 
 ### `raze`
 
-Built rooms S5 (construction@1): raze the live built room at site's direction. Refused service.nothing_to_raze without one, permission_denied unless the actor raised it, service.occupied while an entity that cannot move (a corpse) lies in it; otherwise its statuses end, everything on its floor moves to the site and a tombstone (built row) is written. site and direction as build's.
+Tears down the built room in direction from the site. Only the player who built it can, and not while a corpse lies in it; everything on its floor moves to the site room.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -365,20 +391,20 @@ The actor's instance of the quest is in this lifecycle state.
 
 ### `fact_compare`
 
-The fact, in the actor's scope, equals this value. An entity or pair fact (toolbox row W2) is read at exactly one subject: npc or item, that definition's authored instance, or subject target, the action's target (false without one); a player or instance fact names none.
+The fact, in the actor's scope, equals this value. An entity or pair fact is read on exactly one subject: npc or item, the one placed in the world from that definition, or subject target, the action's target (false without one); a player or instance fact names none.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
 | equals | [FactValue](source-kinds.gen.md#factvalue) | yes | The value to compare. |
 | fact | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The fact to read. |
-| item | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Reads this item's authored instance. |
-| npc | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Reads this NPC's authored instance. |
+| item | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Reads the item placed in the world from this definition. |
+| npc | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Reads the NPC placed in the world from this definition. |
 | subject | `target` |  | `target` reads the action's target. |
-| with | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Toolbox row FD4: an npc_pair fact's second NPC, read at the pair (subject toward with). |
+| with | [DefinitionRef](source-kinds.gen.md#definitionref) |  | An npc_pair fact's second NPC, read at the pair (subject toward with). |
 
 ### `time_window`
 
-06 §21 time_window, a window of authored calendar hours: floor(time / calendar.units_per_hour) mod calendar.hours_per_day is in `from` inclusive to `to` exclusive, wrapping at day end. The compiler rejects endpoints outside the authored day and equal endpoints (EMPTY_TIME_WINDOW). Owned by schedule@1.
+Holds during a range of hours of the day: from (included) up to to (not included), wrapping past midnight. Example: from 20 to 6 is night. From and to must differ.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -387,7 +413,7 @@ The fact, in the actor's scope, equals this value. An entity or pair fact (toolb
 
 ### `barrier_state`
 
-The barrier's current state equals `equals` (room.schema.json BarrierState; closed means closed and unlocked). Owned by barrier@1.
+True while the door is in this state: open, closed or locked.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -396,7 +422,7 @@ The barrier's current state equals `equals` (room.schema.json BarrierState; clos
 
 ### `stat_compare`
 
-The actor's value of the attribute (cartridge.schema.json AttributeSpec: its start, while nothing writes attributes) is at least at_least. Owned by attribute@1.
+True while the player's attribute is at least this value.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -405,7 +431,7 @@ The actor's value of the attribute (cartridge.schema.json AttributeSpec: its sta
 
 ### `level_compare`
 
-Toolbox row 29a: the actor's level (toolbox row 4, derived from its experience; 1 in a cartridge without world.levelling) is at least at_least. Owned by attribute@1.
+True while the player's level is at least at_least.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -413,7 +439,7 @@ Toolbox row 29a: the actor's level (toolbox row 4, derived from its experience; 
 
 ### `resource_compare`
 
-The current value of the resource on the actor's body (regenerated to now, before the action's costs) is at least at_least; false for an actor without a body. Toolbox row 39: subject subject reads the pool on a reaction's event subject (the actor's body outside a reaction); at_least_percent holds when value * 100 >= percent * the entity's maximum. Exactly one of at_least and at_least_percent. Owned by attribute@1.
+Holds when the actor's resource (for example hp) is at least at_least, or at least at_least_percent of its maximum; use exactly one of the two. With subject, it reads the event's subject in a reaction. False for an actor without a body.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -424,7 +450,7 @@ The current value of the resource on the actor's body (regenerated to now, befor
 
 ### `escort_state`
 
-API1.11 escort@1: this actor’s typed escort for the named quest instance has this status.
+True while the player's escort for the named quest has this status.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -433,11 +459,13 @@ API1.11 escort@1: this actor’s typed escort for the named quest instance has t
 
 ### `light_off`
 
+Holds while the player's room is dark.
+
 Type: object.
 
 ### `has_tag`
 
-The subject's definition declares the tag (entity.schema.json Tag). Exactly one subject: subject target, the action's target, holding when it is an item whose definition declares the tag (false without a target, for a detail or for an NPC); subject room, the actor's current room; or item, barrier or room, that definition of this cartridge, a constant (tags never change). Owned by tag@1 (toolbox row G1).
+True when something has this tag: the action's target (target), the player's room (room), or a named item, door or room.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -449,7 +477,7 @@ The subject's definition declares the tag (entity.schema.json Tag). Exactly one 
 
 ### `sky`
 
-The derived sky at the committed clock, never stored (toolbox rows 10 and 31): exactly one of lunar, season or tide (the cut of that calendar cycle containing ((clock - origin) mod period)) or weather (the calendar day's weather table entry) holds when the current phase is that phase; a set of phases is an any of sky leaves. The compiler rejects a phase the named calendar table does not author, or no such table (SCHEMA_VIOLATION). Owned by calendar@1.
+True while the sky is in this phase: a moon phase, season, tide or the day's weather.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -460,7 +488,7 @@ The derived sky at the committed clock, never stored (toolbox rows 10 and 31): e
 
 ### `wearing`
 
-The actor's body wears an item whose definition declares tag (toolbox row W25): an item in one of the body's slot holders (equipment@1). False without a body. Owned by equipment@1.
+True while the player wears an item with this tag. False without a body.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -468,7 +496,7 @@ The actor's body wears an item whose definition declares tag (toolbox row W25): 
 
 ### `visited_count`
 
-The actor's count of accepted body entries into the room, the current one included, is at least at_least (toolbox row W7): a new character's start room counts once, any other room 0 until entered. Counted only while alternates@1 is locked (VisitedRoom.count). Owned by alternates@1.
+True once the player has entered the room at least this many times. The starting room counts as entered once.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -477,7 +505,7 @@ The actor's count of accepted body entries into the room, the current one includ
 
 ### `skill_compare`
 
-The actor's level in the named skill (skill@1: 1 when acquired, plus each growth threshold its use count has reached; 0 when neither) is at least at_least (toolbox row FD2). Derived on read. Owned by skill@1.
+True while the player's level in the named skill is at least at_least: 1 when learned, plus one for each growth step reached through use; 0 if not learned.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -486,7 +514,7 @@ The actor's level in the named skill (skill@1: 1 when acquired, plus each growth
 
 ### `population_count`
 
-The named population plan has at least at_least living members: slots 1 to cap whose row has a member_id and no replacement_due (toolbox row W12). Derived on read; reads no actor. Owned by population@1.
+True while the named population has at least at_least living members.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -495,7 +523,7 @@ The named population plan has at least at_least living members: slots 1 to cap w
 
 ### `status_active`
 
-The subject holds an active status of this definition (status@1 row; toolbox row W6). subject target: the action's target, or, in an entity's own variant (TextVariants), the entity described; false without a target or for a detail. subject self (toolbox row G3 reader 1): the actor's body. subject subject (reader 1): in a reaction's when, the event's subject, the holder a status.apply without item, npc or co_present lands on; false anywhere else. subject room (Built rooms S4, status reader 9): the actor's current room, which is the room being described in a room's or structure's variant. Owned by status@1.
+True while someone has this status: the action's target (target), the player (self), the event's subject in a reaction (subject), or the player's room (room).
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -504,7 +532,7 @@ The subject holds an active status of this definition (status@1 row; toolbox row
 
 ### `item_present`
 
-An item carrying this property tag (Tag, toolbox row G1) lies directly in the actor's current room: on its floor, not carried and not inside a container there (Homestead hs-6, furnishing). That is the actor's room (the only room the Book describes), as status_active subject room; in a reaction's when the reaction's actor's room. One query step per container row scanned. Owned by containment@1.
+True while an item with this tag lies on the floor of the player's room, not carried and not in a container. In a reaction, the room is the acting character's.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -512,7 +540,7 @@ An item carrying this property tag (Tag, toolbox row G1) lies directly in the ac
 
 ### `npc_present`
 
-The NPC of this definition is present: in the actor's current room and alive (hp above 0 when it has hp); false without a body. Presence, not posture (the player's posture is the position fact). Toolbox row W6. Owned by target_resolution@1.
+Holds when this NPC is alive and in the actor's room.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -520,7 +548,7 @@ The NPC of this definition is present: in the actor's current room and alive (hp
 
 ### `cue_perceived`
 
-The NPC of this definition, alive, perceives a cue of sense (toolbox row G6): an active Cue whose source is within its range of the NPC's room, through exits not hidden from the actor, read for the actor (a reaction's actor); in a reaction's condition whose cause is a scripted action outcome event (check_failed: failure; check_passed or action_completed: success), only that outcome's cues, from the actor's room. False for an NPC that is dead or nowhere. Owned by sense_cue@1.
+True while this NPC, alive, can sense a cue of this sense: a cue whose source is within its range of the NPC's room, through exits the player can see. In a reaction to an action's outcome, only that outcome's cues count.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -529,31 +557,33 @@ The NPC of this definition, alive, perceives a cue of sense (toolbox row G6): an
 
 ### `fact_at_least`
 
-An int fact's value, read as fact_compare reads it, is at least at_least (a dialogue's relationship or count gate). Owned by fact@1.
+True while a number fact is at least at_least, such as a relationship or a count.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| at_least | integer | yes |  |
-| fact | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| item | [DefinitionRef](source-kinds.gen.md#definitionref) |  |  |
-| npc | [DefinitionRef](source-kinds.gen.md#definitionref) |  |  |
-| subject | `target` |  |  |
-| with | [DefinitionRef](source-kinds.gen.md#definitionref) |  |  |
+| at_least | integer | yes | The smallest value that passes. |
+| fact | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The number fact to read. |
+| item | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Read the fact on this item. |
+| npc | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Read the fact on this NPC. |
+| subject | `target` |  | Set to target to read the fact on the action's target. |
+| with | [DefinitionRef](source-kinds.gen.md#definitionref) |  | For a fact held between two NPCs: the other NPC. |
 
 ### `time_since`
 
-Toolbox row FD1: the world clock minus the int fact's value (as fact_compare reads it, at its named NPC or item) is at least at_least; a fact never stamped holds its default. Owned by fact@1.
+True once at least at_least time has passed since the time stored in a number fact, read at its named NPC or item. A fact never set holds its default.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
 | at_least | integer | yes | The least elapsed time that holds. |
 | fact | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The int fact holding a stamp. |
-| item | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Reads this item's authored instance. |
-| npc | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Reads this NPC's authored instance. |
+| item | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Reads the item placed in the world from this definition. |
+| npc | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Reads the NPC placed in the world from this definition. |
 
 ## Events
 
 ### `fact_changed`
+
+A fact's value changed.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -561,24 +591,26 @@ Toolbox row FD1: the world clock minus the int fact's value (as fact_compare rea
 
 ### `entity_entered_room`
 
+Someone entered a room.
+
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| npc | [DefinitionRef](source-kinds.gen.md#definitionref) |  | The entrant is this NPC's authored instance (toolbox row W3). |
+| npc | [DefinitionRef](source-kinds.gen.md#definitionref) |  | The one entering is the NPC placed in the world from this definition. |
 | room | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Only this room. |
 
 ### `spoken`
 
-Toolbox row G9 (speech@1): one spoken event per NPC that heard the word.
+Someone said a word an NPC heard; fires once for each NPC that heard it.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
 | loudness | [Loudness](source-kinds.gen.md#loudness) |  | Only this loudness. |
-| npc | [DefinitionRef](source-kinds.gen.md#definitionref) |  | The hearer is this NPC's authored instance. |
+| npc | [DefinitionRef](source-kinds.gen.md#definitionref) |  | The one hearing is the NPC placed in the world from this definition. |
 | word | [SpokenKeyword](source-kinds.gen.md#spokenkeyword) |  | The word that fires it. |
 
 ### `level_reached`
 
-Toolbox row 4 (attribute@1): a character reached a level.
+A character reached a level.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -586,15 +618,17 @@ Toolbox row 4 (attribute@1): a character reached a level.
 
 ### `asked`
 
-Toolbox row FD7 (speech@1): the actor asked an NPC about a topic.
+The player asked an NPC about a topic.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
 | answered | boolean |  | Only asks that were, or were not, answered. |
-| npc | [DefinitionRef](source-kinds.gen.md#definitionref) |  | The asked NPC is this NPC's authored instance. |
+| npc | [DefinitionRef](source-kinds.gen.md#definitionref) |  | The NPC asked is the one placed in the world from this definition. |
 | topic | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Only this topic. |
 
 ### `quest_resolved`
+
+A quest was completed with an outcome.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -603,26 +637,34 @@ Toolbox row FD7 (speech@1): the actor asked an NPC about a topic.
 
 ### `rested`
 
+The player rested.
+
 | Field | Type | Required | Meaning |
 |---|---|---|---|
 | room | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Only this room. |
 
 ### `item_acquired`
 
+An item came into someone's hands: picked up, bought, given, harvested or stolen.
+
 | Field | Type | Required | Meaning |
 |---|---|---|---|
 | item | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Only this item. |
-| witness | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Toolbox row FD5: this NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness. |
+| witness | [DefinitionRef](source-kinds.gen.md#definitionref) |  | The NPC placed in the world from this definition, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness. |
 
 ### `item_dropped`
+
+An item was dropped.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
 | item | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Only this item. |
 | room | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Only this room. |
-| witness | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Toolbox row FD5: this NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness. |
+| witness | [DefinitionRef](source-kinds.gen.md#definitionref) |  | The NPC placed in the world from this definition, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness. |
 
 ### `shooed`
+
+A creature was shooed away from an item.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -631,21 +673,29 @@ Toolbox row FD7 (speech@1): the actor asked an NPC about a topic.
 
 ### `quest_activated`
 
+A quest started.
+
 | Field | Type | Required | Meaning |
 |---|---|---|---|
 | quest | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Only this quest. |
 
 ### `choice_opened`
 
+A choice was put in front of the player, in a conversation, a scene or speech.
+
 Type: object.
 
 ### `choice_resolved`
+
+The player picked an option in a choice.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
 | choice | [Key](source-kinds.gen.md#key) |  | Only this choice. |
 
 ### `story_point_reached`
+
+A story point was reached.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -654,32 +704,42 @@ Type: object.
 
 ### `custom_event`
 
+A custom event sent by an event.emit step.
+
 | Field | Type | Required | Meaning |
 |---|---|---|---|
 | custom | [Key](source-kinds.gen.md#key) |  | The custom event key. |
 
 ### `action_completed`
 
+A scripted action finished.
+
 | Field | Type | Required | Meaning |
 |---|---|---|---|
 | action | [Key](source-kinds.gen.md#key) |  | Only this action. |
-| witness | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Toolbox row FD5: this NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness. |
+| witness | [DefinitionRef](source-kinds.gen.md#definitionref) |  | The NPC placed in the world from this definition, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness. |
 
 ### `check_passed`
 
+A check passed.
+
 | Field | Type | Required | Meaning |
 |---|---|---|---|
 | check | [Key](source-kinds.gen.md#key) |  | Only the check with this key. |
-| witness | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Toolbox row FD5: this NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness. |
+| witness | [DefinitionRef](source-kinds.gen.md#definitionref) |  | The NPC placed in the world from this definition, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness. |
 
 ### `check_failed`
 
+A check failed.
+
 | Field | Type | Required | Meaning |
 |---|---|---|---|
 | check | [Key](source-kinds.gen.md#key) |  | Only the check with this key. |
-| witness | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Toolbox row FD5: this NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness. |
+| witness | [DefinitionRef](source-kinds.gen.md#definitionref) |  | The NPC placed in the world from this definition, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness. |
 
 ### `barrier_changed`
+
+A door or other barrier changed state, such as opened or locked.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -688,28 +748,36 @@ Type: object.
 
 ### `scene_ended`
 
+A scene ended.
+
 | Field | Type | Required | Meaning |
 |---|---|---|---|
 | scene | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Only this scene. |
 
 ### `entity_died`
 
+Someone died.
+
 | Field | Type | Required | Meaning |
 |---|---|---|---|
 | room | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Only this room. |
 | victim | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Only this victim. |
-| witness | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Toolbox row FD5: this NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness. |
+| witness | [DefinitionRef](source-kinds.gen.md#definitionref) |  | The NPC placed in the world from this definition, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness. |
 
 ### `attack_result`
 
+An attack hit or missed.
+
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| attacker | [DefinitionRef](source-kinds.gen.md#definitionref) |  | The attacker is this NPC's authored instance (loka-kgd.79); a player's blow never matches. |
+| attacker | [DefinitionRef](source-kinds.gen.md#definitionref) |  | The attacker is the NPC placed in the world from this definition; a player's blow never matches. |
 | hit | boolean |  | Only hits, or only misses. |
-| target | [DefinitionRef](source-kinds.gen.md#definitionref) |  | The target is this NPC's authored instance (row 39); a blow on the player never matches. |
-| witness | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Toolbox row FD5: this NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness. |
+| target | [DefinitionRef](source-kinds.gen.md#definitionref) |  | The target is this NPC itself; a blow on the player never matches. |
+| witness | [DefinitionRef](source-kinds.gen.md#definitionref) |  | The NPC placed in the world from this definition, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness. |
 
 ### `filled`
+
+A vessel was filled with a liquid.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -717,11 +785,15 @@ Type: object.
 
 ### `poured`
 
+A liquid was poured out.
+
 | Field | Type | Required | Meaning |
 |---|---|---|---|
 | kind | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Only this liquid. |
 
 ### `drank`
+
+Someone drank a liquid.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -729,11 +801,13 @@ Type: object.
 
 ### `clock_hour`
 
-The world's hourly calendar event (toolbox row W25; schedule@1): no filters; a status lands on the actor's body.
+Fires at the start of every hour of the game day.
 
 Type: object.
 
 ### `status_ticked`
+
+An active status took effect again, such as poison each tick.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -741,7 +815,7 @@ Type: object.
 
 ### `status_applied`
 
-Toolbox row G3 reader 2.
+A status was put on someone.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -749,11 +823,15 @@ Toolbox row G3 reader 2.
 
 ### `status_expired`
 
+A status wore off.
+
 | Field | Type | Required | Meaning |
 |---|---|---|---|
 | status | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Only this status. |
 
 ### `quest_failed`
+
+A quest failed.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -766,7 +844,7 @@ The scene format is in [Writing the game](../guides/writing-the-game.md).
 
 ## Choice fields
 
-One option of a dialogue (06 §17, §43): label and narration its text keys; steps, its effects in order (Steps of the dialogue choice context, docs/system/cartridge.md Steps and checks; a fact.assign sets a declared fact of the cartridge at the one scope it allows, a value of its type, as a scripted action's: fact@1 emits fact_changed when the value changes); hand_over, the item role the actor's body gives to the npc role (an item_acquired with that NPC as holder, as give); accept, a quest of this cartridge the choice activates as quest@1's activation does (quest.activate at player scope and quest_activated; the choose is invalid_state when accept_quest would be: the actor already has an instance of it, or its offer, if declared, has a policy that fails), never with a hand_over (activation and acquisition in one decision conflict: OUTCOME_MISMATCH). The choose that selects it applies all of them, resolves the dialogue's quest or activates the accepted one, and resolves the choice in one decision; its outcome is the choice_id. API1.7 receive {item, from} transfers the selected bound NPC-held item into the actor body, only while resolving a quest before API1.10; API1.10 also permits nonterminal receive. Receive is never combined with accept/hand_over. API1.7 fact.adjust applies a safe integer amount to a declared bounded integer fact using checked addition then authored bounds, lowered to fact.assign. Optional (toolbox row 14): check (step.schema.json Check, kind opposed), an opposed check made when the choice is chosen; a checked choice carries only label, narration, narration_variants, steps, availability, check, policy, then and then_failed, in a dialogue with no quest and no riddle, and its steps grant no skill (else OUTCOME_MISMATCH at its check). policy, the option's own condition, read with the speaker as target at the view, the choose and the talk: while it fails the option is not drawn and its choose is invalid_state. then, the key of a dialogue (of any speaker) that the accepted answer opens next as the conversation's new row, or end, which ends the conversation; a dialogue reached this way is no talk of its own and never reopens itself. then_failed, the same for a failed check; refused without check. narration_variants, words read instead of narration by the first when that holds before the answer's writes.
+One option the player can pick in a conversation: its button text, the line it tells, and what it does (steps, a quest to accept, an item to hand over). It can also have a condition that hides it, a check with what opens next on success (then) or failure (then_failed), or then: end to close the conversation.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -776,7 +854,7 @@ One option of a dialogue (06 §17, §43): label and narration its text keys; ste
 | availability.from | [LogicalTime](source-kinds.gen.md#logicaltime) |  | First logical time the choice is offered. |
 | availability.through | [LogicalTime](source-kinds.gen.md#logicaltime) |  | Last logical time the choice is offered, inclusive. |
 | check | [Check](source-kinds.gen.md#check) |  | An opposed check made when chosen. |
-| escort | object |  | API1.11 escort@1: npc names a bound NPC role. Start/rejoin are nonterminal; complete resolves the dialogue’s same quest. |
+| escort | object |  | Starts, rejoins or completes an escort: npc names the NPC who follows the player. start and rejoin keep the conversation going; complete finishes the dialogue's quest. |
 | escort.npc | [Key](source-kinds.gen.md#key) | yes | A bound NPC role. |
 | escort.quest | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The escort quest. |
 | escort.transition | `start` or `rejoin` or `complete` | yes | The transition made. |
@@ -790,9 +868,9 @@ One option of a dialogue (06 §17, §43): label and narration its text keys; ste
 | lesson_payment.resource | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The resource paid. |
 | lesson_payment.to | [Key](source-kinds.gen.md#key) | yes | The npc role paid. |
 | narration | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of what the actor reads on choosing. |
-| narration_variants | [TextVariants](source-kinds.gen.md#textvariants) |  |  |
+| narration_variants | [TextVariants](source-kinds.gen.md#textvariants) |  | Other lines read on choosing, each used while its condition holds. |
 | once | `true` |  | This choice goes away once taken: lowered to the fact <dialogue>_<choice>_done, a step that sets it and a policy that needs it unset. |
-| order | integer |  | Display position among this dialogue's choices, lowest first; a choice with none follows, and a tie or none sorts by key. The compiler writes it for a scene set in an unsorted order. |
+| order | integer |  | Where this choice is listed, lowest first; choices without one come after, and ties are sorted by key. |
 | patrol | object |  | A patrol transition. |
 | patrol.npc | [Key](source-kinds.gen.md#key) | yes | A bound NPC role. |
 | patrol.quest | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The patrol quest. |
@@ -801,12 +879,12 @@ One option of a dialogue (06 §17, §43): label and narration its text keys; ste
 | payment.amount | integer | yes | How much. |
 | payment.from | [Key](source-kinds.gen.md#key) | yes | The paying npc role. |
 | payment.resource | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The resource paid. |
-| policy | [Policy](vocabulary.gen.md#policy-leaves) |  | See the type. |
+| policy | [Policy](vocabulary.gen.md#policy-leaves) |  | When this option is shown: a condition the player must meet, checked with the speaker. |
 | receive | object |  | The bound NPC-held item transferred to the actor. |
 | receive.from | [Key](source-kinds.gen.md#key) | yes | The npc role holding it. |
 | receive.item | [Key](source-kinds.gen.md#key) | yes | The bound item transferred. |
-| sitting | `true` |  | Taken, this choice leaves the reopened hub until the conversation next opens. Only on a plain answer of a dialogue that reopens; the compiler refuses the rest. |
-| steps | list of [Step](vocabulary.gen.md#steps) |  | See the type. |
+| sitting | `true` |  | Once taken, this choice is hidden until the conversation is next opened. Only on a plain answer in a dialogue that reopens. |
+| steps | list of [Step](vocabulary.gen.md#steps) |  | What happens when the player picks this option, in order. |
 | story_point | string |  | <story point>/<outcome>: the outcome this choice reaches; one per outcome. |
-| then | [Key](source-kinds.gen.md#key) |  |  |
-| then_failed | [Key](source-kinds.gen.md#key) |  |  |
+| then | [Key](source-kinds.gen.md#key) |  | The conversation to go to next, or end to finish talking. |
+| then_failed | [Key](source-kinds.gen.md#key) |  | The conversation to go to next when this option's check fails. |
