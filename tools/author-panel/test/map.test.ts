@@ -280,3 +280,87 @@ test('the New list gives dialogues the first sentence of its schema description'
   assert.equal(await line.textContent(), first);
   await page.close();
 });
+
+// Breaks (mapsvg.tsx Grow, map.ts grows): a + on the side with an exit, a handle click that pans
+// instead (pan()'s pointer capture), grows the wrong way or level, a + over a room on the next
+// level, or does not select the new room.
+// Last: it writes rooms into the shared showcase copy.
+test('a + on a free side of the selected room makes and links a room there and selects it', async () => {
+  const room = (k: string) =>
+    JSON.parse(readFileSync(join(dir, `showcase/areas/homestead/rooms/${k}.json`), 'utf8')).exits;
+  const row = async (k: string) => {
+    for (let t = 0; t < 100; t++) {
+      const r = JSON.parse(readFileSync(join(dir, 'showcase/layout.json'), 'utf8')).find(
+        (o: { room: string }) => o.room === k,
+      );
+      if (r) return r;
+      await new Promise((r) => setTimeout(r, 100));
+    }
+  };
+  const handles = (page: Page, key: string) =>
+    page.getByLabel('Map slot').getByRole('button', { name: new RegExp(`^${key}: new room `) });
+  let page = await open({ selection: { kind: 'room', key: 'farm_kitchen' } });
+  await handles(page, 'farm_kitchen').first().waitFor({ timeout: boot });
+  assert.deepEqual(
+    await handles(page, 'farm_kitchen').evaluateAll((gs) =>
+      gs.map((g) => g.getAttribute('aria-label')),
+    ),
+    [
+      'farm_kitchen: new room east',
+      'farm_kitchen: new room south',
+      'farm_kitchen: new room west',
+      'farm_kitchen: new room up',
+      'farm_kitchen: new room down',
+    ],
+  ); // north: farm_yard
+  await page.getByRole('button', { name: 'farm_kitchen: new room east', exact: true }).click();
+  assert.deepEqual(await row('room_1'), { room: 'room_1', x: -3, y: 1, z: 0 });
+  assert.deepEqual(room('farm_kitchen').east, { to: 'room_1' });
+  assert.deepEqual(room('room_1'), { west: { to: 'farm_kitchen' } });
+  // selected: its handles show; Enter (and below, Space) on one grows, as a button's keys do
+  await page
+    .getByRole('button', { name: 'room_1: new room up', exact: true })
+    .focus({ timeout: boot });
+  await page.keyboard.press('Enter');
+  assert.deepEqual(await row('room_2'), { room: 'room_2', x: -3, y: 1, z: 1 });
+  await page
+    .getByRole('button', { name: 'room_2: new room north', exact: true })
+    .waitFor({ timeout: boot });
+  assert.equal(await page.getByRole('button', { name: 'room_2: new room down' }).count(), 0); // its exit to room_1
+  // record what the panel posts to the Book frame (book.ts sends through contentWindow only);
+  // a string: the test tsconfig has no DOM lib
+  await page.evaluate(`(() => {
+    const real = Object.getOwnPropertyDescriptor(HTMLIFrameElement.prototype, 'contentWindow');
+    window.ops = [];
+    Object.defineProperty(HTMLIFrameElement.prototype, 'contentWindow', {
+      get() {
+        const f = real.get.call(this);
+        return { postMessage: (m, o) => (window.ops.push(m.op), f.postMessage(m, o)) };
+      },
+    });
+  })()`);
+  await page.getByRole('button', { name: 'room_2: new room north', exact: true }).focus();
+  await page.keyboard.press('Shift+Enter'); // grows; the map's Shift-Enter (play there) never sees it
+  assert.deepEqual(await row('room_3'), { room: 'room_3', x: -3, y: 0, z: 1 });
+  await page
+    .getByRole('button', { name: 'room_3: new room north', exact: true })
+    .waitFor({ timeout: boot }); // compiled: the next page's free key is room_4
+  assert.equal(await page.getByRole('button', { name: 'room_3: new room down' }).count(), 0); // pond below, no exit
+  const ops = await page.evaluate('window.ops');
+  assert.deepEqual(new Set(ops as string[]), new Set(['select'])); // the new room shown, no go_to_room
+  await page.close();
+  page = await open({ selection: { kind: 'room', key: 'farm_kitchen' } });
+  await handles(page, 'farm_kitchen').first().focus({ timeout: boot });
+  await page.keyboard.press('Shift+Tab'); // back into the map's rooms: a + in the page's order, grows on no other key
+  const [inMap, name] = (await page.evaluate(
+    `[!!document.activeElement.closest('svg'), document.activeElement.getAttribute('aria-label')]`,
+  )) as [boolean, string];
+  assert.equal(inMap, true);
+  assert.doesNotMatch(name, /: new room /);
+  await page
+    .getByRole('button', { name: 'farm_kitchen: new room down', exact: true })
+    .focus({ timeout: boot });
+  await page.keyboard.press('Space');
+  assert.deepEqual(await row('room_4'), { room: 'room_4', x: -4, y: 1, z: -1 });
+  await page.close();
+});

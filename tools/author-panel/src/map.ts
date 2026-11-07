@@ -25,6 +25,7 @@ export const M = {
   tri: 5, // mutate-skip: uncalibrated design value
   tick: 6, // mutate-skip: uncalibrated design value
   lock: 14, // mutate-skip: uncalibrated design value
+  plus: 7, // mutate-skip: uncalibrated design value (a grow handle's radius)
   pad: 12, // space.lg
   min: 0.25,
   floor: 0.1, // the map's least zoom when a level fits only below `min` (map rulings, minimum zoom)
@@ -224,3 +225,23 @@ export function footer(rooms: MapRoom[], unreached: Set<string>, locked: Set<str
 
 /** The shared selection a room click makes (the hierarchy and Book follow it). */
 export const select = (r: MapRoom) => ({ file: r.file, kind: 'room', key: r.key });
+
+/** The cell one step away, as `templates.ex` places a grown room (north is -y). */
+export const STEP: Record<string, [number, number, number]> = {
+  north: [0, -1, 0],
+  east: [1, 0, 0],
+  south: [0, 1, 0],
+  west: [-1, 0, 0],
+  up: [0, 0, 1],
+  down: [0, 0, -1],
+};
+/** The sides a room can grow from: no exit that way (grow refuses one) and no placed room on
+ * the target cell (the server would set the new room elsewhere on that level). */
+export function grows(r: MapRoom, rooms: MapRoom[]) {
+  const at = r.at;
+  if (!at) return [];
+  const held = new Set(rooms.flatMap((o) => (o.at ? [`${o.at.x},${o.at.y},${o.at.z}`] : [])));
+  return Object.entries(STEP)
+    .filter(([dir, [x, y, z]]) => !r.exits.some((e) => e.dir === dir) && !held.has(`${at.x + x},${at.y + y},${at.z + z}`))
+    .map(([dir]) => dir);
+}

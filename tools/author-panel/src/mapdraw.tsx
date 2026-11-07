@@ -15,6 +15,10 @@ const HUE = [
 ];
 const DASH = '[stroke-dasharray:4_3]';
 
+/** Half a room's drawn width and height: the disc below the overview zoom, else the box. */
+export const half = (v: View) =>
+  v.zoom < M.overview ? [M.disc / 2, M.disc / 2] : [(M.w / 2) * v.zoom, (M.h / 2) * v.zoom];
+
 /** A room's centre on screen. */
 export const at = (r: MapRoom, v: View) => {
   const c = centre(r.at!);
@@ -108,10 +112,7 @@ export function Stubs({ level, v }: { level: MapRoom[]; v: View }) {
           .map((e) => {
             const s = e.dir === 'up' ? -1 : 1;
             const c = at(r, v);
-            const [hw, hh] =
-              v.zoom < M.overview
-                ? [M.disc / 2, M.disc / 2]
-                : [(M.w / 2) * v.zoom, (M.h / 2) * v.zoom];
+            const [hw, hh] = half(v);
             const [x0, y0] = [c.x + hw, c.y + s * hh];
             const [x1, y1] = [x0 + d, y0 + s * d];
             const tri = `${x1 - M.tri / 2},${y1} ${x1 + M.tri / 2},${y1} ${x1},${y1 + s * M.tri}`;
@@ -135,7 +136,7 @@ export type Marks = {
   selected: boolean;
 };
 
-const RING = 'hidden fill-none stroke-ring stroke-2 group-focus-visible:block'; // the focus ring
+export const RING = 'hidden fill-none stroke-ring stroke-2 group-focus-visible:block'; // the focus ring
 
 /** The box (or overview disc) with its state's stroke and fill, the pin, the lock and the label. */
 export function Box({ r, v, m }: { r: MapRoom; v: View; m: Marks }) {

@@ -11,6 +11,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 (commit `997a7a8`, `docs/rewrite-v3/reviews/`).
 
 - [Review: modal scene Trigger row (loka-wfrgk.107)](2026-11-07-scene-trigger-review.md): **APPROVE**
+- [Review: map + handles grow the selected room (loka-wfrgk.104)](2026-11-07-map-grow-handles-review.md): **CHANGES REQUIRED**
 - [Review: Hierarchy New + and kind-header + (loka-wfrgk.108)](2026-11-07-hierarchy-new-review.md): **CHANGES REQUIRED**
 - [Review: Field guide B, Add menus with descriptions and the generated field guide (loka-wfrgk.102.3)](2026-11-07-field-guide-b-review.md): **APPROVE WITH NOTES**
 - [Review: Field guide A, plain-English field help for prologue Part 1 kinds (loka-wfrgk.102 A)](2026-11-07-field-guide-a-review.md): **CHANGES REQUIRED**

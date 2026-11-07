@@ -5,9 +5,9 @@ import type { Level, MapProps, Reach } from './areamap.tsx';
 import type { MapRoom } from './map.ts';
 import * as map from './map.ts';
 import { M } from './map.ts';
-import { Box, Edges, Hulls, Pills, Stubs, type Marks } from './mapdraw.tsx';
+import { at, Box, half, Edges, Hulls, Pills, RING, Stubs, type Marks } from './mapdraw.tsx';
 import { cellAt, dragged, toward } from './mapedit.ts';
-import { edit, shown } from './mapwire.ts';
+import { edit, mapCommand, shown } from './mapwire.ts';
 
 /** `locked`: the map's drag lock (areamap.tsx); rooms do not move while it is on. */
 export type DrawProps = { p: MapProps; l: Level; reach: Reach; locked: boolean };
@@ -48,6 +48,7 @@ export function Drawing(d: DrawProps) {
         v={view}
         here={d.p.here}
       />
+      <Grow d={d} />
     </svg>
   );
 }
@@ -96,6 +97,58 @@ function Room({
     >
       <title>{map.name(r, {})}</title>
       <Box r={r} v={d.l.v.view!} m={m} />
+    </g>
+  );
+}
+
+/** A + on each side the selected room can grow from (map.grows): a click or Enter makes and
+ * links a new room that way and selects it. After the rooms, so Tab from the room reaches them. */
+function Grow({ d }: { d: DrawProps }) {
+  const r = d.l.level.find((o) => o.ref === d.p.selected);
+  if (!r) return null;
+  const v = d.l.v.view!;
+  const c = at(r, v);
+  const [hw, hh] = half(v);
+  const k = M.stub * Math.SQRT1_2; // mutate-skip: placement; up and down sit where their stubs would
+  const spot: Record<string, [number, number, number]> = {
+    north: [c.x, c.y - hh - M.plus - 3, M.plus], // mutate-skip: placement
+    east: [c.x + hw + M.plus + 3, c.y, M.plus], // mutate-skip: placement
+    south: [c.x, c.y + hh + M.plus + 3, M.plus], // mutate-skip: placement
+    west: [c.x - hw - M.plus - 3, c.y, M.plus], // mutate-skip: placement
+    up: [c.x + hw + k, c.y - hh - k, M.plus - 2], // mutate-skip: placement
+    down: [c.x + hw + k, c.y + hh + k, M.plus - 2], // mutate-skip: placement
+  };
+  return map.grows(r, d.p.story.map).map((dir) => <Plus key={dir} r={r} dir={dir} at={spot[dir]} />);
+}
+
+/** One grow handle: a button, kept out of pan()'s drag. */
+function Plus({ r, dir, at: [x, y, s] }: { r: MapRoom; dir: string; at: [number, number, number] }) {
+  const grow = () => mapCommand('map-grow', r.key, dir);
+  const a = s / 2; // mutate-skip: placement, the + arm
+  return (
+    <g
+      role="button"
+      tabIndex={0}
+      aria-label={`${r.key}: new room ${dir}`}
+      className="group cursor-pointer outline-none"
+      onPointerDown={(e) => e.stopPropagation()} // else pan() captures the pointer and the click is lost
+      onClick={grow}
+      onKeyDown={(e) => {
+        if (e.key !== 'Enter' && e.key !== ' ') return;
+        e.preventDefault();
+        e.stopPropagation(); // else the map's own Enter picks, or with Shift plays, the room it had
+        grow();
+      }}
+    >
+      <title>{`New room ${dir}`}</title>
+      <circle
+        cx={x}
+        cy={y}
+        r={s}
+        className="fill-background stroke-input group-hover:stroke-ring"
+      />
+      <path d={`M${x - a},${y}H${x + a}M${x},${y - a}V${y + a}`} className="stroke-foreground" />
+      <circle cx={x} cy={y} r={s + 2} className={RING} /> {/* mutate-skip: the focus ring's gap */}
     </g>
   );
 }
