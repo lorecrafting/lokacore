@@ -1,4 +1,4 @@
-// size: allow 645, one editor's keys, saves, conflicts, add-here and capitalised titles walked over one stubbed page
+// size: allow 660, one editor's keys, saves, conflicts, add-here and capitalised titles walked over one stubbed page
 // E5's in-Book editor (docs/design/prose-in-the-book-rulings.md) in headless Google Chrome, over a
 // page of plain lines and a stubbed /__author route; the Book itself is the walk's (web-preview.md).
 import assert from 'node:assert/strict';
@@ -174,6 +174,24 @@ test("the card's Edit in Book opens a capitalised menu title's field", async () 
   await page.locator('h1[data-loka-field]').waitFor();
   assert.equal(await page.locator('h1').textContent(), 'brass lantern');
   assert.deepEqual(posted('/open'), []);
+});
+
+// Breaks: a title two keys draw alike (journal_sampler: quest.oar.title "The lost oar", the
+// item page's cap(item.oar.short) "the lost oar") opens one key's field, exact or lowered first,
+// so Enter writes the other key's line; or Edit in Book opens it under the wrong key.
+test('a title two keys draw alike opens no field, from either key', async () => {
+  await capitalised('item.oar.short', 'the lost oar');
+  await page.evaluate(() => (window as any).seen.set('The lost oar', 'quest.oar.title'));
+  await page.locator('h1 span').dblclick();
+  await noteSays('Not a line of words. Alt-click opens its source.');
+  for (const key of ['item.oar.short', 'quest.oar.title'])
+    await page.evaluate((key) => postMessage({ op: 'edit', key }, '*'), key);
+  await settle(); // each key's line is not on this page, so it opens in the owner's editor
+  assert.deepEqual(
+    posted('/open').map((b: any) => b.key),
+    ['item.oar.short', 'quest.oar.title'],
+  );
+  assert.equal(await page.locator('[data-loka-field]').count(), 0);
 });
 
 const TILDE = { file: 'a.loka', line: 4, was: '~', words: '~' };

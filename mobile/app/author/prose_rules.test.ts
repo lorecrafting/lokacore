@@ -5,6 +5,8 @@ import { join } from 'node:path';
 import { test } from 'node:test';
 import { color } from '../book/tokens.ts';
 import {
+  bind,
+  clicked,
   selects,
   shortcut,
   noFieldNote,
@@ -146,4 +148,27 @@ test('the Book hands the panel its shortcuts, and marks only the selection`s lin
     !selects('room.hutch.title', 'room', 'hut') && !selects('item.hut.short', 'room', 'hut'),
   );
   assert.ok(!selects(undefined, 'room', 'hut'));
+});
+
+// Breaks: a click on a title cap() drew selects nothing (exact words only); Alt-click opens the
+// drawn capital, not the file's words; the exact or the lowered form wins when both name a key
+// (journal_sampler's oar: the quest title's field opens on the item's title); or words two keys
+// draw bind to the last key drawn.
+test("a clicked line's key: its words or the capital lowered, none when two keys claim it", () => {
+  const seen = new Map<string, string>(),
+    said = new Map([['item.lantern.name', 'brass lantern']]);
+  bind(seen, 'brass lantern', 'item.lantern.name');
+  assert.deepEqual(clicked(seen, said, 'Brass lantern'), {
+    key: 'item.lantern.name',
+    words: 'brass lantern',
+  });
+  assert.deepEqual(clicked(seen, said, 'Not drawn'), { key: undefined, words: 'Not drawn' });
+  bind(seen, 'the lost oar', 'item.oar.short');
+  bind(seen, 'The lost oar', 'quest.oar.title');
+  assert.equal(clicked(seen, said, 'The lost oar').key, undefined);
+  assert.equal(clicked(seen, said, 'the lost oar').key, 'item.oar.short');
+  bind(seen, 'the lost oar', 'item.oar.short');
+  assert.equal(clicked(seen, said, 'the lost oar').key, 'item.oar.short', 'one key drawn twice');
+  bind(seen, 'the lost oar', 'quest.oar.name');
+  assert.equal(clicked(seen, said, 'the lost oar').key, undefined, 'two keys, one words');
 });

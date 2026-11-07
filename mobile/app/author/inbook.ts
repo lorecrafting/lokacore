@@ -4,7 +4,7 @@
 // panel.tsx requires this only in the author preview, so a player build never holds it.
 import type { Message } from './live.ts';
 import { noFieldNote, oneLine, CSS, paletteNear, paper, saving, step } from './prose_rules.ts';
-import { textField, unwritten, walk, selects, shortcut } from './prose_rules.ts';
+import { drawnWords, textField, unwritten, walk, selects, shortcut } from './prose_rules.ts';
 
 export { tagged } from './prose_rules.ts';
 type Hooks = {
@@ -40,11 +40,7 @@ const observer =
   typeof MutationObserver === 'undefined' ? undefined : new MutationObserver(reapply);
 const watch = () =>
   observer?.observe(document.body, { childList: true, subtree: true, characterData: true });
-/** A drawn line's words as text() gave them: exact, or with the first letter the Book capitalised lowered. */
-function drawn(el: Node) {
-  const t = el.textContent ?? '';
-  return [t, t.charAt(0).toLowerCase() + t.slice(1)].find((w) => hooks.seen.has(w));
-}
+const drawn = (el: Node) => drawnWords(hooks.seen, el.textContent ?? ''); // as text() gave them
 const keyOf = (el: Node) => hooks.seen.get(drawn(el)!);
 const lines = () =>
   [...document.querySelectorAll<HTMLElement>('[dir="auto"]')].filter(
