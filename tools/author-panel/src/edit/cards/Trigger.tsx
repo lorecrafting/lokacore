@@ -5,7 +5,8 @@ import {
   kindOf,
   leftover,
   offers,
-  refused,
+  outcomeRefused,
+  outcomesOf,
   type Kind,
   type On,
 } from '../../../../../kernel/ts/play/scene_trigger.ts';
@@ -43,12 +44,12 @@ export function Trigger({ on, context, put }: { on: On; context: Context; put: (
           <Pick
             label="outcome"
             value={on.outcome}
-            of={all[kind].filter((o) => o[kind] === on[kind]).map((o) => o.outcome)}
+            of={outcomesOf(all[kind], on)}
             pick={(o) => put({ story_point: on.story_point, outcome: o })}
           />
         ) : null}
         {kind === 'quest' ? (
-          <QuestOutcome on={on} taken={(o) => refused(t, context.key, o)} put={put} />
+          <QuestOutcome on={on} bad={(o) => outcomeRefused(t, context.key, on, o)} put={put} />
         ) : null}
       </label>
       {quest ? <p className="text-muted-foreground">~ {quest}</p> : null}
@@ -84,20 +85,19 @@ function Pick({
   );
 }
 
-/** A quest's outcome, free text (scenes.ex never checks it); another scene's quest and outcome refused. */
+/** A quest's outcome, free text (scenes.ex never checks it); a non-Key or another scene's pair refused. */
 function QuestOutcome({
   on,
-  taken,
+  bad,
   put,
 }: {
   on: On;
-  taken: (on: On) => boolean;
+  bad: (outcome: string) => boolean;
   put: (on: On) => void;
 }) {
   const [outcome, setOutcome] = useState(String(on.outcome ?? ''));
   useEffect(() => setOutcome(String(on.outcome ?? '')), [on.outcome]);
-  const typed = { quest: on.quest, outcome };
-  const refused = outcome !== on.outcome && taken(typed);
+  const refused = outcome !== on.outcome && bad(outcome);
   return (
     <>
       <Input
@@ -106,7 +106,7 @@ function QuestOutcome({
         value={outcome}
         aria-invalid={refused}
         onChange={(e) => setOutcome(e.target.value)}
-        onBlur={() => outcome && outcome !== on.outcome && !refused && put(typed)}
+        onBlur={() => outcome !== on.outcome && !refused && put({ quest: on.quest, outcome })}
         onKeyDown={(e) => e.key === 'Enter' && e.currentTarget.blur()}
       />
       {refused ? <Refusal>~</Refusal> : null}

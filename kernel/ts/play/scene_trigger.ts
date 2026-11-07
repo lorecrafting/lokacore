@@ -1,5 +1,6 @@
 // A modal scene's trigger (loka-wfrgk.107; cards hold no logic): what may start it, offered only as
 // the compile accepts it (lib/loka/content/scenes.ex), and the starter's quest a switch leaves.
+import { validate } from '../src/foundation/validate.ts';
 import { choices } from './world_card.ts';
 
 type Obj = Record<string, unknown>;
@@ -16,13 +17,16 @@ export type Triggers = {
 
 const key = (v: unknown) => (v && typeof v === 'object' ? (v as Obj).key : v);
 const tail = (ref: string) => ref.slice(ref.lastIndexOf(':') + 1);
-/** One on's identity: scenes.ex:274-292 refuses two scenes with the same one (every start is one). */
+/** One on's identity: scenes.ex:274-292 refuses two scenes with the same one; every start, whatever
+ * else it carries, is one (scenes.ex:278). */
 const same = (on: On) =>
-  JSON.stringify(
-    Object.keys(on)
-      .sort()
-      .map((k) => [k, key(on[k])]),
-  );
+  'start' in on
+    ? 'start'
+    : JSON.stringify(
+        Object.keys(on)
+          .sort()
+          .map((k) => [k, key(on[k])]),
+      );
 
 /** The trigger's kind, in Scenes.trigger_kind's order (scenes.ex:140-147). */
 export const kindOf = (on: On = {}): Kind =>
@@ -81,6 +85,16 @@ export function refused(t: Triggers, scene: string, on: On) {
   const sig = same(on);
   return Object.entries(t.taken).some(([k, s]) => k !== scene && s === sig);
 }
+
+/** The outcomes `offered` (offers' story_point list) has for `on`'s point, none of another point's
+ * (scenes.ex:241-257). */
+export const outcomesOf = (offered: On[], on: On) =>
+  offered.filter((o) => o.story_point === on.story_point).map((o) => o.outcome);
+
+/** A typed quest outcome is not written when it is no Key (SceneDefinition's on) or another scene
+ * starts on the quest with it (scenes.ex:274-292). */
+export const outcomeRefused = (t: Triggers, scene: string, on: On, outcome: string) =>
+  validate('Key', outcome).length > 0 || refused(t, scene, { quest: on.quest, outcome });
 
 /** The starter's `<scene>_quest` (starters/templates.ex) when the scene no longer starts on it and
  * nothing else names it: the author may delete it (never deleted for them). */

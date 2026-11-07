@@ -2,7 +2,7 @@
 // (lib/loka/content/scenes.ex), and the starter's quest a switch leaves.
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { leftover, offers, triggers } from '../play/scene_trigger.ts';
+import { leftover, offers, outcomeRefused, outcomesOf, triggers } from '../play/scene_trigger.ts';
 
 const ref = (kind: string, key: string) => ({ kind, key });
 // a compiled cartridge's shape (loadCartridge): definitions by ref, `on` naming refs
@@ -10,6 +10,7 @@ const c = {
   // `far` is outside the scene's area (not in nodes, area_rules.ex)
   story_points: {
     p: { key: 'fate', outcomes: { burn: {}, keep: {} } },
+    g: { key: 'other', outcomes: { ring: {} } },
     f: { key: 'far', outcomes: { x: {} } },
   },
   quests: { q: { key: 'ash_quest' }, r: { key: 'bell_quest' } },
@@ -47,11 +48,32 @@ test('Opening is exactly {start: true}, and only for the one opening scene', () 
 test('a story point offers its outcomes no other scene starts on', () => {
   assert.deepEqual(offers(t, 'dawn', nodes).story_point, [
     { story_point: 'fate', outcome: 'keep' },
+    { story_point: 'other', outcome: 'ring' },
   ]);
-  assert.deepEqual(offers(t, 'ash', nodes).story_point, [
+  const ash = offers(t, 'ash', nodes).story_point;
+  assert.deepEqual(ash, [
     { story_point: 'fate', outcome: 'burn' },
     { story_point: 'fate', outcome: 'keep' },
+    { story_point: 'other', outcome: 'ring' },
   ]);
+  // Break: the outcome picker lists another point's outcome, and fate + ring is refused (scenes.ex:241-257).
+  assert.deepEqual(outcomesOf(ash, { story_point: 'fate', outcome: 'burn' }), ['burn', 'keep']);
+});
+
+// Break: every start is one on (scenes.ex:278): a start that carries an outcome still holds the opening.
+test('a start with an outcome still takes the one opening', () => {
+  const s = { ...c, scenes: { o: { key: 'dawn', on: { start: true, outcome: 'x' } } } };
+  assert.deepEqual(offers(triggers(s, []), 'dusk', nodes).start, []);
+});
+
+// Break: a typed quest outcome another scene starts on with that quest (DUPLICATE_DEFINITION,
+// scenes.ex:274-292), or one that is no Key, is written; or the scene's own pair or a free key refused.
+test('a typed quest outcome is refused when taken by another scene or not a Key', () => {
+  const on = { quest: 'bell_quest', outcome: 'rung' };
+  assert.equal(outcomeRefused(t, 'ash', on, 'completed'), true);
+  assert.equal(outcomeRefused(t, 'ash', on, 'Bad Key'), true);
+  assert.equal(outcomeRefused(t, 'ash', on, 'tolled'), false);
+  assert.equal(outcomeRefused(t, 'bell', on, 'completed'), false);
 });
 
 // Break: an action whose target's room lacks the detail is offered (OUTCOME_MISMATCH, scenes.ex:174-181),
