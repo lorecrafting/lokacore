@@ -16,7 +16,7 @@ sound are. Each effect waits for its own owner decision.
 
 Round ink action buttons for the combat hotbar (loka-x6t.131): the [Inked icon style guide](icon-style-guide.md) (the owner's pick, 2026-11-05; grid, tokens, states, recipe for every future icon) from the [exploration](ink-buttons-exploration.md), drawn in Storybook `Docs/Ink buttons`.
 
-The editor's chrome (dev only, never the Book): [editor chrome rulings](editor-chrome-rulings.md); its left-column map and Story list: [map and story rulings](editor-map-and-story-rulings.md); scene structure in the Scene text card: [scene structure rulings](scene-structure-rulings.md).
+The editor's chrome (dev only, never the Book): [editor chrome rulings](editor-chrome-rulings.md); its left-column map and Story list: [map and story rulings](editor-map-and-story-rulings.md); scene structure in the Scene text card: [scene structure rulings](scene-structure-rulings.md); story tooling (consequence preview, step debugger, checkpoint re-runs, story lints) assessed against what the compile gives: [story tooling](story-tooling.md).
 
 Rules: [component catalogue](../BOOK-UI-COMPONENTS.md). Values: [tokens](../../mobile/app/book/tokens.ts).
 Behaviour: [Book UI](../system/book-ui.md). Earlier explorations and the foundation audit: [archive](../archive/README.md).
