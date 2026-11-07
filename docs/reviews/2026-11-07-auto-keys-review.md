@@ -62,3 +62,22 @@ The 10 mapwire.ts SURVIVED rows are not selected by the sweep; five rerun by han
 - `~template` keyboard path removed: the brief keeps `~` only "where a prompt remains"; the map New has none. Accepted.
 - New text/behaviours still prompt: no graph node holds their keys. Accepted; owner may revisit.
 - `minted` client-only (mapedit.ts:167): accepted for created and made (the starter never rewrites their file); not for grow (finding 1).
+
+## Re-check at 486a279f2157e6977b6f2cbe2f81971b6d0b8afc
+
+Fix commits bf4316830, 0a6d0f0b3, 3ec31f232, 486a279f2 only. CI at head (`gh run list --commit`): ci success,
+book-e2e success. Verdict: **APPROVE WITH NOTES**.
+
+- Finding 1 (blocker): **resolved.** `newRefused` (kernel/ts/play/guard.ts:96-112), called from `create`
+  (write.ts:180), refuses a `<dir>/<name>` that any file (`placed`, root or area) or area bundle (`bundled`) holds,
+  compiled or not. Both probes are in the new author_mapedit test: `grow(b, 'south', 'room_9')` onto an uncompiled
+  `rooms/room_9.json` is refused with both files unchanged; `made(c, 'npcs', 'npc_9')` with `c` in area yard is
+  refused and writes no `areas/yard/npcs/npc_9.json`. Kind-to-folder: cutscene to `scenes/` and areas to `rooms/`
+  plus the area's folder or bundle, matching Starters `dir_of` and the starter's area room. A key of another kind
+  stays free (`made(start, 'items', 'npc_9')` passes), so no legitimate New is refused.
+  Hand mutants against author_mapedit.test.ts, each red: drop the file check (2 fail), drop areas->rooms (1), drop
+  cutscene->scenes (2), ignore the dir (1), drop the area-folder check (2). Baseline 23 pass.
+- Finding 2: **resolved.** `childKey` (mapedit.ts:179) holds the npc/item mapping; swapping it turns the
+  "dropped template's child" test red (1 fail).
+- Nits 3 and 4 stand (not required).
+- Out of scope: `bin/loka new` on the command line has the same gap (PM files it separately).
