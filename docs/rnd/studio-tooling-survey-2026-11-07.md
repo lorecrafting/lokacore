@@ -437,6 +437,11 @@ re-derive it.
 
 ## 7. Owner questions
 
+**Owner 2026-11-07 (paraphrased): yes to each recommendation below.** Decided: W1 goes after R1 and K2 after D1;
+E1 stays before v1, pulled forward only when a beat asks for it (a second scene per branch until then); L2b is a
+warning; the v1 save policy is decided at the release-candidate audit; roam reports only until Part 1 is written,
+then gates with a baseline. The questions stay below as the record.
+
 1. **Reopen the order?** The decided order R1, D1, C1, L1, F1, R2 stands. The survey's evidence (every shipping
    studio runs a random player; a one-shot reaction is the first reactive line the owner will write) argues for
    R1, **W1**, D1, **K2**, C1, L1 + L2, W2, F1 + W4, R2, K1. Accept the insertion, or keep the six and queue W1 and
