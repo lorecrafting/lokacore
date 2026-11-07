@@ -83,10 +83,10 @@ const NEEDS: Record<string, (doc: Obj, world: Obj, hidden: string[]) => boolean>
   ...Object.fromEntries(['fuel', 'vessel'].map((f) => [`items.${f}`, uneaten])),
   // entities.ex:227-232 receptacles: a container's; death.ex:137: no template's
   'items.capacity': (doc) =>
-    uneaten(doc) && doc.container === true && (doc.location as Obj | undefined)?.in !== 'template',
+    doc.container === true && (doc.location as Obj | undefined)?.in !== 'template',
   // skills.ex:230-231: an off-hand item's; skills.ex:245-256: the world's combat narrates a block
   'items.block_chance': (doc, world) =>
-    uneaten(doc) && doc.slot === 'off_hand' && !!((world.combat as Obj)?.narration as Obj)?.block,
+    doc.slot === 'off_hand' && !!((world.combat as Obj)?.narration as Obj)?.block,
   'actions.duration': (d, w) => !w.time_policy && !/"status\.apply"/.test(JSON.stringify(d)), // INVALID_TIME_POLICY (scripted_actions.ex:88): the whole cartridge.json; duration_status (:94); ponytail: also hides it beside a permanent status, which status.ex:72 lets through
   'actions.craft': (doc) => (doc.target as Obj | undefined)?.kind !== 'spell', // replenish.ex:59
   'reactions.zone': (doc) => (doc.on as Obj | undefined)?.room === undefined, // ReactionRule: a zone forbids on.room

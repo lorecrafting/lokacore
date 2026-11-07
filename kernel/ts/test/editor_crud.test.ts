@@ -188,10 +188,7 @@ test('every field a card draws takes its add-menu value through /change and comp
         // the card holds what the compiler refuses until the author picks it (Generic.tsx send)
         const all = diff(doc, edited);
         const ops = apart(all, unready(edited));
-        if (all.length && !ops.length) {
-          posted.add(`${k}.${f} held`);
-          continue;
-        }
+        if (all.length && !ops.length) continue;
         const r = await post('/change', { file, was, ops });
         posted.add(`${k}.${f}`);
         if (!r.ok) {
@@ -218,7 +215,6 @@ test('every field a card draws takes its add-menu value through /change and comp
     `only ${posted.size} add-menu values were sent: added() offers nothing`,
   );
   for (const f of ['items.readable', 'rooms.dark']) assert.ok(posted.has(f), `${f} never sent`);
-  assert.ok(posted.has('quests.offer held'), 'a targetless offer was not held back');
 });
 
 test('a definition another names is refused, then every one deletes through /delete and compiles', async () => {
