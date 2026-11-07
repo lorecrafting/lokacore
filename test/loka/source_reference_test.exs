@@ -197,11 +197,24 @@ defmodule Loka.SourceReferenceTest do
   end
 
   # Breaks: a field's line not taken from the schema (own, else its type's), an example from a
-  # non-sampler cartridge, from a later sampler or from an area folder missed, or a sampler edit the check does not see.
+  # non-sampler cartridge, from a later sampler or from an area folder missed, two closed shapes
+  # merged into one table (offering fields one shape rejects), or a sampler edit the check misses.
   test "the field guide lists each field's description and a sampler example", ctx do
     tmp = Path.dirname(ctx.out)
     carts = Path.join(tmp, "cartridges")
-    defs = put_in(@defs, ["$defs", "Ref", "description"], "A planted ref.")
+
+    defs =
+      @defs
+      |> put_in(["$defs", "Ref", "description"], "A planted ref.")
+      |> put_in(["$defs", "source.notes", "else"], %{
+        "if" => %{"required" => ["script"]},
+        "then" => %{"$ref" => "#/$defs/source.Scripted"},
+        "else" => %{"$ref" => "#/$defs/source.Note"}
+      })
+      |> put_in(["$defs", "source.Scripted"], %{
+        "properties" => %{"script" => %{"type" => "string"}}
+      })
+
     File.write!(Path.join(ctx.schemas, "defs.schema.json"), JSON.encode!(defs))
 
     for {file, body} <- [
@@ -224,6 +237,10 @@ defmodule Loka.SourceReferenceTest do
              "| a |  | list of string | [cartridges/a_sampler/areas/v/notes/m.json](../cartridges/a_sampler/areas/v/notes/m.json) |\n"
 
     assert guide =~ "| ref | A planted ref. | [Ref](reference/source-kinds.gen.md#ref) |  |\n"
+
+    # Two closed shapes get a table each: `script` only beside its own shape's fields.
+    assert guide =~
+             "### Shape 1\n\n| Field | What it does | Allowed values | Example |\n|---|---|---|---|\n| script |  | string |  |\n\n### Shape 2\n"
 
     File.write!(Path.join(carts, "b_sampler/notes/k.json"), JSON.encode!(%{"ref" => "y"}))
     assert {message, 1} = generate(["--check", ctx.schemas, ctx.out, carts])
