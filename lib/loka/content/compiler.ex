@@ -172,8 +172,15 @@ defmodule Loka.Content.Compiler do
       "description" => "The room a fresh world puts the player's body in.",
       "$ref" => "DefinitionRef"
     })
-    |> put_in(["properties", "calendar"], %{"$ref" => "Calendar"})
-    |> put_in(["properties", "world"], %{"$ref" => "WorldSettings"})
+    |> put_in(["properties", "calendar"], %{
+      "description" =>
+        "The game's clock: hours in a day, parts of the day, moon, seasons and weather.",
+      "$ref" => "Calendar"
+    })
+    |> put_in(["properties", "world"], %{
+      "description" => "Settings for the whole world: combat, death, movement, water and more.",
+      "$ref" => "WorldSettings"
+    })
     |> Map.update!("properties", &Map.merge(&1, Map.take(v2, @v2_settings)))
   end
 

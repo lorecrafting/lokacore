@@ -153,6 +153,9 @@ defmodule SystemGraph do
 
   @sec "[0-9A-Z](?:[0-9A-Za-z.]*[0-9A-Za-z])?"
 
+  @doc false
+  def cites(text, root), do: cited(text, spec_files(root))
+
   # `NN §a, §b` cites each section of NN.
   defp cited(text, specs) do
     for [run, nn] <- Regex.scan(~r/\b(\d\d[a-z]?) §(?:#{@sec})?(?:(?:, |-|–)§#{@sec})*/u, text),
