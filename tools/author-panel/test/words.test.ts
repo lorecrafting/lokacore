@@ -113,7 +113,8 @@ test('the field is read-only while its save is out', async () => {
 });
 
 // Breaks: POST /edit's `was` guard bypassed (a fresh read's `was` sent, or none), so an outside save
-// is overwritten; or a refused save drops the author's draft.
+// is overwritten; or a refused save drops the author's draft; or Keep mine on a draft equal to theirs
+// leaves the conflict shown.
 test('a line changed on disk since the card read it is refused and the draft kept', async () => {
   const before = readFileSync(TEXT, 'utf8');
   const page = await open(room);
@@ -127,8 +128,26 @@ test('a line changed on disk since the card read it is refused and the draft kep
     await page.getByText(`Changed on disk since you opened it. ${RAIN}`).waitFor();
     assert.equal(await field.inputValue(), '~');
     assert.equal(readFileSync(TEXT, 'utf8'), theirs);
+    await field.fill(RAIN); // mine now equals theirs: Keep mine has nothing to write and takes theirs
+    await page.getByRole('button', { name: 'Keep mine' }).click();
+    await page.getByText('Changed on disk since you opened it.', { exact: false }).waitFor({ state: 'detached' });
+    assert.equal(readFileSync(TEXT, 'utf8'), theirs);
   } finally {
     writeFileSync(TEXT, before);
+    await page.close();
+  }
+});
+
+// Breaks: a refused GET /line taken as the line, so the field opens on no words and saves a bad `was`.
+test('a line the server cannot find leaves the field shut and says why', async () => {
+  const page = await open({ right: 420, selection: { kind: 'item', key: 'lute' } });
+  const nowhere = JSON.stringify('No line for this key.');
+  await page.route('**/__author/line?*', (r) => r.fulfill({ status: 404, contentType: 'application/json', body: nowhere }));
+  try {
+    await page.reload(); // the first GET /line answered before the route
+    await page.getByText('No line for this key.').first().waitFor();
+    assert.equal(await page.getByLabel('name words').isDisabled(), true);
+  } finally {
     await page.close();
   }
 });
