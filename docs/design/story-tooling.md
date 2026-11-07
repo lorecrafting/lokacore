@@ -31,7 +31,10 @@ already has, and gives a build order. Doc only; the owner picks, and each pick b
 | 9 | `~` writing tracker | **Done** | `/todo`, the palette's `~` filter, placeholders per story node; one Beads fix (loka-vduxr.69) |
 | 10 | Barks | **Drop** as a mechanic; one lint row in L1 | Ambient sets are state-chosen line pools already; event-driven lines are reactions |
 
-Recommended order: R1, D1, C1, L1, F1, R2 (section 5).
+Recommended order: R1, D1, C1, L1, F1, R2 (section 5); decided by the owner 2026-11-07 (section 6). The
+[studio tooling survey](../rnd/studio-tooling-survey-2026-11-07.md) (loka-wfrgk.114) widened the scope to
+engine, protocol and compiler changes; its slices are ruled in section 2b and placed in section 5b, after the
+decided six unless the owner reorders (survey question 1).
 
 ## 1. What the compile already gives
 
@@ -123,6 +126,75 @@ Trace. In the Story slot's lower section (`Facts`), Cmd-K `facts`. All of it is 
 `reachReport` today; the slice is the table and the sort. Test: a planted cartridge with one fact of each
 status lists them in the order `read_only`, `write_only`, `unused`, then the rest by key.
 
+## 2b. Rulings for the survey's slices (loka-wfrgk.114)
+
+From the [studio tooling survey](../rnd/studio-tooling-survey-2026-11-07.md); the lesson and its sources are in
+its section 3 by row number. Tools slices need no reviewer; the compiler slices change source schemas only and
+leave the artifact as it is; L2 joins L1's Elixir slice; E1 is an engine change.
+
+### W1: Roam, a random player over the real authority (survey row 9)
+
+For the owner: what no path reaches, found by a bot that plays at random, at speed, many times, and keeps every
+crash as a checkpoint. Larian's World Tester, Owlcat's bots, ChoiceScript's Randomtest, Ink-Tester.
+
+| Ruling | Why | Test |
+|---|---|---|
+| **`bin/loka roam <cartridge> [--runs N] [--steps M] [--seed S]`** in `kernel/ts/play/roam.ts`: compiles to a temp dir like `sim.ts`, marks the artifact (`coverage.ts` `marked()`), opens the headless game as `check.ts` does, and drives it with `flows.ts`'s worker (`kernel/ts/play/flows.ts:39`) for M steps per seeded run; a choice step is added to the worker if it lacks one | The three parts exist and are already reused across `play/`; the marker is the only honest "did it fire" without a kernel change | A planted reaction only a rare choice reaches: zero-hit at 20 runs, hit at 500, same seed base |
+| **Report**: zero-hit reactions, choices, quests, scenes and story points first, then hit counts per node, as one canonical JSON document (`coverage.ts`'s form) and as lines; the panel may show the counts as a chip later (R2's slot) | A report for authors, not a check, like coverage and flows | The showcase's report lists each kind once and sorts zero-hit first |
+| **A fault or invariant failure writes `checkpoints/roam-<seed>.json`** holding the run's steps up to the failure, shrunk by greedy step deletion as `sim.ts` does (`kernel/ts/test/sim.ts:169`) | A found bug becomes a path R1 guards after every compile | A planted invariant break at step 40 writes the file; `bin/loka check` fails it at the same step; the shrunk path is shorter than 40 |
+| **Budget shown**: prints its run time; the acceptance keeps the showcase at 50 × 300 under two minutes on the M1, else the number is recorded | A slow tool is run once; a fast one every day | measured in the slice |
+
+### K2: `once` and `cooldown` on a reaction (survey row 3)
+
+For the owner: a rule that fires once, or rests, without writing the fact, the `not`, the assign and `silent`.
+
+| Ruling | Why | Test |
+|---|---|---|
+| **Source only.** `once: true` on a reaction lowers to the engine bool fact `<rule>_done` (default false), `not fact_compare` under `all` beside the authored `when`, and a trailing silent `fact.assign … true`; `cooldown: N` (logical seconds, ≥ 1) lowers to the engine int fact `<rule>_at`, `time_since {at_least: N}` and a trailing `fact.stamp`. An authored fact of either name, or a write to it, is `RESERVED_FACT` (as tips, `docs/system/cartridge.md:1370`) | The same lowering the compiler does for a choice's `once` (`cartridge.md:1018`); the artifact is unchanged, so no protocol, kernel or reviewer | A rule with `once` fires on the first matching event and not the second in a checkpoint; with `cooldown: 60` it fires, stays silent at +30 s and fires at +61 s |
+| **Lint sees the lowered write as deliberate**: the added assign or stamp does not trigger the narrate-or-silent rule | The write is bookkeeping, not a consequence | A `once` rule with a `narrate` step lints clean; one with no step but the lowered assign lints as today's silent rule does |
+| **Both on `after` rules**: the `once` guard is checked at delivery and again when the job runs (the rule's `when` is, `protocol/reaction.schema.json:529`) | No special case | A delayed `once` rule delivered twice before its job runs fires once |
+
+### W2: a rename rewrites the checkpoints (survey row 12)
+
+For the owner: renaming a room, NPC or dialogue does not rot the recorded paths. Ink's order-based paths and
+CDPR's deletion markers are the two sides of the lesson.
+
+| Ruling | Why | Test |
+|---|---|---|
+| **In the `/restructure` route** (in flight, another session): when a key is renamed, every `checkpoints/*.json` step whose intent names the old key (a room, NPC, item, dialogue, choice or fact ref) is rewritten in the same write; the response adds `checkpoints: n` | The editor knows the rename; the checkpoint is `{steps: [{intent} | {advance}]}` (`mobile/app/author/place.ts:7`) and names keys | Rename a room a checkpoint walks into: the file changes, `bin/loka check` stays `ok`; a checkpoint that never names it is byte-identical |
+| **Undo covers it**: the route's undo restores the checkpoint bytes with the source | One undo, one write | Undo after the rename restores both |
+
+### L2: three lint rows (survey rows 6, 8, 7)
+
+| Row | Finding | Why | Test |
+|---|---|---|---|
+| L2a | **Threshold never reachable.** A bounded int fact compared (`fact_compare`, `fact_at_least`) against a value the default plus the sum of every positive `fact.adjust` amount in the cartridge cannot reach, unless a repeatable writer (a repeatable quest's exchange or a reaction on a repeating event) adjusts it | Failbetter's parsimony; a gate that never opens is definite from the source | A fact default 0 adjusted +1, +2 and compared `at_least 5` is a finding; `at_least 3` is not; with a repeatable exchange writer, neither is |
+| L2b | **No fallback choice** (warning). A dialogue whose every choice carries a `policy` or `availability` | BioWare's unconditioned last line; Yarn skips the group; a talk that opens with nothing to pick | Two gated choices: a finding; add one ungated `then: end`: none |
+| L2c | **A fact without `meaning`** (nit; baseline absorbs today's) | One quality, one meaning; F1's table shows it | planted fact without the field |
+
+### K1: named conditions (survey row 2)
+
+For the owner: write `~trusts you` once and read it at twenty gates. BioWare's defined flags, Osiris's QRY,
+Yarn's smart variables.
+
+| Ruling | Why | Test |
+|---|---|---|
+| **`conditions/<key>.json` holds one Policy; `{"op": "named", "key": "<k>"}` is accepted wherever a Policy is written in source and replaced by that Policy at compile** (`Loka.Content.Resolve`'s stage, before type checks); a cycle is `CONDITION_CYCLE` at the file; an unknown key `UNRESOLVED_REFERENCE` | The artifact never carries the leaf: no protocol, kernel or reviewer; the owner rule allows compile-time shortcuts (`docs/system/owner-rules.md:117`) | Two sites name it: the artifact is byte-identical to the hand-inlined cartridge; a cycle is refused |
+| **The Story map shows a condition as a node with its readers; the Trace answers "where is `~k` read"** | The point of a name is to find it | `GET /story` lists the node with two reader edges |
+| **The card**: the Policy block's leaf picker offers `named` with the keys | One more leaf in the picker | the picker lists it |
+
+### W3: a lines sheet (survey row 14)
+
+`bin/loka lines <cartridge> [--speaker <key>]`: one row per text key: key, words, speaker or owning node, source
+`file:line`, the gate in the explainer's sentence form (`why_words.ts`), a `~` flag, byte length; CSV and JSON. First
+for proofreading an area in order; later the on-ramp for voice and localisation, where Yarn's `lock` hash becomes a
+column. Test: a planted cartridge with a gated and an ungated line lists both with the gate words on the first.
+
+### E1: a conditional page in a modal scene (survey row 15, engine)
+
+Rulings, contract and parity impact: [survey section 5](../rnd/studio-tooling-survey-2026-11-07.md#5-engine-proposals-contract-parity-reviewer).
+Owner question 2 there; not scheduled until answered.
+
 ## 3. Candidates dropped or done, with reasons
 
 - **2, story map.** Built. Remaining: the nits in loka-wfrgk.18.8 and .18.10, and S4 (character pages) and S7
@@ -161,7 +233,29 @@ kernel or the Book, except where a row says so.
 | 5 | **F1** facts table (XS) | Reads what S2 already has | The F1 test; Cmd-K `facts` opens it |
 | 6 | **R2** coverage chips | Needs R1's child and more than one checkpoint to be useful | The R2 tests; the chip's title lists the checkpoint names |
 
+### 5b. The survey's slices
+
+After the six above unless the owner reorders ([survey question 1](../rnd/studio-tooling-survey-2026-11-07.md#7-owner-questions)
+proposes R1, W1, D1, K2, C1, L1 + L2, W2, F1 + W4, R2, K1). No protocol or kernel change except E1.
+
+| Order | Slice | Size | Why here | Acceptance |
+|---|---|---|---|---|
+| 7 | **W1** roam | M | The one QA tool every shipping studio built; reuses `flows.ts`, `coverage.ts`, `sim.ts`; a found fault becomes a checkpoint R1 guards | The W1 tests; the showcase timing recorded |
+| 8 | **K2** `once` and `cooldown` on reactions | S | The first reactive lines are one-shot rules; same lowering as a choice's `once` | The K2 tests; the compiled artifact of a cartridge without the fields is byte-identical |
+| 9 | **L2** rows a, b, c | S | Joins L1's Elixir slice when it runs, else its own, one reviewer | One ExUnit test per row with a red control; the baseline grows by listed rows only |
+| 10 | **W2** rename rewrites checkpoints | S | With or after the `/restructure` route | The W2 tests |
+| 11 | **W4** F1 columns `meaning`, reachable range | XS | Reads what L2a computes | The F1 test lists the range |
+| 12 | **K1** named conditions | S | Before v1; now if Part 1's second area repeats a gate | The K1 tests |
+| 13 | **W3** lines sheet | S | Before v1; proofreading first | The W3 test |
+| — | **E1** conditional scene page | M, reviewer | Owner question; before v1 | The E1 tests in the survey |
+
 ## 6. Owner questions
+
+**Owner 2026-11-07 (paraphrased): yes to each recommendation below.** Decided: weather is a story fact for Part 1
+(no `weather.set` step); modal scenes stay choice-free and branch through `.scene` dialogues; D1 accepts the
+per-step replay within a stated budget before any kernel firing record; the two new L1 rows are lints with a
+baseline; the order is R1, D1, C1, L1, F1, R2. The questions stay below as the record. A reopen of the order (W1
+and K2 inserted) is [survey question 1](../rnd/studio-tooling-survey-2026-11-07.md#7-owner-questions).
 
 1. **Weather.** Story weather as a fact the story sets (no engine change; `sky` and `wet` do not follow it), or
    a `weather.set` step (spec amendment, kernel, reviewer)? Recommend the fact for Part 1.
