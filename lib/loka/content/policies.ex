@@ -44,9 +44,8 @@ defmodule Loka.Content.Policies do
   # (cartridge_scoped_facts.ts:80), here with the source's file line.
   defp subjectless(rel, steps, %{"op" => op, "fact" => f} = n, m, defs)
        when op in ~w(fact_compare fact_at_least time_since) do
-    fields = if op == "time_since", do: ~w(npc item), else: ~w(subject npc item)
-
-    case not Enum.any?(fields, &is_map_key(n, &1)) and resolve(f, "fact", m, defs) do
+    # time_since takes no `subject`: its schema refuses one before this runs
+    case not Enum.any?(~w(subject npc item), &is_map_key(n, &1)) and resolve(f, "fact", m, defs) do
       {_, _, %{"per_subject" => true}} -> [diag("FACT_SCOPE_UNSUPPORTED", at(rel, steps))]
       _ -> []
     end

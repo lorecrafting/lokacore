@@ -18,6 +18,23 @@ export const files = (dir: string, under = ''): string[] =>
     .sort() // readdir order differs by platform
     .sort((a, b) => Number(b === 'text.json') - Number(a === 'text.json'));
 
+/** The file of each definition an `areas/<a>.json` bundle holds, by `<section>/<key>` (a half-typed
+ * bundle holds none: the compiler reports it). */
+export function bundled(dir: string) {
+  const out: Record<string, string> = {};
+  for (const rel of files(dir).filter((f) => /^areas\/[a-z0-9_]+\.json$/.test(f))) {
+    let held: Record<string, object>;
+    try {
+      held = JSON.parse(readFileSync(join(dir, rel), 'utf8'));
+    } catch {
+      continue;
+    }
+    for (const [section, defs] of Object.entries(held))
+      for (const key of Object.keys(defs ?? {})) out[`${section}/${key}`] = rel;
+  }
+  return out;
+}
+
 type Prose = [at: string, text: string];
 // A definition's prose: every {"prose": "<words>"} marker by path (its other strings are keys
 // and names, not the writer's words).

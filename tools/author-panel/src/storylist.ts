@@ -34,6 +34,7 @@ export type Story = {
   todo: Record<string, Todo[]>;
   diagnostics: Record<string, { code?: string; path?: string }[]>;
   files: Record<string, string>;
+  bundled: Record<string, string>; // a bundle member's ref => its areas/<a>.json
   map: MapRoom[];
   words: Record<string, number>; // written words by node (Pacing)
   choices: Record<string, number>; // choice count by dialogue (Knowledge)

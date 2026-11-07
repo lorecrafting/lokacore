@@ -113,6 +113,15 @@ const linked = (doc: Obj) =>
  * food without a restore, cure or status: food.ex:21 effect?). */
 export const awaits = (def: string, f: string) =>
   ['source.QuestDefinition.offer', 'source.ItemDefinition.edible'].includes(`${def}.${f}`);
+/** What the schema takes and the compiler refuses, as an error `apart` holds the field by: food
+ * with no restore, cure or status (food.ex:21 effect?, a `[]` none). */
+export const unfed = (doc: Obj) => {
+  const e = doc?.edible as Obj | undefined;
+  const some = (v: unknown) => v != null && !(Array.isArray(v) && !v.length);
+  return e && !['resource', 'cures', 'applies'].some((k) => some(e[k]))
+    ? [{ property: '.edible', message: 'needs a resource, cures or applies' }]
+    : [];
+};
 
 /** The menu's fields whose capability `requires.capabilities` (`caps`) declares and whose other needs
  * the definition (`doc`), cartridge.json's `world` and the hidden skills' keys meet; others would not compile. */

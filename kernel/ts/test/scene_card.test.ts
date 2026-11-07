@@ -116,26 +116,36 @@ test('/set refuses each thing that is not a real key on a value line', (t) => {
   assert.equal(read(), original); // nothing written by any refusal
 });
 
-// Break: /set writes another area's NPC into an area scene, which area_rules.ex:27 refuses.
+// Break: /set writes another area's NPC into an area scene, which area_rules.ex:27 refuses; an NPC
+// in an `areas/<a>.json` bundle read as the root's (it has no file of its own).
 test('/set refuses an NPC of another area in an area scene, takes a root one', (t) => {
-  const { root, write } = sampler(t, true);
-  const scene = 'areas/west/scenes/west_talk.scene';
-  for (const [from, to] of [
-    ['rooms/den.json', 'areas/east/rooms/den.json'], // an area needs a room
-    ['npcs/guard.json', 'areas/east/npcs/guard.json'],
-    ['rooms/square.json', 'areas/west/rooms/square.json'],
-  ]) {
-    mkdirSync(join(root, to, '..'), { recursive: true });
-    renameSync(join(root, from), join(root, to));
+  for (const bundle of [false, true]) {
+    const { root, write } = sampler(t, true);
+    const scene = 'areas/west/scenes/west_talk.scene';
+    const east = ['rooms/den.json', 'npcs/guard.json']; // an area needs a room
+    const moves = [['rooms/square.json', 'west'], ...(bundle ? [] : east.map((f) => [f, 'east']))];
+    for (const [from, area] of moves) {
+      const to = `areas/${area}/${from}`;
+      mkdirSync(join(root, to, '..'), { recursive: true });
+      renameSync(join(root, from), join(root, to));
+    }
+    if (bundle) {
+      const [rooms, npcs] = east.map((f) => JSON.parse(readFileSync(join(root, f), 'utf8')));
+      writeFileSync(
+        join(root, 'areas/east.json'),
+        JSON.stringify({ rooms: { den: rooms }, npcs: { guard: npcs } }),
+      );
+      for (const f of east) rmSync(join(root, f));
+    }
+    cpSync(join(root, SCENE), join(root, scene));
+    const at = (value: string) =>
+      refusal(() => write({ file: scene, line: 1, was: 'npc: stranger', value }));
+    assert.deepEqual(at('guard'), [
+      400,
+      'npc: guard is area east’s, not this file’s (area_rules.ex:27)',
+    ]);
+    assert.equal(at('stranger'), 'written'); // a root NPC
   }
-  cpSync(join(root, SCENE), join(root, scene));
-  const at = (value: string) =>
-    refusal(() => write({ file: scene, line: 1, was: 'npc: stranger', value }));
-  assert.deepEqual(at('guard'), [
-    400,
-    'npc: guard is area east’s, not this file’s (area_rules.ex:27)',
-  ]);
-  assert.equal(at('stranger'), 'written'); // a root NPC
 });
 
 // Break: the served /set takes its keys from no compile (write.ts), or writes no journal; a

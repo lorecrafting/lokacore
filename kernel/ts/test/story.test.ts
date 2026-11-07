@@ -302,7 +302,7 @@ test("the compile's diagnostics by node", () => {
 test('each node names its own source file, a .json over its .scene', () => {
   const scene = join(src, 'scenes/greet.scene');
   writeFileSync(scene, '');
-  const { files } = story(src, dev, []);
+  const { files, bundled } = story(src, dev, []);
   const json = join(src, 'dialogues/greet.json');
   const twin = readFileSync(json);
   rmSync(json);
@@ -314,6 +314,9 @@ test('each node names its own source file, a .json over its .scene', () => {
   assert.equal(files[ref('dialogue', 'greet')], 'dialogues/greet.json');
   assert.equal(lone, 'scenes/greet.scene');
   assert.ok(!Object.values(files).includes('text.json'));
+  // Break: a bundle's room has no area for the pickers (reachable), or a card file of its own.
+  assert.deepEqual(bundled, { [ref('room', 'shed')]: 'areas/yard.json' });
+  assert.ok(!Object.values(files).includes('areas/yard.json'));
 });
 
 // Break: a bad outline.json throws (a 500 for the whole map) instead of a refusal in the model

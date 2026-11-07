@@ -23,7 +23,7 @@ import {
   unlisted,
 } from '../../../../kernel/ts/play/card.ts';
 import { uiSchema } from '../../../../kernel/ts/play/ui_schema.ts';
-import { capabilityRow } from '../../../../kernel/ts/play/allowed.ts';
+import { capabilityRow, unfed } from '../../../../kernel/ts/play/allowed.ts';
 import { ask, type useDiagnostics } from '../author.ts';
 import { Button } from '../components/ui/button.tsx';
 import { fields, type Context } from './fields.tsx';
@@ -113,7 +113,7 @@ export function useCard(rel: string, diag: Diag) {
   };
   const commit = () => {
     if (!saved) return;
-    const errors = fresh(saved, latest.current);
+    const errors = [...fresh(saved, latest.current), ...unfed(latest.current as never)];
     const [first] = errors;
     setHeld(first && `${first.property} ${first.message}`);
     const ops = apart(diff(saved.doc, latest.current), errors);

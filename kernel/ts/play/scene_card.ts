@@ -8,7 +8,7 @@ import { guarded, named, placed, refuse, stale } from './guard.ts';
 import { contentGraph } from './reach.ts';
 import { picks, VALUE, type Verb } from './scene_lines.ts';
 import { unlinkable } from './story_counts.ts';
-import { files } from './todo.ts';
+import { bundled, files } from './todo.ts';
 import { crossed } from './world_card.ts';
 import type { Answer, Change } from './write.ts';
 
@@ -33,12 +33,12 @@ export function ids(c: Obj = {}): Record<Verb, string[]> {
   };
 }
 
-/** The source file of the `dir` definition `key` (story.ts nodeOf: a `.scene` is a dialogue). */
+/** The source file of the `dir` definition `key`, else its bundle (story.ts nodeOf: a `.scene` is a dialogue). */
 const home = (root: string, key: string, dir: string) =>
   files(root).find((f) => {
     const p = placed(f);
     return p?.key === key && (p.ext === 'scene' ? 'dialogues' : p.dir) === dir;
-  });
+  }) ?? bundled(root)[`${dir}/${key}`];
 
 export function set(
   root: string,

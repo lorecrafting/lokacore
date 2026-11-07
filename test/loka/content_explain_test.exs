@@ -1,4 +1,4 @@
-# size: allow 595, one catalog walked row by row; each row is its own small test
+# size: allow 610, one catalog walked row by row; each row is its own small test
 defmodule Loka.ContentExplainTest do
   # What an author reads from a refused compile (loka-vduxr A1, A9). Expected fragments are
   # hand-written; wording around them may move.
@@ -254,6 +254,25 @@ defmodule Loka.ContentExplainTest do
       scene(dir, "npc: bram\nbram: hi\n- Go\n  needs: met\n  bram: ok\n", %{"facts.json" => facts})
 
     assert line_at(lines, "scenes/hi.scene:4") =~ "scope cannot be used here"
+  end
+
+  # Break: the line check reads fact_compare only, so these pass to the loader with no line.
+  test "fact_at_least and time_since on a per_subject fact are refused at their line", %{
+    tmp_dir: dir
+  } do
+    facts =
+      ~s({"facts":{"met":{"version":1,"meaning":"m","scopes":["player"],"per_subject":true,"value_type":{"type":"int","default":0}}}})
+
+    variant = &~s(\n{"description":#{@prose},"when":{"fact":"met","at_least":1,"op":"#{&1}"}})
+    variants = Enum.map_join(~w(fact_at_least time_since), ",", variant)
+    room = ~s({"description":#{@prose},"exits":{},"name":#{@prose},"variants":[#{variants}]})
+    caps = manifest(Map.put(@caps, "description_variant", 1))
+
+    lines =
+      said(dir, %{"facts.json" => facts, "rooms/start.json" => room, "cartridge.json" => caps})
+
+    assert line_at(lines, "rooms/start.json:2") =~ "scope cannot be used here"
+    assert line_at(lines, "rooms/start.json:3") =~ "scope cannot be used here"
   end
 
   # Break: a file that cannot be read still lets the rest compile, so the writer also gets

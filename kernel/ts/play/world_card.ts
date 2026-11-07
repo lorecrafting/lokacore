@@ -18,13 +18,14 @@ export const crossed = (from?: string, to?: string) => {
   const [a, b] = [areaOf(from), areaOf(to)];
   return a && b && a !== b ? b : undefined;
 };
-/** The nodes a definition in file `rel` may name: any room, else not another area's (area_rules.ex:27).
- * ponytail: a node in an `areas/<a>.json` bundle has no file here, so counts as the root's. */
+type Files = Record<string, string>;
+/** The nodes a definition in file `rel` may name: any room, else not another area's (area_rules.ex:27),
+ * by the node's own file or its `areas/<a>.json` bundle (story.ts files, bundled). */
 export const reachable = <N extends { ref: string; kind: string }>(
   nodes: N[],
-  files: Record<string, string> = {},
+  { files = {}, bundled = {} }: { files?: Files; bundled?: Files } = {},
   rel?: string,
-) => nodes.filter((n) => n.kind === 'room' || !crossed(rel, files[n.ref]));
+) => nodes.filter((n) => n.kind === 'room' || !crossed(rel, files[n.ref] ?? bundled[n.ref]));
 
 /** What a world file's reference field names, by its field (a transport's `reverse` is a transport). */
 const PICKS: Record<string, string> = {

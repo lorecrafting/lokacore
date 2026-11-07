@@ -62,10 +62,10 @@ test('a World card edit round-trips to its file and undo restores the bytes', as
   }
 });
 
-// Break: a picker offers a def from another area, which area_rules.ex:27 refuses in an area file;
-// or hides a root def, an own-area def or a room (each allowed: areas.ex:70-73, area_rules.ex:27).
+// Break: a picker offers a def from another area, by its file or its `areas/<a>.json` bundle, which
+// area_rules.ex:27 refuses in an area file; or hides a root def, an own-area def or a room (each allowed: areas.ex:70-73, area_rules.ex:27).
 test('the pickers offer an area file its own area, the root and every room', () => {
-  const nodes = ['hob', 'own', 'top', 'yard', 'bundled'].map((ref, i) => ({
+  const nodes = ['hob', 'own', 'top', 'yard', 'elder'].map((ref, i) => ({
     ref,
     kind: i === 3 ? 'room' : 'npc',
   }));
@@ -75,9 +75,11 @@ test('the pickers offer an area file its own area, the root and every room', () 
     top: 'npcs/top.json',
     yard: 'areas/hub/rooms/yard.json',
   };
-  const offered = (rel?: string) => reachable(nodes, files, rel).map((n) => n.ref);
-  assert.deepEqual(offered('areas/law/barriers/door.json'), ['own', 'top', 'yard', 'bundled']);
-  assert.deepEqual(offered('areas/law.json'), ['own', 'top', 'yard', 'bundled']);
-  assert.deepEqual(offered('barriers/door.json'), ['hob', 'own', 'top', 'yard', 'bundled']);
-  assert.deepEqual(offered(), ['hob', 'own', 'top', 'yard', 'bundled']);
+  const bundled = { elder: 'areas/village.json' };
+  const offered = (rel?: string) => reachable(nodes, { files, bundled }, rel).map((n) => n.ref);
+  assert.deepEqual(offered('areas/law/barriers/door.json'), ['own', 'top', 'yard']);
+  assert.deepEqual(offered('areas/law.json'), ['own', 'top', 'yard']);
+  assert.deepEqual(offered('areas/village/npcs/x.json'), ['top', 'yard', 'elder']);
+  assert.deepEqual(offered('barriers/door.json'), ['hob', 'own', 'top', 'yard', 'elder']);
+  assert.deepEqual(offered(), ['hob', 'own', 'top', 'yard', 'elder']);
 });
