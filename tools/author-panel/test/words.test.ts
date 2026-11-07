@@ -152,6 +152,21 @@ test('a line the server cannot find leaves the field shut and says why', async (
   }
 });
 
+// Breaks: a dialogue choice's label offered as a words field, though POST /edit refuses a choice
+// label (its key is its words; gui-editor-design ruling 11); or its narration loses its field.
+test('a choice label shows its key, no words field; its narration keeps one', async () => {
+  const page = await open({ right: 420, selection: { kind: 'dialogue', key: 'aldous_talk' } });
+  try {
+    const bounty = page.locator('[aria-label="choice bounty"]');
+    await bounty.locator('summary').click();
+    await shows(bounty.getByLabel('narration words'), JSON.parse(readFileSync(TEXT, 'utf8'))['narration.aldous_talk.bounty']);
+    assert.equal(await bounty.getByLabel('label words').count(), 0);
+    assert.equal(await bounty.locator('code', { hasText: /^dialogue\.aldous_talk\.bounty$/ }).count(), 1);
+  } finally {
+    await page.close();
+  }
+});
+
 // Last: it switches the world. Breaks: a `.scene` words line written to another line, or its `* `
 // lost (Scene.tsx's words hint, prose.ts edit).
 test("a scene card writes its words line in place", async () => {

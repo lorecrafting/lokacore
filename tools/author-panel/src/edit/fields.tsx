@@ -31,7 +31,16 @@ const context = (p: FieldProps) => p.registry.formContext as Context;
 /** Prose: the text key's words, edited in place (agents write no words). */
 function TextKey(p: FieldProps) {
   const { kind, key } = context(p);
-  const k = proseKey(p.formData, kind, key, p.fieldPathId.path);
+  const { path } = p.fieldPathId;
+  const k = proseKey(p.formData, kind, key, path);
+  if (path[0] === 'choices' && path.at(-1) === 'label')
+    // a choice label is its key: POST /edit refuses it (gui-editor-design ruling 11)
+    return (
+      <div className="flex items-center gap-2 text-xs">
+        <span className="text-muted-foreground">{p.name}</span>
+        <code className="min-w-0 truncate">{k}</code>
+      </div>
+    );
   return <WordsField key={k} label={p.name} k={k} words={inline(p.formData)} />;
 }
 /** An inline prose marker's words (docs/system/cartridge.md "Inline prose"): GET /line's hint. */
