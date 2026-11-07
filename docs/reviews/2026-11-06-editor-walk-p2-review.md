@@ -33,3 +33,32 @@ Open item d, no finding: a world switch reloads the page (`tools/author-panel/sr
 - Claim rerun: the allowed.ts edible/container rows (:60, :63, :70) are red-narrow in this run, as claimed.
 - `subjectless` field lists match `fieldsOf` (cartridge_scoped_facts.ts:44-45) and are no stricter.
 - `Parts.starts` reads the root `resources.json` that `first` picks from (`@single`).
+
+## Fix round at 22f22f0fb07d0f80b35d7cad17989fb47ba26ce1
+
+Commits 58fbf137f, d889c4f7c, 22f22f0fb only. CI at the head: ci, book-e2e and graph-diff all success (`gh run list --commit 22f22f0fb07d…`).
+
+**Verdict: APPROVE WITH NOTES.**
+
+### Dispositions (hand mutants, `bin/mutate.sh` narrow commands, all red-narrow)
+
+1. Fixed. `policies.ex:46-48` uses one field list for every op. The schema refuses `subject` on time_since (Policy `time_since`: additionalProperties false; fields npc, item). Red: the guard narrowed to `fact_compare`, with `fact_at_least` dropped, and with `time_since` dropped (content_explain_test).
+2. Fixed. `allowed.ts:118` `unfed`, in `Generic.tsx:116`. Red: `some` ignores `[]`, `applies` dropped (story_card.test), and `unfed` dropped from commit (cards.test.ts browser test, which is green unmutated).
+3. Fixed. `world_card.ts:28` and `scene_card.ts:41` read `todo.ts bundled`. Red: each fallback dropped (world_card.test, scene_card.test).
+4. Fixed. The PR body .68 now says `--from` did not reproduce and stays open.
+
+d889c4f7c is sound. Red: the bundle room's area set to null and `held ?? {}` dropped (story.test). `openAt` falls back to `<bundle>:1` when the key has no line in the file (prose.ts:72-76). `key ?? ref` restores the non-ref open.
+
+### Dispute: parts.ex:32 `stock` with a nil start
+
+Upheld, no finding. ResourceSpec requires `start` (protocol/resource.schema.json), so a nil start needs a resources.json the compiler already refuses (an author error). `first` picks from that same file (starters.ex:228).
+
+### Open items: all nits, to Beads
+
+- `Generic.tsx:125`: a refused Undo also drops a held draft the compiler had refused. That needs an outside save, and it writes nothing.
+- `storylist.tsx:104`: Bind over-refuses short refs only while the compile is refused. It writes nothing wrong.
+- `Generic.tsx:50`: the shared undo map is keyed by file. A world switch reloads the page (finding d above).
+- Bundles re-read on each call: this is cost only.
+- `allowed.ts:55`: a redundant check, with no behaviour change.
+
+Round-1 nit 5 is unchanged and stays a nit.
