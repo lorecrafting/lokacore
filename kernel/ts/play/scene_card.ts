@@ -84,6 +84,6 @@ export function restructure(
     steps = 'steps' in JSON.parse(readFileSync(twin, 'utf8'));
   } catch {} // no twin, or one the compiler refuses on its own
   const answer = cut(before, op, steps);
-  if ('refused' in answer) refuse(400, answer.refused);
+  if ('refused' in answer) return refuse(400, answer.refused);
   return done(`restructure ${file}`, [{ file, before, after: answer.after }]);
 }

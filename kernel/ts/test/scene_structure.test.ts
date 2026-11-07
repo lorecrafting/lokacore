@@ -78,7 +78,7 @@ test('/restructure: each page op over every fixture cut changes only its lines; 
     assert.equal(done.status, 200, JSON.stringify([op, done.body]));
     assert.deepEqual(cut(bytes, op), { after }); // the card's preview is the route's answer
     assert.equal(read(), after, JSON.stringify(op));
-    assert.equal((await ask('/undo', { id: done.body.id })).status, 200);
+    assert.equal((await ask('/undo', { id: (done.body as { id: string }).id })).status, 200);
     assert.equal(read(), bytes, JSON.stringify(op)); // byte for byte
   }
 });
