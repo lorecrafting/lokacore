@@ -38,9 +38,10 @@ export async function drop(key: string, file?: string) {
 /** The palette's Undo: the newest journal entry if it is a Delete, which leaves no card to undo it
  * from (loka-wfrgk.92); else the Book's Cmd-Z, which puts back its own words. */
 export async function undoDelete(book: Pick<ReturnType<typeof useBook>, 'send'>) {
-  const [last]: { id: number; what: string }[] = await fetch('/__author/journal').then((r) =>
-    r.json(),
-  );
+  const r = await fetch('/__author/journal');
+  const told: unknown = await r.json().catch(() => r.statusText);
+  if (!r.ok) return refused({ ok: false, told });
+  const [last] = told as { id: number; what: string }[];
   if (!last?.what.startsWith('delete '))
     return book.send({ op: 'key', key: 'z', metaKey: true, ctrlKey: false, altKey: false });
   refused(await ask('undo', { id: last.id }));

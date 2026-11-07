@@ -2,7 +2,7 @@
 // `bin/loka dev --watch` on the toolbox showcase, in stable Chrome (the runner image has it, as the
 // Storybook jobs use). A new check: a test() here naming its break, with a red control.
 // bin/mutate_diff.sh runs this file for every panel .tsx line, by this marker: mutate-covers: src
-// size: allow 696, every panel E2E shares harness.ts's one Vite + bin/loka dev server pair and Chrome
+// size: allow 700, every panel E2E shares harness.ts's one Vite + bin/loka dev server pair and Chrome
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { appendFileSync, existsSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
@@ -604,10 +604,14 @@ test('palette Undo brings back the file palette Delete removed, once', async () 
   try {
     await run('Delete the selected definition', () => !existsSync(file));
     assert.equal(existsSync(file), false, `not deleted: ${told}`);
+    const down = (r: Route) => r.fulfill({ status: 500, body: '"no journal"' }); // shown, not thrown
+    await page.route('**/__author/journal', down, { times: 1 });
+    await run('Undo the last edit', () => told.length > 0);
     const refuse = (r: Route) => r.fulfill({ status: 409, body: '{}' }); // changed since: refused
     await page.route('**/__author/undo', refuse, { times: 1 });
-    await run('Undo the last edit', () => told.length > 0);
-    assert.deepEqual([told, existsSync(file)], [['Changed outside: try again'], false]);
+    await run('Undo the last edit', () => told.length > 1);
+    const both = ['no journal', 'Changed outside: try again'];
+    assert.deepEqual([told, existsSync(file)], [both, false]);
     await run('Undo the last edit', () => existsSync(file));
     assert.equal(readFileSync(file, 'utf8'), bytes, `not brought back: ${told}`);
     await run('Undo the last edit', () => !existsSync(file)); // the Book's Cmd-Z, not the journal's

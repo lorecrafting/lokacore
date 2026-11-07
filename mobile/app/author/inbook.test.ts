@@ -1,4 +1,4 @@
-// size: allow 550, one editor's keys, saves, conflicts and add-here walked over one stubbed page
+// size: allow 580, one editor's keys, saves, conflicts and add-here walked over one stubbed page
 // E5's in-Book editor (docs/design/prose-in-the-book-rulings.md) in headless Google Chrome, over a
 // page of plain lines and a stubbed /__author route; the Book itself is the walk's (web-preview.md).
 import assert from 'node:assert/strict';
@@ -313,6 +313,33 @@ test('Cmd-Z puts back this page`s edits one per press, then says none are left',
   assert.deepEqual(await told1(() => page.keyboard.press('ControlOrMeta+z')), {
     note: 'Nothing of yours to put back.',
   });
+});
+
+// Breaks (loka-wfrgk.92): Cmd-Z after a palette Delete puts back the page's edit instead, so the
+// deleted file is out of reach and the edit lost; or it undoes the Delete again on the next press.
+test('Cmd-Z puts back a palette Delete first, then this page`s edit', async () => {
+  await openFirst();
+  await page.keyboard.type('!');
+  await page.keyboard.press('Enter');
+  await page.waitForFunction(() => !document.querySelector('[data-loka-field]'));
+  await page.locator('main').click();
+  const journal = [{ id: 9, what: 'delete areas/x.json' }]; // newest first: the Delete came after
+  const plain = answer;
+  answer = (path, body) => {
+    if (path === '/journal') return [200, journal];
+    if (body?.id === 9) journal.unshift({ id: 10, what: 'undo delete areas/x.json' });
+    return plain(path, body);
+  };
+  assert.deepEqual(await told1(() => page.keyboard.press('ControlOrMeta+z')), {
+    note: 'put back areas/x.json',
+  });
+  assert.deepEqual(await told1(() => page.keyboard.press('ControlOrMeta+z')), {
+    note: 'put back a.loka:3',
+  });
+  assert.deepEqual(
+    posted('/undo').map((b) => b.id),
+    [9, 7],
+  );
 });
 
 test('a 409 put-back names the file and offers its source', async () => {
