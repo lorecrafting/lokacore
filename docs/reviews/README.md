@@ -10,6 +10,7 @@ of closed work are deleted once their lesson is folded, and linked by permalink
 Reviews before R2 live in the [legacy repository](https://github.com/lorecrafting/lokacore-v2-legacy)
 (commit `997a7a8`, `docs/rewrite-v3/reviews/`).
 
+- [Review: modal scene Trigger row (loka-wfrgk.107)](2026-11-07-scene-trigger-review.md): **CHANGES REQUIRED**
 - [Review: ruled batch 3, map least zoom, second death waits, author note margin, Hotbar story words](2026-11-06-ruled-batch-3-review.md): **CHANGES REQUIRED**
 - [Review: /line opens an inline prose key's own definition line (loka-wfrgk.100.3)](2026-11-06-loka-wfrgk.100.3-review.md): **APPROVE WITH NOTES**
 - [Review: engine follow-ups (loka-vduxr.35, loka-vduxr.78, loka-wfrgk.51, loka-kgd.220)](2026-11-06-engine-followups-review.md): **CHANGES REQUIRED**
