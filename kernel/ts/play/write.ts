@@ -15,7 +15,7 @@ import {
 import { dirname, join } from 'node:path';
 import { files } from './todo.ts';
 import { type Bytes, current, DIRS, guarded, named, placed, refuse, Refused } from './guard.ts';
-import { ROOTS, SCHEMAS, rootFile, sha256, stale, there } from './guard.ts';
+import { newRefused, ROOTS, SCHEMAS, rootFile, sha256, stale, there } from './guard.ts';
 import { apply } from './edit_model.ts';
 import { others, still, taken, users } from './find.ts';
 import { edit, located } from './prose.ts';
@@ -177,10 +177,8 @@ async function create(t: Tree, { kind, name, from, area, extends: up }: Sent): P
   const optional = (v: unknown) => v == null || named(v);
   if (!named(kind) || !named(name) || !fromOk || !optional(area) || !optional(up))
     refuse(400, 'kind, name, area, extends, from.room and from.direction: [a-z0-9_]+');
-  // mix writes past guarded() (the area, its companions, --from's folder); no link anywhere keeps
-  // every write inside the tree and in the snapshot the journal diffs (a link reads as no file).
-  const link = files(t.root).find((rel) => there(join(t.root, rel))?.isSymbolicLink());
-  if (link) refuse(400, `a symlink on the way to ${link}`);
+  const why = newRefused(t.root, kind, name);
+  if (why) refuse(400, why);
   t.busy++;
   try {
     const before = t.snapshot();

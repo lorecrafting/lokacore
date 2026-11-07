@@ -3,7 +3,7 @@
 import { createHash } from 'node:crypto';
 import { lstatSync, readdirSync, readFileSync, realpathSync } from 'node:fs';
 import { dirname, join, posix, resolve, sep } from 'node:path';
-import { files } from './todo.ts';
+import { bundled, files } from './todo.ts';
 
 export type Bytes = string | null; // null: no file there
 export const REPO = resolve(import.meta.dirname, '../../..');
@@ -91,4 +91,18 @@ export function guarded(root: string, rel: unknown, mode: 'read' | 'create'): st
   } else if (!files(root).includes(rel as string)) refuse(404, `no source file ${rel}`);
   else if (!at?.isFile()) refuse(400, `not a regular file: ${rel}`);
   return path;
+}
+
+/** Why `/new` may not run loka.new. mix writes past guarded() (the area, its companions, --from's
+ * folder): no link anywhere keeps every write inside the tree and in the snapshot the journal diffs
+ * (a link reads as no file). A `<dir>/<name>` any file or area bundle holds is taken, compiled or not
+ * (the starter would join that room, or write a second file in another area). */
+export function newRefused(root: string, kind: string, name: string) {
+  const all = files(root);
+  const link = all.find((rel) => there(join(root, rel))?.isSymbolicLink());
+  if (link) return `a symlink on the way to ${link}`;
+  const dir = kind === 'areas' ? 'rooms' : kind;
+  const own = all.find((rel) => placed(rel)?.dir === dir && placed(rel)?.key === name);
+  const held = own ?? bundled(root)[`${dir}/${name}`];
+  return held && `${dir}/${name} exists in ${held}`;
 }

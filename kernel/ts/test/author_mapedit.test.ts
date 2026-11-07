@@ -1,3 +1,4 @@
+// size: allow 530, one scaffolded cartridge the tests edit in turn and the last undoes; a split needs a second scaffold
 // The editor map's edits (tools/author-panel/src/mapedit.ts) through the real write routes
 // (play/write.ts) and the real `mix loka.new`, on one scaffolded cartridge the tests edit in turn;
 // the last one undoes every gesture. Expected files are written by hand.
@@ -16,6 +17,7 @@ import type { MapRoom } from '../../../tools/author-panel/src/map.ts';
 import {
   cellAt,
   editor,
+  childKey,
   freeKey,
   toward,
   dragged,
@@ -386,7 +388,7 @@ test("a dropped template's child takes the first free <template>_<n>", () => {
     kind: r.split('/')[0],
     ref: `cart@0:${r}`,
   }));
-  const wild = (held: string[], on = nodes) => freeKey('wild', 'npc', on, held); // each call mints its key
+  const wild = (held: string[], on = nodes) => childKey('npcs', 'wild', on, held); // each call mints its key
   assert.deepEqual([wild([], []), wild([]), wild(['wild_3'])], ['wild_1', 'wild_2', 'wild_5']);
 });
 
@@ -485,6 +487,37 @@ test('a drop on an empty map writes the first row at 0,0,0 and the knowledge it 
   await editor(s.io).first().finally(s.close);
   const got = [read('layout.json'), read('cartridge.json').requires.capabilities.knowledge];
   assert.deepEqual(got, [[{ room: 'start', x: 0, y: 0, z: 0 }], 1]);
+});
+
+test('a key a file or an area bundle already holds is refused, compiled or not', async () => {
+  // Breaks: New room from here joining a room the last compile lacks (exits written into both);
+  // New NPC here writing a second npc_9 file in another area, or an item a bundle already holds.
+  const planted = {
+    'rooms/room_9.json': read('rooms/start.json'),
+    'npcs/npc_9.json': '{}\n',
+    'areas/zz.json': '{ "items": { "item_9": {} } }\n',
+  };
+  for (const [f, bytes] of Object.entries(planted)) writeFileSync(join(src, f), bytes);
+  try {
+    const was = read('rooms/b.json');
+    await assert.rejects(
+      ed.grow(b, 'south', 'room_9'),
+      /rooms\/room_9 exists in rooms\/room_9.json/,
+    );
+    assert.deepEqual(
+      [read('rooms/b.json'), read('rooms/room_9.json')],
+      [was, planted['rooms/room_9.json']],
+    );
+    await assert.rejects(ed.made(c, 'npcs', 'npc_9'), /npcs\/npc_9 exists in npcs\/npc_9.json/);
+    assert.equal(existsSync(join(src, 'areas/yard/npcs/npc_9.json')), false);
+    await assert.rejects(
+      ed.made(start, 'items', 'item_9'),
+      /items\/item_9 exists in areas\/zz.json/,
+    );
+    assert.equal(existsSync(join(src, 'items/item_9.json')), false);
+  } finally {
+    for (const f of Object.keys(planted)) rmSync(join(src, f));
+  }
 });
 
 test('undo puts every gesture back: the files are byte-identical to the start', async () => {

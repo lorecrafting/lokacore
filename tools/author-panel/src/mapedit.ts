@@ -175,6 +175,10 @@ export function freeKey(base: string, kind: string, nodes: { kind: string; ref: 
   return `${base}_${n}`;
 }
 
+/** A dropped template's child key, `<template>_<n>`, free among the nodes of the template's kind. */
+export const childKey = (dir: 'npcs' | 'items', template: string, nodes: { kind: string; ref: string }[], templates: string[]) =>
+  freeKey(template, dir === 'npcs' ? 'npc' : 'item', nodes, templates);
+
 /** Move to area: the file moves to `areas/<area>/rooms/`, or to the root for null. */
 const move = async (s: Run, r: MapRoom, area: string | null) =>
   s.call('move', { file: fileOf(r), was: (await s.read(fileOf(r))).was, area });
