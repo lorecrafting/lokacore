@@ -11,6 +11,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 (commit `997a7a8`, `docs/rewrite-v3/reviews/`).
 
 - [Review: ruled batch 3, map least zoom, second death waits, author note margin, Hotbar story words](2026-11-06-ruled-batch-3-review.md): **CHANGES REQUIRED**
+- [Review: /line opens an inline prose key's own definition line (loka-wfrgk.100.3)](2026-11-06-loka-wfrgk.100.3-review.md): **APPROVE WITH NOTES**
 - [Review: engine follow-ups (loka-vduxr.35, loka-vduxr.78, loka-wfrgk.51, loka-kgd.220)](2026-11-06-engine-followups-review.md): **CHANGES REQUIRED**
 - [Review: Editor walk P2 (PR #686, loka-wfrgk.61-.64, .67-.71, .80)](2026-11-06-editor-walk-p2-review.md): **APPROVE WITH NOTES**
 - [Review: editor walk P1, dev save survives edits, palette New for every kind, Delete refused while named](2026-11-06-editor-walk-p1-review.md): **APPROVE WITH NOTES**
