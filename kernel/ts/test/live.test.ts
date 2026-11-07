@@ -113,6 +113,8 @@ test('open: a text key opens its definition, inline prose its words, in LOKA_EDI
   writeFileSync(join(dir, 'two.json'), '{"room.d": "~"}\n');
   writeFileSync(join(dir, 'scenes/q.scene'), 'npc: maud\n* ~\n');
   assert.deepEqual(sourcesOf(dir, 'dialogue.q.prompt', '~'), ['scenes/q.scene:2']);
+  // Break: a scene's words edited outside the Book open another scene's line that says them.
+  assert.deepEqual(sourcesOf(dir, 'dialogue.q.prompt', 'Rain falls.'), []);
   const log = join(dir, 'opened');
   // Written aside and renamed: `> log` creates the file empty before printf fills it, and the
   // existsSync poll below read that empty file on CI (loka-vduxr.30).

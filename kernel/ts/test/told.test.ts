@@ -289,14 +289,19 @@ test('/line opens an inline prose key in its own definition, whoever else holds 
     await line('room.f.description', 'Arch'),
     at('rooms/g.json', 3, '  "description": {"prose": "Arch"},', 'Arch'),
   );
-  // a label whose key is its words: the words, not the key
+  // a label whose key is its words (at column 0): the words, not the key; a label named `room`
+  // is no `room_line`
   writeFileSync(
     join(src, 'items/bell.json'),
-    '{\n  "labels": {\n    "ring": {"prose": "ring"}\n  }\n}\n',
+    '{"labels": {\n"ring": {"prose": "ring"},\n"room": {"prose": "ring"}\n}}\n',
   );
   assert.deepEqual(
     await line('item.bell.labels.ring', 'ring'),
-    at('items/bell.json', 3, '    "ring": {"prose": "ring"}', 'ring'),
+    at('items/bell.json', 2, '"ring": {"prose": "ring"},', 'ring'),
+  );
+  assert.deepEqual(
+    await line('item.bell.labels.room', 'ring'),
+    at('items/bell.json', 3, '"room": {"prose": "ring"}', 'ring'),
   );
   // two fields with the same words on one line: found (worded's refusal), not 'no source line'
   writeFileSync(
