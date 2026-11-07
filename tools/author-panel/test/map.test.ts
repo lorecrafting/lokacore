@@ -3,7 +3,7 @@
 // boot). A new check: a test() here naming its break, with a red control.
 // bin/mutate_diff.sh runs this file for every panel .tsx line, by this marker: mutate-covers: src
 import assert from 'node:assert/strict';
-import { readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { test, type TestContext } from 'node:test';
 import type { Page } from 'playwright';
@@ -247,6 +247,37 @@ test('an Unplaced chip dropped on an empty map asks the layout starter for the f
   await slot.locator('div.relative.flex-1').dispatchEvent('drop', { dataTransfer: dt });
   for (let t = 0; !posted.length && t < 50; t++) await new Promise((r) => setTimeout(r, 100));
   assert.deepEqual(posted, [{ kind: 'layout', name: 'layout' }]);
+  await page.close();
+});
+
+// Breaks (left.tsx, shell.ts newCommand, loka-wfrgk.108): the item header's + with a room selected
+// runs plain New items, an unplaced item at the cartridge root, not New item here in that room.
+test('the item header`s + with a room selected makes an item in that room', async () => {
+  const page = await open({ right: 280, leftOpen: true, tab: 'hierarchy', selection: { kind: 'room', key: 'smithy' } });
+  const items = join(dir, 'showcase/areas/fell_road/items');
+  const before = readdirSync(items);
+  const made = () => readdirSync(items).filter((f) => !before.includes(f));
+  try {
+    await page.getByRole('button', { name: 'New item here', exact: true }).click({ timeout: boot });
+    for (let t = 0; !made().length && t < 100; t++) await page.waitForTimeout(100);
+    assert.equal(made().length, 1, 'one new item file in the room`s area');
+    for (let t = 0; !readFileSync(join(items, made()[0]), 'utf8').includes('smithy') && t < 50; t++) await page.waitForTimeout(100);
+    assert.deepEqual(JSON.parse(readFileSync(join(items, made()[0]), 'utf8')).location, { in: 'room', room: 'smithy' });
+  } finally {
+    for (const f of made()) rmSync(join(items, f));
+    await page.close();
+  }
+});
+
+// Breaks (left.tsx described, loka-wfrgk.108): the New list's line is the whole schema description,
+// another kind's, or none, not the first sentence of the dialogue definition's.
+test('the New list gives dialogues the first sentence of its schema description', async () => {
+  const page = await open({ right: 280, leftOpen: true, tab: 'hierarchy', selection: { kind: 'room', key: 'smithy' } });
+  await page.getByRole('button', { name: 'New', exact: true }).click({ timeout: boot });
+  const line = page.getByRole('button', { name: 'New dialogues', exact: true }).locator('span');
+  await line.filter({ hasText: /\S/ }).waitFor({ timeout: boot });
+  const first = 'A conversation with an NPC: who speaks (npc), when it is offered (policy), the question shown (prompt) and the choices the player can pick.';
+  assert.equal(await line.textContent(), first);
   await page.close();
 });
 
