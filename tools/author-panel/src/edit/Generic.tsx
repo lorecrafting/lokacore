@@ -104,13 +104,13 @@ export function useCard(rel: string, diag: Diag) {
   const [undo, setUndo] = useUndo(rel);
   const [held, setHeld] = useState<string>(); // the schema's first new error: the draft not sent
   useEffect(() => void (setRevealed([]), setHeld(undefined)), [rel]); // a new file starts with nothing revealed
-  const post = async (path: string, sent: Sent, otherwise: string, base = saved!.doc) => {
+  const post = async (path: string, sent: Sent, otherwise: string) => {
     const { ok, told } = await ask(path, sent);
     setRefused(ok ? undefined : typeof told === 'string' ? told : otherwise);
     // a refused change wrote nothing, so the last write's Undo still stands
     if (ok || path === 'undo')
       setUndo(ok && path === 'change' ? (told as { id: string }).id : undefined);
-    await load(base, sent.ops);
+    await load(file.current!.doc, sent.ops); // the file the write was made from
   };
   // one write at a time, each from the file the last one reloaded: a blur while a write is in flight
   // (a field left for the next one, typed into at once) would send a stale `was`, be refused and dropped
@@ -123,7 +123,7 @@ export function useCard(rel: string, diag: Diag) {
     setHeld(first && `${first.property} ${first.message}`);
     const ops = apart(diff(saved.doc, latest.current), errors);
     if (ops.length)
-      await post('change', { file: rel, was: saved.sha256, ops }, 'Changed outside: reloaded.', saved.doc);
+      await post('change', { file: rel, was: saved.sha256, ops }, 'Changed outside: reloaded.');
   };
   const commit = () => void (queue.current = queue.current.then(send).catch(console.error));
   const change = (doc: unknown) => setDraft((latest.current = applied(saved!.doc, unlistedIn(saved!, doc))));
