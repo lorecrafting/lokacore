@@ -121,7 +121,7 @@ function Grow({ d }: { d: DrawProps }) {
   return map.grows(r, d.p.story.map).map((dir) => <Plus key={dir} r={r} dir={dir} at={spot[dir]} />);
 }
 
-/** One grow handle: a button, kept out of pan()'s drag and the map's Enter. */
+/** One grow handle: a button, kept out of pan()'s drag. */
 function Plus({ r, dir, at: [x, y, s] }: { r: MapRoom; dir: string; at: [number, number, number] }) {
   const grow = () => mapCommand('map-grow', r.key, dir);
   const a = s / 2; // mutate-skip: placement, the + arm
@@ -136,7 +136,6 @@ function Plus({ r, dir, at: [x, y, s] }: { r: MapRoom; dir: string; at: [number,
       onKeyDown={(e) => {
         if (e.key !== 'Enter' && e.key !== ' ') return;
         e.preventDefault();
-        e.stopPropagation(); // the map's Enter would select the focused room instead
         grow();
       }}
     >

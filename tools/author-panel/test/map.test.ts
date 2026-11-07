@@ -285,7 +285,7 @@ test('a + on a free side of the selected room makes and links a room there and s
   assert.deepEqual(await row('room_1'), { room: 'room_1', x: -3, y: 1, z: 0 });
   assert.deepEqual(room('farm_kitchen').east, { to: 'room_1' });
   assert.deepEqual(room('room_1'), { west: { to: 'farm_kitchen' } });
-  // selected: its handles show; Enter on one grows (the map's Enter does not take it)
+  // selected: its handles show; Enter (and below, Space) on one grows, as a button's keys do
   await page
     .getByRole('button', { name: 'room_1: new room up', exact: true })
     .focus({ timeout: boot });
@@ -299,7 +299,8 @@ test('a + on a free side of the selected room makes and links a room there and s
   page = await open({ selection: { kind: 'room', key: 'farm_kitchen' } });
   await page
     .getByRole('button', { name: 'farm_kitchen: new room down', exact: true })
-    .click({ timeout: boot });
+    .focus({ timeout: boot });
+  await page.keyboard.press('Space');
   assert.deepEqual(await row('room_3'), { room: 'room_3', x: -4, y: 1, z: -1 });
   await page.close();
 });
