@@ -23,7 +23,7 @@ import {
   unlisted,
 } from '../../../../kernel/ts/play/card.ts';
 import { uiSchema } from '../../../../kernel/ts/play/ui_schema.ts';
-import { capabilityRow, unfed } from '../../../../kernel/ts/play/allowed.ts';
+import { capabilityRow, unready } from '../../../../kernel/ts/play/allowed.ts';
 import { ask, type useDiagnostics } from '../author.ts';
 import { Button } from '../components/ui/button.tsx';
 import { fields, type Context } from './fields.tsx';
@@ -121,7 +121,7 @@ export function useCard(rel: string, diag: Diag) {
   const send = async () => {
     const saved = file.current;
     if (!saved) return;
-    const errors = [...fresh(saved, latest.current), ...unfed(latest.current as never)];
+    const errors = [...fresh(saved, latest.current), ...unready(latest.current as never)];
     const [first] = errors;
     setHeld(first && `${first.property} ${first.message}`);
     const ops = apart(diff(saved.doc, latest.current), errors);
@@ -196,6 +196,8 @@ type FormProps = {
   fields?: RegistryFieldsType;
 };
 
+// a field's own blur commits what it holds: a button's blur into one would commit its first keystroke
+const typed = (t: EventTarget | null) => !!(t as Element | null)?.matches?.('input,textarea,select,[contenteditable]');
 const removes = (t: EventTarget) => !!(t as Element).closest?.('button[aria-label="Remove"]');
 
 /** The card's form: rjsf draws the file under `ui`, each blur commits, refusals at their field. */
@@ -208,7 +210,7 @@ export function CardForm({ rel, card, context, diag, ui, fields: picks = fields 
     // after the blur's own change lands: rjsf sends a map key's rename after its setState, past the blur;
     // rjsf's Remove drops the focused button, so no blur follows: it commits once its change lands
     <div
-      onBlur={() => setTimeout(card.commit)}
+      onBlur={(e) => (typed(e.target) || !typed(e.relatedTarget)) && setTimeout(card.commit)}
       onClick={(e) => removes(e.target) && setTimeout(card.commit)}
     >
       <CardFormBase

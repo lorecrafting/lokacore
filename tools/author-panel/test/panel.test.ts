@@ -2,7 +2,7 @@
 // `bin/loka dev --watch` on the toolbox showcase, in stable Chrome (the runner image has it, as the
 // Storybook jobs use). A new check: a test() here naming its break, with a red control.
 // bin/mutate_diff.sh runs this file for every panel .tsx line, by this marker: mutate-covers: src
-// size: allow 664, every panel E2E shares harness.ts's one Vite + bin/loka dev server pair and Chrome
+// size: allow 691, every panel E2E shares harness.ts's one Vite + bin/loka dev server pair and Chrome
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { appendFileSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
@@ -510,6 +510,33 @@ test('a new room detail saves with a `~` description, its optional fields folded
   await page.waitForTimeout(2000);
   assert.equal(well().rating, 12);
   writeFileSync(file, was);
+  await page.close();
+});
+
+// Breaks: the Edit in Book button's blur commits once the first keystroke has landed in the field the
+// author clicked next (CPU slowed): a half-typed `2` is written, then `21`, and Undo goes back to `2`.
+test('a field typed into from Edit in Book writes once, and Undo goes back past it', async () => {
+  const page = await open({ right: 420, selection: { kind: 'npc', key: 'hob' } });
+  await (await page.context().newCDPSession(page)).send('Emulation.setCPUThrottlingRate', { rate: 6 });
+  const file = join(dir, 'showcase/areas/hub/npcs/hob.json');
+  const was = readFileSync(file, 'utf8');
+  const from = () => JSON.parse(readFileSync(file, 'utf8')).name_variants[0].when.from;
+  const writes: string[] = [];
+  page.on('request', (r) => r.url().includes('/__author/change') && writes.push(r.postData() ?? ''));
+  const form = page.locator('[aria-label="Inspector"] form');
+  const field = form.locator('#root_name_variants_0_when_from');
+  await field.waitFor({ timeout: boot });
+  await form.getByRole('button', { name: 'Edit in Book' }).first().click();
+  await field.click();
+  await page.keyboard.press('ControlOrMeta+A');
+  await page.keyboard.type('21', { delay: 50 });
+  await page.keyboard.press('Tab');
+  for (let t = 0; from() !== 21 && t < 50; t++) await page.waitForTimeout(100);
+  await page.waitForTimeout(1000);
+  assert.equal(writes.length, 1, writes.join('\n'));
+  await page.getByRole('button', { name: 'Undo', exact: true }).click();
+  for (let t = 0; readFileSync(file, 'utf8') !== was && t < 50; t++) await page.waitForTimeout(100);
+  assert.equal(readFileSync(file, 'utf8'), was);
   await page.close();
 });
 

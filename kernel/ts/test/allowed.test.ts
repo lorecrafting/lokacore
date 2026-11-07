@@ -10,7 +10,9 @@ const defs = JSON.parse(
 ).$defs;
 
 // Break: a field offered before the one the compiler needs beside it (dependentRequired, skills.ex:107,
-// derived.ex:70, population.ex:117 and :153, trails.ex:139-140), or seeded short of what it counts.
+// derived.ex:70, population.ex:117 and :153, trails.ex:139-140; a capacity beside container, not on a
+// template: entities.ex:227-232, death.ex:137; a block_chance off-hand, its block narrated: skills.ex:230-231,
+// :245-256), or seeded short of what it counts.
 test('a field waits for the field it needs; a seeded one carries every key the compiler counts', () => {
   const pass = (kind: string, f: string, doc: object, caps = {}, world = {}) =>
     allowed(kind, [f], caps, doc as Record<string, unknown>, world).length === 1;
@@ -48,7 +50,21 @@ test('a field waits for the field it needs; a seeded one carries every key the c
     ],
     [true, false, false],
   );
+  const held = [{}, { container: true }, { container: true, location: { in: 'template' } }];
+  assert.deepEqual(
+    held.map((d) => pass('items', 'capacity', d)),
+    [false, true, false],
+  );
   const t = { prose: '~' };
+  const narrated = { combat: { narration: { block: t } } };
+  assert.deepEqual(
+    [
+      pass('items', 'block_chance', { slot: 'off_hand' }, {}, narrated),
+      pass('items', 'block_chance', { slot: 'wield' }, {}, narrated),
+      pass('items', 'block_chance', { slot: 'off_hand' }, {}, { combat: {} }),
+    ],
+    [true, false, false],
+  );
   const away = { north: t, south: t, east: t, west: t, up: t, down: t };
   assert.deepEqual(added({ growth: [2, 4] }, 'ranks', defs, 'source.SkillDefinition')?.ranks, [
     { name: t },
@@ -76,6 +92,7 @@ test('a policy field waits for policy and an ambient for emote', () => {
   const rows = [
     ['barriers', 'opens_when', 'policy'],
     ['dialogues', 'policy', 'policy'],
+    ['dialogues.choices', 'policy', 'policy'],
     ['populations', 'birth_when', 'policy'],
     ['populations', 'wander_when', 'policy'],
     ['npcs', 'ambient', 'emote'],

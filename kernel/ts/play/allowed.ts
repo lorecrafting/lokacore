@@ -51,6 +51,7 @@ const OWNERS: Record<string, string> = {
   'reactions.when': 'policy',
   'barriers.opens_when': 'policy',
   'dialogues.policy': 'policy',
+  'dialogues.choices.policy': 'policy', // a choice's policy is a root too (dialogue_links.ex:12; policies.ex:26)
   'populations.birth_when': 'policy',
   'populations.wander_when': 'policy',
   // emote@1 owns every room's, NPC's or item's ambient (emotes.ex:3-4, :25)
@@ -79,9 +80,13 @@ const NEEDS: Record<string, (doc: Obj, world: Obj, hidden: string[]) => boolean>
   // derived.ex:64
   'items.equip': (doc) => doc.slot !== undefined,
   'items.container': (doc) => doc.bandage === undefined && doc.edible === undefined,
-  ...Object.fromEntries(
-    ['capacity', 'block_chance', 'fuel', 'vessel'].map((f) => [`items.${f}`, uneaten]),
-  ),
+  ...Object.fromEntries(['fuel', 'vessel'].map((f) => [`items.${f}`, uneaten])),
+  // entities.ex:227-232 receptacles: a container's; death.ex:137: no template's
+  'items.capacity': (doc) =>
+    uneaten(doc) && doc.container === true && (doc.location as Obj | undefined)?.in !== 'template',
+  // skills.ex:230-231: an off-hand item's; skills.ex:245-256: the world's combat narrates a block
+  'items.block_chance': (doc, world) =>
+    uneaten(doc) && doc.slot === 'off_hand' && !!((world.combat as Obj)?.narration as Obj)?.block,
   'actions.duration': (d, w) => !w.time_policy && !/"status\.apply"/.test(JSON.stringify(d)), // INVALID_TIME_POLICY (scripted_actions.ex:88): the whole cartridge.json; duration_status (:94); ponytail: also hides it beside a permanent status, which status.ex:72 lets through
   'actions.craft': (doc) => (doc.target as Obj | undefined)?.kind !== 'spell', // replenish.ex:59
   'reactions.zone': (doc) => (doc.on as Obj | undefined)?.room === undefined, // ReactionRule: a zone forbids on.room
@@ -132,14 +137,19 @@ const linked = (doc: Obj) =>
  * food without a restore, cure or status: food.ex:21 effect?). */
 export const awaits = (def: string, f: string) =>
   ['source.QuestDefinition.offer', 'source.ItemDefinition.edible'].includes(`${def}.${f}`);
-/** What the schema takes and the compiler refuses, as an error `apart` holds the field by: food
- * with no restore, cure or status (food.ex:21 effect?, a `[]` none). */
-export const unfed = (doc: Obj) => {
+/** What the schema takes and the compiler refuses, as errors `apart` holds the fields by: food
+ * with no restore, cure or status (food.ex:21 effect?, a `[]` none); an offer with no target (quests.ex:63-66). */
+export const unready = (doc: Obj) => {
   const e = doc?.edible as Obj | undefined;
   const some = (v: unknown) => v != null && !(Array.isArray(v) && !v.length);
-  return e && !['resource', 'cures', 'applies'].some((k) => some(e[k]))
-    ? [{ property: '.edible', message: 'needs a resource, cures or applies' }]
-    : [];
+  return [
+    ...(e && !['resource', 'cures', 'applies'].some((k) => some(e[k]))
+      ? [{ property: '.edible', message: 'needs a resource, cures or applies' }]
+      : []),
+    ...(doc?.offer && !(doc.offer as Obj).target
+      ? [{ property: '.offer', message: 'needs a target' }]
+      : []),
+  ];
 };
 
 /** The menu's fields whose capability `requires.capabilities` (`caps`) declares and whose other needs
