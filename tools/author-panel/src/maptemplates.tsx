@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { templates, type Story, type Template } from './author.ts';
 import type { MapRoom } from './map.ts';
-import { freeKey } from './mapedit.ts';
+import { childKey } from './mapedit.ts';
 import { edit, shown } from './mapwire.ts';
 
 export const DRAGGED = 'text/x-loka-template';
@@ -46,7 +46,7 @@ export function Templates({ story, room }: { story: Story; room?: MapRoom }) {
 
 /** A template chip dropped on `room`: its child there, keyed `<template>_<n>`. */
 export function dropped(t: Dragged, room: MapRoom, story: Story) {
-  // ponytail: a key only an uncompiled file holds is the starter's to refuse (told on the footer)
-  const key = freeKey(t, story.graph.nodes, t.templates);
+  // ponytail: a key only an uncompiled file holds is refused by /new (told on the footer), not skipped
+  const key = childKey(t.dir, t.key, story.graph.nodes, t.templates);
   void edit((ed) => ed.made(room, t.dir, key, t.key));
 }

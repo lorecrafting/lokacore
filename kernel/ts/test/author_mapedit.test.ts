@@ -1,3 +1,4 @@
+// size: allow 540, one scaffolded cartridge the tests edit in turn and the last undoes; a split needs a second scaffold
 // The editor map's edits (tools/author-panel/src/mapedit.ts) through the real write routes
 // (play/write.ts) and the real `mix loka.new`, on one scaffolded cartridge the tests edit in turn;
 // the last one undoes every gesture. Expected files are written by hand.
@@ -16,8 +17,8 @@ import type { MapRoom } from '../../../tools/author-panel/src/map.ts';
 import {
   cellAt,
   editor,
+  childKey,
   freeKey,
-  childOf,
   toward,
   dragged,
   type Editor,
@@ -157,6 +158,14 @@ test('new room from here makes a ~ room linked both ways and placed beside it', 
   await assert.rejects(ed.grow(start, 'south', 'cellar2'), /start already has an exit south/);
   // Breaks: the server's own refusal text replaced by the stale-file message
   await assert.rejects(ed.grow(start, 'west', 'Cellar'), /kind, name, area/);
+});
+
+test('new room from here keys the room room_<n> past a compiled room_1, linked both ways', async () => {
+  // Breaks: a compiled room's key reused (the starter refuses the room), or the key not room_<n>.
+  const key = freeKey('room', 'room', [{ kind: 'room', ref: 'cart@0:room/room_1' }], []);
+  await ed.grow(b, 'east', key);
+  assert.deepEqual(json('rooms/room_2.json').exits, { west: { to: 'b' } });
+  assert.deepEqual(json('rooms/b.json').exits.east, { to: 'room_2' });
 });
 
 test('move to area moves the file and the cartridge still compiles', async () => {
@@ -341,6 +350,14 @@ test("a new NPC or item lands in the selected room's area, placed in that room",
   assert.equal(existsSync(join(src, 'items/pail.json')), false);
 });
 
+test('two New item in a row, before a recompile, write item_1 then item_2', async () => {
+  // Breaks: the second New reusing item_1 because the story still lacks it (the starter refuses it).
+  await ed.made(start, 'items', freeKey('item', 'item', [], []));
+  await ed.made(start, 'items', freeKey('item', 'item', [], []));
+  for (const key of ['item_1', 'item_2'])
+    assert.deepEqual(json(`items/${key}.json`).location, { in: 'room', room: 'start' });
+});
+
 test('a map point maps to its layout cell, and a drag between cells to a compass direction', () => {
   // Breaks: the cell size or pan offset wrong in the inverse of mapdraw.tsx; a diagonal or
   // cross-level drag read as an exit.
@@ -367,32 +384,12 @@ test('a map point maps to its layout cell, and a drag between cells to a compass
 test("a dropped template's child takes the first free <template>_<n>", () => {
   // Breaks: a child key reusing a compiled one (the starter refuses the drop), or starting past _1.
   // Also: an item's key counted against an NPC child, or a template's key (no node holds it) missed.
-  const node = (kind: string, key: string) => ({ kind, ref: `cart@0:${kind}/${key}` });
-  const nodes = [
-    node('npc', 'wild'),
-    node('npc', 'wild_1'),
-    node('item', 'wild_2'),
-    node('npc', 'wild_4'),
-  ];
-  const wild = { dir: 'npcs' as const, key: 'wild' };
-  assert.deepEqual(
-    [freeKey(wild, [], []), freeKey(wild, nodes, []), freeKey(wild, nodes, ['wild_2'])],
-    ['wild_1', 'wild_2', 'wild_3'],
-  );
-});
-
-test('the palette makes a template child from `~<template>`, a plain key otherwise', () => {
-  // Breaks: map-npc/map-item (the keyboard path to a template child) passing no extends, the `~`
-  // kept in the parent's key, or a plain key read as a template.
-  const nodes = [{ kind: 'npc', ref: 'cart@0:npc/wild_1' }];
-  assert.deepEqual(
-    [
-      childOf('~wild', 'npcs', nodes, []),
-      childOf('~wild', 'items', nodes, []),
-      childOf('bob', 'npcs', nodes, []),
-    ],
-    [['wild_2', 'wild'], ['wild_1', 'wild'], ['bob']],
-  );
+  const nodes = ['npc/wild', 'npc/wild_1', 'item/wild_2', 'npc/wild_4'].map((r) => ({
+    kind: r.split('/')[0],
+    ref: `cart@0:${r}`,
+  }));
+  const wild = (held: string[], on = nodes) => childKey('npcs', 'wild', on, held); // each call mints its key
+  assert.deepEqual([wild([], []), wild([]), wild(['wild_3'])], ['wild_1', 'wild_2', 'wild_5']);
 });
 
 test('a press that stays within 4 px is a click (it selects); one that leaves is a drag', () => {
@@ -490,6 +487,49 @@ test('a drop on an empty map writes the first row at 0,0,0 and the knowledge it 
   await editor(s.io).first().finally(s.close);
   const got = [read('layout.json'), read('cartridge.json').requires.capabilities.knowledge];
   assert.deepEqual(got, [[{ room: 'start', x: 0, y: 0, z: 0 }], 1]);
+});
+
+test('a key a file or an area bundle already holds is refused, compiled or not', async () => {
+  // Breaks: New room from here joining an uncompiled room; a second npc_9 or bundled item_9 file.
+  const planted = {
+    'rooms/room_9.json': read('rooms/start.json'),
+    'npcs/npc_9.json': '{}\n',
+    'areas/zz.json': '{ "items": { "item_9": {} }, "scenes": { "cut_9": {} } }\n',
+  };
+  for (const [f, bytes] of Object.entries(planted)) writeFileSync(join(src, f), bytes);
+  try {
+    const was = read('rooms/b.json');
+    await assert.rejects(
+      ed.grow(b, 'south', 'room_9'),
+      /rooms\/room_9 exists in rooms\/room_9.json/,
+    );
+    assert.deepEqual(
+      [read('rooms/b.json'), read('rooms/room_9.json')],
+      [was, planted['rooms/room_9.json']],
+    );
+    await assert.rejects(ed.made(c, 'npcs', 'npc_9'), /npcs\/npc_9 exists in npcs\/npc_9.json/);
+    assert.equal(existsSync(join(src, 'areas/yard/npcs/npc_9.json')), false);
+    await assert.rejects(
+      ed.made(start, 'items', 'item_9'),
+      /items\/item_9 exists in areas\/zz.json/,
+    );
+    assert.equal(existsSync(join(src, 'items/item_9.json')), false);
+    // Breaks: a New area (its first room) not checked as a room; a key of another kind counted.
+    assert.deepEqual(await io.post('new', { kind: 'areas', name: 'room_9' }), {
+      ok: false,
+      told: 'rooms/room_9 exists in rooms/room_9.json',
+    });
+    // Breaks: a cutscene checked under cutscene/ (not scenes/); a New area joining an area folder.
+    assert.deepEqual(await io.post('new', { kind: 'cutscene', name: 'cut_9' }), {
+      ok: false,
+      told: 'scenes/cut_9 exists in areas/zz.json',
+    });
+    const area = (await io.post('new', { kind: 'areas', name: 'yard' })) as { told: string };
+    assert.match(area.told, /areas\/yard\//);
+    await ed.made(start, 'items', 'npc_9');
+  } finally {
+    for (const f of Object.keys(planted)) rmSync(join(src, f));
+  }
 });
 
 test('undo puts every gesture back: the files are byte-identical to the start', async () => {

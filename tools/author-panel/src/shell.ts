@@ -128,17 +128,21 @@ export const COMMANDS: Item[] = [
   ['map-lock', 'Lock on exit'],
   ['map-undo', 'Undo the last map edit'],
 ].map(([id, label]) => ({ kind: 'command', label, detail: 'command', id }));
+/** A definition's row label: `key · name`, the key alone with no written name. */
+export const named = (key: string, name?: string) => (name ? `${key} · ${name}` : key);
+
 /** The palette's rows: commands, /story's definitions, /find's text keys and the `~` keys. */
 export function items(
   nodes: Node[],
   text: Record<string, string>,
   todo: Record<string, string>,
+  names: Record<string, string> = {},
 ): Item[] {
   return [
     ...COMMANDS,
     ...nodes.flatMap((n) => {
       const s = fromRef(n.ref);
-      return s ? [{ kind: 'key' as const, label: s.key, detail: s.kind, id: n.ref }] : [];
+      return s ? [{ kind: 'key' as const, label: named(s.key, names[n.ref]), detail: s.kind, id: n.ref }] : [];
     }),
     ...Object.entries(todo).map(([key, at]) => ({
       kind: 'todo' as const,

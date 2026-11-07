@@ -26,6 +26,7 @@ export const model = (refs: string[], edges: Edge[], outline: Story['outline'] =
   diagnostics: {},
   map: [],
   words: {},
+  names: {},
   choices: {},
   hidden: [],
   unlinkable: {},

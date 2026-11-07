@@ -23,6 +23,7 @@ import {
   shorts,
   unlinkable,
   wordsByNode,
+  names,
 } from './story_counts.ts';
 import { refString } from '../src/runtime/decision.ts';
 
@@ -155,6 +156,7 @@ export function story(source: string, dev: Dev, diagnostics: Diagnostic[]) {
     outline: beats(source, { refs, defs, todos, unreached }),
     map: rooms(c, sources, inBundle),
     words: wordsByNode(defs, (c.text ?? {}) as Record<string, unknown>),
+    names: names(defs, (c.text ?? {}) as Obj), // the Hierarchy's and palette's `key · name`
     choices: choiceCounts(c),
     hidden: hiddenSkills(c), // the cards' add menus and links (allowed.ts, link.ts)
     unlinkable: unlinkable(c),

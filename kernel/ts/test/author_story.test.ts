@@ -52,6 +52,7 @@ const story = (outline: Story['outline']): Story => ({
   },
   map: [],
   words: {},
+  names: {},
   choices: {},
   hidden: [],
   unlinkable: {},
