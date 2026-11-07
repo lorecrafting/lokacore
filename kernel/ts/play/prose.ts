@@ -2,8 +2,8 @@
 // words change: a JSON string literal (with its key and comma kept) or a scene's `* ` line.
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { guarded, refuse, stale } from './guard.ts';
-import { files } from './todo.ts';
+import { guarded, placed, refuse, stale } from './guard.ts';
+import { bundled, files } from './todo.ts';
 import type { Answer, Change } from './write.ts';
 
 // a JSON string line, its key optional; an inline `"field": {"prose": "..."}` on one line too
@@ -55,7 +55,7 @@ export function sourcesOf(source: string, key: string, words?: string) {
   const first = words?.trim().split('\n')[0];
   if (defined.length || !first) return defined;
   // both kinds: a `~` scene line must not lose to some JSON `"~"` (located refuses two)
-  return [
+  const hits = [
     ...find((l) => l.includes(JSON.stringify(words))),
     ...find(
       (l) =>
@@ -64,6 +64,70 @@ export function sourcesOf(source: string, key: string, words?: string) {
       all.filter((rel) => /\.(scene|cut)$/.test(rel)),
     ),
   ];
+  return own(source, key, words!, hits, all);
+}
+const fileOf = (at: string) => at.slice(0, at.lastIndexOf(':'));
+const MARK = '\u0000line';
+/** JSON file `rel`'s value at `steps` (`room` a `room_line`'s at any depth, prose.ex step/1), with
+ * the `words` at column `i` of line `n` marked first; none while it does not parse (half-saved). */
+function valueAt(source: string, rel: string, steps: string[], words = '', n = -1, i = 0) {
+  const lines = readFileSync(join(source, rel), 'utf8').split('\n');
+  const was = JSON.stringify(words);
+  if (n >= 0)
+    lines[n] = lines[n].slice(0, i) + JSON.stringify(MARK) + lines[n].slice(i + was.length);
+  try {
+    return steps.reduce(
+      (at: any, step) => at?.[step === 'room' && at?.room_line ? 'room_line' : step],
+      JSON.parse(lines.join('\n')),
+    );
+  } catch {
+    return undefined;
+  }
+}
+/** Whether marking one place `words` stand on line `n` (a label keyed by its words, two fields on
+ * one line) marks the value at `steps`: a string or an inline `{"prose"}`. */
+function marked(source: string, rel: string, steps: string[], words: string, n: number) {
+  const [line, was] = [
+    readFileSync(join(source, rel), 'utf8').split('\n')[n],
+    JSON.stringify(words),
+  ];
+  for (let i = line.indexOf(was); i >= 0; i = line.indexOf(was, i + 1)) {
+    const value = valueAt(source, rel, steps, words, n, i);
+    if (value === MARK || value?.prose === MARK) return true;
+  }
+  return false;
+}
+/** An inline prose key `<kind>.<key>.<path>`'s `hits` that its own definition holds at that path:
+ * the same words elsewhere (a keyword, another room, its other fields) are not its line. With its
+ * definition holding other words there (edited outside the Book), none: never another's line. */
+function own(source: string, key: string, words: string, hits: string[], all: string[]) {
+  const [kind, name, ...path] = key.split('.');
+  const fits = (dir: string, k: string) =>
+    k === name && [kind, `${kind}s`, `${kind}es`].includes(dir);
+  const ownFile = (rel: string) => {
+    const placing = placed(rel); // an area bundle places as `areas/<a>`: its members below
+    return !!placing && fits(placing.ext === 'scene' ? 'dialogues' : placing.dir, placing.key);
+  };
+  const mine = all.filter(ownFile);
+  const [bundle] = mine.length
+    ? []
+    : Object.entries(bundled(source)).filter(([ref]) =>
+        fits(...(ref.split('/') as [string, string])),
+      );
+  const steps = (rel: string) =>
+    ownFile(rel) ? path : rel === bundle?.[1] ? [bundle[0].split('/')[0], name, ...path] : null;
+  // a JSON hit is the key's when marking its words on that line marks the key's own words
+  const holds = (at: string) => {
+    const [rel, s] = [fileOf(at), steps(fileOf(at))];
+    if (!s || !rel.endsWith('.json')) return !!s; // a scene: its own file
+    return marked(source, rel, s, words, Number(at.slice(at.lastIndexOf(':') + 1)) - 1);
+  };
+  const kept = hits.filter(holds);
+  // a half-saved own file cannot tell either: as with nothing there, every hit
+  const defines = (rel: string) =>
+    !rel.endsWith('.json') || valueAt(source, rel, steps(rel)!) != null;
+  // nothing there (`extends`, or a kind with no file of its own): wherever the words are found
+  return [...mine, ...(bundle ? [bundle[1]] : [])].some(defines) ? kept : hits;
 }
 export const sourceOf = (source: string, key: string, words?: string) =>
   sourcesOf(source, key, words)[0];
