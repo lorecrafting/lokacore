@@ -9,6 +9,7 @@ import {
   closing,
   combatResult,
   detailLines,
+  dropLines,
   logLines,
   narrationLines,
   quietOf,
@@ -20,6 +21,7 @@ import {
 import type { Button } from './presenter.ts';
 import { commandOf } from './buttons.ts';
 import { fall } from './spirit.ts';
+import { restarted } from './heard.ts';
 
 type Say = (key: string) => string;
 
@@ -57,7 +59,7 @@ export function received(game: Game, reply: Reply, was: GameView, s: Logs, text:
     reply.kind === 'saved' && reply.decision.kind === 'accepted' ? reply.decision : undefined;
   const itemChanged = !!accepted && (!!attempt.button.pick || CHANGED.includes(accepted.outcome));
   const moved = !!accepted && was.place.id !== now.place.id;
-  resetLogs(s, now);
+  lookAgain(s, now, reply, accepted, was);
   const retained = retainedNarration(game, s, reply, accepted);
   const { pickup, readableDetail, detail } = detailRoute(
     s,
@@ -124,6 +126,18 @@ const routedLines = (
 };
 
 type Accepted = Extract<Extract<Reply, { kind: 'saved' }>['decision'], { kind: 'accepted' }>;
+
+// A room change, or the room's own Look (not an aimed `examined`, not in a fight, not a reply seen
+// before), starts the room's log over, as arriving does (owner 2026-11-06; book-ui.md).
+function lookAgain(s: Logs, now: GameView, reply: Reply, a: Accepted | undefined, was: GameView) {
+  resetLogs(s, now);
+  if (a?.outcome !== 'looked' || was.combat || now.combat) return;
+  if (reply.kind === 'saved' && reply.command_id && reply.command_id === s.narrationId) return;
+  dropLines(s.log);
+  s.noted = new Set();
+  s.away = undefined;
+  restarted.add(s); // the live region reads the new log in full
+}
 
 export const telling = ({ payload: e }: Accepted['events'][number]) =>
   (e.type === 'entity_died' && !e.victim_definition) ||
