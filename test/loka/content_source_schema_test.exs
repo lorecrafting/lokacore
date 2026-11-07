@@ -49,18 +49,22 @@ defmodule Loka.ContentSourceSchemaTest do
   defp gaps(%{} = s, path) do
     props = Map.get(s, "properties", %{})
     own = for {k, p} <- props, not told?(p, s), do: {"#{path}.#{k}", "no description"}
-    d = s["description"]
-    cites = if is_binary(d) and d =~ @jargon, do: [{path, "cites the spec: #{d}"}], else: []
     inner = for {k, p} <- props, g <- gaps(p, "#{path}.#{k}"), do: g
-    # if/then/else only constrains fields declared beside it; the editor shows their help.
-    rest =
-      for {k, v} <- s,
-          k not in ~w(properties if then else examples default),
-          g <- gaps(v, path),
-          do: g
-
-    own ++ cites ++ inner ++ rest
+    own ++ jargon(s["description"], path) ++ inner ++ rest(s, path)
   end
+
+  # if/then/else only constrains fields declared beside it; the editor shows their help.
+  defp rest(s, path) do
+    for {k, v} <- s,
+        k not in ~w(properties if then else examples default),
+        g <- gaps(v, path),
+        do: g
+  end
+
+  defp jargon(d, path) when is_binary(d),
+    do: if(d =~ @jargon, do: [{path, "cites the spec: #{d}"}], else: [])
+
+  defp jargon(_, _), do: []
 
   defp gaps(l, path) when is_list(l), do: Enum.flat_map(l, &gaps(&1, path))
   defp gaps(_, _), do: []
