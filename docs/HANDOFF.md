@@ -52,7 +52,9 @@ open, schedule, status, detail, add beat, failed save and reload all held.
 
 ## Resume, in order
 
-1. **Owner feedback from the Part 1 build** comes first; file it in Beads, fix blockers.
+1. **Owner feedback from the Part 1 build** comes first; file it in Beads, fix blockers. Branch
+   `docs/prologue-beat-review` (pushed at session end, never merged) holds the owner's 2026-10-31 Part 1 and NPC rulings
+   on the outline (trowel, Brennan glimpse, Dov's line, opening assembly); main's outline lacks them. Open its PR.
 2. **Editor P2s:** loka-wfrgk.90 (a click-in edit saves the first keystroke early; cause is the queued
    `setTimeout(card.commit)` reading late, try field-to-field at CPU throttle 4; #688's attempt was reverted), .94
    (schedules and details hidden from add menus until World adds the capability), .68 (`bin/loka new` key churn),
