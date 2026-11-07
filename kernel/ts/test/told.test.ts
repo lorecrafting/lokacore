@@ -227,12 +227,14 @@ test('/line opens an inline prose key in its own definition, whoever else holds 
   mkdirSync(join(src, 'rooms'));
   writeFileSync(join(src, 'rooms/a.json'), room('{"prose": "Hall"}', '{"prose": "x"}'));
   writeFileSync(join(src, 'rooms/b.json'), room('{"prose": "Yard"}', '{\n    "prose": "x"\n  }'));
-  writeFileSync(join(src, 'rooms/c.json'), room('{"prose": "z"}', '{"prose": "z"}'));
+  const detail = '{"prose": "z"},\n  "details": {"n": {\n    "description": {"prose": "z"}\n  }}';
+  writeFileSync(join(src, 'rooms/c.json'), room('{"prose": "z"}', detail));
   mkdirSync(join(src, 'items'));
   const lamp = '{\n  "keywords": ["x", "lamp"],\n  "name": {"prose": "lamp"}\n}\n';
   writeFileSync(join(src, 'items/lamp.json'), lamp);
   mkdirSync(join(src, 'areas'));
-  const area = '{"rooms": {"d": {\n  "description": {"prose": "x"}\n}}}\n';
+  const area =
+    '{"rooms": {"d": {\n  "description": {"prose": "x"}\n}, "e": {\n  "description": {"prose": "y"}\n}}}\n';
   writeFileSync(join(src, 'areas/w.json'), area);
   const line = async (key: string, words: string) => {
     const { status, text } = await call(`/line?key=${key}&words=${words}`);
@@ -258,5 +260,13 @@ test('/line opens an inline prose key in its own definition, whoever else holds 
     await line('item.lamp.name', 'lamp'),
     at('items/lamp.json', 3, '  "name": {"prose": "lamp"}', 'lamp'),
   );
-  assert.equal((await line('room.c.description', 'z'))[0], 400); // two prose lines: which?
+  assert.deepEqual(
+    await line('room.c.name', 'z'),
+    at('rooms/c.json', 2, '  "name": {"prose": "z"},', 'z'),
+  );
+  assert.equal((await line('room.c.description', 'z'))[0], 400); // two description lines: which?
+  // words edited outside the Book before the compile: its own line is gone, so no other's line
+  assert.equal((await line('room.b.name', 'Hall'))[0], 404);
+  assert.equal((await line('item.lamp.description', 'lamp'))[0], 404);
+  assert.equal((await line('room.e.description', 'x'))[0], 404);
 });

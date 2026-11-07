@@ -64,31 +64,45 @@ export function sourcesOf(source: string, key: string, words?: string) {
       all.filter((rel) => /\.(scene|cut)$/.test(rel)),
     ),
   ];
-  return own(source, key, hits);
+  return own(source, key, words!, hits, all);
 }
 const fileOf = (at: string) => at.slice(0, at.lastIndexOf(':'));
-/** An inline prose key `<kind>.<key>.<field>`'s `hits` in its definition's own file, there its
- * `"prose"` line, if any: the same words elsewhere (a keyword, another room) are not its line. */
-function own(source: string, key: string, hits: string[]) {
-  const [kind, name] = key.split('.');
+const lineOf = (source: string, at: string, back = 0) =>
+  readFileSync(join(source, fileOf(at)), 'utf8').split('\n')[
+    Number(at.slice(at.lastIndexOf(':') + 1)) - 1 - back
+  ];
+/** An inline prose key `<kind>.<key>.<field>`'s `hits` on its own definition's field line: the
+ * same words elsewhere (a keyword, another room, its other fields) are not its line. With its
+ * definition found but no such hit (words edited outside the Book), none: never another's line. */
+function own(source: string, key: string, words: string, hits: string[], all: string[]) {
+  const [kind, name, ...path] = key.split('.');
   const fits = (dir: string, k: string) =>
     k === name && [kind, `${kind}s`, `${kind}es`].includes(dir);
-  const bundles = Object.entries(bundled(source));
-  const mine = hits.filter((at) => {
-    const placing = placed(fileOf(at)); // an area bundle places as `areas/<a>`: its members count
-    return (
-      (!!placing && fits(placing.ext === 'scene' ? 'dialogues' : placing.dir, placing.key)) ||
-      bundles.some(
-        ([ref, rel]) => rel === fileOf(at) && fits(...(ref.split('/') as [string, string])),
-      )
-    );
-  });
-  const prose = mine.filter((at) =>
-    readFileSync(join(source, fileOf(at)), 'utf8')
-      .split('\n')
-      [Number(at.slice(at.lastIndexOf(':') + 1)) - 1].includes('"prose"'),
+  const ownFile = (rel: string) => {
+    const placing = placed(rel); // an area bundle places as `areas/<a>`: its members below
+    return !!placing && fits(placing.ext === 'scene' ? 'dialogues' : placing.dir, placing.key);
+  };
+  const [bundle] = Object.entries(bundled(source)).filter(([ref]) =>
+    fits(...(ref.split('/') as [string, string])),
   );
-  return prose.length ? prose : mine.length ? mine : hits;
+  // a bundle hit is its member's only while the member's own field still holds the words
+  const member = (rel: string) =>
+    !!bundle &&
+    rel === bundle[1] &&
+    [bundle[0].split('/')[0], name, ...path].reduce(
+      (at: any, step) => at?.[step],
+      JSON.parse(readFileSync(join(source, rel), 'utf8')),
+    )?.prose === words;
+  if (!bundle && !all.some(ownFile)) return hits; // a kind with no file of its own: search them all
+  const field = path.at(-1);
+  const named = (at: string) =>
+    /\.(scene|cut)$/.test(fileOf(at)) ||
+    !field ||
+    /^\d+$/.test(field) ||
+    lineOf(source, at).includes(`"${field}":`) ||
+    (/^\s*"prose"\s*:/.test(lineOf(source, at)) &&
+      !!lineOf(source, at, 1)?.includes(`"${field}":`));
+  return hits.filter((at) => (ownFile(fileOf(at)) || member(fileOf(at))) && named(at));
 }
 export const sourceOf = (source: string, key: string, words?: string) =>
   sourcesOf(source, key, words)[0];
