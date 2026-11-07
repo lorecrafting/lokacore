@@ -139,7 +139,8 @@ const capitalised = (key: string, words: string) =>
   );
 
 // Breaks: the lookup matches a drawn line's words exactly only, so a capitalised NPC title says
-// "Not a line of words", or the field shows and saves the capitalised form, not the file's.
+// "Not a line of words"; the field shows or saves the capitalised form, not the file's; or the
+// words held while it is open are the capitalised ones, so the key's other uses capitalise too.
 test("a capitalised title opens its key's field with the file's words; Enter saves that line", async () => {
   await capitalised('npc.stranger.short', 'a hooded stranger');
   answer = (path) => (path.startsWith('/line') ? [200, STRANGER] : [200, { id: 7 }]);
@@ -147,6 +148,8 @@ test("a capitalised title opens its key's field with the file's words; Enter sav
   const field = page.locator('[data-loka-field]');
   assert.equal(await field.textContent(), 'a hooded stranger');
   assert.equal(asked[0].path, '/line?key=npc.stranger.short&words=a%20hooded%20stranger');
+  const frozen = () => page.evaluate(() => (window as any).inbook.frozen('npc.stranger.short'));
+  assert.equal(await frozen(), 'a hooded stranger', 'a lowercase use of the key stays lowercase');
   await page.keyboard.type(', cloaked');
   await page.keyboard.press('Enter');
   await page.waitForFunction(() => !document.querySelector('[data-loka-field]'));
