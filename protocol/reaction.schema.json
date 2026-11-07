@@ -4,7 +4,7 @@
   "description": "ReactionRule (21 \u00a73.4, \u00a711; 06 \u00a714; 04 \u00a75.2-\u00a75.4), owned by reaction@1.",
   "$defs": {
     "ReactionRule": {
-      "description": "Typed reaction owned by reaction@1. Every registered event kind can trigger; each optional filter must equal its payload field (W1). Every delivery runs for the command actor; quest resolution verifies the source instance; a status.apply hits the event's subject or its named item (docs/system/mechanics.md reaction@1). Steps may assign facts (an entity or pair fact, toolbox row W2, at its named npc's or item's instance, else at the event's subject when that is an NPC, item or detail; no subject, no write) or activate a quest on quest_resolved. API1.12 adds typed quest.resolve and quest.fail on fact_changed. Deliveries use one writer group and the existing FIFO budgets; faults commit nothing.",
+      "description": "A rule that runs steps when something happens in the game: when names the event (such as a fact changing), any filters must match it, and the steps then change the world, such as setting a fact or starting a quest.",
       "type": "object",
       "properties": {
         "key": {
@@ -39,7 +39,7 @@
                 },
                 "npc": {
                   "$ref": "identity.schema.json#/$defs/DefinitionRef",
-                  "description": "The entrant is this NPC's authored instance (toolbox row W3)."
+                  "description": "The entrant is this NPC's authored instance."
                 }
               },
               "required": [
@@ -148,7 +148,7 @@
               ],
               "additionalProperties": false
             },
-            {"description":"An item was picked up.",
+            {"description":"An item came into someone's hands: picked up, bought, given, harvested or stolen.",
               "type": "object",
               "properties": {
                 "event": {
@@ -156,7 +156,7 @@
                 },
                 "witness": {
                   "$ref": "identity.schema.json#/$defs/DefinitionRef",
-                  "description": "Toolbox row FD5: this NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness."
+                  "description": "This NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness."
                 },
                 "item": {"description":"Only this item.",
                   "$ref": "identity.schema.json#/$defs/DefinitionRef"
@@ -175,7 +175,7 @@
                 },
                 "witness": {
                   "$ref": "identity.schema.json#/$defs/DefinitionRef",
-                  "description": "Toolbox row FD5: this NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness."
+                  "description": "This NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness."
                 },
                 "item": {"description":"Only this item.",
                   "$ref": "identity.schema.json#/$defs/DefinitionRef"
@@ -222,7 +222,7 @@
               ],
               "additionalProperties": false
             },
-            {"description":"A conversation put a choice in front of the player.",
+            {"description":"A choice was put in front of the player, in a conversation, a scene or speech.",
               "type": "object",
               "properties": {
                 "event": {
@@ -290,7 +290,7 @@
                 },
                 "witness": {
                   "$ref": "identity.schema.json#/$defs/DefinitionRef",
-                  "description": "Toolbox row FD5: this NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness."
+                  "description": "This NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness."
                 },
                 "action": {"description":"Only this action.",
                   "$ref": "action.schema.json#/$defs/Key"
@@ -309,7 +309,7 @@
                 },
                 "witness": {
                   "$ref": "identity.schema.json#/$defs/DefinitionRef",
-                  "description": "Toolbox row FD5: this NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness."
+                  "description": "This NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness."
                 },
                 "check": {"description":"Only the check with this key.",
                   "$ref": "action.schema.json#/$defs/Key"
@@ -328,7 +328,7 @@
                 },
                 "witness": {
                   "$ref": "identity.schema.json#/$defs/DefinitionRef",
-                  "description": "Toolbox row FD5: this NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness."
+                  "description": "This NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness."
                 },
                 "check": {"description":"Only the check with this key.",
                   "$ref": "action.schema.json#/$defs/Key"
@@ -380,7 +380,7 @@
                 },
                 "witness": {
                   "$ref": "identity.schema.json#/$defs/DefinitionRef",
-                  "description": "Toolbox row FD5: this NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness."
+                  "description": "This NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness."
                 },
                 "victim": {"description":"Only this victim.",
                   "$ref": "identity.schema.json#/$defs/DefinitionRef"
@@ -402,14 +402,14 @@
                 },
                 "witness": {
                   "$ref": "identity.schema.json#/$defs/DefinitionRef",
-                  "description": "Toolbox row FD5: this NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness."
+                  "description": "This NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness."
                 },
                 "hit": {"description":"Only hits, or only misses.",
                   "type": "boolean"
                 },
                 "attacker": {
                   "$ref": "identity.schema.json#/$defs/DefinitionRef",
-                  "description": "The attacker is this NPC's authored instance (loka-kgd.79); a player's blow never matches."
+                  "description": "The attacker is this NPC's authored instance; a player's blow never matches."
                 },
                 "target": {
                   "$ref": "identity.schema.json#/$defs/DefinitionRef",
@@ -527,7 +527,7 @@
           "const": true
         },
         "after": {
-          "description": "Toolbox row FD1: the steps run this many logical seconds after delivery, as a reaction job for the delivery's actor, when `when` holds at both times; due no earlier than 1 s after the proposal's clock.",
+          "description": "The steps run this many logical seconds after delivery, as a reaction job for the delivery's actor, when `when` holds at both times; due no earlier than 1 s after the proposal's clock.",
           "type": "integer",
           "minimum": 1,
           "maximum": 2147483647

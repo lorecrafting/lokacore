@@ -6,6 +6,9 @@ defmodule Loka.ContentSourceSchemaTest do
   @dir "schemas/source"
 
   # The kinds prologue Part 1 uses (loka-wfrgk.102): their help texts are the editor's field help.
+  # Spec cites and internal names an author cannot use: sections, decisions, toolbox rows, docs, issues.
+  @jargon ~r/§|ADR-|(?i:toolbox row)|schema\.json|\b[A-Z]+_[A-Z_]+\b|\.md\b|\bloka-|\bAPI\d|\b[A-Z]{1,2}\d+(\.\d+)?\b|\b[A-Z][a-z]+[A-Z]\w*/u
+
   @plain ~w(source.rooms source.npcs source.items source.reactions source.ScriptedAction
             source.dialogues source.scenes source.facts source.quests source.cartridge)
 
@@ -16,8 +19,8 @@ defmodule Loka.ContentSourceSchemaTest do
            "schemas/source is stale: run `mix loka.source_schema`"
   end
 
-  # Break: a field the editor offers with no help line, or one citing the spec (§, ADR-) instead
-  # of saying what it does. A bare `const` field (an `op` or `type` tag) is told by its branch.
+  # Break: a field the editor offers with no help line, or help (a field's, a kind's or an
+  # option's) citing the spec or an internal name instead of saying what it does.
   test "every field of the Part 1 kinds has a plain description" do
     defs = Jason.decode!(Loka.Content.source_schema()["defs.schema.json"])["$defs"]
 
@@ -45,20 +48,25 @@ defmodule Loka.ContentSourceSchemaTest do
 
   defp gaps(%{} = s, path) do
     props = Map.get(s, "properties", %{})
-    own = for {k, p} <- props, why <- [gap(p, s)], why, do: {"#{path}.#{k}", why}
+    own = for {k, p} <- props, not told?(p, s), do: {"#{path}.#{k}", "no description"}
+    d = s["description"]
+    cites = if is_binary(d) and d =~ @jargon, do: [{path, "cites the spec: #{d}"}], else: []
     inner = for {k, p} <- props, g <- gaps(p, "#{path}.#{k}"), do: g
     # if/then/else only constrains fields declared beside it; the editor shows their help.
-    own ++
-      inner ++ for({k, v} <- s, k not in ~w(properties if then else), g <- gaps(v, path), do: g)
+    rest =
+      for {k, v} <- s,
+          k not in ~w(properties if then else examples default),
+          g <- gaps(v, path),
+          do: g
+
+    own ++ cites ++ inner ++ rest
   end
 
   defp gaps(l, path) when is_list(l), do: Enum.flat_map(l, &gaps(&1, path))
   defp gaps(_, _), do: []
 
-  defp gap(%{"const" => _} = p, branch) when map_size(p) == 1, do: told(branch["description"])
-  defp gap(%{} = p, _), do: told(p["description"])
-  defp gap(p, _), do: "no description: #{inspect(p)}"
-
-  defp told(d) when not is_binary(d) or d == "", do: "no description"
-  defp told(d), do: if(d =~ ~r/§|ADR-/u, do: "cites the spec: #{d}")
+  # A bare `const` field (an `op` or `type` tag) is told by its branch.
+  defp told?(%{"const" => _} = p, branch) when map_size(p) == 1, do: told?(branch, nil)
+  defp told?(%{"description" => d}, _), do: is_binary(d) and d != ""
+  defp told?(_, _), do: false
 end

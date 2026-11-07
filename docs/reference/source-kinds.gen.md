@@ -18,7 +18,7 @@ An advertised affordance (04 §19; 06 §20; 21 §7): stable key, name (its local
 
 ## actions shape 2
 
-A cartridge-local action composed only of registered operations (06 §20 Composed actions / ScriptedAction; 21 §7; 05 §28), invoked by the perform command: its stable key (its ActionSet identity), name, the aliases a player types as its verb (the first words of the command), its target, presentation priority, availability policy (evaluated for the actor; while it fails the action is shown unavailable and perform is rejected), and its outcomes. success is one explicit list of at most 16 steps, run in order as one logical decision (04 §5.2) and followed by the engine's action_completed event, and the narration its actor reads; observers is the line others in the room would read, kept for the first host with a second viewer. Optional (R5 S6): a check (step.schema.json Check; check@1), whose result selects the outcome: success when it passes, failure when it fails; a scripted action has a failure outcome exactly when it has a check (OUTCOME_MISMATCH). A failed check is an accepted perform with outcome failure whose RNG draw and time commit like success (04 §5.0); a scripted action without a check has outcome performed. failure's steps may be empty. duration, a whole number of LogicalTime units, advances the clock by that much on every accepted perform, success or failure (21 §7 Cost, time; 04 §5.4: one time.advance after the outcome's steps); events keep the time the perform was admitted at. action_completed follows the outcome's steps when the outcome is performed or success, never failure. Optional (R5 S6b): costs (ActionCost, resource@1), paid in order by the actor's body on every admitted perform, failure included; one it cannot pay rejects the perform insufficient_resource before any check or draw. cooldown, a whole number of LogicalTime units: a perform by the same actor before the last admitted attempt's time plus cooldown is rejected cooldown; an admitted attempt, failure included, starts it at its admission time (delta cooldown.start), and at exactly that time plus cooldown the scripted action is available again. Admission order: target, cooldown, costs, then the check. Optional (toolbox row W23, fact@1): tip, a text the actor reads once, after the outcome's narration, on the first accepted perform (success, failure or performed); that perform also assigns the engine-owned player fact seen_tip_<key> (bool, default false) true, which the compiler adds, so a scripted action with a tip has a key of at most 55 characters and no definition writes that fact (RESERVED_FACT). Optional (loka-j64e): reason, a text key the GameView adds as the message of an offered ActionSet action's (or learned spell word's) unavailable reason while its policy fails (a use-target scripted action is hidden then, so its reason is not shown); the perform or cast refusal stays invalid_state. Optional (Homestead hs-10): craft (ActionCraft), the items a station scripted action uses up and makes; a spell scripted action has none (SCHEMA_VIOLATION). Result bands join later.
+An action the player can take, such as ring the bell: the words that start it, what it acts on, when it is offered, what it costs, an optional check, and what happens on success or failure.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -31,11 +31,11 @@ A cartridge-local action composed only of registered operations (06 §20 Compose
 | name | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of its name. |
 | outcomes | object | yes | The outcomes a perform selects. |
 | outcomes.failure | object |  | Runs when the check fails. |
-| outcomes.failure.cues | [Cues](source-kinds.gen.md#cues) |  | Transient cues of this outcome (toolbox row G6), from the actor's room: perceived only by a cue_perceived condition of a reaction this outcome's check_passed, check_failed or action_completed causes; never stored or shown. |
+| outcomes.failure.cues | [Cues](source-kinds.gen.md#cues) |  | Transient cues of this outcome, from the actor's room: perceived only by a cue_perceived condition of a reaction this outcome's check_passed, check_failed or action_completed causes; never stored or shown. |
 | outcomes.failure.narration | [ActionNarration](source-kinds.gen.md#actionnarration) | yes | The line the player reads on failure. |
 | outcomes.failure.steps | list of [Step](vocabulary.gen.md#steps) | yes | What happens on failure, in order. |
 | outcomes.success | object | yes | Runs when the check passes, or when the action has no check. |
-| outcomes.success.cues | [Cues](source-kinds.gen.md#cues) |  | Transient cues of this outcome (toolbox row G6), from the actor's room: perceived only by a cue_perceived condition of a reaction this outcome's check_passed, check_failed or action_completed causes; never stored or shown. |
+| outcomes.success.cues | [Cues](source-kinds.gen.md#cues) |  | Transient cues of this outcome, from the actor's room: perceived only by a cue_perceived condition of a reaction this outcome's check_passed, check_failed or action_completed causes; never stored or shown. |
 | outcomes.success.narration | [ActionNarration](source-kinds.gen.md#actionnarration) | yes | The line the player reads on success. |
 | outcomes.success.steps | list of [Step](vocabulary.gen.md#steps) | yes | What happens on success, in order. |
 | policy | [Policy](vocabulary.gen.md#policy-leaves) |  | When the action is offered: a condition the player must meet, or it is refused. |
@@ -87,7 +87,7 @@ Shared mutable state for one logical door or gate (21 §5 Barrier), owned by bar
 | keywords | list of [Alias](source-kinds.gen.md#alias) | yes | Words a player names it by. |
 | name | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of the barrier's short description. |
 | opens_when | [Policy](vocabulary.gen.md#policy-leaves) |  | A condition its open command needs (toolbox row 10, barrier@1): while it fails, open is refused invalid_state; close, lock and unlock and an already open barrier are unaffected. |
-| tags | list of [Tag](source-kinds.gen.md#tag) |  | Its property tags (Tag; toolbox row G1), read by the has_tag policy leaf (tag@1). |
+| tags | list of [Tag](source-kinds.gen.md#tag) |  | Its property tags, read by the has_tag policy leaf (tag@1). |
 
 ## behaviours
 
@@ -113,11 +113,11 @@ An authored body bleed duration, tick cadence and HP loss.
 
 ## cartridge
 
-A cartridge's manifest (05 §3, §20): identity, title, compatibility requirements and supported profiles (at least one; order and duplicates carry no meaning). Fields that freeze with their feature (entry, locales, activation groups, continuity, time policy) are added then (14 §R3B).
+A cartridge's manifest: identity, title, compatibility requirements and supported profiles (at least one; order and duplicates carry no meaning). Fields that freeze with their feature (entry, locales, activation groups, continuity, time policy) are added then.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| alternates | map of list of [TextKey](source-kinds.gen.md#textkey) |  | Narration variety (alternates@1, toolbox row W7): a text key's alternates, each a key of the text catalog; a committed narration line with that key shows one of the key and its alternates, chosen by a hash of the command id and the key (mechanics.md narration variety), never the authority RNG. |
+| alternates | map of list of [TextKey](source-kinds.gen.md#textkey) |  | Narration variety: a text key's alternates, each a key of the text catalog; a committed narration line with that key shows one of the key and its alternates, chosen by a hash of the command id and the key, never the authority RNG. |
 | ancestries | map of [AncestrySpec](source-kinds.gen.md#ancestryspec) |  | Authored once-only character choices (attribute@1), keyed by choice Key. |
 | api_version | [ApiVersion](source-kinds.gen.md#apiversion) | yes | The source format family this cartridge is written in; always loka/v3. |
 | calendar | [Calendar](source-kinds.gen.md#calendar) |  | The game's clock: hours in a day, parts of the day, moon, seasons and weather. |
@@ -125,7 +125,7 @@ A cartridge's manifest (05 §3, §20): identity, title, compatibility requiremen
 | entry | [DefinitionRef](source-kinds.gen.md#definitionref) |  | The room a fresh world puts the player's body in. |
 | id | [CartridgeId](source-kinds.gen.md#cartridgeid) | yes | The cartridge's identity; every definition key and reference carries it. |
 | requires | [CompatibilityRequirements](source-kinds.gen.md#compatibilityrequirements) | yes | Which engine versions and features this cartridge needs. |
-| speech | object |  | Word bar S2 (speech@1): phrases, the cartridge's static say words, each a speech@1 Word, offered to every actor with no fact gate; GameView projects them as phrases. In source it is cartridge.json's speech, beside world. |
+| speech | object |  | Words the player can say anywhere: phrases, offered to every player on the word bar. |
 | speech.phrases | list of [Word](source-kinds.gen.md#word) | yes | The words every player can say, as chips in the say bar. |
 | supported_profiles | list of [ExecutionProfile](source-kinds.gen.md#executionprofile) | yes | The hosting profiles this cartridge runs under; at least one (offline_private, online_private, party, shared_area). |
 | time_policy | [TimePolicy](source-kinds.gen.md#timepolicy) |  | How many game seconds pass for each real second. |
@@ -135,13 +135,13 @@ A cartridge's manifest (05 §3, §20): identity, title, compatibility requiremen
 
 ## dialogues
 
-One dialogue node (06 §17; Early R7/R8 D1), keyed in CompiledCartridge.dialogues by DefinitionRefString of kind dialogue, owned by dialogue@1 (a cartridge with one requires it): its key, also the stable action key of its talk (no action's, scripted action's, quest's or registered command's: DUPLICATE_DEFINITION) and the beat of the choice it opens; npc, the speaker, whose talk the actor's ActionSet offers while the speaker is in the actor's room, and which is one of the npc roles (a speaker may have several dialogues: a talk to it opens the first, in key order, whose policy holds, and is invalid_state when none does); policy, the talk's availability, rechecked at Choose; prompt, the text key of the pending choice's prompt; roles, the participants talk binds to EntityIds in the durable choice (06 §33, §43: bound once, never re-resolved by name), each an npc that must be in the actor's room or an item the actor's body must hold when a choice is made (else not_present or not_owned), never named actor (the actor is always a participant: DUPLICATE_DEFINITION); quest, the quest a choice resolves through quest@1's resolution, with the choice_id as its outcome (absent in a dialogue with an accept choice, so accepting never resolves: OUTCOME_MISMATCH); and choices, at least one (a compiler check: the subset has no minProperties), each with its label, its narration line (committed with the actor's body and every role pinned), its fact.assign consequences and an optional hand_over of an item role to an npc role. Choices list by order, then key. API1.9 optionally adds riddle: its existing choice_id, lowercase canonical answer, ordered uppercase letter bank containing every answer letter with multiplicity, and wrong-answer narration text key.
+A conversation with an NPC: who speaks (npc), when it is offered (policy), the question shown (prompt) and the choices the player can pick. Talking to an NPC opens its first dialogue, by key, whose condition holds. It can name a quest the choices resolve, and a riddle.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
 | choices | map of [DialogueChoice](vocabulary.gen.md#choice-fields) | yes | The options the player can pick, each with a short id, a button label and what happens. |
 | entry | boolean |  | An optional marker: true, talk to this speaker opens this dialogue and no other of theirs but keyword ones, over the inferred entry (dialogue@1), at most one per speaker and not on a keyword dialogue; false, talk never opens it, only a `then` does. |
-| keyword | [SpokenKeyword](source-kinds.gen.md#spokenkeyword) |  | Toolbox row G9 (speech@1): a say or whisper of this word to the speaker opens this dialogue, which talk never offers or opens; no riddle. |
+| keyword | [SpokenKeyword](source-kinds.gen.md#spokenkeyword) |  | (speech@1): a say or whisper of this word to the speaker opens this dialogue, which talk never offers or opens; no riddle. |
 | name | [TextKey](source-kinds.gen.md#textkey) |  | A distinct name (the Talk label) opts that authored control into exact dialogue selection; omission retains first-eligible Talk. |
 | npc | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The speaker, also an npc role. |
 | policy | [Policy](vocabulary.gen.md#policy-leaves) |  | When this conversation is offered: a condition the player must meet. |
@@ -172,15 +172,15 @@ NPC emotes (G9, emote@1; cartridge.md Emote declarations): one canned emote an N
 |---|---|---|---|
 | facts | map of object | yes | The game's facts, by key: things the world remembers, such as door_open. |
 | facts.*.meaning | string | yes | What the fact means, for authors. The rules do not read it. |
-| facts.*.npc_pair | `true` |  | Toolbox row FD4: a pair fact between two NPCs, one value per ordered pair (the subject NPC toward the with NPC), stored with subject_id and with_id. Needs per_subject and scopes exactly [instance] (world state). |
-| facts.*.per_subject | `true` |  | Toolbox row W2: the fact has one value per subject, an NPC, item or detail, stored with its subject_id (ScopedFact): an entity fact at scope instance, a pair fact (the subject and the character) at scope player. Absent: one value per scope. |
+| facts.*.npc_pair | `true` |  | A pair fact between two NPCs, one value per ordered pair (the subject NPC toward the with NPC), stored with subject_id and with_id. Needs per_subject and scopes exactly [instance] (world state). |
+| facts.*.per_subject | `true` |  | True if the fact has its own value for each NPC, item or detail rather than one value overall. |
 | facts.*.scopes | list of `player` or `party` or `instance` or `realm` | yes | The scope kinds allowed. This kernel accepts exactly one, `player` or `instance`. |
 | facts.*.value_type | [FactType](source-kinds.gen.md#facttype) | yes | The fact's type and default value. |
 | facts.*.version | integer | yes | The version of the fact's type. |
 
 ## items
 
-A portable thing (21 §8): its key; keywords, the Alias words a player names it by (target resolution); name, the text key of its short description ("a brass lantern"); room_line, the text key of the line a room shows while it lies there ("A brass lantern sits here."), with room_line_variants (DescriptionVariant, first match wins, as for a room's description); description, the text key examine shows; location, where a fresh world puts it; and optionally container: true, making it a receptacle; only receptacles may declare capacity, the most items held directly (without capacity a receptacle has no limit); optionally slot, the SlotKey it is worn in (equipment@1), with optional affects (ItemAffect), each added to the wearer's attribute while the item is worn (toolbox row 3; needs slot and attribute@1); and optionally barrier, the barrier on it (a container's lid, barrier@1, c1-locks): a barrier of this cartridge that no exit and no other item names (BARRIER_MISMATCH), whose state the door verbs change with the item as target_id; while it is closed or locked, what the item holds is out of reach (containment@1 custody). Optional mass_grams is the shell mass, required for every item when world.carry is authored. Optional tags are its property tags (Tag, toolbox row G1). Optional name_variants and description_variants vary its name and description (TextVariants, toolbox row W6). Optional words are its name words (NameWords, loka-6qi).
+An item: something the player can pick up, carry, wear or open. It has names and text, where it starts, and optional parts such as being a container, a worn slot, a lid or a weight.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -198,29 +198,29 @@ A portable thing (21 §8): its key; keywords, the Alias words a player names it 
 | description | [TextKey](source-kinds.gen.md#textkey) | yes | Text key examine shows. |
 | description_variants | [TextVariants](source-kinds.gen.md#textvariants) |  | Description variants. |
 | edible | [ItemEdible](source-kinds.gen.md#itemedible) |  | Makes the item food: what eating it restores, cures or applies. |
-| equip | object |  | Authored wear and remove words (toolbox row 6a, loka-x6t.20): the Wear and Remove labels and the worn and removed lines. Only with slot; each key is in the text catalog. |
+| equip | object |  | Authored wear and remove words: the Wear and Remove labels and the worn and removed lines. Only with slot; each key is in the text catalog. |
 | equip.remove | [TextKey](source-kinds.gen.md#textkey) | yes | The item's Remove label. |
 | equip.removed | [TextKey](source-kinds.gen.md#textkey) | yes | The line told when the item is removed. |
 | equip.wear | [TextKey](source-kinds.gen.md#textkey) | yes | The item's Wear label. |
 | equip.worn | [TextKey](source-kinds.gen.md#textkey) | yes | The line told when the item is worn. |
 | fuel | [FuelSpec](source-kinds.gen.md#fuelspec) |  | Makes the item a lightable fuel source that burns while lit, or a supply that refuels one. |
-| give_allowed | `false` |  | API1.10: false prevents ordinary Give of this item or any container holding it transitively; absence permits Give when contents allow it. Dialogue hand_over remains legal. |
-| identified | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Toolbox row 27: a boolean fact, not per_subject; the item is identified while it reads true for the player, and GameView worn sums identified items only (needs affects). |
-| immune | list of [DefinitionRef](source-kinds.gen.md#definitionref) |  | Toolbox row G3: statuses that status.apply skips on this item's instance; each names a declared status. |
+| give_allowed | `false` |  | False prevents ordinary Give of this item or any container holding it transitively; absence permits Give when contents allow it. Dialogue hand_over remains legal. |
+| identified | [DefinitionRef](source-kinds.gen.md#definitionref) |  | A true-or-false fact: the item counts as identified, and its bonuses show, while the fact is true. |
+| immune | list of [DefinitionRef](source-kinds.gen.md#definitionref) |  | Statuses that status.apply skips on this item's instance; each names a declared status. |
 | intended_level | integer |  | Balance tool 6b: the level the item is meant for, read only by the power report's gear budget (needs affects; the engine ignores it at runtime). |
 | keywords | list of [Alias](source-kinds.gen.md#alias) | yes | Words a player names it by. |
 | location | [ItemLocation](source-kinds.gen.md#itemlocation) | yes | Where a fresh world puts it. |
-| locks | object |  | Toolbox row G7 (mechanics.md Access locks): get, the policy an actor must hold to take this item or anything inside it, and put, the policy to put an item into it (a container only: compiler SCHEMA_VIOLATION invalid_value at locks.put). Each is optional (absent holds) and read with this item as target; failing it refuses permission_denied. |
+| locks | object |  | Conditions to take this item (get) or put things into it (put); a player who fails one is refused. |
 | locks.get | [Policy](vocabulary.gen.md#policy-leaves) |  | A condition the player must meet to take this item or anything inside it. |
 | locks.put | [Policy](vocabulary.gen.md#policy-leaves) |  | A condition the player must meet to put something into this container. |
-| mass_grams | integer |  | The item shell mass in grams, excluding its contents. Required on every item under world.carry; explicit zero is valid (docs/system/cartridge.md Carrying settings and item mass). |
+| mass_grams | integer |  | The item shell mass in grams, excluding its contents. Required on every item under world.carry; explicit zero is valid. |
 | name | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of its short description. |
 | name_variants | [NameVariants](source-kinds.gen.md#namevariants) |  | Name variants; first match wins. |
 | readable | [ItemReadable](source-kinds.gen.md#itemreadable) |  | Lets the player read the item, and optionally learn a topic from it. |
 | room_line | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of the line a room shows while it lies there. |
 | room_line_variants | [TextVariants](source-kinds.gen.md#textvariants) |  | Room line variants; first match wins. |
 | slot | [SlotKey](source-kinds.gen.md#slotkey) |  | The slot it is worn in. |
-| tags | list of [Tag](source-kinds.gen.md#tag) |  | Its property tags (Tag; toolbox row G1), read by the has_tag policy leaf (tag@1). |
+| tags | list of [Tag](source-kinds.gen.md#tag) |  | Its property tags, read by the has_tag policy leaf (tag@1). |
 | vessel | [VesselSpec](source-kinds.gen.md#vesselspec) |  | Makes the item hold liquid: how much, and what is in it at the start. |
 | weapon | [WeaponProfile](source-kinds.gen.md#weaponprofile) |  | Makes the item a weapon: the skill needed and its attack. |
 | words | [NameWords](source-kinds.gen.md#namewords) |  | The item's name words, such as the bare name lantern, its article and plural, used to build sentences. |
@@ -246,12 +246,12 @@ Cartridge-owned mass, integer serving and unit labels for a declared liquid.
 
 ## npcs
 
-A non-player character (00a §4), as a holder of items so far: its key, keywords, name, room_line and description as for an item, the room a fresh world puts it in, and optionally capacity, the most items it holds. Optionally daily_schedule, its daily location schedule (schedule@1), and schedule_cases, its conditional hours (toolbox row W10); dialogue joins with its capability as an optional field. Optional hp opts into entity-specific HP (docs/system/cartridge.md NPC HP overrides). Optional name_variants and description_variants vary its name and description, its mood (TextVariants, toolbox row W6); an NPC's room_line has no variants (owner, 2026-10-30). Optional words are its name words (NameWords, loka-6qi).
+A non-player character, as a holder of items so far: its key, keywords, name, room_line and description as for an item, the room a fresh world puts it in, and optionally capacity, the most items it holds. Optionally daily_schedule, its daily location schedule (schedule@1), and schedule_cases, its conditional hours; dialogue joins with its capability as an optional field. Optional hp opts into entity-specific HP. Optional name_variants and description_variants vary its name and description, its mood; an NPC's room_line has no variants (owner, 2026-10-30). Optional words are its name words.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
 | ambient | [NpcAmbientSets](source-kinds.gen.md#npcambientsets) |  | Ambient lines or emotes told while the player is in this NPC's room and sees it: 1 to 4 of {lines \| emotes, every, chance?, when?}. |
-| ask | object |  | Toolbox row FD7 (speech@1 with topic@1): what the NPC says when asked about a topic. The first answer in authored order whose topic is the one asked and whose when holds (the player as the actor, the NPC as the target) is narrated and grants its grants topic; none: unknown. |
+| ask | object |  | (speech@1 with topic@1): what the NPC says when asked about a topic. The first answer in authored order whose topic is the one asked and whose when holds (the player as the actor, the NPC as the target) is narrated and grants its grants topic; none: unknown. |
 | ask.answers | list of object | yes | What the NPC answers, topic by topic. |
 | ask.answers[].grants | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Granted when this answer is given. |
 | ask.answers[].text | [TextKey](source-kinds.gen.md#textkey) | yes | What the NPC says when asked about this topic. |
@@ -259,7 +259,7 @@ A non-player character (00a §4), as a holder of items so far: its key, keywords
 | ask.answers[].when | [Policy](vocabulary.gen.md#policy-leaves) |  | This answer is used only while this condition holds. |
 | ask.unknown | [TextKey](source-kinds.gen.md#textkey) | yes | What the NPC says when no answer matches the topic. |
 | attack | [AttackProfile](source-kinds.gen.md#attackprofile) |  | How the NPC fights: chance to hit and damage range. |
-| attributes | list of object |  | Toolbox row G3: this NPC's base attribute values (attribute@1), read at use by an opposed check naming the NPC and by its derived attack; each names a distinct attribute of this cartridge. An attribute it does not list reads its definition start. |
+| attributes | list of object |  | This NPC's base attribute values (attribute@1), read at use by an opposed check naming the NPC and by its derived attack; each names a distinct attribute of this cartridge. An attribute it does not list reads its definition start. |
 | attributes[].attribute | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | A cartridge attribute, read by opposed checks. |
 | attributes[].value | [ResourceInt](source-kinds.gen.md#resourceint) | yes | This NPC's value of the attribute. |
 | behaviours | list of [Key](source-kinds.gen.md#key) or object |  | Behaviours this entity takes on: each adds one copy of the behaviour's rules, with `{"param": "holder"}` replaced by this entity's key. |
@@ -281,37 +281,37 @@ A non-player character (00a §4), as a holder of items so far: its key, keywords
 | daily_schedule.*[]{walks=true}.when | [Policy](vocabulary.gen.md#policy-leaves) |  | This case is used only while this condition holds; leave it out to always match. |
 | description | [TextKey](source-kinds.gen.md#textkey) | yes | Text key examine shows. |
 | description_variants | [TextVariants](source-kinds.gen.md#textvariants) |  | Description variants, its mood. |
-| disposition | object |  | Toolbox row G11: how the NPC stands toward the player, derived when read, never stored: hostile while hostile holds, else friendly while friendly holds, else wary (an NPC without it is wary). Each condition is read with the player as the actor and the NPC as the target, so subject target facts are its pair facts with the player. Hostile refuses talk and trade and, with an attack, engages a player who walks in, saying engage; friendly takes a friendly buy_discount. Toolbox row 35: with arrest instead of engage, a hostile NPC stops a player who walks in and the body goes to arrest.to, saying arrest.narration; no encounter opens. |
+| disposition | object |  | How the NPC treats the player: hostile while hostile holds, else friendly while friendly holds, else wary. A hostile NPC refuses talk and trade and, with engage, attacks a player who walks in, or with arrest sends them to arrest.to; a friendly one gives its friendly discount. |
 | disposition.arrest | object |  | Instead of engage: this hostile NPC stops a player who walks in, and no encounter opens. |
 | disposition.arrest.narration | [TextKey](source-kinds.gen.md#textkey) | yes | Said when the player is arrested. |
 | disposition.arrest.to | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The room the arrested body goes to. |
 | disposition.engage | [TextKey](source-kinds.gen.md#textkey) |  | Said when this hostile NPC engages a player who walks in. |
 | disposition.friendly | [Policy](vocabulary.gen.md#policy-leaves) |  | While this condition holds (and hostile does not), the NPC is friendly. |
 | disposition.hostile | [Policy](vocabulary.gen.md#policy-leaves) |  | While this condition holds, the NPC is hostile: it will not talk or trade, and may attack. |
-| disposition.refuse | [TextKey](source-kinds.gen.md#textkey) |  | Book hostile refusal: the line the Book shows on the NPC's page while it is hostile, naming the mood, never the cause; projected as its EntityView refusal. |
-| drops | list of object |  | Toolbox row 8 loot table (docs/system/mechanics.md loot tables, world.death): in order, an item this NPC holds at genesis and its percent chance of passing to the corpse when combat kills the NPC; a failed item stays with the dead NPC. |
+| disposition.refuse | [TextKey](source-kinds.gen.md#textkey) |  | The line shown on the NPC's page while it is hostile; it names the mood, not the reason. |
+| drops | list of object |  | Loot table: in order, an item this NPC holds at genesis and its percent chance of passing to the corpse when combat kills the NPC; a failed item stays with the dead NPC. |
 | drops[].chance | integer | yes | Percent chance, 1 to 100, that the item stays on the corpse; otherwise it is kept back. |
 | drops[].item | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | An item of this cartridge held by this NPC. |
 | hp | [NpcHp](source-kinds.gen.md#npchp) |  | The NPC's hit points: minimum, maximum and starting value. |
-| immune | list of [DefinitionRef](source-kinds.gen.md#definitionref) |  | Toolbox row G3: statuses that status.apply skips on this NPC's instance; each names a declared status. |
+| immune | list of [DefinitionRef](source-kinds.gen.md#definitionref) |  | Statuses that status.apply skips on this NPC's instance; each names a declared status. |
 | keywords | list of [Alias](source-kinds.gen.md#alias) | yes | Words a player names it by. |
-| locks | object |  | Toolbox row 33 (mechanics.md Theft, fence and witnessed offense): get, the policy an actor must hold to take an item this NPC directly holds (target: that item); refuses permission_denied. |
+| locks | object |  | Get, the policy an actor must hold to take an item this NPC directly holds (target: that item); refuses permission_denied. |
 | locks.get | [Policy](vocabulary.gen.md#policy-leaves) |  | A condition the player must meet to take an item this NPC holds. |
-| mount | object |  | Toolbox row 43b (needs world.mount): this NPC can be ridden. While world.mount.riding is true for (this NPC, a character) and both share a room, the character's moves need a destination room carrying one of terrain, each move's fare is scaled by cost_percent (default 100, floored, applied last) and this NPC moves with the body. Never on a spawn template. |
+| mount | object |  | (needs world.mount): this NPC can be ridden. While world.mount.riding is true for (this NPC, a character) and both share a room, the character's moves need a destination room carrying one of terrain, each move's fare is scaled by cost_percent (default 100, floored, applied last) and this NPC moves with the body. Never on a spawn template. |
 | mount.cost_percent | integer |  | Percent, 0 to 1000, applied last to the rider's move cost, rounded down. Absent: the cost is not scaled. |
 | mount.terrain | list of [Tag](source-kinds.gen.md#tag) | yes | Room tags this mount carries a rider over; a move into a room with none of them is refused. 1 to 8 unique tags. |
 | name | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of its short description. |
 | name_variants | [NameVariants](source-kinds.gen.md#namevariants) |  | Name variants, its mood. |
 | perception | object |  | Hides the NPC until a fact is true. |
 | perception.discovered | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | A fact that must be true for this NPC to be visible. |
-| resistances | [Resistances](source-kinds.gen.md#resistances) |  | How much less damage the NPC takes from each kind of damage, in percent; negative means a weakness. |
+| resistances | [Resistances](source-kinds.gen.md#resistances) |  | How much less damage the NPC takes, in percent, from each kind of damage and from weapons of each material tag; negative means a weakness. |
 | resource_starts | map of [ResourceInt](source-kinds.gen.md#resourceint) |  | Starting value of each named resource. |
 | room | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The room a fresh world puts it in. |
 | room_line | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of the line a room shows. |
 | services | list of [DefinitionRef](source-kinds.gen.md#definitionref) |  | Services this NPC offers. |
 | shop | [Shop](source-kinds.gen.md#shop) |  | Makes the NPC a shopkeeper: the items offered, their prices and the lines told on buying and selling. |
 | spawn_template | `true` |  | Not placed in a fresh world; used as a population template. |
-| unattackable | boolean |  | loka-w9id: this NPC is never an Attack target and never opens a fight: no Attack offer, Attack refused invalid_target. An arrest still applies. Absent means attackable if it has an attack profile. |
+| unattackable | boolean |  | this NPC is never an Attack target and never opens a fight: no Attack offer, Attack refused invalid_target. An arrest still applies. Absent means attackable if it has an attack profile. |
 | words | [NameWords](source-kinds.gen.md#namewords) |  | The NPC's name words, such as the bare name guard, its article and plural, used to build sentences. |
 
 ## outline
@@ -382,11 +382,11 @@ One fixed-slot, two-room bounded population with an owned wander and replacement
 
 ## quests
 
-A quest with one objective (06 §2; R6P pre-release-proof.md), keyed in CompiledCartridge.quests by DefinitionRefString of kind quest, owned by quest@1 (a cartridge with one requires it): its key, also the stable action key of its offer (no action's, scripted action's or registered command's: DUPLICATE_DEFINITION); name, the text key of its journal entry (QuestView.title); offer, optional, the accept action its actor's ActionSet lists while the actor has no instance of the quest (label its text key, policy its availability: while it fails the offer is shown unavailable and accept_quest is rejected), which resolves to accept_quest; without one, only a dialogue choice's accept (dialogue.schema.json DialogueChoice) activates the quest; and objective (QuestObjective). Resolution is another capability's: a choice resolves it through quest@1's resolution, which re-checks the objective. Giver, turn-in, prerequisites beyond the offer's policy, further objectives, outcomes and automatic or discovered activation join as optional fields. Optional journal declares lifecycle texts (QuestJournal); selection is computed in QuestView without changing persisted state.
+A quest: its name, how the player takes it on (offer or a dialogue choice), its objective, and its journal text.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| deadline | object |  | A quest deadline, one object (validate.ts oneOf needs a const discriminator). Legacy (S2): at, fact, trust_fact and trust_amount, no after. Generic (toolbox row W24): exactly one of after (logical units from activation) or at (absolute logical time), no legacy field; activation schedules one engine job and expiry fails the instance with outcome and emits quest_failed. The compiler (lib/loka/content/quests.ex) refuses any other shape (SCHEMA_VIOLATION). |
+| deadline | object |  | When the quest runs out: after a number of time units from when it starts, or at a fixed time. When time is up the quest fails. |
 | deadline.after | integer |  | Generic deadline: logical units from activation, at least 1. Exactly one of after or at. |
 | deadline.at | [LogicalTime](source-kinds.gen.md#logicaltime) |  | The logical time the deadline falls due. |
 | deadline.fact | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Legacy deadline: the fact assigned at expiry. |
@@ -431,7 +431,7 @@ A quest with one objective (06 §2; R6P pre-release-proof.md), keyed in Compiled
 | offer | object |  | The accept action offered while the actor has no instance. |
 | offer.label | [TextKey](source-kinds.gen.md#textkey) | yes | The accept action's label. |
 | offer.policy | [Policy](vocabulary.gen.md#policy-leaves) |  | When the quest is offered: a condition the player must meet. |
-| offer.target | object |  | The fixture or NPC the offer draws on (mechanics.md, quest@1). The offer is listed and admitted only while the target is in the actor's room, alive and seen. |
+| offer.target | object |  | The fixture or NPC the offer draws on. The offer is listed and admitted only while the target is in the actor's room, alive and seen. |
 | offer.target{kind=detail} | variant |  | The offer draws on a fixture in a room: the player must be in that room and see it. |
 | offer.target{kind=detail}.detail | [Key](source-kinds.gen.md#key) | yes | The detail's key in that room. |
 | offer.target{kind=detail}.room | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The room holding the detail. |
@@ -449,11 +449,11 @@ A quest with one objective (06 §2; R6P pre-release-proof.md), keyed in Compiled
 
 ## reactions
 
-Typed reaction owned by reaction@1. Every registered event kind can trigger; each optional filter must equal its payload field (W1). Every delivery runs for the command actor; quest resolution verifies the source instance; a status.apply hits the event's subject or its named item (docs/system/mechanics.md reaction@1). Steps may assign facts (an entity or pair fact, toolbox row W2, at its named npc's or item's instance, else at the event's subject when that is an NPC, item or detail; no subject, no write) or activate a quest on quest_resolved. API1.12 adds typed quest.resolve and quest.fail on fact_changed. Deliveries use one writer group and the existing FIFO budgets; faults commit nothing.
+A rule that runs steps when something happens in the game: when names the event (such as a fact changing), any filters must match it, and the steps then change the world, such as setting a fact or starting a quest.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| after | integer |  | Toolbox row FD1: the steps run this many logical seconds after delivery, as a reaction job for the delivery's actor, when `when` holds at both times; due no earlier than 1 s after the proposal's clock. |
+| after | integer |  | The steps run this many logical seconds after delivery, as a reaction job for the delivery's actor, when `when` holds at both times; due no earlier than 1 s after the proposal's clock. |
 | on | [event](vocabulary.gen.md#events) | yes | See the type. |
 | silent | `true` |  | Author-time only (mix loka.lint, pass-1 row 3): the rule writes state without a narrate step on purpose. The compiler drops it, so a compiled cartridge never carries it. |
 | steps | list of [Step](vocabulary.gen.md#steps) or object | yes | The steps in order; a `wait` splits them in time. |
@@ -483,7 +483,7 @@ One replenish entry (docs/system/cartridge.md Replenish declarations): each due 
 
 ## rooms
 
-A navigable place (21 §5 Place/Room): its key, its name and description text keys (05 §18; resolved in the cartridge text catalog), and its exits by compass direction, the six-way compass of 00 §4.10 (a direction without an exit is absent), optionally its inspectable details by key, at most 64, its description variants (DescriptionVariant) and its contributions to the ActionSet of an actor in it, applied in order (action.schema.json ActionContribution; R5 S5, optional). Custom named connections (05 §17) join later as a separate optional field. Optional tags are its property tags (entity.schema.json Tag, toolbox row G1).
+A place the player can be: its name, description, exits by direction (north, south, east, west, up, down), things to look at, other descriptions picked by condition, and tags.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -501,15 +501,15 @@ A navigable place (21 §5 Place/Room): its key, its name and description text ke
 | exits.south | [Connection](source-kinds.gen.md#connection) |  | The exit to the south. |
 | exits.up | [Connection](source-kinds.gen.md#connection) |  | The exit up. |
 | exits.west | [Connection](source-kinds.gen.md#connection) |  | The exit to the west. |
-| locks | object |  | Toolbox row G7 (mechanics.md Access locks): enter, the policy the mover must hold to come into this room, read by movementPlan after the exit's traverse lock; failing it refuses permission_denied. Read with no target. |
+| locks | object |  | Enter, the policy the mover must hold to come into this room, read by movementPlan after the exit's traverse lock; failing it refuses permission_denied. Read with no target. |
 | locks.enter | [Policy](vocabulary.gen.md#policy-leaves) |  | A condition the player must meet to come into this room. |
 | name | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of its name. |
 | sanctuary | boolean |  | Combat cannot be opened here and hostile NPCs do not engage on entry. |
-| site | object |  | Built rooms S1 (construction@1; cartridge.md Structure and site declarations): where a structure may be built from this room. directions, the compass directions a built room may open on, none an authored exit of this room (SITE_EXIT_CONFLICT); structures, the StructureDefinitions that may be built here (UNRESOLVED_REFERENCE otherwise). |
+| site | object |  | Where a structure can be built from this room: directions, the directions a built room may open on (none may be an existing exit), and structures, the kinds that may be built. |
 | site.directions | list of `north` or `south` or `east` or `west` or `up` or `down` | yes | Compass directions a built room may take from here. |
 | site.structures | list of [DefinitionRef](source-kinds.gen.md#definitionref) | yes | Structures that may be built from this room. |
 | sound | [Key](source-kinds.gen.md#key) |  | Its sound bed tag, projected as place.sound: the host plays that tag's bed and exploration piece. The cartridge owns the names; a tag with no file plays the wild bed. |
-| tags | list of [Tag](source-kinds.gen.md#tag) |  | Its property tags (Tag; toolbox row G1), read by the has_tag policy leaf (tag@1) and the terrain fare (row 43a); unique, since a repeated tag would apply its fare percent twice. |
+| tags | list of [Tag](source-kinds.gen.md#tag) |  | Its property tags, read by the has_tag policy leaf (tag@1) and the terrain fare (row 43a); unique, since a repeated tag would apply its fare percent twice. |
 | variants | list of [DescriptionVariant](source-kinds.gen.md#descriptionvariant) |  | Other descriptions of the room, each used while its condition holds, such as at night. |
 | zones | list of [Key](source-kinds.gen.md#key) |  | The zones this room belongs to; a reaction with `zone` and no `on.room` gets one copy per member room. |
 
@@ -640,7 +640,7 @@ Paired original boarding detail, destination, conserved fare recipient and corps
 
 ### ActionContribution
 
-One source's contribution to an actor's ActionSet (06 §19; ADR-016), applied to the set composed so far by stable action key: union adds the named actions whose keys the set lacks, override adds them and replaces those it has, replace makes the set exactly them, subtract removes them and intersect keeps only them. A key names an engine verb (a registered command type), a cartridge action or a cartridge scripted action; union, override and replace take its definition (a cartridge's own over the engine verb's). A room applies its contributions in order after the engine verbs and the cartridge's actions and scripted actions (kernel/ts/src/actions.ts).
+Changes the list of actions the player is offered here: union adds actions, override adds or replaces them, replace offers exactly these, subtract removes them, intersect keeps only these. Each key names a built-in verb or one of the game's actions.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -649,7 +649,7 @@ One source's contribution to an actor's ActionSet (06 §19; ADR-016), applied to
 
 ### ActionCost
 
-One resource cost of a ScriptedAction (21 §7 Cost): the actor's body pays amount of a resource of the cartridge on every admitted perform, failure included (04 §5.0). A perform whose body cannot pay (current value minus amount below the resource's minimum) is rejected insufficient_resource before any RNG draw, and changes nothing.
+What the action costs the player each time, failure included: an amount of one pool, such as 5 mv. Without enough, the action is refused and nothing happens.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -658,7 +658,7 @@ One resource cost of a ScriptedAction (21 §7 Cost): the actor's body pays amoun
 
 ### ActionCraft
 
-What a craft scripted action uses up and makes (docs/system/mechanics.md Craft; Homestead hs-10): consume, yield or both. consume: on every accepted perform, failure included, the first quantity of the listed items the actor's body holds directly (lowest EntityId first; one inside a worn or carried container does not count) move to the holder to; while the body holds fewer the perform is rejected invalid_state and the offer is unavailable, its reason's message reason when declared. yield: unless the outcome is failure, one of the listed items directly in the holder from (lowest EntityId first) moves to the body, with item_acquired after the check's events; while from holds none the perform is rejected invalid_state and the offer is unavailable with no message. Every moved item passes the body's carrying limits (give rules). The compiler (lib/loka/content/replenish.ex) refuses a template location, a holder with no placed entity (a spawn-template NPC or template item), an item holder that is not a container, duplicate items, and an unresolved item, holder or reason.
+What a crafting action uses up and makes. consume: the items taken from the player's hands into a holder on every try; yield: an item moved from a holder to the player when the action succeeds.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -679,7 +679,7 @@ Type: `ancestry` or `attribute` or `word` or `topic` or `direction` or `choice_i
 
 ### ActionNarration
 
-A scripted action outcome's narration (21 §4 NarrationSpec): the actor's line, the observers' line, and the entities the actor's line names, each resolved and pinned when the outcome commits (06 §43; text.schema.json Text participants).
+A scripted action outcome's narration: the actor's line, the observers' line, and the entities the actor's line names, each resolved and pinned when the outcome commits.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -689,13 +689,13 @@ A scripted action outcome's narration (21 §4 NarrationSpec): the actor's line, 
 
 ### Alias
 
-A word or phrase a player types to name a detail (21 §6 aliases; 04 §18 aliases) or, for a ScriptedAction, the action (its verb, the first words typed): lowercase letters and digits, the words of a phrase joined by _ (the player's `mooring post` is compared as mooring_post; kernel/ts/src/target.ts gives the normalization). At most 64 characters.
+A word the player types to name something or start an action: lowercase letters and digits, words joined by _ (the player types mooring post, you write mooring_post). At most 64 characters.
 
 Type: string.
 
 ### AmbientSet
 
-An ambient set (emote@1; mechanics.md Ambient emotes): one of its lines is told, at most one per entity per advance, when the clock crosses a multiple of every and the chance roll passes, chosen by SHA-256 of "<entity ref>:<set index>:<boundary>", never the authority RNG.
+An ambient set: one of its lines is told, at most one per entity per advance, when the clock crosses a multiple of every and the chance roll passes, chosen by SHA-256 of "<entity ref>:<set index>:<boundary>", never the authority RNG.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -706,7 +706,7 @@ An ambient set (emote@1; mechanics.md Ambient emotes): one of its lines is told,
 
 ### AmbientSets
 
-A room's or item's ambient sets (AmbientSet), in authored order.
+The ambient lines of a room or item, in order.
 
 Type: list of [AmbientSet](source-kinds.gen.md#ambientset).
 
@@ -728,7 +728,7 @@ One authored character choice and its bounded initial effects.
 
 ### ApiVersion
 
-api_version: the authored source document/schema family (05 §3).
+api_version: the authored source document/schema family.
 
 Type: `loka/v3`.
 
@@ -747,9 +747,9 @@ Cartridge-owned hit chance and positive damage bounds. Compiler and loader enfor
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| attacks | integer |  | Swings (loka-kgd.200): how many swings one opportunity makes, each rolled on its own, their damage summed (1 to 10; default 1). |
+| attacks | integer |  | Swings: how many swings one opportunity makes, each rolled on its own, their damage summed (1 to 10; default 1). |
 | chance | integer | yes | Percent chance an attack is accurate; a defense can still prevent the hit. |
-| crit | object |  | Toolbox row G2: a hit whose accuracy roll (the hit draw, uniform in [0, 100)) is below chance is critical and its damage is multiplied by multiplier, before resistances. |
+| crit | object |  | A hit whose accuracy roll (the hit draw, uniform in [0, 100)) is below chance is critical and its damage is multiplied by multiplier, before resistances. |
 | crit.chance | integer | yes | Percent of all attacks, sharing the accuracy draw: a hit whose draw is below this is critical, so a chance above the accuracy makes every hit critical. |
 | crit.multiplier | integer | yes | Damage of a critical hit is multiplied by this (2 to 10). |
 | damage_max | integer | yes | Most positive damage; at least damage_min. |
@@ -760,25 +760,25 @@ Cartridge-owned hit chance and positive damage bounds. Compiler and loader enfor
 
 ### BandTable
 
-A condition band table (04 §15 as amended 2026-10-02), highest cut first: the band is the first row whose cut p reaches, and maximum = minimum gives the top row. Cuts are strictly descending and the last is 0, so every value has a band, and keys are unique within the table; the compiler reports a table that breaks this as RESOURCE_SPEC_INVALID at the table. A pool's bands (ResourceSpec), else the cartridge's world.bands (cartridge.schema.json WorldSettings), else the engine default table.
+How a pool's level is described, highest first: each row names a band and the level it starts at, and the last row starts at 0.
 
 Type: list of [ConditionBand](source-kinds.gen.md#conditionband).
 
 ### BandTone
 
-A condition band's tone (04 §15 as amended 2026-10-02): how serious the band is; each presenter maps it to its own colour.
+A condition band's tone: how serious the band is; each presenter maps it to its own colour.
 
 Type: `normal` or `warning` or `danger`.
 
 ### BarrierState
 
-A barrier's state (21 §5 Barrier: open/closed, locked/unlocked): open, closed (and unlocked) or locked (and closed); a lock needs a closed door, so an open locked barrier does not exist. The legal transitions (04 §5.3 'Lifecycle transition') are closed to open (open), open to closed (close), closed to locked (lock) and locked to closed (unlock); delta.schema.json barrier.transition.
+A door's state: open, closed or locked. A locked door is always closed.
 
 Type: `open` or `closed` or `locked`.
 
 ### Calendar
 
-calendar@1: authored logical units per hour, hours per day, displayed subdivisions, and optional ordered solar/lunar cuts. Cut starts are inclusive; the compiler checks order, cycle bounds and schedule/window hours (lib/loka/content/calendar.ex). Toolbox row 31 adds the season and tide cycles and the weather table (one weighted entry per calendar day, chosen by a hash of the world id and the day).
+The game's clock: how many time units make an hour, hours in a day, the parts of the day shown to the player, and optional sun and moon phases. Seasons, tides and a weather table can be added.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -790,7 +790,7 @@ calendar@1: authored logical units per hour, hours per day, displayed subdivisio
 | subdivisions_per_hour | integer |  | Parts the status line splits an hour into; must divide units_per_hour. |
 | tide | [CalendarCycle](source-kinds.gen.md#calendarcycle) |  | The tides: a repeating cycle with a length and named phases. |
 | units_per_hour | integer |  | Logical time units in one hour; the three unit fields are given together. |
-| weather | list of [WeatherEntry](source-kinds.gen.md#weatherentry) |  | The possible weathers. Each day picks one at random, weighted by each entry's weight. |
+| weather | list of [WeatherEntry](source-kinds.gen.md#weatherentry) |  | The possible weathers. Each day gets one, weighted by each entry's weight; the same world and day always get the same weather. |
 
 ### CalendarCut
 
@@ -803,7 +803,7 @@ An inclusive phase start within one authored solar day or lunar period.
 
 ### CalendarCycle
 
-A repeating cycle of ordered cuts in logical time units (lunar; season and tide, toolbox row 31): the phase at time t is the last cut at or before ((t - origin) mod period); the first cut starts at 0.
+A repeating cycle, such as the moon, seasons or tides: a period and the phases it passes through, each starting at a point in the cycle (the first at 0).
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -813,25 +813,25 @@ A repeating cycle of ordered cuts in logical time units (lunar; season and tide,
 
 ### CapabilityVersion
 
-A capability contract version (05 §6): a positive integer. key@version is immutable in meaning once published; a breaking change takes a new version (05 §6, 'Capability version immutability').
+A capability contract version: a positive integer. key@version is immutable in meaning once published; a breaking change takes a new version.
 
 Type: integer.
 
 ### CapabilityVersions
 
-Exact capability pins, capability key to version (05 §3 requires.capabilities; 05 §6). A map, so one version per key: the canonical decoder rejects a repeated key, and canonical encoding sorts keys.
+Exact capability pins, capability key to version. A map, so one version per key: the canonical decoder rejects a repeated key, and canonical encoding sorts keys.
 
 Type: map of [CapabilityVersion](source-kinds.gen.md#capabilityversion).
 
 ### CartridgeId
 
-A cartridge identity (05 §3 id, 05 §4), lowercase snake_case, at most 64 characters.
+A cartridge identity, lowercase snake_case, at most 64 characters.
 
 Type: string.
 
 ### Chapter
 
-An ordered chapter marker (mechanics.md Chapters): name is a catalog key; only chapter 0 lacks a story_point, and it has no outcome. Later chapters name a story point and optionally one of its outcome keys (checked at the reference stage).
+An ordered chapter marker: name is a catalog key; only chapter 0 lacks a story_point, and it has no outcome. Later chapters name a story point and optionally one of its outcome keys (checked at the reference stage).
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -858,20 +858,20 @@ Type: object.
 | {kind=attribute_threshold}.attribute | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The actor's attribute compared. |
 | {kind=attribute_threshold}.difficulty | integer | yes | The value compared against. |
 | {kind=attribute_threshold}.key | [Key](source-kinds.gen.md#key) | yes | This check's key, unique across scripted actions and dialogue choices. |
-| {kind=opposed} | variant |  | An opposed check (toolbox rows 5 and G5, docs/system/mechanics.md): passes when the actor's level of skill, or value of attribute, at admission is at least the target detail's rating, or, when npc names an NPC of this cartridge (attribute only, toolbox row G3), that NPC's value of the attribute; draws no RNG. A skill with growth gains one use per perform. Dialogue choice: A dialogue choice's check (toolbox row 14, docs/system/mechanics.md dialogue skill checks; check@1): an opposed check as a scripted action's (action.schema.json ScriptedAction check, kind opposed) made when the choice is chosen, drawing no RNG: it passes when the actor's level of skill, or value of attribute, is at least rating, or, when npc names an NPC instance of this cartridge that declares the attribute, that NPC's value of it; exactly one of rating and npc (else SCHEMA_VIOLATION invalid_value at the check). key names it in its check_passed or check_failed event (a DefinitionRef of kind check, whose subject is the speaker), shared with no scripted action's or other choice's check (DUPLICATE_DEFINITION). On a pass the choice applies as unchecked; on a failure the actor reads failure instead, nothing else of the choice applies and the conversation closes. A skill with growth gains one use per check, passed or failed. |
+| {kind=opposed} | variant |  | A test of the player's skill or attribute against a number (rating) or against an NPC's attribute. It never rolls dice: it passes when the player's value is at least the other. |
 | {kind=opposed}.attribute | [DefinitionRef](source-kinds.gen.md#definitionref) | one of a group | The attribute compared; give this or skill, not both. |
 | {kind=opposed}.failure | [TextKey](source-kinds.gen.md#textkey) |  | The failure branch; a dialogue choice needs it, a scripted action refuses it. |
 | {kind=opposed}.key | [Key](source-kinds.gen.md#key) | yes | This check's key, unique across scripted actions and dialogue choices. |
 | {kind=opposed}.npc | [DefinitionRef](source-kinds.gen.md#definitionref) |  | With attribute, compares against this NPC's value of the attribute instead of a rating. |
 | {kind=opposed}.rating | integer |  | The target detail's rating; a scripted action refuses it. |
 | {kind=opposed}.skill | [DefinitionRef](source-kinds.gen.md#definitionref) | one of a group | The skill whose level is compared; give this or attribute, not both. |
-| {kind=track} | variant |  | A track check (toolbox row W13, docs/system/mechanics.md Tracks and trails): passes when the trail of population plan plan (its key; the plan declares trail) in the actor's room is fresh (world.trails.fresh_for); draws no RNG; on success the outcome's lines are followed by world.trails.leads[<exit>]. |
+| {kind=track} | variant |  | A track check: passes when the trail of population plan plan (its key; the plan declares trail) in the actor's room is fresh (world.trails.fresh_for); draws no RNG; on success the outcome's lines are followed by world.trails.leads[<exit>]. |
 | {kind=track}.key | [Key](source-kinds.gen.md#key) | yes | This check's key, unique across scripted actions and dialogue choices. |
 | {kind=track}.plan | [Key](source-kinds.gen.md#key) | yes | Key of the population plan whose trail is looked for; passes when that trail is fresh in the actor's room. |
 
 ### ClientFeature
 
-A presentation/input capability of the installed Loka app (05 §3 client_features), lowercase snake_case, at most 64 characters.
+A presentation/input capability of the installed Loka app, lowercase snake_case, at most 64 characters.
 
 Type: string.
 
@@ -881,42 +881,42 @@ Cartridge-owned attack profile, round interval, position multipliers and combat 
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| allies | list of [DefinitionRef](source-kinds.gen.md#definitionref) |  | Authored NPCs that fight beside the player (docs/system/mechanics.md, toolbox row 6b, narration ally_hit and ally_miss): the first listed one living in the encounter room strikes the player's target each round, is never an attack target, and its kill credits the player. |
-| conditions | list of object |  | Condition lines (docs/system/mechanics.md, Diku rounds), highest at_percent first: after each round, the first row the player's living foe's hp reaches is told, binding {target}. |
+| allies | list of [DefinitionRef](source-kinds.gen.md#definitionref) |  | Authored NPCs that fight beside the player: the first listed one living in the encounter room strikes the player's target each round, is never an attack target, and its kill credits the player. |
+| conditions | list of object |  | Condition lines, highest at_percent first: after each round, the first row the player's living foe's hp reaches is told, binding {target}. |
 | conditions[].at_percent | integer | yes | The percent of the foe's hp range it must reach. |
 | conditions[].text | [TextKey](source-kinds.gen.md#textkey) | yes | The line told, binding {target}. |
 | dodge | object |  | Percent chance to dodge an enemy attack that would otherwise hit; absent means no dodge. |
 | dodge.chance | integer | yes | Percent chance of dodging. |
 | dodge.skill | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The skill that must be usable for a dodge. |
 | flee_multiplier | integer | yes | Multiplies the move cost of a body that is engaged. |
-| initiative | `true` |  | Opts into Diku rounds (docs/system/mechanics.md, Diku rounds): each round draws initiative for which side strikes first, Attack resolves round 1 at once, and the combat narration binds {attacker} and {target}. |
+| initiative | `true` |  | Opts into Diku rounds: each round draws initiative for which side strikes first, Attack resolves round 1 at once, and the combat narration binds {attacker} and {target}. |
 | interval | integer | yes | Clock units between combat rounds. |
 | narration | object | yes | Text keys told in combat rounds. |
 | narration.ally_hit | [TextKey](source-kinds.gen.md#textkey) |  | Told when an ally's strike hits. |
 | narration.ally_miss | [TextKey](source-kinds.gen.md#textkey) |  | Told when an ally's strike misses. |
-| narration.ally_volley | [TextKey](source-kinds.gen.md#textkey) |  | Swings (loka-kgd.200): the summary line before an ally's strike line when its profile makes more than one swing and some but not all hit, and more than one; binds count and hits. No key, no line. |
-| narration.ally_volley_all | [TextKey](source-kinds.gen.md#textkey) |  | Swings (loka-kgd.200): the summary line before an ally's strike line when its profile makes more than one swing and every one hit; binds count and hits. No key, no line. |
-| narration.ally_volley_one | [TextKey](source-kinds.gen.md#textkey) |  | Swings (loka-kgd.200): the summary line before an ally's strike line when its profile makes more than one swing and exactly one hit; binds count and hits. No key, no line. |
+| narration.ally_volley | [TextKey](source-kinds.gen.md#textkey) |  | Swings: the summary line before an ally's strike line when its profile makes more than one swing and some but not all hit, and more than one; binds count and hits. No key, no line. |
+| narration.ally_volley_all | [TextKey](source-kinds.gen.md#textkey) |  | Swings: the summary line before an ally's strike line when its profile makes more than one swing and every one hit; binds count and hits. No key, no line. |
+| narration.ally_volley_one | [TextKey](source-kinds.gen.md#textkey) |  | Swings: the summary line before an ally's strike line when its profile makes more than one swing and exactly one hit; binds count and hits. No key, no line. |
 | narration.block | [TextKey](source-kinds.gen.md#textkey) |  | Told when a shield blocks. |
 | narration.dodge | [TextKey](source-kinds.gen.md#textkey) |  | Told when the player dodges. |
 | narration.npc_died | [TextKey](source-kinds.gen.md#textkey) | yes | Told when an NPC falls in a combat round. |
 | narration.npc_hit | [TextKey](source-kinds.gen.md#textkey) | yes | Told when an NPC's attack hits the player. |
 | narration.npc_miss | [TextKey](source-kinds.gen.md#textkey) | yes | Told when an NPC's attack misses the player. |
-| narration.npc_volley | [TextKey](source-kinds.gen.md#textkey) |  | Swings (loka-kgd.200): the summary line before an NPC's strike line when its profile makes more than one swing and some but not all hit, and more than one; binds count and hits. No key, no line. |
-| narration.npc_volley_all | [TextKey](source-kinds.gen.md#textkey) |  | Swings (loka-kgd.200): the summary line before an NPC's strike line when its profile makes more than one swing and every one hit; binds count and hits. No key, no line. |
-| narration.npc_volley_one | [TextKey](source-kinds.gen.md#textkey) |  | Swings (loka-kgd.200): the summary line before an NPC's strike line when its profile makes more than one swing and exactly one hit; binds count and hits. No key, no line. |
+| narration.npc_volley | [TextKey](source-kinds.gen.md#textkey) |  | Swings: the summary line before an NPC's strike line when its profile makes more than one swing and some but not all hit, and more than one; binds count and hits. No key, no line. |
+| narration.npc_volley_all | [TextKey](source-kinds.gen.md#textkey) |  | Swings: the summary line before an NPC's strike line when its profile makes more than one swing and every one hit; binds count and hits. No key, no line. |
+| narration.npc_volley_one | [TextKey](source-kinds.gen.md#textkey) |  | Swings: the summary line before an NPC's strike line when its profile makes more than one swing and exactly one hit; binds count and hits. No key, no line. |
 | narration.player_died | [TextKey](source-kinds.gen.md#textkey) | yes | Told when the player falls in a combat round; also the default fall line for tick deaths. |
 | narration.player_hit | [TextKey](source-kinds.gen.md#textkey) | yes | Told when the player's attack hits. |
 | narration.player_miss | [TextKey](source-kinds.gen.md#textkey) | yes | Told when the player's attack misses. |
-| narration.player_volley | [TextKey](source-kinds.gen.md#textkey) |  | Swings (loka-kgd.200): the summary line before the player's strike line when its profile makes more than one swing and some but not all hit, and more than one; binds count and hits. No key, no line. |
-| narration.player_volley_all | [TextKey](source-kinds.gen.md#textkey) |  | Swings (loka-kgd.200): the summary line before the player's strike line when its profile makes more than one swing and every one hit; binds count and hits. No key, no line. |
-| narration.player_volley_one | [TextKey](source-kinds.gen.md#textkey) |  | Swings (loka-kgd.200): the summary line before the player's strike line when its profile makes more than one swing and exactly one hit; binds count and hits. No key, no line. |
+| narration.player_volley | [TextKey](source-kinds.gen.md#textkey) |  | Swings: the summary line before the player's strike line when its profile makes more than one swing and some but not all hit, and more than one; binds count and hits. No key, no line. |
+| narration.player_volley_all | [TextKey](source-kinds.gen.md#textkey) |  | Swings: the summary line before the player's strike line when its profile makes more than one swing and every one hit; binds count and hits. No key, no line. |
+| narration.player_volley_one | [TextKey](source-kinds.gen.md#textkey) |  | Swings: the summary line before the player's strike line when its profile makes more than one swing and exactly one hit; binds count and hits. No key, no line. |
 | narration.shot_hit | [TextKey](source-kinds.gen.md#textkey) |  | Told when a ranged first strike hits. Required when any item declares weapon.ranged. |
 | narration.shot_miss | [TextKey](source-kinds.gen.md#textkey) |  | Told when a ranged first strike misses. Required when any item declares weapon.ranged. |
 | player_attack | [AttackProfile](source-kinds.gen.md#attackprofile) | yes | The player's unarmed attack: chance to hit and damage range. |
 | sleep_multiplier | integer | yes | Multiplies an NPC's damage against a sleeping player. |
-| target_choice | `true` |  | Opts into target choice (docs/system/mechanics.md, toolbox row 6a): during a roster encounter the player's attack on another present active member makes it the primary the player strikes. |
-| tiers | list of object |  | Damage tiers (docs/system/mechanics.md, Diku rounds), highest at_percent first: a hit whose hp loss reaches at_percent of the target's hp maximum is told with the first such tier's key for that perspective instead of the plain hit key. |
+| target_choice | `true` |  | Opts into target choice: during a roster encounter the player's attack on another present active member makes it the primary the player strikes. |
+| tiers | list of object |  | Damage tiers, highest at_percent first: a hit whose hp loss reaches at_percent of the target's hp maximum is told with the first such tier's key for that perspective instead of the plain hit key. |
 | tiers[].ally_hit | [TextKey](source-kinds.gen.md#textkey) |  | Told for the ally's hit at this tier. |
 | tiers[].at_percent | integer | yes | The percent of the target's hp maximum a hit's loss must reach. |
 | tiers[].npc_hit | [TextKey](source-kinds.gen.md#textkey) |  | Told for the foe's hit at this tier. |
@@ -925,7 +925,7 @@ Cartridge-owned attack profile, round interval, position multipliers and combat 
 
 ### CompatibilityRequirements
 
-requires (05 §3): a kernel_api range, exact rule_ir and content_schema versions (published cartridges pin them exactly), exact capability versions and required client features. protocol_version is Realm-only and not here (05 §3 'Version vocabulary').
+requires: a kernel_api range, exact rule_ir and content_schema versions (published cartridges pin them exactly), exact capability versions and required client features. protocol_version is Realm-only and not here.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -947,29 +947,29 @@ One row of a condition band table: the band key holds when p, the percentage of 
 
 ### Connection
 
-One directed exit to another room of the same cartridge (21 §5 Connection; 05 §17). Its identity is its room and direction. barrier, optional (barrier@1), names the Barrier whose one shared state the exit passes through (21 §5 Barrier; 05 §25 coherent connections): move through it is refused while it is closed (exit_closed) or locked (exit_locked); an exit without one means what it always meant. A reciprocal exit is authored in the destination room (00a §2); faces pair by opposite direction: an exit's reciprocal face is its destination's exit in the opposite compass direction when that exit leads back to its room, and an exit with a barrier needs a reciprocal face naming the same barrier (BARRIER_MISMATCH at each face otherwise). One-way and bent barrier passages (no reciprocal face, or an opposite-direction exit that leads elsewhere) are rejected for now and may be allowed later; an exit without a barrier is BARRIER_MISMATCH only when its reciprocal face names one.
+An exit to another room of this game. Add a door with barrier; the room on the other side needs the matching exit back with the same door.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
 | barrier | [DefinitionRef](source-kinds.gen.md#definitionref) |  | The barrier the exit passes through. |
-| climb | object |  | Toolbox row 30 (docs/system/mechanics.md rope and climb): crossing this directed exit is a climb. A mover whose body holds item (directly or in a container) climbs down as on any exit; one without it falls: the move still happens and also costs damage HP, never below 1 (a fall never kills), narrated by fell. The cartridge declares an hp pool (RESOURCE_SPEC_INVALID otherwise). NPCs never take a climb face. |
+| climb | object |  | This exit is a climb: a player holding the named item climbs safely; without it they fall, still arrive, and lose some health (never below 1). |
 | climb.damage | integer | yes | HP a fall costs; a fall never takes HP below 1. |
 | climb.fell | [TextKey](source-kinds.gen.md#textkey) | yes | Told when the mover falls. |
 | climb.item | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The item a mover must hold to climb rather than fall. |
 | corpse_ingress | object |  | Close this directed exit while the named global fact has the specified value, except for the living owner of a nonempty player corpse in its destination. The exception is rechecked at movement admission. |
 | corpse_ingress.equals | [FactValue](source-kinds.gen.md#factvalue) | yes | The value at which the exit is closed. |
 | corpse_ingress.fact | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The global fact that closes the exit. |
-| hidden_until | object |  | Toolbox row 11 (docs/system/mechanics.md hidden passages): for the commanded character this directed exit does not exist (not listed, not seen through, absent from the map, a move through it not_found) until the named fact has the specified value. No barrier on a hidden face (BARRIER_MISMATCH). |
+| hidden_until | object |  | This exit is hidden from the player until the named fact has the given value. |
 | hidden_until.equals | [FactValue](source-kinds.gen.md#factvalue) | yes | The value that reveals the exit; of the fact's type. |
 | hidden_until.fact | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | A fact of this cartridge, normally a player bool; the exit stays hidden until it has the value. |
 | knock | [KnockResponse](source-kinds.gen.md#knockresponse) |  | The face's answer to a knock. |
-| locks | object |  | Toolbox row G7 (mechanics.md Access locks): traverse, the policy the mover must hold to cross this exit, read by movementPlan after the barrier; failing it refuses permission_denied. Read with no target. |
+| locks | object |  | Traverse, the policy the mover must hold to cross this exit, read by movementPlan after the barrier; failing it refuses permission_denied. Read with no target. |
 | locks.traverse | [Policy](vocabulary.gen.md#policy-leaves) |  | A condition the player must meet to go through this exit. |
 | to | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The room this exit leads to. |
 
 ### Cue
 
-A sense cue (toolbox row G6): what a listener smells, hears or feels from its source. sense is sound, smell or heat; text the authored line (the sense in its words, trap 12); range the rooms it carries through exits, 0 (the source's room only) to 2; when, optional, a condition read for the listener (the player for the view, a reaction's actor for an NPC). Owned by sense_cue@1. Its source is the room, detail, item or NPC, lit fuel source, active status or scripted action outcome that declares it.
+A sense cue: what a listener smells, hears or feels from its source. sense is sound, smell or heat; text the authored line (the sense in its words, trap 12); range the rooms it carries through exits, 0 (the source's room only) to 2; when, optional, a condition read for the listener (the player for the view, a reaction's actor for an NPC). Owned by sense_cue@1. Its source is the room, detail, item or NPC, lit fuel source, active status or scripted action outcome that declares it.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -980,13 +980,13 @@ A sense cue (toolbox row G6): what a listener smells, hears or feels from its so
 
 ### Cues
 
-A source's sense cues (Cue; toolbox row G6), in authored order.
+A source's sense cues, in authored order.
 
 Type: list of [Cue](source-kinds.gen.md#cue).
 
 ### DamageKind
 
-A damage kind (toolbox row G2): a closed engine vocabulary shared by attack profiles and NPC resistances. A row that needs a new kind adds it here; a kind never shares a name with a Tag.
+A damage kind: a closed engine vocabulary shared by attack profiles and NPC resistances. A row that needs a new kind adds it here; a kind never shares a name with a Tag.
 
 Type: `cold` or `fire` or `physical` or `poison`.
 
@@ -1002,16 +1002,16 @@ Finite authored death credit linking one local attackable NPC, its authored room
 
 ### DeathSettings
 
-Fixed corpse templates, same-body return room and pool restoration; requires death@1 (docs/system/cartridge.md).
+Fixed corpse templates, same-body return room and pool restoration; requires death@1.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| narration | object |  | A player's death lines outside a combat round (loka-3w3q). player_died: the fall line a bleed or status tick death tells after its tick line (default world.combat.narration.player_died; a drowning tells world.water.drowned instead). woke: told once after every player death, combat included, after the penalty line. |
+| narration | object |  | A player's death lines outside a combat round. player_died: the fall line a bleed or status tick death tells after its tick line (default world.combat.narration.player_died; a drowning tells world.water.drowned instead). woke: told once after every player death, combat included, after the penalty line. |
 | narration.player_died | [TextKey](source-kinds.gen.md#textkey) |  | The fall line a bleed or status tick death tells after its tick line. |
 | narration.woke | [TextKey](source-kinds.gen.md#textkey) |  | Told once after every player death, after the penalty line. |
 | npc_corpse | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | Corpse template for an NPC, unless its population names its own. |
 | npc_corpse_decay | integer |  | Logical units from an NPC's death until its corpse decays: direct items spill to the room, the corpse leaves play. Omitted: never. |
-| penalty | object |  | What a player's death costs (toolbox row 47). experience: the body loses floor(experience * percent / 100), never below the threshold of its current level, and narration is told once; it needs world.levelling. items: corpse (the default) moves what the body held into the corpse; kept leaves it on the body. |
+| penalty | object |  | What dying costs the player: some experience (a percent, never below the current level) and whether held items stay on the corpse (the default) or are kept. |
 | penalty.experience | object |  | Experience lost on death; needs world.levelling. |
 | penalty.experience.narration | [TextKey](source-kinds.gen.md#textkey) | yes | Told once when experience is lost. |
 | penalty.experience.percent | integer | yes | The body loses floor(experience * percent / 100), never below its current level's threshold. |
@@ -1037,7 +1037,7 @@ Type: [Key](source-kinds.gen.md#key) or object.
 
 ### DerivedStat
 
-One stat's attribute bonus (docs/system/mechanics.md derived stats): floor(sum of per_point * (value - pivot) over terms / divisor), rounded toward minus infinity; value is the player's attribute as attribute@1 reads it. Every number is the cartridge's; divisor defaults to 1.
+One stat's attribute bonus: floor(sum of per_point * (value - pivot) over terms / divisor), rounded toward minus infinity; value is the player's attribute as attribute@1 reads it. Every number is the cartridge's; divisor defaults to 1.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -1049,7 +1049,7 @@ One stat's attribute bonus (docs/system/mechanics.md derived stats): floor(sum o
 
 ### DescriptionVariant
 
-Prose selected by a condition (21 §6 DescriptionVariant; 00a §12): description replaces the base description key when the condition holds for the actor over committed state (policy.schema.json Policy; the evaluator is pure, 06 §21). A room's or detail's variants are tried in list order and the first whose condition holds is shown; when none holds, the base description is. Variants are derived, never a mutated description (21 §6). Owned by description_variant (a cartridge with one requires it); its condition's ops by their owners.
+Prose selected by a condition: description replaces the base description key when the condition holds for the actor over committed state. A room's or detail's variants are tried in list order and the first whose condition holds is shown; when none holds, the base description is. Variants are derived, never a mutated description. Owned by description_variant (a cartridge with one requires it); its condition's ops by their owners.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -1058,7 +1058,7 @@ Prose selected by a condition (21 §6 DescriptionVariant; 00a §12): description
 
 ### DialogueRole
 
-A dialogue role's participant, as action.schema.json NarrationParticipant's npc or item branch (the actor is implicit): an NPC or item of this cartridge (else UNRESOLVED_REFERENCE).
+Who plays this role in the conversation: an NPC or item of this game.
 
 Type: object.
 
@@ -1077,13 +1077,13 @@ Type: `following` or `separated` or `completed`.
 
 ### ExecutionProfile
 
-A hosting profile a cartridge supports or a deployment uses: the canonical execution-profile vocabulary (07 §3; 09 §20 reuses it).
+A hosting profile a cartridge supports or a deployment uses: the canonical execution-profile vocabulary.
 
 Type: `offline_private` or `online_private` or `party` or `shared_area`.
 
 ### FactType
 
-A fact's value type and default (03 §7). The types chapter one declares (00a §6): bool, enum over Keys, and int with optional inclusive bounds. The value itself is a FactValue (delta.schema.json).
+What kind of value the fact holds and where it starts: true or false (bool), one of a list of words (enum), or a whole number with optional bounds (int).
 
 Type: object.
 
@@ -1101,7 +1101,7 @@ Type: object.
 
 ### FactValue
 
-The value of a fact, in fact.assign, fact_compare and fact_changed: a Key, a safe integer or a boolean, the value types FactSpec declares (fact.schema.json; 03 §7). Which one a fact takes is its FactType, which the compiler checks.
+A fact's value: a word, a whole number, or true or false, matching the fact's type.
 
 Type: [Key](source-kinds.gen.md#key) or integer or boolean.
 
@@ -1115,7 +1115,7 @@ Type: object.
 |---|---|---|---|
 | {kind=source} | variant |  | A lightable item that burns fuel while lit, and is refilled from a supply item. |
 | {kind=source}.capacity | integer | yes | The most fuel the source holds, in its unit. |
-| {kind=source}.cues | [Cues](source-kinds.gen.md#cues) |  | Cues active only while this source is lit (toolbox row G6). |
+| {kind=source}.cues | [Cues](source-kinds.gen.md#cues) |  | Cues active only while this source is lit. |
 | {kind=source}.doused | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of the line told when it is put out. |
 | {kind=source}.ignited | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of the line told when it is lit. |
 | {kind=source}.initial | integer | yes | Fuel it holds at the start; at most capacity. |
@@ -1130,7 +1130,7 @@ Type: object.
 
 ### InspectableDetail
 
-A lightweight keyed detail of a room (21 §6 InspectableDetail): the aliases a player can name it by, the first of which also names it when a lookup is ambiguous, and its description text key (05 §18). Not a RuntimeEntity: a fresh world gives it a target id only (numeric profile, Initial world ids). Two details of one room may share an alias (an ambiguous lookup lists both, 04 §18), but the first alias must be the detail's own and in the form a lookup produces (no empty word, not starting with at, the, a or an), or the player could not pick it by name (UNREACHABLE_DETAIL). Its variants (DescriptionVariant) select other prose by condition. Owned by inspectable_detail (a cartridge with details requires it). R5 freezes this v1 shape (14 §R5): perception, reveal facts and contextual actions join as optional fields.
+Something in a room the player can look at, such as a well or a painting: the words that name it (the first is its own name and must not start with a, an, the or at), its description, and other descriptions picked by condition.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -1150,7 +1150,7 @@ A lightweight keyed detail of a room (21 §6 InspectableDetail): the aliases a p
 | harvest.label | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of the harvest action's button. |
 | harvest.narration | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of the line told after an ordinary harvest (one item). |
 | harvest.title | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of the title of the harvest page. |
-| harvest.tool | object |  | Toolbox row 19: Harvest needs a held item whose definition declares tag. |
+| harvest.tool | object |  | Harvest needs a held item whose definition declares tag. |
 | harvest.tool.tag | [Tag](source-kinds.gen.md#tag) | yes | The tag a held item must carry for the harvest to be allowed. |
 | liquid_source | [DefinitionRef](source-kinds.gen.md#definitionref) |  | The liquid a held vessel can be filled with at this detail. |
 | notice_board | object |  | Makes the detail a board that lists other readable details of the room. |
@@ -1161,12 +1161,12 @@ A lightweight keyed detail of a room (21 §6 InspectableDetail): the aliases a p
 | perception | object |  | Perception traits of the detail. |
 | perception.self_luminous | `true` | yes | Must be true: the detail gives light, so it is seen in a dark room. |
 | perception.title | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of the title of the detail's page. |
-| rating | integer |  | Toolbox row G5 (docs/system/mechanics.md opposed checks): the value an opposed scripted action check against this detail must reach. |
-| readable | object |  | Optional readable@1 prose and its place-action label (docs/system/mechanics.md readable@1); both keys resolve in the text catalog. |
+| rating | integer |  | The value an opposed scripted action check against this detail must reach. |
+| readable | object |  | Optional readable@1 prose and its place-action label; both keys resolve in the text catalog. |
 | readable.label | [TextKey](source-kinds.gen.md#textkey) | yes | The read action's label. |
 | readable.text | [TextKey](source-kinds.gen.md#textkey) | yes | The text read. |
 | readable.title | [TextKey](source-kinds.gen.md#textkey) |  | Text key of the title of the readable's page; without it the label is shown. |
-| title | [TextKey](source-kinds.gen.md#textkey) |  | Optional page title the Book shows for this detail (loka-x6t.120; docs/system/mechanics.md inspectable_detail@1): it resolves in the text catalog (UNRESOLVED_REFERENCE); without it a page falls back to its kind's title or the description. |
+| title | [TextKey](source-kinds.gen.md#textkey) |  | The title shown on this detail's page in the Book (a text key). Without it the page uses a general title. |
 | transport | object |  | Makes the detail a stop on a transport route. |
 | transport.route | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The transport route this stop belongs to. |
 | transport.title | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of the title of the stop's page. |
@@ -1174,7 +1174,7 @@ A lightweight keyed detail of a room (21 §6 InspectableDetail): the aliases a p
 
 ### ItemAffect
 
-One attribute modifier an item grants its wearer while worn (docs/system/mechanics.md item slots and affects, toolbox row 3), or an active status grants its holder (StatusDefinition.modifies, row 2c; the shape of an ancestry's attribute modifier): attribute, an attribute of this cartridge; modifier, the signed amount added to the value attribute@1 reads. The number is the cartridge's.
+Adds an amount to an attribute while the item is worn or the status lasts, such as strength +1. Use a negative amount to lower it.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -1194,20 +1194,20 @@ A directly held item opted into exact bleed treatment.
 
 ### ItemEdible
 
-D4 held-food metadata; a complete original item grants its effect (capped recovery, cures, applies) when Consume commits.
+Held-food metadata; a complete original item grants its effect (capped recovery, cures, applies) when Consume commits.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
 | amount | integer |  | Positive integer; the canonical numeric profile supplies the safe-integer upper limit. |
-| applies | list of [AppliedStatus](source-kinds.gen.md#appliedstatus) |  | Toolbox row hs-5: statuses Consume applies to the eater's body after the recovery and any cures, through the shared status apply (status_applied on a first application, immune holds, a refresh is silent); none may modify an hp-maximum attribute. |
-| cures | list of [DefinitionRef](source-kinds.gen.md#definitionref) |  | Statuses (toolbox row 1) this food ends when eaten; eating is allowed at the pool maximum while one of them is active. |
+| applies | list of [AppliedStatus](source-kinds.gen.md#appliedstatus) |  | Statuses Consume applies to the eater's body after the recovery and any cures, through the shared status apply (status_applied on a first application, immune holds, a refresh is silent); none may modify an hp-maximum attribute. |
+| cures | list of [DefinitionRef](source-kinds.gen.md#definitionref) |  | Statuses this food ends when eaten; the player may eat it while one is active even when full. |
 | label | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of the eat action's button. |
 | narration | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of the line told when it is eaten. |
-| resource | [DefinitionRef](source-kinds.gen.md#definitionref) |  | The pool eating restores (for example mv); with amount, or neither (loka-kgd.209). |
+| resource | [DefinitionRef](source-kinds.gen.md#definitionref) |  | The pool eating restores (for example mv); with amount, or neither. |
 
 ### ItemLocation
 
-Where an item starts (00a §12 location): in a room, held by an NPC, or inside another item of the same cartridge, named by the field its kind selects. The containers an artifact's items start in form no cycle (CONTAINMENT_CYCLE) and hold at most their capacity (CAPACITY_EXCEEDED).
+Where the item is when the game starts: in a room, held by an NPC, or inside another item.
 
 Type: object.
 
@@ -1223,7 +1223,7 @@ Type: object.
 
 ### ItemReadable
 
-API1.24: one explicit held-item Read, with optional declared Boolean topic grant.
+One explicit held-item Read, with optional declared Boolean topic grant.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -1233,7 +1233,7 @@ API1.24: one explicit held-item Read, with optional declared Boolean topic grant
 
 ### KernelApiRange
 
-The kernel_api compatibility range a cartridge declares (05 §3 'Compatibility versions'): at_least inclusive, below exclusive, so '>=1.3 <2.0' is at_least 1.3, below 2.0.
+The kernel_api compatibility range a cartridge declares: at_least inclusive, below exclusive, so '>=1.3 <2.0' is at_least 1.3, below 2.0.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -1242,13 +1242,13 @@ The kernel_api compatibility range a cartridge declares (05 §3 'Compatibility v
 
 ### KernelApiVersion
 
-A kernel_api version, MAJOR.MINOR without leading zeros (05 §3).
+A kernel_api version, MAJOR.MINOR without leading zeros.
 
 Type: string.
 
 ### Key
 
-A stable semantic key: lowercase snake_case of at most 64 characters, the DefinitionRef segment rule (03 §2). Used for action keys, directions, choices, outcomes and key-valued facts.
+A name the game uses inside: lowercase letters, digits and underscores, at most 64 characters, such as north or old_well.
 
 Type: string.
 
@@ -1278,13 +1278,13 @@ Exact vessel contents: null iff zero, positive declared kind bounded by immutabl
 
 ### LogicalTime
 
-Explicit logical time (01 A6; 04 §4). Units are fixed by the authored calendar (calendar@1): time 0 is midnight of day 1, and the hour of day is floor(t / units_per_hour) mod hours_per_day (policy.schema.json time_window).
+A moment in game time, counted in the calendar's units from midnight of day 1.
 
 Type: integer.
 
 ### Loudness
 
-How a word was spoken (speech@1; toolbox row G9): whisper reaches the addressee, say the speaker's room, shout the rooms one exit away too.
+How a word was spoken: whisper reaches the addressee, say the speaker's room, shout the rooms one exit away too.
 
 Type: `whisper` or `say` or `shout`.
 
@@ -1301,7 +1301,7 @@ Static integer drawing coordinates for one room; exits remain the sole connectio
 
 ### NameVariants
 
-Toolbox row W6: variants of an item's or NPC's short name (TextVariants), each optionally with its own name words (NameWords), which a presenter uses while that variant names the entity; a variant without words has none, so a presenter shows its description alone.
+Other names for this item or NPC, each used while its condition holds; the first that matches wins. Each can have its own name words.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -1311,7 +1311,7 @@ Toolbox row W6: variants of an item's or NPC's short name (TextVariants), each o
 
 ### NameWords
 
-Name words (loka-6qi): bare, the text key of the name with no article ("lantern"); optionally article, the article a presenter puts before bare (a, an or the); optionally plural, the text key of the plural ("lanterns"). short stays the phrase narration binds; words exist for presenters that compose a sentence from several names. Each key is in the text catalog.
+Name words: bare, the text key of the name with no article ("lantern"); optionally article, the article a presenter puts before bare (a, an or the); optionally plural, the text key of the plural ("lanterns"). short stays the phrase narration binds; words exist for presenters that compose a sentence from several names. Each key is in the text catalog.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -1321,7 +1321,7 @@ Name words (loka-6qi): bare, the text key of the name with no article ("lantern"
 
 ### NarrationParticipant
 
-An entity a scripted action's narration names, by the field its role selects (like entity.schema.json ItemLocation): an NPC or item of this cartridge, or the command's actor (its body). The compiler reports an npc or item that names no definition of that kind in this cartridge as UNRESOLVED_REFERENCE.
+Someone or something the narration names: an NPC or item of this game, or the player.
 
 Type: object.
 
@@ -1335,12 +1335,12 @@ Type: object.
 
 ### NpcAmbientSet
 
-An NPC's ambient set (emote@1): as AmbientSet, with exactly one of lines or emotes (the compiler refuses both or neither); an emote pick is told by emote.performed with the NPC as actor.
+Things an NPC says or does now and then: give either lines or emotes, not both.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
 | chance | integer |  | Percent chance it fires when due, 1 to 100; 100 when absent. |
-| emotes | list of [DefinitionRef](source-kinds.gen.md#definitionref) |  | The emotes, 1 to 8 EmoteDefinitions. |
+| emotes | list of [DefinitionRef](source-kinds.gen.md#definitionref) |  | The emotes it picks from, 1 to 8. |
 | every | integer | yes | Logical seconds between chances; a set is due when the clock crosses a multiple of it. |
 | lines | list of [TextKey](source-kinds.gen.md#textkey) |  | The lines, 1 to 8 text keys. |
 | when | [Policy](vocabulary.gen.md#policy-leaves) |  | A condition read with the entity as target (a room has none); the first set whose when holds is the active one. |
@@ -1353,7 +1353,7 @@ Type: list of [NpcAmbientSet](source-kinds.gen.md#npcambientset).
 
 ### NpcHp
 
-Explicit entity-specific HP bounds/start/gain. Requires minimum <= start <= maximum (RESOURCE_SPEC_INVALID) and no minimum or start below 0 (BODY_BELOW_ZERO). Required legacy-shaped birth/save row; no position recovery.
+This NPC's health: its lowest, highest and starting value and how much it regains. Lowest is at most starting, which is at most highest, and none is below 0.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -1364,7 +1364,7 @@ Explicit entity-specific HP bounds/start/gain. Requires minimum <= start <= maxi
 
 ### QuestJournal
 
-Lifecycle journal texts, selected by quest@1 in GameView (06 §2, §41; 04 §15, c1-journal amendment). All five stage texts are required; outcomes optionally overrides terminal text by outcome key. Outcome keys need not name a dialogue choice. Reveal remains LATER. API1.9 active_variants are checked in order for active quests; the first holding policy supplies text, otherwise ordinary active/objectives_met selection applies. API1.46 hints (toolbox row W23): per stage (active, objectives_met), each after a whole number of real minutes since the stage began (the instance's started_at), strictly ascending, and at least one stage (an empty hints object is a compiler check: the subset has no minProperties); the Journal shows the last one whose time has passed.
+The journal text for each stage of the quest; all five stages are required. outcomes can replace the ending text per outcome, active_variants can replace the active text while a condition holds (the first that holds wins), and hints add text after a number of real minutes in a stage.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -1387,7 +1387,7 @@ Lifecycle journal texts, selected by quest@1 in GameView (06 §2, §41; 04 §15,
 
 ### QuestObjective
 
-A quest's one objective and its evidence policy (06 §3 Objective credit/causation policy, §43; 04 §5.2). current_state: met while policy holds for the actor, evaluated on the state at hand and never stored (the R6P lantern: current possession, so a lantern taken before acceptance counts and one given away no longer does). post_activation_event: met by an item_acquired event whose item is the item `item_acquired` names and whose holder is the actor's body, at a causal position after the instance's activation; the instance then moves to objectives_complete in the same decision, and an acquisition before activation never counts (the Tiny fixture's strict credit; its automatic resolution is not part of this vocabulary yet).
+A quest's one objective and its evidence policy. current_state: met while policy holds for the actor, evaluated on the state at hand and never stored (the R6P lantern: current possession, so a lantern taken before acceptance counts and one given away no longer does). post_activation_event: met by an item_acquired event whose item is the item `item_acquired` names and whose holder is the actor's body, at a causal position after the instance's activation; the instance then moves to objectives_complete in the same decision, and an acquisition before activation never counts (the Tiny fixture's strict credit; its automatic resolution is not part of this vocabulary yet).
 
 Type: object.
 
@@ -1402,25 +1402,25 @@ Type: object.
 
 ### QuestState
 
-Persisted QuestInstance lifecycle state (06 §1). Availability is derived, not a state.
+Where a quest stands for the player: active, completed, failed and so on.
 
 Type: `active` or `objectives_complete` or `resolved` or `failed` or `abandoned`.
 
 ### ReleaseVersion
 
-A release version (05 §3 version, §12): MAJOR.MINOR.PATCH without leading zeros, pre-release or build metadata, at most 64 characters.
+A release version: MAJOR.MINOR.PATCH without leading zeros, pre-release or build metadata, at most 64 characters.
 
 Type: string.
 
 ### ResistancePercent
 
-A resistance percent (toolbox row G2): negative is a weakness.
+A resistance percent: negative is a weakness.
 
 Type: integer.
 
 ### Resistances
 
-Toolbox row G2 (docs/system/mechanics.md damage model): an NPC's percent resistance per damage kind (DamageKind) and per material tag (Tag) of the weapon whose own attack strikes (an unarmed or NPC attack has none); negative is a weakness. An attack sums the entries for its kind and each such tag, clamps the sum to -100..100 and scales its damage by (100 - sum) / 100, rounded down. Its members are exactly the DamageKind and Tag values.
+How much less damage the NPC takes, in percent, from each kind of damage and from weapons of each material tag; negative means a weakness.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -1460,7 +1460,7 @@ Type: integer.
 
 ### Revival
 
-loka-kgd.206: what a client shows a player between death and waking: the lines in order, over seconds of wall-clock time. Presentation only; the kernel restores the body at once and exposes this as GameView.revival.
+What the player sees between dying and waking: lines shown in order, over a number of real seconds. It changes nothing in the game.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -1469,7 +1469,7 @@ loka-kgd.206: what a client shows a player between death and waking: the lines i
 
 ### ScriptedTarget
 
-What a ScriptedAction acts on (06 §20 target; 21 §7 TargetSpec): one inspectable detail, by its room and its key in that room's details, offered only while the actor is in that room; or (toolbox row G4) a use: a tool the actor holds, used on another item on the floor of the actor's room or carried directly, both chosen by the invocation (perform item_id and target_id), the scripted action keyed by the tool's properties here and the target's through its policy (has_tag and status_active, subject target), never by item ids; or (toolbox row 29a) a spell named by its word, castable by an actor only while its learned fact reads true for them.
+What the action works on: a detail in a room (offered while the player is there), a tool used on another item, or a spell's word.
 
 Type: object.
 
@@ -1480,7 +1480,7 @@ Type: object.
 | {kind=detail}.room | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The room that holds the detail. |
 | {kind=use} | variant |  | The action uses a tool the actor holds on another item. |
 | {kind=use}.tool | [UseTool](source-kinds.gen.md#usetool) | yes | What the tool must be: an item with a given tag, or a vessel holding a given liquid. |
-| {kind=spell} | variant |  | Toolbox row 29a (word bar S2): a spell, cast only by the cast command typing its word (no other spell scripted action has it), never offered by key or performed; it acts on the caster's body. With aimed (loka-x6t.109) it is cast at one entity in those scopes of the caster's room or body (cast target_id; invalid_target otherwise, after the word's own invalid_state), its policy read with that target, offered on each admitted target's GameView entry and never in spell_words; an unaimed spell refuses a target_id. learned names a bool fact of this cartridge (FACT_TYPE_MISMATCH otherwise; a per_subject fact is FACT_SCOPE_UNSUPPORTED, loader only): while it reads false for the caster, a cast of the word is refused exactly as an unknown word and GameView spell_words omits it. |
+| {kind=spell} | variant |  | A spell, cast by typing its word. With aimed it is cast at someone or something nearby; learned names a true-or-false fact the player must have true to cast it. |
 | {kind=spell}.aimed | object |  | Makes it an aimed spell, cast at one target; without it the spell takes no target. |
 | {kind=spell}.aimed.scopes | list of `room_occupants` or `room_contents` or `inventory` | yes | Where the target is looked for: the caster's room occupants, room contents or inventory. |
 | {kind=spell}.learned | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | A bool fact; the word works for a caster only while it reads true for them. |
@@ -1488,12 +1488,12 @@ Type: object.
 
 ### Shop
 
-A finite NPC shop: conserved resource, exact authored item offers and committed purchase/sale narration keys (B3).
+A finite NPC shop: conserved resource, exact authored item offers and committed purchase/sale narration keys.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
 | bought | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of the purchase narration. |
-| buy_discount | object |  | A buy price of floor(buy * numerator / denominator), at least minimum, while its condition holds: exactly one of skill (the actor has the skill usable) or (toolbox row 15) friendly, the shop's NPC disposed friendly to the actor (its disposition). |
+| buy_discount | object |  | A discount on buying: the price is multiplied by numerator / denominator (rounded down, at least minimum) while the player has the skill or the shopkeeper is friendly. |
 | buy_discount.denominator | integer | yes | Divides the buy price; the price is floor(buy times numerator over denominator). |
 | buy_discount.friendly | `true` | one of a group | Must be true: the discount applies while the shop's NPC is friendly to the actor. Give this or skill. |
 | buy_discount.minimum | integer | yes | The discounted buy price is never below this. |
@@ -1505,33 +1505,33 @@ A finite NPC shop: conserved resource, exact authored item offers and committed 
 
 ### ShopOffer
 
-One exact authored shop item definition with its positive buy and sell prices; custody determines availability (B3).
+One exact authored shop item definition with its positive buy and sell prices; custody determines availability.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
 | buy | integer | yes | Its positive buy price. |
 | item | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The item definition offered. |
 | sell | integer | yes | Its positive sell price. |
-| stock | object |  | Toolbox row W11: sell from this identity set, items[0] the offer's item, at buy[n-1] while the shopkeeper directly holds n of it; buy has one entry per item and buy[0] equals the offer's buy. |
+| stock | object |  | Sell from this identity set, items[0] the offer's item, at buy[n-1] while the shopkeeper directly holds n of it; buy has one entry per item and buy[0] equals the offer's buy. |
 | stock.buy | list of integer | yes | Buy prices by count held: entry n is the price while the shopkeeper holds n of the items; one entry per item. |
 | stock.items | list of [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The interchangeable items sold as one offer; the first is the offer's item. |
-| stolen | `true` |  | Toolbox row 34: this shopkeeper is a fence; sell takes only an instance whose world.theft stolen fact is true, and a shop without it only one whose fact is false. Never on a stock offer. |
+| stolen | `true` |  | This shopkeeper is a fence; sell takes only an instance whose world.theft stolen fact is true, and a shop without it only one whose fact is false. Never on a stock offer. |
 
 ### SlotKey
 
-An equipment slot (equipment@1; 00 §4.4 and 21 §8 as amended by c1-equipment): the thirteen keys. A fresh world makes one holder entity inside the body per slot some item declares, capacity 2 for finger (two fingers, toolbox row 3) and 1 for every other slot (numeric profile, Slot holder ids).
+An equipment slot: the thirteen keys. A fresh world makes one holder entity inside the body per slot some item declares, capacity 2 for finger and 1 for every other slot (numeric profile, Slot holder ids).
 
 Type: `head` or `neck` or `body` or `cloak` or `arms` or `hands` or `finger` or `waist` or `legs` or `feet` or `wield` or `off_hand` or `light`.
 
 ### SpokenKeyword
 
-An authored spoken keyword (speech@1; toolbox row G9): 1 to 32 lowercase ASCII letters, compared with a case-folded say, whisper or shout word.
+An authored spoken keyword: 1 to 32 lowercase ASCII letters, compared with a case-folded say, whisper or shout word.
 
 Type: string.
 
 ### Tag
 
-A property tag (toolbox row G1): a closed engine vocabulary, so every mechanic that gives a tag meaning and every cartridge that declares one share its spelling. Item, barrier and room definitions declare tags; the has_tag policy leaf (tag@1) reads them. A row whose mechanic needs a new tag adds it here. A room tagged air, chasm or water (status reader 7) admits a move into it only for a body whose active statuses pass that tag. Toolbox row 28 gives cursed no meaning of its own (has_tag, wearing and resistances see it as any tag): content marks a curse-bearing item with it for a wearing leaf in that item's name variant. Toolbox row 43a adds road and marsh, which have no meaning of their own: cartridge.json world.movement.terrain gives a room tag a fare percent. Aimed spells (loka-x6t.109) add lamp, which has no meaning of its own: content marks a light an aimed lux may target.
+A tag on an item, barrier or room, from a fixed list; conditions test for it with has_tag. Some tags do something: a room tagged air, chasm or water admits only a body with a status that allows it, and the world's terrain settings can make moving into a road or marsh room cost more or less.
 
 Type: `air` or `bed` or `burnable` or `chasm` or `cool` or `cursed` or `exposed` or `forge` or `fragile` or `lamp` or `liquid_holding` or `marsh` or `metal` or `road` or `rod` or `rug` or `sharp` or `silver` or `warm` or `water` or `waterproof` or `windproof` or `wooden`.
 
@@ -1555,7 +1555,7 @@ Type: map of string.
 
 ### TextKey
 
-A localization string id (04 §15; 05 §18): lowercase dotted snake_case of at most 128 characters, the ActionDefinition label rule. Text carries its interpolation bindings. Or inline prose, written as {"prose": "..."}.
+Words shown to the player: write them inline as {"prose": "..."}, or give the key of a text in the text catalog, such as room.well.name (lowercase, dots and underscores).
 
 Type: string or object.
 
@@ -1565,24 +1565,24 @@ Type: string or object.
 
 ### TextVariants
 
-Toolbox row W6: variants of one entity text (short, room_line or description), the first whose condition holds replacing it (DescriptionVariant, as for a room's description); the base text stays mandatory. Each condition reads with the entity itself as the target (status_active subject target).
+Other versions of this text, each used while its condition holds; the first that matches wins, else the base text shows.
 
 Type: list of [DescriptionVariant](source-kinds.gen.md#descriptionvariant).
 
 ### TimePolicy
 
-Opt-in M1-A elapsed logical seconds per real second; absence retains legacy play_time. Requires schedule@1. Millisecond conversion and fractional remainder belong to host M1-B. Integer type obeys loka-numeric-v1 safe range.
+How fast game time runs while the player plays: game seconds per real second. Leave it out for the default.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
 | away_cap_hours | integer |  | In-game hours one absence can catch up at most; the rest of the absence is skipped, not played. Absent: one in-game day. At most seven in-game days. |
 | profile | `real_elapsed` | yes | Must be real_elapsed: logical time follows real time. |
 | rate | integer | yes | Logical seconds that pass per real second; at least 1. |
-| recap_after_minutes | integer |  | Toolbox row W27, opt-in: an elapsed settlement spanning at least this many real minutes opens the next Book page with one away recap block; the away cap bounds the threshold, so a capped absence can reach it. At most one week (10080). |
+| recap_after_minutes | integer |  | Opt-in: an elapsed settlement spanning at least this many real minutes opens the next Book page with one away recap block; the away cap bounds the threshold, so a capped absence can reach it. At most one week (10080). |
 
 ### UseTool
 
-Toolbox row G4: what a use scripted action's tool must be, at least one property: an item whose definition declares tag, and a vessel holding some of liquid (quantity above 0).
+What a use scripted action's tool must be, at least one property: an item whose definition declares tag, and a vessel holding some of liquid (quantity above 0).
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -1601,7 +1601,7 @@ Opted finite vessel shell with authored positive capacity and initial contents.
 
 ### WaterSettings
 
-D6 exact paired surface/bottom routes, usable skill, entry load/cost, absolute submersion duration and authored warning/death copy; real_elapsed content only.
+Exact paired surface/bottom routes, usable skill, entry load/cost, absolute submersion duration and authored warning/death copy; real_elapsed content only.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -1622,16 +1622,16 @@ An equipped weapon's required skill and authored attack profile.
 | Field | Type | Required | Meaning |
 |---|---|---|---|
 | attack | [AttackProfile](source-kinds.gen.md#attackprofile) | yes | Its attack profile. |
-| durability | object |  | Toolbox row 21: the bounded int entity fact holding this weapon's durability (its default is a new weapon's) and the amount each hit of its own attack takes off; at the fact's minimum it is broken and strikes unarmed. |
+| durability | object |  | The bounded int entity fact holding this weapon's durability (its default is a new weapon's) and the amount each hit of its own attack takes off; at the fact's minimum it is broken and strikes unarmed. |
 | durability.fact | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The bounded int fact that holds the weapon's durability. |
 | durability.wear | integer | yes | Durability each of the weapon's hits takes off. |
-| ranged | object |  | Toolbox row 17: the weapon shoots in an encounter's round 1, spending one of the body's ammo resource pool; it never strikes in melee. |
+| ranged | object |  | The weapon shoots in an encounter's round 1, spending one of the body's ammo resource pool; it never strikes in melee. |
 | ranged.ammo | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The resource pool one unit of which each shot spends. |
 | skill | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The required skill. |
 
 ### WeatherEntry
 
-One weather of a calendar's weather table (toolbox row 31): each calendar day takes one entry with probability weight / total weight, by a hash of the world id and the day, never the authority RNG. wet: an exposed room's flame will not light (light@1 ignite). Phases are unique in the table.
+One kind of weather and its weight: a day gets it with chance weight out of the total. wet stops fires lighting in rooms open to the sky.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -1641,13 +1641,13 @@ One weather of a calendar's weather table (toolbox row 31): each calendar day ta
 
 ### Word
 
-One spoken word (speech@1; toolbox row G9): 1 to 32 ASCII letters, the riddle answer's bound. The rule case-folds it and compares it only with authored keywords; it never reaches narration.
+One spoken word: 1 to 32 ASCII letters, the riddle answer's bound. The rule case-folds it and compares it only with authored keywords; it never reaches narration.
 
 Type: string.
 
 ### WorldSettings
 
-The cartridge's world settings (owner decision world parameters; 00 §4 and 04 §15 as amended 2026-10-02), each optional with an engine default: movement.cost, what a move costs the body (movement@1; default 1 mv when the cartridge declares mv), its resource a pool of this cartridge (UNRESOLVED_REFERENCE otherwise); movement.terrain, the percent each destination room tag scales that cost by (row 43a; default none); movement without cost, or with terrain; bands, the condition band table of every pool without its own (resource.schema.json BandTable; default the 04 §15 table). An optional field of loka-cartridge-v2: the tag stays, and the compiler writes it only when the source authors it. In source it is cartridge.json's world, beside entry.
+Settings for the whole world, each optional with a default: what a move costs (movement.cost, by default 1 mv), how room tags change that cost (movement.terrain), and the condition words for any pool without its own (bands).
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -1656,22 +1656,22 @@ The cartridge's world settings (owner decision world parameters; 00 §4 and 04 �
 | bell_cue.fact | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The bool fact whose change to true triggers the line. |
 | bell_cue.rooms | list of [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The rooms where it is told, to anyone there. |
 | bell_cue.text | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of the line. |
-| carry | object |  | Opts into the voluntary Take ceiling (docs/system/mechanics.md containment@1); every item must author mass_grams. No engine default. |
+| carry | object |  | Opts into the voluntary Take ceiling; every item must author mass_grams. No engine default. |
 | carry.max_grams | integer | yes | The Take ceiling, in grams. |
 | combat | [CombatSettings](source-kinds.gen.md#combatsettings) |  | How fights run: the player's own attack, time between rounds and the lines told. |
-| construction | object |  | Built rooms S1 (construction@1): max_total, the most structures built in this world at once. |
+| construction | object |  | Building limits: max_total is the most structures that can stand in the world at once. |
 | construction.max_total | integer | yes | The most structures built in this world at once. |
 | death | [DeathSettings](source-kinds.gen.md#deathsettings) |  | What happens when a player or NPC dies: corpses, how long they last and how the player comes back. |
 | death_credit | list of [DeathCredit](source-kinds.gen.md#deathcredit) |  | NPCs whose death is credited to the player: killing one sets a true-or-false player fact. |
-| derived | object |  | Opts into stats derived from the player's attributes (docs/system/mechanics.md derived stats, toolbox row 2; attribute@1). Each table's bonus is added to the authored number it modifies: hit_chance to the attack profile's chance (clamped 0..100), damage to both damage_min and damage_max (clamped at 0), carry_grams to carry.max_grams (clamped at 0), hp_max to the player body's hp maximum (clamped at the pool minimum). hit_chance and damage need world.combat; carry_grams needs world.carry. An NPC keeps its authored profile unless it declares attributes (toolbox row G3): then hit_chance and damage apply to its attack with its own values. |
+| derived | object |  | Opts into stats derived from the player's attributes. Each table's bonus is added to the authored number it modifies: hit_chance to the attack profile's chance (clamped 0..100), damage to both damage_min and damage_max (clamped at 0), carry_grams to carry.max_grams (clamped at 0), hp_max to the player body's hp maximum (clamped at the pool minimum). hit_chance and damage need world.combat; carry_grams needs world.carry. An NPC keeps its authored profile unless it declares attributes: then hit_chance and damage apply to its attack with its own values. |
 | derived.carry_grams | [DerivedStat](source-kinds.gen.md#derivedstat) |  | Bonus to how much the player can carry, in grams, by attribute value. |
 | derived.damage | [DerivedStat](source-kinds.gen.md#derivedstat) |  | Bonus to the player's damage, by attribute value. |
 | derived.hit_chance | [DerivedStat](source-kinds.gen.md#derivedstat) |  | Bonus to the player's chance to hit, by attribute value. |
 | derived.hp_max | [DerivedStat](source-kinds.gen.md#derivedstat) |  | Bonus to the player's maximum hit points, by attribute value. |
-| gear_budget | object |  | Balance tool 6b (docs/system/cartridge.md item affect declarations; attribute@1): the signed affect total an item in each slot may carry at intended level 1 (per_slot) and what each level above 1 adds (per_level). The engine ignores it at runtime; only the power report reads it. |
+| gear_budget | object |  | Balance tool 6b: the signed affect total an item in each slot may carry at intended level 1 (per_slot) and what each level above 1 adds (per_level). The engine ignores it at runtime; only the power report reads it. |
 | gear_budget.per_level | integer | yes | What each level above 1 adds to the slot's budget. Read only by the power report. |
-| gear_budget.per_slot | map of integer | yes | Keyed by SlotKey (entity.schema.json), at least one (a compiler check, SCHEMA_VIOLATION too_few_items: the subset has no minProperties); a slot it omits is unbudgeted, never 0. |
-| group | object |  | Toolbox rows G8, 22a and 22b: member, stay and fight each name a bool pair fact read at each NPC; wage pays every member amount of a conserved resource each `every` clock units (docs/system/cartridge.md#group-declarations). |
+| gear_budget.per_slot | map of integer | yes | The gear budget for each equipment slot, such as head or hands; a slot not listed has no budget. |
+| group | object |  | 22a and 22b: member, stay and fight each name a bool pair fact read at each NPC; wage pays every member amount of a conserved resource each `every` clock units. |
 | group.fight | [DefinitionRef](source-kinds.gen.md#definitionref) |  | A bool pair fact, read at each NPC: the hireling order to fight. |
 | group.member | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | A bool pair fact, read at each NPC: this NPC is in the player's group. |
 | group.stay | [DefinitionRef](source-kinds.gen.md#definitionref) |  | A bool pair fact, read at each NPC: the hireling order to stay. |
@@ -1679,10 +1679,10 @@ The cartridge's world settings (owner decision world parameters; 00 §4 and 04 �
 | group.wage.amount | integer | yes | How much of the resource each member is paid. |
 | group.wage.every | integer | yes | Clock units between payments. |
 | group.wage.resource | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The conserved resource paid. |
-| identity | object |  | Toolbox rows W15 and FD9 (mechanics.md Recognition and earned titles): the player's displayed name, the text key name, varied by name_variants (TextVariants, first match wins; subject target is the player's body). GameView projects it as actor_name. |
+| identity | object |  | The player's name as shown, with optional variants that change it while their condition holds. |
 | identity.name | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of the player's displayed name. |
 | identity.name_variants | [TextVariants](source-kinds.gen.md#textvariants) |  | Variants of the name; the first match wins, with the player's body as subject target. |
-| levelling | object |  | Opts into experience and levelling (docs/system/mechanics.md experience and levelling, toolbox row 4; attribute@1). thresholds are the strictly increasing experience totals that reach levels 2, 3 and so on; points_per_level the attribute points each level grants; kills the experience a credited kill of each NPC definition grants; level_up the receipt line when a decision reaches a new level. Every number is the cartridge's. |
+| levelling | object |  | Opts into experience and levelling. thresholds are the strictly increasing experience totals that reach levels 2, 3 and so on; points_per_level the attribute points each level grants; kills the experience a credited kill of each NPC definition grants; level_up the receipt line when a decision reaches a new level. Every number is the cartridge's. |
 | levelling.gained | [TextKey](source-kinds.gen.md#textkey) |  | The line telling the experience a proposal added, binding amount. |
 | levelling.kills | list of object |  | The experience a credited kill of each NPC definition grants. |
 | levelling.kills[].experience | integer | yes | Experience granted per credited kill. |
@@ -1690,12 +1690,12 @@ The cartridge's world settings (owner decision world parameters; 00 §4 and 04 �
 | levelling.level_up | [TextKey](source-kinds.gen.md#textkey) | yes | The receipt line when a decision reaches a new level. |
 | levelling.points_per_level | integer | yes | Attribute points each level grants. |
 | levelling.thresholds | list of integer | yes | Strictly increasing experience totals that reach levels 2, 3 and so on. |
-| mount | object |  | Toolbox row 43b: riding names a bool pair fact, per subject and scoped to player, read at each NPC with a mount declaration; such an NPC carries its rider (docs/system/cartridge.md#mount-declarations). |
+| mount | object |  | Riding names a bool pair fact, per subject and scoped to player, read at each NPC with a mount declaration; such an NPC carries its rider. |
 | mount.riding | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | A bool pair fact, per subject and scoped to player: the player rides this NPC. |
 | movement | object |  | What a move costs the body, and how destination room tags scale it. |
 | movement.cost | [ActionCost](source-kinds.gen.md#actioncost) |  | What one move costs the body, such as 1 movement point. |
-| movement.terrain | map of integer |  | Terrain movement costs (row 43a; docs/system/mechanics.md, Terrain movement costs): a room tag to the percent a move into a room carrying it scales the fare by, applied after status cost_percent, in the room's authored tag order, rounded down each step. The key pattern repeats the entity.schema.json Tag enum, so a Tag added there is refused here until this list follows (fail closed). |
-| theft | object |  | Toolbox rows 33 and 34 (mechanics.md Theft, fence and witnessed offense): take may lift an item a living NPC in the actor's room directly holds. The victim notices when the actor's level in skill is below the victim's value of attribute (absent: 0); every other living NPC there that is not blind and the actor's body is not concealed from also sees. Containment alone sets the per_subject instance bool fact stolen true on the item; a seen theft emits custom_event noticed (subject: the thief's body) and says narration.seen, an unseen one narration.unseen. |
+| movement.terrain | map of integer |  | Extra move cost by room tag, in percent: for example 200 makes moves into rooms with that tag cost double. |
+| theft | object |  | Take may lift an item a living NPC in the actor's room directly holds. The victim notices when the actor's level in skill is below the victim's value of attribute (absent: 0); every other living NPC there that is not blind and the actor's body is not concealed from also sees. Containment alone sets the per_subject instance bool fact stolen true on the item; a seen theft emits custom_event noticed (subject: the thief's body) and says narration.seen, an unseen one narration.unseen. |
 | theft.attribute | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The victim's attribute compared with the actor's skill level. Absent: 0. |
 | theft.narration | object | yes | Text keys told after a theft. |
 | theft.narration.seen | [TextKey](source-kinds.gen.md#textkey) | yes | Told when the theft is noticed. |
@@ -1703,7 +1703,7 @@ The cartridge's world settings (owner decision world parameters; 00 §4 and 04 �
 | theft.noticed | [Key](source-kinds.gen.md#key) | yes | Key of the custom event emitted when a theft is seen. |
 | theft.skill | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The victim notices when the actor's level in this skill is below the victim's attribute. |
 | theft.stolen | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The per_subject instance bool fact set true on a stolen item. |
-| trails | object |  | Toolbox row W13 (mechanics.md Tracks and trails): a trail is fresh while now minus its time is below fresh_for (logical seconds); a passed track check appends leads[<exit>], one per direction some room's exit uses. |
+| trails | object |  | A trail is fresh while now minus its time is below fresh_for (logical seconds); a passed track check appends leads[<exit>], one per direction some room's exit uses. |
 | trails.fresh_for | integer | yes | A trail is fresh while now minus its time is below this, in logical seconds. |
 | trails.leads | object | yes | What a passed track check appends, per direction some room's exit uses. |
 | trails.leads.down | [TextKey](source-kinds.gen.md#textkey) |  | Appended when the trail leads down. |

@@ -4,7 +4,7 @@
   "description": "The room (place) definition kind and its exits (21 §5 Place/Room, Connection; 05 §17; 00 §4.1, §4.10; 00a §2, §12), owned by movement (capability_registry.json). R5 slice 1: what look and move need; slice 2: inspectable details; slice 3: description variants. Tags and barriers join with their capabilities as optional fields, which keep the loka-cartridge-v2 tag (CompiledCartridge compatibility rule); contents are derived from containment (03 §23), not stored in the room.",
   "$defs": {
     "Alias": {
-      "description": "A word or phrase a player types to name a detail (21 §6 aliases; 04 §18 aliases) or, for a ScriptedAction, the action (its verb, the first words typed): lowercase letters and digits, the words of a phrase joined by _ (the player's `mooring post` is compared as mooring_post; kernel/ts/src/target.ts gives the normalization). At most 64 characters.",
+      "description": "A word the player types to name something or start an action: lowercase letters and digits, words joined by _ (the player types mooring post, you write mooring_post). At most 64 characters.",
       "type": "string",
       "pattern": "^[a-z0-9][a-z0-9_]*$",
       "maxLength": 64,
@@ -15,7 +15,7 @@
       ]
     },
     "Connection": {
-      "description": "One directed exit to another room of the same cartridge (21 §5 Connection; 05 §17). Its identity is its room and direction. barrier, optional (barrier@1), names the Barrier whose one shared state the exit passes through (21 §5 Barrier; 05 §25 coherent connections): move through it is refused while it is closed (exit_closed) or locked (exit_locked); an exit without one means what it always meant. A reciprocal exit is authored in the destination room (00a §2); faces pair by opposite direction: an exit's reciprocal face is its destination's exit in the opposite compass direction when that exit leads back to its room, and an exit with a barrier needs a reciprocal face naming the same barrier (BARRIER_MISMATCH at each face otherwise). One-way and bent barrier passages (no reciprocal face, or an opposite-direction exit that leads elsewhere) are rejected for now and may be allowed later; an exit without a barrier is BARRIER_MISMATCH only when its reciprocal face names one.",
+      "description": "An exit to another room of this game. Add a door with barrier; the room on the other side needs the matching exit back with the same door.",
       "type": "object",
       "properties": {
         "to": {"description":"The room this exit leads to.",
@@ -42,7 +42,7 @@
           "additionalProperties": false
         },
         "hidden_until": {
-          "description": "Toolbox row 11 (docs/system/mechanics.md hidden passages): for the commanded character this directed exit does not exist (not listed, not seen through, absent from the map, a move through it not_found) until the named fact has the specified value. No barrier on a hidden face (BARRIER_MISMATCH).",
+          "description": "This exit is hidden from the player until the named fact has the given value.",
           "type": "object",
           "properties": {
             "fact": {"description":"A fact of this cartridge, normally a player bool; the exit stays hidden until it has the value.",
@@ -59,7 +59,7 @@
           "additionalProperties": false
         },
         "climb": {
-          "description": "Toolbox row 30 (docs/system/mechanics.md rope and climb): crossing this directed exit is a climb. A mover whose body holds item (directly or in a container) climbs down as on any exit; one without it falls: the move still happens and also costs damage HP, never below 1 (a fall never kills), narrated by fell. The cartridge declares an hp pool (RESOURCE_SPEC_INVALID otherwise). NPCs never take a climb face.",
+          "description": "This exit is a climb: a player holding the named item climbs safely; without it they fall, still arrive, and lose some health (never below 1).",
           "type": "object",
           "properties": {
             "item": {"description":"The item a mover must hold to climb rather than fall.",
@@ -84,7 +84,7 @@
           "$ref": "room.schema.json#/$defs/KnockResponse"
         },
         "locks": {
-          "description": "Toolbox row G7 (mechanics.md Access locks): traverse, the policy the mover must hold to cross this exit, read by movementPlan after the barrier; failing it refuses permission_denied. Read with no target.",
+          "description": "Traverse, the policy the mover must hold to cross this exit, read by movementPlan after the barrier; failing it refuses permission_denied. Read with no target.",
           "type": "object",
           "properties": {
             "traverse": {"description":"A condition the player must meet to go through this exit.",
@@ -124,7 +124,7 @@
       ]
     },
     "InspectableDetail": {
-      "description": "A lightweight keyed detail of a room (21 §6 InspectableDetail): the aliases a player can name it by, the first of which also names it when a lookup is ambiguous, and its description text key (05 §18). Not a RuntimeEntity: a fresh world gives it a target id only (numeric profile, Initial world ids). Two details of one room may share an alias (an ambiguous lookup lists both, 04 §18), but the first alias must be the detail's own and in the form a lookup produces (no empty word, not starting with at, the, a or an), or the player could not pick it by name (UNREACHABLE_DETAIL). Its variants (DescriptionVariant) select other prose by condition. Owned by inspectable_detail (a cartridge with details requires it). R5 freezes this v1 shape (14 §R5): perception, reveal facts and contextual actions join as optional fields.",
+      "description": "Something in a room the player can look at, such as a well or a painting: the words that name it (the first is its own name and must not start with a, an, the or at), its description, and other descriptions picked by condition.",
       "type": "object",
       "properties": {
         "aliases": {"description":"The words a player names it by; the first also names an ambiguous lookup.",
@@ -147,11 +147,11 @@
           "maxItems": 16
         },
         "rating": {
-          "description": "Toolbox row G5 (docs/system/mechanics.md opposed checks): the value an opposed scripted action check against this detail must reach.",
+          "description": "The value an opposed scripted action check against this detail must reach.",
           "type": "integer"
         },
         "readable": {
-          "description": "Optional readable@1 prose and its place-action label (docs/system/mechanics.md readable@1); both keys resolve in the text catalog.",
+          "description": "Optional readable@1 prose and its place-action label; both keys resolve in the text catalog.",
           "type": "object",
           "properties": {
             "label": {"description":"The read action's label.",
@@ -251,7 +251,7 @@
               "additionalProperties": false
             },
             "tool": {
-              "description": "Toolbox row 19: Harvest needs a held item whose definition declares tag.",
+              "description": "Harvest needs a held item whose definition declares tag.",
               "type": "object",
               "properties": {
                 "tag": {"description":"The tag a held item must carry for the harvest to be allowed.",
@@ -308,7 +308,7 @@
           "additionalProperties": false
         },
         "title": {
-          "description": "Optional page title the Book shows for this detail (loka-x6t.120; docs/system/mechanics.md inspectable_detail@1): it resolves in the text catalog (UNRESOLVED_REFERENCE); without it a page falls back to its kind's title or the description.",
+          "description": "The title shown on this detail's page in the Book (a text key). Without it the page uses a general title.",
           "$ref": "text.schema.json#/$defs/TextKey"
         },
         "transport": {"description":"Makes the detail a stop on a transport route.",
@@ -407,7 +407,7 @@
       ]
     },
     "RoomDefinition": {
-      "description": "A navigable place (21 §5 Place/Room): its key, its name and description text keys (05 §18; resolved in the cartridge text catalog), and its exits by compass direction, the six-way compass of 00 §4.10 (a direction without an exit is absent), optionally its inspectable details by key, at most 64, its description variants (DescriptionVariant) and its contributions to the ActionSet of an actor in it, applied in order (action.schema.json ActionContribution; R5 S5, optional). Custom named connections (05 §17) join later as a separate optional field. Optional tags are its property tags (entity.schema.json Tag, toolbox row G1).",
+      "description": "A place the player can be: its name, description, exits by direction (north, south, east, west, up, down), things to look at, other descriptions picked by condition, and tags.",
       "type": "object",
       "properties": {
         "key": {
@@ -483,7 +483,7 @@
           "$ref": "action.schema.json#/$defs/Key"
         },
         "tags": {
-          "description": "Its property tags (Tag; toolbox row G1), read by the has_tag policy leaf (tag@1) and the terrain fare (row 43a); unique, since a repeated tag would apply its fare percent twice.",
+          "description": "Its property tags, read by the has_tag policy leaf (tag@1) and the terrain fare (row 43a); unique, since a repeated tag would apply its fare percent twice.",
           "type": "array",
           "minItems": 1,
           "maxItems": 16,
@@ -499,7 +499,7 @@
           "$ref": "entity.schema.json#/$defs/AmbientSets"
         },
         "site": {
-          "description": "Built rooms S1 (construction@1; cartridge.md Structure and site declarations): where a structure may be built from this room. directions, the compass directions a built room may open on, none an authored exit of this room (SITE_EXIT_CONFLICT); structures, the StructureDefinitions that may be built here (UNRESOLVED_REFERENCE otherwise).",
+          "description": "Where a structure can be built from this room: directions, the directions a built room may open on (none may be an existing exit), and structures, the kinds that may be built.",
           "type": "object",
           "properties": {
             "directions": {"description":"Compass directions a built room may take from here.",
@@ -533,7 +533,7 @@
           "additionalProperties": false
         },
         "locks": {
-          "description": "Toolbox row G7 (mechanics.md Access locks): enter, the policy the mover must hold to come into this room, read by movementPlan after the exit's traverse lock; failing it refuses permission_denied. Read with no target.",
+          "description": "Enter, the policy the mover must hold to come into this room, read by movementPlan after the exit's traverse lock; failing it refuses permission_denied. Read with no target.",
           "type": "object",
           "properties": {
             "enter": {"description":"A condition the player must meet to come into this room.",
@@ -628,7 +628,7 @@
       ]
     },
     "DescriptionVariant": {
-      "description": "Prose selected by a condition (21 §6 DescriptionVariant; 00a §12): description replaces the base description key when the condition holds for the actor over committed state (policy.schema.json Policy; the evaluator is pure, 06 §21). A room's or detail's variants are tried in list order and the first whose condition holds is shown; when none holds, the base description is. Variants are derived, never a mutated description (21 §6). Owned by description_variant (a cartridge with one requires it); its condition's ops by their owners.",
+      "description": "Prose selected by a condition: description replaces the base description key when the condition holds for the actor over committed state. A room's or detail's variants are tried in list order and the first whose condition holds is shown; when none holds, the base description is. Variants are derived, never a mutated description. Owned by description_variant (a cartridge with one requires it); its condition's ops by their owners.",
       "type": "object",
       "properties": {
         "when": {"description":"The condition.",
@@ -659,7 +659,7 @@
       ]
     },
     "BarrierState": {
-      "description": "A barrier's state (21 §5 Barrier: open/closed, locked/unlocked): open, closed (and unlocked) or locked (and closed); a lock needs a closed door, so an open locked barrier does not exist. The legal transitions (04 §5.3 'Lifecycle transition') are closed to open (open), open to closed (close), closed to locked (lock) and locked to closed (unlock); delta.schema.json barrier.transition.",
+      "description": "A door's state: open, closed or locked. A locked door is always closed.",
       "enum": [
         "open",
         "closed",
@@ -696,7 +696,7 @@
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
         },
         "tags": {
-          "description": "Its property tags (Tag; toolbox row G1), read by the has_tag policy leaf (tag@1).",
+          "description": "Its property tags, read by the has_tag policy leaf (tag@1).",
           "type": "array",
           "minItems": 1,
           "maxItems": 16,

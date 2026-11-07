@@ -76,7 +76,7 @@
               "enum": [
                 "reverie"
               ],
-              "description": "Presentation only: the Book treatment that draws this scene (book-ui.md, Book treatments)."
+              "description": "Presentation only: the Book treatment that draws this scene."
             },
             "on_end": {"description":"What happens when the scene ends: facts are set, then a story point is reached.",
               "type": "object",

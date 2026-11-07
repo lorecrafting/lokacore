@@ -14,7 +14,7 @@
       ]
     },
     "CapabilityVersion": {
-      "description": "A capability contract version (05 §6): a positive integer. key@version is immutable in meaning once published; a breaking change takes a new version (05 §6, 'Capability version immutability').",
+      "description": "A capability contract version: a positive integer. key@version is immutable in meaning once published; a breaking change takes a new version.",
       "type": "integer",
       "minimum": 1,
       "examples": [
@@ -23,7 +23,7 @@
       ]
     },
     "CapabilityVersions": {
-      "description": "Exact capability pins, capability key to version (05 §3 requires.capabilities; 05 §6). A map, so one version per key: the canonical decoder rejects a repeated key, and canonical encoding sorts keys.",
+      "description": "Exact capability pins, capability key to version. A map, so one version per key: the canonical decoder rejects a repeated key, and canonical encoding sorts keys.",
       "type": "object",
       "propertyNames": {
         "pattern": "^[a-z][a-z0-9_]{0,63}$"

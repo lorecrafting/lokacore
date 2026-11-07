@@ -81,13 +81,11 @@ defmodule Loka.Content.SourceSchema do
 
   # The words of inline prose may stand wherever a text key goes (Loka.Content.Prose).
   defp prose(text_key) do
-    {doc, rest} = Map.pop(text_key, "description")
-
     %{
       "description" =>
-        String.replace(doc, ", never display text", "") <>
-          " Or inline prose, written as {\"prose\": \"...\"}.",
-      "anyOf" => [rest, @prose]
+        "Words shown to the player: write them inline as {\"prose\": \"...\"}, or give the key " <>
+          "of a text in the text catalog, such as room.well.name (lowercase, dots and underscores).",
+      "anyOf" => [Map.delete(text_key, "description"), @prose]
     }
   end
 
@@ -253,7 +251,8 @@ defmodule Loka.Content.SourceSchema do
   defp partial(k, v, ch) when k in ~w(additionalProperties oneOf anyOf), do: partial(v, ch)
   defp partial(_, v, _), do: v
 
-  # Root files (cartridge, facts, resources, attributes, layout) as compiled: no shortcuts.
+  # cartridge.json, facts.json, resources.json, attributes.json and layout.json as the compiler
+  # checks them; root files take no shortcut (an area bundle opens into definitions).
   defp roots(defs) do
     fact = defs["FactSpec"] |> drop("key")
     about = "The game's facts, by key: things the world remembers, such as door_open."

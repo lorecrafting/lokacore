@@ -4,7 +4,7 @@
   "description": "FactSpec and scoped facts (03 §7, §13; 21 §3.9, §4 Fact).",
   "$defs": {
     "FactType": {
-      "description": "A fact's value type and default (03 §7). The types chapter one declares (00a §6): bool, enum over Keys, and int with optional inclusive bounds. The value itself is a FactValue (delta.schema.json).",
+      "description": "What kind of value the fact holds and where it starts: true or false (bool), one of a list of words (enum), or a whole number with optional bounds (int).",
       "oneOf": [
         {
           "description": "true or false.",
@@ -99,7 +99,7 @@
       ]
     },
     "FactSpec": {
-      "description": "A typed, namespaced fact declaration (03 §7): key (the fact's DefinitionRef is cartridge@version:fact/key; the cartridge is the namespace, 05 §4), versioned type, default, allowed scope kinds (a set) and meaning. Transition constraints and the reference graph are added with the compiler (R4).",
+      "description": "A typed, namespaced fact declaration: key, versioned type, default, allowed scope kinds (a set) and meaning. Transition constraints and the reference graph are added with the compiler.",
       "type": "object",
       "properties": {
         "key": {
@@ -125,11 +125,11 @@
           "minItems": 1
         },
         "per_subject": {
-          "description": "Toolbox row W2: the fact has one value per subject, an NPC, item or detail, stored with its subject_id (ScopedFact): an entity fact at scope instance, a pair fact (the subject and the character) at scope player. Absent: one value per scope.",
+          "description": "True if the fact has its own value for each NPC, item or detail rather than one value overall.",
           "const": true
         },
         "npc_pair": {
-          "description": "Toolbox row FD4: a pair fact between two NPCs, one value per ordered pair (the subject NPC toward the with NPC), stored with subject_id and with_id. Needs per_subject and scopes exactly [instance] (world state).",
+          "description": "A pair fact between two NPCs, one value per ordered pair (the subject NPC toward the with NPC), stored with subject_id and with_id. Needs per_subject and scopes exactly [instance] (world state).",
           "const": true
         },
         "meaning": {"description":"What the fact means, for authors. The rules do not read it.",

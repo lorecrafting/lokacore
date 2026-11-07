@@ -115,7 +115,7 @@
       ]
     },
     "BandTone": {
-      "description": "A condition band's tone (04 \u00a715 as amended 2026-10-02): how serious the band is; each presenter maps it to its own colour.",
+      "description": "A condition band's tone: how serious the band is; each presenter maps it to its own colour.",
       "type": "string",
       "enum": [
         "normal",
@@ -159,7 +159,7 @@
       ]
     },
     "BandTable": {
-      "description": "A condition band table (04 \u00a715 as amended 2026-10-02), highest cut first: the band is the first row whose cut p reaches, and maximum = minimum gives the top row. Cuts are strictly descending and the last is 0, so every value has a band, and keys are unique within the table; the compiler reports a table that breaks this as RESOURCE_SPEC_INVALID at the table. A pool's bands (ResourceSpec), else the cartridge's world.bands (cartridge.schema.json WorldSettings), else the engine default table.",
+      "description": "How a pool's level is described, highest first: each row names a band and the level it starts at, and the last row starts at 0.",
       "type": "array",
       "items": {
         "$ref": "#/$defs/ConditionBand"
@@ -245,7 +245,7 @@
       ]
     },
     "NpcHp": {
-      "description": "Explicit entity-specific HP bounds/start/gain. Requires minimum <= start <= maximum (RESOURCE_SPEC_INVALID) and no minimum or start below 0 (BODY_BELOW_ZERO). Required legacy-shaped birth/save row; no position recovery.",
+      "description": "This NPC's health: its lowest, highest and starting value and how much it regains. Lowest is at most starting, which is at most highest, and none is below 0.",
       "type": "object",
       "properties": {
         "minimum": {"description":"Lower HP bound.",

@@ -64,7 +64,7 @@
       ]
     },
     "LogicalTime": {
-      "description": "Explicit logical time (01 A6; 04 §4). Units are fixed by the authored calendar (calendar@1): time 0 is midnight of day 1, and the hour of day is floor(t / units_per_hour) mod hours_per_day (policy.schema.json time_window).",
+      "description": "A moment in game time, counted in the calendar's units from midnight of day 1.",
       "type": "integer",
       "minimum": 0,
       "examples": [
