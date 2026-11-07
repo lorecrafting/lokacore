@@ -11,6 +11,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 (commit `997a7a8`, `docs/rewrite-v3/reviews/`).
 
 - [Review: ruled batch 3, map least zoom, second death waits, author note margin, Hotbar story words](2026-11-06-ruled-batch-3-review.md): **CHANGES REQUIRED**
+- [Review: /line opens an inline prose key's own definition line (loka-wfrgk.100.3)](2026-11-06-loka-wfrgk.100.3-review.md): **APPROVE WITH NOTES**
 - [Review: engine follow-ups (loka-vduxr.35, loka-vduxr.78, loka-wfrgk.51, loka-kgd.220)](2026-11-06-engine-followups-review.md): **CHANGES REQUIRED**
 - [Review: Editor walk P2 (PR #686, loka-wfrgk.61-.64, .67-.71, .80)](2026-11-06-editor-walk-p2-review.md): **APPROVE WITH NOTES**
 - [Review: editor walk P1, dev save survives edits, palette New for every kind, Delete refused while named](2026-11-06-editor-walk-p1-review.md): **APPROVE WITH NOTES**
@@ -22,6 +23,8 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Review: editor gaps, Story beats, room detail, New outline, set delete, add-menu gates and seeds](2026-11-06-editor-gaps-review.md): **APPROVE**
 - [Review: author panel, palette Undo brings back a palette Delete](2026-11-06-editor-delete-undo-review.md): **APPROVE**
 - [Review: editor coverage A, CRUD matrix, card round-trip, route-caller tests](2026-11-06-editor-coverage-a-review.md): **APPROVE**
+- [Review: inline words field on every card words row (loka-wfrgk.100.1)](2026-11-06-card-words-field-review.md): **APPROVE WITH NOTES**
+- [Review: a blank world's first room is placed on the map](2026-11-06-blank-world-map-review.md): **APPROVE WITH NOTES**
 - [Review: editor world picker and New world (loka-vduxr.65)](2026-11-05-world-picker-review.md): **APPROVE WITH NOTES**
 - [Review: Story map S2, the List view and Trace in the map slot (PR #646, loka-wfrgk.18.2)](2026-11-05-story-map-s2-review.md): **APPROVE WITH NOTES**
 - [Review: Story map S1, the story model (PR #620, loka-wfrgk.18)](2026-11-05-story-map-s1-review.md): **APPROVE WITH NOTES**

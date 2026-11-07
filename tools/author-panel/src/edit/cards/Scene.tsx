@@ -1,13 +1,12 @@
 // The Scene cards (docs/rnd/gui-editor-design-2026-11-04.md §4.4, E6d): a `.scene` dialogue's text,
-// line by line, its speakers and links picked in place (POST /set) and its words opened in the Book;
-// a modal scene's treatment picked from the schema's (its steps' words keep the form's Book edit).
+// line by line, its speakers and links picked in place (POST /set) and its words edited in place;
+// a modal scene's treatment picked from the schema's (its steps' words in the form's words fields).
 import { useCallback, useEffect, useState } from 'react';
 import { refusePick } from '../../../../../kernel/ts/play/card.ts';
 import { picks, sceneLines, type Line } from '../../../../../kernel/ts/play/scene_lines.ts';
 import { ask, type useDiagnostics } from '../../author.ts';
-import { Button } from '../../components/ui/button.tsx';
 import { Input } from '../../components/ui/input.tsx';
-import type { Context } from '../fields.tsx';
+import { WordsField, type Context } from '../fields.tsx';
 import { Header, useCard } from '../Generic.tsx';
 import { Refusal } from '../templates.tsx';
 import { RoomForm } from './Room.tsx';
@@ -46,24 +45,24 @@ export function SceneText({ rel, context, diag }: Props) {
   );
 }
 
-/** The file's lines: a value line its picker, a words line its Book edit, the rest as written. */
+/** The file's lines: a value line its picker, a words line its words field, the rest as written. */
 type Setter = (line: Line, value: string) => void;
 function Lines({ lines, context, set }: { lines: Line[]; context: Context; set: Setter }) {
   return (
     <ol className="grid gap-1 font-mono">
       {lines.map((l) => (
-        <li key={`${l.n}:${l.text}`} className="flex min-w-0 items-center gap-2">
+        // a words line keeps its field (and a draft) when its text changes; a value line remounts
+        <li key={l.key ?? `${l.n}:${l.text}`} className="flex min-w-0 items-center gap-2">
           <span className="w-6 shrink-0 text-right text-muted-foreground">{l.n}</span>
           {l.verb ? (
             <Value line={l} keys={picks(l.verb, context.nodes, context.unlinkable)} set={(value) => set(l, value)} />
+          ) : l.key ? (
+            <div className="min-w-0 flex-1">
+              <WordsField label="" k={l.key} words={l.text.replace(/^\s*\* /, '')} />
+            </div>
           ) : (
             <span className="min-w-0 flex-1 truncate whitespace-pre">{l.text}</span>
           )}
-          {l.key ? (
-            <Button type="button" size="xs" variant="outline" onClick={() => context.edit(l.key!)}>
-              Edit in Book
-            </Button>
-          ) : null}
         </li>
       ))}
     </ol>

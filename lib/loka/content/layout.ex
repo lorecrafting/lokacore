@@ -58,6 +58,7 @@ defmodule Loka.Content.Layout do
         do: diag("UNRESOLVED_REFERENCE", at(rel, [i, "room"]))
   end
 
+  # Row writers add knowledge@1 too: Templates.cartridge, Starters.with_layout, mapedit.ts first.
   defp requirements(rel, m) do
     if m["requires"]["capabilities"]["knowledge"] == 1,
       do: [],

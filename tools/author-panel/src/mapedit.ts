@@ -77,6 +77,10 @@ const place = (s: Run, r: MapRoom, at: At) =>
     return [{ path: [i < 0 ? rows.length : i], value: { room: r.key, ...at } }];
   });
 
+/** A drop on an empty map: `bin/loka new layout` writes every room's row, the first sorted at 0,0,0,
+ * with the knowledge@1 layout.json needs (lib/loka/content/layout.ex:62). A placed map compiled, so has it. */
+const first = (s: Run) => s.call('new', { kind: 'layout', name: 'layout' });
+
 /** Draws an exit `a` → `b` going `dir` and, unless one-way, its reciprocal face. */
 async function link(s: Run, a: MapRoom, dir: string, b: MapRoom, oneWay: boolean) {
   const home = back(dir);
@@ -275,6 +279,7 @@ export function editor(io: Io) {
     /** The last gesture's newest journal id if it read or wrote `file`: a card's Undo runs it when newer than its own. */
     newest: (file: string) => (done.at(-1)?.files.has(file) ? done.at(-1)!.ids.at(-1) : undefined),
     place: (r: MapRoom, at: At) => run((s) => place(s, r, at)),
+    first: () => run(first),
     link: (a: MapRoom, dir: string, b: MapRoom, one = false) => run((s) => link(s, a, dir, b, one)),
     unlink: (a: MapRoom, dir: string, rooms: MapRoom[]) => run((s) => unlink(s, a, dir, rooms)),
     oneWay: (a: MapRoom, dir: string, rooms: MapRoom[]) => run((s) => oneWay(s, a, dir, rooms)),

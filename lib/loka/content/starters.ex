@@ -120,11 +120,13 @@ defmodule Loka.Content.Starters do
   # The first key of each kind the template references (dirs only: an area bundle's npcs are not
   # scanned), plus every room, bundled ones too, for layout's completeness check.
   defp context(dir, needs, area) do
-    room_list = rooms(dir)
+    rooms = rooms(dir)
+    room_list = Enum.map(rooms, &elem(&1, 0))
     entry = with %{"entry" => e} <- read(Path.join(dir, "cartridge.json")), do: e
 
     start = %{
       "room_list" => room_list,
+      "places" => places(rooms),
       "layout" => layout_rows(dir),
       "entry" => (area && Area.first_room(dir, area)) || if(entry in room_list, do: entry)
     }
@@ -139,6 +141,9 @@ defmodule Loka.Content.Starters do
       end
     end)
   end
+
+  # An abstract room is no place: layout.json has no row for it (the compiler refuses one).
+  defp places(rooms), do: for({k, r} <- rooms, !match?(%{"abstract" => true}, r), do: k)
 
   defp placed(context, dir, kind, name, from, own) do
     with :ok <- new_room(dir, kind, name, context, own), do: joined(context, dir, name, from)
@@ -179,12 +184,10 @@ defmodule Loka.Content.Starters do
 
   defp with_layout(files, dir, c, name) do
     if File.exists?(Path.join(dir, "layout.json")) do
-      rooms =
-        Enum.uniq(
-          c["room_list"] ++ Enum.flat_map(files, fn {rel, b} -> rooms_in(Path.split(rel), b) end)
-        )
-
-      Map.put(files, "layout.json", Templates.with_rows(c["layout"], rooms, name, c["from"]))
+      rooms = Enum.flat_map(files, fn {rel, b} -> rooms_in(Path.split(rel), b) end)
+      rows = Templates.with_rows(c["layout"], Enum.uniq(c["places"] ++ rooms), name, c["from"])
+      # Rows need knowledge@1 (lib/loka/content/layout.ex:62).
+      files |> Map.put("layout.json", rows) |> with_capabilities(~w(knowledge))
     else
       files
     end
@@ -195,18 +198,15 @@ defmodule Loka.Content.Starters do
   defp rooms_in(_, _), do: []
 
   defp rooms(dir) do
-    bundled =
-      for a <- Path.wildcard(Path.join(dir, "areas/*.json")),
-          r <- area_rooms(a),
-          do: r
+    bundled = for a <- Path.wildcard(Path.join(dir, "areas/*.json")), r <- area_rooms(a), do: r
 
-    plain = for r <- own_files(dir, "rooms"), do: Path.basename(r, ".json")
+    plain = for f <- own_files(dir, "rooms"), do: {Path.basename(f, ".json"), read(f)}
     Enum.sort(bundled ++ plain)
   end
 
   defp area_rooms(file) do
     case read(file) do
-      %{"rooms" => %{} = rooms} -> Map.keys(rooms)
+      %{"rooms" => %{} = rooms} -> Map.to_list(rooms)
       area when is_map(area) and not is_map_key(area, "rooms") -> []
       _ -> throw({:bad_area, file})
     end

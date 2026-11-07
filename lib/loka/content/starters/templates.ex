@@ -54,7 +54,7 @@ defmodule Loka.Content.Starters.Templates do
   defp kind("transports"),
     do: {~w(transport inspectable_detail), ~w(rooms npcs resources), &World.transport/2}
 
-  @doc "A new cartridge: manifest, one room `start`, nothing else."
+  @doc "A new cartridge: manifest, room `start` at 0,0,0 (a row needs knowledge@1, lib/loka/content/layout.ex:62)."
   def cartridge(id) do
     %{
       "cartridge.json" => %{
@@ -72,12 +72,14 @@ defmodule Loka.Content.Starters.Templates do
             "movement" => 1,
             "containment" => 1,
             "fact" => 1,
-            "description_variant" => 1
+            "description_variant" => 1,
+            "knowledge" => 1
           },
           "client_features" => []
         },
         "supported_profiles" => ["offline_private"]
       },
+      "layout.json" => [%{"room" => "start", "x" => 0, "y" => 0, "z" => 0}],
       "rooms/start.json" => room()
     }
   end
@@ -255,7 +257,7 @@ defmodule Loka.Content.Starters.Templates do
   end
 
   # An existing row keeps its coordinates; a new room gets the next x.
-  defp layout(_, c), do: %{"layout.json" => with_rows(c["layout"], c["room_list"])}
+  defp layout(_, c), do: %{"layout.json" => with_rows(c["layout"], c["places"])}
 
   @doc "The rows, the room joined `--from` beside its source, then the next x for each other lack."
   def with_rows(rows, rooms, name \\ nil, from \\ nil) do

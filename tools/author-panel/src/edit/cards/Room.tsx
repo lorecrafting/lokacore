@@ -1,7 +1,7 @@
 // The Room card (docs/rnd/gui-editor-design-2026-11-04.md §6, E6a): the room's words open in the
 // Book, its exits take the map's edits, its mechanics are added (here or from the Book) and removed;
 // every write is the generic card's (useCard: POST /change, Undo, Hold, refusals at the field).
-import { Fragment, type ReactNode, useEffect } from 'react';
+import { type ReactNode, useEffect } from 'react';
 import type { FieldProps, UiSchema } from '@rjsf/utils';
 import {
   addable,
@@ -17,7 +17,7 @@ import type { useDiagnostics } from '../../author.ts';
 import { addHere } from '../../book.ts';
 import { Button } from '../../components/ui/button.tsx';
 import { mapCommand, mapNewest } from '../../mapwire.ts';
-import { fields, type Context } from '../fields.tsx';
+import { fields, inline, WordsField, type Context } from '../fields.tsx';
 import { AddMenu, CardForm, Header, adder, useCard, useCartridge } from '../Generic.tsx';
 import { Folded, Refusal } from '../templates.tsx';
 import registry from '../registry.json';
@@ -194,7 +194,7 @@ export function RoomForm({
   );
 }
 
-/** The definition's words as text keys; Edit opens each line in the Book (agents write no words). */
+/** The definition's words, each edited in place (agents write no words). */
 export function Words({
   draft,
   context,
@@ -205,21 +205,11 @@ export function Words({
   fields: string[];
 }) {
   return (
-    <dl className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-x-2 gap-y-1">
+    <div className="grid gap-1" aria-label="words">
       {fields.map((f) => {
-        const key = proseKey(draft[f], context.kind, context.key, [f]);
-        return (
-          <Fragment key={f}>
-            <dt className="text-muted-foreground">{f}</dt>
-            <dd className="truncate font-mono">{key}</dd>
-            <dd>
-              <Button type="button" size="xs" variant="outline" onClick={() => context.edit(key)}>
-                Edit in Book
-              </Button>
-            </dd>
-          </Fragment>
-        );
+        const k = proseKey(draft[f], context.kind, context.key, [f]);
+        return <WordsField key={k} label={f} k={k} words={inline(draft[f])} />;
       })}
-    </dl>
+    </div>
   );
 }
