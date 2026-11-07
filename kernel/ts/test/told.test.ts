@@ -102,11 +102,12 @@ test('/line answers the source line a Book line writes, its words unbound, or wh
   ]);
   assert.equal((await line('room.none', 'nowhere'))[0], 404);
   // Break: two scenes' `* ~` lines both answer the first, so a save writes into the wrong scene;
-  // with no map, the one `* ~` there is may be another key's (409: wait for the compile).
+  // with no map, the one `* ~` there is (its own scene's too) may be another key's (409: wait for
+  // the compile).
   writeFileSync(join(src, 'scenes/t.scene'), 'dialogue t\n  * ~\n');
   assert.equal((await line('dialogue.t.prompt', '~'))[0], 409);
   writeFileSync(join(src, 'scenes/u.scene'), 'dialogue u\n  * ~\n');
-  assert.equal((await line('dialogue.u.prompt', '~'))[0], 400);
+  assert.equal((await line('dialogue.u.prompt', '~'))[0], 409);
 });
 
 test("/line finds a `~` key's own line by the compile's map, among many `~` lines", async (t) => {
@@ -215,4 +216,47 @@ test('a 200 /undo shows the old words it sent at once, before the compile', asyn
   assert.equal((await events()).text['room.a'], 'new words');
   assert.equal(await ask('/undo', back), 200);
   assert.equal((await events()).text['room.a'], 'old words');
+});
+
+test('/line opens an inline prose key in its own definition, whoever else holds its words', async (t) => {
+  // Breaks (loka-wfrgk.100.3): an item keyword, another room or a bundle holding the same words
+  // makes /line refuse two lines, or open the other one, so the Book cannot re-edit the words.
+  const { call, src } = await served(t);
+  const room = (name: string, description: string) =>
+    `{\n  "name": ${name},\n  "description": ${description},\n  "exits": {}\n}\n`;
+  mkdirSync(join(src, 'rooms'));
+  writeFileSync(join(src, 'rooms/a.json'), room('{"prose": "Hall"}', '{"prose": "x"}'));
+  writeFileSync(join(src, 'rooms/b.json'), room('{"prose": "Yard"}', '{\n    "prose": "x"\n  }'));
+  writeFileSync(join(src, 'rooms/c.json'), room('{"prose": "z"}', '{"prose": "z"}'));
+  mkdirSync(join(src, 'items'));
+  const lamp = '{\n  "keywords": ["x", "lamp"],\n  "name": {"prose": "lamp"}\n}\n';
+  writeFileSync(join(src, 'items/lamp.json'), lamp);
+  mkdirSync(join(src, 'areas'));
+  const area = '{"rooms": {"d": {\n  "description": {"prose": "x"}\n}}}\n';
+  writeFileSync(join(src, 'areas/w.json'), area);
+  const line = async (key: string, words: string) => {
+    const { status, text } = await call(`/line?key=${key}&words=${words}`);
+    return [status, status === 200 ? JSON.parse(text) : text];
+  };
+  const at = (file: string, n: number, was: string, words: string) => [
+    200,
+    { file, line: n, was, words },
+  ];
+  assert.deepEqual(
+    await line('room.a.description', 'x'),
+    at('rooms/a.json', 3, '  "description": {"prose": "x"},', 'x'),
+  );
+  assert.deepEqual(
+    await line('room.b.description', 'x'),
+    at('rooms/b.json', 4, '    "prose": "x"', 'x'),
+  );
+  assert.deepEqual(
+    await line('room.d.description', 'x'),
+    at('areas/w.json', 2, '  "description": {"prose": "x"}', 'x'),
+  );
+  assert.deepEqual(
+    await line('item.lamp.name', 'lamp'),
+    at('items/lamp.json', 3, '  "name": {"prose": "lamp"}', 'lamp'),
+  );
+  assert.equal((await line('room.c.description', 'z'))[0], 400); // two prose lines: which?
 });

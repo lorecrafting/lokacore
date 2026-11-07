@@ -2,8 +2,8 @@
 // words change: a JSON string literal (with its key and comma kept) or a scene's `* ` line.
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { guarded, refuse, stale } from './guard.ts';
-import { files } from './todo.ts';
+import { guarded, placed, refuse, stale } from './guard.ts';
+import { bundled, files } from './todo.ts';
 import type { Answer, Change } from './write.ts';
 
 // a JSON string line, its key optional; an inline `"field": {"prose": "..."}` on one line too
@@ -55,7 +55,7 @@ export function sourcesOf(source: string, key: string, words?: string) {
   const first = words?.trim().split('\n')[0];
   if (defined.length || !first) return defined;
   // both kinds: a `~` scene line must not lose to some JSON `"~"` (located refuses two)
-  return [
+  const hits = [
     ...find((l) => l.includes(JSON.stringify(words))),
     ...find(
       (l) =>
@@ -64,6 +64,31 @@ export function sourcesOf(source: string, key: string, words?: string) {
       all.filter((rel) => /\.(scene|cut)$/.test(rel)),
     ),
   ];
+  return own(source, key, hits);
+}
+const fileOf = (at: string) => at.slice(0, at.lastIndexOf(':'));
+/** An inline prose key `<kind>.<key>.<field>`'s `hits` in its definition's own file, there its
+ * `"prose"` line, if any: the same words elsewhere (a keyword, another room) are not its line. */
+function own(source: string, key: string, hits: string[]) {
+  const [kind, name] = key.split('.');
+  const fits = (dir: string, k: string) =>
+    k === name && [kind, `${kind}s`, `${kind}es`].includes(dir);
+  const bundles = Object.entries(bundled(source));
+  const mine = hits.filter((at) => {
+    const placing = placed(fileOf(at)); // an area bundle places as `areas/<a>`: its members count
+    return (
+      (!!placing && fits(placing.ext === 'scene' ? 'dialogues' : placing.dir, placing.key)) ||
+      bundles.some(
+        ([ref, rel]) => rel === fileOf(at) && fits(...(ref.split('/') as [string, string])),
+      )
+    );
+  });
+  const prose = mine.filter((at) =>
+    readFileSync(join(source, fileOf(at)), 'utf8')
+      .split('\n')
+      [Number(at.slice(at.lastIndexOf(':') + 1)) - 1].includes('"prose"'),
+  );
+  return prose.length ? prose : mine.length ? mine : hits;
 }
 export const sourceOf = (source: string, key: string, words?: string) =>
   sourcesOf(source, key, words)[0];
