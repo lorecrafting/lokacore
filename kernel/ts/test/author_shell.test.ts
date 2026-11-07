@@ -1,6 +1,7 @@
 // The editor shell's model (tools/author-panel/src/shell.ts): expected values from the chrome
 // ruling (docs/design/editor-chrome-rulings.md) and the E2 brief, not from the code.
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
 import * as shell from '../../../tools/author-panel/src/shell.ts';
 
@@ -184,4 +185,32 @@ test('.dark and color-scheme follow a forced OS scheme and its changes', () => {
   assert.deepEqual([classes.has('dark'), root.style.colorScheme], [false, 'light']);
   unfollow();
   assert.equal(heard.size, 0);
+});
+
+// Breaks: a starter added to edit/new.json never reaches the Hierarchy's + list, or a kind header's
+// + makes the wrong starter (`room` making an area; `scene` or `status` making nothing).
+test('the Hierarchy + lists every starter once, and a kind header`s + makes its own starter', () => {
+  const starters = JSON.parse(
+    readFileSync(new URL('../../../tools/author-panel/src/edit/new.json', import.meta.url), 'utf8'),
+  );
+  assert.deepEqual(shell.GROUPS.flatMap(([, kinds]) => kinds).sort(), [...starters].sort());
+  assert.deepEqual(
+    [
+      shell.STARTER.room,
+      shell.STARTER.scene,
+      shell.STARTER.status,
+      shell.STARTER.npc,
+      shell.STARTER.action,
+    ],
+    ['rooms', 'cutscene', 'statuses', 'npcs', undefined],
+  );
+});
+
+// Breaks: the npc header's + with a room selected makes an unplaced NPC (new-npcs) instead of New NPC here.
+test('with a room selected, the npc and item headers` + place the new one in that room', () => {
+  const room = { kind: 'room', key: 'smithy' } as const;
+  assert.deepEqual(
+    [shell.newCommand('npcs', room), shell.newCommand('items', room), shell.newCommand('npcs')],
+    ['map-npc', 'map-item', 'new-npcs'],
+  );
 });

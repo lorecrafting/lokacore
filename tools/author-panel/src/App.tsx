@@ -23,6 +23,7 @@ import {
   fromRef,
   fromTextKey,
   items,
+  newCommand,
   places,
   START,
   type Item,
@@ -90,6 +91,7 @@ function Left({ layout, set, story, book, diag, pick }: Shell) {
   const picked = places(layout.selection, story?.graph.nodes ?? []).hierarchy;
   const play = (room: string) => book.send({ op: 'go_to_room', room });
   const tab = (tab: string) => set((l) => ({ ...l, tab: tab as Layout['tab'] }));
+  const make = (kind: string) => command(book, layout.selection, pick, story)({ kind: 'command', label: '', detail: 'command', id: newCommand(kind, layout.selection) });
   return (
     <Tabs value={layout.tab} onValueChange={tab} className="min-h-0 flex-1 gap-0">
       <div className="flex h-8 items-center border-b px-2">
@@ -107,6 +109,8 @@ function Left({ layout, set, story, book, diag, pick }: Shell) {
             here={book.state?.shown.here}
             pick={pick}
             play={play}
+            make={make}
+            sel={layout.selection}
           />
         </TabsContent>
         <TabsContent value="project" forceMount className="data-[state=inactive]:hidden">

@@ -128,6 +128,24 @@ export const COMMANDS: Item[] = [
   ['map-lock', 'Lock on exit'],
   ['map-undo', 'Undo the last map edit'],
 ].map(([id, label]) => ({ kind: 'command', label, detail: 'command', id }));
+const NODE: Record<string, string> = { cutscene: 'scene', areas: 'room' };
+/** The graph kind a starter compiles to (`rooms` → `room`, `statuses` → `status`, `cutscene` → `scene`). */
+export const nodeOf = (kind: string) => NODE[kind] ?? kind.replace(/(us)es$|s$/, '$1');
+/** The starter a Hierarchy kind header's + makes: `room` → rooms (the later of areas and rooms wins). */
+// The actions starter writes a scripted action, not the command `action` nodes listed under that header, so it gets no +.
+export const STARTER: Record<string, string> = Object.fromEntries(NEW.filter((k) => k !== 'actions').map((k) => [nodeOf(k), k]));
+/** The Hierarchy's New list: every starter of edit/new.json, by what an author is making. */
+export const GROUPS: [string, string[]][] = [
+  ['Places', ['rooms', 'areas', 'barriers', 'transports', 'structures']],
+  ['People and things', ['npcs', 'items', 'populations', 'services', 'liquids']],
+  ['Story', ['quests', 'dialogues', 'cutscene', 'reactions', 'actions', 'topics', 'facts', 'behaviours', 'emotes']],
+  ['World rules', ['resources', 'attributes', 'skills', 'statuses', 'bleeds', 'replenish']],
+  ['Files', ['layout', 'text', 'outline']],
+];
+/** The palette command a New `kind` runs: an NPC or item goes in the selected room, as New NPC/item here. */
+export const newCommand = (kind: string, sel?: Selection) =>
+  sel?.kind === 'room' && (kind === 'npcs' || kind === 'items') ? `map-${kind.slice(0, -1)}` : `new-${kind}`;
+
 /** A definition's row label: `key · name`, the key alone with no written name. */
 export const named = (key: string, name?: string) => (name ? `${key} · ${name}` : key);
 

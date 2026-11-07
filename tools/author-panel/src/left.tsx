@@ -1,12 +1,15 @@
 // The shell's left column: the Hierarchy (every definition by kind, the current room marked, the
 // selection shared) and the map slot under it, its Map | Story segment (E3a and S2 fill them).
-import { MapPin, Play } from 'lucide-react';
+import { useState } from 'react';
+import { MapPin, Play, Plus } from 'lucide-react';
+import { definitionOf } from '../../../kernel/ts/play/card.ts';
 import { AreaMap, type MapProps } from './areamap.tsx';
 import type { Change, Story } from './author.ts';
 import { Button } from './components/ui/button.tsx';
+import { Popover, PopoverContent, PopoverTrigger } from './components/ui/popover.tsx';
 import { Refusal } from './edit/templates.tsx';
 import type { SetLayout } from './columns.tsx';
-import { fromRef, named, WORLD, type Layout, type Selection } from './shell.ts';
+import { COMMANDS, fromRef, GROUPS, named, newCommand, STARTER, WORLD, type Layout, type Selection } from './shell.ts';
 import { FlowView } from './flow.tsx';
 import { StoryList } from './storylist.tsx';
 
@@ -56,29 +59,98 @@ export const WorldButton = ({ pick }: { pick: Pick }) => (
   </Button>
 );
 
-/** Every definition of the last good compile, grouped by kind. */
-export function Hierarchy({
-  story,
-  picked,
-  here,
-  pick,
-  play,
-}: {
+let lines: Promise<Record<string, string>> | undefined;
+/** Each starter's plain line: the first sentence of its source definition's schema description. */
+const described = () =>
+  (lines ??= fetch('/__author/schema/rooms')
+    .then((r) => r.json())
+    .then(({ $defs }) =>
+      Object.fromEntries(
+        GROUPS.flatMap(([, kinds]) => kinds).map((k) => {
+          const text = String($defs[definitionOf($defs, k, {})]?.description ?? '');
+          return [k, text.split(/(?<=\.)\s/)[0]];
+        }),
+      ),
+    )
+    .catch(() => ((lines = undefined), {})));
+
+type Make = { make: (kind: string) => void; label: (kind: string) => string };
+/** The + beside World: every starter, grouped, each with its plain line; runs the palette's New. */
+function NewMenu({ make, label }: Make) {
+  const [said, setSaid] = useState<Record<string, string>>({});
+  const [open, setOpen] = useState(false);
+  const show = (on: boolean) => {
+    setOpen(on);
+    if (on) void described().then(setSaid);
+  };
+  return (
+    <Popover open={open} onOpenChange={show}>
+      <PopoverTrigger asChild>
+        <Button size="icon-xs" variant="outline" title="New" aria-label="New">
+          <Plus />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent align="start" className="max-h-[70vh] w-80 overflow-y-auto p-1 text-xs">
+        {GROUPS.map(([group, kinds]) => (
+          <section key={group}>
+            <h4 className="px-2 pt-1.5 text-muted-foreground">{group}</h4>
+            {kinds.map((k) => (
+              <Button
+                key={k}
+                variant="ghost"
+                size="xs"
+                className="h-auto w-full flex-col items-start gap-0 py-1"
+                aria-label={label(k)}
+                onClick={() => (setOpen(false), make(k))}
+              >
+                {k}
+                <span className="w-full truncate text-left font-normal text-muted-foreground" title={said[k]}>
+                  {said[k]}
+                </span>
+              </Button>
+            ))}
+          </section>
+        ))}
+      </PopoverContent>
+    </Popover>
+  );
+}
+
+/** A kind's header; its + makes that kind's starter, if it has one. */
+const Header = ({ kind, make, label }: Make & { kind: string }) => (
+  <h3 className="flex items-center px-2 text-xs text-muted-foreground">
+    {kind}
+    {STARTER[kind] ? (
+      <Button variant="ghost" size="icon-xs" className="ml-auto" title={label(STARTER[kind])} aria-label={label(STARTER[kind])} onClick={() => make(STARTER[kind])}>
+        <Plus />
+      </Button>
+    ) : null}
+  </h3>
+);
+
+/** Every definition of the last good compile, grouped by kind; a + makes a new one (`make`). */
+export function Hierarchy({ story, picked, here, pick, play, make, sel }: {
   story?: Story;
   picked?: string;
   here?: string;
   pick: Pick;
   play: (room: string) => void;
+  make: (kind: string) => void;
+  sel?: Selection; // the selection `make` runs on (App.tsx), so a + names what it makes
 }) {
   if (!story) return <p className="p-3 text-muted-foreground">Waiting for the watcher.</p>;
+  const label = (k: string) => COMMANDS.find((c) => c.id === newCommand(k, sel))!.label; // New item here, in a room
   const kinds = new Map<string, Story['graph']['nodes']>();
   for (const n of story.graph.nodes) kinds.set(n.kind, [...(kinds.get(n.kind) ?? []), n]);
   return (
     <div className="space-y-2 p-2">
-      <WorldButton pick={pick} />
+      <div className="flex items-center">
+        <WorldButton pick={pick} />
+        <NewMenu make={make} label={label} />
+      </div>
       {[...kinds].map(([kind, nodes]) => (
         <section key={kind}>
-          <h3 className="px-2 text-xs text-muted-foreground">{kind}</h3>
+          <Header kind={kind} make={make} label={label} />
           <ul>
             {nodes.map((n) => (
               <Row
