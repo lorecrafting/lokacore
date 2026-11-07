@@ -478,9 +478,12 @@ test("removing a room's last variant writes it gone, and Undo brings it back", a
 
 // Breaks: a detail added on the Room card is held refused (no description or alias; the Book's
 // Edit answers "not on this page"), or opens with every optional sub-field drawn (loka-wfrgk.76), or
-// a folded field leaves its fold on the first keystroke and drops the next ones.
+// a folded field leaves its fold on the first keystroke and drops the next ones, or a blur while a
+// write is in flight is sent stale, refused and dropped (CPU slowed as on CI: the summary's blur
+// writes `1` mid-typing, the Tab's `12` is refused).
 test('a new room detail saves with a `~` description, its optional fields folded', async () => {
   const page = await open({ right: 420, selection: { kind: 'room', key: 'sea_cave' } });
+  await (await page.context().newCDPSession(page)).send('Emulation.setCPUThrottlingRate', { rate: 6 });
   const file = join(dir, 'showcase/areas/tidewater/rooms/sea_cave.json');
   const was = readFileSync(file, 'utf8');
   const well = () => JSON.parse(readFileSync(file, 'utf8')).details.well;

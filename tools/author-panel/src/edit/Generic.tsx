@@ -81,10 +81,11 @@ function useFile(rel: string, diag: Diag) {
   const [draft, setDraft] = useState<unknown>();
   const [refused, setRefused] = useState<string>(); // the server's: stays until the next write
   const latest = useRef<unknown>(undefined);
+  const file = useRef<Saved>(undefined); // `saved` as of now, for a write queued before the reload drew
   const load = useCallback(
     async (base?: unknown, sent: Op[] = []) => {
       const s = await source(rel).catch((e: Error) => void setRefused(`${rel} not loaded: ${e.message}`));
-      if (s) (setSaved(s), setDraft((latest.current = rebase(base, latest.current, s.doc, sent)))); // keeps edits not yet sent
+      if (s) ((file.current = s), setSaved(s), setDraft((latest.current = rebase(base, latest.current, s.doc, sent)))); // keeps edits not yet sent
     },
     [rel],
   );
@@ -93,33 +94,38 @@ function useFile(rel: string, diag: Diag) {
   useEffect(() => {
     if (saved && outside?.file === rel && outside.sha256 !== saved.sha256) void load(saved.doc);
   }, [outside]); // eslint-disable-line react-hooks/exhaustive-deps
-  return { saved, draft, setDraft, refused, setRefused, latest, load };
+  return { saved, draft, setDraft, refused, setRefused, latest, file, load };
 }
 
 /** The card's file, changed by a blur and undone. */
 export function useCard(rel: string, diag: Diag) {
-  const { saved, draft, setDraft, refused, setRefused, latest, load } = useFile(rel, diag);
+  const { saved, draft, setDraft, refused, setRefused, latest, file, load } = useFile(rel, diag);
   const [revealed, setRevealed] = useState<string[]>([]);
   const [undo, setUndo] = useUndo(rel);
   const [held, setHeld] = useState<string>(); // the schema's first new error: the draft not sent
   useEffect(() => void (setRevealed([]), setHeld(undefined)), [rel]); // a new file starts with nothing revealed
-  const post = async (path: string, sent: Sent, otherwise: string) => {
+  const post = async (path: string, sent: Sent, otherwise: string, base = saved!.doc) => {
     const { ok, told } = await ask(path, sent);
     setRefused(ok ? undefined : typeof told === 'string' ? told : otherwise);
     // a refused change wrote nothing, so the last write's Undo still stands
     if (ok || path === 'undo')
       setUndo(ok && path === 'change' ? (told as { id: string }).id : undefined);
-    await load(saved!.doc, sent.ops);
+    await load(base, sent.ops);
   };
-  const commit = () => {
+  // one write at a time, each from the file the last one reloaded: a blur while a write is in flight
+  // (a field left for the next one, typed into at once) would send a stale `was`, be refused and dropped
+  const queue = useRef(Promise.resolve());
+  const send = async () => {
+    const saved = file.current;
     if (!saved) return;
     const errors = [...fresh(saved, latest.current), ...unfed(latest.current as never)];
     const [first] = errors;
     setHeld(first && `${first.property} ${first.message}`);
     const ops = apart(diff(saved.doc, latest.current), errors);
     if (ops.length)
-      void post('change', { file: rel, was: saved.sha256, ops }, 'Changed outside: reloaded.');
+      await post('change', { file: rel, was: saved.sha256, ops }, 'Changed outside: reloaded.', saved.doc);
   };
+  const commit = () => void (queue.current = queue.current.then(send).catch(console.error));
   const change = (doc: unknown) => setDraft((latest.current = applied(saved!.doc, unlistedIn(saved!, doc))));
   // Undo drops the held draft too: rebasing it onto the undone file would put the refusal straight back
   const back = () =>
