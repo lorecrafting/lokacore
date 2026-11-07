@@ -10,6 +10,27 @@ export const oneLine = (typed: string) => typed.replace(/\r\n|[\r\n\t]/g, ' ');
 export const saving = (draft: string, words: string) =>
   !draft.trim() ? 'empty' : draft === words ? 'unchanged' : 'save';
 
+/** Bind drawn words to a key; words two keys draw bind to none ('') so neither opens. */
+export const bind = (seen: Map<string, string>, words: string, key: string) => {
+  const was = seen.get(words);
+  seen.set(words, was === undefined || was === key ? key : '');
+};
+/** The seen words naming a drawn line: exact, or with the letter cap() raised lowered. None when
+ *  both forms, or two keys, claim it: a wrong write is worse than no field (journal_sampler's oar). */
+export function drawnWords(seen: Map<string, string>, t: string) {
+  const found = [...new Set([t, t.charAt(0).toLowerCase() + t.slice(1)])].filter((w) =>
+    seen.has(w),
+  );
+  return found.length === 1 && seen.get(found[0]) ? found[0] : undefined;
+}
+
+/** A clicked line's key, and the words Alt-click opens: the file's, else the drawn text. */
+export function clicked(seen: Map<string, string>, said: Map<string, string>, text: string) {
+  const w = drawnWords(seen, text);
+  const key = w && seen.get(w);
+  return { key, words: (key && said.get(key)) || text };
+}
+
 // A `~` line's words are tagged with its key's number in zero-width marks, so two `~` lines on one
 // page name two keys (the Book shows `~` alike; `seen` would resolve both to one).
 const MARK = /[\u200b\u200c]+$/;

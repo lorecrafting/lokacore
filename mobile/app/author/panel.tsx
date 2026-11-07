@@ -23,6 +23,7 @@ import {
 } from './place.ts';
 import { factRows, shown, type Canon } from './shown.ts';
 import { worded } from '../book/words.ts';
+import { bind, clicked } from './prose_rules.ts';
 
 export { frozenClock } from './place.ts';
 
@@ -38,7 +39,7 @@ export const devClock =
 const inBook: typeof import('./inbook.ts') | undefined =
   process.env.EXPO_PUBLIC_LOKA_DEV_CARTRIDGE === '1' ? require('./inbook.ts') : undefined;
 if (devClock) {
-  worded.note = (words, key) => seen.set(words, key); // a line as shown, bound too
+  worded.note = (words, key) => bind(seen, words, key); // a line as shown, bound too
   worded.made = new Map(); // an open conversation re-words its lines from the overlay (loka-wfrgk.19)
 }
 const g = globalThis as { loka_dev_skew?: number }; // ms the dev clock has moved both host clocks
@@ -137,7 +138,7 @@ export function played(game: Opened | undefined) {
         if (held !== undefined) return held;
         const words = overlay[key] ?? game.text(key);
         const shown = inBook?.tagged(key, words) ?? words; // two `~` lines show apart
-        seen.set(shown, key);
+        bind(seen, shown, key);
         said.set(key, words);
         return shown;
       },
@@ -213,13 +214,12 @@ const stateOf = (game: Opened) => ({
 // A click on a Book line selects its definition in the panel; Alt-click (Option-click) also opens
 // its source in the owner's editor.
 const onClick = (e: MouseEvent) => {
-  const words = (e.target as HTMLElement).textContent ?? '';
-  const key = seen.get(words);
-  if (key) tell({ select: key });
+  const line = clicked(seen, said, (e.target as HTMLElement).textContent ?? '');
+  if (line.key) tell({ select: line.key });
   if (!e.altKey) return;
   e.preventDefault();
   e.stopPropagation();
-  tell({ line: { key, words: (key && said.get(key)) || words } });
+  tell({ line });
 };
 // Through `played`, so an accepted cheat is a recorded step `bin/loka check` replays.
 function askCheat(game: Opened, cheat: Cheat) {

@@ -2,7 +2,7 @@
 // loka-wfrgk.19): the page keeps its place and its choice, only the words move.
 import assert from 'node:assert/strict';
 import { test, type TestContext } from 'node:test';
-import { tagged } from '../author/prose_rules.ts';
+import { bind, tagged } from '../author/prose_rules.ts';
 import { book, bundle } from './__tests__/polish-book.test.ts';
 import { worded } from './words.ts';
 
@@ -15,7 +15,7 @@ function talking(t: TestContext, preview: boolean) {
   const overlay: Record<string, string> = { [KEY]: '~' };
   const seen = new Map<string, string>();
   if (preview) {
-    worded.note = (words, key) => seen.set(words, key);
+    worded.note = (words, key) => bind(seen, words, key);
     worded.made = new Map();
   }
   t.after(() => ((worded.note = undefined), (worded.made = undefined)));
