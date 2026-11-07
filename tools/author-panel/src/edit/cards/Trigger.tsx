@@ -24,7 +24,7 @@ export function Trigger({ on, context, put }: { on: On; context: Context; put: (
   const quest = leftover(t, context.key, on);
   return (
     <div className="grid gap-1">
-      <label className="flex items-center gap-2">
+      <div className="flex items-center gap-2">
         <span className="text-muted-foreground">on</span>
         <Pick
           label="on"
@@ -51,7 +51,7 @@ export function Trigger({ on, context, put }: { on: On; context: Context; put: (
         {kind === 'quest' ? (
           <QuestOutcome on={on} bad={(o) => outcomeRefused(t, context.key, on, o)} put={put} />
         ) : null}
-      </label>
+      </div>
       {quest ? <p className="text-muted-foreground">~ {quest}</p> : null}
     </div>
   );
@@ -96,7 +96,7 @@ function QuestOutcome({
   put: (on: On) => void;
 }) {
   const [outcome, setOutcome] = useState(String(on.outcome ?? ''));
-  useEffect(() => setOutcome(String(on.outcome ?? '')), [on.outcome]);
+  useEffect(() => setOutcome(String(on.outcome ?? '')), [on.quest, on.outcome]);
   const refused = outcome !== on.outcome && bad(outcome);
   return (
     <>
