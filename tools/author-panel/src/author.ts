@@ -11,6 +11,9 @@ export const ask = (path: string, sent: object) =>
     ok: r.ok,
     told: (await r.json()) as unknown,
   }));
+/** A refusal (what still names it, or changed since) shows as an alert. */
+const refused = ({ ok, told }: { ok: boolean; told: unknown }) =>
+  ok || alert(typeof told === 'string' ? told : 'Changed outside: try again');
 
 /** The palette's Delete (POST /delete): the definition's file, or its row of a root file; a refusal
  * (what still names it) shows as an alert, as the palette's New does. */
@@ -30,7 +33,7 @@ export async function drop(key: string, file?: string) {
       also: Object.fromEntries(set.map((m) => [m.file, m.sha256])),
     }));
   else if (set) return;
-  if (!ok) alert(typeof told === 'string' ? told : 'Changed outside: try again');
+  refused({ ok, told });
 }
 /** The palette's Undo: the newest journal entry if it is a Delete, which leaves no card to undo it
  * from (loka-wfrgk.92); else the Book's Cmd-Z, which puts back its own words. */
@@ -40,8 +43,7 @@ export async function undoDelete(book: Pick<ReturnType<typeof useBook>, 'send'>)
   );
   if (!last?.what.startsWith('delete '))
     return book.send({ op: 'key', key: 'z', metaKey: true, ctrlKey: false, altKey: false });
-  const { ok, told } = await ask('undo', { id: last.id });
-  if (!ok) alert(typeof told === 'string' ? told : 'Changed outside: try again');
+  refused(await ask('undo', { id: last.id }));
 }
 
 export const checkpoints = {
