@@ -123,6 +123,16 @@ const bundledRefs = (source: string, refs: Map<string, string>) =>
     ),
   );
 
+// each node's own source file, for the inspector's card: a `.json`, else its `.scene` (a `.cut` none)
+const ownFiles = (source: string, refs: Map<string, string>) => {
+  const json = (f: string) => Number(f.endsWith('.json'));
+  const pairs = files(source)
+    .filter((f) => /\.(json|scene)$/.test(f))
+    .sort((a, b) => json(a) - json(b))
+    .map((rel) => [nodeOf(rel, refs), rel]);
+  return Object.fromEntries(pairs.filter(([ref]) => ref)) as Record<string, string>;
+};
+
 /** The model for `source` compiled to `dev`, with the compile's diagnostics. */
 export function story(source: string, dev: Dev, diagnostics: Diagnostic[]) {
   const loaded = loadCartridge(artifactBytes(dev), INSTALLED);
@@ -136,15 +146,7 @@ export function story(source: string, dev: Dev, diagnostics: Diagnostic[]) {
   const byNode: Record<string, Diagnostic[]> = {};
   for (const d of diagnostics) add(byNode, nodeOf(d.rel, refs), d);
   const unreached = new Set(Object.values(report.unreachable).flat());
-  // each node's own source file, for the inspector's card: a `.json`, else its `.scene` (a `.cut` none)
-  const sources: Record<string, string> = {};
-  const json = (f: string) => Number(f.endsWith('.json'));
-  for (const rel of files(source)
-    .filter((f) => /\.(json|scene)$/.test(f))
-    .sort((a, b) => json(a) - json(b))) {
-    const ref = nodeOf(rel, refs);
-    if (ref) sources[ref] = rel;
-  }
+  const sources = ownFiles(source, refs);
   const inBundle = bundledRefs(source, refs);
   return {
     hash: dev.sha256,
