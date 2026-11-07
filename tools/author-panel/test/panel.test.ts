@@ -72,17 +72,16 @@ test('the palette asks /find once per pause in the typing', async () => {
 });
 
 // Breaks: a quest or dialogue opens the generic card (right.tsx's dispatch), a quest's own name is
-// not a Book link (Quest.tsx's words), a dialogue's words list a field it lacks, a choice's then_failed row shows without a check (or hides
+// a words field (Quest.tsx's words), a dialogue's words list a field it lacks, a choice's then_failed row shows without a check (or hides
 // with one), a known target is not drafted, or a choice's link
 // takes a dialogue the story lacks (refuseLink not wired, or the refused text drafted and committed):
 // the compile's UNRESOLVED_REFERENCE.
 test('a quest and a dialogue open their cards; a link to no dialogue is refused', async () => {
   const quest = await open(QUEST);
   await quest.locator('[aria-label="quest card"]').waitFor({ timeout: boot });
-  const book = quest
-    .locator('[aria-label="quest card"] dl')
-    .getByRole('button', { name: 'Edit in Book' });
-  assert.equal(await book.count(), 1); // its own name opens in the Book, never a text input
+  const named = quest.locator('[aria-label="quest card"] [aria-label="words"] input');
+  await named.first().waitFor({ timeout: boot });
+  assert.equal(await named.count(), 1); // its own name: a words field, never a Book link
   await quest.close();
   const bess = await open({ right: 280, selection: { kind: 'dialogue', key: 'bess_talk' } });
   const rows = bess.locator('[aria-label="links"] input');
@@ -102,8 +101,8 @@ test('a quest and a dialogue open their cards; a link to no dialogue is refused'
   assert.deepEqual(tree, ['praise', 'insult', 'boast', 'lean']);
   const boast = bess.locator('[aria-label="choice boast"]');
   await boast.locator('summary').click();
-  // its words keep the form's widgets: Edit in Book, never a text input (fields.tsx TextKey)
-  await boast.getByRole('button', { name: 'Edit in Book' }).first().waitFor({ timeout: boot });
+  // its words keep the form's widgets: a words field (fields.tsx TextKey)
+  await boast.locator('input[aria-label$=" words"]').first().waitFor({ timeout: boot });
   // bess_talk.json's boast: check and steps are removable rows; label and narration, its words, never
   const shown = await boast.locator('span.flex-1').allTextContents();
   assert.deepEqual(shown.sort(), ['check', 'steps']);
@@ -113,8 +112,9 @@ test('a quest and a dialogue open their cards; a link to no dialogue is refused'
   const page = await open({ right: 280, selection: { kind: 'dialogue', key: 'aldous_talk' } });
   const link = page.getByLabel('bounty then');
   await link.waitFor({ timeout: boot });
-  const words = await page.locator('[aria-label="dialogue card"] dl dt').allTextContents();
-  assert.deepEqual(words, ['prompt']); // aldous_talk.json has a prompt and no name of its own
+  const words = page.locator('[aria-label="dialogue card"] [aria-label="words"] input');
+  await words.first().waitFor({ timeout: boot });
+  assert.deepEqual(await words.evaluateAll((l) => l.map((e) => e.ariaLabel)), ['prompt words']); // aldous_talk.json has a prompt and no name of its own
   const saved = await link.inputValue();
   assert.equal(await page.getByRole('button', { name: 'Add choice' }).isDisabled(), true); // no key yet
   await link.fill('end'); // a known target is drafted
@@ -623,11 +623,11 @@ test('palette Undo brings back the file palette Delete removed, once', async () 
 });
 
 // Last: it switches the world. Breaks: a `.scene` dialogue routed to no card or the generic one, a
-// value line without its picker or its verb's keys, a words line without its Book edit, an unknown
+// value line without its picker or its verb's keys, a words line without its words field, an unknown
 // key or the line's own value sent, Enter not sending, a refusal or a write's Undo not shown, or a
 // modal scene's treatment shown as none, or then: offering an unlinkable dialogue (Scene.tsx's
 // context.unlinkable dropped).
-test('a .scene dialogue opens its text card: a picker per value line, words to the Book', async () => {
+test('a .scene dialogue opens its text card: a picker per value line, words in place', async () => {
   appendFileSync(join(dir, 'identity_sampler/scenes/stranger_talk.scene'), '  then: end\n'); // line 7
   // the block tests' last write compiled first: a switch mid-compile leaves this card unopened
   const at = (f: string) => statSync(join(dir, f)).mtimeMs;
@@ -642,7 +642,7 @@ test('a .scene dialogue opens its text card: a picker per value line, words to t
   const npc = page.getByLabel('line 1 npc');
   assert.equal(await npc.inputValue(), 'stranger');
   const card = page.getByLabel('scene card');
-  assert.equal(await card.getByRole('button', { name: 'Edit in Book' }).count(), 2); // lines 3, 6
+  assert.equal(await card.locator('input[aria-label$=" words"]').count(), 2); // lines 3, 6
   const sent: string[] = [];
   page.on('request', (r) => void (r.url().includes('/set') && sent.push(r.url())));
   await npc.fill('nobody');
