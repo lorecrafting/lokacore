@@ -33,9 +33,9 @@ export function Inspector({ sel, story, diag, offer, pick }: Props) {
     );
   const ref = places(sel, story?.graph.nodes ?? []).inspector?.ref;
   const rel = fileOf(sel, ref, story?.files);
-  const { hidden, unlinkable, files } = story ?? {};
+  const { hidden, unlinkable, files, triggers } = story ?? {};
   const nodes = reachable(story?.graph.nodes ?? [], story, rel); // every picker offers what the card's file may name
-  const context = { kind: sel.kind, key: sel.key, nodes, hidden, unlinkable, files, open: pick, held: held(story?.graph.edges, ref) };
+  const context = { kind: sel.kind, key: sel.key, nodes, hidden, unlinkable, files, triggers, open: pick, held: held(story?.graph.edges, ref) };
   const count = (rows?: Record<string, unknown[]>) => (ref && rows?.[ref]?.length) || 0;
   const unreached =
     !!ref && Object.values(story!.report.unreachable).some((refs) => refs.includes(ref));
