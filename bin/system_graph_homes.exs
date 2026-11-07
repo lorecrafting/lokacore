@@ -33,6 +33,10 @@ defmodule SystemGraph.Homes do
   # `cartridges/*/rooms/*.json` or one file `cartridges/*/facts.json`.
   @spec authored(String.t(), map()) :: %{String.t() => [String.t()]}
   def authored(root, defs) do
+    # Tracked files only: an owner's uncommitted world in the main checkout is not the repo's (loka-wfrgk.112).
+    {out, 0} = System.cmd("git", ["-C", root, "ls-files", "cartridges"])
+    tracked = MapSet.new(String.split(out, "\n", trim: true))
+
     for {map, %{"additionalProperties" => %{"$ref" => r}}} <-
           defs["CompiledCartridge"]["properties"],
         into: %{} do
@@ -44,6 +48,7 @@ defmodule SystemGraph.Homes do
        files
        |> Enum.flat_map(&Path.wildcard/1)
        |> Enum.map(&Path.relative_to(&1, root))
+       |> Enum.filter(&MapSet.member?(tracked, &1))
        |> Enum.sort()}
     end
   end
