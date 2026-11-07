@@ -4,81 +4,82 @@ The present only: open work, next steps, owner questions, and standing owner rul
 yet. Rewrite this page in place once per session, at its end; never add dated session sections. History lives in git, Beads and `docs/reviews/`; lessons
 go to [PM lessons](lessons/pm.md) ([harness patterns](decisions/owner-decision-harness-patterns-2026-10-28.md)).
 
-AS OF main after #681; written 2026-11-06 by Claude Code (Opus 5.5), the editor build session (parallel, five agents). `kernel_api` is 1.159. Lean default in force since #533.
+AS OF main after #688; written 2026-11-06 by Claude Code (Opus 5.5), the editor build session (parallel, five agents). `kernel_api` is 1.159 (no contract slice since). Lean default in force since #533.
 
-## Direction (owner 2026-10-30 to 2026-11-05)
+## Direction (owner 2026-10-30 to 2026-11-06)
 
 - **The prologue is v1** (epic loka-g5hh): a free, complete 3 to 5 hour short story ending on the landing. Outline:
-  [prologue outline](worldbuilding/notes/prologue-outline-2026-10-30.md) (Fable draft, not canon). The owner writes it
-  in the editor (`bin/loka dev <cartridge>`, `?dev=1`): double-click a line, Enter saves, Esc cancels, Cmd-Z puts back,
-  `[`/`]` walk `~` lines; typing over a bare `~` replaces it.
+  [prologue outline](worldbuilding/notes/prologue-outline-2026-10-30.md) (Fable draft, not canon).
+- **The owner is now evaluating the editor by building prologue Part 1** (beats 1 to 9, outline section 7) and sends
+  feedback in the conversation. Start: `bin/author.sh` (watcher, Book preview and panel in one command; with no
+  argument it opens the last world; New world in the world picker makes one), later `bin/author.sh cartridges/<name>`.
+  `bin/loka dev` alone is only the watcher. In the Book: double-click a line, Enter saves, Esc cancels, Cmd-Z puts back
+  (also a palette Delete, #687), `[`/`]` walk `~` lines.
 - **The owner writes every player-facing word** in the prologue ([owner rules](system/owner-rules.md#process)); agents use `~`.
   Exception: the PM writes the **showcase's** combat, corpse, shrine, resurrection and consumable words and the Book's
   chrome words when the designer rules them.
-- **Do not wait for Pro (owner 2026-11-05):** build every editor slice now while the plan limit allows. The plan drops to
-  Pro around 2026-11-10; after it: one session, Sonnet for content, reviewers for engine changes, second opinions for
-  save and contract changes. Author-side edge-case guards are nits, not fix rounds.
+- **Descoping before Pro:** the plan drops to Pro around 2026-11-10; after it: one session, Sonnet for content, reviewers
+  for engine changes, second opinions for save and contract changes. Author-side edge-case guards are nits, not fix rounds.
 - **Agent cap is five** (owner 2026-11-05), counting agents waiting on CI. Never bypass hooks, the load gate or CI; wait
   for load with a background until-loop (two readings under 7 avoids a refused spawn).
 - **Authoring tool first, then write slowly; no aggressive mechanic expansion; polish** (owner 2026-11-04). Ideas parked
-  at P4 with label `deferred`, among them **loka-ni2zd** (owner ask 2026-11-05: NPC routines that really gather, sell and
-  feed the economy; plan first, needs an owner go).
-- **Fable** reviews foundation, trust-boundary and contract slices and gives design second opinions; developers are Opus.
-- **Card bar** (this session's reviews): a card never offers or writes what the compiler refuses; gates go two ways with
-  the compiler `file:line`; a path leaves the generic baseline only when a bespoke part really draws it.
+  at P4 with label `deferred`. **loka-ni2zd** (NPC routines that really gather, sell and feed the economy) is NOT before
+  Pro; the owner designs it in a separate session.
+- **Fable** reviews foundation, trust-boundary, save and contract slices and gives design second opinions; developers are Opus.
+- **Card bar:** a card never offers or writes what the compiler refuses; gates go two ways with the compiler
+  `file:line`; a path leaves the generic baseline only when a bespoke part really draws it.
 - **Developers walk in real Chrome on the final head**, screenshots in their own subfolder of the PM scratchpad, PR body
   drafts in their own worktree. **PR bodies are the reviewer's brief.**
 - **Hunger and thirst are retired** (loka-vduxr.61). **Death outside a fight**: owner option B (#629/#634).
-- **Hotbar** (loka-x6t.131): Inked; four slots in author order; the wedge is the only clock (no visible count, #671).
-- **Story map**: Map | Story | Flow in the left slot; v1 is S1 to S3. [Editor plan](decisions/owner-decision-authoring-editor-plan-2026-11-04.md).
 
 ## The editor today (main)
 
-Three-column shell (Cmd-K over `/find`, layout kept, dark), map with edits (locked by default, minimum zoom per the #680
-the minimum zoom fits the level in the slot, #681), edit model and gate, generic card with a capability-filtered add menu (#678), Book add-here, world
-picker and New world, resident compiler. Bespoke cards: **Room**, **World**, **NPC/Item** with **Combat numbers** and
-**Schedule** blocks (#672), **Reaction/Action** rules blocks, **Quest**, **Scene text** with `npc:`/`with:`/`then:` writes
-through `POST /set` and a modal-scene treatment picker (#673), **Dialogue choice tree** with gate badges, nested sets and
-compiler-matched add menus (#675). Story map S1 to S3 (list, Trace, Knowledge, Pacing, Bind, Flow). `.scene`/`.cut` lint.
-Engine this session: `HUB_SHUT` warning, `ENTRY_GUESSED` names deeper targets (#676), drowning refused with hp minimum
-above 0 (#674), patrol choice refusal instead of a crash (#676).
+Three-column shell (Cmd-K over `/find`), map with edits, edit model and gate, generic card with a capability-filtered
+add menu, Book add-here, world picker and New world, resident compiler. Bespoke cards: Room (details save with one Tab,
+optional parts folded), World, NPC/Item with Combat numbers and Schedule, Reaction/Action, Quest, Scene text, Dialogue
+choice tree. Story map S1 to S3 with Add beat in number order and New outline. Palette New for every kind; Delete
+refused while named (names the `file:line`), takes a set's extra files and templates with it, and is undone by Cmd-Z or
+the palette's Undo (#687). Card saves run one at a time; a failed save shows a refusal and keeps the draft (#685).
+Coverage tests (#684): a CRUD matrix over every registry kind, card round-trip, every server route has a caller; GAPS
+rows in `kernel/ts/test/editor_crud.test.ts` name their Beads issue and go red when stale.
+
+Go/no-go walk (this session, main af742b449): GO after #687. Built beats 1 to 3 in a fresh world; lint, Trace, Flow/Map
+open, schedule, status, detail, add beat, failed save and reload all held.
 
 ## In flight at handoff
 
-- Nothing. This session merged 29 PRs (#651, #654 to #681); no agent is running.
+- Nothing. This session merged 39 PRs (#651 to #688).
 
 ## Resume, in order
 
-1. **loka-kgd.221** dead page: a fight death then an off-fight death before Let go, and a press during the dead page
-   (from review-681; may need a designer ruling first).
-2. **Story map follow-ups** and **editor nits** still open (all P3/P4 unless noted): loka-wfrgk.42.1 (Schedule row on the
-   Map), .42.2 (P2: weapon fight rows need per-weapon rows in `kernel/ts/play/fight.ts`), .42.3, .43, .43.1, .47, .52, .53.1,
-   .53.2, .54, .56 (outside-write panel harness), .18.4.1, .18.8.1, .18.10, .25, .20; loka-vduxr.67 (Play from first),
-   .69 (`~words` spec change), .70 (not reproduced), .79.
-3. **Map features** left by batch A as features, not nits: loka-wfrgk.27, .28, .33, .34, .35.
-4. **loka-wfrgk.13** drag a template into a room; **loka-wfrgk.40** generic card overflow check; samplers (loka-vduxr.60);
-   loka-x6t.132 item grouping.
-5. Housekeeping retro 2026-11-06: loka-1zbvi, loka-7wvgo, loka-voset, loka-bqnu4, loka-rvbmn (owner approves).
+1. **Owner feedback from the Part 1 build** comes first; file it in Beads, fix blockers.
+2. **Editor P2s:** loka-wfrgk.90 (a click-in edit saves the first keystroke early; cause is the queued
+   `setTimeout(card.commit)` reading late, try field-to-field at CPU throttle 4; #688's attempt was reverted), .94
+   (schedules and details hidden from add menus until World adds the capability), .68 (`bin/loka new` key churn),
+   loka-lvo9i (CI flake: `editor_crud.test.ts:262` sees `play.test.ts:365`'s probe file).
+3. **Coverage PR B** (every schema field reachable, every menu offer compiles, loka-bqnu4; design-table rows each name a
+   test) and a read-only **test-cruft audit** driven by a mutation sweep (tests that kill no mutant).
+4. **P3 editor nits:** loka-wfrgk.84.2, .86.1, .87.1, .89, .91, .92.1, .92.2, .95, .65, .72, .81, .82, .42.x, .43, .47,
+   .53.x, .54, .56, .18.x.
+5. **Engine and design:** loka-kgd.222 (no fall line on an off-fight death, P2, a bug per spec), .221 (dead page
+   rulings), .223 (sim crash at `flows.ts:175`), loka-x6t.141 (designer dead-page text), loka-wfrgk.73 (in-fight death
+   page explains nothing; design question).
 
-## Owner-visible calls made this session (override any)
+## Owner calls this session (override any)
 
-- Mend's showcase words: "Mend"; "You speak the word of mending, and the cut along your arm draws closed." Mend at full
-  hp still spends and cools (left as is).
-- Hotbar: aimed spells stay in the foe's list; no fillers means no strip; no visible rounds-left count (#671).
-  `throw`, `wheel` and `pry` are the weakest glyphs at 24 px; redraws if you want them.
-- The Set level cheat fires no level reactions. The S1 Flow double-click opens the definition by key.
-- The trial and showcase jailers' pay (and showcase work_off) choices now end the talk (`then: end`); the
-  `walk_economy_jail` transcript was re-pinned (#676).
-- The author panel's single advance is capped at 3000 game minutes (#674).
-- Nested sets in the Dialogue tree are a read-only fold one level deep (#675).
+- A death outside a fight shows no "You are dead" line: a bug per spec (loka-kgd.222).
+- An encounter arriving during the dead page waits for Let go; a second off-fight death keeps the first death's page
+  (loka-x6t.141, loka-kgd.221).
+- NPC routines (loka-ni2zd) deferred to a separate design session.
+- Hunger and thirst are retired, so prologue beat 9's feast lines are a writing call for the owner.
+- PM calls: deleting a scene does not delete its quest (`taken()` refuses and names the quest); palette Delete is
+  undoable rather than confirmed (no new author words); #688's unproven .90 change was reverted rather than shipped.
 
 ## Waiting on the owner
 
-- **New:** a death outside a fight shows no "You are dead" line, unlike a fight death (#677 walk). Intended?
-- **New, unruled, no consumer yet:** an encounter arriving while the dead page shows (designer note on #680).
-- **New:** loka-ni2zd NPC routines (see Direction).
+- Part 1 build feedback (in the conversation).
 - Older: studio defaults, weapon proficiency shape, store fees, iOS first, the save guarantee, #574 acceptance, #564
-  calls, hosting (12uz).
+  calls, hosting (12uz). Retro items labelled `retro`/`housekeeping` for approval.
 
 ## Owner's writing list (prologue; text keys, no prose from agents)
 
@@ -87,7 +88,7 @@ above 0 (#674), patrol choice refusal instead of a crash (#676).
 `combat.title_you_attack` {target}, `combat.title_attacks_you` {attacker}; Well fed and Refreshed status names and meal
 and drink lines; the opening dream's scene lines (reverie); ambient lines; the showcase hub sign that still mentions
 hunger (`toolbox_showcase/text.json:1461`, `docs/showcase/hub-and-first-districts.md:79`); identity_sampler
-`stranger_talk.scene` talk text.
+`stranger_talk.scene` talk text; every `~` in the prologue.
 
 ## Holds
 
@@ -108,10 +109,13 @@ owner guide: [polish tour](design/polish-tour.md). Screenshots: Playwright needs
 - A kernel contract slice bumps only `INSTALLED.kernel_api` to main+1 at push; parallel claims rebump on the later merge.
 - CI waits: `bin/wait_ci.sh <sha|branch>`; it can time out while runs are still going: confirm with `gh run list --commit`.
   Merges one at a time in the main checkout via `bin/merge_pr.sh <pr> <id[,id...]>`. When `br` refuses a parent with open
-  nit dot-children, `br close <id> --force --reason "Merged #N"` and rerun `bin/after_merge.sh`; an untracked PR body
+  follow-up children, `br close <id> --force --reason "Merged #N"` and rerun `bin/after_merge.sh`; an untracked PR body
   draft in the worktree also stops it (remove it, rerun). A conflict after another merge goes back to the developer as
   "merge origin/main, no rebase" (force-push is forbidden). Review records sit on local `review-<PR>` branches and are
   carried by `after_merge`; a second record for the same PR is cherry-picked onto `review-<PR>` first.
+- Mutation runs in a throwaway worktree need node_modules (root, `kernel/ts`, `tools/author-panel`) and `deps` linked and
+  `_build` copied, else every row is BASELINE-RED; panel rows often stay BASELINE-RED there, so hand mutants in the slice
+  worktree cover them.
 - Subagents work only in their own worktrees under `~/dev/worktrees.noindex`; a fresh worktree runs `bin/worktree_setup.sh`.
   The load gate refuses spawns at load 8 or more: wait with a background until-loop, never bypass. Kill orphaned
   author servers and Playwright Chromes when load climbs (`ps` for `worktrees.noindex` and `--disable-field-trial-config`).
