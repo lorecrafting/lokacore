@@ -478,9 +478,8 @@ test("removing a room's last variant writes it gone, and Undo brings it back", a
 
 // Breaks: a detail added on the Room card is held refused (no description or alias; the Book's
 // Edit answers "not on this page"), or opens with every optional sub-field drawn (loka-wfrgk.76), or
-// a folded field leaves its fold on the first keystroke and drops the next ones, or a blur while a
-// write is in flight is sent stale, refused and dropped (CPU slowed as on CI: the summary's blur
-// writes `1` mid-typing, the Tab's `12` is refused).
+// a folded field leaves its fold on the first keystroke and drops the next ones, or a write behind one
+// in flight (CPU slowed as on CI: the summary's blur writes `1` mid-typing) or an Undo sent stale.
 test('a new room detail saves with a `~` description, its optional fields folded', async () => {
   const page = await open({ right: 420, selection: { kind: 'room', key: 'sea_cave' } });
   await (await page.context().newCDPSession(page)).send('Emulation.setCPUThrottlingRate', { rate: 6 });
@@ -499,6 +498,12 @@ test('a new room detail saves with a `~` description, its optional fields folded
   await rating.pressSequentially('12', { delay: 50 });
   await page.keyboard.press('Tab');
   for (let t = 0; well().rating !== 12 && t < 50; t++) await page.waitForTimeout(100);
+  assert.equal(well().rating, 12);
+  await rating.fill('123'); // and Undo clicked while its write is in flight undoes it once it lands
+  await page.keyboard.press('Tab');
+  const undo = page.getByRole('button', { name: 'Undo', exact: true });
+  await Promise.all([page.waitForResponse((r) => r.url().includes('/__author/undo')), undo.click()]);
+  await page.waitForTimeout(2000);
   assert.equal(well().rating, 12);
   writeFileSync(file, was);
   await page.close();
