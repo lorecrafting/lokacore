@@ -44,7 +44,7 @@ test('a room card writes its description line in place, off the Book page; Esc w
     await field.blur();
     await page.waitForTimeout(300);
     assert.equal(await field.inputValue(), FELL_TOP);
-    assert.deepEqual(posts, []);
+    assert.equal(posts.length, 0);
     assert.equal(readFileSync(TEXT, 'utf8'), before);
     await field.fill('~');
     await field.blur();
@@ -71,7 +71,7 @@ test("the generic card's words commit once, on Enter, never per keystroke", asyn
     await field.selectText();
     await field.pressSequentially('~'); // one keystroke
     await page.waitForTimeout(300);
-    assert.deepEqual(posts, []);
+    assert.equal(posts.length, 0);
     await field.press('Enter');
     await field.blur();
     await until(() => readFileSync(TEXT, 'utf8') !== before);
