@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import type { Story, Todo } from './storylist.ts';
 export type { Edge, Beat, Outline, Story, Todo } from './storylist.ts';
 import type { Timings } from './shell.ts';
+import type { useBook } from './book.ts';
 import type { Fights, Numbers } from '../../../kernel/ts/play/numbers.ts';
 
 export const ask = (path: string, sent: object) =>
@@ -29,6 +30,17 @@ export async function drop(key: string, file?: string) {
       also: Object.fromEntries(set.map((m) => [m.file, m.sha256])),
     }));
   else if (set) return;
+  if (!ok) alert(typeof told === 'string' ? told : 'Changed outside: try again');
+}
+/** The palette's Undo: the newest journal entry if it is a Delete, which leaves no card to undo it
+ * from (loka-wfrgk.92); else the Book's Cmd-Z, which puts back its own words. */
+export async function undoDelete(book: Pick<ReturnType<typeof useBook>, 'send'>) {
+  const [last]: { id: number; what: string }[] = await fetch('/__author/journal').then((r) =>
+    r.json(),
+  );
+  if (!last?.what.startsWith('delete '))
+    return book.send({ op: 'key', key: 'z', metaKey: true, ctrlKey: false, altKey: false });
+  const { ok, told } = await ask('undo', { id: last.id });
   if (!ok) alert(typeof told === 'string' ? told : 'Changed outside: try again');
 }
 

@@ -2,10 +2,10 @@
 // `bin/loka dev --watch` on the toolbox showcase, in stable Chrome (the runner image has it, as the
 // Storybook jobs use). A new check: a test() here naming its break, with a red control.
 // bin/mutate_diff.sh runs this file for every panel .tsx line, by this marker: mutate-covers: src
-// size: allow 664, every panel E2E shares harness.ts's one Vite + bin/loka dev server pair and Chrome
+// size: allow 692, every panel E2E shares harness.ts's one Vite + bin/loka dev server pair and Chrome
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
-import { appendFileSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
+import { appendFileSync, existsSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { test } from 'node:test';
 import axe from 'axe-core';
@@ -583,6 +583,34 @@ test('palette New and Delete send the starter and the selected file; refusals sh
   ]);
   assert.deepEqual(told, ['refused here', 'refused here', `${file}: not found`, 'refused here']);
   assert.deepEqual(asked, ['New room key']); // the starter is the plural dir
+  await page.close();
+});
+
+// Breaks: a palette Delete's journal entry is undone from nowhere in the GUI, so only git brings the
+// file back (loka-wfrgk.92), or a second Undo undoes that undo and deletes the file again.
+test('palette Undo brings back the file palette Delete removed, once', async () => {
+  const page = await open({ selection: { kind: 'reaction', key: 'boar_gore' } });
+  const file = join(dir, 'showcase/areas/combat/reactions/boar_gore.json');
+  const bytes = readFileSync(file, 'utf8');
+  const told: string[] = [];
+  page.on('dialog', (d) => void (told.push(d.message()), d.accept()));
+  const run = async (command: string, until: () => boolean) => {
+    await page.keyboard.press('Control+k');
+    await page.getByLabel('Find a key, a ~ or a command').fill(command);
+    await page.keyboard.press('Enter');
+    for (let t = 0; !until() && t < 50; t++) await page.waitForTimeout(100);
+  };
+  try {
+    await run('Delete the selected definition', () => !existsSync(file));
+    assert.equal(existsSync(file), false, `not deleted: ${told}`);
+    await run('Undo the last edit', () => existsSync(file));
+    assert.equal(readFileSync(file, 'utf8'), bytes, `not brought back: ${told}`);
+    await run('Undo the last edit', () => false); // the Book's Cmd-Z: nothing of its own to put back
+    await page.getByText('Nothing of yours to put back.').waitFor({ timeout: boot });
+    assert.equal(existsSync(file), true, 'the second Undo deleted it again');
+  } finally {
+    writeFileSync(file, bytes); // the later tests share this cartridge
+  }
   await page.close();
 });
 
