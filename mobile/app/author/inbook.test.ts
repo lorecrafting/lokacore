@@ -1,10 +1,11 @@
-// size: allow 585, one editor's keys, saves, conflicts and add-here walked over one stubbed page
+// size: allow 660, one editor's keys, saves, conflicts, add-here and capitalised titles walked over one stubbed page
 // E5's in-Book editor (docs/design/prose-in-the-book-rulings.md) in headless Google Chrome, over a
 // page of plain lines and a stubbed /__author route; the Book itself is the walk's (web-preview.md).
 import assert from 'node:assert/strict';
 import { after, afterEach, before, beforeEach, test } from 'node:test';
 import { build } from 'esbuild';
 import { chromium, type Browser, type Page } from 'playwright';
+import { cap } from '../book/words.ts';
 import type { start } from './inbook.ts';
 
 const ORIGIN = 'http://localhost:19999'; // the relay takes only a local origin; the route answers, no server
@@ -116,6 +117,81 @@ test('a double-click opens the source words; Enter saves them to that line and c
       .first()
       .evaluate((el) => el === document.activeElement),
   );
+});
+
+// A line the Book draws through cap() (an NPC page title, a menu title): text() saw its file's words.
+const STRANGER = {
+  file: 'text.json',
+  line: 31,
+  was: 'a hooded stranger',
+  words: 'a hooded stranger',
+};
+const capitalised = (key: string, words: string) =>
+  page.evaluate(
+    ([key, words, shown]) => {
+      const w = window as unknown as { seen: Map<string, string>; said: Map<string, string> };
+      const el = document.querySelector('main')!.appendChild(document.createElement('h1'));
+      el.dir = 'auto';
+      const cut = shown.lastIndexOf(' ');
+      const inner = Object.assign(document.createElement('span'), {
+        textContent: shown.slice(0, cut),
+      });
+      el.append(inner, shown.slice(cut)); // a nested Text: a double-click lands on part of the line
+      w.seen.set(words, key);
+      w.said.set(key, words);
+    },
+    [key, words, cap(words)], // drawn as the Book's cap() draws a title
+  );
+
+// Breaks: the lookup matches a drawn line's words exactly only, so a capitalised NPC title says
+// "Not a line of words"; the field shows or saves the capitalised form, not the file's; or the
+// words held while it is open are the capitalised ones, so the key's other uses capitalise too;
+// or a double-click on a nested part of the line does not climb to the line.
+test("a capitalised title opens its key's field with the file's words; Enter saves that line", async () => {
+  await capitalised('npc.stranger.short', 'a hooded stranger');
+  answer = (path) => (path.startsWith('/line') ? [200, STRANGER] : [200, { id: 7 }]);
+  await page.locator('h1 span').dblclick();
+  const field = page.locator('[data-loka-field]');
+  assert.equal(await field.textContent(), 'a hooded stranger');
+  assert.equal(asked[0].path, '/line?key=npc.stranger.short&words=a%20hooded%20stranger');
+  const frozen = () => page.evaluate(() => (window as any).inbook.frozen('npc.stranger.short'));
+  assert.equal(await frozen(), 'a hooded stranger', 'a lowercase use of the key stays lowercase');
+  await page.keyboard.type(', cloaked');
+  await page.keyboard.press('Enter');
+  await page.waitForFunction(() => !document.querySelector('[data-loka-field]'));
+  assert.deepEqual(posted('/edit'), [
+    { ...STRANGER, words: 'a hooded stranger, cloaked', key: 'npc.stranger.short' },
+  ]);
+  assert.equal(await page.locator('h1').textContent(), 'A hooded stranger');
+});
+
+// Breaks: the card's Edit in Book finds a capitalised menu title by exact words only, so it opens
+// the owner's editor although the line is on this page.
+test("the card's Edit in Book opens a capitalised menu title's field", async () => {
+  await capitalised('item.lantern.name', 'brass lantern');
+  answer = () => [200, { ...STRANGER, was: 'brass lantern', words: 'brass lantern' }];
+  await page.evaluate(() => postMessage({ op: 'edit', key: 'item.lantern.name' }, '*'));
+  await page.locator('h1[data-loka-field]').waitFor();
+  assert.equal(await page.locator('h1').textContent(), 'brass lantern');
+  assert.deepEqual(posted('/open'), []);
+});
+
+// Breaks: a title two keys draw alike (journal_sampler: quest.oar.title "The lost oar", the
+// item page's cap(item.oar.short) "the lost oar") opens one key's field, exact or lowered first,
+// so Enter writes the other key's line; or Edit in Book opens it under the wrong key.
+test('a title two keys draw alike opens no field, from either key', async () => {
+  await capitalised('item.oar.short', 'the lost oar');
+  await page.evaluate(() => (window as any).seen.set('The lost oar', 'quest.oar.title'));
+  await page.locator('h1 span').dblclick();
+  await noteSays('Not a line of words. Alt-click opens its source.');
+  for (const key of ['item.oar.short', 'quest.oar.title'])
+    await page.evaluate((key) => postMessage({ op: 'edit', key }, '*'), key);
+  await settle(); // each key's line is not on this page, so it opens in the owner's editor
+  assert.deepEqual(
+    posted('/open').map((b: any) => b.key),
+    ['item.oar.short', 'quest.oar.title'],
+  );
+  assert.equal(await page.locator('[data-loka-field]').count(), 0);
 });
 
 const TILDE = { file: 'a.loka', line: 4, was: '~', words: '~' };
