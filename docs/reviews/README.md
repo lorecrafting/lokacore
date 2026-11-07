@@ -15,7 +15,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Review: Editor walk P2 (PR #686, loka-wfrgk.61-.64, .67-.71, .80)](2026-11-06-editor-walk-p2-review.md): **APPROVE WITH NOTES**
 - [Review: editor walk P1, dev save survives edits, palette New for every kind, Delete refused while named](2026-11-06-editor-walk-p1-review.md): **APPROVE WITH NOTES**
 - [Review: editor walk C, schedule hour kinds, status duration, one-way Undo, last variant, Run fights](2026-11-06-editor-walk-c-review.md): **CHANGES REQUIRED**
-- [Review: Editor P2 follow-ups (PR #688, loka-wfrgk.84.1, .88, .90, .93)](2026-11-06-editor-p2-followups-review.md): **CHANGES REQUIRED**
+- [Review: Editor P2 follow-ups (PR #688, loka-wfrgk.84.1, .88, .90, .93)](2026-11-06-editor-p2-followups-review.md): **APPROVE**
 - [Review: editor nit batch B2, story list, Flow and picker nits](2026-11-06-editor-nits-b2-review.md): **APPROVE WITH NOTES**
 - [Review: editor nit batch B, cards, lint and content-report nits](2026-11-06-editor-nits-b-review.md): **CHANGES REQUIRED**
 - [Review: Editor nit batch A, map, shell and Book death-page fixes (PR #677)](2026-11-06-editor-nits-a-review.md): **CHANGES REQUIRED**

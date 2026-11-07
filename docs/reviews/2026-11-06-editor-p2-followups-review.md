@@ -31,3 +31,13 @@
 - Partial target `{kind:'npc'}` and `{}` fail the schema, so `fresh` holds them.
 - Hand mutants, all red-narrow (allowed.test, story_card.test): template clause dropped at allowed.ts:86; narration clause dropped at :89; `===` to `!==` at :89 (PR claim rerun); OWNERS :54 renamed; `!` dropped at unready :149.
 - `bin/mutate_diff.sh origin/main` (10 mutants): 7 red-narrow (allowed.ts:86 x3, :89 x2, :146, :149); 3 BASELINE-RED Generic.tsx:213 (panel dev servers). The PR reports all 10 BASELINE-RED for its run and the same 7 red-narrow by hand; consistent. Its hand table discloses Generic.tsx:213 #2 SURVIVED, matching finding 1.
+
+## Fix round at 63db41c37
+
+Commits a58e506f2, 63db41c37 only. CI at the head (`gh run list --commit 63db41c37…`): ci success (attempt 2, kernel rerun for loka-lvo9i, not this diff), book-e2e success, graph-diff success.
+
+### Verdict: APPROVE
+
+- Finding 1, resolved: `Generic.tsx` and `panel.test.ts` match the merge base af742b449 apart from the .84.1 `unfed` to `unready` rename; .90 is out of the title and body and stays open.
+- Finding 2, resolved: `kernel/ts/play/card.ts:347-348` seeds capacity at `max(1, held)`; `held` (:369) counts `.location.item` edges into the selection's graph ref (`tools/author-panel/src/right.tsx:39`), the same set entities.ex:242-253 counts (templates have no `.location.item` edge). Test `kernel/ts/test/allowed.test.ts:109` uses hand-written expectations. Hand mutants, all red: path check dropped from `held`; `Math.max(1, held)` to `held`; seed reverted to `1`. Disclosed limit (an item placed since the last good compile is not counted) accepted: the next compile reports it, and nothing is written silently wrong at seed time beyond that window.
+- Findings 3 and 4: filed as loka-wfrgk.84.2.
