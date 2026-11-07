@@ -298,6 +298,18 @@ test('/line opens an inline prose key in its own definition, whoever else holds 
     await line('item.bell.labels.ring', 'ring'),
     at('items/bell.json', 3, '    "ring": {"prose": "ring"}', 'ring'),
   );
+  // two fields with the same words on one line: found (worded's refusal), not 'no source line'
+  writeFileSync(
+    join(src, 'rooms/h.json'),
+    '{"name": {"prose": "Q"}, "description": {"prose": "Q"}, "exits": {}}\n',
+  );
+  assert.deepEqual(await line('room.h.name', 'Q'), [400, '"not a line of words"']);
+  // a half-saved extending file cannot tell: its parent's line still opens
+  writeFileSync(join(src, 'rooms/f.json'), '{\n  "extends": "g",\n');
+  assert.deepEqual(
+    await line('room.f.description', 'Arch'),
+    at('rooms/g.json', 3, '  "description": {"prose": "Arch"},', 'Arch'),
+  );
   // words edited outside the Book before the compile: its own line is gone, so no other's line
   assert.equal((await line('room.b.name', 'Hall'))[0], 404);
   assert.equal((await line('item.lamp.name', 'x'))[0], 404);

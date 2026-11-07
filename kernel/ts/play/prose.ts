@@ -68,11 +68,11 @@ export function sourcesOf(source: string, key: string, words?: string) {
 }
 const fileOf = (at: string) => at.slice(0, at.lastIndexOf(':'));
 const MARK = '\u0000line';
-/** JSON file `rel`'s value at `steps` (`room` a `room_line`'s, prose.ex step/1), with line `n`'s
- * last `words` marked first; null while it does not parse (a half-saved file: cannot tell). */
-function valueAt(source: string, rel: string, steps: string[], words = '', n = -1) {
+/** JSON file `rel`'s value at `steps` (`room` a `room_line`'s, prose.ex step/1), with the `words`
+ * at column `i` of line `n` marked first; null while it does not parse (a half-saved file). */
+function valueAt(source: string, rel: string, steps: string[], words = '', n = -1, i = 0) {
   const lines = readFileSync(join(source, rel), 'utf8').split('\n');
-  const [was, i] = [JSON.stringify(words), lines[n]?.lastIndexOf(JSON.stringify(words))];
+  const was = JSON.stringify(words);
   if (n >= 0)
     lines[n] = lines[n].slice(0, i) + JSON.stringify(MARK) + lines[n].slice(i + was.length);
   try {
@@ -84,6 +84,19 @@ function valueAt(source: string, rel: string, steps: string[], words = '', n = -
   } catch {
     return null;
   }
+}
+/** Whether marking one place `words` stand on line `n` (a label keyed by its words, two fields on
+ * one line) marks the value at `steps`: a string or an inline `{"prose"}`; a half-saved file, yes. */
+function marked(source: string, rel: string, steps: string[], words: string, n: number) {
+  const [line, was] = [
+    readFileSync(join(source, rel), 'utf8').split('\n')[n],
+    JSON.stringify(words),
+  ];
+  for (let i = line.indexOf(was); i >= 0; i = line.indexOf(was, i + 1)) {
+    const value = valueAt(source, rel, steps, words, n, i);
+    if (value === null || value === MARK || value?.prose === MARK) return true;
+  }
+  return false;
 }
 /** An inline prose key `<kind>.<key>.<path>`'s `hits` that its own definition holds at that path:
  * the same words elsewhere (a keyword, another room, its other fields) are not its line. With its
@@ -109,12 +122,12 @@ function own(source: string, key: string, words: string, hits: string[], all: st
   const holds = (at: string) => {
     const [rel, s] = [fileOf(at), steps(fileOf(at))];
     if (!s || !rel.endsWith('.json')) return !!s; // a scene: its own file
-    const value = valueAt(source, rel, s, words, Number(at.slice(at.lastIndexOf(':') + 1)) - 1);
-    return value === null || value === MARK || value?.prose === MARK; // a string or `{"prose"}`
+    return marked(source, rel, s, words, Number(at.slice(at.lastIndexOf(':') + 1)) - 1);
   };
   const kept = hits.filter(holds);
+  // a half-saved own file (null) cannot tell either: as with nothing there, every hit
   const defines = (rel: string) =>
-    !rel.endsWith('.json') || valueAt(source, rel, steps(rel)!) !== undefined;
+    !rel.endsWith('.json') || valueAt(source, rel, steps(rel)!) != null;
   // nothing there: words it inherits (`extends`) are wherever they are found
   return kept.length || [...mine, ...(bundle ? [bundle[1]] : [])].some(defines) ? kept : hits;
 }
