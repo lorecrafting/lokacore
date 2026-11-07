@@ -10,12 +10,14 @@ const { created, mapCommand, shown } = await import(wire);
 let posts: object[] = [];
 const picks: object[] = [];
 const g = globalThis as Record<string, unknown>;
-g.alert = () => {};
+const alerts: string[] = [];
+g.alert = (m: string) => void alerts.push(m);
 let answer: string | null = null;
 g.prompt = () => answer;
 g.fetch = async (url: string, init?: { body?: string }) => {
   if (init?.body) posts.push(JSON.parse(init.body));
-  const made = { id: 1, files: ['npcs/npc_3.json'], bytes: '{}', sha256: '' };
+  const again = init?.body?.includes('"layout"'); // its file is there: the starter reruns, writing nothing
+  const made = { id: 1, files: again ? [] : ['npcs/npc_3.json'], bytes: '{}', sha256: '' };
   const held = [
     { dir: 'npcs', key: 'npc_1' },
     { dir: 'items', key: 'item_1' },
@@ -27,7 +29,8 @@ shown.nodes = [{ kind: 'scene', ref: 'scene/cutscene_1' }];
 
 // Breaks: a palette kind keyed against its own name instead of its graph kind (a cutscene is a
 // `scene` node, so cutscene_1 is reused), templates not skipped for items, an outline or layout renamed,
-// a text key generated (it would merge into a held one) or a cancelled prompt still sent.
+// a text key generated (it would merge into a held one) or selected (no node holds it), a cancelled
+// prompt still sent, or a rerun on an existing file taken for a new card.
 test('palette New picks the graph kind, skips templates, keeps fixed names and asks for a text key', async () => {
   await created('cutscene');
   await created('npcs');
@@ -50,8 +53,8 @@ test('palette New picks the graph kind, skips templates, keeps fixed names and a
     { kind: 'scene', key: 'cutscene_2' },
     { kind: 'npc', key: 'npc_2' },
     { kind: 'item', key: 'item_2' },
-    { kind: 'text', key: 'hello' },
   ]);
+  assert.deepEqual(alerts, ['layout already exists']);
 });
 
 const first = async (id: string, dir?: string) => {

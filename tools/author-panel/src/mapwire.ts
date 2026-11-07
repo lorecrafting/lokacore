@@ -36,7 +36,8 @@ export async function created(kind: string) {
   if (!name) return;
   const { ok, told } = await ask('new', { kind, name });
   if (!ok) alert(String(told));
-  else if (!fixed) shown.pick({ kind: node, key: name });
+  else if (!(told as { files: string[] }).files.length) alert(`${name} already exists`); // the starter reran on its file
+  else if (!fixed && !NAMED.includes(kind)) shown.pick({ kind: node, key: name }); // text and behaviours have no node
 }
 
 /** The last map edit's id if it read or wrote `file` (mapedit.ts `newest`). */
