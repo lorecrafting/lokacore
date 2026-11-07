@@ -70,3 +70,31 @@ palette Undo test, both red-narrow:
 
 Finding 1 needs a fix round (logic change, more than the small-should-fix shape). Findings 2-5 are nits:
 file 2 in Beads or leave as a known limit; 3-5 at the developer's option in the fix round.
+
+## Fix round at d9985337551461ff6435be97acf0900f66473102
+
+Commits reviewed: `1a814cd3d`, `d99853375` (plus `9595583b5`, the first record). CI on the head:
+ci, book-e2e, graph-diff all success (`gh run list --commit`).
+
+| Finding | Disposition |
+|---|---|
+| 1 keyboard Cmd-Z loses the delete | Fixed. `mobile/app/author/inbook.ts:192` `putBack` reads `/journal` and `/undo`s a newest `delete` entry before popping `edits`; its only caller `onKey` (direct press and the `op:'key'` relay at `inbook.ts:268`) reaches it, so all three Cmd-Z paths meet the check. Test `inbook.test.ts:318` asserts undo ids `[9, 7]` (delete first, then the page edit). |
+| 2 newest-only | Accepted nit, in Beads (later write hides an older delete). |
+| 3 no `r.ok` | Fixed. `tools/author-panel/src/author.ts:41-43` refuses on `!r.ok` with the body or statusText; `panel.test.ts` routes a 500 and asserts the alert. |
+| 4 double Undo false 409 | Fixed. `inbook.ts:33,220` `putting` chains presses so the second reads the journal after the first undo. |
+| 5 5 s settle | Accepted nit. |
+
+Hand mutants (fresh detached worktree at the head, `node --test author/inbook.test.ts`):
+
+| Mutant | Result |
+|---|---|
+| inbook.ts:220 `putting = putting.catch(() => {}).then(putBack)` -> `putBack()` (no serialisation) | red-narrow |
+| inbook.ts:197 `{ id: newest.id }` -> `{ id: newest.id + 1 }` | red-narrow |
+
+The PR's `mutate_diff` rows for inbook.ts:195/196/200 are red-narrow; its panel rows were BASELINE-RED in
+the developer's worktree and cleared by hand (red-full), matching my first-round runs.
+
+Known limits, already in Beads, not findings here: a second Cmd-Z after a put-back says "nothing to put
+back" because the Book page reloads; a failed undo always reads "changed since".
+
+**Verdict: APPROVE.**
