@@ -10,6 +10,7 @@ of closed work are deleted once their lesson is folded, and linked by permalink
 Reviews before R2 live in the [legacy repository](https://github.com/lorecrafting/lokacore-v2-legacy)
 (commit `997a7a8`, `docs/rewrite-v3/reviews/`).
 
+- [Review: Field guide B, Add menus with descriptions and the generated field guide (loka-wfrgk.102.3)](2026-11-07-field-guide-b-review.md): **APPROVE WITH NOTES**
 - [Review: Field guide A, plain-English field help for prologue Part 1 kinds (loka-wfrgk.102 A)](2026-11-07-field-guide-a-review.md): **CHANGES REQUIRED**
 - [Review: ruled batch 3, map least zoom, second death waits, author note margin, Hotbar story words](2026-11-06-ruled-batch-3-review.md): **CHANGES REQUIRED**
 - [Review: /line opens an inline prose key's own definition line (loka-wfrgk.100.3)](2026-11-06-loka-wfrgk.100.3-review.md): **APPROVE WITH NOTES**
