@@ -94,7 +94,7 @@
           ],
           "additionalProperties": false
         },
-        {
+        {"description":"Starts a quest.",
           "type": "object",
           "properties": {
             "op": {
@@ -110,7 +110,7 @@
           ],
           "additionalProperties": false
         },
-        {
+        {"description":"Completes a quest with an outcome.",
           "type": "object",
           "properties": {
             "op": {
@@ -130,7 +130,7 @@
           ],
           "additionalProperties": false
         },
-        {
+        {"description":"Fails a quest with an outcome.",
           "type": "object",
           "properties": {
             "op": {
@@ -584,7 +584,7 @@
             ]
           }
         },
-        {
+        {"description":"The player learns a skill.",
           "type": "object",
           "properties": {
             "op": {
@@ -600,7 +600,7 @@
           ],
           "additionalProperties": false
         },
-        {
+        {"description":"The player learns a topic they can ask about.",
           "type": "object",
           "properties": {
             "op": {
@@ -616,7 +616,7 @@
           ],
           "additionalProperties": false
         },
-        {
+        {"description":"A service's benefit: the player is now owed something, such as a paid room, recorded in a fact.",
           "type": "object",
           "properties": {
             "op": {
@@ -673,7 +673,7 @@
           ],
           "additionalProperties": false
         },
-        {
+        {"description":"A service's benefit: a meal that draws on the provider's stock and restores the body.",
           "type": "object",
           "properties": {
             "op": {
@@ -705,7 +705,7 @@
           ],
           "additionalProperties": false
         },
-        {
+        {"description":"A service's benefit: a drink served from a vessel that restores the body.",
           "type": "object",
           "properties": {
             "op": {
@@ -735,7 +735,7 @@
           ],
           "additionalProperties": false
         },
-        {
+        {"description":"A service's benefit: repairs the player's wielded weapon.",
           "type": "object",
           "properties": {
             "op": {
@@ -757,7 +757,7 @@
           ],
           "additionalProperties": false
         },
-        {
+        {"description":"A service's benefit: collects the player's ready order.",
           "type": "object",
           "properties": {
             "op": {
@@ -773,7 +773,7 @@
           ],
           "additionalProperties": false
         },
-        {
+        {"description":"A service's benefit: cancels the player's order.",
           "type": "object",
           "properties": {
             "op": {
@@ -789,7 +789,7 @@
           ],
           "additionalProperties": false
         },
-        {
+        {"description":"A service's benefit: puts the player's money into a shared vault; a fact shows their balance.",
           "type": "object",
           "properties": {
             "op": {
@@ -815,7 +815,7 @@
           ],
           "additionalProperties": false
         },
-        {
+        {"description":"A service's benefit: takes the player's money out of a shared vault.",
           "type": "object",
           "properties": {
             "op": {
@@ -960,7 +960,7 @@
       ],
       "oneOf": [
         {
-          "description": "A luck check (21 §7 Check; 00a `check: {kind: luck, chance: 50}`), owned by check@1: resolved once per admitted perform, after every admission check (a rejection draws nothing) and before any outcome step. luck draws one uniform integer in [0, 100) from the world's RNG (rng.ts uniform; xoshiro128ss-1.1, numeric profile) and passes when it is below chance; the draw commits whether the check passes or fails (04 §5.0). key names the check in its check_passed or check_failed event (a DefinitionRef of kind check in the cartridge's namespace), the key a quest objective matches (00a). An inline check's key is its check definition's key, so two checks, of scripted actions or dialogue choices, may not share one (DUPLICATE_DEFINITION).",
+          "description": "A roll of chance: passes when a random number from 0 to 99 is below chance. Example: chance 50 passes half the time.",
           "type": "object",
           "properties": {
             "key": {"description":"This check's key, unique across scripted actions and dialogue choices.",
@@ -983,7 +983,7 @@
           "additionalProperties": false
         },
         {
-          "description": "A deterministic threshold (21 §7 Check: deterministic threshold, difficulty; R5 S6b), owned by check@1 like a luck roll: passes when the actor's body's current value of a resource of the cartridge, read at admission before the scripted action's costs, is at least difficulty. It draws no RNG and emits check_passed or check_failed under key; the key rules of a luck check apply.",
+          "description": "A fixed test: passes when the player's resource, such as stamina, is at least difficulty. No dice.",
           "type": "object",
           "properties": {
             "key": {"description":"This check's key, unique across scripted actions and dialogue choices.",

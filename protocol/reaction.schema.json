@@ -10,9 +10,9 @@
         "key": {
           "$ref": "action.schema.json#/$defs/Key"
         },
-        "on": {
+        "on": {"description":"What sets this reaction off: one event, optionally narrowed to a room, item, NPC and so on. Example: {\"event\": \"item_acquired\", \"item\": \"key\"}.",
           "oneOf": [
-            {
+            {"description":"A fact's value changed.",
               "type": "object",
               "properties": {
                 "event": {
@@ -28,7 +28,7 @@
               ],
               "additionalProperties": false
             },
-            {
+            {"description":"Someone entered a room.",
               "type": "object",
               "properties": {
                 "event": {
@@ -50,7 +50,7 @@
             },
             {
               "type": "object",
-              "description": "Toolbox row G9 (speech@1): one spoken event per NPC that heard the word.",
+              "description": "Someone said a word an NPC heard; fires once for each NPC that heard it.",
               "properties": {
                 "event": {
                   "const": "spoken"
@@ -73,7 +73,7 @@
             },
             {
               "type": "object",
-              "description": "Toolbox row 4 (attribute@1): a character reached a level.",
+              "description": "A character reached a level.",
               "properties": {
                 "event": {
                   "const": "level_reached"
@@ -91,7 +91,7 @@
             },
             {
               "type": "object",
-              "description": "Toolbox row FD7 (speech@1): the actor asked an NPC about a topic.",
+              "description": "The player asked an NPC about a topic.",
               "properties": {
                 "event": {
                   "const": "asked"
@@ -112,7 +112,7 @@
               ],
               "additionalProperties": false
             },
-            {
+            {"description":"A quest was completed with an outcome.",
               "type": "object",
               "properties": {
                 "event": {
@@ -132,7 +132,7 @@
               ],
               "additionalProperties": false
             },
-            {
+            {"description":"The player rested.",
               "type": "object",
               "properties": {
                 "event": {
@@ -148,7 +148,7 @@
               ],
               "additionalProperties": false
             },
-            {
+            {"description":"An item was picked up.",
               "type": "object",
               "properties": {
                 "event": {
@@ -167,7 +167,7 @@
               ],
               "additionalProperties": false
             },
-            {
+            {"description":"An item was dropped.",
               "type": "object",
               "properties": {
                 "event": {
@@ -189,7 +189,7 @@
               ],
               "additionalProperties": false
             },
-            {
+            {"description":"A creature was shooed away from an item.",
               "type": "object",
               "properties": {
                 "event": {
@@ -207,7 +207,7 @@
               ],
               "additionalProperties": false
             },
-            {
+            {"description":"A quest started.",
               "type": "object",
               "properties": {
                 "event": {
@@ -222,7 +222,7 @@
               ],
               "additionalProperties": false
             },
-            {
+            {"description":"A conversation put a choice in front of the player.",
               "type": "object",
               "properties": {
                 "event": {
@@ -234,7 +234,7 @@
               ],
               "additionalProperties": false
             },
-            {
+            {"description":"The player picked an option in a choice.",
               "type": "object",
               "properties": {
                 "event": {
@@ -249,7 +249,7 @@
               ],
               "additionalProperties": false
             },
-            {
+            {"description":"A story point was reached.",
               "type": "object",
               "properties": {
                 "event": {
@@ -267,7 +267,7 @@
               ],
               "additionalProperties": false
             },
-            {
+            {"description":"A custom event sent by an event.emit step.",
               "type": "object",
               "properties": {
                 "event": {
@@ -282,7 +282,7 @@
               ],
               "additionalProperties": false
             },
-            {
+            {"description":"A scripted action finished.",
               "type": "object",
               "properties": {
                 "event": {
@@ -301,7 +301,7 @@
               ],
               "additionalProperties": false
             },
-            {
+            {"description":"A check passed.",
               "type": "object",
               "properties": {
                 "event": {
@@ -320,7 +320,7 @@
               ],
               "additionalProperties": false
             },
-            {
+            {"description":"A check failed.",
               "type": "object",
               "properties": {
                 "event": {
@@ -339,7 +339,7 @@
               ],
               "additionalProperties": false
             },
-            {
+            {"description":"A door or other barrier changed state, such as opened or locked.",
               "type": "object",
               "properties": {
                 "event": {
@@ -357,7 +357,7 @@
               ],
               "additionalProperties": false
             },
-            {
+            {"description":"A scene ended.",
               "type": "object",
               "properties": {
                 "event": {
@@ -372,7 +372,7 @@
               ],
               "additionalProperties": false
             },
-            {
+            {"description":"Someone died.",
               "type": "object",
               "properties": {
                 "event": {
@@ -394,7 +394,7 @@
               ],
               "additionalProperties": false
             },
-            {
+            {"description":"An attack hit or missed.",
               "type": "object",
               "properties": {
                 "event": {
@@ -421,7 +421,7 @@
               ],
               "additionalProperties": false
             },
-            {
+            {"description":"A vessel was filled with a liquid.",
               "type": "object",
               "properties": {
                 "event": {
@@ -436,7 +436,7 @@
               ],
               "additionalProperties": false
             },
-            {
+            {"description":"A liquid was poured out.",
               "type": "object",
               "properties": {
                 "event": {
@@ -451,7 +451,7 @@
               ],
               "additionalProperties": false
             },
-            {
+            {"description":"Someone drank a liquid.",
               "type": "object",
               "properties": {
                 "event": {
@@ -467,7 +467,7 @@
               "additionalProperties": false
             },
             {
-              "description": "The world's hourly calendar event (toolbox row W25; schedule@1): no filters; a status lands on the actor's body.",
+              "description": "Fires at the start of every hour of the game day.",
               "type": "object",
               "properties": {
                 "event": {
@@ -479,7 +479,7 @@
               ],
               "additionalProperties": false
             },
-            {
+            {"description":"An active status took effect again, such as poison each tick.",
               "type": "object",
               "properties": {
                 "event": { "const": "status_ticked" },
@@ -490,7 +490,7 @@
             },
             {
               "type": "object",
-              "description": "Toolbox row G3 reader 2.",
+              "description": "A status was put on someone.",
               "properties": {
                 "event": { "const": "status_applied" },
                 "status": {"description":"Only this status.", "$ref": "identity.schema.json#/$defs/DefinitionRef" }
@@ -498,7 +498,7 @@
               "required": ["event"],
               "additionalProperties": false
             },
-            {
+            {"description":"A status wore off.",
               "type": "object",
               "properties": {
                 "event": { "const": "status_expired" },
@@ -507,7 +507,7 @@
               "required": ["event"],
               "additionalProperties": false
             },
-            {
+            {"description":"A quest failed.",
               "type": "object",
               "properties": {
                 "event": { "const": "quest_failed" },
@@ -519,7 +519,7 @@
             }
           ]
         },
-        "when": {
+        "when": {"description":"A condition that must also hold for the reaction to run.",
           "$ref": "policy.schema.json#/$defs/Policy"
         },
         "silent": {
@@ -532,7 +532,7 @@
           "minimum": 1,
           "maximum": 2147483647
         },
-        "steps": {
+        "steps": {"description":"What happens, in order.",
           "type": "array",
           "items": { "$ref": "step.schema.json#/$defs/Step" }
         }

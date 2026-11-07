@@ -179,7 +179,7 @@
         "name": {"description":"Text key of its short description.",
           "$ref": "text.schema.json#/$defs/TextKey"
         },
-        "words": {
+        "words": {"description":"The item's name words, such as the bare name lantern, its article and plural, used to build sentences.",
           "$ref": "#/$defs/NameWords"
         },
         "name_variants": {"description":"Name variants; first match wins.",
@@ -220,7 +220,7 @@
             "removed": {"description":"The line told when the item is removed.","$ref": "text.schema.json#/$defs/TextKey"}
           }
         },
-        "affects": {
+        "affects": {"description":"Attribute bonuses the item gives while worn, such as +1 strength.",
           "type": "array",
           "minItems": 1,
           "maxItems": 16,
@@ -258,7 +258,7 @@
         "fuel": {"description":"Makes the item a lightable fuel source that burns while lit, or a supply that refuels one.",
           "$ref": "#/$defs/FuelSpec"
         },
-        "weapon": {
+        "weapon": {"description":"Makes the item a weapon: the skill needed and its attack.",
           "$ref": "entity.schema.json#/$defs/WeaponProfile"
         },
         "block_chance": {"description":"Percent chance that this shield blocks while held.",
@@ -266,16 +266,16 @@
           "minimum": 0,
           "maximum": 100
         },
-        "vessel": {
+        "vessel": {"description":"Makes the item hold liquid: how much, and what is in it at the start.",
           "$ref": "liquid.schema.json#/$defs/VesselSpec"
         },
-        "readable": {
+        "readable": {"description":"Lets the player read the item, and optionally learn a topic from it.",
           "$ref": "#/$defs/ItemReadable"
         },
-        "edible": {
+        "edible": {"description":"Makes the item food: what eating it restores, cures or applies.",
           "$ref": "#/$defs/ItemEdible"
         },
-        "bandage": {
+        "bandage": {"description":"Makes the item a bandage that can treat bleeding.",
           "$ref": "entity.schema.json#/$defs/ItemBandage"
         },
         "tags": {
@@ -306,10 +306,10 @@
           "description": "Toolbox row G7 (mechanics.md Access locks): get, the policy an actor must hold to take this item or anything inside it, and put, the policy to put an item into it (a container only: compiler SCHEMA_VIOLATION invalid_value at locks.put). Each is optional (absent holds) and read with this item as target; failing it refuses permission_denied.",
           "type": "object",
           "properties": {
-            "get": {
+            "get": {"description":"A condition the player must meet to take this item or anything inside it.",
               "$ref": "policy.schema.json#/$defs/Policy"
             },
-            "put": {
+            "put": {"description":"A condition the player must meet to put something into this container.",
               "$ref": "policy.schema.json#/$defs/Policy"
             }
           },
@@ -550,7 +550,7 @@
         "name": {"description":"Text key of its short description.",
           "$ref": "text.schema.json#/$defs/TextKey"
         },
-        "words": {
+        "words": {"description":"The NPC's name words, such as the bare name guard, its article and plural, used to build sentences.",
           "$ref": "#/$defs/NameWords"
         },
         "name_variants": {"description":"Name variants, its mood.",
@@ -574,7 +574,7 @@
           "maximum": 1024
         },
         "daily_schedule": {
-          "description": "schedule@1 (06 §13 Behavior/schedule profiles; 21 §10; capability_registry.json definitions): a daily location schedule. Each key is a nonnegative hour of the authored calendar day without a leading zero; the compiler checks it is below hours_per_day. From that hour until the next listed one (wrapping at day end) the NPC belongs in that room of this cartridge. A fresh world schedules one durable job at the first listed hour strictly after its start time; each job's run_job moves the NPC there, if it is elsewhere, and schedules the next (04 §5.4). Until its first job runs, the NPC stays in its room. An empty schedule schedules nothing.",
+          "description": "Where the NPC goes during the day. Each key is an hour, such as 6 or 20; from that hour until the next listed one the NPC belongs in that room. The value is a room, or a list of cases tried in order. Example: {\"6\": \"market\", \"20\": \"home\"}.",
           "type": "object",
           "propertyNames": {
             "pattern": "^(0|[1-9][0-9]*)$"
@@ -587,10 +587,10 @@
           "description": "Toolbox row G11: how the NPC stands toward the player, derived when read, never stored: hostile while hostile holds, else friendly while friendly holds, else wary (an NPC without it is wary). Each condition is read with the player as the actor and the NPC as the target, so subject target facts are its pair facts with the player. Hostile refuses talk and trade and, with an attack, engages a player who walks in, saying engage; friendly takes a friendly buy_discount. Toolbox row 35: with arrest instead of engage, a hostile NPC stops a player who walks in and the body goes to arrest.to, saying arrest.narration; no encounter opens.",
           "type": "object",
           "properties": {
-            "hostile": {
+            "hostile": {"description":"While this condition holds, the NPC is hostile: it will not talk or trade, and may attack.",
               "$ref": "policy.schema.json#/$defs/Policy"
             },
-            "friendly": {
+            "friendly": {"description":"While this condition holds (and hostile does not), the NPC is friendly.",
               "$ref": "policy.schema.json#/$defs/Policy"
             },
             "engage": {"description":"Said when this hostile NPC engages a player who walks in.",
@@ -634,7 +634,7 @@
                   "text": {"description":"What the NPC says when asked about this topic.",
                     "$ref": "text.schema.json#/$defs/TextKey"
                   },
-                  "when": {
+                  "when": {"description":"This answer is used only while this condition holds.",
                     "$ref": "policy.schema.json#/$defs/Policy"
                   },
                   "grants": {"description":"Granted when this answer is given.",
@@ -661,7 +661,7 @@
             "$ref": "#/$defs/ScheduleCases"
           }
         },
-        "hp": {
+        "hp": {"description":"The NPC's hit points: minimum, maximum and starting value.",
           "$ref": "resource.schema.json#/$defs/NpcHp"
         },
         "resource_starts": {"description":"Starting value of each named resource.",
@@ -677,10 +677,10 @@
           "description": "loka-w9id: this NPC is never an Attack target and never opens a fight: no Attack offer, Attack refused invalid_target. An arrest still applies. Absent means attackable if it has an attack profile.",
           "type": "boolean"
         },
-        "attack": {
+        "attack": {"description":"How the NPC fights: chance to hit and damage range.",
           "$ref": "entity.schema.json#/$defs/AttackProfile"
         },
-        "shop": {
+        "shop": {"description":"Makes the NPC a shopkeeper: the items offered, their prices and the lines told on buying and selling.",
           "$ref": "entity.schema.json#/$defs/Shop"
         },
         "perception": {"description":"Hides the NPC until a fact is true.",
@@ -730,7 +730,7 @@
           "minItems": 1,
           "maxItems": 8
         },
-        "resistances": {
+        "resistances": {"description":"How much less damage the NPC takes from each kind of damage, in percent; negative means a weakness.",
           "$ref": "entity.schema.json#/$defs/Resistances"
         },
         "immune": {
@@ -774,7 +774,7 @@
           "description": "Toolbox row 33 (mechanics.md Theft, fence and witnessed offense): get, the policy an actor must hold to take an item this NPC directly holds (target: that item); refuses permission_denied.",
           "type": "object",
           "properties": {
-            "get": {
+            "get": {"description":"A condition the player must meet to take an item this NPC holds.",
               "$ref": "policy.schema.json#/$defs/Policy"
             }
           },
@@ -840,13 +840,13 @@
       "items": {
         "type": "object",
         "properties": {
-          "when": {
+          "when": {"description":"This name is used only while this condition holds.",
             "$ref": "policy.schema.json#/$defs/Policy"
           },
           "description": {"description":"Text key of the short name used while this variant applies.",
             "$ref": "text.schema.json#/$defs/TextKey"
           },
-          "words": {
+          "words": {"description":"The name words for this name, such as the bare name and plural.",
             "$ref": "#/$defs/NameWords"
           }
         },
@@ -913,7 +913,7 @@
         "description": "One case of the hour: where the NPC goes, and optionally why and how.",
         "type": "object",
         "properties": {
-          "when": {
+          "when": {"description":"This case is used only while this condition holds; leave it out to always match.",
             "$ref": "policy.schema.json#/$defs/Policy"
           },
           "room": {
@@ -1436,10 +1436,10 @@
       "description": "loka-kgd.209: a status a consumable applies; duration, logical seconds, replaces the status's own (never on a permanent status, compiler SCHEMA_VIOLATION). A repeat refreshes to the later end. The source may name the status alone.",
       "type": "object",
       "properties": {
-        "status": {
+        "status": {"description":"The status it applies, such as poisoned.",
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
         },
-        "duration": {
+        "duration": {"description":"How long it lasts, in game time units; replaces the status's own length.",
           "type": "integer",
           "minimum": 1,
           "maximum": 2147483647

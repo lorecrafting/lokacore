@@ -78,7 +78,7 @@
       "description": "requires (05 §3): a kernel_api range, exact rule_ir and content_schema versions (published cartridges pin them exactly), exact capability versions and required client features. protocol_version is Realm-only and not here (05 §3 'Version vocabulary').",
       "type": "object",
       "properties": {
-        "kernel_api": {
+        "kernel_api": {"description":"The range of engine versions this cartridge works with.",
           "$ref": "#/$defs/KernelApiRange"
         },
         "rule_ir": {"description":"Rule format version; must equal the one the engine supports (currently 1).",
@@ -159,7 +159,7 @@
           "description": "The cartridge's name as listed for the player.",
           "type": "string"
         },
-        "requires": {
+        "requires": {"description":"Which engine versions and features this cartridge needs.",
           "$ref": "#/$defs/CompatibilityRequirements"
         },
         "supported_profiles": {
@@ -170,7 +170,7 @@
           },
           "minItems": 1
         },
-        "time_policy": {
+        "time_policy": {"description":"How many game seconds pass for each real second.",
           "$ref": "#/$defs/TimePolicy"
         }
       },

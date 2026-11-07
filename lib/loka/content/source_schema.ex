@@ -253,11 +253,11 @@ defmodule Loka.Content.SourceSchema do
   defp partial(k, v, ch) when k in ~w(additionalProperties oneOf anyOf), do: partial(v, ch)
   defp partial(_, v, _), do: v
 
-  # cartridge.json, facts.json, resources.json, attributes.json and layout.json, as the
-  # compiler checks them; root files take no shortcut (an area bundle opens into definitions).
+  # Root files (cartridge, facts, resources, attributes, layout) as compiled: no shortcuts.
   defp roots(defs) do
     fact = defs["FactSpec"] |> drop("key")
-    facts = %{"type" => "object", "additionalProperties" => fact}
+    about = "The game's facts, by key: things the world remembers, such as door_open."
+    facts = %{"description" => about, "type" => "object", "additionalProperties" => fact}
 
     bundle =
       for {dir, _} <- Source.dirs(),

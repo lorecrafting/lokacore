@@ -738,23 +738,23 @@
           "type": "integer",
           "minimum": 1
         },
-        "solar": {
+        "solar": {"description":"The parts of the day, such as dawn, day, dusk and night, each starting at a time into the day.",
           "type": "array",
           "minItems": 1,
           "items": {
             "$ref": "#/$defs/CalendarCut"
           }
         },
-        "lunar": {
+        "lunar": {"description":"The moon's phases: a repeating cycle with a length and named phases.",
           "$ref": "#/$defs/CalendarCycle"
         },
-        "season": {
+        "season": {"description":"The seasons: a repeating cycle with a length and named phases.",
           "$ref": "#/$defs/CalendarCycle"
         },
-        "tide": {
+        "tide": {"description":"The tides: a repeating cycle with a length and named phases.",
           "$ref": "#/$defs/CalendarCycle"
         },
-        "weather": {
+        "weather": {"description":"The possible weathers. Each day picks one at random, weighted by each entry's weight.",
           "type": "array",
           "minItems": 1,
           "maxItems": 32,
@@ -812,7 +812,7 @@
           "type": "integer",
           "minimum": 0
         },
-        "phases": {
+        "phases": {"description":"The named phases in order, each with the time it starts; the first starts at 0.",
           "type": "array",
           "minItems": 1,
           "items": {
@@ -1072,7 +1072,7 @@
         "movement": {"description":"What a move costs the body, and how destination room tags scale it.",
           "type": "object",
           "properties": {
-            "cost": {
+            "cost": {"description":"What one move costs the body, such as 1 movement point.",
               "$ref": "action.schema.json#/$defs/ActionCost"
             },
             "terrain": {
@@ -1111,16 +1111,16 @@
           "description": "Opts into stats derived from the player's attributes (docs/system/mechanics.md derived stats, toolbox row 2; attribute@1). Each table's bonus is added to the authored number it modifies: hit_chance to the attack profile's chance (clamped 0..100), damage to both damage_min and damage_max (clamped at 0), carry_grams to carry.max_grams (clamped at 0), hp_max to the player body's hp maximum (clamped at the pool minimum). hit_chance and damage need world.combat; carry_grams needs world.carry. An NPC keeps its authored profile unless it declares attributes (toolbox row G3): then hit_chance and damage apply to its attack with its own values.",
           "type": "object",
           "properties": {
-            "hit_chance": {
+            "hit_chance": {"description":"Bonus to the player's chance to hit, by attribute value.",
               "$ref": "cartridge.schema.json#/$defs/DerivedStat"
             },
-            "damage": {
+            "damage": {"description":"Bonus to the player's damage, by attribute value.",
               "$ref": "cartridge.schema.json#/$defs/DerivedStat"
             },
-            "carry_grams": {
+            "carry_grams": {"description":"Bonus to how much the player can carry, in grams, by attribute value.",
               "$ref": "cartridge.schema.json#/$defs/DerivedStat"
             },
-            "hp_max": {
+            "hp_max": {"description":"Bonus to the player's maximum hit points, by attribute value.",
               "$ref": "cartridge.schema.json#/$defs/DerivedStat"
             }
           },
@@ -1209,20 +1209,20 @@
           ],
           "additionalProperties": false
         },
-        "death": {
+        "death": {"description":"What happens when a player or NPC dies: corpses, how long they last and how the player comes back.",
           "$ref": "cartridge.schema.json#/$defs/DeathSettings"
         },
-        "combat": {
+        "combat": {"description":"How fights run: the player's own attack, time between rounds and the lines told.",
           "$ref": "cartridge.schema.json#/$defs/CombatSettings"
         },
-        "death_credit": {
+        "death_credit": {"description":"NPCs whose death is credited to the player: killing one sets a true-or-false player fact.",
           "type": "array",
           "items": {
             "$ref": "cartridge.schema.json#/$defs/DeathCredit"
           },
           "minItems": 1
         },
-        "water": {
+        "water": {"description":"Deep water: who may dive, how long they can stay under before drowning and which rooms connect.",
           "$ref": "water.schema.json#/$defs/WaterSettings"
         },
         "bell_cue": {"description":"A line told in the listed rooms when the fact turns true.",
@@ -1636,7 +1636,7 @@
           },
           "additionalProperties": false
         },
-        "revival": {
+        "revival": {"description":"What the player sees between dying and waking: lines shown in order over a few seconds.",
           "$ref": "#/$defs/Revival"
         }
       },
@@ -1678,7 +1678,7 @@
     "CombatSettings": {
       "type": "object",
       "properties": {
-        "player_attack": {
+        "player_attack": {"description":"The player's unarmed attack: chance to hit and damage range.",
           "$ref": "entity.schema.json#/$defs/AttackProfile"
         },
         "interval": {"description":"Clock units between combat rounds.",

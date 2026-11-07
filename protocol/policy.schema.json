@@ -165,7 +165,7 @@
           "additionalProperties": false
         },
         {
-          "description": "06 §21 time_window, a window of authored calendar hours: floor(time / calendar.units_per_hour) mod calendar.hours_per_day is in `from` inclusive to `to` exclusive, wrapping at day end. The compiler rejects endpoints outside the authored day and equal endpoints (EMPTY_TIME_WINDOW). Owned by schedule@1.",
+          "description": "Holds during a range of hours of the day: from (included) up to to (not included), wrapping past midnight. Example: from 20 to 6 is night. From and to must differ.",
           "type": "object",
           "properties": {
             "op": {
@@ -303,7 +303,7 @@
           "additionalProperties": false,
           "description": "API1.11 escort@1: this actor’s typed escort for the named quest instance has this status."
         },
-        {
+        {"description":"Holds while the player's room is dark.",
           "type": "object",
           "properties": {
             "op": {
@@ -561,12 +561,12 @@
           "type": "object",
           "properties": {
             "op": { "const": "fact_at_least" },
-            "fact": { "$ref": "identity.schema.json#/$defs/DefinitionRef" },
-            "subject": { "enum": ["target"] },
-            "npc": { "$ref": "identity.schema.json#/$defs/DefinitionRef" },
-            "item": { "$ref": "identity.schema.json#/$defs/DefinitionRef" },
-            "with": { "$ref": "identity.schema.json#/$defs/DefinitionRef" },
-            "at_least": { "type": "integer", "minimum": -2147483648, "maximum": 2147483647 }
+            "fact": {"description":"The number fact to read.", "$ref": "identity.schema.json#/$defs/DefinitionRef" },
+            "subject": {"description":"Set to target to read the fact on the action's target.", "enum": ["target"] },
+            "npc": {"description":"Read the fact on this NPC.", "$ref": "identity.schema.json#/$defs/DefinitionRef" },
+            "item": {"description":"Read the fact on this item.", "$ref": "identity.schema.json#/$defs/DefinitionRef" },
+            "with": {"description":"For a fact held between two NPCs: the other NPC.", "$ref": "identity.schema.json#/$defs/DefinitionRef" },
+            "at_least": {"description":"The smallest value that passes.", "type": "integer", "minimum": -2147483648, "maximum": 2147483647 }
           },
           "required": ["op", "fact", "at_least"],
           "additionalProperties": false

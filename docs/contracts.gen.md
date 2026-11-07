@@ -649,13 +649,13 @@ The core policy AST (06 §21; 21 §3.2, §4 Policy; 14 §R3A). Typed, pure and f
   - `has_item`: The actor holds an item of this definition, directly or inside containers it holds, transitively.
   - `quest_state`: The actor's instance of the quest is in this lifecycle state.
   - `fact_compare`: The fact, in the actor's scope, equals this value. An entity or pair fact (toolbox row W2) is read at exactly one subject: npc or item, that definition's authored instance, or subject target, the action's target (false without one); a player or instance fact names none.
-  - `time_window`: 06 §21 time_window, a window of authored calendar hours: floor(time / calendar.units_per_hour) mod calendar.hours_per_day is in `from` inclusive to `to` exclusive, wrapping at day end. The compiler rejects endpoints outside the authored day and equal endpoints (EMPTY_TIME_WINDOW). Owned by schedule@1.
+  - `time_window`: Holds during a range of hours of the day: from (included) up to to (not included), wrapping past midnight. Example: from 20 to 6 is night. From and to must differ.
   - `barrier_state`: The barrier's current state equals `equals` (room.schema.json BarrierState; closed means closed and unlocked). Owned by barrier@1.
   - `stat_compare`: The actor's value of the attribute (cartridge.schema.json AttributeSpec: its start, while nothing writes attributes) is at least at_least. Owned by attribute@1.
   - `level_compare`: Toolbox row 29a: the actor's level (toolbox row 4, derived from its experience; 1 in a cartridge without world.levelling) is at least at_least. Owned by attribute@1.
   - `resource_compare`: The current value of the resource on the actor's body (regenerated to now, before the action's costs) is at least at_least; false for an actor without a body. Toolbox row 39: subject subject reads the pool on a reaction's event subject (the actor's body outside a reaction); at_least_percent holds when value * 100 >= percent * the entity's maximum. Exactly one of at_least and at_least_percent. Owned by attribute@1.
   - `escort_state`: API1.11 escort@1: this actor’s typed escort for the named quest instance has this status.
-  - `light_off`
+  - `light_off`: Holds while the player's room is dark.
   - `has_tag`: The subject's definition declares the tag (entity.schema.json Tag). Exactly one subject: subject target, the action's target, holding when it is an item whose definition declares the tag (false without a target, for a detail or for an NPC); subject room, the actor's current room; or item, barrier or room, that definition of this cartridge, a constant (tags never change). Owned by tag@1 (toolbox row G1).
   - `sky`: The derived sky at the committed clock, never stored (toolbox rows 10 and 31): exactly one of lunar, season or tide (the cut of that calendar cycle containing ((clock - origin) mod period)) or weather (the calendar day's weather table entry) holds when the current phase is that phase; a set of phases is an any of sky leaves. The compiler rejects a phase the named calendar table does not author, or no such table (SCHEMA_VIOLATION). Owned by calendar@1.
   - `wearing`: The actor's body wears an item whose definition declares tag (toolbox row W25): an item in one of the body's slot holders (equipment@1). False without a body. Owned by equipment@1.
@@ -745,14 +745,14 @@ The room (place) definition kind and its exits (21 §5 Place/Room, Connection; 0
 - **DreamDraw**: Captured original scene-owned choice occurrence at its shown choice beat.
 - **RestBinding**: One exact paid Rest binding: authored bed, first-credit fact and sole quest.
 - **SceneDefinition**: Modal narration or the consumed paid-Rest anchored, resumable presentation-only dream.
-  - `modal`
-  - `presentation_only`
+  - `modal`: A scene that takes over the screen: some lines, a Continue button, then it ends.
+  - `presentation_only`: A dream when the player rests in a paid bed: three lines, a choice of two, the chosen option's text, then Continue.
 - **SceneStep**: The installed closed scene step subset; no arbitrary writes.
-  - `narrate`
-  - `await_ack`
-  - `end`
-  - `choice`
-  - `branch`
+  - `narrate`: Shows a line of text.
+  - `await_ack`: Waits for the player to press Continue.
+  - `end`: Ends the scene.
+  - `choice`: Asks the player to pick one of two options.
+  - `branch`: Shows the text of the option the player picked.
 
 ## Scope and audience contracts (`protocol/scope.schema.json`)
 
@@ -781,17 +781,17 @@ B8 typed finite paid entitlement, meal and provider-owned serving.
 One step vocabulary and one check vocabulary (C3 D2, loka-ivjq.4): a reaction's steps, a scripted action outcome's steps and a dialogue choice's steps list Steps, and a service's benefit is one Step; a scripted action's and a dialogue choice's check is a Check. Each context runs a declared subset, enforced by the compiler (lib/loka/content/steps.ex, lib/loka/content/check_kinds.ex).
 
 - **Check**: A check (check@1), discriminated by kind.
-  - `luck`: A luck check (21 §7 Check; 00a `check: {kind: luck, chance: 50}`), owned by check@1: resolved once per admitted perform, after every admission check (a rejection draws nothing) and before any outcome step. luck draws one uniform integer in [0, 100) from the world's RNG (rng.ts uniform; xoshiro128ss-1.1, numeric profile) and passes when it is below chance; the draw commits whether the check passes or fails (04 §5.0). key names the check in its check_passed or check_failed event (a DefinitionRef of kind check in the cartridge's namespace), the key a quest objective matches (00a). An inline check's key is its check definition's key, so two checks, of scripted actions or dialogue choices, may not share one (DUPLICATE_DEFINITION).
-  - `threshold`: A deterministic threshold (21 §7 Check: deterministic threshold, difficulty; R5 S6b), owned by check@1 like a luck roll: passes when the actor's body's current value of a resource of the cartridge, read at admission before the scripted action's costs, is at least difficulty. It draws no RNG and emits check_passed or check_failed under key; the key rules of a luck check apply.
+  - `luck`: A roll of chance: passes when a random number from 0 to 99 is below chance. Example: chance 50 passes half the time.
+  - `threshold`: A fixed test: passes when the player's resource, such as stamina, is at least difficulty. No dice.
   - `attribute_threshold`: Passes when the actor's value of the attribute is at least difficulty; draws no random number.
   - `opposed`: An opposed check (toolbox rows 5 and G5, docs/system/mechanics.md): passes when the actor's level of skill, or value of attribute, at admission is at least the target detail's rating, or, when npc names an NPC of this cartridge (attribute only, toolbox row G3), that NPC's value of the attribute; draws no RNG. A skill with growth gains one use per perform. Dialogue choice: A dialogue choice's check (toolbox row 14, docs/system/mechanics.md dialogue skill checks; check@1): an opposed check as a scripted action's (action.schema.json ScriptedAction check, kind opposed) made when the choice is chosen, drawing no RNG: it passes when the actor's level of skill, or value of attribute, is at least rating, or, when npc names an NPC instance of this cartridge that declares the attribute, that NPC's value of it; exactly one of rating and npc (else SCHEMA_VIOLATION invalid_value at the check). key names it in its check_passed or check_failed event (a DefinitionRef of kind check, whose subject is the speaker), shared with no scripted action's or other choice's check (DUPLICATE_DEFINITION). On a pass the choice applies as unchecked; on a failure the actor reads failure instead, nothing else of the choice applies and the conversation closes. A skill with growth gains one use per check, passed or failed.
   - `track`: A track check (toolbox row W13, docs/system/mechanics.md Tracks and trails): passes when the trail of population plan plan (its key; the plan declares trail) in the actor's room is fresh (world.trails.fresh_for); draws no RNG; on success the outcome's lines are followed by world.trails.leads[<exit>].
 - **Step**: One registered operation of a step list, discriminated by op. Scripted action outcome's explicit steps (04 §5.2 step 4, §5.3; 05 §28: never a generic setter or an untyped effect). fact.assign sets a declared fact of the cartridge, at the one scope the fact allows, to a value of its type (the host emits fact_changed at this step's causal position when the value changes, fact@1). event.emit emits the cartridge's custom event of this key (EventPayload custom_event, scripted_action@1), whose subject is the scripted action's target. resource.adjust adds by (negative: subtracts) to a resource of the actor's body, chained after the costs and any earlier adjust of it, stopping at the resource's bounds (DikuMUD-style: healing at full health heals nothing); this saturation is the step's declared meaning, not a silent clamp (04 §5.1): the rule computes the stopped value and proposes an exact delta resource.adjust to it, or none when the value does not change. Costs never saturate (ActionCost).
   - `fact.assign`: Assign a fact.
   - `fact.adjust`: Toolbox row 15: adds amount to a bounded int fact, clamped to its minimum and maximum, at the subject a fact.assign step writes at.
-  - `quest.activate`
-  - `quest.resolve`
-  - `quest.fail`
+  - `quest.activate`: Starts a quest.
+  - `quest.resolve`: Completes a quest with an outcome.
+  - `quest.fail`: Fails a quest with an outcome.
   - `population.suppress`: Suppress one authored population plan for duration logical seconds from this accepted fact-change cause, preserving current members and closing its current encounter.
   - `status.apply`: Reaction: Apply one authored status (toolbox row 1) at the cause's time to the event's subject (a body, NPC or thing, row G3), or to the named item's or (row 42, never with item; not a spawn template) NPC's authored instance, or (row W21, co_present) to every living NPC in the event's room; an active one is refreshed; an NPC or item that declares the status immune takes nothing. Scripted action: Toolbox row 29b (spell scripted actions only, compiler SCHEMA_VIOLATION): start or refresh this status on the named NPC's instance, else on an aimed spell's target, else on the caster's body, as a reaction's status.apply does (status@1: a dead NPC or an immune holder takes nothing; a first application emits status_applied while a reaction listens).
   - `barrier.set`: Toolbox row W22 (Beads loka-kgd.96, barrier@1): move barrier, or every barrier on an exit of the event's room (its room_id, else the room directly holding the subject) whose definition carries tag, in direction-key order, to state to, from any state and with no key, opens_when or reach check (a burnt or broken door); each legal step on the way (locked, closed, open) is one barrier.transition and one barrier_changed, and a barrier already at to takes nothing. to locked needs the barrier's key_item, every tagged barrier's for tag (compiler BARRIER_UNREACHABLE_KEY at to).
@@ -810,16 +810,16 @@ One step vocabulary and one check vocabulary (C3 D2, loka-ivjq.4): a reaction's 
   - `light.ignite`: Toolbox row 29b (spell scripted actions only): ignite the named fuel source (without item, an aimed spell's target; an unaimed spell requires item, compiler SCHEMA_VIOLATION) as the ignite verb does (light@1), when the caster holds it and the verb would admit it; otherwise nothing.
   - `resource.adjust`: Adjust a resource of the actor's body by `by`, stopping at its bounds.
   - `build`: Scripted action: Built rooms S6 (detail-target scripted actions only, at most one per outcome, construction@1): raise structure at the scripted action target's room (its site) toward direction for the actor, as a build service does (service.schema.json); success outcome only (the compiler refuses it elsewhere, lib/loka/content/construction.ex). Admission refuses the perform while the build would be refused (service.site_taken, service.construction_full). Service benefit: Built rooms S2 (construction@1): raise structure at site's direction (site required on a service, lib/loka/content/steps.ex). structure is one of site.structures and direction one of site.directions (SCHEMA_VIOLATION invalid_value otherwise). Refused service.site_taken while a built room holds that site direction and service.construction_full at world.construction.max_total. Built rooms S3: fact with escrow (ready_after, no output) makes it a commission: the order sets fact true, moves the inputs to custody and schedules an order job; when due the job raises the room for its owner and sets fact false (refunding the inputs when the site is taken or construction full by then). Cancel (a cancel benefit naming this service) returns the inputs, never the fee.
-  - `skill.acquire`
-  - `topic.grant`
-  - `entitlement`
-  - `meal`
-  - `drink`
-  - `repair`
-  - `claim`
-  - `cancel`
-  - `deposit`
-  - `withdraw`
+  - `skill.acquire`: The player learns a skill.
+  - `topic.grant`: The player learns a topic they can ask about.
+  - `entitlement`: A service's benefit: the player is now owed something, such as a paid room, recorded in a fact.
+  - `meal`: A service's benefit: a meal that draws on the provider's stock and restores the body.
+  - `drink`: A service's benefit: a drink served from a vessel that restores the body.
+  - `repair`: A service's benefit: repairs the player's wielded weapon.
+  - `claim`: A service's benefit: collects the player's ready order.
+  - `cancel`: A service's benefit: cancels the player's order.
+  - `deposit`: A service's benefit: puts the player's money into a shared vault; a fact shows their balance.
+  - `withdraw`: A service's benefit: takes the player's money out of a shared vault.
   - `mend`: Built rooms S4 (construction@1): mend the built room at site's direction. Refused service.nothing_to_mend unless that room's structure ruin status is active on it; otherwise the mend cures ruin and applies the structure's weathering again. site and direction as build's.
   - `raze`: Built rooms S5 (construction@1): raze the live built room at site's direction. Refused service.nothing_to_raze without one, permission_denied unless the actor raised it, service.occupied while an entity that cannot move (a corpse) lies in it; otherwise its statuses end, everything on its floor moves to the site and a tombstone (built row) is written. site and direction as build's.
 

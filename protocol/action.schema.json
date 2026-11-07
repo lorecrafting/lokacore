@@ -593,7 +593,7 @@
             "kind": {
               "const": "use"
             },
-            "tool": {
+            "tool": {"description":"What the tool must be: an item with a given tag, or a vessel holding a given liquid.",
               "$ref": "#/$defs/UseTool"
             }
           },
@@ -711,7 +711,7 @@
         "priority": {"description":"Presentation priority.",
           "type": "integer"
         },
-        "policy": {
+        "policy": {"description":"When the action is offered: a condition the player must meet, or it is refused.",
           "$ref": "policy.schema.json#/$defs/Policy"
         },
         "outcomes": {"description":"The outcomes a perform selects.",
@@ -720,7 +720,7 @@
             "success": {"description":"Runs when the check passes, or when the action has no check.",
               "type": "object",
               "properties": {
-                "steps": {
+                "steps": {"description":"What happens on success, in order.",
                   "type": "array",
                   "items": {
                     "$ref": "step.schema.json#/$defs/Step"
@@ -728,7 +728,7 @@
                   "minItems": 1,
                   "maxItems": 16
                 },
-                "narration": {
+                "narration": {"description":"The line the player reads on success.",
                   "$ref": "#/$defs/ActionNarration"
                 },
                 "cues": {
@@ -745,7 +745,7 @@
             "failure": {"description":"Runs when the check fails.",
               "type": "object",
               "properties": {
-                "steps": {
+                "steps": {"description":"What happens on failure, in order.",
                   "type": "array",
                   "items": {
                     "$ref": "step.schema.json#/$defs/Step"
@@ -753,7 +753,7 @@
                   "minItems": 0,
                   "maxItems": 16
                 },
-                "narration": {
+                "narration": {"description":"The line the player reads on failure.",
                   "$ref": "#/$defs/ActionNarration"
                 },
                 "cues": {
@@ -778,7 +778,7 @@
           "type": "integer",
           "minimum": 1
         },
-        "costs": {
+        "costs": {"description":"What the action costs the player's body each time, such as 1 movement point; up to 8. If the player cannot pay, it is refused.",
           "type": "array",
           "items": {
             "$ref": "#/$defs/ActionCost"
@@ -786,7 +786,7 @@
           "minItems": 1,
           "maxItems": 8
         },
-        "craft": {
+        "craft": {"description":"Makes the action a crafting recipe: the items it uses up, the item it makes, or both.",
           "$ref": "#/$defs/ActionCraft"
         },
         "cooldown": {"description":"The action is refused until this much logical time has passed since the actor's last admitted attempt.",

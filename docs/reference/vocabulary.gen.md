@@ -30,11 +30,15 @@ Toolbox row 15: adds amount to a bounded int fact, clamped to its minimum and ma
 
 ### `quest.activate`
 
+Starts a quest.
+
 | Field | Type | Required | Meaning |
 |---|---|---|---|
 | quest | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The quest to activate. |
 
 ### `quest.resolve`
+
+Completes a quest with an outcome.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -42,6 +46,8 @@ Toolbox row 15: adds amount to a bounded int fact, clamped to its minimum and ma
 | quest | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The quest to resolve. |
 
 ### `quest.fail`
+
+Fails a quest with an outcome.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -217,17 +223,23 @@ Scripted action: Built rooms S6 (detail-target scripted actions only, at most on
 
 ### `skill.acquire`
 
+The player learns a skill.
+
 | Field | Type | Required | Meaning |
 |---|---|---|---|
 | skill | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The skill the actor acquires. |
 
 ### `topic.grant`
 
+The player learns a topic they can ask about.
+
 | Field | Type | Required | Meaning |
 |---|---|---|---|
 | topic | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The topic the actor comes to know. |
 
 ### `entitlement`
+
+A service's benefit: the player is now owed something, such as a paid room, recorded in a fact.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -241,6 +253,8 @@ Scripted action: Built rooms S6 (detail-target scripted actions only, at most on
 
 ### `meal`
 
+A service's benefit: a meal that draws on the provider's stock and restores the body.
+
 | Field | Type | Required | Meaning |
 |---|---|---|---|
 | amount | integer | yes | How much is restored, up to its maximum. |
@@ -249,6 +263,8 @@ Scripted action: Built rooms S6 (detail-target scripted actions only, at most on
 | stock | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The provider's resource the meal draws on. |
 
 ### `drink`
+
+A service's benefit: a drink served from a vessel that restores the body.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -259,6 +275,8 @@ Scripted action: Built rooms S6 (detail-target scripted actions only, at most on
 
 ### `repair`
 
+A service's benefit: repairs the player's wielded weapon.
+
 | Field | Type | Required | Meaning |
 |---|---|---|---|
 | amount | integer | yes | Durability restored, up to its maximum. |
@@ -266,17 +284,23 @@ Scripted action: Built rooms S6 (detail-target scripted actions only, at most on
 
 ### `claim`
 
+A service's benefit: collects the player's ready order.
+
 | Field | Type | Required | Meaning |
 |---|---|---|---|
 | service | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The service whose order is claimed. |
 
 ### `cancel`
 
+A service's benefit: cancels the player's order.
+
 | Field | Type | Required | Meaning |
 |---|---|---|---|
 | service | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The service whose order is cancelled. |
 
 ### `deposit`
+
+A service's benefit: puts the player's money into a shared vault; a fact shows their balance.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -285,6 +309,8 @@ Scripted action: Built rooms S6 (detail-target scripted actions only, at most on
 | vault | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The NPC holding the shared pool. |
 
 ### `withdraw`
+
+A service's benefit: takes the player's money out of a shared vault.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -378,7 +404,7 @@ The fact, in the actor's scope, equals this value. An entity or pair fact (toolb
 
 ### `time_window`
 
-06 §21 time_window, a window of authored calendar hours: floor(time / calendar.units_per_hour) mod calendar.hours_per_day is in `from` inclusive to `to` exclusive, wrapping at day end. The compiler rejects endpoints outside the authored day and equal endpoints (EMPTY_TIME_WINDOW). Owned by schedule@1.
+Holds during a range of hours of the day: from (included) up to to (not included), wrapping past midnight. Example: from 20 to 6 is night. From and to must differ.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -432,6 +458,8 @@ API1.11 escort@1: this actor’s typed escort for the named quest instance has t
 | state | [EscortStatus](source-kinds.gen.md#escortstatus) | yes | The escort status. |
 
 ### `light_off`
+
+Holds while the player's room is dark.
 
 Type: object.
 
@@ -533,12 +561,12 @@ An int fact's value, read as fact_compare reads it, is at least at_least (a dial
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| at_least | integer | yes |  |
-| fact | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
-| item | [DefinitionRef](source-kinds.gen.md#definitionref) |  |  |
-| npc | [DefinitionRef](source-kinds.gen.md#definitionref) |  |  |
-| subject | `target` |  |  |
-| with | [DefinitionRef](source-kinds.gen.md#definitionref) |  |  |
+| at_least | integer | yes | The smallest value that passes. |
+| fact | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The number fact to read. |
+| item | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Read the fact on this item. |
+| npc | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Read the fact on this NPC. |
+| subject | `target` |  | Set to target to read the fact on the action's target. |
+| with | [DefinitionRef](source-kinds.gen.md#definitionref) |  | For a fact held between two NPCs: the other NPC. |
 
 ### `time_since`
 
@@ -555,11 +583,15 @@ Toolbox row FD1: the world clock minus the int fact's value (as fact_compare rea
 
 ### `fact_changed`
 
+A fact's value changed.
+
 | Field | Type | Required | Meaning |
 |---|---|---|---|
 | fact | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | Only this fact. |
 
 ### `entity_entered_room`
+
+Someone entered a room.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -568,7 +600,7 @@ Toolbox row FD1: the world clock minus the int fact's value (as fact_compare rea
 
 ### `spoken`
 
-Toolbox row G9 (speech@1): one spoken event per NPC that heard the word.
+Someone said a word an NPC heard; fires once for each NPC that heard it.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -578,7 +610,7 @@ Toolbox row G9 (speech@1): one spoken event per NPC that heard the word.
 
 ### `level_reached`
 
-Toolbox row 4 (attribute@1): a character reached a level.
+A character reached a level.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -586,7 +618,7 @@ Toolbox row 4 (attribute@1): a character reached a level.
 
 ### `asked`
 
-Toolbox row FD7 (speech@1): the actor asked an NPC about a topic.
+The player asked an NPC about a topic.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -596,6 +628,8 @@ Toolbox row FD7 (speech@1): the actor asked an NPC about a topic.
 
 ### `quest_resolved`
 
+A quest was completed with an outcome.
+
 | Field | Type | Required | Meaning |
 |---|---|---|---|
 | outcome | [Key](source-kinds.gen.md#key) | yes | Only this outcome. |
@@ -603,11 +637,15 @@ Toolbox row FD7 (speech@1): the actor asked an NPC about a topic.
 
 ### `rested`
 
+The player rested.
+
 | Field | Type | Required | Meaning |
 |---|---|---|---|
 | room | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Only this room. |
 
 ### `item_acquired`
+
+An item was picked up.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -615,6 +653,8 @@ Toolbox row FD7 (speech@1): the actor asked an NPC about a topic.
 | witness | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Toolbox row FD5: this NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness. |
 
 ### `item_dropped`
+
+An item was dropped.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -624,6 +664,8 @@ Toolbox row FD7 (speech@1): the actor asked an NPC about a topic.
 
 ### `shooed`
 
+A creature was shooed away from an item.
+
 | Field | Type | Required | Meaning |
 |---|---|---|---|
 | item | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Only this item. |
@@ -631,21 +673,29 @@ Toolbox row FD7 (speech@1): the actor asked an NPC about a topic.
 
 ### `quest_activated`
 
+A quest started.
+
 | Field | Type | Required | Meaning |
 |---|---|---|---|
 | quest | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Only this quest. |
 
 ### `choice_opened`
 
+A conversation put a choice in front of the player.
+
 Type: object.
 
 ### `choice_resolved`
+
+The player picked an option in a choice.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
 | choice | [Key](source-kinds.gen.md#key) |  | Only this choice. |
 
 ### `story_point_reached`
+
+A story point was reached.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -654,11 +704,15 @@ Type: object.
 
 ### `custom_event`
 
+A custom event sent by an event.emit step.
+
 | Field | Type | Required | Meaning |
 |---|---|---|---|
 | custom | [Key](source-kinds.gen.md#key) |  | The custom event key. |
 
 ### `action_completed`
+
+A scripted action finished.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -667,12 +721,16 @@ Type: object.
 
 ### `check_passed`
 
+A check passed.
+
 | Field | Type | Required | Meaning |
 |---|---|---|---|
 | check | [Key](source-kinds.gen.md#key) |  | Only the check with this key. |
 | witness | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Toolbox row FD5: this NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness. |
 
 ### `check_failed`
+
+A check failed.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -681,6 +739,8 @@ Type: object.
 
 ### `barrier_changed`
 
+A door or other barrier changed state, such as opened or locked.
+
 | Field | Type | Required | Meaning |
 |---|---|---|---|
 | barrier | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Only this barrier. |
@@ -688,11 +748,15 @@ Type: object.
 
 ### `scene_ended`
 
+A scene ended.
+
 | Field | Type | Required | Meaning |
 |---|---|---|---|
 | scene | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Only this scene. |
 
 ### `entity_died`
+
+Someone died.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -701,6 +765,8 @@ Type: object.
 | witness | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Toolbox row FD5: this NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness. |
 
 ### `attack_result`
+
+An attack hit or missed.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -711,11 +777,15 @@ Type: object.
 
 ### `filled`
 
+A vessel was filled with a liquid.
+
 | Field | Type | Required | Meaning |
 |---|---|---|---|
 | kind | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Only this liquid. |
 
 ### `poured`
+
+A liquid was poured out.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -723,17 +793,21 @@ Type: object.
 
 ### `drank`
 
+Someone drank a liquid.
+
 | Field | Type | Required | Meaning |
 |---|---|---|---|
 | kind | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Only this liquid. |
 
 ### `clock_hour`
 
-The world's hourly calendar event (toolbox row W25; schedule@1): no filters; a status lands on the actor's body.
+Fires at the start of every hour of the game day.
 
 Type: object.
 
 ### `status_ticked`
+
+An active status took effect again, such as poison each tick.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -741,7 +815,7 @@ Type: object.
 
 ### `status_applied`
 
-Toolbox row G3 reader 2.
+A status was put on someone.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -749,11 +823,15 @@ Toolbox row G3 reader 2.
 
 ### `status_expired`
 
+A status wore off.
+
 | Field | Type | Required | Meaning |
 |---|---|---|---|
 | status | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Only this status. |
 
 ### `quest_failed`
+
+A quest failed.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -790,7 +868,7 @@ One option of a dialogue (06 §17, §43): label and narration its text keys; ste
 | lesson_payment.resource | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The resource paid. |
 | lesson_payment.to | [Key](source-kinds.gen.md#key) | yes | The npc role paid. |
 | narration | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of what the actor reads on choosing. |
-| narration_variants | [TextVariants](source-kinds.gen.md#textvariants) |  |  |
+| narration_variants | [TextVariants](source-kinds.gen.md#textvariants) |  | Other lines read on choosing, each used while its condition holds. |
 | once | `true` |  | This choice goes away once taken: lowered to the fact <dialogue>_<choice>_done, a step that sets it and a policy that needs it unset. |
 | order | integer |  | Display position among this dialogue's choices, lowest first; a choice with none follows, and a tie or none sorts by key. The compiler writes it for a scene set in an unsorted order. |
 | patrol | object |  | A patrol transition. |
@@ -801,12 +879,12 @@ One option of a dialogue (06 §17, §43): label and narration its text keys; ste
 | payment.amount | integer | yes | How much. |
 | payment.from | [Key](source-kinds.gen.md#key) | yes | The paying npc role. |
 | payment.resource | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The resource paid. |
-| policy | [Policy](vocabulary.gen.md#policy-leaves) |  | See the type. |
+| policy | [Policy](vocabulary.gen.md#policy-leaves) |  | When this option is shown: a condition the player must meet, checked with the speaker. |
 | receive | object |  | The bound NPC-held item transferred to the actor. |
 | receive.from | [Key](source-kinds.gen.md#key) | yes | The npc role holding it. |
 | receive.item | [Key](source-kinds.gen.md#key) | yes | The bound item transferred. |
 | sitting | `true` |  | Taken, this choice leaves the reopened hub until the conversation next opens. Only on a plain answer of a dialogue that reopens; the compiler refuses the rest. |
-| steps | list of [Step](vocabulary.gen.md#steps) |  | See the type. |
+| steps | list of [Step](vocabulary.gen.md#steps) |  | What happens when the player picks this option, in order. |
 | story_point | string |  | <story point>/<outcome>: the outcome this choice reaches; one per outcome. |
-| then | [Key](source-kinds.gen.md#key) |  |  |
-| then_failed | [Key](source-kinds.gen.md#key) |  |  |
+| then | [Key](source-kinds.gen.md#key) |  | The conversation to go to next, or end to finish talking. |
+| then_failed | [Key](source-kinds.gen.md#key) |  | The conversation to go to next when this option's check fails. |

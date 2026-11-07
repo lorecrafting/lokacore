@@ -19,7 +19,7 @@
         "npc": {"description":"The speaker, also an npc role.",
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
         },
-        "policy": {
+        "policy": {"description":"When this conversation is offered: a condition the player must meet.",
           "$ref": "policy.schema.json#/$defs/Policy"
         },
         "prompt": {"description":"Text key of the pending choice's prompt.",
@@ -37,7 +37,7 @@
         "quest": {"description":"The quest a choice resolves, with the choice id as its outcome.",
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
         },
-        "choices": {
+        "choices": {"description":"The options the player can pick, each with a short id, a button label and what happens.",
           "type": "object",
           "propertyNames": {
             "pattern": "^[a-z][a-z0-9_]{0,63}$"
@@ -207,7 +207,7 @@
         "narration": {"description":"Text key of what the actor reads on choosing.",
           "$ref": "text.schema.json#/$defs/TextKey"
         },
-        "steps": {
+        "steps": {"description":"What happens when the player picks this option, in order.",
           "type": "array",
           "items": { "$ref": "step.schema.json#/$defs/Step" }
         },
@@ -358,7 +358,7 @@
         "check": {"description":"An opposed check made when chosen.",
           "$ref": "step.schema.json#/$defs/Check"
         },
-        "policy": {
+        "policy": {"description":"When this option is shown: a condition the player must meet, checked with the speaker.",
           "$ref": "policy.schema.json#/$defs/Policy"
         },
         "order": {"description":"Display position among this dialogue's choices, lowest first; a choice with none follows, and a tie or none sorts by key. The compiler writes it for a scene set in an unsorted order.",
@@ -368,13 +368,13 @@
         "sitting": {"description":"Taken, this choice leaves the reopened hub until the conversation next opens. Only on a plain answer of a dialogue that reopens; the compiler refuses the rest.",
           "const": true
         },
-        "then": {
+        "then": {"description":"The conversation to go to next, or end to finish talking.",
           "$ref": "action.schema.json#/$defs/Key"
         },
-        "then_failed": {
+        "then_failed": {"description":"The conversation to go to next when this option's check fails.",
           "$ref": "action.schema.json#/$defs/Key"
         },
-        "narration_variants": {
+        "narration_variants": {"description":"Other lines read on choosing, each used while its condition holds.",
           "$ref": "entity.schema.json#/$defs/TextVariants"
         },
         "asked_when": {

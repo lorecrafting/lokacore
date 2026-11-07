@@ -19,7 +19,7 @@
             "label": {"description":"The accept action's label.",
               "$ref": "text.schema.json#/$defs/TextKey"
             },
-            "policy": {
+            "policy": {"description":"When the quest is offered: a condition the player must meet.",
               "$ref": "policy.schema.json#/$defs/Policy"
             },
             "target": {
@@ -402,7 +402,7 @@
             "evidence": {
               "const": "current_state"
             },
-            "policy": {
+            "policy": {"description":"The condition that counts as done while it holds.",
               "$ref": "policy.schema.json#/$defs/Policy"
             }
           },
@@ -499,7 +499,7 @@
           "items": {
             "type": "object",
             "properties": {
-              "when": {
+              "when": {"description":"This journal text is used only while this condition holds.",
                 "$ref": "policy.schema.json#/$defs/Policy"
               },
               "text": {"description":"Text key shown while this variant's condition holds.",
