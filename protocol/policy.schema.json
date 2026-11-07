@@ -129,7 +129,7 @@
           "additionalProperties": false
         },
         {
-          "description": "The fact, in the actor's scope, equals this value. An entity or pair fact is read at exactly one subject: npc or item, that definition's authored instance, or subject target, the action's target (false without one); a player or instance fact names none.",
+          "description": "The fact, in the actor's scope, equals this value. An entity or pair fact is read on exactly one subject: npc or item, the one placed in the world from that definition, or subject target, the action's target (false without one); a player or instance fact names none.",
           "type": "object",
           "properties": {
             "op": {
@@ -143,10 +143,10 @@
                 "target"
               ]
             },
-            "npc": {"description":"Reads this NPC's authored instance.",
+            "npc": {"description":"Reads the NPC placed in the world from this definition.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "item": {"description":"Reads this item's authored instance.",
+            "item": {"description":"Reads the item placed in the world from this definition.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
             "with": {
@@ -577,8 +577,8 @@
           "properties": {
             "op": { "const": "time_since" },
             "fact": {"description":"The int fact holding a stamp.", "$ref": "identity.schema.json#/$defs/DefinitionRef" },
-            "npc": {"description":"Reads this NPC's authored instance.", "$ref": "identity.schema.json#/$defs/DefinitionRef" },
-            "item": {"description":"Reads this item's authored instance.", "$ref": "identity.schema.json#/$defs/DefinitionRef" },
+            "npc": {"description":"Reads the NPC placed in the world from this definition.", "$ref": "identity.schema.json#/$defs/DefinitionRef" },
+            "item": {"description":"Reads the item placed in the world from this definition.", "$ref": "identity.schema.json#/$defs/DefinitionRef" },
             "at_least": {"description":"The least elapsed time that holds.", "type": "integer", "minimum": 0, "maximum": 2147483647 }
           },
           "required": ["op", "fact", "at_least"],

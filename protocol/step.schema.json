@@ -42,10 +42,10 @@
             "fact": {"description":"The declared fact to set.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "npc": {"description":"The NPC whose authored instance holds an entity fact.",
+            "npc": {"description":"The NPC holding the fact: the one placed in the world from this definition.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "item": {"description":"The item whose authored instance holds an entity fact.",
+            "item": {"description":"The item holding the fact: the one placed in the world from this definition.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
             "with": {
@@ -182,10 +182,10 @@
             "status": {"description":"The status to apply.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "item": {"description":"Lands on this item's authored instance.",
+            "item": {"description":"Lands on the item placed in the world from this definition.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
-            "npc": {"description":"Lands on this NPC's authored instance; never with item.",
+            "npc": {"description":"Lands on the NPC placed in the world from this definition; never with item.",
               "$ref": "identity.schema.json#/$defs/DefinitionRef"
             },
             "room": {
@@ -381,7 +381,7 @@
           "additionalProperties": false
         },
         {
-          "description": "NPC emotes: an NPC performs an emote of the cartridge's table. The emoter is npc (an authored instance alive in the delivery's room), else the delivery's subject; to subject names the subject as the target and needs the emote's to forms. Appends one emote.performed line, told only to a reader who sees the emoter; writes nothing, emits no event.",
+          "description": "NPC emotes: an NPC performs an emote from the cartridge's table. The one emoting is npc (the one placed in the world, alive in the delivery's room), else the delivery's subject; to subject makes the subject the target and needs the emote's wording for a target. Adds one emote line to the story, shown only to a reader who sees the one emoting; changes nothing else and sets off nothing.",
           "type": "object",
           "properties": {
             "op": {
@@ -863,7 +863,7 @@
             },
             "escrow": {
               "type": "object",
-              "description": "Items the player hands over with the order; they wait in the custody room. With ready_after and output, the order takes time and is claimed later, and cancelling returns the items but not the fee. With output and no ready_after it is an immediate trade.",
+              "description": "The payment for the mend: when the player pays, quantity items of the listed kinds that the player carries move to the custody room. Without that many, the mend is refused.",
               "properties": {
                 "items": {"description":"The item definitions accepted as payment.",
                   "type": "array",

@@ -130,7 +130,7 @@ The game's identity: its title, the engine versions it needs, and the profiles i
 | supported_profiles | list of [ExecutionProfile](source-kinds.gen.md#executionprofile) | yes | The hosting profiles this cartridge runs under; at least one (offline_private, online_private, party, shared_area). |
 | time_policy | [TimePolicy](source-kinds.gen.md#timepolicy) |  | How many game seconds pass for each real second. |
 | title | string | yes | The cartridge's name as listed for the player. |
-| version | [ReleaseVersion](source-kinds.gen.md#releaseversion) | yes | The cartridge's release version, MAJOR.MINOR.PATCH. |
+| version | [ReleaseVersion](source-kinds.gen.md#releaseversion) | yes | The cartridge's release version: three whole numbers joined by dots, such as 1.4.0. |
 | world | [WorldSettings](source-kinds.gen.md#worldsettings) |  | Settings for the whole world: combat, death, movement, water and more. |
 
 ## dialogues
@@ -272,7 +272,7 @@ A character other than the player: its key, words, name, room line and descripti
 | daily_schedule.*{walks=true}.goal | [TextKey](source-kinds.gen.md#textkey) |  | Text key told when the NPC leaves the player's room by this case; silent if the player does not see it go. |
 | daily_schedule.*{walks=true}.room | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The room the NPC moves to when this case is chosen. |
 | daily_schedule.*.cartridge_id | [CartridgeId](source-kinds.gen.md#cartridgeid) | in this form | The owning cartridge. Lowercase snake_case, at most 64 characters. |
-| daily_schedule.*.cartridge_version | [ReleaseVersion](source-kinds.gen.md#releaseversion) | in this form | The cartridge version, MAJOR.MINOR.PATCH. |
+| daily_schedule.*.cartridge_version | [ReleaseVersion](source-kinds.gen.md#releaseversion) | in this form | The cartridge version: three whole numbers joined by dots, such as 1.4.0. |
 | daily_schedule.*.key | string | in this form | The definition's key within its kind. |
 | daily_schedule.*.kind | string | in this form | The definition's kind. |
 | daily_schedule.*[]{walks=true} | variant |  | One case of the hour: where the NPC goes, and optionally why and how. |
@@ -509,7 +509,7 @@ A place the player can be: its name, description, exits by direction (north, sou
 | site.directions | list of `north` or `south` or `east` or `west` or `up` or `down` | yes | Compass directions a built room may take from here. |
 | site.structures | list of [DefinitionRef](source-kinds.gen.md#definitionref) | yes | Structures that may be built from this room. |
 | sound | [Key](source-kinds.gen.md#key) |  | Its sound bed tag, projected as place.sound: the host plays that tag's bed and exploration piece. The cartridge owns the names; a tag with no file plays the wild bed. |
-| tags | list of [Tag](source-kinds.gen.md#tag) |  | Its tags: words a condition can check for, which also set the cost of moving in. Each tag once only, since a repeat would count its cost twice. |
+| tags | list of [Tag](source-kinds.gen.md#tag) |  | Its tags: words a condition can check for. A tag also changes the cost of moving in, but only when the world's movement terrain setting gives that tag a cost. Each tag once only, since a repeat would count its cost twice. |
 | variants | list of [DescriptionVariant](source-kinds.gen.md#descriptionvariant) |  | Other descriptions of the room, each used while its condition holds, such as at night. |
 | zones | list of [Key](source-kinds.gen.md#key) |  | The zones this room belongs to; a reaction with `zone` and no `on.room` gets one copy per member room. |
 
@@ -1031,7 +1031,7 @@ Type: [Key](source-kinds.gen.md#key) or object.
 | Field | Type | Required | Meaning |
 |---|---|---|---|
 | cartridge_id | [CartridgeId](source-kinds.gen.md#cartridgeid) | in this form | The owning cartridge. Lowercase snake_case, at most 64 characters. |
-| cartridge_version | [ReleaseVersion](source-kinds.gen.md#releaseversion) | in this form | The cartridge version, MAJOR.MINOR.PATCH. |
+| cartridge_version | [ReleaseVersion](source-kinds.gen.md#releaseversion) | in this form | The cartridge version: three whole numbers joined by dots, such as 1.4.0. |
 | key | string | in this form | The definition's key within its kind. |
 | kind | string | in this form | The definition's kind. |
 
@@ -1242,7 +1242,7 @@ The kernel_api compatibility range a cartridge declares: at_least inclusive, bel
 
 ### KernelApiVersion
 
-A kernel_api version, MAJOR.MINOR without leading zeros.
+A kernel_api version: two whole numbers joined by a dot, such as 1.2, with no leading zeros.
 
 Type: string.
 
@@ -1271,7 +1271,7 @@ Exact vessel contents: null iff zero, positive declared kind bounded by immutabl
 |---|---|---|---|
 | kind | null or [Key](source-kinds.gen.md#key) or object | yes | The declared liquid; null iff quantity is zero. |
 | kind.cartridge_id | [CartridgeId](source-kinds.gen.md#cartridgeid) | in this form | The owning cartridge. Lowercase snake_case, at most 64 characters. |
-| kind.cartridge_version | [ReleaseVersion](source-kinds.gen.md#releaseversion) | in this form | The cartridge version, MAJOR.MINOR.PATCH. |
+| kind.cartridge_version | [ReleaseVersion](source-kinds.gen.md#releaseversion) | in this form | The cartridge version: three whole numbers joined by dots, such as 1.4.0. |
 | kind.key | string | in this form | The definition's key within its kind. |
 | kind.kind | string | in this form | The definition's kind. |
 | quantity | integer | yes | Exact amount, bounded by capacity. |
@@ -1408,7 +1408,7 @@ Type: `active` or `objectives_complete` or `resolved` or `failed` or `abandoned`
 
 ### ReleaseVersion
 
-A release version: MAJOR.MINOR.PATCH without leading zeros, pre-release or build metadata, at most 64 characters.
+A release version: three whole numbers joined by dots, such as 1.4.0, with no leading zeros and nothing after the last number, at most 64 characters.
 
 Type: string.
 

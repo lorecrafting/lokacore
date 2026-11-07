@@ -926,7 +926,7 @@
           },
           "walks": {
             "const": true,
-            "description": "The step moves only when a path to room exists through exits a walking NPC may cross (breadth first, direction-key order, one query step per exit); the NPC moves in one step, each locked door on the path it holds the key of is unlocked, opened, closed and locked again; no path leaves it where it is."
+            "description": "The NPC moves only when it can reach room through exits a walking NPC may cross. It takes the shortest way (on a tie, the exit whose direction name comes first alphabetically) in one step, and each locked door on the way that it holds the key of is unlocked, opened, closed and locked again. With no way there it stays where it is."
           }
         },
         "required": [

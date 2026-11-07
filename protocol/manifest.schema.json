@@ -42,7 +42,7 @@
       ]
     },
     "KernelApiVersion": {
-      "description": "A kernel_api version, MAJOR.MINOR without leading zeros.",
+      "description": "A kernel_api version: two whole numbers joined by a dot, such as 1.2, with no leading zeros.",
       "type": "string",
       "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$",
       "maxLength": 64,
@@ -152,7 +152,7 @@
           "$ref": "identity.schema.json#/$defs/CartridgeId"
         },
         "version": {
-          "description": "The cartridge's release version, MAJOR.MINOR.PATCH.",
+          "description": "The cartridge's release version: three whole numbers joined by dots, such as 1.4.0.",
           "$ref": "identity.schema.json#/$defs/ReleaseVersion"
         },
         "title": {

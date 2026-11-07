@@ -53,6 +53,9 @@ defmodule Loka.ContentSourceSchemaTest do
     own ++ jargon(s["description"], path) ++ inner ++ rest(s, path)
   end
 
+  defp gaps(l, path) when is_list(l), do: Enum.flat_map(l, &gaps(&1, path))
+  defp gaps(_, _), do: []
+
   # if/then/else only constrains fields declared beside it; the editor shows their help.
   defp rest(s, path) do
     for {k, v} <- s,
@@ -65,9 +68,6 @@ defmodule Loka.ContentSourceSchemaTest do
     do: if(d =~ @jargon, do: [{path, "cites the spec: #{d}"}], else: [])
 
   defp jargon(_, _), do: []
-
-  defp gaps(l, path) when is_list(l), do: Enum.flat_map(l, &gaps(&1, path))
-  defp gaps(_, _), do: []
 
   # A bare `const` field (an `op` or `type` tag) is told by its branch.
   defp told?(%{"const" => _} = p, branch) when map_size(p) == 1, do: told?(branch, nil)

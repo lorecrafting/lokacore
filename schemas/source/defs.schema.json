@@ -1296,7 +1296,7 @@
         { "$ref": "#/$defs/Key" },
         {
           "additionalProperties": false,
-          "description": "Globally stable, immutable reference to a content definition. cartridge_id, kind and key are lowercase snake_case of at most 64 characters; cartridge_version is MAJOR.MINOR.PATCH without leading zeros, pre-release or build metadata.",
+          "description": "A permanent reference to one content definition in one cartridge release. cartridge_id, kind and key are lowercase words joined by underscores, at most 64 characters; cartridge_version is three whole numbers joined by dots, such as 1.4.0, with no leading zeros and nothing after the last number.",
           "properties": {
             "cartridge_id": {
               "$ref": "#/$defs/CartridgeId",
@@ -1304,7 +1304,7 @@
             },
             "cartridge_version": {
               "$ref": "#/$defs/ReleaseVersion",
-              "description": "The cartridge version, MAJOR.MINOR.PATCH."
+              "description": "The cartridge version: three whole numbers joined by dots, such as 1.4.0."
             },
             "key": {
               "description": "The definition's key within its kind.",
@@ -2299,7 +2299,7 @@
       "type": "object"
     },
     "KernelApiVersion": {
-      "description": "A kernel_api version, MAJOR.MINOR without leading zeros.",
+      "description": "A kernel_api version: two whole numbers joined by a dot, such as 1.2, with no leading zeros.",
       "maxLength": 64,
       "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$",
       "type": "string"
@@ -2349,7 +2349,7 @@
             { "$ref": "#/$defs/Key" },
             {
               "additionalProperties": false,
-              "description": "Globally stable, immutable reference to a content definition. cartridge_id, kind and key are lowercase snake_case of at most 64 characters; cartridge_version is MAJOR.MINOR.PATCH without leading zeros, pre-release or build metadata.",
+              "description": "A permanent reference to one content definition in one cartridge release. cartridge_id, kind and key are lowercase words joined by underscores, at most 64 characters; cartridge_version is three whole numbers joined by dots, such as 1.4.0, with no leading zeros and nothing after the last number.",
               "properties": {
                 "cartridge_id": {
                   "$ref": "#/$defs/CartridgeId",
@@ -2357,7 +2357,7 @@
                 },
                 "cartridge_version": {
                   "$ref": "#/$defs/ReleaseVersion",
-                  "description": "The cartridge version, MAJOR.MINOR.PATCH."
+                  "description": "The cartridge version: three whole numbers joined by dots, such as 1.4.0."
                 },
                 "key": {
                   "description": "The definition's key within its kind.",
@@ -2726,7 +2726,7 @@
         },
         {
           "additionalProperties": false,
-          "description": "The fact, in the actor's scope, equals this value. An entity or pair fact is read at exactly one subject: npc or item, that definition's authored instance, or subject target, the action's target (false without one); a player or instance fact names none.",
+          "description": "The fact, in the actor's scope, equals this value. An entity or pair fact is read on exactly one subject: npc or item, the one placed in the world from that definition, or subject target, the action's target (false without one); a player or instance fact names none.",
           "properties": {
             "equals": {
               "$ref": "#/$defs/FactValue",
@@ -2738,11 +2738,11 @@
             },
             "item": {
               "$ref": "#/$defs/DefinitionRef",
-              "description": "Reads this item's authored instance."
+              "description": "Reads the item placed in the world from this definition."
             },
             "npc": {
               "$ref": "#/$defs/DefinitionRef",
-              "description": "Reads this NPC's authored instance."
+              "description": "Reads the NPC placed in the world from this definition."
             },
             "op": { "const": "fact_compare" },
             "subject": {
@@ -3266,11 +3266,11 @@
             },
             "item": {
               "$ref": "#/$defs/DefinitionRef",
-              "description": "Reads this item's authored instance."
+              "description": "Reads the item placed in the world from this definition."
             },
             "npc": {
               "$ref": "#/$defs/DefinitionRef",
-              "description": "Reads this NPC's authored instance."
+              "description": "Reads the NPC placed in the world from this definition."
             },
             "op": { "const": "time_since" }
           },
@@ -3475,7 +3475,7 @@
       ]
     },
     "ReleaseVersion": {
-      "description": "A release version: MAJOR.MINOR.PATCH without leading zeros, pre-release or build metadata, at most 64 characters.",
+      "description": "A release version: three whole numbers joined by dots, such as 1.4.0, with no leading zeros and nothing after the last number, at most 64 characters.",
       "maxLength": 64,
       "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$",
       "type": "string"
@@ -4037,11 +4037,11 @@
             },
             "item": {
               "$ref": "#/$defs/DefinitionRef",
-              "description": "The item whose authored instance holds an entity fact."
+              "description": "The item holding the fact: the one placed in the world from this definition."
             },
             "npc": {
               "$ref": "#/$defs/DefinitionRef",
-              "description": "The NPC whose authored instance holds an entity fact."
+              "description": "The NPC holding the fact: the one placed in the world from this definition."
             },
             "op": { "const": "fact.assign" },
             "value": {
@@ -4188,11 +4188,11 @@
             },
             "item": {
               "$ref": "#/$defs/DefinitionRef",
-              "description": "Lands on this item's authored instance."
+              "description": "Lands on the item placed in the world from this definition."
             },
             "npc": {
               "$ref": "#/$defs/DefinitionRef",
-              "description": "Lands on this NPC's authored instance; never with item."
+              "description": "Lands on the NPC placed in the world from this definition; never with item."
             },
             "op": { "const": "status.apply" },
             "room": {
@@ -4388,7 +4388,7 @@
         },
         {
           "additionalProperties": false,
-          "description": "NPC emotes: an NPC performs an emote of the cartridge's table. The emoter is npc (an authored instance alive in the delivery's room), else the delivery's subject; to subject names the subject as the target and needs the emote's to forms. Appends one emote.performed line, told only to a reader who sees the emoter; writes nothing, emits no event.",
+          "description": "NPC emotes: an NPC performs an emote from the cartridge's table. The one emoting is npc (the one placed in the world, alive in the delivery's room), else the delivery's subject; to subject makes the subject the target and needs the emote's wording for a target. Adds one emote line to the story, shown only to a reader who sees the one emoting; changes nothing else and sets off nothing.",
           "properties": {
             "emote": {
               "$ref": "#/$defs/DefinitionRef",
@@ -4883,7 +4883,7 @@
             },
             "escrow": {
               "additionalProperties": false,
-              "description": "Items the player hands over with the order; they wait in the custody room. With ready_after and output, the order takes time and is claimed later, and cancelling returns the items but not the fee. With output and no ready_after it is an immediate trade.",
+              "description": "The payment for the mend: when the player pays, quantity items of the listed kinds that the player carries move to the custody room. Without that many, the mend is refused.",
               "properties": {
                 "custody": {
                   "$ref": "#/$defs/DefinitionRef",
@@ -6034,7 +6034,7 @@
         { "$ref": "#/$defs/Key" },
         {
           "additionalProperties": false,
-          "description": "Globally stable, immutable reference to a content definition. cartridge_id, kind and key are lowercase snake_case of at most 64 characters; cartridge_version is MAJOR.MINOR.PATCH without leading zeros, pre-release or build metadata.",
+          "description": "A permanent reference to one content definition in one cartridge release. cartridge_id, kind and key are lowercase words joined by underscores, at most 64 characters; cartridge_version is three whole numbers joined by dots, such as 1.4.0, with no leading zeros and nothing after the last number.",
           "properties": {
             "cartridge_id": {
               "$ref": "#/$defs/CartridgeId",
@@ -6042,7 +6042,7 @@
             },
             "cartridge_version": {
               "$ref": "#/$defs/ReleaseVersion",
-              "description": "The cartridge version, MAJOR.MINOR.PATCH."
+              "description": "The cartridge version: three whole numbers joined by dots, such as 1.4.0."
             },
             "key": {
               "description": "The definition's key within its kind.",
@@ -6737,7 +6737,7 @@
             { "$ref": "#/$defs/Key" },
             {
               "additionalProperties": false,
-              "description": "Globally stable, immutable reference to a content definition. cartridge_id, kind and key are lowercase snake_case of at most 64 characters; cartridge_version is MAJOR.MINOR.PATCH without leading zeros, pre-release or build metadata.",
+              "description": "A permanent reference to one content definition in one cartridge release. cartridge_id, kind and key are lowercase words joined by underscores, at most 64 characters; cartridge_version is three whole numbers joined by dots, such as 1.4.0, with no leading zeros and nothing after the last number.",
               "properties": {
                 "cartridge_id": {
                   "$ref": "#/$defs/CartridgeId",
@@ -6745,7 +6745,7 @@
                 },
                 "cartridge_version": {
                   "$ref": "#/$defs/ReleaseVersion",
-                  "description": "The cartridge version, MAJOR.MINOR.PATCH."
+                  "description": "The cartridge version: three whole numbers joined by dots, such as 1.4.0."
                 },
                 "key": {
                   "description": "The definition's key within its kind.",
@@ -6938,7 +6938,7 @@
         },
         {
           "additionalProperties": false,
-          "description": "The fact, in the actor's scope, equals this value. An entity or pair fact is read at exactly one subject: npc or item, that definition's authored instance, or subject target, the action's target (false without one); a player or instance fact names none.",
+          "description": "The fact, in the actor's scope, equals this value. An entity or pair fact is read on exactly one subject: npc or item, the one placed in the world from that definition, or subject target, the action's target (false without one); a player or instance fact names none.",
           "properties": {
             "equals": {
               "$ref": "#/$defs/FactValue",
@@ -6950,11 +6950,11 @@
             },
             "item": {
               "$ref": "#/$defs/partial.DefinitionRef",
-              "description": "Reads this item's authored instance."
+              "description": "Reads the item placed in the world from this definition."
             },
             "npc": {
               "$ref": "#/$defs/partial.DefinitionRef",
-              "description": "Reads this NPC's authored instance."
+              "description": "Reads the NPC placed in the world from this definition."
             },
             "op": { "const": "fact_compare" },
             "subject": {
@@ -7325,11 +7325,11 @@
             },
             "item": {
               "$ref": "#/$defs/partial.DefinitionRef",
-              "description": "Reads this item's authored instance."
+              "description": "Reads the item placed in the world from this definition."
             },
             "npc": {
               "$ref": "#/$defs/partial.DefinitionRef",
-              "description": "Reads this NPC's authored instance."
+              "description": "Reads the NPC placed in the world from this definition."
             },
             "op": { "const": "time_since" }
           },
@@ -7664,11 +7664,11 @@
             },
             "item": {
               "$ref": "#/$defs/partial.DefinitionRef",
-              "description": "The item whose authored instance holds an entity fact."
+              "description": "The item holding the fact: the one placed in the world from this definition."
             },
             "npc": {
               "$ref": "#/$defs/partial.DefinitionRef",
-              "description": "The NPC whose authored instance holds an entity fact."
+              "description": "The NPC holding the fact: the one placed in the world from this definition."
             },
             "op": { "const": "fact.assign" },
             "value": {
@@ -7781,11 +7781,11 @@
             },
             "item": {
               "$ref": "#/$defs/partial.DefinitionRef",
-              "description": "Lands on this item's authored instance."
+              "description": "Lands on the item placed in the world from this definition."
             },
             "npc": {
               "$ref": "#/$defs/partial.DefinitionRef",
-              "description": "Lands on this NPC's authored instance; never with item."
+              "description": "Lands on the NPC placed in the world from this definition; never with item."
             },
             "op": { "const": "status.apply" },
             "room": {
@@ -7927,7 +7927,7 @@
         },
         {
           "additionalProperties": false,
-          "description": "NPC emotes: an NPC performs an emote of the cartridge's table. The emoter is npc (an authored instance alive in the delivery's room), else the delivery's subject; to subject names the subject as the target and needs the emote's to forms. Appends one emote.performed line, told only to a reader who sees the emoter; writes nothing, emits no event.",
+          "description": "NPC emotes: an NPC performs an emote from the cartridge's table. The one emoting is npc (the one placed in the world, alive in the delivery's room), else the delivery's subject; to subject makes the subject the target and needs the emote's wording for a target. Adds one emote line to the story, shown only to a reader who sees the one emoting; changes nothing else and sets off nothing.",
           "properties": {
             "emote": {
               "$ref": "#/$defs/partial.DefinitionRef",
@@ -8317,7 +8317,7 @@
             },
             "escrow": {
               "additionalProperties": false,
-              "description": "Items the player hands over with the order; they wait in the custody room. With ready_after and output, the order takes time and is claimed later, and cancelling returns the items but not the fee. With output and no ready_after it is an immediate trade.",
+              "description": "The payment for the mend: when the player pays, quantity items of the listed kinds that the player carries move to the custody room. Without that many, the mend is refused.",
               "properties": {
                 "custody": {
                   "$ref": "#/$defs/partial.DefinitionRef",
@@ -9144,7 +9144,7 @@
                   },
                   "walks": {
                     "const": true,
-                    "description": "The step moves only when a path to room exists through exits a walking NPC may cross (breadth first, direction-key order, one query step per exit); the NPC moves in one step, each locked door on the path it holds the key of is unlocked, opened, closed and locked again; no path leaves it where it is."
+                    "description": "The NPC moves only when it can reach room through exits a walking NPC may cross. It takes the shortest way (on a tie, the exit whose direction name comes first alphabetically) in one step, and each locked door on the way that it holds the key of is unlocked, opened, closed and locked again. With no way there it stays where it is."
                   }
                 },
                 "title": "walk",
@@ -9152,7 +9152,7 @@
               },
               {
                 "additionalProperties": false,
-                "description": "Globally stable, immutable reference to a content definition. cartridge_id, kind and key are lowercase snake_case of at most 64 characters; cartridge_version is MAJOR.MINOR.PATCH without leading zeros, pre-release or build metadata.",
+                "description": "A permanent reference to one content definition in one cartridge release. cartridge_id, kind and key are lowercase words joined by underscores, at most 64 characters; cartridge_version is three whole numbers joined by dots, such as 1.4.0, with no leading zeros and nothing after the last number.",
                 "properties": {
                   "cartridge_id": {
                     "$ref": "#/$defs/CartridgeId",
@@ -9160,7 +9160,7 @@
                   },
                   "cartridge_version": {
                     "$ref": "#/$defs/ReleaseVersion",
-                    "description": "The cartridge version, MAJOR.MINOR.PATCH."
+                    "description": "The cartridge version: three whole numbers joined by dots, such as 1.4.0."
                   },
                   "key": {
                     "description": "The definition's key within its kind.",
@@ -9196,7 +9196,7 @@
                         },
                         "walks": {
                           "const": true,
-                          "description": "The step moves only when a path to room exists through exits a walking NPC may cross (breadth first, direction-key order, one query step per exit); the NPC moves in one step, each locked door on the path it holds the key of is unlocked, opened, closed and locked again; no path leaves it where it is."
+                          "description": "The NPC moves only when it can reach room through exits a walking NPC may cross. It takes the shortest way (on a tie, the exit whose direction name comes first alphabetically) in one step, and each locked door on the way that it holds the key of is unlocked, opened, closed and locked again. With no way there it stays where it is."
                         },
                         "when": {
                           "$ref": "#/$defs/Policy",
@@ -9990,7 +9990,7 @@
                 "event": { "const": "entity_entered_room" },
                 "npc": {
                   "$ref": "#/$defs/partial.DefinitionRef",
-                  "description": "The entrant is this NPC's authored instance."
+                  "description": "The one entering is the NPC placed in the world from this definition."
                 },
                 "room": {
                   "$ref": "#/$defs/partial.DefinitionRef",
@@ -10010,7 +10010,7 @@
                 },
                 "npc": {
                   "$ref": "#/$defs/partial.DefinitionRef",
-                  "description": "The hearer is this NPC's authored instance."
+                  "description": "The one hearing is the NPC placed in the world from this definition."
                 },
                 "word": {
                   "$ref": "#/$defs/SpokenKeyword",
@@ -10043,7 +10043,7 @@
                 "event": { "const": "asked" },
                 "npc": {
                   "$ref": "#/$defs/partial.DefinitionRef",
-                  "description": "The asked NPC is this NPC's authored instance."
+                  "description": "The NPC asked is the one placed in the world from this definition."
                 },
                 "topic": {
                   "$ref": "#/$defs/partial.DefinitionRef",
@@ -10091,7 +10091,7 @@
                 },
                 "witness": {
                   "$ref": "#/$defs/partial.DefinitionRef",
-                  "description": "This NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness."
+                  "description": "The NPC placed in the world from this definition, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness."
                 }
               },
               "type": "object"
@@ -10111,7 +10111,7 @@
                 },
                 "witness": {
                   "$ref": "#/$defs/partial.DefinitionRef",
-                  "description": "This NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness."
+                  "description": "The NPC placed in the world from this definition, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness."
                 }
               },
               "type": "object"
@@ -10203,7 +10203,7 @@
                 "event": { "const": "action_completed" },
                 "witness": {
                   "$ref": "#/$defs/partial.DefinitionRef",
-                  "description": "This NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness."
+                  "description": "The NPC placed in the world from this definition, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness."
                 }
               },
               "type": "object"
@@ -10219,7 +10219,7 @@
                 "event": { "const": "check_passed" },
                 "witness": {
                   "$ref": "#/$defs/partial.DefinitionRef",
-                  "description": "This NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness."
+                  "description": "The NPC placed in the world from this definition, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness."
                 }
               },
               "type": "object"
@@ -10235,7 +10235,7 @@
                 "event": { "const": "check_failed" },
                 "witness": {
                   "$ref": "#/$defs/partial.DefinitionRef",
-                  "description": "This NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness."
+                  "description": "The NPC placed in the world from this definition, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness."
                 }
               },
               "type": "object"
@@ -10283,7 +10283,7 @@
                 },
                 "witness": {
                   "$ref": "#/$defs/partial.DefinitionRef",
-                  "description": "This NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness."
+                  "description": "The NPC placed in the world from this definition, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness."
                 }
               },
               "type": "object"
@@ -10294,7 +10294,7 @@
               "properties": {
                 "attacker": {
                   "$ref": "#/$defs/partial.DefinitionRef",
-                  "description": "The attacker is this NPC's authored instance; a player's blow never matches."
+                  "description": "The attacker is the NPC placed in the world from this definition; a player's blow never matches."
                 },
                 "event": { "const": "attack_result" },
                 "hit": {
@@ -10307,7 +10307,7 @@
                 },
                 "witness": {
                   "$ref": "#/$defs/partial.DefinitionRef",
-                  "description": "This NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness."
+                  "description": "The NPC placed in the world from this definition, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness."
                 }
               },
               "type": "object"
@@ -10619,7 +10619,7 @@
           "description": "Its sound bed tag, projected as place.sound: the host plays that tag's bed and exploration piece. The cartridge owns the names; a tag with no file plays the wild bed."
         },
         "tags": {
-          "description": "Its tags: words a condition can check for, which also set the cost of moving in. Each tag once only, since a repeat would count its cost twice.",
+          "description": "Its tags: words a condition can check for. A tag also changes the cost of moving in, but only when the world's movement terrain setting gives that tag a cost. Each tag once only, since a repeat would count its cost twice.",
           "items": { "$ref": "#/$defs/Tag" },
           "maxItems": 16,
           "minItems": 1,
@@ -12056,7 +12056,7 @@
                   },
                   "walks": {
                     "const": true,
-                    "description": "The step moves only when a path to room exists through exits a walking NPC may cross (breadth first, direction-key order, one query step per exit); the NPC moves in one step, each locked door on the path it holds the key of is unlocked, opened, closed and locked again; no path leaves it where it is."
+                    "description": "The NPC moves only when it can reach room through exits a walking NPC may cross. It takes the shortest way (on a tie, the exit whose direction name comes first alphabetically) in one step, and each locked door on the way that it holds the key of is unlocked, opened, closed and locked again. With no way there it stays where it is."
                   }
                 },
                 "required": [
@@ -12068,7 +12068,7 @@
               },
               {
                 "additionalProperties": false,
-                "description": "Globally stable, immutable reference to a content definition. cartridge_id, kind and key are lowercase snake_case of at most 64 characters; cartridge_version is MAJOR.MINOR.PATCH without leading zeros, pre-release or build metadata.",
+                "description": "A permanent reference to one content definition in one cartridge release. cartridge_id, kind and key are lowercase words joined by underscores, at most 64 characters; cartridge_version is three whole numbers joined by dots, such as 1.4.0, with no leading zeros and nothing after the last number.",
                 "properties": {
                   "cartridge_id": {
                     "$ref": "#/$defs/CartridgeId",
@@ -12076,7 +12076,7 @@
                   },
                   "cartridge_version": {
                     "$ref": "#/$defs/ReleaseVersion",
-                    "description": "The cartridge version, MAJOR.MINOR.PATCH."
+                    "description": "The cartridge version: three whole numbers joined by dots, such as 1.4.0."
                   },
                   "key": {
                     "description": "The definition's key within its kind.",
@@ -12118,7 +12118,7 @@
                         },
                         "walks": {
                           "const": true,
-                          "description": "The step moves only when a path to room exists through exits a walking NPC may cross (breadth first, direction-key order, one query step per exit); the NPC moves in one step, each locked door on the path it holds the key of is unlocked, opened, closed and locked again; no path leaves it where it is."
+                          "description": "The NPC moves only when it can reach room through exits a walking NPC may cross. It takes the shortest way (on a tie, the exit whose direction name comes first alphabetically) in one step, and each locked door on the way that it holds the key of is unlocked, opened, closed and locked again. With no way there it stays where it is."
                         },
                         "when": {
                           "$ref": "#/$defs/Policy",
@@ -13060,7 +13060,7 @@
                 "event": { "const": "entity_entered_room" },
                 "npc": {
                   "$ref": "#/$defs/DefinitionRef",
-                  "description": "The entrant is this NPC's authored instance."
+                  "description": "The one entering is the NPC placed in the world from this definition."
                 },
                 "room": {
                   "$ref": "#/$defs/DefinitionRef",
@@ -13083,7 +13083,7 @@
                 },
                 "npc": {
                   "$ref": "#/$defs/DefinitionRef",
-                  "description": "The hearer is this NPC's authored instance."
+                  "description": "The one hearing is the NPC placed in the world from this definition."
                 },
                 "word": {
                   "$ref": "#/$defs/SpokenKeyword",
@@ -13122,7 +13122,7 @@
                 "event": { "const": "asked" },
                 "npc": {
                   "$ref": "#/$defs/DefinitionRef",
-                  "description": "The asked NPC is this NPC's authored instance."
+                  "description": "The NPC asked is the one placed in the world from this definition."
                 },
                 "topic": {
                   "$ref": "#/$defs/DefinitionRef",
@@ -13181,7 +13181,7 @@
                 },
                 "witness": {
                   "$ref": "#/$defs/DefinitionRef",
-                  "description": "This NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness."
+                  "description": "The NPC placed in the world from this definition, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness."
                 }
               },
               "required": [
@@ -13204,7 +13204,7 @@
                 },
                 "witness": {
                   "$ref": "#/$defs/DefinitionRef",
-                  "description": "This NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness."
+                  "description": "The NPC placed in the world from this definition, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness."
                 }
               },
               "required": [
@@ -13317,7 +13317,7 @@
                 "event": { "const": "action_completed" },
                 "witness": {
                   "$ref": "#/$defs/DefinitionRef",
-                  "description": "This NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness."
+                  "description": "The NPC placed in the world from this definition, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness."
                 }
               },
               "required": [
@@ -13336,7 +13336,7 @@
                 "event": { "const": "check_passed" },
                 "witness": {
                   "$ref": "#/$defs/DefinitionRef",
-                  "description": "This NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness."
+                  "description": "The NPC placed in the world from this definition, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness."
                 }
               },
               "required": [
@@ -13355,7 +13355,7 @@
                 "event": { "const": "check_failed" },
                 "witness": {
                   "$ref": "#/$defs/DefinitionRef",
-                  "description": "This NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness."
+                  "description": "The NPC placed in the world from this definition, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness."
                 }
               },
               "required": [
@@ -13412,7 +13412,7 @@
                 },
                 "witness": {
                   "$ref": "#/$defs/DefinitionRef",
-                  "description": "This NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness."
+                  "description": "The NPC placed in the world from this definition, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness."
                 }
               },
               "required": [
@@ -13426,7 +13426,7 @@
               "properties": {
                 "attacker": {
                   "$ref": "#/$defs/DefinitionRef",
-                  "description": "The attacker is this NPC's authored instance; a player's blow never matches."
+                  "description": "The attacker is the NPC placed in the world from this definition; a player's blow never matches."
                 },
                 "event": { "const": "attack_result" },
                 "hit": {
@@ -13439,7 +13439,7 @@
                 },
                 "witness": {
                   "$ref": "#/$defs/DefinitionRef",
-                  "description": "This NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness."
+                  "description": "The NPC placed in the world from this definition, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness."
                 }
               },
               "required": [
@@ -13798,7 +13798,7 @@
           "description": "Its sound bed tag, projected as place.sound: the host plays that tag's bed and exploration piece. The cartridge owns the names; a tag with no file plays the wild bed."
         },
         "tags": {
-          "description": "Its tags: words a condition can check for, which also set the cost of moving in. Each tag once only, since a repeat would count its cost twice.",
+          "description": "Its tags: words a condition can check for. A tag also changes the cost of moving in, but only when the world's movement terrain setting gives that tag a cost. Each tag once only, since a repeat would count its cost twice.",
           "items": { "$ref": "#/$defs/Tag" },
           "maxItems": 16,
           "minItems": 1,
@@ -14995,7 +14995,7 @@
         },
         "version": {
           "$ref": "#/$defs/ReleaseVersion",
-          "description": "The cartridge's release version, MAJOR.MINOR.PATCH."
+          "description": "The cartridge's release version: three whole numbers joined by dots, such as 1.4.0."
         },
         "world": {
           "$ref": "#/$defs/WorldSettings",

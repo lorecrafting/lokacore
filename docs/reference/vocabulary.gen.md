@@ -11,8 +11,8 @@ Assign a fact.
 | Field | Type | Required | Meaning |
 |---|---|---|---|
 | fact | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The declared fact to set. |
-| item | [DefinitionRef](source-kinds.gen.md#definitionref) |  | The item whose authored instance holds an entity fact. |
-| npc | [DefinitionRef](source-kinds.gen.md#definitionref) |  | The NPC whose authored instance holds an entity fact. |
+| item | [DefinitionRef](source-kinds.gen.md#definitionref) |  | The item holding the fact: the one placed in the world from this definition. |
+| npc | [DefinitionRef](source-kinds.gen.md#definitionref) |  | The NPC holding the fact: the one placed in the world from this definition. |
 | value | [FactValue](source-kinds.gen.md#factvalue) | yes | The new value, of the fact's type. |
 | with | [DefinitionRef](source-kinds.gen.md#definitionref) |  | An npc_pair fact's second NPC; the step writes at the pair (its subject toward this NPC). |
 
@@ -70,8 +70,8 @@ Starts a status, or refreshes it if already active. In a reaction it lands on th
 | Field | Type | Required | Meaning |
 |---|---|---|---|
 | co_present | `true` |  | Put the status on every living NPC in the room (not the player) instead of one target. |
-| item | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Lands on this item's authored instance. |
-| npc | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Lands on this NPC's authored instance; never with item. |
+| item | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Lands on the item placed in the world from this definition. |
+| npc | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Lands on the NPC placed in the world from this definition; never with item. |
 | room | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Put the status on this room instead of a person or item. |
 | status | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The status to apply. |
 | tag | [Tag](source-kinds.gen.md#tag) |  | With co_present only: put the status on every item lying in the room with this tag instead. |
@@ -152,7 +152,7 @@ Adds the line text to what the player reads, after the lines of earlier steps. C
 
 ### `emote`
 
-NPC emotes: an NPC performs an emote of the cartridge's table. The emoter is npc (an authored instance alive in the delivery's room), else the delivery's subject; to subject names the subject as the target and needs the emote's to forms. Appends one emote.performed line, told only to a reader who sees the emoter; writes nothing, emits no event.
+NPC emotes: an NPC performs an emote from the cartridge's table. The one emoting is npc (the one placed in the world, alive in the delivery's room), else the delivery's subject; to subject makes the subject the target and needs the emote's wording for a target. Adds one emote line to the story, shown only to a reader who sees the one emoting; changes nothing else and sets off nothing.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -325,7 +325,7 @@ Repairs the built room in direction from the site once it has fallen into ruin. 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
 | direction | `north` or `south` or `east` or `west` or `up` or `down` | yes | As build's direction. |
-| escrow | object |  | Items the player hands over with the order; they wait in the custody room. With ready_after and output, the order takes time and is claimed later, and cancelling returns the items but not the fee. With output and no ready_after it is an immediate trade. |
+| escrow | object |  | The payment for the mend: when the player pays, quantity items of the listed kinds that the player carries move to the custody room. Without that many, the mend is refused. |
 | escrow.custody | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The room holding them. |
 | escrow.items | list of [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The item definitions accepted as payment. |
 | escrow.quantity | integer | yes | How many of them move. |
@@ -391,14 +391,14 @@ The actor's instance of the quest is in this lifecycle state.
 
 ### `fact_compare`
 
-The fact, in the actor's scope, equals this value. An entity or pair fact is read at exactly one subject: npc or item, that definition's authored instance, or subject target, the action's target (false without one); a player or instance fact names none.
+The fact, in the actor's scope, equals this value. An entity or pair fact is read on exactly one subject: npc or item, the one placed in the world from that definition, or subject target, the action's target (false without one); a player or instance fact names none.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
 | equals | [FactValue](source-kinds.gen.md#factvalue) | yes | The value to compare. |
 | fact | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The fact to read. |
-| item | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Reads this item's authored instance. |
-| npc | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Reads this NPC's authored instance. |
+| item | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Reads the item placed in the world from this definition. |
+| npc | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Reads the NPC placed in the world from this definition. |
 | subject | `target` |  | `target` reads the action's target. |
 | with | [DefinitionRef](source-kinds.gen.md#definitionref) |  | An npc_pair fact's second NPC, read at the pair (subject toward with). |
 
@@ -576,8 +576,8 @@ True once at least at_least time has passed since the time stored in a number fa
 |---|---|---|---|
 | at_least | integer | yes | The least elapsed time that holds. |
 | fact | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The int fact holding a stamp. |
-| item | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Reads this item's authored instance. |
-| npc | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Reads this NPC's authored instance. |
+| item | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Reads the item placed in the world from this definition. |
+| npc | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Reads the NPC placed in the world from this definition. |
 
 ## Events
 
@@ -595,7 +595,7 @@ Someone entered a room.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| npc | [DefinitionRef](source-kinds.gen.md#definitionref) |  | The entrant is this NPC's authored instance. |
+| npc | [DefinitionRef](source-kinds.gen.md#definitionref) |  | The one entering is the NPC placed in the world from this definition. |
 | room | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Only this room. |
 
 ### `spoken`
@@ -605,7 +605,7 @@ Someone said a word an NPC heard; fires once for each NPC that heard it.
 | Field | Type | Required | Meaning |
 |---|---|---|---|
 | loudness | [Loudness](source-kinds.gen.md#loudness) |  | Only this loudness. |
-| npc | [DefinitionRef](source-kinds.gen.md#definitionref) |  | The hearer is this NPC's authored instance. |
+| npc | [DefinitionRef](source-kinds.gen.md#definitionref) |  | The one hearing is the NPC placed in the world from this definition. |
 | word | [SpokenKeyword](source-kinds.gen.md#spokenkeyword) |  | The word that fires it. |
 
 ### `level_reached`
@@ -623,7 +623,7 @@ The player asked an NPC about a topic.
 | Field | Type | Required | Meaning |
 |---|---|---|---|
 | answered | boolean |  | Only asks that were, or were not, answered. |
-| npc | [DefinitionRef](source-kinds.gen.md#definitionref) |  | The asked NPC is this NPC's authored instance. |
+| npc | [DefinitionRef](source-kinds.gen.md#definitionref) |  | The NPC asked is the one placed in the world from this definition. |
 | topic | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Only this topic. |
 
 ### `quest_resolved`
@@ -650,7 +650,7 @@ An item came into someone's hands: picked up, bought, given, harvested or stolen
 | Field | Type | Required | Meaning |
 |---|---|---|---|
 | item | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Only this item. |
-| witness | [DefinitionRef](source-kinds.gen.md#definitionref) |  | This NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness. |
+| witness | [DefinitionRef](source-kinds.gen.md#definitionref) |  | The NPC placed in the world from this definition, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness. |
 
 ### `item_dropped`
 
@@ -660,7 +660,7 @@ An item was dropped.
 |---|---|---|---|
 | item | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Only this item. |
 | room | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Only this room. |
-| witness | [DefinitionRef](source-kinds.gen.md#definitionref) |  | This NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness. |
+| witness | [DefinitionRef](source-kinds.gen.md#definitionref) |  | The NPC placed in the world from this definition, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness. |
 
 ### `shooed`
 
@@ -717,7 +717,7 @@ A scripted action finished.
 | Field | Type | Required | Meaning |
 |---|---|---|---|
 | action | [Key](source-kinds.gen.md#key) |  | Only this action. |
-| witness | [DefinitionRef](source-kinds.gen.md#definitionref) |  | This NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness. |
+| witness | [DefinitionRef](source-kinds.gen.md#definitionref) |  | The NPC placed in the world from this definition, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness. |
 
 ### `check_passed`
 
@@ -726,7 +726,7 @@ A check passed.
 | Field | Type | Required | Meaning |
 |---|---|---|---|
 | check | [Key](source-kinds.gen.md#key) |  | Only the check with this key. |
-| witness | [DefinitionRef](source-kinds.gen.md#definitionref) |  | This NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness. |
+| witness | [DefinitionRef](source-kinds.gen.md#definitionref) |  | The NPC placed in the world from this definition, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness. |
 
 ### `check_failed`
 
@@ -735,7 +735,7 @@ A check failed.
 | Field | Type | Required | Meaning |
 |---|---|---|---|
 | check | [Key](source-kinds.gen.md#key) |  | Only the check with this key. |
-| witness | [DefinitionRef](source-kinds.gen.md#definitionref) |  | This NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness. |
+| witness | [DefinitionRef](source-kinds.gen.md#definitionref) |  | The NPC placed in the world from this definition, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness. |
 
 ### `barrier_changed`
 
@@ -762,7 +762,7 @@ Someone died.
 |---|---|---|---|
 | room | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Only this room. |
 | victim | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Only this victim. |
-| witness | [DefinitionRef](source-kinds.gen.md#definitionref) |  | This NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness. |
+| witness | [DefinitionRef](source-kinds.gen.md#definitionref) |  | The NPC placed in the world from this definition, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness. |
 
 ### `attack_result`
 
@@ -770,10 +770,10 @@ An attack hit or missed.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| attacker | [DefinitionRef](source-kinds.gen.md#definitionref) |  | The attacker is this NPC's authored instance; a player's blow never matches. |
+| attacker | [DefinitionRef](source-kinds.gen.md#definitionref) |  | The attacker is the NPC placed in the world from this definition; a player's blow never matches. |
 | hit | boolean |  | Only hits, or only misses. |
 | target | [DefinitionRef](source-kinds.gen.md#definitionref) |  | The target is this NPC itself; a blow on the player never matches. |
-| witness | [DefinitionRef](source-kinds.gen.md#definitionref) |  | This NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness. |
+| witness | [DefinitionRef](source-kinds.gen.md#definitionref) |  | The NPC placed in the world from this definition, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness. |
 
 ### `filled`
 

@@ -483,7 +483,7 @@
           "$ref": "action.schema.json#/$defs/Key"
         },
         "tags": {
-          "description": "Its tags: words a condition can check for, which also set the cost of moving in. Each tag once only, since a repeat would count its cost twice.",
+          "description": "Its tags: words a condition can check for. A tag also changes the cost of moving in, but only when the world's movement terrain setting gives that tag a cost. Each tag once only, since a repeat would count its cost twice.",
           "type": "array",
           "minItems": 1,
           "maxItems": 16,

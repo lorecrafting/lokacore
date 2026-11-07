@@ -39,7 +39,7 @@
                 },
                 "npc": {
                   "$ref": "identity.schema.json#/$defs/DefinitionRef",
-                  "description": "The entrant is this NPC's authored instance."
+                  "description": "The one entering is the NPC placed in the world from this definition."
                 }
               },
               "required": [
@@ -57,7 +57,7 @@
                 },
                 "npc": {
                   "$ref": "identity.schema.json#/$defs/DefinitionRef",
-                  "description": "The hearer is this NPC's authored instance."
+                  "description": "The one hearing is the NPC placed in the world from this definition."
                 },
                 "word": {"description":"The word that fires it.",
                   "$ref": "dialogue.schema.json#/$defs/SpokenKeyword"
@@ -98,7 +98,7 @@
                 },
                 "npc": {
                   "$ref": "identity.schema.json#/$defs/DefinitionRef",
-                  "description": "The asked NPC is this NPC's authored instance."
+                  "description": "The NPC asked is the one placed in the world from this definition."
                 },
                 "topic": {"description":"Only this topic.",
                   "$ref": "identity.schema.json#/$defs/DefinitionRef"
@@ -156,7 +156,7 @@
                 },
                 "witness": {
                   "$ref": "identity.schema.json#/$defs/DefinitionRef",
-                  "description": "This NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness."
+                  "description": "The NPC placed in the world from this definition, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness."
                 },
                 "item": {"description":"Only this item.",
                   "$ref": "identity.schema.json#/$defs/DefinitionRef"
@@ -175,7 +175,7 @@
                 },
                 "witness": {
                   "$ref": "identity.schema.json#/$defs/DefinitionRef",
-                  "description": "This NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness."
+                  "description": "The NPC placed in the world from this definition, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness."
                 },
                 "item": {"description":"Only this item.",
                   "$ref": "identity.schema.json#/$defs/DefinitionRef"
@@ -290,7 +290,7 @@
                 },
                 "witness": {
                   "$ref": "identity.schema.json#/$defs/DefinitionRef",
-                  "description": "This NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness."
+                  "description": "The NPC placed in the world from this definition, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness."
                 },
                 "action": {"description":"Only this action.",
                   "$ref": "action.schema.json#/$defs/Key"
@@ -309,7 +309,7 @@
                 },
                 "witness": {
                   "$ref": "identity.schema.json#/$defs/DefinitionRef",
-                  "description": "This NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness."
+                  "description": "The NPC placed in the world from this definition, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness."
                 },
                 "check": {"description":"Only the check with this key.",
                   "$ref": "action.schema.json#/$defs/Key"
@@ -328,7 +328,7 @@
                 },
                 "witness": {
                   "$ref": "identity.schema.json#/$defs/DefinitionRef",
-                  "description": "This NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness."
+                  "description": "The NPC placed in the world from this definition, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness."
                 },
                 "check": {"description":"Only the check with this key.",
                   "$ref": "action.schema.json#/$defs/Key"
@@ -380,7 +380,7 @@
                 },
                 "witness": {
                   "$ref": "identity.schema.json#/$defs/DefinitionRef",
-                  "description": "This NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness."
+                  "description": "The NPC placed in the world from this definition, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness."
                 },
                 "victim": {"description":"Only this victim.",
                   "$ref": "identity.schema.json#/$defs/DefinitionRef"
@@ -402,14 +402,14 @@
                 },
                 "witness": {
                   "$ref": "identity.schema.json#/$defs/DefinitionRef",
-                  "description": "This NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness."
+                  "description": "The NPC placed in the world from this definition, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness."
                 },
                 "hit": {"description":"Only hits, or only misses.",
                   "type": "boolean"
                 },
                 "attacker": {
                   "$ref": "identity.schema.json#/$defs/DefinitionRef",
-                  "description": "The attacker is this NPC's authored instance; a player's blow never matches."
+                  "description": "The attacker is the NPC placed in the world from this definition; a player's blow never matches."
                 },
                 "target": {
                   "$ref": "identity.schema.json#/$defs/DefinitionRef",

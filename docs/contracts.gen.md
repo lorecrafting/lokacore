@@ -544,13 +544,13 @@ Definition identity and runtime identities (03 §2, §3, §6; 05 §4). Each id i
 - **CartridgeId**: A cartridge identity, lowercase snake_case, at most 64 characters.
 - **CharacterId**: A character (02 §4); the id of player StateScope and player AudiencePolicy (03 §6). Lowercase hyphenated UUID, any version.
 - **CommandId**: Stable semantic Command id (04 §3), derived from the logical idempotency scope and the InvocationId; stable when the authority domain changes (03 §6). Lowercase hyphenated UUID, any version.
-- **DefinitionRef**: Globally stable, immutable reference to a content definition. cartridge_id, kind and key are lowercase snake_case of at most 64 characters; cartridge_version is MAJOR.MINOR.PATCH without leading zeros, pre-release or build metadata.
+- **DefinitionRef**: A permanent reference to one content definition in one cartridge release. cartridge_id, kind and key are lowercase words joined by underscores, at most 64 characters; cartridge_version is three whole numbers joined by dots, such as 1.4.0, with no leading zeros and nothing after the last number.
 - **DefinitionRefString**: Canonical string form of a DefinitionRef, cartridge_id@cartridge_version:kind/key (03 §2, 05 §4), with the same segment rules: each at most 64 characters, so every valid DefinitionRef has a valid string form.
 - **EntityId**: Runtime entity identity (03 §3). Two entities from one DefinitionRef have different EntityIds. Lowercase hyphenated UUID, any version.
 - **InvocationId**: Client-visible stable retry identity of one ActionInvocation (04 §1, §2). Lowercase hyphenated UUID, any version.
 - **PartyId**: A party; the id of party StateScope and party AudiencePolicy (03 §6). Lowercase hyphenated UUID, any version.
 - **RealmId**: The broader persistent Realm identity (03 §6); the id of realm StateScope. Lowercase hyphenated UUID, any version.
-- **ReleaseVersion**: A release version: MAJOR.MINOR.PATCH without leading zeros, pre-release or build metadata, at most 64 characters.
+- **ReleaseVersion**: A release version: three whole numbers joined by dots, such as 1.4.0, with no leading zeros and nothing after the last number, at most 64 characters.
 - **WorldContextId**: Logical world/context identity: the simulation, save or deployment context in which state exists (03 §6, 'Logical world identity is not mutation-owner placement'). Never a fencing, owner or shard token. Lowercase hyphenated UUID, any version.
 
 ## Invariant registry contract (`protocol/invariant.schema.json`)
@@ -581,7 +581,7 @@ Cartridge manifests and releases and their version fields (05 §3, §20, §22; 0
 - **ContentHash**: A semantic content hash: SHA-256 as 64 lowercase hex digits. It covers the semantic payload only, never signatures, certificates or package bytes (05 §11 'Hash domains and attestations'); how the payload is formed is the compiler's (R4).
 - **ExecutionProfile**: A hosting profile a cartridge supports or a deployment uses: the canonical execution-profile vocabulary.
 - **KernelApiRange**: The kernel_api compatibility range a cartridge declares: at_least inclusive, below exclusive, so '>=1.3 <2.0' is at_least 1.3, below 2.0.
-- **KernelApiVersion**: A kernel_api version, MAJOR.MINOR without leading zeros.
+- **KernelApiVersion**: A kernel_api version: two whole numbers joined by a dot, such as 1.2, with no leading zeros.
 - **TimePolicy**: How fast game time runs while the player plays: game seconds per real second. Leave it out for the default.
 
 ## Observation contracts (`protocol/observation.schema.json`)
@@ -648,7 +648,7 @@ The core policy AST (06 §21; 21 §3.2, §4 Policy; 14 §R3A). Typed, pure and f
   - `target_present`: The resolved target is present to the actor.
   - `has_item`: The actor holds an item of this definition, directly or inside containers it holds, transitively.
   - `quest_state`: The actor's instance of the quest is in this lifecycle state.
-  - `fact_compare`: The fact, in the actor's scope, equals this value. An entity or pair fact is read at exactly one subject: npc or item, that definition's authored instance, or subject target, the action's target (false without one); a player or instance fact names none.
+  - `fact_compare`: The fact, in the actor's scope, equals this value. An entity or pair fact is read on exactly one subject: npc or item, the one placed in the world from that definition, or subject target, the action's target (false without one); a player or instance fact names none.
   - `time_window`: Holds during a range of hours of the day: from (included) up to to (not included), wrapping past midnight. Example: from 20 to 6 is night. From and to must differ.
   - `barrier_state`: True while the door is in this state: open, closed or locked.
   - `stat_compare`: True while the player's attribute is at least this value.
@@ -803,7 +803,7 @@ One step vocabulary and one check vocabulary (C3 D2, loka-ivjq.4): a reaction's 
   - `population.spawn`: For timed world events: adds one group of the population to its home, in a free slot, as the population's own births do. With no free slot nothing is born. No dice are rolled.
   - `replenish.run`: Run one restock at once: move items as the named replenish rule would, without waiting.
   - `narrate`: Adds the line text to what the player reads, after the lines of earlier steps. Changes nothing in the world.
-  - `emote`: NPC emotes: an NPC performs an emote of the cartridge's table. The emoter is npc (an authored instance alive in the delivery's room), else the delivery's subject; to subject names the subject as the target and needs the emote's to forms. Appends one emote.performed line, told only to a reader who sees the emoter; writes nothing, emits no event.
+  - `emote`: NPC emotes: an NPC performs an emote from the cartridge's table. The one emoting is npc (the one placed in the world, alive in the delivery's room), else the delivery's subject; to subject makes the subject the target and needs the emote's wording for a target. Adds one emote line to the story, shown only to a reader who sees the one emoting; changes nothing else and sets off nothing.
   - `fact.stamp`: Writes the delivery's logical time into an int fact (no maximum, minimum absent or at most 0) at the subject a fact.assign step writes at, as a fact.assign.
   - `event.emit`: Emit a custom event.
   - `damage`: Spells only: the named NPC (or the spell's target) takes this much damage of this kind, after its resistances; at 0 it dies, killed by the caster.
