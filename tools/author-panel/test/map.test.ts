@@ -268,3 +268,15 @@ test('the item header`s + with a room selected makes an item in that room', asyn
     await page.close();
   }
 });
+
+// Breaks (left.tsx described, loka-wfrgk.108): the New list's line is the whole schema description,
+// another kind's, or none, not the first sentence of the dialogue definition's.
+test('the New list gives dialogues the first sentence of its schema description', async () => {
+  const page = await open({ right: 280, leftOpen: true, tab: 'hierarchy', selection: { kind: 'room', key: 'smithy' } });
+  await page.getByRole('button', { name: 'New', exact: true }).click({ timeout: boot });
+  const line = page.getByRole('button', { name: 'New dialogues', exact: true }).locator('span');
+  await line.filter({ hasText: /\S/ }).waitFor({ timeout: boot });
+  const first = 'A conversation with an NPC: who speaks (npc), when it is offered (policy), the question shown (prompt) and the choices the player can pick.';
+  assert.equal(await line.textContent(), first);
+  await page.close();
+});
