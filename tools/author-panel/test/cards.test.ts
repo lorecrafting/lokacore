@@ -30,3 +30,22 @@ test('an added edible is held from the next write until it has an effect', async
     await page.close();
   }
 });
+
+// Break: a switch to Opening keeps the story point's fields (valid_source?, scenes.ex:149-156: the
+// compile refuses a start with any other key), or the trigger chooser is missing from a modal scene.
+test('a modal scene switched to Opening writes exactly start: true', async () => {
+  const page = await open({ selection: { kind: 'scene', key: 'letter_ash' } });
+  const file = join(dir, 'showcase/scenes/letter_ash.json');
+  const before = readFileSync(file, 'utf8');
+  const on = () => JSON.parse(readFileSync(file, 'utf8')).on;
+  try {
+    const kind = page.getByLabel('scene card').getByLabel('on', { exact: true });
+    await kind.waitFor({ timeout: boot });
+    await kind.selectOption('start');
+    for (let t = 0; !on().start && t < 50; t++) await page.waitForTimeout(100);
+    assert.deepEqual(on(), { start: true });
+  } finally {
+    writeFileSync(file, before); // the other tests' showcase has no opening
+    await page.close();
+  }
+});

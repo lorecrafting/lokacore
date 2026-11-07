@@ -32,6 +32,7 @@ export const model = (refs: string[], edges: Edge[], outline: Story['outline'] =
   files: {},
   bundled: {},
   shorts: [],
+  triggers: { points: {}, actions: {}, taken: {}, named: {} },
 });
 // Beat 1 holds q and d1, beat 2 d2 and d3; d1 `then` d2, forks to d3 by `check` and reads f, as r1
 // does; d2 and d3 `then` back to d1 (two loops). f is a read_only fact; thera_greets is unrelated.
