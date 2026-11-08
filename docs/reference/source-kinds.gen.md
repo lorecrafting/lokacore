@@ -46,6 +46,8 @@ An action the player can take, such as ring the bell: the words that start it, w
 
 ## areas
 
+A named region of the map: groups rooms and local definitions under an area folder.
+
 | Field | Type | Required | Meaning |
 |---|---|---|---|
 | actions | map of [actions](source-kinds.gen.md#actions) |  | Definitions of this kind in the bundle, by key, each without its key field. |
@@ -72,13 +74,15 @@ An action the player can take, such as ring the bell: the words that start it, w
 
 ## attributes
 
+Core character statistics such as strength, agility, and intellect that govern checks and modifiers.
+
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| attributes | map of map of any | yes |  |
+| attributes | map of map of any | yes | Declared attributes mapped by key. |
 
 ## barriers
 
-Shared mutable state for one logical door or gate (21 §5 Barrier), owned by barrier@1 (a cartridge with one requires it), keyed in CompiledCartridge.barriers by DefinitionRefString of kind barrier and named by the exits that pass through it (Connection.barrier): its key; keywords, the Alias words a player names it by after open, close, lock or unlock (the direction of its exit names it too); name, the text key of its short description ("the oak door"); initial, its state in a fresh world (BarrierState); and optionally key_item, the item whose holder may lock and unlock it (has_item: held directly or inside containers the holder holds). Without key_item no one can lock or unlock it. Damaged/repaired and blocked states join as optional fields. Optional tags are its property tags (entity.schema.json Tag, toolbox row G1).
+A door, gate, or passage between rooms that can be opened, closed, locked, or unlocked. Exits name the barrier to control passage; an optional key item lets players lock and unlock it.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -86,15 +90,17 @@ Shared mutable state for one logical door or gate (21 §5 Barrier), owned by bar
 | key_item | [DefinitionRef](source-kinds.gen.md#definitionref) |  | The item whose holder may lock and unlock this barrier. |
 | keywords | list of [Alias](source-kinds.gen.md#alias) | yes | Words a player names it by. |
 | name | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of the barrier's short description. |
-| opens_when | [Policy](vocabulary.gen.md#policy-leaves) |  | A condition its open command needs (toolbox row 10, barrier@1): while it fails, open is refused invalid_state; close, lock and unlock and an already open barrier are unaffected. |
+| opens_when | [Policy](vocabulary.gen.md#policy-leaves) |  | A condition that must be met before the barrier can be opened. Closing, locking, unlocking, and an already-open barrier are unaffected. |
 | tags | list of [Tag](source-kinds.gen.md#tag) |  | Its tags: words a condition can check for. |
 
 ## behaviours
 
+A reusable bundle of reaction rules that can be attached to NPCs or items.
+
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| params | list of [Key](source-kinds.gen.md#key) |  |  |
-| reactions | map of object | yes |  |
+| params | list of [Key](source-kinds.gen.md#key) |  | Parameter keys passed into the behaviour when attached. |
+| reactions | map of object | yes | Named reaction rules this behaviour attaches to holders. |
 
 ## bleeds
 
@@ -157,7 +163,7 @@ A conversation with an NPC: who speaks (npc), when it is offered (policy), the q
 
 ## emotes
 
-NPC emotes (G9, emote@1; cartridge.md Emote declarations): one canned emote an NPC performs. Its key; others, the text key of the line every reader but the target reads ({actor}, the emoter); optional to, the forms with a target: to.others for the other readers ({actor}, {target}) and to.you for the target ({actor}). No label and no self form: only NPCs emote.
+A canned social expression an NPC performs in the room, with different text for observers and targets.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -167,6 +173,8 @@ NPC emotes (G9, emote@1; cartridge.md Emote declarations): one canned emote an N
 | to.you | [TextKey](source-kinds.gen.md#textkey) | yes | Text key for the target. |
 
 ## facts
+
+World and player state tracked by key: booleans, numbers, and strings that remember progress and choices.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -226,6 +234,8 @@ An item: something the player can pick up, carry, wear or open. It has names and
 | words | [NameWords](source-kinds.gen.md#namewords) |  | The item's name words, such as the bare name lantern, its article and plural, used to build sentences. |
 
 ## layout
+
+The 2D map coordinates for placing rooms on the world grid.
 
 Type: list of [MapPosition](source-kinds.gen.md#mapposition).
 
@@ -464,7 +474,7 @@ A rule that runs steps when something happens in the game: when names the event 
 
 ## replenish
 
-One replenish entry (docs/system/cartridge.md Replenish declarations): each due job moves up to count of items, lowest EntityId first, from the holder from to the holder to until to holds cap of them, then schedules the next at its due time plus every. A move never exceeds to's declared capacity. The compiler (lib/loka/content/replenish.ex) refuses a template location, a holder with no placed entity (a spawn-template NPC or template item), an item holder that is not a container, an item to when any listed item is a container, from equal to to, duplicate items and an unresolved item or holder.
+A periodic restocking rule that transfers items from a source container to a destination up to a target count. Runs repeatedly on a timer to keep shops or containers supplied.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
@@ -477,9 +487,11 @@ One replenish entry (docs/system/cartridge.md Replenish declarations): each due 
 
 ## resources
 
+Numeric character pools such as health, mana, and stamina with minimum, maximum, and starting values.
+
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| resources | map of map of any | yes |  |
+| resources | map of map of any | yes | Declared resources mapped by key. |
 
 ## rooms
 
@@ -551,61 +563,61 @@ An acquired skill with authored display text and a policy for current qualificat
 
 ## statuses
 
-Toolbox row 1: one authored timed status on a body. Every tick_every seconds until duration ends, per_tick (signed) is added to resource, saturating at the pool bounds; a negative hp result at zero runs the death sequence. Applied by a reaction status.apply; ended by expiry, an edible that cures it, or death. A reapplication while active refreshes ends_at and keeps the pending tick. Optional modifies (row 2c) adds attribute modifiers, read at use while active; a status with modifies may omit per_tick, and then never ticks (its one job is the expiry).
+A temporary or lasting condition on a body that modifies stats, inflicts periodic damage or healing, or alters capabilities.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
-| allows | list of [Key](source-kinds.gen.md#key) |  | Status reader 4: the only Command types the holding body may issue while the status is active (a modal answer aside); named as blocks; may stand in for per_tick. |
-| blocks | list of [Key](source-kinds.gen.md#key) |  | Status reader 4: Command types (CommandPayload type) the holding body may not issue while the status is active; each names a registered command other than run_job and elapsed (compiler UNKNOWN_COMMAND); may stand in for per_tick. |
-| concealment | `invisible` or `hidden` |  | Status reader 8: while active on an NPC, the player does not see it; on the player's body, an NPC does not engage it on entry. invisible yields to a see_invisible perception; hidden to none, unless pierced_by. May stand in for per_tick. |
-| cues | [Cues](source-kinds.gen.md#cues) |  | Cues active while this status is active on a holder, from the holder's room (toolbox row G6). |
-| duration | integer or `permanent` | yes | Logical seconds, or permanent (toolbox row W8): no expiry and no job, kept by the same-body return, ended only by a cure; a permanent status that declares per_tick ticks until cured, with no ends_at (loka-rn3b). |
-| fear | `true` |  | Toolbox row W21: while active on a pack member, its C4 flight is attempted on its every opponent turn, whatever its hp; may stand in for per_tick. |
-| kind | `buff` or `debuff` |  | Toolbox row loka-x6t.64: the status icon's polarity, shown as GameView ConditionView.kind; wins over the polarity derived from the effect fields. |
-| modifies | list of [ItemAffect](source-kinds.gen.md#itemaffect) |  | Toolbox row 2c: while the status is active on a holder, each modifier is added to the holder's attribute as attribute@1 reads it. |
-| movement | object |  | Status reader 7: the holding body's move cost and the terrain it may cross while the status is active; may stand in for per_tick. |
+| allows | list of [Key](source-kinds.gen.md#key) |  | The only action and command types the character is permitted to perform while this status is active. |
+| blocks | list of [Key](source-kinds.gen.md#key) |  | Action and command types the character cannot perform while this status is active. |
+| concealment | `invisible` or `hidden` |  | Hides the character from normal sight or prevents enemies from engaging them on entry. |
+| cues | [Cues](source-kinds.gen.md#cues) |  | Sensory cues broadcast into the room while this status is active on a holder. |
+| duration | integer or `permanent` | yes | How long the status lasts in seconds, or permanent until cured. |
+| fear | `true` |  | When true, forces the character to attempt fleeing combat on every turn. |
+| kind | `buff` or `debuff` |  | Whether the condition is beneficial (buff) or harmful (debuff), determining its display icon. |
+| modifies | list of [ItemAffect](source-kinds.gen.md#itemaffect) |  | Modifiers added to the holder attributes while the status is active. |
+| movement | object |  | Adjustments to the character movement cost and the terrain types they can cross. |
 | movement.cost_percent | integer |  | Percent of each move's fare (world.movement.cost or 1 mv, after the flee multiplier) the holding body pays, rounded down; several statuses apply in turn in definition order. |
 | movement.passes | list of `air` or `chasm` or `water` |  | Terrain tags the holding body may enter: a move into a room tagged air, chasm or water is refused invalid_state unless the body's active statuses pass each such tag. |
 | name | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of its name. |
 | narration | object | yes | Text told as the status is applied, ticks and ends. |
 | narration.applied | [TextKey](source-kinds.gen.md#textkey) | yes | Text told when the status is applied. |
-| narration.expired | [TextKey](source-kinds.gen.md#textkey) |  | Told when a timed status ends; required unless duration is permanent (compiler SCHEMA_VIOLATION, loka-rn3b). |
-| narration.observed | [TextKey](source-kinds.gen.md#textkey) |  | Row G3 (loka-kgd.176): told when a first application lands on an NPC or item in the player's room that the player perceives, or on the room the player stands in (loka-x6t.37); with none, such a holder is silent. |
-| narration.skipped | [TextKey](source-kinds.gen.md#textkey) |  | Told, whole, when this status bars its holder's combat blow (loka-x6t.30); with none, the round tells the engine line combat.skipped, its bindings.status this status's name. |
+| narration.expired | [TextKey](source-kinds.gen.md#textkey) |  | Text told when a timed status ends; required unless duration is permanent. |
+| narration.observed | [TextKey](source-kinds.gen.md#textkey) |  | Text told when a status is applied to an NPC or item in the player room that the player perceives. |
+| narration.skipped | [TextKey](source-kinds.gen.md#textkey) |  | Text told when this status prevents its holder from taking an action in combat. |
 | narration.tick | [TextKey](source-kinds.gen.md#textkey) | yes | Text told on each tick of the status. |
-| per_tick | integer |  | Signed; never 0, required unless modifies, fear, blocks, allows, resistances, perception, concealment or movement is present or duration is permanent (compiler SCHEMA_VIOLATION). |
-| perception | object |  | Status reader 6: what the holding body perceives while the status is active. sight blind: every room is dark to it, a lit source or dark sight notwithstanding; dark_sight: sees in an unlit room as an ancestry's dark_sight does; see_invisible: sees a holder of an invisible status. hearing deaf: no sound cue reaches it. At least one field (compiler SCHEMA_VIOLATION); may stand in for per_tick. |
-| perception.hearing | `deaf` |  | deaf: no sound cue reaches the holder. |
+| per_tick | integer |  | Amount added to or subtracted from the pool on each tick. |
+| perception | object |  | Alters what the character can perceive, such as granting dark vision, seeing invisible entities, or inflicting blindness or deafness. |
+| perception.hearing | `deaf` |  | When deaf, no sound cues reach the character. |
 | perception.sight | `blind` or `dark_sight` or `see_invisible` |  | Changes what the holder sees: blind (every room is dark), dark_sight (sees in an unlit room) or see_invisible (sees holders of an invisible status). |
-| pierced_by | object |  | Toolbox row 16, only beside concealment: a seer whose attribute value (an NPC's declared value, a player's attribute@1 value) is greater than the holder's skill level sees through the concealment; a holder without a character is never pierced. No draw. While the holder is a player's body, an NPC that engages it on entry ends every active concealment status on it. |
+| pierced_by | object |  | The attribute and skill check needed for an observer to see through this concealment. |
 | pierced_by.attribute | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The attribute whose value the seer needs; it is compared with the holder's skill level. |
 | pierced_by.skill | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The skill whose level the seer's attribute value must beat to see through the concealment. |
-| resistances | [Resistances](source-kinds.gen.md#resistances) |  | Status reader 5: while active on the struck body (the player's or an NPC's), each entry joins the G2 resistance sum of an attack on it, before the one -100..100 clamp; may stand in for per_tick. |
-| resource | [DefinitionRef](source-kinds.gen.md#definitionref) |  | The pool per_tick changes; omitted only beside ticks (compiler SCHEMA_VIOLATION). |
+| resistances | [Resistances](source-kinds.gen.md#resistances) |  | Damage resistances and vulnerabilities added to the character while this status is active. |
+| resource | [DefinitionRef](source-kinds.gen.md#definitionref) |  | The pool adjusted on each tick; omitted when multiple pools are listed under ticks. |
 | tick_every | integer | yes | Seconds between ticks. |
-| ticks | list of object |  | loka-kgd.209: several pools one tick changes, each by its signed per_tick (never 0), in place of resource and per_tick (compiler SCHEMA_VIOLATION beside either). |
-| ticks[].per_tick | integer | yes |  |
-| ticks[].resource | [DefinitionRef](source-kinds.gen.md#definitionref) | yes |  |
+| ticks | list of object |  | Multiple pools adjusted on each tick, each with its own amount. |
+| ticks[].per_tick | integer | yes | Amount added to or subtracted from the pool on each tick. |
+| ticks[].resource | [DefinitionRef](source-kinds.gen.md#definitionref) | yes | The pool adjusted on each tick. |
 
 ## structures
 
-Built rooms S1 (construction@1; cartridge.md Structure and site declarations): one structure a player may build at a room's site (RoomDefinition.site). Its key; name and description, the text keys of the room it becomes; optional variants (DescriptionVariant) and tags (Tag) as a room's; optional locks.enter, the policy the mover must hold to come into the built room, as a room's (toolbox row G7). Nothing builds in S1: the cartridge declares and both compilers check. Built rooms S3: optional max_per_owner, the most rooms of this structure one character may own at once; an order at the cap is refused service.construction_full. Built rooms S4: optional weathering, a status of this cartridge the room gets when it is raised (and again when mended); optional ruin, the status a mend cures (a reaction applies it, typically on weathering's status_expired), the mend benefit refuses service.nothing_to_mend unless ruin is active on the room.
+A buildable room or building a player can construct at a dedicated site. Defines the resulting room name, description, entry conditions, and durability statuses.
 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
 | description | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of the description of the room this structure becomes. |
 | locks | object |  | Rules for the built room; enter is the policy a mover must meet to come in. |
-| locks.enter | [Policy](vocabulary.gen.md#policy-leaves) |  | See the type. |
+| locks.enter | [Policy](vocabulary.gen.md#policy-leaves) |  | The policy a character must meet to enter the built room. |
 | max_per_owner | integer |  | The most rooms of this structure one character may own at once; an order past it is refused. |
 | name | [TextKey](source-kinds.gen.md#textkey) | yes | Text key of the name of the room this structure becomes. |
 | ruin | [DefinitionRef](source-kinds.gen.md#definitionref) |  | The status a mend cures; mending is refused unless the room has it. |
 | tags | list of [Tag](source-kinds.gen.md#tag) |  | Tags the built room carries, as on a room. |
-| variants | list of [DescriptionVariant](source-kinds.gen.md#descriptionvariant) |  | See the type. |
+| variants | list of [DescriptionVariant](source-kinds.gen.md#descriptionvariant) |  | Alternative descriptions for the built room, shown when specific conditions hold. |
 | weathering | [DefinitionRef](source-kinds.gen.md#definitionref) |  | The status the room gets when it is raised and again when mended. |
 
 ## text
 
-The cartridge's default-locale strings (05 §18: stable string ids, inline defaults extracted into a catalog): each TextKey to its display text, 1 to 4,096 characters. One locale only; per-locale catalogs, plural rules and binding placeholders join later under a new cartridge format tag. Every text key a room, detail, variant, item, NPC (short, room_line, description) or action (label, accessibility) uses has an entry; a string marks its tappable words inline as touch links (owner decision 2026-09-25, Q3): the words in square brackets, which link the thing whose text it is, optionally followed at once by a target key in parentheses, which links that detail of the room or item or NPC of the cartridge instead (DiagnosticCode UNRESOLVED_REFERENCE, TOUCH_LINK_MISSING), so each locale marks its own words; a host showing plain text shows the words without the brackets and target; the compiler reports a missing one as UNRESOLVED_REFERENCE.
+The catalog of localized display strings: maps each text key to written prose between 1 and 4,096 characters. Words in square brackets mark tappable links to inspectable details, items, or characters in the room.
 
 Type: map of string.
 
@@ -1549,7 +1561,7 @@ Type: object.
 
 ### TextCatalog
 
-The cartridge's default-locale strings (05 §18: stable string ids, inline defaults extracted into a catalog): each TextKey to its display text, 1 to 4,096 characters. One locale only; per-locale catalogs, plural rules and binding placeholders join later under a new cartridge format tag. Every text key a room, detail, variant, item, NPC (short, room_line, description) or action (label, accessibility) uses has an entry; a string marks its tappable words inline as touch links (owner decision 2026-09-25, Q3): the words in square brackets, which link the thing whose text it is, optionally followed at once by a target key in parentheses, which links that detail of the room or item or NPC of the cartridge instead (DiagnosticCode UNRESOLVED_REFERENCE, TOUCH_LINK_MISSING), so each locale marks its own words; a host showing plain text shows the words without the brackets and target; the compiler reports a missing one as UNRESOLVED_REFERENCE.
+The catalog of localized display strings: maps each text key to written prose between 1 and 4,096 characters. Words in square brackets mark tappable links to inspectable details, items, or characters in the room.
 
 Type: map of string.
 
@@ -1716,11 +1728,4 @@ Settings for the whole world, each optional with a default: what a move costs (m
 
 ## Fields without a meaning
 
-6 fields.
-
-- `attributes: attributes`
-- `behaviours: params`
-- `behaviours: reactions`
-- `resources: resources`
-- `statuses: ticks[].per_tick`
-- `statuses: ticks[].resource`
+0 fields.
