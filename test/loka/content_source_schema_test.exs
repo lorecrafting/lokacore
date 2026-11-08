@@ -10,7 +10,10 @@ defmodule Loka.ContentSourceSchemaTest do
   @jargon ~r/§|ADR-|(?i:toolbox row|\brow \d|\btrap \d|\bpass-\d)|@\d|\bmix loka|(?i:balance tool)|\bstatus\.apply|\brefuses [a-z]+_[a-z_]+|\bcompiler\b|\bbytes\b|\bnamespaced\b|\badded then\b|\bversioned\b|\b[A-Z]\d[A-Z]\b|\bRNG\b|SHA-|^[(a-z\d]|schema\.json|\b[A-Z]+_[A-Z_]+\b|\.md\b|\bloka-|\bAPI\d|\b[A-Z]{1,2}\d+(\.\d+)?\b|\b[A-Z][a-z]+[A-Z]\w*/u
 
   @plain ~w(source.rooms source.npcs source.items source.reactions source.ScriptedAction
-            source.dialogues source.scenes source.facts source.quests source.cartridge)
+            source.dialogues source.scenes source.facts source.quests source.cartridge
+            source.cutscene source.behaviours source.resources source.attributes
+            source.layout source.text source.barriers source.structures source.emotes
+            source.statuses source.replenish)
 
   test "schemas/source matches the generator byte for byte" do
     on_disk = Map.new(File.ls!(@dir), &{&1, File.read!(Path.join(@dir, &1))})
@@ -31,6 +34,8 @@ defmodule Loka.ContentSourceSchemaTest do
           do: "#{path}: #{why}"
 
     assert bad == []
+    assert is_binary(defs["source.areas"]["description"])
+    refute defs["source.areas"]["description"] =~ @jargon
   end
 
   defp reach([], _defs, seen), do: Enum.sort(seen)
