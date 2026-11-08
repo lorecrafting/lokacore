@@ -1,4 +1,4 @@
-# size: allow 359, one generator translates every source contract and shortcut to JSON Schema
+# size: allow 389, one generator translates every source contract and shortcut to JSON Schema
 defmodule Loka.Content.SourceSchema do
   @moduledoc """
   JSON Schema (draft 2020-12) of each source file kind, for editors and LLM authors
@@ -45,7 +45,9 @@ defmodule Loka.Content.SourceSchema do
     names = Map.merge(@roots, Map.new(Map.keys(Source.dirs()), &{&1, "source." <> &1}))
     kinds = for {file, def} <- names, into: %{}, do: {file <> ".schema.json", top(file, def)}
 
-    Map.put(kinds, "defs.schema.json", %{"$defs" => prune(defs(), Map.values(names))})
+    published = ["source.cutscene", "source.text" | Map.values(names)]
+
+    Map.put(kinds, "defs.schema.json", %{"$defs" => prune(defs(), published)})
     |> Map.new(fn {f, s} -> {f, encode(head(s))} end)
   end
 
@@ -179,10 +181,22 @@ defmodule Loka.Content.SourceSchema do
   # A file in a definition directory: an abstract parent (never checked), an extends child (it
   # may leave out any inherited member), or a whole definition. actions/ holds both kinds.
   defp kind(:behaviour) do
-    reactions = %{"type" => "object", "propertyNames" => @key, "additionalProperties" => @object}
-    params = %{"type" => "array", "items" => %{"$ref" => "Key", "not" => %{"const" => "holder"}}}
+    reactions = %{
+      "description" => "Named reaction rules this behaviour attaches to holders.",
+      "type" => "object",
+      "propertyNames" => @key,
+      "additionalProperties" => @object
+    }
+
+    params = %{
+      "description" => "Parameter keys passed into the behaviour when attached.",
+      "type" => "array",
+      "items" => %{"$ref" => "Key", "not" => %{"const" => "holder"}}
+    }
 
     %{
+      "description" =>
+        "A reusable bundle of reaction rules that can be attached to NPCs or items.",
       "type" => "object",
       "properties" => %{"reactions" => reactions, "params" => params},
       "required" => ["reactions"],
@@ -258,7 +272,34 @@ defmodule Loka.Content.SourceSchema do
     about = "The game's facts, by key: things the world remembers, such as door_open."
     facts = %{"description" => about, "type" => "object", "additionalProperties" => fact}
 
-    bundle =
+    %{
+      "source.cartridge" => Compiler.manifest_file(defs),
+      "source.facts" => put(Compiler.facts_file(), "facts", facts),
+      "source.resources" => Resources.file_schema("resources"),
+      "source.attributes" => Resources.file_schema("attributes"),
+      "source.layout" => %{
+        "description" => "The 2D map coordinates for placing rooms on the world grid.",
+        "type" => "array",
+        "items" => %{"$ref" => "MapPosition"},
+        "minItems" => 1
+      },
+      "source.areas" => area_bundle(),
+      "source.cutscene" => %{
+        "description" =>
+          "A full-screen modal story scene: paragraphs of prose followed by a divider, triggered by an event or quest.",
+        "$ref" => "source.SceneDefinition"
+      },
+      "source.text" => %{
+        "description" =>
+          "The catalog of localized display strings: maps each text key to written prose between 1 and 4,096 characters.",
+        "$ref" => "TextCatalog"
+      },
+      "source.outline" => Loka.Content.OutlineSchema.schema()
+    }
+  end
+
+  defp area_bundle do
+    props =
       for {dir, _} <- Source.dirs(),
           into: %{},
           do:
@@ -272,21 +313,11 @@ defmodule Loka.Content.SourceSchema do
              }}
 
     %{
-      "source.cartridge" => Compiler.manifest_file(defs),
-      "source.facts" => put(Compiler.facts_file(), "facts", facts),
-      "source.resources" => Resources.file_schema("resources"),
-      "source.attributes" => Resources.file_schema("attributes"),
-      "source.layout" => %{
-        "type" => "array",
-        "items" => %{"$ref" => "MapPosition"},
-        "minItems" => 1
-      },
-      "source.areas" => %{
-        "type" => "object",
-        "properties" => bundle,
-        "additionalProperties" => false
-      },
-      "source.outline" => Loka.Content.OutlineSchema.schema()
+      "description" =>
+        "A named region of the map: groups rooms and local definitions under an area folder.",
+      "type" => "object",
+      "properties" => props,
+      "additionalProperties" => false
     }
   end
 

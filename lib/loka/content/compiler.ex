@@ -29,6 +29,8 @@ defmodule Loka.Content.Compiler do
     Loka.Content.DialogueAsked
   ]
   @facts_file %{
+    "description" =>
+      "World and player state tracked by key: booleans, numbers, and strings that remember progress and choices.",
     "type" => "object",
     "properties" => %{"facts" => %{"type" => "object", "additionalProperties" => %{}}},
     "required" => ["facts"],

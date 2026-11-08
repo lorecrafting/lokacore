@@ -75,12 +75,27 @@ defmodule Loka.Content.Resources do
     entry = %{"type" => "object", "additionalProperties" => %{}}
 
     %{
+      "description" => description(name),
       "type" => "object",
-      "properties" => %{name => %{"type" => "object", "additionalProperties" => entry}},
+      "properties" => %{
+        name => %{
+          "description" => "Declared #{name} mapped by key.",
+          "type" => "object",
+          "additionalProperties" => entry
+        }
+      },
       "required" => [name],
       "additionalProperties" => false
     }
   end
+
+  defp description("resources"),
+    do:
+      "Numeric character pools such as health, mana, and stamina with minimum, maximum, and starting values."
+
+  defp description("attributes"),
+    do:
+      "Core character statistics such as strength, agility, and intellect that govern checks and modifiers."
 
   @doc """
   Diagnostics of the condition band tables (resource.schema.json BandTable: each pool's `bands`
