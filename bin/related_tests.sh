@@ -35,7 +35,7 @@ red=
 for t in $tests; do
   s=$(date +%s)
   rel=${t#kernel/ts/}
-  # awk's exit status is 0 on ok, 1 on red, 2 when perl's alarm killed node at the cap.
+  # 0 ok, 1 red, and 142 (or 2) when perl's alarm killed node at the cap before it could answer.
   st=$(cd kernel/ts && perl -e 'alarm $ARGV[0]; exec @ARGV[1..$#ARGV]' "$cap" node --test --test-reporter=dot "$rel" >/dev/null 2>&1; echo $?)
   if [ "$st" = 0 ]; then	printf '%ss %s\n' "$(( $(date +%s) - s ))" "$rel"
   elif [ "$st" = 2 ] || [ "$st" = 142 ]; then printf '%ss SLOW %s\n' "$(( $(date +%s) - s ))" "$rel"
