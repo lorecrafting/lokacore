@@ -102,6 +102,7 @@ jobs:
       - run: sh bin/orphans_red_controls.sh
       - run: sh bin/author_red_controls.sh
       - run: sh bin/ci_timing_red_controls.sh
+      - run: sh bin/related_tests_red_controls.sh
       - run: sh bin/mutate_diff_red_controls.sh
       # bin/merge_resolve.py calls `mise exec -- elixir`; CI pins the tools itself, so a stub runs
       # the command (as in book-e2e.yml's walk job).
