@@ -672,7 +672,7 @@
       ]
     },
     "BarrierDefinition": {
-      "description": "Shared mutable state for one logical door or gate (21 §5 Barrier), owned by barrier@1 (a cartridge with one requires it), keyed in CompiledCartridge.barriers by DefinitionRefString of kind barrier and named by the exits that pass through it (Connection.barrier): its key; keywords, the Alias words a player names it by after open, close, lock or unlock (the direction of its exit names it too); name, the text key of its short description (\"the oak door\"); initial, its state in a fresh world (BarrierState); and optionally key_item, the item whose holder may lock and unlock it (has_item: held directly or inside containers the holder holds). Without key_item no one can lock or unlock it. Damaged/repaired and blocked states join as optional fields. Optional tags are its property tags (entity.schema.json Tag, toolbox row G1).",
+      "description": "A door, gate, or passage between rooms that can be opened, closed, locked, or unlocked. Exits name the barrier to control passage; an optional key item lets players lock and unlock it.",
       "type": "object",
       "properties": {
         "key": {
@@ -705,7 +705,7 @@
           }
         },
         "opens_when": {
-          "description": "A condition its open command needs (toolbox row 10, barrier@1): while it fails, open is refused invalid_state; close, lock and unlock and an already open barrier are unaffected.",
+          "description": "A condition that must be met before the barrier can be opened. Closing, locking, unlocking, and an already-open barrier are unaffected.",
           "$ref": "policy.schema.json#/$defs/Policy"
         }
       },

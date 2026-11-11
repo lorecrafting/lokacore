@@ -5030,7 +5030,7 @@
         "minLength": 1,
         "type": "string"
       },
-      "description": "The cartridge's default-locale strings (05 §18: stable string ids, inline defaults extracted into a catalog): each TextKey to its display text, 1 to 4,096 characters. One locale only; per-locale catalogs, plural rules and binding placeholders join later under a new cartridge format tag. Every text key a room, detail, variant, item, NPC (short, room_line, description) or action (label, accessibility) uses has an entry; a string marks its tappable words inline as touch links (owner decision 2026-09-25, Q3): the words in square brackets, which link the thing whose text it is, optionally followed at once by a target key in parentheses, which links that detail of the room or item or NPC of the cartridge instead (DiagnosticCode UNRESOLVED_REFERENCE, TOUCH_LINK_MISSING), so each locale marks its own words; a host showing plain text shows the words without the brackets and target; the compiler reports a missing one as UNRESOLVED_REFERENCE.",
+      "description": "The catalog of localized display strings: maps each text key to written prose between 1 and 4,096 characters. Words in square brackets mark tappable links to inspectable details, items, or characters in the room.",
       "propertyNames": { "pattern": "^[a-z][a-z0-9_.]{0,127}$" },
       "type": "object"
     },
@@ -8549,7 +8549,7 @@
     },
     "partial.source.BarrierDefinition": {
       "additionalProperties": false,
-      "description": "Shared mutable state for one logical door or gate (21 §5 Barrier), owned by barrier@1 (a cartridge with one requires it), keyed in CompiledCartridge.barriers by DefinitionRefString of kind barrier and named by the exits that pass through it (Connection.barrier): its key; keywords, the Alias words a player names it by after open, close, lock or unlock (the direction of its exit names it too); name, the text key of its short description (\"the oak door\"); initial, its state in a fresh world (BarrierState); and optionally key_item, the item whose holder may lock and unlock it (has_item: held directly or inside containers the holder holds). Without key_item no one can lock or unlock it. Damaged/repaired and blocked states join as optional fields. Optional tags are its property tags (entity.schema.json Tag, toolbox row G1).",
+      "description": "A door, gate, or passage between rooms that can be opened, closed, locked, or unlocked. Exits name the barrier to control passage; an optional key item lets players lock and unlock it.",
       "properties": {
         "extends": { "$ref": "#/$defs/Key" },
         "initial": {
@@ -8573,7 +8573,7 @@
         },
         "opens_when": {
           "$ref": "#/$defs/partial.Policy",
-          "description": "A condition its open command needs (toolbox row 10, barrier@1): while it fails, open is refused invalid_state; close, lock and unlock and an already open barrier are unaffected."
+          "description": "A condition that must be met before the barrier can be opened. Closing, locking, unlocking, and an already-open barrier are unaffected."
         },
         "tags": {
           "description": "Its tags: words a condition can check for.",
@@ -8722,7 +8722,7 @@
     },
     "partial.source.EmoteDefinition": {
       "additionalProperties": false,
-      "description": "NPC emotes (G9, emote@1; cartridge.md Emote declarations): one canned emote an NPC performs. Its key; others, the text key of the line every reader but the target reads ({actor}, the emoter); optional to, the forms with a target: to.others for the other readers ({actor}, {target}) and to.you for the target ({actor}). No label and no self form: only NPCs emote.",
+      "description": "A canned social expression an NPC performs in the room, with different text for observers and targets.",
       "properties": {
         "extends": { "$ref": "#/$defs/Key" },
         "others": {
@@ -10456,7 +10456,7 @@
     },
     "partial.source.ReplenishPlan": {
       "additionalProperties": false,
-      "description": "One replenish entry (docs/system/cartridge.md Replenish declarations): each due job moves up to count of items, lowest EntityId first, from the holder from to the holder to until to holds cap of them, then schedules the next at its due time plus every. A move never exceeds to's declared capacity. The compiler (lib/loka/content/replenish.ex) refuses a template location, a holder with no placed entity (a spawn-template NPC or template item), an item holder that is not a container, an item to when any listed item is a container, from equal to to, duplicate items and an unresolved item or holder.",
+      "description": "A periodic restocking rule that transfers items from a source container to a destination up to a target count. Runs repeatedly on a timer to keep shops or containers supplied.",
       "properties": {
         "cap": {
           "description": "Stop moving once the destination holds this many of the items.",
@@ -10810,7 +10810,7 @@
           "type": "object"
         }
       ],
-      "description": "Modal narration or the consumed paid-Rest anchored, resumable presentation-only dream."
+      "description": "A scripted story scene or dream sequence presented across steps, triggered by an event, quest, or rest."
     },
     "partial.source.ScriptedAction": {
       "additionalProperties": false,
@@ -11034,24 +11034,24 @@
     },
     "partial.source.StatusDefinition": {
       "additionalProperties": false,
-      "description": "Toolbox row 1: one authored timed status on a body. Every tick_every seconds until duration ends, per_tick (signed) is added to resource, saturating at the pool bounds; a negative hp result at zero runs the death sequence. Applied by a reaction status.apply; ended by expiry, an edible that cures it, or death. A reapplication while active refreshes ends_at and keeps the pending tick. Optional modifies (row 2c) adds attribute modifiers, read at use while active; a status with modifies may omit per_tick, and then never ticks (its one job is the expiry).",
+      "description": "A temporary or lasting condition on a body that modifies stats, inflicts periodic damage or healing, or alters capabilities.",
       "properties": {
         "allows": {
-          "description": "Status reader 4: the only Command types the holding body may issue while the status is active (a modal answer aside); named as blocks; may stand in for per_tick.",
+          "description": "The only action and command types the character is permitted to perform while this status is active.",
           "items": { "$ref": "#/$defs/Key" },
           "maxItems": 64,
           "minItems": 1,
           "type": "array"
         },
         "blocks": {
-          "description": "Status reader 4: Command types (CommandPayload type) the holding body may not issue while the status is active; each names a registered command other than run_job and elapsed (compiler UNKNOWN_COMMAND); may stand in for per_tick.",
+          "description": "Action and command types the character cannot perform while this status is active.",
           "items": { "$ref": "#/$defs/Key" },
           "maxItems": 64,
           "minItems": 1,
           "type": "array"
         },
         "concealment": {
-          "description": "Status reader 8: while active on an NPC, the player does not see it; on the player's body, an NPC does not engage it on entry. invisible yields to a see_invisible perception; hidden to none, unless pierced_by. May stand in for per_tick.",
+          "description": "Hides the character from normal sight or prevents enemies from engaging them on entry.",
           "enum": [
             "invisible",
             "hidden"
@@ -11059,7 +11059,7 @@
         },
         "cues": {
           "$ref": "#/$defs/Cues",
-          "description": "Cues active while this status is active on a holder, from the holder's room (toolbox row G6)."
+          "description": "Sensory cues broadcast into the room while this status is active on a holder."
         },
         "duration": {
           "anyOf": [
@@ -11073,22 +11073,22 @@
               "type": "string"
             }
           ],
-          "description": "Logical seconds, or permanent (toolbox row W8): no expiry and no job, kept by the same-body return, ended only by a cure; a permanent status that declares per_tick ticks until cured, with no ends_at (loka-rn3b)."
+          "description": "How long the status lasts in seconds, or permanent until cured."
         },
         "extends": { "$ref": "#/$defs/Key" },
         "fear": {
           "const": true,
-          "description": "Toolbox row W21: while active on a pack member, its C4 flight is attempted on its every opponent turn, whatever its hp; may stand in for per_tick."
+          "description": "When true, forces the character to attempt fleeing combat on every turn."
         },
         "kind": {
-          "description": "Toolbox row loka-x6t.64: the status icon's polarity, shown as GameView ConditionView.kind; wins over the polarity derived from the effect fields.",
+          "description": "Whether the condition is beneficial (buff) or harmful (debuff), determining its display icon.",
           "enum": [
             "buff",
             "debuff"
           ]
         },
         "modifies": {
-          "description": "Toolbox row 2c: while the status is active on a holder, each modifier is added to the holder's attribute as attribute@1 reads it.",
+          "description": "Modifiers added to the holder attributes while the status is active.",
           "items": { "$ref": "#/$defs/ItemAffect" },
           "maxItems": 16,
           "minItems": 1,
@@ -11096,7 +11096,7 @@
         },
         "movement": {
           "additionalProperties": false,
-          "description": "Status reader 7: the holding body's move cost and the terrain it may cross while the status is active; may stand in for per_tick.",
+          "description": "Adjustments to the character movement cost and the terrain types they can cross.",
           "properties": {
             "cost_percent": {
               "description": "Percent of each move's fare (world.movement.cost or 1 mv, after the flee multiplier) the holding body pays, rounded down; several statuses apply in turn in definition order.",
@@ -11134,15 +11134,15 @@
             },
             "expired": {
               "$ref": "#/$defs/partial.TextKey",
-              "description": "Told when a timed status ends; required unless duration is permanent (compiler SCHEMA_VIOLATION, loka-rn3b)."
+              "description": "Text told when a timed status ends; required unless duration is permanent."
             },
             "observed": {
               "$ref": "#/$defs/partial.TextKey",
-              "description": "Row G3 (loka-kgd.176): told when a first application lands on an NPC or item in the player's room that the player perceives, or on the room the player stands in (loka-x6t.37); with none, such a holder is silent."
+              "description": "Text told when a status is applied to an NPC or item in the player room that the player perceives."
             },
             "skipped": {
               "$ref": "#/$defs/partial.TextKey",
-              "description": "Told, whole, when this status bars its holder's combat blow (loka-x6t.30); with none, the round tells the engine line combat.skipped, its bindings.status this status's name."
+              "description": "Text told when this status prevents its holder from taking an action in combat."
             },
             "tick": {
               "$ref": "#/$defs/partial.TextKey",
@@ -11152,17 +11152,17 @@
           "type": "object"
         },
         "per_tick": {
-          "description": "Signed; never 0, required unless modifies, fear, blocks, allows, resistances, perception, concealment or movement is present or duration is permanent (compiler SCHEMA_VIOLATION).",
+          "description": "Amount added to or subtracted from the pool on each tick.",
           "maximum": 2147483647,
           "minimum": -2147483647,
           "type": "integer"
         },
         "perception": {
           "additionalProperties": false,
-          "description": "Status reader 6: what the holding body perceives while the status is active. sight blind: every room is dark to it, a lit source or dark sight notwithstanding; dark_sight: sees in an unlit room as an ancestry's dark_sight does; see_invisible: sees a holder of an invisible status. hearing deaf: no sound cue reaches it. At least one field (compiler SCHEMA_VIOLATION); may stand in for per_tick.",
+          "description": "Alters what the character can perceive, such as granting dark vision, seeing invisible entities, or inflicting blindness or deafness.",
           "properties": {
             "hearing": {
-              "description": "deaf: no sound cue reaches the holder.",
+              "description": "When deaf, no sound cues reach the character.",
               "enum": [
                 "deaf"
               ]
@@ -11180,7 +11180,7 @@
         },
         "pierced_by": {
           "additionalProperties": false,
-          "description": "Toolbox row 16, only beside concealment: a seer whose attribute value (an NPC's declared value, a player's attribute@1 value) is greater than the holder's skill level sees through the concealment; a holder without a character is never pierced. No draw. While the holder is a player's body, an NPC that engages it on entry ends every active concealment status on it.",
+          "description": "The attribute and skill check needed for an observer to see through this concealment.",
           "properties": {
             "attribute": {
               "$ref": "#/$defs/partial.DefinitionRef",
@@ -11195,11 +11195,11 @@
         },
         "resistances": {
           "$ref": "#/$defs/Resistances",
-          "description": "Status reader 5: while active on the struck body (the player's or an NPC's), each entry joins the G2 resistance sum of an attack on it, before the one -100..100 clamp; may stand in for per_tick."
+          "description": "Damage resistances and vulnerabilities added to the character while this status is active."
         },
         "resource": {
           "$ref": "#/$defs/partial.DefinitionRef",
-          "description": "The pool per_tick changes; omitted only beside ticks (compiler SCHEMA_VIOLATION)."
+          "description": "The pool adjusted on each tick; omitted when multiple pools are listed under ticks."
         },
         "tick_every": {
           "description": "Seconds between ticks.",
@@ -11208,16 +11208,20 @@
           "type": "integer"
         },
         "ticks": {
-          "description": "loka-kgd.209: several pools one tick changes, each by its signed per_tick (never 0), in place of resource and per_tick (compiler SCHEMA_VIOLATION beside either).",
+          "description": "Multiple pools adjusted on each tick, each with its own amount.",
           "items": {
             "additionalProperties": false,
             "properties": {
               "per_tick": {
+                "description": "Amount added to or subtracted from the pool on each tick.",
                 "maximum": 2147483647,
                 "minimum": -2147483647,
                 "type": "integer"
               },
-              "resource": { "$ref": "#/$defs/DefinitionRef" }
+              "resource": {
+                "$ref": "#/$defs/DefinitionRef",
+                "description": "The pool adjusted on each tick."
+              }
             },
             "required": [
               "resource",
@@ -11235,7 +11239,7 @@
     },
     "partial.source.StructureDefinition": {
       "additionalProperties": false,
-      "description": "Built rooms S1 (construction@1; cartridge.md Structure and site declarations): one structure a player may build at a room's site (RoomDefinition.site). Its key; name and description, the text keys of the room it becomes; optional variants (DescriptionVariant) and tags (Tag) as a room's; optional locks.enter, the policy the mover must hold to come into the built room, as a room's (toolbox row G7). Nothing builds in S1: the cartridge declares and both compilers check. Built rooms S3: optional max_per_owner, the most rooms of this structure one character may own at once; an order at the cap is refused service.construction_full. Built rooms S4: optional weathering, a status of this cartridge the room gets when it is raised (and again when mended); optional ruin, the status a mend cures (a reaction applies it, typically on weathering's status_expired), the mend benefit refuses service.nothing_to_mend unless ruin is active on the room.",
+      "description": "A buildable room or building a player can construct at a dedicated site. Defines the resulting room name, description, entry conditions, and durability statuses.",
       "properties": {
         "description": {
           "$ref": "#/$defs/partial.TextKey",
@@ -11246,7 +11250,10 @@
           "additionalProperties": false,
           "description": "Rules for the built room; enter is the policy a mover must meet to come in.",
           "properties": {
-            "enter": { "$ref": "#/$defs/partial.Policy" }
+            "enter": {
+              "$ref": "#/$defs/partial.Policy",
+              "description": "The policy a character must meet to enter the built room."
+            }
           },
           "type": "object"
         },
@@ -11272,6 +11279,7 @@
           "type": "array"
         },
         "variants": {
+          "description": "Alternative descriptions for the built room, shown when specific conditions hold.",
           "items": { "$ref": "#/$defs/DescriptionVariant" },
           "maxItems": 16,
           "minItems": 1,
@@ -11406,7 +11414,7 @@
     },
     "source.BarrierDefinition": {
       "additionalProperties": false,
-      "description": "Shared mutable state for one logical door or gate (21 §5 Barrier), owned by barrier@1 (a cartridge with one requires it), keyed in CompiledCartridge.barriers by DefinitionRefString of kind barrier and named by the exits that pass through it (Connection.barrier): its key; keywords, the Alias words a player names it by after open, close, lock or unlock (the direction of its exit names it too); name, the text key of its short description (\"the oak door\"); initial, its state in a fresh world (BarrierState); and optionally key_item, the item whose holder may lock and unlock it (has_item: held directly or inside containers the holder holds). Without key_item no one can lock or unlock it. Damaged/repaired and blocked states join as optional fields. Optional tags are its property tags (entity.schema.json Tag, toolbox row G1).",
+      "description": "A door, gate, or passage between rooms that can be opened, closed, locked, or unlocked. Exits name the barrier to control passage; an optional key item lets players lock and unlock it.",
       "properties": {
         "initial": {
           "$ref": "#/$defs/BarrierState",
@@ -11429,7 +11437,7 @@
         },
         "opens_when": {
           "$ref": "#/$defs/Policy",
-          "description": "A condition its open command needs (toolbox row 10, barrier@1): while it fails, open is refused invalid_state; close, lock and unlock and an already open barrier are unaffected."
+          "description": "A condition that must be met before the barrier can be opened. Closing, locking, unlocking, and an already-open barrier are unaffected."
         },
         "tags": {
           "description": "Its tags: words a condition can check for.",
@@ -11602,7 +11610,7 @@
     },
     "source.EmoteDefinition": {
       "additionalProperties": false,
-      "description": "NPC emotes (G9, emote@1; cartridge.md Emote declarations): one canned emote an NPC performs. Its key; others, the text key of the line every reader but the target reads ({actor}, the emoter); optional to, the forms with a target: to.others for the other readers ({actor}, {target}) and to.you for the target ({actor}). No label and no self form: only NPCs emote.",
+      "description": "A canned social expression an NPC performs in the room, with different text for observers and targets.",
       "properties": {
         "others": {
           "$ref": "#/$defs/TextKey",
@@ -13626,7 +13634,7 @@
     },
     "source.ReplenishPlan": {
       "additionalProperties": false,
-      "description": "One replenish entry (docs/system/cartridge.md Replenish declarations): each due job moves up to count of items, lowest EntityId first, from the holder from to the holder to until to holds cap of them, then schedules the next at its due time plus every. A move never exceeds to's declared capacity. The compiler (lib/loka/content/replenish.ex) refuses a template location, a holder with no placed entity (a spawn-template NPC or template item), an item holder that is not a container, an item to when any listed item is a container, from equal to to, duplicate items and an unresolved item or holder.",
+      "description": "A periodic restocking rule that transfers items from a source container to a destination up to a target count. Runs repeatedly on a timer to keep shops or containers supplied.",
       "properties": {
         "cap": {
           "description": "Stop moving once the destination holds this many of the items.",
@@ -14052,7 +14060,7 @@
           "type": "object"
         }
       ],
-      "description": "Modal narration or the consumed paid-Rest anchored, resumable presentation-only dream."
+      "description": "A scripted story scene or dream sequence presented across steps, triggered by an event, quest, or rest."
     },
     "source.ScriptedAction": {
       "additionalProperties": false,
@@ -14306,24 +14314,24 @@
     },
     "source.StatusDefinition": {
       "additionalProperties": false,
-      "description": "Toolbox row 1: one authored timed status on a body. Every tick_every seconds until duration ends, per_tick (signed) is added to resource, saturating at the pool bounds; a negative hp result at zero runs the death sequence. Applied by a reaction status.apply; ended by expiry, an edible that cures it, or death. A reapplication while active refreshes ends_at and keeps the pending tick. Optional modifies (row 2c) adds attribute modifiers, read at use while active; a status with modifies may omit per_tick, and then never ticks (its one job is the expiry).",
+      "description": "A temporary or lasting condition on a body that modifies stats, inflicts periodic damage or healing, or alters capabilities.",
       "properties": {
         "allows": {
-          "description": "Status reader 4: the only Command types the holding body may issue while the status is active (a modal answer aside); named as blocks; may stand in for per_tick.",
+          "description": "The only action and command types the character is permitted to perform while this status is active.",
           "items": { "$ref": "#/$defs/Key" },
           "maxItems": 64,
           "minItems": 1,
           "type": "array"
         },
         "blocks": {
-          "description": "Status reader 4: Command types (CommandPayload type) the holding body may not issue while the status is active; each names a registered command other than run_job and elapsed (compiler UNKNOWN_COMMAND); may stand in for per_tick.",
+          "description": "Action and command types the character cannot perform while this status is active.",
           "items": { "$ref": "#/$defs/Key" },
           "maxItems": 64,
           "minItems": 1,
           "type": "array"
         },
         "concealment": {
-          "description": "Status reader 8: while active on an NPC, the player does not see it; on the player's body, an NPC does not engage it on entry. invisible yields to a see_invisible perception; hidden to none, unless pierced_by. May stand in for per_tick.",
+          "description": "Hides the character from normal sight or prevents enemies from engaging them on entry.",
           "enum": [
             "invisible",
             "hidden"
@@ -14331,7 +14339,7 @@
         },
         "cues": {
           "$ref": "#/$defs/Cues",
-          "description": "Cues active while this status is active on a holder, from the holder's room (toolbox row G6)."
+          "description": "Sensory cues broadcast into the room while this status is active on a holder."
         },
         "duration": {
           "anyOf": [
@@ -14345,21 +14353,21 @@
               "type": "string"
             }
           ],
-          "description": "Logical seconds, or permanent (toolbox row W8): no expiry and no job, kept by the same-body return, ended only by a cure; a permanent status that declares per_tick ticks until cured, with no ends_at (loka-rn3b)."
+          "description": "How long the status lasts in seconds, or permanent until cured."
         },
         "fear": {
           "const": true,
-          "description": "Toolbox row W21: while active on a pack member, its C4 flight is attempted on its every opponent turn, whatever its hp; may stand in for per_tick."
+          "description": "When true, forces the character to attempt fleeing combat on every turn."
         },
         "kind": {
-          "description": "Toolbox row loka-x6t.64: the status icon's polarity, shown as GameView ConditionView.kind; wins over the polarity derived from the effect fields.",
+          "description": "Whether the condition is beneficial (buff) or harmful (debuff), determining its display icon.",
           "enum": [
             "buff",
             "debuff"
           ]
         },
         "modifies": {
-          "description": "Toolbox row 2c: while the status is active on a holder, each modifier is added to the holder's attribute as attribute@1 reads it.",
+          "description": "Modifiers added to the holder attributes while the status is active.",
           "items": { "$ref": "#/$defs/ItemAffect" },
           "maxItems": 16,
           "minItems": 1,
@@ -14367,7 +14375,7 @@
         },
         "movement": {
           "additionalProperties": false,
-          "description": "Status reader 7: the holding body's move cost and the terrain it may cross while the status is active; may stand in for per_tick.",
+          "description": "Adjustments to the character movement cost and the terrain types they can cross.",
           "properties": {
             "cost_percent": {
               "description": "Percent of each move's fare (world.movement.cost or 1 mv, after the flee multiplier) the holding body pays, rounded down; several statuses apply in turn in definition order.",
@@ -14405,15 +14413,15 @@
             },
             "expired": {
               "$ref": "#/$defs/TextKey",
-              "description": "Told when a timed status ends; required unless duration is permanent (compiler SCHEMA_VIOLATION, loka-rn3b)."
+              "description": "Text told when a timed status ends; required unless duration is permanent."
             },
             "observed": {
               "$ref": "#/$defs/TextKey",
-              "description": "Row G3 (loka-kgd.176): told when a first application lands on an NPC or item in the player's room that the player perceives, or on the room the player stands in (loka-x6t.37); with none, such a holder is silent."
+              "description": "Text told when a status is applied to an NPC or item in the player room that the player perceives."
             },
             "skipped": {
               "$ref": "#/$defs/TextKey",
-              "description": "Told, whole, when this status bars its holder's combat blow (loka-x6t.30); with none, the round tells the engine line combat.skipped, its bindings.status this status's name."
+              "description": "Text told when this status prevents its holder from taking an action in combat."
             },
             "tick": {
               "$ref": "#/$defs/TextKey",
@@ -14427,17 +14435,17 @@
           "type": "object"
         },
         "per_tick": {
-          "description": "Signed; never 0, required unless modifies, fear, blocks, allows, resistances, perception, concealment or movement is present or duration is permanent (compiler SCHEMA_VIOLATION).",
+          "description": "Amount added to or subtracted from the pool on each tick.",
           "maximum": 2147483647,
           "minimum": -2147483647,
           "type": "integer"
         },
         "perception": {
           "additionalProperties": false,
-          "description": "Status reader 6: what the holding body perceives while the status is active. sight blind: every room is dark to it, a lit source or dark sight notwithstanding; dark_sight: sees in an unlit room as an ancestry's dark_sight does; see_invisible: sees a holder of an invisible status. hearing deaf: no sound cue reaches it. At least one field (compiler SCHEMA_VIOLATION); may stand in for per_tick.",
+          "description": "Alters what the character can perceive, such as granting dark vision, seeing invisible entities, or inflicting blindness or deafness.",
           "properties": {
             "hearing": {
-              "description": "deaf: no sound cue reaches the holder.",
+              "description": "When deaf, no sound cues reach the character.",
               "enum": [
                 "deaf"
               ]
@@ -14455,7 +14463,7 @@
         },
         "pierced_by": {
           "additionalProperties": false,
-          "description": "Toolbox row 16, only beside concealment: a seer whose attribute value (an NPC's declared value, a player's attribute@1 value) is greater than the holder's skill level sees through the concealment; a holder without a character is never pierced. No draw. While the holder is a player's body, an NPC that engages it on entry ends every active concealment status on it.",
+          "description": "The attribute and skill check needed for an observer to see through this concealment.",
           "properties": {
             "attribute": {
               "$ref": "#/$defs/DefinitionRef",
@@ -14474,11 +14482,11 @@
         },
         "resistances": {
           "$ref": "#/$defs/Resistances",
-          "description": "Status reader 5: while active on the struck body (the player's or an NPC's), each entry joins the G2 resistance sum of an attack on it, before the one -100..100 clamp; may stand in for per_tick."
+          "description": "Damage resistances and vulnerabilities added to the character while this status is active."
         },
         "resource": {
           "$ref": "#/$defs/DefinitionRef",
-          "description": "The pool per_tick changes; omitted only beside ticks (compiler SCHEMA_VIOLATION)."
+          "description": "The pool adjusted on each tick; omitted when multiple pools are listed under ticks."
         },
         "tick_every": {
           "description": "Seconds between ticks.",
@@ -14487,16 +14495,20 @@
           "type": "integer"
         },
         "ticks": {
-          "description": "loka-kgd.209: several pools one tick changes, each by its signed per_tick (never 0), in place of resource and per_tick (compiler SCHEMA_VIOLATION beside either).",
+          "description": "Multiple pools adjusted on each tick, each with its own amount.",
           "items": {
             "additionalProperties": false,
             "properties": {
               "per_tick": {
+                "description": "Amount added to or subtracted from the pool on each tick.",
                 "maximum": 2147483647,
                 "minimum": -2147483647,
                 "type": "integer"
               },
-              "resource": { "$ref": "#/$defs/DefinitionRef" }
+              "resource": {
+                "$ref": "#/$defs/DefinitionRef",
+                "description": "The pool adjusted on each tick."
+              }
             },
             "required": [
               "resource",
@@ -14519,7 +14531,7 @@
     },
     "source.StructureDefinition": {
       "additionalProperties": false,
-      "description": "Built rooms S1 (construction@1; cartridge.md Structure and site declarations): one structure a player may build at a room's site (RoomDefinition.site). Its key; name and description, the text keys of the room it becomes; optional variants (DescriptionVariant) and tags (Tag) as a room's; optional locks.enter, the policy the mover must hold to come into the built room, as a room's (toolbox row G7). Nothing builds in S1: the cartridge declares and both compilers check. Built rooms S3: optional max_per_owner, the most rooms of this structure one character may own at once; an order at the cap is refused service.construction_full. Built rooms S4: optional weathering, a status of this cartridge the room gets when it is raised (and again when mended); optional ruin, the status a mend cures (a reaction applies it, typically on weathering's status_expired), the mend benefit refuses service.nothing_to_mend unless ruin is active on the room.",
+      "description": "A buildable room or building a player can construct at a dedicated site. Defines the resulting room name, description, entry conditions, and durability statuses.",
       "properties": {
         "description": {
           "$ref": "#/$defs/TextKey",
@@ -14529,7 +14541,10 @@
           "additionalProperties": false,
           "description": "Rules for the built room; enter is the policy a mover must meet to come in.",
           "properties": {
-            "enter": { "$ref": "#/$defs/Policy" }
+            "enter": {
+              "$ref": "#/$defs/Policy",
+              "description": "The policy a character must meet to enter the built room."
+            }
           },
           "type": "object"
         },
@@ -14555,6 +14570,7 @@
           "type": "array"
         },
         "variants": {
+          "description": "Alternative descriptions for the built room, shown when specific conditions hold.",
           "items": { "$ref": "#/$defs/DescriptionVariant" },
           "maxItems": 16,
           "minItems": 1,
@@ -14702,6 +14718,7 @@
     },
     "source.areas": {
       "additionalProperties": false,
+      "description": "A named region of the map: groups rooms and local definitions under an area folder.",
       "properties": {
         "actions": {
           "additionalProperties": { "$ref": "#/$defs/source.actions" },
@@ -14834,12 +14851,14 @@
     },
     "source.attributes": {
       "additionalProperties": false,
+      "description": "Core character statistics such as strength, agility, and intellect that govern checks and modifiers.",
       "properties": {
         "attributes": {
           "additionalProperties": {
             "additionalProperties": {},
             "type": "object"
           },
+          "description": "Declared attributes mapped by key.",
           "type": "object"
         }
       },
@@ -14874,8 +14893,10 @@
     },
     "source.behaviours": {
       "additionalProperties": false,
+      "description": "A reusable bundle of reaction rules that can be attached to NPCs or items.",
       "properties": {
         "params": {
+          "description": "Parameter keys passed into the behaviour when attached.",
           "items": {
             "$ref": "#/$defs/Key",
             "not": { "const": "holder" }
@@ -14884,6 +14905,7 @@
         },
         "reactions": {
           "additionalProperties": { "type": "object" },
+          "description": "Named reaction rules this behaviour attaches to holders.",
           "propertyNames": { "$ref": "#/$defs/Key" },
           "type": "object"
         }
@@ -15012,6 +15034,10 @@
       ],
       "type": "object"
     },
+    "source.cutscene": {
+      "$ref": "#/$defs/source.SceneDefinition",
+      "description": "A full-screen modal story scene: paragraphs of prose followed by a divider, triggered by an event or quest."
+    },
     "source.dialogues": {
       "else": {
         "else": { "$ref": "#/$defs/source.DialogueDefinition" },
@@ -15062,6 +15088,7 @@
     },
     "source.facts": {
       "additionalProperties": false,
+      "description": "World and player state tracked by key: booleans, numbers, and strings that remember progress and choices.",
       "properties": {
         "facts": {
           "additionalProperties": {
@@ -15146,6 +15173,7 @@
       }
     },
     "source.layout": {
+      "description": "The 2D map coordinates for placing rooms on the world grid.",
       "items": { "$ref": "#/$defs/MapPosition" },
       "minItems": 1,
       "type": "array"
@@ -15373,12 +15401,14 @@
     },
     "source.resources": {
       "additionalProperties": false,
+      "description": "Numeric character pools such as health, mana, and stamina with minimum, maximum, and starting values.",
       "properties": {
         "resources": {
           "additionalProperties": {
             "additionalProperties": {},
             "type": "object"
           },
+          "description": "Declared resources mapped by key.",
           "type": "object"
         }
       },
@@ -15530,6 +15560,10 @@
         },
         "type": "object"
       }
+    },
+    "source.text": {
+      "$ref": "#/$defs/TextCatalog",
+      "description": "The catalog of localized display strings: maps each text key to written prose between 1 and 4,096 characters."
     },
     "source.topics": {
       "else": {

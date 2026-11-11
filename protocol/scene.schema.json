@@ -217,7 +217,7 @@
           "additionalProperties": false
         }
       ],
-      "description": "Modal narration or the consumed paid-Rest anchored, resumable presentation-only dream.",
+      "description": "A scripted story scene or dream sequence presented across steps, triggered by an event, quest, or rest.",
       "examples": [
         {
           "key": "bell_rung",
