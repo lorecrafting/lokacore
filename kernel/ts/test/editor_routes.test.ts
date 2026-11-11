@@ -32,6 +32,7 @@ const ROUTES: Record<string, string[]> = {
   '/fights': ['GET'],
   '/find': ['GET'],
   '/open': ['POST'],
+  '/restructure': ['POST'],
   '/why': ['POST'],
   '/story': ['GET'],
   '/events': ['GET'],
