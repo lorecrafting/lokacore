@@ -907,6 +907,17 @@ out=$(sh "$bin/push_slice.sh" "$R" slice) && bad "push_slice: a rejected push ex
 case "$out" in PUSH_EXIT=0*) bad "push_slice: a rejected push printed PUSH_EXIT=0";; *started*) bad "push_slice: a rejected push reported runs";; PUSH_EXIT=*) ;; *) bad "push_slice: no PUSH_EXIT line: $out";; esac
 out=$(sh "$bin/push_slice.sh" "$R" main 2>&1) || true  # the refusal exits 2; set -e must not stop here
 case "$out" in *"is not the branch checked out"*) ;; *) bad "push_slice: pushed a branch that is not checked out in the worktree: $out";; esac
+# Break (loka-4ks2l): a red unit file the diff touches is pushed anyway, so #707's missing ROUTES row
+# waited four days for CI. The stub runs nothing and reports the file red; nothing reaches origin.
+git checkout -q slice && git reset -q --hard origin/slice 2>/dev/null || git checkout -q slice
+mkdir -p kernel/ts/test kernel/ts/play kernel/ts/node_modules && printf 'x\n' > kernel/ts/play/write.ts && echo new > kernel/ts/test/editor_routes.test.ts
+git add -A . && git commit -qm "a route with no ROUTES row"; before=$(git ls-remote origin slice | cut -f1)
+mkdir "$tmp/rt"; printf '#!/bin/sh\nexit 1\n' > "$tmp/rt/node"; chmod +x "$tmp/rt/node"
+rc=0; out=$(PATH="$tmp/rt:$PATH" sh "$bin/push_slice.sh" "$R" slice 2>&1) || rc=$?
+[ "$rc" = 1 ] || bad "push_slice: a red touched unit file exited $rc, want 1"
+case "$out" in PUSH_EXIT=1*) ;; *) bad "push_slice: a red touched unit file printed no PUSH_EXIT=1: $out";; esac
+[ "$(git ls-remote origin slice | cut -f1)" = "$before" ] || bad "push_slice: a red touched unit file still pushed"
+git reset -q --hard origin/slice
 # --- .githooks/pre-push, format_on_edit.sh ----------------------------------------------------
 # Break (loka-ivjq.19): a new commit whose message names a home or worktree path is pushed; a clean one is refused.
 R=$(mktemp -d); cd "$R"; git init -q; mkdir bin; printf '#!/bin/sh\nexit 0\n' > bin/prepush.sh; chmod +x bin/prepush.sh; git add .
