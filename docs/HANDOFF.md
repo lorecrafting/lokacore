@@ -4,8 +4,9 @@ The present only: open work, next steps, owner questions, and standing owner rul
 yet. Rewrite this page in place once per session, at its end; never add dated session sections. History lives in git, Beads and `docs/reviews/`; lessons
 go to [PM lessons](lessons/pm.md) ([harness patterns](decisions/owner-decision-harness-patterns-2026-10-28.md)).
 
-AS OF main after #706; written 2026-11-07 by Claude Code (Opus 5.5), PM session. `kernel_api` is 1.159 (no contract slice since).
-**The owner is taking about a month off and pausing the subscription (2026-11-07).** Nothing is mid-merge.
+AS OF main after #708; written 2026-11-11 in the Pi harness by deploy/deepseek-ai/deepseek-v4.1-flash-1017, PM session.
+`kernel_api` is 1.159 (no contract slice since). **The owner is taking about a month off and pausing the subscription
+(2026-11-07).** Nothing is mid-merge; S1 (#707) is open, green-checked and ready to merge.
 
 ## Direction (owner 2026-10-30 to 2026-11-07)
 
@@ -15,34 +16,41 @@ AS OF main after #706; written 2026-11-07 by Claude Code (Opus 5.5), PM session.
 - **Card bar:** a card never offers or writes what the compiler refuses; gates go two ways with the compiler `file:line`.
 - NPC routines (loka-ni2zd) wait for the owner's own design session.
 
-## Merged this session
+## Merged since the 2026-11-07 handoff
 
-#703 system graph lists only tracked cartridge files (nightly CI was red from the owner's untracked world; loka-wfrgk.112);
-#701 scene structure design; #704 story tooling design (`docs/design/story-tooling.md`); #705 big-studio tooling survey
-(`docs/rnd/studio-tooling-survey-2026-11-07.md`); #706 owner decisions and build order.
+#708 field guide B (the last code merge, 2026-11-08). Everything after it is Beads tracking for epic loka-wfrgk.119
+(narrative intelligence, 8 open children) and a `docs/worldbuilding` Act II lore commit (2026-11-09): **no engine, kernel
+or editor work has landed since 2026-11-07.** Nightly `ci` and `book-e2e` were green on main as of 2026-11-11 17:30.
+Untracked `cartridges/prologue/` is the owner's in-progress Part 1: never touch it, read it only.
 
 ## In flight at handoff
 
-- **S1** (loka-wfrgk.100.5.2): **draft PR #707**, branch `editor/restructure-cut-pages`, head `8056fca34`, worktree
-  `~/dev/worktrees.noindex/loka-wfrgk.100.5.2`. `scene_structure.ts` (five `.cut` page ops), `POST /restructure`
-  (`scene_card.ts` `restructure`, wired in `write.ts`), page buttons on the modal scene card. Kernel typecheck and 10
-  tests pass, push_slice green, red controls in the PR body. **Not done:** hosted CI not run; the panel card E2E not rerun
-  after the review fixes. Open review notes: Undo order across page ops and form edits (ponytail note in `Scene.tsx`),
-  `cut()` recomputed per button per render, stale check duplicates `write.ts` `fresh()`, CRLF cuts get mixed endings; a
-  cut-only scene (no `.json`) is unreachable in the panel (outside S1: file it). To finish: rerun the card E2E, mark
-  ready, CI, merge with `bin/merge_pr.sh 707 loka-wfrgk.100.5.2`.
+- **S1** (loka-wfrgk.100.5.2): **PR #707, ready, not draft**, branch `editor/restructure-cut-pages`, head `510d816f4`
+  (main merged in), worktree `~/dev/worktrees.noindex/loka-wfrgk.100.5.2`. `scene_structure.ts` (five `.cut` page ops),
+  `POST /restructure` (`scene_card.ts` `restructure`, wired in `write.ts`), page buttons on the modal scene card.
+  The 2026-11-07 handoff's two gaps are closed: the card E2E was rerun (7/7 `cards.test.ts`) and CI's one red test is
+  fixed (`'/restructure': ['POST']` was missing from `ROUTES` in `kernel/ts/test/editor_routes.test.ts:63`, which is what
+  failed run 42415442700 twice). The PR body carries the full test list and red controls.
+  To finish: `bin/wait_ci.sh 510d816f4`, then `bin/merge_pr.sh 707 loka-wfrgk.100.5.2` from the main checkout.
+  Open review notes (all accepted, none blocking): Undo order across page ops and form edits (ponytail note in
+  `Scene.tsx`), `cut()` recomputed per button per render, `fresh()` duplicated to avoid a circular import, CRLF cuts get
+  mixed endings. A cut-only scene (no `.json`) is unreachable in the panel: **loka-cr7l7**, needs a designer ruling
+  (show the twinless `.cut`, or refuse it at compile; the second is the smaller diff).
+- **#632** (loka-vduxr.64) belongs to another session (lokacore-fb). **#454** is the owner's P3 hold. Both now lack
+  `external_ref`, which is why `bin/session_status.sh` reports them as drift: set it when their session next writes.
 
 ## Resume, in order
 
-1. S1, then S2 (loka-wfrgk.100.5.3), then S3 (loka-wfrgk.100.5.4, compiler grammar, reviewer), one at a time
-   ([rulings](design/scene-structure-rulings.md)).
+1. S1 (#707: merge on green), then S2 (loka-wfrgk.100.5.3), then S3 (loka-wfrgk.100.5.4, compiler grammar, reviewer),
+   one at a time ([rulings](design/scene-structure-rulings.md)).
 2. Story tooling epic **loka-wfrgk.115**, children .1 to .12 chained in the owner's order: R1, W1, D1, K2, C1, L1 + L2, W2,
    F1 + W4, R2, K1, then W3 and E1 before v1. K2, L1 + L2, K1 and E1 take a reviewer.
 3. Older P1s: loka-wfrgk.94, loka-wfrgk.100.8 (key-tagged Book lines), loka-lvo9i (CI flake), loka-wfrgk.100.4.
 4. Housekeeping PR: loka-ebnu3, jqxb8, grdiq, lvo9i, wfrgk.96, the panel.test.ts:225 flake, and the retro items (below).
+   `loka-za8br` (P1) is the one that bites every handoff: `bin/worktree_setup.sh` leaves node_modules empty.
 5. P2 editor items: .97, .98, .99, .102 follow-ups, map handle placement, `bin/loka new` duplicate keys.
 
-## Owner calls this session (override any)
+## Owner calls to date (2026-11-07 session; override any)
 
 - #701 merged as designed: a choice key is fixed by a ` #<key>` suffix, words are free.
 - Story tooling: yes to every recommendation of both docs. Weather stays a story fact for Part 1 (no `weather.set`);
@@ -56,6 +64,14 @@ AS OF main after #706; written 2026-11-07 by Claude Code (Opus 5.5), PM session.
 
 - Part 1 build feedback. Older: studio defaults, weapon proficiency shape, store fees, iOS first, the save guarantee,
   #574 acceptance, #564 calls, hosting (12uz).
+
+## Retro 2026-11-11 (filed, awaiting the owner's yes/no)
+
+Four items, evidence in each: loka-4ks2l (push_slice does not run the unit files the diff touches, which is how #707's
+one-line red test cost four days), loka-x4ejm (session_status does not print a PR head's CI conclusion, so the handoff
+said "CI not run" when it had failed twice), loka-y043w (the drift check calls a missing `external_ref` "no Beads issue":
+three false alarms a session), loka-r7vrx (the queue is 75 open with duplicates and nothing closed since 11-07). Closed
+`loka-wfrgk.116` as a duplicate of `loka-za8br` while filing. The 2026-11-07 items are still open and unapproved.
 
 ## Owner's writing list (prologue; text keys, no prose from agents)
 
