@@ -4,9 +4,9 @@ The present only: open work, next steps, owner questions, and standing owner rul
 yet. Rewrite this page in place once per session, at its end; never add dated session sections. History lives in git, Beads and `docs/reviews/`; lessons
 go to [PM lessons](lessons/pm.md) ([harness patterns](decisions/owner-decision-harness-patterns-2026-10-28.md)).
 
-AS OF main after #708; written 2026-11-11 in the Pi harness by deploy/deepseek-ai/deepseek-v4.1-flash-1017, PM session.
+AS OF main after #707; written 2026-11-11 20:20 UTC in the Pi harness by deploy/deepseek-ai/deepseek-v4.1-flash-1017, PM session.
 `kernel_api` is 1.159 (no contract slice since). **The owner is taking about a month off and pausing the subscription
-(2026-11-07).** Nothing is mid-merge; S1 (#707) is open, green-checked and ready to merge.
+(2026-11-07).** Nothing is mid-merge, nothing is in flight, no agent is running.
 
 ## Direction (owner 2026-10-30 to 2026-11-07)
 
@@ -18,31 +18,28 @@ AS OF main after #708; written 2026-11-11 in the Pi harness by deploy/deepseek-a
 
 ## Merged since the 2026-11-07 handoff
 
-#708 field guide B (the last code merge, 2026-11-08). Everything after it is Beads tracking for epic loka-wfrgk.119
-(narrative intelligence, 8 open children) and a `docs/worldbuilding` Act II lore commit (2026-11-09): **no engine, kernel
-or editor work has landed since 2026-11-07.** Nightly `ci` and `book-e2e` were green on main as of 2026-11-11 17:30.
-Untracked `cartridges/prologue/` is the owner's in-progress Part 1: never touch it, read it only.
+#707 S1 of the scene structure work (`.cut` page ops through `POST /restructure`, loka-wfrgk.100.5.2, closed by
+`after_merge`); #708 plain-English field guide for the kinds slice A did not cover. Then docs and Beads only:
+`docs/worldbuilding` Act II lore (b5fa77bd3) and epic loka-wfrgk.119 (narrative intelligence and LLM co-authoring tools,
+8 open children, no work started). Nightly `ci` and `book-e2e` green on main as of 2026-11-11 17:30. Untracked
+`cartridges/prologue/` is the owner's in-progress Part 1: never touch it, read it only.
 
 ## In flight at handoff
 
-- **S1** (loka-wfrgk.100.5.2): **PR #707, ready, not draft**, branch `editor/restructure-cut-pages`, head `510d816f4`
-  (main merged in), worktree `~/dev/worktrees.noindex/loka-wfrgk.100.5.2`. `scene_structure.ts` (five `.cut` page ops),
-  `POST /restructure` (`scene_card.ts` `restructure`, wired in `write.ts`), page buttons on the modal scene card.
-  The 2026-11-07 handoff's two gaps are closed: the card E2E was rerun (7/7 `cards.test.ts`) and CI's one red test is
-  fixed (`'/restructure': ['POST']` was missing from `ROUTES` in `kernel/ts/test/editor_routes.test.ts:63`, which is what
-  failed run 42415442700 twice). The PR body carries the full test list and red controls.
-  To finish: `bin/wait_ci.sh 510d816f4`, then `bin/merge_pr.sh 707 loka-wfrgk.100.5.2` from the main checkout.
-  Open review notes (all accepted, none blocking): Undo order across page ops and form edits (ponytail note in
-  `Scene.tsx`), `cut()` recomputed per button per render, `fresh()` duplicated to avoid a circular import, CRLF cuts get
-  mixed endings. A cut-only scene (no `.json`) is unreachable in the panel: **loka-cr7l7**, needs a designer ruling
-  (show the twinless `.cut`, or refuse it at compile; the second is the smaller diff).
-- **#632** (loka-vduxr.64) belongs to another session (lokacore-fb). **#454** is the owner's P3 hold. Both now lack
-  `external_ref`, which is why `bin/session_status.sh` reports them as drift: set it when their session next writes.
+Nothing. The next slice starts from main.
+
+- **#632** (loka-vduxr.64) belongs to another session (lokacore-fb). **#454** is the owner's P3 hold. Both now carry
+  `external_ref`, so `bin/session_status.sh` reports no drift.
+- A cut-only scene (no `.json`) is unreachable in the panel: **loka-cr7l7**, needs a designer ruling (show the twinless
+  `.cut`, or refuse it at compile; the second is the smaller diff).
 
 ## Resume, in order
 
-1. S1 (#707: merge on green), then S2 (loka-wfrgk.100.5.3), then S3 (loka-wfrgk.100.5.4, compiler grammar, reviewer),
-   one at a time ([rulings](design/scene-structure-rulings.md)).
+1. S2 (loka-wfrgk.100.5.3: `.scene` line add, remove and move with the key check and drafts first), then S3
+   (loka-wfrgk.100.5.4: ` #<key>` grammar in `scene_lines.ex`, compiler, takes a reviewer), one at a time
+   ([rulings](design/scene-structure-rulings.md)). S1 is on main: `POST /restructure` and `scene_structure.ts` are there
+   to build on. S2 writes files, so read loka-wfrgk.68 (`bin/loka new` re-sorts keys and `--from` writes to the repo root)
+   before it.
 2. Story tooling epic **loka-wfrgk.115**, children .1 to .12 chained in the owner's order: R1, W1, D1, K2, C1, L1 + L2, W2,
    F1 + W4, R2, K1, then W3 and E1 before v1. K2, L1 + L2, K1 and E1 take a reviewer.
 3. Older P1s: loka-wfrgk.94, loka-wfrgk.100.8 (key-tagged Book lines), loka-lvo9i (CI flake), loka-wfrgk.100.4.
@@ -86,6 +83,10 @@ hunger (`toolbox_showcase/text.json:1461`, `docs/showcase/hub-and-first-district
 
 - P3 hold (owner 2026-10-22): draft #454, kgd.188, 2lvx, 5i4c, x6t.98. loka-x6t.126 skill-gated room depth.
 - #632 (loka-vduxr.64) belongs to another session (lokacore-fb), not the PM.
+- `toolbox/settle-3` is 9 commits ahead of main from 2026-10-15 with no PR: decide PR or delete before the next batch.
+- Seven worktrees sit at main with nothing to save (`lokacore-preview`, `lokacore-session`, `loka-kgd.202-old`,
+  `.203-mut`, `.205-design-review`, `loka-vduxr.10-second`, `toolbox-authoring-batch-a-walks`); `loka-wfrgk.100.5.2` is
+  merged and prunable. `playtest-sweep` holds untracked logs, a report and shots worth reading before it goes.
 
 Storybook http://localhost:6006 serves main from the preview checkout (`bin/preview_update.sh`); a PR's stories need a
 Storybook run from its own worktree. The owner sends polish prompts in the conversation; loop: [PM, Live polish session](PM.md#live-polish-session),
