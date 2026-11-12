@@ -47,6 +47,8 @@ export async function undoDelete(book: Pick<ReturnType<typeof useBook>, 'send'>)
   refused(await ask('undo', { id: last.id }));
 }
 
+/** R1's verdict for one checkpoint (docs/design/story-tooling.md §2), from the watcher's push. */
+export type Checked = { name: string } & ({ ok: true } | { ok: false; step: number; why: string });
 export const checkpoints = {
   list: () => fetch('/__author/checkpoints').then((r) => r.json() as Promise<string[]>),
   get: (name: string) =>

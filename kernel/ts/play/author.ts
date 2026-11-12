@@ -21,6 +21,8 @@ import { createInterface } from 'node:readline';
 import { dirname, join, resolve } from 'node:path';
 import { INSTALLED, loadCartridge } from '../src/index.ts';
 import { lintLines, serve, textOnly, type Canonical, type Timings } from './live.ts';
+import { compiler, type Run } from './compile_run.ts';
+import { recheck } from './recheck.ts';
 
 const root = resolve(import.meta.dirname, '../../..');
 const out = resolve(
@@ -93,6 +95,7 @@ const timed = (started: number, compiled: number, kind: Timings['kind'], sha256?
   kind,
   ...(sha256 && { sha256 }),
 });
+let good: { canonical: string; sha256: string } | undefined; // the page's artifact, for R1
 function publish(
   canonicalText: string,
   sha256: string,
@@ -100,6 +103,7 @@ function publish(
   started: number,
   compiled: number,
 ) {
+  good = { canonical: canonicalText, sha256 };
   failed = undefined;
   const ms = () => `in ${Math.round(performance.now() - started)} ms`;
   const canonical: Canonical = JSON.parse(canonicalText);
@@ -132,65 +136,6 @@ function write(canonicalText: string, sha256: string, said: string[], timings?: 
 // The preview allows `~` placeholders; a release compile refuses them (mix loka.compile). Not
 // spawnSync: the watcher answers /source, /events and writes while it runs.
 const MIX = ['exec', '--', 'mix', 'loka.compile'];
-const compileArgs = (a: string) => {
-  const out = ['--json', diagnostics(a), '--placeholders', placeholders(a)];
-  return [source, a, '--allow-placeholders', ...out];
-};
-type Run = { status: number | null; stderr: string; error?: Error };
-const oneShot = (artifact: string) =>
-  new Promise<Run>((done) => {
-    let stderr = '';
-    const run = spawn('mise', [...MIX, ...compileArgs(artifact)], {
-      cwd: root,
-      stdio: ['ignore', 'ignore', 'pipe'], // a launcher may have closed stdin (EBADF otherwise)
-    });
-    let error: Error | undefined;
-    run.stderr.on('data', (chunk) => (stderr += chunk));
-    run.on('error', (e) => (error = e)); // `close` follows
-    run.on('close', (status) => done({ status, stderr, error }));
-  });
-// With --watch, a resident `mix loka.compile --serve` takes each compile, one at a time (the queue).
-// Dead, wedged, halted (lib/ changed) or not up yet: that compile runs one-shot, a new one starts.
-const WEDGED_MS = 60_000; // mutate-skip: far past a cold showcase compile on a loaded machine
-let resident: ChildProcess | undefined, answer: ((line?: string) => void) | undefined;
-function start() {
-  const run = spawn('mise', [...MIX, '--serve'], { cwd: root, stdio: ['pipe', 'pipe', 'ignore'] });
-  createInterface({ input: run.stdout }).on('line', (line) => {
-    if (line.startsWith('loka.compile ')) answer?.(line.slice(13));
-  });
-  run.on('error', () => {}).stdin.on('error', () => {}); // a dead one: `close` answers
-  run.on('close', () => {
-    if (resident !== run) return;
-    resident = undefined;
-    answer?.();
-  });
-  resident = run;
-}
-const served = (artifact: string) =>
-  new Promise<string | undefined>((done) => {
-    const run = resident;
-    if (!run) return done(undefined);
-    const wedged = setTimeout(() => answer?.(), WEDGED_MS);
-    answer = (line) => {
-      clearTimeout(wedged);
-      answer = undefined;
-      if (line === undefined) {
-        resident = undefined; // never reused: a late reply would answer the next compile
-        run.kill('SIGKILL');
-      }
-      done(line);
-    };
-    run.stdin!.write(`${compileArgs(artifact).join('\t')}\n`);
-  });
-async function compile(artifact: string): Promise<Run> {
-  const line = await served(artifact);
-  if (line !== undefined) return JSON.parse(line);
-  const run = await oneShot(artifact);
-  if (live) start();
-  return run;
-}
-const diagnostics = (artifact: string) => join(dirname(artifact), 'diagnostics.json');
-const placeholders = (artifact: string) => join(dirname(artifact), 'placeholders.json');
 const parsed = (file: string, none: unknown) =>
   existsSync(file) ? JSON.parse(readFileSync(file, 'utf8')) : none;
 // The last lint read older source, so it goes with the failed compile.
@@ -199,6 +144,9 @@ const notCompiled = (said: string[], timings?: Timings) => {
   failed = said;
   live?.push({ said, compiled: false, lint: undefined, ...(timings && { timings }) });
 };
+
+// one compile runner for the watcher's lifetime; `compile` carries the resident child
+const compile = compiler(source, flag === '--watch');
 
 async function build(): Promise<boolean> {
   const started = performance.now();
@@ -212,8 +160,8 @@ async function build(): Promise<boolean> {
     if (saves !== read) return false;
     // none written (mix crashed before it): the last build's cards must not stay up
     live?.push({
-      diagnostics: parsed(diagnostics(artifact), []),
-      placeholders: parsed(placeholders(artifact), {}),
+      diagnostics: parsed(join(dirname(artifact), 'diagnostics.json'), []),
+      placeholders: parsed(join(dirname(artifact), 'placeholders.json'), {}),
     });
     const said = run.stderr.split('\n').filter((l) => /^(error|warning|info): /.test(l));
     for (const line of said) console.error(line);
@@ -271,7 +219,12 @@ function enqueue() {
       waiting = false;
       return build();
     })
-    .then((ok) => ok && lint())
+    .then((ok) => {
+      if (!ok || !good) return;
+      lint(); // both go after the page has the artifact, so neither delays the preview
+      const { canonical, sha256 } = good;
+      return recheck(source, canonical, sha256).then((c) => live?.push({ checkpoints: c }));
+    })
     .catch((e) => console.error(`Not updated: ${(e as Error).message}`)); // a thrown build must not end the watch
 }
 let timer: ReturnType<typeof setTimeout> | undefined;

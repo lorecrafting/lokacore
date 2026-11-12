@@ -46,6 +46,7 @@ export type Message = {
   // the lines /edit pushed that the last compile refused (file:line); a good compile clears them
   unconfirmed?: { key: string; at: string }[];
   placeholders?: Record<string, string>; // each `~` key's file:line, from the compile (/line)
+  checkpoints?: import('./checkpoints.ts').Checked[]; // R1: this artifact's replays (§2)
   timings?: Timings; // the last compile's, kept like the rest: the editor tells them apart by `at`
 };
 /** One compile's milliseconds: the compile, then its push or write (a refusal: its notice). */

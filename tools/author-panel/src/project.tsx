@@ -6,10 +6,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from './components/ui/tabs.t
 import { Numbers } from './numbers.tsx';
 import { Facts, Find, Why } from './reading.tsx';
 import { Play, Todo } from './sections.tsx';
+import type { Checked } from './author.ts';
 
-type Props = Pick<ReturnType<typeof useBook>, 'state' | 'send' | 'trace'> & { said?: string[] };
+type Props = Pick<ReturnType<typeof useBook>, 'state' | 'send' | 'trace'> & {
+  said?: string[];
+  checked?: Checked[];
+};
 
-export function Project({ state, send, trace, said }: Props) {
+export function Project({ state, send, trace, said, checked }: Props) {
   return (
     <Tabs defaultValue="play" className="gap-0">
       <p
@@ -28,7 +32,7 @@ export function Project({ state, send, trace, said }: Props) {
       </TabsList>
       <div className="p-3">
         <TabsContent value="play">
-          <Play state={state} send={send} />
+          <Play state={state} send={send} checked={checked} />
         </TabsContent>
         <TabsContent value="write">
           <Todo said={said} />
