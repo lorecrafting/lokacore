@@ -55,7 +55,7 @@ defmodule Loka.Content.Explain do
          REACTION_DRAINS_BODY | A rule that lowers a body's pool skips death, so the body could stand at 0. | Hurt it with combat, a status tick or a bleed; give this rule a positive `by`.
          BARRIER_MISMATCH | The two sides of this barrier disagree. | Name the same barrier on both, and check its rooms and direction.
          BARRIER_UNREACHABLE_KEY | The key to this barrier is out of reach without passing it. | Place the key on the near side.
-         RESERVED_FACT | The engine owns the fact name `{field}`. | Rename your fact.
+         RESERVED_FACT | The engine owns the fact name `{reserved}`. | Rename your fact.
          INVALID_TIME_POLICY | This needs a time policy the cartridge does not have, or does not fit it. | Fix time_policy in cartridge.json, or remove this.
          VISITS_UNRECORDED | A visits check can never pass, because nothing records visits. | Add `knowledge` under requires.capabilities in cartridge.json.
          SPEAKER_ELSEWHERE | This `then` leads to a speaker in another room, so the talk ends as it reaches them. | Move the speaker, or end the talk here.
@@ -102,7 +102,7 @@ defmodule Loka.Content.Explain do
          choice_order_written | A choice's `order` is the compiler's mark of a scene's written order, not a field to write. | Remove it: a scene's choices show as written, a JSON dialogue's by key.
          once_outside_choice | Line `{text}`: `once` belongs under a choice. | Move it under a `- ` line.
          once_key_taken | `once` here would make the fact `{key}`, and that fact already exists. | Rename that fact, or this choice's words.
-         once_key_long | `once` here would make the fact `{key}`, longer than 64 characters. | Shorten the choice's words or the scene's key.
+         once_key_long | `once` or `cooldown` here would make the fact `{key}`, longer than 64 characters. | Shorten the key that names it.
          bad_then | Line `{text}` is not `then: <key>` or `then: end`, or repeats a `then:`. | Name one dialogue by its key, or `end`; `~` holds the place of words, not of a key.
          then_outside_choice | Line `{text}`: `then:` belongs under a choice. | Move it under a `- ` line.
          then_and_nested | Line `{text}`: this choice already goes on to its nested choices. | Remove the `then:`, or remove the nested choices.
@@ -264,7 +264,8 @@ defmodule Loka.Content.Explain do
 
   defp words(%{"code" => code, "data" => data} = d) do
     {what, fix} = entry(code, d)
-    vars = vars(d)
+    # RESERVED_FACT names the fact, which is not the path's last step (`...fact`).
+    vars = Map.put(vars(d), "reserved", data["field"] || data["key"] || field(d["path"]))
     # A root-level fault has no field to name: the file itself is at fault.
     String.replace(
       "#{fill(what, vars)} #{fill(fix, vars)}#{extra(code, data, vars["field"])}",

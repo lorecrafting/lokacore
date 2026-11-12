@@ -8,7 +8,7 @@ defmodule Loka.Content.Position do
   reserves scene_<key>, story-point markers, skill_<key> and seen_tip_<key> facts.
   Its engine fact specs match kernel/ts/src/content/cartridge_position.ts.
   """
-  import Loka.Content.Source, only: [diag: 2, at: 2]
+  import Loka.Content.Source, only: [diag: 2, diag: 3, at: 2]
 
   @engine %{
     "key" => "position",
@@ -52,7 +52,7 @@ defmodule Loka.Content.Position do
     for {rel, steps, s} <- sites(defs, extra),
         s["op"] in ["fact.assign", "fact.adjust", "fact.stamp"],
         reserved_write?(s, refs, dream_refs),
-        do: diag("RESERVED_FACT", at(rel, steps ++ ["fact"]))
+        do: diag("RESERVED_FACT", at(rel, steps ++ ["fact"]), %{"field" => fact_name(s["fact"])})
   end
 
   def check(_, _, _, _), do: []

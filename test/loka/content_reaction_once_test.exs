@@ -207,6 +207,75 @@ defmodule Loka.ContentReactionOnceTest do
     assert path =~ "bone_drop.cooldown"
   end
 
+  # Break: the key comes from the file's basename, so in an area file (one file, many rules) a
+  # rule's own write is measured against the bundle's name and the refusal names the wrong fact.
+  # Break: the key comes from the file's basename, so in an area file (one file, many rules) a
+  # rule's own write is measured against the bundle's name; the refusal then names the wrong fact
+  # or misses the write entirely.
+  test "an area file's rule is guarded under its own key", %{dir: dir} do
+    area =
+      JSON.decode!("""
+      {"rooms":{},"reactions":{"elder_hears":{"on":{"event":"spoken"},"once":true,
+       "steps":[{"op":"fact.assign","fact":"elder_hears_done","value":true}]}}}
+      """)
+
+    assert {:error, diags} = Loka.ContentSource.compile(dir, [{"areas/village.json", area}])
+
+    assert Enum.any?(
+             diags,
+             &match?(
+               %{"code" => "RESERVED_FACT", "data" => %{"field" => "elder_hears_done"}},
+               &1
+             )
+           ),
+           inspect(diags)
+  end
+
+  # Break: the fault's data carries no name, so Explain's `{reserved}` reads the path's last step
+  # (`fact`) and every RESERVED_FACT names the literal word `fact` (a real compile showed it).
+  test "a reserved-write fault names the fact", %{dir: dir} do
+    other = fn r ->
+      r
+      |> Map.put("steps", [%{"op" => "fact.assign", "fact" => "bone_taken_done", "value" => true}])
+    end
+
+    assert {:error, [%{"code" => "RESERVED_FACT", "data" => data}]} =
+             Loka.ContentSource.compile(dir, [{"reactions/bone_drop.json", other}])
+
+    assert data["field"] == "bone_taken_done"
+
+    # And the sentence names it: `field` alone is the path's last step, the word `fact`.
+    assert [line] =
+             Loka.Content.Explain.lines(
+               [
+                 %{
+                   "code" => "RESERVED_FACT",
+                   "path" => "reactions/x.steps[0].fact",
+                   "data" => data
+                 }
+               ],
+               dir
+             )
+
+    assert line =~ "`bone_taken_done`"
+  end
+
+  # Break: a lowered name past 64 characters is refused with a `why` Explain has no sentence for,
+  # so `Map.fetch!` raises and the compile crashes with a MatchError instead of reporting it (a
+  # real compile crashed exactly so).
+  test "a lowered name past 64 characters is worded, not a crash", %{dir: dir} do
+    long = String.duplicate("k", 60)
+    src = Path.join(dir, "reactions/#{long}.json")
+    File.write!(src, ~s({"on":{"event":"spoken"},"once":true,"steps":[]}))
+
+    try do
+      assert {:error, diags} = Loka.ContentSource.compile(dir, [])
+      assert Enum.any?(diags, &(&1["data"]["why"] == "once_key_long")), inspect(diags)
+    after
+      File.rm!(src)
+    end
+  end
+
   defp bool_fact(meaning),
     do: %{
       "version" => 1,

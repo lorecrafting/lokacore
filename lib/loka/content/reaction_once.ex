@@ -54,20 +54,20 @@ defmodule Loka.Content.ReactionOnce do
   so a write of it would overwrite the rule's own bookkeeping. Reads the authored source, since the
   lowering drops the field and its steps are indistinguishable from the author's own.
   """
-  @spec writes([{String.t(), map()}]) :: [map()]
+  @spec writes([{String.t(), term(), map()}]) :: [map()]
   def writes(files) when is_list(files) do
-    for {rel, {:reaction, _, _}, %{} = rule} <- files,
-        {_field, fact} <- own_facts(rel, rule),
+    for {rel, {:reaction, key, _}, %{} = rule} <- files,
+        {_field, fact} <- own_facts(key, rule),
         {s, i} <- Enum.with_index(rule["steps"] || []),
         s["op"] in ["fact.assign", "fact.adjust", "fact.stamp"],
         s["fact"] == fact,
-        do: diag("RESERVED_FACT", at(rel, ["steps", i, "fact"]), %{"key" => fact})
+        do:
+          diag("RESERVED_FACT", at(rel, ["steps", i, "fact"]), %{"field" => fact, "key" => fact})
   end
 
-  # Each fact this rule lowers to, with the field that named it.
-  defp own_facts(rel, rule) do
-    key = rel |> List.wrap() |> List.last() |> to_string() |> Path.basename(".json")
-
+  # Each fact this rule lowers to, with the field that named it. The rule's own key, not the file's:
+  # in an area file one file holds many rules, so a basename would name the bundle.
+  defp own_facts(key, rule) do
     for {field, lowered} <- [{"once", "_done"}, {"cooldown", "_at"}],
         Map.has_key?(rule, field),
         do: {field, key <> lowered}
@@ -134,11 +134,15 @@ defmodule Loka.Content.ReactionOnce do
     site = at(rel, [field])
 
     taken =
-      if is_map_key(acc, fact), do: [diag("RESERVED_FACT", site, %{"key" => fact})], else: []
+      if is_map_key(acc, fact),
+        do: [diag("RESERVED_FACT", site, %{"field" => fact, "key" => fact})],
+        else: []
 
     long =
       if byte_size(fact) > @key_max,
-        do: [diag("SCHEMA_VIOLATION", site, %{"why" => "key_long", "key" => fact})],
+        do: [
+          diag("SCHEMA_VIOLATION", site, %{"why" => "once_key_long", "key" => fact})
+        ],
         else: []
 
     {Map.put(acc, fact, {"cartridge.json", [], spec(fact, field)}), ds ++ taken ++ long}
