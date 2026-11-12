@@ -9968,6 +9968,12 @@
           "minimum": 1,
           "type": "integer"
         },
+        "cooldown": {
+          "description": "This rule rests this many logical seconds after it fires (fact <rule>_at).",
+          "maximum": 2147483647,
+          "minimum": 1,
+          "type": "integer"
+        },
         "extends": { "$ref": "#/$defs/Key" },
         "on": {
           "anyOf": [
@@ -10410,6 +10416,11 @@
             }
           ],
           "description": "What sets this reaction off: one event, optionally narrowed to a room, item, NPC and so on. Example: {\"event\": \"item_acquired\", \"item\": \"key\"}."
+        },
+        "once": {
+          "description": "This rule runs at most once: lowered to the fact <rule>_done.",
+          "enum": [true],
+          "type": "boolean"
         },
         "silent": {
           "const": true,
@@ -13043,6 +13054,12 @@
           "minimum": 1,
           "type": "integer"
         },
+        "cooldown": {
+          "description": "This rule rests this many logical seconds after it fires (fact <rule>_at).",
+          "maximum": 2147483647,
+          "minimum": 1,
+          "type": "integer"
+        },
         "on": {
           "anyOf": [
             {
@@ -13577,6 +13594,11 @@
             }
           ],
           "description": "What sets this reaction off: one event, optionally narrowed to a room, item, NPC and so on. Example: {\"event\": \"item_acquired\", \"item\": \"key\"}."
+        },
+        "once": {
+          "description": "This rule runs at most once: lowered to the fact <rule>_done.",
+          "enum": [true],
+          "type": "boolean"
         },
         "silent": {
           "const": true,
