@@ -24,3 +24,16 @@ for d in $(git ls-files package-lock.json '*/package-lock.json' | sed 's|/*packa
     (cd "$d" && mise exec -- npm ci) && echo "$sum" > "$d/node_modules/.loka-lock-cksum"
   fi
 done
+
+# Name what a worktree still lacks (loka-za8br: an empty or half-cloned node_modules made every
+# developer re-install by hand and read Metro's 'Unable to resolve expo' instead of a real fault).
+# A warning, not a failure: deps may be absent on a host without Hex access, and _build is built by
+# the first `mix compile`.
+missing=
+for d in $(git ls-files package-lock.json '*/package-lock.json' | sed 's|/*package-lock.json$||; s|^$|.|'); do
+  [ -x "$d/node_modules/.bin/prettier" ] || [ "$d" != . ] || missing="$missing $d/node_modules/.bin/prettier"
+  [ -d "$d/node_modules" ] || missing="$missing $d/node_modules"
+done
+[ -d deps ] || missing="$missing deps"
+[ -z "$missing" ] || echo "worktree_setup: still missing:$missing (re-run, or install by hand)" >&2
+exit 0

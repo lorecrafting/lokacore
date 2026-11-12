@@ -9,7 +9,7 @@ import { appendFileSync, existsSync, readdirSync, readFileSync, statSync, writeF
 import { join } from 'node:path';
 import { test } from 'node:test';
 import axe from 'axe-core';
-import { author, boot, dir, open, QUEST } from './harness.ts';
+import { author, boot, dir, fill, open, QUEST } from './harness.ts';
 import type { Route } from 'playwright';
 
 // Breaks: a card's field grid sizes its track to its content (an auto track, not grid-cols-1's
@@ -203,7 +203,7 @@ test('a held edit gives way to its undoing, Undo and a reselect', async () => {
   const field = page.locator('#root_mass_grams');
   const undo = page.getByRole('button', { name: 'Undo', exact: true });
   const refusal = page.getByText('mass_grams must be >= 0'); // the held line, not rjsf's own
-  const set = async (v: string) => (await field.fill(v), await field.blur());
+  const set = async (v: string) => (await fill(field, v), await field.blur());
   await field.waitFor({ timeout: boot });
   await set('600');
   for (let t = 0; mass() !== 600 && t < 50; t++) await page.waitForTimeout(100);

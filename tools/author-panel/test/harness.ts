@@ -6,7 +6,7 @@ import { createServer } from 'node:net';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { after, before } from 'node:test';
-import { chromium, type Browser, type Page } from 'playwright';
+import { chromium, type Browser, type Locator, type Page } from 'playwright';
 
 const PANEL = resolve(import.meta.dirname, '..');
 const ROOT = resolve(PANEL, '../..');
@@ -81,3 +81,13 @@ export async function open(layout: object, ready = 'Inspector'): Promise<Page> {
   return page;
 }
 export const QUEST = { right: 280, selection: { kind: 'quest', key: 'carry_letter' } };
+
+/** Fill a controlled input and blur it, retrying until the value takes. React can remount between
+ * `fill`'s select-all and its insert, so the insert lands on the restored draft and appends
+ * ('600800' for '800' under load, loka-wfrgk.110). */
+export async function fill(field: Locator, v: string) {
+  for (let t = 0; t < 10; t++) {
+    await field.fill(v);
+    if ((await field.inputValue()) === v) return;
+  }
+}

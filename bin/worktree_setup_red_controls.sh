@@ -39,3 +39,10 @@ echo A > "$t/main/package-lock.json" && rm "$t/main/node_modules/DRIFT"
 echo stale > node_modules/.loka-lock-cksum
 touch "$t/main/node_modules/unreadable" && chmod 000 "$t/main/node_modules/unreadable"
 if PATH="$t/stub:$PATH" sh bin/worktree_setup.sh 2> /dev/null || [ -e node_modules.tmp ]; then echo 'worktree_setup control failed: a failed clone exited 0 or left node_modules.tmp' >&2; exit 1; fi
+# A worktree left without a package's node_modules names it (loka-za8br): the old script exited 0 and
+# said nothing, so the missing install surfaced later as Metro's "Unable to resolve expo".
+# The stub's npm ci leaves node_modules without .bin/prettier, so the root check names it. The old
+# script said nothing and exited 0, and the gap surfaced later as the commit hook failing.
+rm -f "$t/main/node_modules/unreadable" # the control above leaves it so the clone fails
+out=$(PATH="$t/stub:$PATH" sh bin/worktree_setup.sh 2>&1) || { echo "worktree_setup control failed: the post-check failed the run" >&2; exit 1; }
+case $out in *missing:*node_modules/.bin/prettier*) ;; *) echo "worktree_setup control failed: a missing install went unnamed: $out" >&2; exit 1 ;; esac
