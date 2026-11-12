@@ -47,8 +47,8 @@ export async function undoDelete(book: Pick<ReturnType<typeof useBook>, 'send'>)
   refused(await ask('undo', { id: last.id }));
 }
 
-/** R1's verdict for one checkpoint (docs/design/story-tooling.md §2), from the watcher's push. */
-export type Checked = { name: string } & ({ ok: true } | { ok: false; step: number; why: string });
+import type { Checked } from './verdicts.ts';
+export type { Checked };
 export const checkpoints = {
   list: () => fetch('/__author/checkpoints').then((r) => r.json() as Promise<string[]>),
   get: (name: string) =>
@@ -95,6 +95,7 @@ type Message = {
   changed?: { file: string; sha256: string; by: 'editor' | 'outside' }[];
   unconfirmed?: { key: string; at: string }[];
   placeholders?: Record<string, string>;
+  checkpoints?: Checked[]; // R1: the relays the watcher pushed (docs/design/story-tooling.md §2)
   timings?: Timings;
 };
 export type Change = NonNullable<Message['changed']>[number] & { seen: number };

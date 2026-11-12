@@ -1,7 +1,8 @@
 // R1's status words for the checkpoint list (docs/design/story-tooling.md §2). Kept out of
 // author.ts so it stays a pure function: author.ts imports React, and a test of this must not need a
 // browser.
-import type { Checked } from './author.ts';
+/** R1's verdict for one checkpoint, as the watcher pushes it (kernel/ts/play/checkpoints.ts §2). */
+export type Checked = { name: string } & ({ ok: true } | { ok: false; step: number; why: string });
 
 /** Each checkpoint name with its verdict: the watcher's push keyed by name. A name the watcher has
  * not pushed yet is `not replayed yet`, not a failure (a checkpoint saved moments ago). */
