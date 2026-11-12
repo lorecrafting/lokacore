@@ -84,6 +84,16 @@ debugger without the second application.
 | **Cost shown, not hidden.** The replay re-runs the whole run per step; the panel prints its time and stops asking past a budget (an owner-visible "Why is off past N steps; jump to a checkpoint") | Replay cost grows with path length; a silent slowdown is worse than a stated limit | A run of 400 steps shows the notice; a jump to a checkpoint resets it |
 | **Where.** A `Step` tab beside Why in the reading tabs; rows are node rows (click selects the rule's card) | The reading tabs already hold Why and the state; one more tab, same idiom | Select a listed rule: the inspector shows its card |
 
+Built 2026-11-12 (`tools/author-panel/src/steptab.tsx`, `step.ts`, `steprows.tsx`; tests in
+`test/step.test.ts`). Two notes the build settled:
+
+- **The two views cost no message.** The panel already receives the Book's whole `state` on every update
+  (`mobile/app/author/panel.tsx:205-214`), so the facts changed are its own last two snapshots, and the Book
+  needed no change at all. A second `state` at the same step is a redraw, not another step (`pairViews`).
+- **"Asked on every step" is an effect, not a button.** The report is asked as the step arrives; a step past the
+  budget, and a report slower than 2 s, are both shown rather than hidden. The failing leaf is worded by
+  `why_words.ts`, so a new policy leaf cannot gain a sentence here that the explainer lacks.
+
 ### R1: Checkpoints replayed after each compile
 
 For the owner: every edit re-tests every path the owner recorded, in the editor, with the failing step named.
