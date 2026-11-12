@@ -2,6 +2,7 @@
 // kinds the block takes, Move up, Move down, Remove, and the Alt keys that mirror them. Each button's
 // refusal is the route's own, from scene_structure.ts, so the card never sends what would be refused.
 import { ArrowDown, ArrowUp, Plus, Trash2, type LucideIcon } from 'lucide-react';
+import { useCallback } from 'react';
 import { offers, rows, scene, type Op } from '../../../../../kernel/ts/play/scene_structure.ts';
 import { Button } from '../../components/ui/button.tsx';
 import {
@@ -12,6 +13,20 @@ import {
 } from '../../components/ui/dropdown-menu.tsx';
 
 export type Rower = (op: Op) => void;
+/** The row an op left focus on (rulings §5): its file line number, or nothing. */
+export type Landing = { n: number };
+
+/** The ref a row focuses itself with when an op left focus on it (rulings §5), so Row stays small. */
+export function useLanded(here: boolean) {
+  return useCallback(
+    (el: HTMLLIElement | null) => {
+      // the row takes focus, not a field: a `~` has no field until the compile gives it words, and
+      // Tab from the row reaches whatever field is there
+      if (el && here) el.focus();
+    },
+    [here],
+  );
+}
 
 /** Alt-Up/Alt-Down move a row and Alt-Enter opens Add, from the row itself or a button, never from
  * inside a field: there Alt and the arrows keep their platform text meaning (rulings §5). */

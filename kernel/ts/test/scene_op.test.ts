@@ -8,6 +8,7 @@ import { join } from 'node:path';
 import { test, type TestContext } from 'node:test';
 import { sha256 } from '../play/guard.ts';
 import { serve } from '../play/live.ts';
+import { landed } from '../play/scene_focus.ts';
 import { scene, type Op } from '../play/scene_structure.ts';
 
 const SCENE = 'scenes/guard.scene';
@@ -104,6 +105,30 @@ test('/restructure on a .scene: each op changes only its lines; one /undo restor
 
 // Break: an add that offers a sub-line the block already holds (a second `then:` cannot lower), a
 // speaker line with no role, a remove of a key line, or a move that crosses a depth or a block edge.
+// Break: focus after an op lands on the wrong line, or on a `~` field the card does not render, so
+// the ruling's "focus stays on the moved or added row" is silently false. landed() is the only place
+// that answers, so a wrong line number here is a wrong jump. Literal expectations, read off SRC.
+test('an op names the line to focus after it: the destination, the gap, or the added line', () => {
+  const bytes = SRC.split('\n');
+  // 1 npc | 2 with | 3 blank | 4 "- Take the bowl" | 5 needs | 6 * You take it. | 7 blank
+  // 8 "- ~" | 9 * Words. | 10 blank | 11 "- Leave" | 12 blank
+  // a choice moves with its block, swapping with "- ~" and its words while the blanks 7 and 10 stay
+  // put, so the bowl choice now starts at 7. Focus follows the moved choice's own text.
+  assert.deepEqual(landed(bytes, { move: 4, by: 1 }), { n: 7 });
+  // "- ~" moves up past the bowl block, so its own line now sits at 4
+  assert.deepEqual(landed(bytes, { move: 8, by: -1 }), { n: 4 });
+  // removing the choice at 4 leaves a blank at 4, so focus takes the next line with text
+  assert.deepEqual(landed(bytes, { remove: 4 }), { n: 5 });
+  // a key line has no Remove (rulings §4), so this focuses nothing rather than jumping to line 1
+  assert.equal(landed(bytes, { remove: 1 }), undefined);
+  // an add focuses the line it inserted
+  assert.deepEqual(landed(bytes, { add: { after: 4, kind: 'needs', value: 'x' } }), { n: 5 });
+  // a choice goes after the whole block (its last line is 6), so it lands at 7
+  assert.deepEqual(landed(bytes, { add: { after: 4, kind: 'choice' } }), { n: 7 });
+  // an op the route refuses focuses nothing, so a refusal never moves the caret
+  assert.equal(landed(bytes, { move: 4, by: -1 }), undefined);
+});
+
 test('a .scene op refuses what the grammar cannot hold, and writes nothing', () => {
   const given = (op: Op, src = SRC) => {
     const r = scene(src, op);
