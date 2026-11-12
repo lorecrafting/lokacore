@@ -51,7 +51,8 @@ Nothing. The next slice starts from main.
    `cut()` and `scene()`, and the card's `SceneRows.tsx` are there to build on. The two S2 follow-ups are done: #713
    shipped §5's focus-follows-an-op (loka-g5um8) and #712 the panel typecheck in the pre-push gate (loka-vvreo).
 2. Story tooling epic **loka-wfrgk.115**, children .1 to .12 chained in the owner's order: R1, W1, D1, K2, C1, L1 + L2, W2,
-   F1 + W4, R2, K1, then W3 and E1 before v1. K2, L1 + L2, K1 and E1 take a reviewer.
+   F1 + W4, R2, K1, then W3 and E1 before v1. K2, L1 + L2, K1 and E1 take a reviewer. R1 is done (#716) and W1 is
+   done (#717: `bin/loka roam`, its budget measured over the two-minute ruling and recorded there), so **D1 is next**.
 3. Older P1s: loka-wfrgk.94, loka-wfrgk.100.8 (key-tagged Book lines), loka-wfrgk.100.4.
 4. Housekeeping PR: loka-ebnu3, jqxb8, grdiq, wfrgk.96, and the retro items (below). loka-za8br is done (#710),
    loka-x4ejm is done (#714). Still open from the 2026-11-11 retro: loka-y043w, loka-r7vrx, awaiting the owner's yes/no.
