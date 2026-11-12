@@ -84,7 +84,13 @@ function Lines({ lines, context, set, op, bytes }: Rows & { lines: Line[]; conte
 
 type Rows = { set: Setter; op: Rower; bytes: string };
 /** One line: a value line its picker, a words line its words field, the rest as written. */
-function Row({ l, context, set, op, rs }: Rows & { l: Line; context: Context; rs: ReturnType<typeof rows> }) {
+function Row({
+  l,
+  context,
+  set,
+  op,
+  rs,
+}: Pick<Rows, 'set' | 'op'> & { l: Line; context: Context; rs: ReturnType<typeof rows> }) {
   return (
     <li
       className="group flex min-w-0 items-center gap-2"

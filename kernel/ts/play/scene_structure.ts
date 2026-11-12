@@ -221,7 +221,7 @@ function edit(
     // a choice goes after the line's whole block at its own depth; anything else right after the
     // line, a sub-line two spaces deeper than a `- ` one (its block's indent)
     const kind = o.add?.kind as SceneKind;
-    const [a, b] = kind === 'choice' ? block(rs, at) : ([at, at] as Block);
+    const [, b] = kind === 'choice' ? block(rs, at) : ([at, at] as Block);
     const under = rs.slice(...(block(rs, at) as [number, number]));
     const depth = rs[at].key === undefined ? rs[at].indent : rs[at].indent + 2;
     const made_ = made(
