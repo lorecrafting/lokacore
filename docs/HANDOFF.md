@@ -4,7 +4,7 @@ The present only: open work, next steps, owner questions, and standing owner rul
 yet. Rewrite this page in place once per session, at its end; never add dated session sections. History lives in git, Beads and `docs/reviews/`; lessons
 go to [PM lessons](lessons/pm.md) ([harness patterns](decisions/owner-decision-harness-patterns-2026-10-28.md)).
 
-AS OF main after #707; written 2026-11-11 20:20 UTC in the Pi harness by deploy/deepseek-ai/deepseek-v4.1-flash-1017, PM session.
+AS OF main after #710; written 2026-11-11 23:40 UTC in the Pi harness by deploy/deepseek-ai/deepseek-v4.1-flash-1017, PM session.
 `kernel_api` is 1.159 (no contract slice since). **The owner is taking about a month off and pausing the subscription
 (2026-11-07).** Nothing is mid-merge, nothing is in flight, no agent is running.
 
@@ -19,10 +19,13 @@ AS OF main after #707; written 2026-11-11 20:20 UTC in the Pi harness by deploy/
 ## Merged since the 2026-11-07 handoff
 
 #707 S1 of the scene structure work (`.cut` page ops through `POST /restructure`, loka-wfrgk.100.5.2, closed by
-`after_merge`); #708 plain-English field guide for the kinds slice A did not cover. Then docs and Beads only:
+`after_merge`); #708 plain-English field guide for the kinds slice A did not cover; #709 runs the unit files a diff
+touches before `bin/push_slice.sh` pushes (loka-4ks2l: #707's one-line red test cost four days); #710 two CI flakes and
+the worktree post-check (loka-lvo9i, loka-wfrgk.110, loka-za8br). Then docs and Beads only:
 `docs/worldbuilding` Act II lore (b5fa77bd3) and epic loka-wfrgk.119 (narrative intelligence and LLM co-authoring tools,
-8 open children, no work started). Nightly `ci` and `book-e2e` green on main as of 2026-11-11 17:30. Untracked
-`cartridges/prologue/` is the owner's in-progress Part 1: never touch it, read it only.
+8 open children, no work started). All three workflows green on every merged head. Untracked `cartridges/prologue/` is
+the owner's in-progress Part 1: never touch it, read it only. `docs/system-graph.gen.json` regenerates from it, so keep
+that file out of a commit while the scratch cartridge is present.
 
 ## In flight at handoff
 
@@ -42,10 +45,10 @@ Nothing. The next slice starts from main.
    before it.
 2. Story tooling epic **loka-wfrgk.115**, children .1 to .12 chained in the owner's order: R1, W1, D1, K2, C1, L1 + L2, W2,
    F1 + W4, R2, K1, then W3 and E1 before v1. K2, L1 + L2, K1 and E1 take a reviewer.
-3. Older P1s: loka-wfrgk.94, loka-wfrgk.100.8 (key-tagged Book lines), loka-lvo9i (CI flake), loka-wfrgk.100.4.
-4. Housekeeping PR: loka-ebnu3, jqxb8, grdiq, lvo9i, wfrgk.96, the panel.test.ts:225 flake, and the retro items (below).
-   `loka-za8br` (P1) is the one that bites every handoff: `bin/worktree_setup.sh` leaves node_modules empty.
-5. P2 editor items: .97, .98, .99, .102 follow-ups, map handle placement, `bin/loka new` duplicate keys.
+3. Older P1s: loka-wfrgk.94, loka-wfrgk.100.8 (key-tagged Book lines), loka-wfrgk.100.4.
+4. Housekeeping PR: loka-ebnu3, jqxb8, grdiq, wfrgk.96, and the retro items (below). loka-za8br is done (#710).
+   Still open from the 2026-11-11 retro: loka-x4ejm, loka-y043w, loka-r7vrx, awaiting the owner's yes/no.
+5. P2 editor items: .97, .98, .99, .102 follow-ups, map handle placement, `bin/loka new` duplicate keys (loka-wfrgk.68).
 
 ## Owner calls to date (2026-11-07 session; override any)
 
@@ -64,11 +67,16 @@ Nothing. The next slice starts from main.
 
 ## Retro 2026-11-11 (filed, awaiting the owner's yes/no)
 
-Four items, evidence in each: loka-4ks2l (push_slice does not run the unit files the diff touches, which is how #707's
-one-line red test cost four days), loka-x4ejm (session_status does not print a PR head's CI conclusion, so the handoff
+Three items, evidence in each: loka-x4ejm (session_status does not print a PR head's CI conclusion, so the handoff
 said "CI not run" when it had failed twice), loka-y043w (the drift check calls a missing `external_ref` "no Beads issue":
-three false alarms a session), loka-r7vrx (the queue is 75 open with duplicates and nothing closed since 11-07). Closed
-`loka-wfrgk.116` as a duplicate of `loka-za8br` while filing. The 2026-11-07 items are still open and unapproved.
+three false alarms a session), loka-r7vrx (the queue is 75 open with duplicates and nothing closed since 11-07).
+loka-4ks2l was approved and is merged (#709). Closed `loka-wfrgk.116` as a duplicate of `loka-za8br` while filing. The
+2026-11-07 items are still open and unapproved; three of them closed with #710 (lvo9i, wfrgk.110, za8br).
+
+Fixed this session, worth knowing next time: `wait_ci.sh` can return 1 having merely timed out while the runs are still
+going (`wait_ci: timed out before ci and book-e2e both completed`); confirm with `gh run list --branch <branch>` before
+re-running CI. The panel fill flake (loka-wfrgk.110) is a plausible fix, not a proven one: the race needs a loaded
+runner and does not reproduce locally, so a revert still passes here.
 
 ## Owner's writing list (prologue; text keys, no prose from agents)
 
