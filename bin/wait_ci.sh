@@ -7,7 +7,8 @@ sha=$1 done=; cd "$(dirname "$0")/.." || exit 2
 case $sha in *[!0-9a-f]*) git fetch -q origin "$sha" && sha=$(git rev-parse FETCH_HEAD) || { echo "wait_ci: cannot fetch $1" >&2; exit 2; } ;; esac
 # `gh run list --commit` matches only the full 40-character sha and returns nothing for a short one,
 # which read as "no runs yet" and timed out after 40 min on a green head (three times, 2026-11-12).
-sha=$(git rev-parse "$sha" 2>/dev/null) || { echo "wait_ci: unknown revision $1" >&2; exit 2; }
+# Best effort: a name git cannot resolve is passed through unchanged, so the caller sees gh's answer.
+sha=$(git rev-parse "$sha" 2>/dev/null || echo "$sha")
 # `WAIT_CI_ATTEMPTS` (default 40, one a minute) bounds the wait; a red control sets it to 1.
 for i in $(seq 1 "${WAIT_CI_ATTEMPTS:-40}"); do
   out=$(gh run list --commit "$sha" --json name,status,conclusion -q '.[] | "\(.name):\(.status):\(.conclusion)"' 2>/dev/null)
