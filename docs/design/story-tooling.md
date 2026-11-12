@@ -89,10 +89,14 @@ Built 2026-11-12 (`tools/author-panel/src/steptab.tsx`, `step.ts`, `steprows.tsx
 
 - **The two views cost no message.** The panel already receives the Book's whole `state` on every update
   (`mobile/app/author/panel.tsx:205-214`), so the facts changed are its own last two snapshots, and the Book
-  needed no change at all. A second `state` at the same step is a redraw, not another step (`pairViews`).
+  needed no change at all. A second `state` at the same step is a redraw, not another step (`useViews` keys the
+  pair by `hash:steps.length`, so a redraw reuses its pair instead of pairing a view with itself).
 - **"Asked on every step" is an effect, not a button.** The report is asked as the step arrives; a step past the
   budget, and a report slower than 2 s, are both shown rather than hidden. The failing leaf is worded by
   `why_words.ts`, so a new policy leaf cannot gain a sentence here that the explainer lacks.
+- **No panel E2E.** `test/harness.ts` deliberately serves no Book, so an E2E of this tab could only assert its
+  own text; the pure halves (`changedFacts`, `changedQuests`, `looked`, `lookedLine`) are unit-tested and the tab
+  is a thin render over them.
 
 ### R1: Checkpoints replayed after each compile
 
