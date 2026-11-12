@@ -1,6 +1,7 @@
 // A choice's words in the Scene card (docs/design/scene-structure-rulings.md §2, §5): committing new
-// words pins the key the line already had, so no referrer moves. The commit sends the whole line
-// through POST /set, so it is one journal entry and one Undo, like every other line edit.
+// words pins the key the line already had, so no referrer moves. The commit is a `reword` op on
+// POST /restructure, which recomputes the line from disk, so it is one journal entry and one Undo.
+// `/set` would refuse the line: a `- ` line is not a `npc:/with:/then:` verb line.
 import { useState } from 'react';
 import { Input } from '../../components/ui/input.tsx';
 

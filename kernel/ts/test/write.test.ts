@@ -407,7 +407,7 @@ test('/edit replaces only the words of one line, and refuses a line that is not 
   assert.deepEqual(await scene(1, 'npc: stranger'), { status: 400, body: 'a key line' });
   assert.deepEqual(await scene(3, '- Go on'), {
     status: 400,
-    body: 'a choice label: its key is its words',
+    body: 'a choice label: reword it in the scene card',
   });
   assert.equal((await scene(2, '* hello')).status, 200);
   assert.equal(read('scenes/s.scene'), 'npc: stranger\n* new\n- Go on\n');

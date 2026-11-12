@@ -642,7 +642,7 @@ test('a .scene dialogue opens its text card: a picker per value line, words in p
   const npc = page.getByLabel('line 1 npc');
   assert.equal(await npc.inputValue(), 'stranger');
   const card = page.getByLabel('scene card');
-  assert.equal(await card.locator('input[aria-label$=" words"]').count(), 2); // lines 3, 6
+  assert.equal(await card.locator('input[aria-label$=" words"]').count(), 3); // 3, 6 narration; 4 choice (S3)
   const sent: string[] = [];
   page.on('request', (r) => void (r.url().includes('/set') && sent.push(r.url())));
   await npc.fill('nobody');

@@ -22,7 +22,10 @@ export function worded(rel: string, line: string, words: string) {
     return line.trim() && line.trim() !== '---' ? words : refuse(400, 'not a line of words');
   const said = /^(\s*\* ).*$/.exec(line);
   if (said) return `${said[1]}${words}`;
-  return refuse(400, /^\s*- /.test(line) ? 'a choice label: its key is its words' : 'a key line');
+  return refuse(
+    400,
+    /^\s*- /.test(line) ? 'a choice label: reword it in the scene card' : 'a key line',
+  );
 }
 
 export function edit(
