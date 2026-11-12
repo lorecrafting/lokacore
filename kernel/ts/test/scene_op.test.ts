@@ -9,7 +9,8 @@ import { test, type TestContext } from 'node:test';
 import { sha256 } from '../play/guard.ts';
 import { serve } from '../play/live.ts';
 import { landed } from '../play/scene_focus.ts';
-import { scene, type Op } from '../play/scene_structure.ts';
+import { choiceKey, choiceLabel, rewordedChoice } from '../play/scene_choice.ts';
+import { rows, scene, type Op } from '../play/scene_structure.ts';
 
 const SCENE = 'scenes/guard.scene';
 
@@ -59,7 +60,8 @@ const ROWS: [op: Op, after: string][] = [
   // a choice goes after the line's whole block, at its own depth
   [
     { add: { after: 4, kind: 'choice' } },
-    SRC.replace('  * You take it.\n', '  * You take it.\n- ~\n'),
+    // keyed at once (rulings §2): the next free choice_<n>, not the line's number
+    SRC.replace('  * You take it.\n', '  * You take it.\n- ~ #choice_1\n'),
   ],
   // anything else right after the line, two spaces deeper than a `- ` line
   [
@@ -89,6 +91,24 @@ const ROWS: [op: Op, after: string][] = [
     'npc: guard\nwith: guard\n\n- Take the bowl\n  needs: has_bowl\n  * You take it.\n\n- Leave\n\n- ~\n  * Words.\n',
   ],
 ];
+
+// Break: the card's key disagrees with the compiler's `choice_key` on a ` #<key>` line, so the card
+// checks referrers against a key the compile never made (rulings docs/design/scene-structure-rulings.md
+// §2). The expected values are hand-written from the ruling, not taken from scene_lines.ex.
+test("a choice's key: an explicit ` #<key>`, else its slug, else its line", () => {
+  assert.equal(choiceKey('Carry it #carry', 7), 'carry');
+  assert.equal(choiceKey('Carry it', 7), 'carry_it');
+  assert.equal(choiceKey('~', 7), 'todo__7');
+  // the suffix is not part of the words, so it never reaches the slug
+  assert.equal(choiceKey('Ask #why now', 7), 'ask_why_now');
+  assert.equal(choiceKey('Take #2 pencils', 7), 'take_2_pencils');
+  // rows() reads a whole file, so the card and the compiler see the same keys at the same lines
+  const rs = rows(['npc: maud', '- Carry it #carry', '  maud: Done.', '- Leave it']);
+  assert.deepEqual(
+    rs.map((r) => r.key),
+    [undefined, 'carry', undefined, 'leave_it'],
+  );
+});
 
 test('/restructure on a .scene: each op changes only its lines; one /undo restores', async (t) => {
   const { ask, read, plant } = await served(t);
@@ -192,4 +212,69 @@ test('/restructure refuses a non-scene file and a cut whose twin carries steps',
   });
   assert.equal(cut.status, 400);
   assert.equal(read('scenes/x.cut'), 'A.\n---\n');
+});
+
+// Breaks: a ` #<key>` suffix does not key the line (its key is the slug of the words WITH the
+// suffix), so rewording still moves every referrer (rulings docs/design/scene-structure-rulings.md §2).
+test('an explicit ` #<key>` suffix keys the choice and is not part of its words', () => {
+  // the suffix keys it; the words are the line without the suffix
+  assert.equal(choiceKey('Carry it #carry', 7), 'carry');
+  assert.equal(choiceLabel('Carry it #carry'), 'Carry it');
+  // the control: no suffix, the slug of the words, as every scene before S3 did
+  assert.equal(choiceKey('Carry it', 7), 'carry_it');
+  assert.equal(choiceLabel('Carry it'), 'Carry it');
+  // a `~` placeholder with no suffix still keys on its line
+  assert.equal(choiceKey('~', 7), 'todo__7');
+  // only a trailing ` #<key>` keys: a `#` inside the words is words
+  assert.equal(choiceKey('Take #2 pencils', 7), 'take_2_pencils');
+});
+
+// Breaks: the card rewrites a choice's words by its words rather than pinning the key, so every
+// referrer of that choice moves the moment the owner edits it (rulings §2).
+test('rewording a choice pins the key it already had', () => {
+  // keyed by its words: the new words carry the old key, so no referrer moves
+  assert.equal(rewordedChoice('- Carry it', 'Take it', 3), '- Take it #carry_it');
+  // already explicit: only the words change
+  assert.equal(rewordedChoice('- Carry it #carry', 'Take it', 3), '- Take it #carry');
+  // its indent is the line's, not the card's
+  assert.equal(rewordedChoice('    - Carry it', 'Take it', 3), '    - Take it #carry_it');
+  // a `~` placeholder keeps the key its line gives it
+  assert.equal(rewordedChoice('- ~', 'Carry it', 4), '- Carry it #todo__4');
+  // emptying the field restores the placeholder and still pins
+  assert.equal(rewordedChoice('- Carry it #carry', '   ', 3), '- ~ #carry');
+});
+
+// Breaks: Add choice writes a bare `- ~`, so the new choice's key is its line number and any page
+// inserted above it moves it out from under whatever already refers to it (rulings §2).
+test('Add choice keys the new choice at once', () => {
+  // after the existing choice (line 3), at that choice's own depth
+  const out = scene(
+    ['npc: maud', 'maud: A bowl.', '- Carry it #carry', '  maud: Done.', ''].join('\n'),
+    { add: { after: 3, kind: 'choice' } },
+  );
+  // the next free choice_<n>: choice_1, since nothing claims it
+  assert.deepEqual(out, {
+    // after the choice's whole block, at that choice's own depth (scene_structure.ts:229-231)
+    after: [
+      'npc: maud',
+      'maud: A bowl.',
+      '- Carry it #carry',
+      '  maud: Done.',
+      '- ~ #choice_1',
+      '',
+    ].join('\n'),
+  });
+  // and it never reuses a key the file already claims
+  const second = scene(
+    [
+      'npc: maud',
+      'maud: A bowl.',
+      '- One #choice_1',
+      '  maud: A.',
+      '- Two #choice_2',
+      '  maud: B.',
+    ].join('\n'),
+    { add: { after: 3, kind: 'choice' } },
+  );
+  assert.match(JSON.stringify(second), /- ~ #choice_3/);
 });

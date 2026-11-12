@@ -2,6 +2,8 @@
 // §1, §3, §4): the pure functions POST /restructure (scene_card.ts) and the Scene card's buttons
 // both call, so every refusal is checked here. No node:fs: the panel reads it. Every byte the op
 // does not touch is kept.
+import { choiceKey, freeKey, TODO } from './scene_choice.ts';
+export { choiceKey, choiceLabel, rewordedChoice } from './scene_choice.ts';
 
 /** `n` is a file line (from 1): a page's line, or for `split` the line that starts the new page. */
 export type Op =
@@ -106,24 +108,13 @@ export function cut(bytes: string, op: Op, steps = false): { after: string } | {
 type Row = { indent: number; text: string; key?: string };
 
 const KEYLINE = /^(npc|with|when): /;
-/** The prefix of a `~` choice's key: its line number follows (scene_lines.ex `choice_key`). */
-const TODO = 'todo__';
-
-/** `choice_key`'s slug (scene_lines.ex:80-81), and `todo__<n>` for a `~` placeholder: its line
- * keys it, which is why an insert or a move above one shifts its key. */
-const slug = (label: string) =>
-  label
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '_')
-    .replace(/^_+|_+$/g, '');
-
 export const rows = (lines: string[]): Row[] =>
   lines.map((text, i) => {
     const indent = text.length - text.trimStart().length;
     const body = text.trim();
     if (!body.startsWith('- ')) return { indent, text };
     const label = body.slice(2);
-    return { indent, text, key: label.trim() === '~' ? `${TODO}${i + 1}` : slug(label) };
+    return { indent, text, key: choiceKey(label, i + 1) };
   });
 
 /** A choice's block: its line and every deeper line under it. Trailing blanks belong to neither
@@ -192,9 +183,12 @@ export function offers(rs: Row[], at: number): SceneKind[] {
   );
 }
 
-/** The line a kind adds at `indent`, or why it cannot (`~` is the placeholder the toolbar counts). */
-function made(kind: SceneKind, indent: string, value: string | undefined, under: Row[]) {
-  if (kind === 'page' || kind === 'choice') return `${indent}- ~`;
+/** The line a kind adds at `indent`, or why it cannot (`~` is the placeholder the toolbar counts).
+ * A new choice is keyed at once (rulings §2): `- ~ #choice_<n>`, the next free `choice_<n>` in the
+ * file, so a choice the card makes never depends on its line number or its words. */
+function made(kind: SceneKind, indent: string, value: string | undefined, under: Row[], rs: Row[]) {
+  if (kind === 'page') return `${indent}- ~`;
+  if (kind === 'choice') return `${indent}- ~ #${freeKey(rs.map((r) => r.key))}`;
   if (kind === 'words') return `${indent}* ~`;
   if (kind === 'speaker')
     return value ? `${indent}${value}: ~` : { refused: 'a speaker line names a role' };
@@ -229,6 +223,7 @@ function edit(
       ' '.repeat(kind === 'choice' ? rs[at].indent : depth),
       o.add.value,
       under,
+      rs,
     );
     if (typeof made_ !== 'string') return made_;
     out.splice(b + 1, 0, made_);

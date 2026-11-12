@@ -1,0 +1,26 @@
+{
+  "api_version": "loka/v3",
+  "entry": "start",
+  "id": "prologue",
+  "requires": {
+    "capabilities": {
+      "containment": 1,
+      "description_variant": 1,
+      "fact": 1,
+      "knowledge": 1,
+      "movement": 1
+    },
+    "client_features": [],
+    "content_schema": 1,
+    "kernel_api": {
+      "at_least": "1.0",
+      "below": "2.0"
+    },
+    "rule_ir": 1
+  },
+  "supported_profiles": [
+    "offline_private"
+  ],
+  "title": "~",
+  "version": "0.0.1"
+}
