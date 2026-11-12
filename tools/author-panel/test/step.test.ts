@@ -66,7 +66,7 @@ test('a quest that changed state is reported, one that did not is not', () => {
 const rule = (over: Partial<Report['reactions'][number]> = {}): Report['reactions'][number] => ({
   rule: 'door_opens',
   causes: [],
-  fired: false,
+  fired: 0,
   ...over,
 });
 
@@ -77,7 +77,7 @@ test('a reaction that matched no trigger is not listed', () => {
     ordinal: 3,
     command: 'look',
     outcome: 'accepted',
-    reactions: [rule({ causes: [] }), rule({ rule: 'lamp_lights', causes: [{ event: 'looked' }], fired: true })],
+    reactions: [rule({ causes: [] }), rule({ rule: 'lamp_lights', causes: [{ event: 'looked' }], fired: 1 })],
   };
   assert.deepEqual(
     looked(report).map((x) => x.rule),
@@ -90,7 +90,7 @@ test('a matched rule that did not fire names the first leaf that did not hold', 
   const line = lookedLine(
     rule({
       causes: [{ event: 'looked' }],
-      fired: false,
+      fired: 0,
       // `held` is a delivery count (why.ts held), as the kernel's own test asserts: 1 held, 0 did not.
       when: {
         op: 'all',
@@ -108,7 +108,7 @@ test('a matched rule that did not fire names the first leaf that did not hold', 
 
 // Breaks: a rule that fired reports a leaf instead of the word the panel keys its styling off.
 test('a rule that fired reads as fired', () => {
-  assert.deepEqual(lookedLine(rule({ causes: [{ event: 'x' }], fired: true })), {
+  assert.deepEqual(lookedLine(rule({ causes: [{ event: 'x' }], fired: 1 })), {
     text: 'fired',
     ok: true,
     depth: 0,
@@ -138,4 +138,10 @@ test('a step at a new artifact starts a new pair', () => {
   const two = pairViews(one, 'h2:3', b);
   assert.deepEqual(two.before, a);
   assert.deepEqual(two.after, b);
+});
+
+// Breaks: a rule delivered twice reads as "fired", so the panel hides that a step ran it more than
+// once — which is what a duplicate trigger looks like and is worth seeing.
+test('a rule that fired more than once says how many times', () => {
+  assert.equal(lookedLine(rule({ causes: [{ event: 'x' }], fired: 2 })).text, 'fired 2 times');
 });

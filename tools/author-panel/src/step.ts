@@ -9,11 +9,13 @@ export type Views = {
   facts?: readonly { row: string; key: string; value?: unknown; set?: boolean }[];
   quests?: readonly { quest: string; state: string }[];
 };
+/** The explainer's report (why.ts `why`): `fired` and a leaf's `held` are delivery COUNTS, so 0 is
+ * "did not" — never a boolean (kernel/ts/test/why.test.ts W1/W3 assert the numbers). */
 export type Report = {
   ordinal: number;
   command: string;
   outcome: string;
-  reactions: { rule: string; causes: unknown[]; fired: boolean; when?: unknown }[];
+  reactions: { rule: string; causes: unknown[]; fired: number; when?: unknown }[];
 };
 
 /** A view's fact value: a declared default (`set: false`) is its default value, so setting a fact off
@@ -43,7 +45,7 @@ export const looked = (r: Report | undefined) =>
 /** A looked-at rule as one line: it fired, or the first `when` leaf that did not hold, in its words. */
 export const lookedLine = (x: Report['reactions'][number]): Row =>
   x.fired
-    ? { text: 'fired', ok: true, depth: 0 }
+    ? { text: x.fired > 1 ? `fired ${x.fired} times` : 'fired', ok: true, depth: 0 }
     : { text: firstFailing(x.when) ?? 'no when leaf held', ok: false, depth: 0 };
 
 // The first leaf whose `held` is 0, depth-first in authoring order (why.ts annotates in that order).
