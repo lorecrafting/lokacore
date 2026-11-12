@@ -131,7 +131,7 @@ function Field({ l, context, set, op }: Pick<Rows, 'set' | 'op'> & { l: Line; co
   // a choice's words: committing pins its key in the same line edit, so no referrer moves
   return (
     <div className="min-w-0 flex-1">
-      <ChoiceWords label={choiceLabel(l.choice)} set={(words) => op({ reword: l.n, words })} />
+      <ChoiceWords label={choiceLabel(l.choice)} set={(words) => op({ reword: { line: l.n, words } })} />
     </div>
   );
 }
