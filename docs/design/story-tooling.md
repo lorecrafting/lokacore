@@ -144,6 +144,13 @@ crash as a checkpoint. Larian's World Tester, Owlcat's bots, ChoiceScript's Rand
 | **A fault or invariant failure writes `checkpoints/roam-<seed>.json`** holding the run's steps up to the failure, shrunk by greedy step deletion as `sim.ts` does (`kernel/ts/test/sim.ts:169`) | A found bug becomes a path R1 guards after every compile | A planted invariant break at step 40 writes the file; `bin/loka check` fails it at the same step; the shrunk path is shorter than 40 |
 | **Budget shown**: prints its run time; the acceptance keeps the showcase at 50 × 300 under two minutes on the M1, else the number is recorded | A slow tool is run once; a fast one every day | measured in the slice |
 
+Measured 2026-11-12 on the M1: **50 × 300 took 273 s** (compile 2 s, then 271 s of play), so the budget does not
+hold. `view()` alone is 3564 ms of a 300-step run against 649 ms of presses and 29 ms of choosing, so the number is
+the Book's snapshot build, not the sampler; the default is `10 × 150` (about 40 s) and `--runs`/`--steps` raise it.
+The reaches the spec asks for were met: the gated-choice case reports the ref under `never.choices`, and planted
+kernels cannot be written because the compiler rejects every malformed rule statically, so the break path is
+pinned by `writeBreaks` tests instead of an end-to-end planted fault.
+
 ### K2: `once` and `cooldown` on a reaction (survey row 3)
 
 For the owner: a rule that fires once, or rests, without writing the fact, the `not`, the assign and `silent`.
