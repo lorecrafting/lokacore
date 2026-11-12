@@ -1,8 +1,9 @@
 // What one seeded random walk reaches and whether it breaks (docs/design/story-tooling.md §2b W1),
 // split from roam.ts to keep both files under the size limit.
 import type { GameView } from '../src/contracts.gen.ts';
+import { INSTALLED, loadCartridge, type Cartridge } from '../src/index.ts';
 import { refString } from '../src/runtime/decision.ts';
-import { gen } from '../test/sim.ts';
+import { gen, type Gen } from '../test/sim.ts';
 import {
   frozenClock,
   replay,
@@ -57,15 +58,6 @@ export type Run = {
   points: string[];
   broke?: { at: number; why: string };
 };
-
-/** What a verb that needs one of these can be given, from the page the player is on. */
-const fillers = (view: GameView): Record<string, unknown[]> => ({
-  word: (view.spell_words ?? []).map((w) => w.word).filter((w) => typeof w === 'string'),
-  topic: (view.topics ?? []).map((t) => t.key).filter((t) => typeof t === 'string'),
-  answer: [], // a riddle's answer is authored prose: no honest way to sample it
-  attribute: Object.keys(view.attributes ?? {}),
-  service: (view.entities ?? []).flatMap((e) => (e.services ?? []).map((sv) => sv.key)),
-});
 
 /** What a reply means to a random player: keep pressing (accepted), try another button (a refusal
  * costs nothing), or stop and keep the path (a fault or a crash is a bug found, and the steps up to it
@@ -122,7 +114,8 @@ function oneStep(
   seen: Record<string, Set<string>>,
   g: Gen,
 ) {
-  const { view } = open.game.view();
+  const page = open.game.view();
+  const view = page.view as unknown as GameView;
   if (view.scene) seen.scenes!.add(refString(view.scene.scene));
   const row = view.choice;
   for (const intent of presses(view, open.game, g)) {

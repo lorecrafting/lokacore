@@ -111,11 +111,8 @@ test('the steps a run records replay through the same check `bin/loka check` use
   // property the break path depends on, and it fails if a run records anything replay cannot follow.
   const report = roam(src, { runs: 1, steps: 30, seed: 7 });
   const raw = compiled(resolve(src));
-  assert.notEqual(typeof raw, 'string');
-  const bundled = {
-    canonical: raw.canonical,
-    sha256: raw.sha256,
-  } as Parameters<typeof replayed>[0];
+  if (typeof raw === 'string') assert.fail(raw);
+  const bundled = { canonical: raw.canonical, sha256: raw.sha256 };
   assert.equal(
     replayed(bundled, report.runsWalked[0]!.steps),
     undefined,

@@ -19,25 +19,6 @@ import { roamBytes, shrinkSteps } from './walk.ts';
 // The CLI and the test both read the walk's verdict rules from here: roam.ts is this tool's public face.
 export { verdictOf, type Verdict } from './walk.ts';
 
-// A marker narrate key (`coverage.marked`), mapped back to its reaction by `ruleOf`.
-/** `steps` again, keeping only those that still break it (greedy deletion, as sim.ts shrinks). A
- * refusal is not a break: replay reports one as `failed` with `refused` set, and a random player
- * meets refusals constantly — only a crash, a `fault` reply or a broken invariant is worth saving. */
-const ruleOf = (
-  content: { cartridge: Cartridge; marked: Cartridge },
-  key: string,
-): string | undefined => {
-  const i = Number(MARK.exec(key)?.[1] ?? NaN);
-  return Object.keys(content.cartridge.reactions ?? {})[i];
-};
-
-/** How often each key was reached, in key order. */
-function tally(keys: (string | undefined)[]) {
-  const at: Record<string, number> = {};
-  for (const k of keys) if (k !== undefined) at[k] = (at[k] ?? 0) + 1;
-  return Object.fromEntries(Object.entries(at).sort(([a], [b]) => (a < b ? -1 : 1)));
-}
-
 /** A cartridge directory roamed: the report the CLI prints, with each break's steps (not written to
  * disk — the CLI does that). Exported for kernel/ts/test/roam.test.ts. */
 export function roam(source: string, opts: { runs: number; steps: number; seed: number }) {
@@ -74,7 +55,7 @@ export function writeBreaks(source: string, out: ReturnType<typeof roam>): strin
   for (const b of out.broke) {
     const path = join(source, 'checkpoints', `roam-${b.seed}.json`);
     if (existsSync(path)) continue;
-    const steps = shrinkSteps(out.bytes, b.steps);
+    const steps = shrinkSteps(out.bytes, b.steps as Step[]);
     writeFileSync(path, `${JSON.stringify({ steps }, null, 2)}\n`);
     written.push(path);
   }
@@ -116,7 +97,7 @@ if (import.meta.main) {
       milliseconds: out.milliseconds,
       never_reached: out.never,
       reached: out.reached,
-      broke: out.broke.map(({ steps: _s, bytes: _b, ...rest }) => rest),
+      broke: out.broke.map(({ steps: _s, ...rest }) => rest),
     } as unknown as Json),
   );
 }
