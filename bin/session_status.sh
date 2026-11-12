@@ -26,7 +26,18 @@ prs() { # open PRs, then Beads/PR drift from the same list
     --jq '.[] | "\(.number)\t\(if .isDraft then "DRAFT" else "OPEN" end)\t\(.title[:90])\t\(.headRefName)"' > "$tmp/prs.tsv" 2>/dev/null; then
     echo "gh unavailable: open PRs and drift not checked"; return
   fi
-  [ ! -s "$tmp/prs.tsv" ] || { echo "Open PRs:"; if [ -n "$full" ]; then cat "$tmp/prs.tsv"; else head -10 "$tmp/prs.tsv"; fi; }
+  # the head's CI under each PR line (loka-x4ejm): a handoff cannot claim "CI not run" past this.
+  # One call for every PR; 20 s because statusCheckRollup outlives the default 6 s alarm.
+  perl -e 'alarm shift; exec @ARGV' 20 gh pr list --state open --limit 10 --json number,headRefOid,statusCheckRollup \
+    --jq '.[] | "\(.number)\t\(.headRefOid[:8])\t\([.statusCheckRollup[]? | .conclusion // empty] | map(select(. != "")) | group_by(.) | map("\(.[0]):\(length)") | join(" "))"' > "$tmp/ci.tsv" 2>/dev/null || : > "$tmp/ci.tsv"
+  [ ! -s "$tmp/prs.tsv" ] || {
+    echo "Open PRs:"
+    if [ -s "$tmp/ci.tsv" ]; then
+      awk -F'\t' 'NR==FNR { if ($2 != "") c[$1] = $2 " " $3; next }
+        { print; if ($1 in c) print "  ci: " c[$1] }' "$tmp/ci.tsv" "$tmp/prs.tsv" |
+        { if [ -n "$full" ]; then cat; else head -20; fi; }
+    elif [ -n "$full" ]; then cat "$tmp/prs.tsv"; else head -10 "$tmp/prs.tsv"; fi
+  }
   n=$(wc -l < "$tmp/prs.tsv"); [ -n "$full" ] || [ "$n" -le 10 ] || echo "... and $((n - 10)) more (gh pr list)"
   if [ -z "$have_br" ] || ! brq list --status all --json > "$tmp/issues"; then echo "drift check skipped: br unavailable"; return; fi
   awk -F'\t' '{print $1, "OPEN"}' "$tmp/prs.tsv" > "$tmp/states"
