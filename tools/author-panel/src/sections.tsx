@@ -1,7 +1,8 @@
 // The panel's sections, each reading the Book's state or the watcher's API; no game logic here.
 import { Bookmark, Clock, FileCode2, PenLine, Pin } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { ask, checkpoints, type Todo as TodoRow, todo } from './author.ts';
+import { ask, checkpoints, type Checked, type Todo as TodoRow, todo } from './author.ts';
+import { verdicts } from './verdicts.ts';
 import type { Line, State, Step } from './book.ts';
 import { steps } from '../../../mobile/app/author/place.ts';
 import { Badge } from './components/ui/badge.tsx';
@@ -19,7 +20,18 @@ export const Heading = ({ children }: { children: React.ReactNode }) => (
 );
 
 /** The last compile's diagnostics first: a writer reads the error before anything else. */
-export function Compile({ said, compiled, lint, state, send }: { said?: string[]; compiled: boolean; lint?: string[]; state?: State; send: Send }) {
+/** R1: a broken saved path is as loud as a broken file, beside lint in the refusal colour. */
+function Failed({ checked }: { checked?: Checked[] }) {
+  const broke = checked?.filter((c) => !c.ok) ?? [];
+  if (!broke.length) return null;
+  return (
+    <span className="text-xs text-destructive" title={broke.map((c) => c.name).join(', ')}>
+      {broke.length} checkpoint {broke.length === 1 ? 'fails' : 'fail'}
+    </span>
+  );
+}
+
+export function Compile({ said, compiled, lint, checked, state, send }: { said?: string[]; compiled: boolean; lint?: string[]; checked?: Checked[]; state?: State; send: Send }) {
   const placeNote = state?.placeNote;
   return (
     <section className="border-b px-3 py-2 text-sm">
@@ -32,11 +44,10 @@ export function Compile({ said, compiled, lint, state, send }: { said?: string[]
           <Badge variant="outline">compiled</Badge>
         )}
         {placeNote ? <span className="truncate text-muted-foreground" title={placeNote}>{placeNote}</span> : null}
+        <Failed checked={checked} />
       </div>
       {state?.refused === undefined ? null : (
-        <Button className="mt-2" size="sm" variant="outline" onClick={() => send({ op: 'drop' })}>
-          drop this step and continue
-        </Button>
+        <Button className="mt-2" size="sm" variant="outline" onClick={() => send({ op: 'drop' })}>drop this step and continue</Button>
       )}
       {said?.length ? (
         <pre className="mt-2 max-h-40 overflow-auto whitespace-pre-wrap rounded-md bg-muted p-2 font-mono text-xs">
@@ -70,12 +81,12 @@ export type Send = (
     | { op: 'set_level'; level: number; points: Record<string, number> },
 ) => void;
 /** Game time and named checkpoints; both go through the Book's own replay path. */
-export function Play({ state, send }: { state?: State; send: Send }) {
+export function Play({ state, send, checked }: { state?: State; send: Send; checked?: Checked[] }) {
   return (
     <div className="space-y-4">
       <GameTime state={state} send={send} />
       <Separator />
-      <Checkpoints state={state} send={send} />
+      <Checkpoints state={state} send={send} checked={checked} />
       <Separator />
       <Cheats state={state} send={send} />
     </div>
@@ -118,7 +129,7 @@ function GameTime({ state, send }: { state?: State; send: Send }) {
   );
 }
 
-function Checkpoints({ state, send }: { state?: State; send: Send }) {
+function Checkpoints({ state, send, checked }: { state?: State; send: Send; checked?: Checked[] }) {
   const [name, setName] = useState('');
   const [names, setNames] = useState<string[]>([]);
   const [note, setNote] = useState('');
@@ -150,12 +161,12 @@ function Checkpoints({ state, send }: { state?: State; send: Send }) {
       </form>
       {name && !named ? <div className="mt-1 text-xs"><Refusal>A name is up to 64 lower-case letters, digits, - and _, starting with a letter or digit.</Refusal></div> : null}
       {note ? <div className="mt-1 text-xs"><Refusal>{note}</Refusal></div> : null}
-      <CheckpointList names={names} jump={jump} />
+      <CheckpointList names={names} jump={jump} checked={checked} />
     </div>
   );
 }
 
-function CheckpointList({ names, jump }: { names: string[]; jump: (n: string) => void }) {
+function CheckpointList({ names, jump, checked }: { names: string[]; jump: (n: string) => void; checked?: Checked[] }) {
   const [start, setStart] = useState(() => localStorage.getItem(START));
   const pin = (n: string) => {
     const next = start === n ? null : n;
@@ -167,7 +178,7 @@ function CheckpointList({ names, jump }: { names: string[]; jump: (n: string) =>
     return <p className="mt-1 text-xs text-muted-foreground">Play to a beat, name it, Save; later, pick it to replay there.</p>;
   return (
     <ul className="mt-2 space-y-1">
-      {names.map((n) => (
+      {verdicts(names, checked).map(({ name: n, said, ok }) => (
         <li key={n} className="flex gap-1">
           <Button variant="outline" size="sm" className="flex-1 justify-start font-mono" onClick={() => jump(n)}>
             {n}
@@ -175,6 +186,13 @@ function CheckpointList({ names, jump }: { names: string[]; jump: (n: string) =>
           <Button variant="ghost" size="sm" aria-pressed={start === n} title="Start a fresh Book here" onClick={() => pin(n)}>
             <Pin className={start === n ? 'text-primary' : 'text-muted-foreground'} />
           </Button>
+          {/* R1: the replayed verdict beside the name, so a broken path is visible in Play */}
+          <span
+            className={`w-24 shrink-0 truncate text-right text-xs ${ok ? 'text-muted-foreground' : 'text-destructive'}`}
+            title={said}
+          >
+            {said}
+          </span>
         </li>
       ))}
     </ul>

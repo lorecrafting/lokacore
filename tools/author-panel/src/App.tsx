@@ -114,7 +114,7 @@ function Left({ layout, set, story, book, diag, pick }: Shell) {
           />
         </TabsContent>
         <TabsContent value="project" forceMount className="data-[state=inactive]:hidden">
-          <Project state={book.state} send={book.send} trace={book.trace} said={diag.said} />
+          <Project state={book.state} send={book.send} trace={book.trace} said={diag.said} checked={diag.checkpoints} />
           <WorldButton pick={pick} />
         </TabsContent>
       </ScrollArea>
@@ -123,7 +123,7 @@ function Left({ layout, set, story, book, diag, pick }: Shell) {
 }
 
 function Right({ layout, set, story, book, diag, offer, pick }: Shell) {
-  const { said, compiled, lint, unconfirmed } = diag;
+  const { said, compiled, lint, unconfirmed, checkpoints } = diag;
   return (
     <>
       <div className="flex h-8 items-center border-b px-3 text-xs">
@@ -137,7 +137,7 @@ function Right({ layout, set, story, book, diag, offer, pick }: Shell) {
         {...{ offer, pick }}
       />
       <ScrollArea className="min-h-32 flex-1 border-t" aria-label="Console">
-        <Compile said={said} compiled={compiled} lint={lint} state={book.state} send={book.send} />
+        <Compile said={said} compiled={compiled} lint={lint} checked={checkpoints} state={book.state} send={book.send} />
         <section className="border-b px-3 pb-2">
           <Counts prose={book.prose} said={said} />
           <Unconfirmed prose={book.prose} unconfirmed={unconfirmed} said={said} />
