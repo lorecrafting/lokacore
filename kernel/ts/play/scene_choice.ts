@@ -45,3 +45,18 @@ export const rewordedChoice = (line: string, words: string, n: number) => {
   const said = words.trim() === '' ? '~' : words.trim();
   return `${indent}- ${said} #${choiceKey(label, n)}`;
 };
+
+/** A choice's words change and its key does not (rulings §2): the one line, at its own indent, with
+ * the key it already had pinned as a ` #<key>` suffix. Only a `- ` line has words; a `* ` narration
+ * line is edited by text key (/edit) and a value line by its picker (/set), so neither is a reword. */
+export /** One line of a `.scene`, as `rows` reads it: indent, text, and a `- ` choice line's key. */
+type Row = { indent: number; text: string; key?: string };
+
+export function reword(o: Record<string, any>, rs: Row[], out: string[], at: number) {
+  const words = typeof o.reword === 'object' ? o.reword?.words : undefined;
+  if (typeof words !== 'string') return { refused: 'reword: {words}' };
+  if (!/^\s*- /.test(rs[at].text)) return { refused: 'only a choice line has words to reword' };
+  if (words.trim() === '') return { refused: 'a choice with no words is a `~` placeholder' };
+  if (/[\r\n]/.test(words)) return { refused: 'a choice is one line' };
+  out[at] = rewordedChoice(rs[at].text, words, at + 1);
+}

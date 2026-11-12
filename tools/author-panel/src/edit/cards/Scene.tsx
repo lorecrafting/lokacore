@@ -8,7 +8,6 @@ import { picks, sceneLines, type Line } from '../../../../../kernel/ts/play/scen
 import { landed } from '../../../../../kernel/ts/play/scene_focus.ts';
 import {
   choiceLabel,
-  rewordedChoice,
   rows,
   type Op,
 } from '../../../../../kernel/ts/play/scene_structure.ts';
@@ -109,7 +108,7 @@ function Row({
       onKeyDown={(e) => lineKey(e, l.n, op)}
     >
       <span className="w-6 shrink-0 text-right text-muted-foreground">{l.n}</span>
-      <Field l={l} context={context} set={set} />
+      <Field l={l} context={context} set={set} op={op} />
       <span className="flex opacity-0 group-focus-within:opacity-100 group-hover:opacity-100">
         <RowMenu n={l.n} rs={rs} op={op} />
       </span>
@@ -119,7 +118,7 @@ function Row({
 
 /** A line's editor, by what the line is: a value line's picker, a `\* ` line's words, a `- ` line's
  * words that pin its key (rulings §2), or plain text the card does not edit. */
-function Field({ l, context, set }: Pick<Rows, 'set'> & { l: Line; context: Context }) {
+function Field({ l, context, set, op }: Pick<Rows, 'set' | 'op'> & { l: Line; context: Context }) {
   if (l.verb)
     return <Value line={l} keys={picks(l.verb, context.nodes, context.unlinkable)} set={(v) => set(l, v)} />;
   if (l.key)
@@ -132,10 +131,7 @@ function Field({ l, context, set }: Pick<Rows, 'set'> & { l: Line; context: Cont
   // a choice's words: committing pins its key in the same line edit, so no referrer moves
   return (
     <div className="min-w-0 flex-1">
-      <ChoiceWords
-        label={choiceLabel(l.choice)}
-        set={(v) => set(l, rewordedChoice(l.text.trim(), v, l.n))}
-      />
+      <ChoiceWords label={choiceLabel(l.choice)} set={(words) => op({ reword: l.n, words })} />
     </div>
   );
 }

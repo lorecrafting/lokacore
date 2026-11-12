@@ -1,17 +1,17 @@
+// size: allow 310, one pure function per op, each with its refusal beside it; splitting the op set would split the one guard
 // A `.cut` file's page ops and a `.scene` file's line ops (docs/design/scene-structure-rulings.md
-// §1, §3, §4): the pure functions POST /restructure (scene_card.ts) and the Scene card's buttons
-// both call, so every refusal is checked here. No node:fs: the panel reads it. Every byte the op
-// does not touch is kept.
-import { choiceKey, freeKey, TODO } from './scene_choice.ts';
+// §1, §3, §4): the pure functions POST /restructure and the Scene card both call. No node:fs: the
+// panel reads it. Every untouched byte is kept, and every refusal is checked here.
+import { choiceKey, freeKey, reword, TODO, type Row } from './scene_choice.ts';
 export { choiceKey, choiceLabel, rewordedChoice } from './scene_choice.ts';
-
-/** `n` is a file line (from 1): a page's line, or for `split` the line that starts the new page. */
+/** `n` is a file line (from 1); a reword names its choice by `line` and the words it becomes. */
 export type Op =
   | { add: { after: number; kind: SceneKind; value?: string } }
   | { remove: number }
   | { move: number; by: -1 | 1 }
   | { split: number }
-  | { join: number };
+  | { join: number }
+  | { reword: { line: number; words: string } };
 type Block = [first: number, last: number]; // 0-based lines
 
 const END = '---';
@@ -105,7 +105,6 @@ export function cut(bytes: string, op: Op, steps = false): { after: string } | {
 }
 
 /** A `.scene` line as the card sees it: its indent, and on a `- ` line its key (S3's ` #<key>`). */
-type Row = { indent: number; text: string; key?: string };
 
 const KEYLINE = /^(npc|with|when): /;
 export const rows = (lines: string[]): Row[] =>
@@ -227,12 +226,13 @@ function edit(
     );
     if (typeof made_ !== 'string') return made_;
     out.splice(b + 1, 0, made_);
-  } else if ('remove' in o) {
+  } else if ('reword' in o) return reword(o, rs, out, at);
+  else if ('remove' in o) {
     if (KEYLINE.test(text)) return { refused: 'a key line has no Remove' };
     const [a, b] = rs[at].key === undefined ? ([at, at] as Block) : block(rs, at);
     out.splice(a, b - a + 1);
   } else if ('move' in o) return shifted(o, rs, out, lines, at);
-  else return { refused: 'op: add, remove or move on a .scene' };
+  else return { refused: 'op: add, remove, move or reword on a .scene' };
 }
 
 /** A move by one: a choice with its block past a sibling, or a sub-line within its own block. */
@@ -277,8 +277,15 @@ export function scene(
   const lines = bytes.split('\n');
   const rs = rows(lines);
   const o = (op && typeof op === 'object' ? op : {}) as Record<string, any>;
-  if (Object.keys(o).filter((k) => k !== 'by').length !== 1) return { refused: 'one op per write' };
-  const n = 'add' in o ? o.add?.after : (o.remove ?? o.move ?? o.split ?? o.join);
+  // one op per write: `by` is a move's argument and `words` a reword's, not ops of their own
+  const ops = Object.keys(o).filter((k) => k !== 'by' && k !== 'words');
+  if (ops.length !== 1) return { refused: 'one op per write' };
+  const n =
+    'add' in o
+      ? o.add?.after
+      : 'reword' in o
+        ? o.reword?.line
+        : (o.remove ?? o.move ?? o.split ?? o.join);
   const at = Number.isInteger(n) ? n - 1 : -1;
   if (at < 0 || at >= lines.length) return { refused: `no line ${n}` };
   const out = [...lines];

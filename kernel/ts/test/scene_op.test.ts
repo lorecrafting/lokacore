@@ -85,6 +85,17 @@ const ROWS: [op: Op, after: string][] = [
   [{ remove: 4 }, 'npc: guard\nwith: guard\n\n\n- ~\n  * Words.\n\n- Leave\n'],
   // remove a sub-line keeps its siblings
   [{ remove: 5 }, SRC.replace('  needs: has_bowl\n', '')],
+  // reword a choice: its words change, its key does not (rulings §2). A slug-keyed choice pins the
+  // key it already had, so the referrer that names `take_the_bowl` still names it
+  [
+    { reword: { line: 4, words: 'Take it' } },
+    SRC.replace('- Take the bowl', '- Take it #take_the_bowl'),
+  ],
+  // an already-explicit key keeps its suffix and only its words change
+  [
+    { reword: { line: 8, words: 'Words' } },
+    SRC.replace('\n- ~\n  * Words.', '\n- Words #todo__8\n  * Words.'),
+  ],
   // move a choice with its block past a sibling, indentation and all
   [
     { move: 8, by: 1 },
@@ -116,6 +127,8 @@ test('/restructure on a .scene: each op changes only its lines; one /undo restor
     plant(SRC);
     const done = await ask('/restructure', { file: SCENE, was: sha256(SRC), op, carry: [] });
     assert.equal(done.status, 200, JSON.stringify([op, done.body]));
+    // the reword's words reached the file, not just the preview
+    if ('reword' in op) assert.match(read(), new RegExp(`- ${op.reword.words} #`));
     assert.deepEqual(scene(SRC, op), { after }); // the card's preview is the route's answer
     assert.equal(read(), after, JSON.stringify(op));
     assert.equal((await ask('/undo', { id: (done.body as { id: string }).id })).status, 200);
@@ -163,6 +176,13 @@ test('a .scene op refuses what the grammar cannot hold, and writes nothing', () 
   assert.match(String(given({ move: 5, by: -1 })), /no line above/); // needs: is the block's first
   assert.match(String(given({ move: 4, by: -1 })), /no choice above/); // the first sibling
   assert.match(String(given({ move: 6, by: 1 })), /no line below/); // the block's last line
+  // a reword is a choice line's words: not a `* ` narration line, not a value line, never empty and
+  // never two lines. A `~` DOES reword: it pins todo__<n>, so its referrer keeps naming it
+  assert.match(String(given({ reword: { line: 8, words: 'Words' } })), /#todo__8/);
+  assert.match(String(given({ reword: { line: 6, words: 'Words' } })), /only a choice line/);
+  assert.match(String(given({ reword: { line: 1, words: 'Words' } })), /only a choice line/);
+  assert.match(String(given({ reword: { line: 4, words: '   ' } })), /no words/);
+  assert.match(String(given({ reword: { line: 4, words: 'Take\nit' } })), /one line/);
 });
 
 // Break: a `~` choice keys by its line (scene_lines.ex:84-85), so an insert above one that a twin
