@@ -275,7 +275,8 @@ const POSTS: Record<string, Post> = {
       () => ids(compiledCartridge(artifact)),
       (what, c) => done(t, what, [c]),
     ),
-  '/restructure': (t, sent) => restructure(t.root, sent, (what, cs) => done(t, what, cs)),
+  '/restructure': (t, sent, artifact) =>
+    restructure(t.root, sent, (what, cs) => done(t, what, cs), artifact),
   '/delete': remove,
   '/move': move,
   '/undo': undo,
