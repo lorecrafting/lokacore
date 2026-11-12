@@ -464,7 +464,9 @@ A rule that runs steps when something happens in the game: when names the event 
 | Field | Type | Required | Meaning |
 |---|---|---|---|
 | after | integer |  | The steps run this many logical seconds after delivery, as a reaction job for the delivery's actor, when `when` holds at both times; due no earlier than 1 s after the proposal's clock. |
+| cooldown | integer |  | This rule rests this many logical seconds after it fires (fact <rule>_at). |
 | on | [event](vocabulary.gen.md#events) | yes | See the type. |
+| once | `true` |  | This rule runs at most once: lowered to the fact <rule>_done. |
 | silent | `true` |  | Says the rule changes things without telling the player, on purpose, so the checker does not warn. Used only while writing; the finished game drops it. |
 | steps | list of [Step](vocabulary.gen.md#steps) or object | yes | The steps in order; a `wait` splits them in time. |
 | steps[]{op=wait} | variant |  | Run the steps after it this many logical seconds later, as a sibling delayed rule with the same `on` and `when`; `when` is read again when they run. |
