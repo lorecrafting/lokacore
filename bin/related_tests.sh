@@ -29,6 +29,14 @@ if printf '%s\n' "$diff" | grep -q '^tools/author-panel/'; then
       echo RELATED_TESTS_fail
       exit 1
     fi
+    # Its own unit tests too: they are pure and fast, and a panel source line can break one.
+    if ( cd tools/author-panel && node --test --test-reporter=dot test/step.test.ts ) >/dev/null 2>&1; then
+      echo AUTHOR_PANEL_TESTS_OK
+    else
+      echo AUTHOR_PANEL_TESTS_FAIL
+      echo RELATED_TESTS_fail
+      exit 1
+    fi
   else
     echo AUTHOR_PANEL_TSC_skip_no_node_modules
   fi

@@ -85,14 +85,15 @@ type Shell = {
   diag: ReturnType<typeof useDiagnostics>;
   pick: (s?: Selection) => void;
   offer: (add: string[]) => void;
+  heard: React.RefObject<Heard>;
 };
 
-function Left({ layout, set, story, book, diag, pick }: Shell) {
+function Left({ layout, set, story, book, diag, pick, heard }: Shell) {
   const picked = places(layout.selection, story?.graph.nodes ?? []).hierarchy;
   const play = (room: string) => book.send({ op: 'go_to_room', room });
   const tab = (tab: string) => set((l) => ({ ...l, tab: tab as Layout['tab'] }));
   const make = (kind: string) => command(book, layout.selection, pick, story)({ kind: 'command', label: '', detail: 'command', id: newCommand(kind, layout.selection) });
-  return (
+  const project = { state: book.state, send: book.send, trace: book.trace, said: diag.said, checked: diag.checkpoints };  return (
     <Tabs value={layout.tab} onValueChange={tab} className="min-h-0 flex-1 gap-0">
       <div className="flex h-8 items-center border-b px-2">
         <TabsList>
@@ -114,7 +115,7 @@ function Left({ layout, set, story, book, diag, pick }: Shell) {
           />
         </TabsContent>
         <TabsContent value="project" forceMount className="data-[state=inactive]:hidden">
-          <Project state={book.state} send={book.send} trace={book.trace} said={diag.said} checked={diag.checkpoints} />
+          <Project {...project} heard={heard.current} />
           <WorldButton pick={pick} />
         </TabsContent>
       </ScrollArea>
@@ -241,9 +242,7 @@ function useStory(said: unknown[] | undefined) {
   }, [said]);
   return [story, refused] as const;
 }
-
-const COLUMN =
-  'flex min-h-0 shrink-0 flex-col bg-background w-(--w) max-[900px]:h-1/2 max-[900px]:w-full';
+const COLUMN = 'flex min-h-0 shrink-0 flex-col bg-background w-(--w) max-[900px]:h-1/2 max-[900px]:w-full';
 
 export default function App() {
   const frame = useRef<HTMLIFrameElement>(null);
@@ -254,7 +253,7 @@ export default function App() {
   const [story, refused] = useStory(diag.said);
   const [palette, setPalette] = useState(false);
   const { pick, run, offer } = useWiring(book, heard, layout, set, () => setPalette(true), story);
-  const s: Shell = { layout, set, story, book, diag, pick, offer };
+  const s: Shell = { layout, set, story, book, diag, pick, offer, heard };
   const all = (text: Record<string, string>) => [
     ...items(story?.graph.nodes ?? [], text, diag.placeholders ?? {}, story?.names),
     ...(story ? [...storyItems(story), ...flowItems(story)] : []),
