@@ -122,6 +122,11 @@ their rules and red controls remain available for resumption.
   (`bin/beads_pr_drift.py`). The check needs no `br` binary.
 - `bin/beads_sync_red_controls.sh` (in `ci.yml`'s `lint` job with the pinned real `br`, and in `bin/prepush.sh` when `bin/lib/beads_sync.sh`, `after_merge`, `beads_checkpoint`, `beads_after_git`, `session_status`, `.githooks/post-merge` or the controls changed and `br` is installed) runs `bin/lib/beads_sync.sh`, the pull and `br sync --merge` of `bin/after_merge.sh` and `bin/beads_checkpoint.sh`, in throwaway clones: a local write and a moved main export fold together and a rerun with nothing committed merges again; a row edited on both sides refuses with its id after the pull, leaves the database row and the base unchanged, and the printed steps keep both sides' rows, and the SessionStart hook (`bin/session_status.sh`) does not import main's row over it; a rerun after an unpushed merge refuses a row main changed since (nothing changed) and the printed steps keep both sides; a rerun with that export staged still pulls; a database that never imported main's last pull keeps main's rows. The stub `beads_checkpoint` cases in `bin/integration_red_controls.sh` also check that a rejected push undoes the checkpoint's commit and a rerun pushes.
 - `bin/ci_timing_red_controls.sh` (in `ci.yml`'s `lint` job) checks that `bin/ci_timing.sh` prints both sim legs of the head and of the nightly run but no other or unfinished job, and the nightly sim median of five runs skipping a failed leg.
+- `bin/wait_ci_red_controls.sh` (in `ci.yml`'s `lint` job) checks that `bin/wait_ci.sh` resolves a short
+  sha before asking `gh`, because `gh run list --commit` matches only the full 40 characters and a short one
+  lists nothing — which read as "no runs yet" and reported a 40-minute timeout on a green head (three times,
+  2026-11-12). It also checks a full sha still works, a failing run still fails, and a sha with no runs says so
+  rather than claiming a timeout. A stub `gh` and `WAIT_CI_ATTEMPTS=1` keep it instant.
 - `bin/related_tests_red_controls.sh` (in `ci.yml`'s `lint` job) checks that `bin/related_tests.sh` selects the
   unit files a diff touches (the test beside a changed source, and a test that names it by path, so a route
   added to `write.ts` with no `ROUTES` row is caught, loka-4ks2l), names a red file and exits 1, reports

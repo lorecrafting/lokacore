@@ -5,12 +5,19 @@
 # positional, not `--branch`.
 sha=$1 done=; cd "$(dirname "$0")/.." || exit 2
 case $sha in *[!0-9a-f]*) git fetch -q origin "$sha" && sha=$(git rev-parse FETCH_HEAD) || { echo "wait_ci: cannot fetch $1" >&2; exit 2; } ;; esac
-for i in $(seq 1 40); do
+# `gh run list --commit` matches only the full 40-character sha and returns nothing for a short one,
+# which read as "no runs yet" and timed out after 40 min on a green head (three times, 2026-11-12).
+sha=$(git rev-parse "$sha" 2>/dev/null) || { echo "wait_ci: unknown revision $1" >&2; exit 2; }
+# `WAIT_CI_ATTEMPTS` (default 40, one a minute) bounds the wait; a red control sets it to 1.
+for i in $(seq 1 "${WAIT_CI_ATTEMPTS:-40}"); do
   out=$(gh run list --commit "$sha" --json name,status,conclusion -q '.[] | "\(.name):\(.status):\(.conclusion)"' 2>/dev/null)
   # Both gating workflows must exist: graph-diff or mobile alone can finish first (loka-514z).
   echo "$out" | grep -q '^ci:' && echo "$out" | grep -q '^book-e2e:' && ! echo "$out" | grep -qv ':completed:' && { done=1; break; }
   sleep 60
 done
 echo "$sha"; echo "$out"
+# No runs at all is a different failure from a slow one, and saying "timed out" sent three green heads
+# back to be re-checked by hand: name it.
+[ -n "$out" ] || { echo "wait_ci: no runs found for $sha" >&2; exit 1; }
 [ -n "$done" ] || { echo "wait_ci: timed out before ci and book-e2e both completed" >&2; exit 1; }
 echo "$out" | grep -qv ':completed:success' && exit 1 || exit 0
