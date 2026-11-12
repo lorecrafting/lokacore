@@ -20,17 +20,14 @@ import { Trigger } from './Trigger.tsx';
 
 export function SceneText({ rel, context, diag }: SceneProps) {
   const { file, post, back, refused } = useSource(rel, diag);
-  if (!file) return <p className="px-3 text-xs text-muted-foreground">Loading {rel}</p>;
-  // the last compile's words (GET /source), then the push's changed ones
-  const words = { ...file.text, ...diag.text };
-  const lines = sceneLines(rel, file.bytes, 'dialogue', words, diag.placeholders ?? {});
-  const set: Setter = (l, value) => void post('set', { file: rel, line: l.n, was: l.text, value });
   // one op is one journal entry: the row buttons and the keys both come here. Focus follows the op
   // (rulings §5) onto the moved, added or gap-closing row. `/restructure` renumbers lines, so landed()
-  // answers from the bytes the op was sent against, before the reload replaces them.
+  // answers from the bytes the op was sent against, before the reload replaces them. These hooks sit
+  // above the loading return: a hook below it would run only once the file lands (rules of hooks).
   const [focus, setFocus] = useState<Landing>();
   const op = useCallback(
     async (o: Op) => {
+      if (!file) return;
       const before = file.bytes.split('\n');
       if (await post('restructure', { file: rel, was: file.sha256, op: o, carry: [] })) {
         setFocus(landed(before, o) ?? undefined);
@@ -38,6 +35,11 @@ export function SceneText({ rel, context, diag }: SceneProps) {
     },
     [file, rel],
   );
+  if (!file) return <p className="px-3 text-xs text-muted-foreground">Loading {rel}</p>;
+  // the last compile's words (GET /source), then the push's changed ones
+  const words = { ...file.text, ...diag.text };
+  const lines = sceneLines(rel, file.bytes, 'dialogue', words, diag.placeholders ?? {});
+  const set: Setter = (l, value) => void post('set', { file: rel, line: l.n, was: l.text, value });
   return (
     <div className="grid min-w-0 grid-cols-1 gap-2 px-3 text-xs" aria-label="scene card">
       <Header rel={rel} diag={diag} undo={back} />
