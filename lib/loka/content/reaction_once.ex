@@ -33,10 +33,10 @@ defmodule Loka.Content.ReactionOnce do
   def lower(defs, _), do: defs
 
   @doc """
-  The facts the authored `once`/`cooldown` fields become, `{name, {rel, field}}`, read from the raw
-  reaction source (`{rel, rule}`): the lowering drops the field, so `defs` no longer has it.
+  The facts the authored `once`/`cooldown` fields become, `{name, {rel, field}}`, read from the
+  reaction defs before the lowering drops the field.
   """
-  @spec reserved([{String.t(), map()}]) :: %{String.t() => {String.t(), [String.t()]}}
+  @spec reserved(map()) :: %{String.t() => {String.t(), [String.t()]}}
   def reserved(defs) when is_map(defs) do
     for {key, {rel, _, %{} = rule}} <- defs["reaction"] || %{},
         field <- ["once", "cooldown"],
@@ -45,44 +45,14 @@ defmodule Loka.Content.ReactionOnce do
         do: {name(key, field), {rel, field}}
   end
 
-  @doc "The lowered fact names another writer may not declare or write (Position.check)."
+  def reserved(_), do: %{}
+
+  @doc """
+  The lowered fact names another writer may not declare or write (Position.check, which scans every
+  write site and so already refuses an author's step that writes one).
+  """
   @spec names(map()) :: [String.t()]
   def names(defs), do: reserved(defs) |> Map.keys()
-
-  @doc """
-  RESERVED_FACT for an author's step that writes a fact this file lowered: the rule owns that fact,
-  so a write of it would overwrite the rule's own bookkeeping. Reads the authored source, since the
-  lowering drops the field and its steps are indistinguishable from the author's own.
-  """
-  @spec writes([{String.t(), term(), map()}]) :: [map()]
-  def writes(files) when is_list(files) do
-    for {rel, {:reaction, key, _}, %{} = rule} <- files,
-        {_field, fact} <- own_facts(key, rule),
-        {s, i} <- Enum.with_index(rule["steps"] || []),
-        s["op"] in ["fact.assign", "fact.adjust", "fact.stamp"],
-        s["fact"] == fact,
-        do:
-          diag("RESERVED_FACT", at(rel, ["steps", i, "fact"]), %{"field" => fact, "key" => fact})
-  end
-
-  # Each fact this rule lowers to, with the field that named it. The rule's own key, not the file's:
-  # in an area file one file holds many rules, so a basename would name the bundle.
-  defp own_facts(key, rule) do
-    for {field, lowered} <- [{"once", "_done"}, {"cooldown", "_at"}],
-        Map.has_key?(rule, field),
-        do: {field, key <> lowered}
-  end
-
-  @doc """
-  How many steps this rule's lowering appends: Position.check skips them, as they write the facts
-  the lowering reserved, not the author's own.
-  """
-  @spec lowered_steps({String.t(), [term()], map()}) :: non_neg_integer()
-  def lowered_steps({_, _, %{} = rule}), do: count(rule["once"], rule["cooldown"], & &1)
-  def lowered_steps(_), do: 0
-
-  defp count(once, cooldown, _),
-    do: if(once == true, do: 1, else: 0) + if(cooldown, do: 1, else: 0)
 
   defp lowered(k, {rel, steps, %{} = rule} = v, m) do
     if Map.has_key?(rule, "once") or Map.has_key?(rule, "cooldown"),
@@ -140,9 +110,7 @@ defmodule Loka.Content.ReactionOnce do
 
     long =
       if byte_size(fact) > @key_max,
-        do: [
-          diag("SCHEMA_VIOLATION", site, %{"why" => "once_key_long", "key" => fact})
-        ],
+        do: [diag("SCHEMA_VIOLATION", site, %{"why" => "reaction_key_long", "key" => fact})],
         else: []
 
     {Map.put(acc, fact, {"cartridge.json", [], spec(fact, field)}), ds ++ taken ++ long}

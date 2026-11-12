@@ -222,8 +222,9 @@ defmodule Loka.ContentScenesTest do
           {"dialogues/bram.json", ["choices", "carry", "steps"],
            "dialogues/bram.choices.carry.steps[0].fact"}
         ] do
+      # The sentence names the fact, so the fault carries it (not only the path's last step).
       assert compile(dir, %{rel => put_in(src(rel), path, [write])}) ==
-               {:error, [d("RESERVED_FACT", diagnostic)]}
+               {:error, [d("RESERVED_FACT", diagnostic, %{"field" => "scene_bell_rung"})]}
     end
   end
 

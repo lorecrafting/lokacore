@@ -207,28 +207,34 @@ defmodule Loka.ContentReactionOnceTest do
     assert path =~ "bone_drop.cooldown"
   end
 
-  # Break: the key comes from the file's basename, so in an area file (one file, many rules) a
-  # rule's own write is measured against the bundle's name and the refusal names the wrong fact.
-  # Break: the key comes from the file's basename, so in an area file (one file, many rules) a
+  # Break: the key comes from the file's basename, so in an area bundle (one file, many rules) a
   # rule's own write is measured against the bundle's name; the refusal then names the wrong fact
-  # or misses the write entirely.
-  test "an area file's rule is guarded under its own key", %{dir: dir} do
-    area =
-      JSON.decode!("""
-      {"rooms":{},"reactions":{"elder_hears":{"on":{"event":"spoken"},"once":true,
-       "steps":[{"op":"fact.assign","fact":"elder_hears_done","value":true}]}}}
-      """)
+  # or is not raised at all. The area file is a change, so the copy is restored after the case.
+  test "an area bundle's rule is guarded under its own key", %{dir: dir} do
+    this = "elder_hears"
 
-    assert {:error, diags} = Loka.ContentSource.compile(dir, [{"areas/village.json", area}])
+    declare = {"cartridge.json", &put_in(&1, ["requires", "capabilities", "speech"], 1)}
 
-    assert Enum.any?(
-             diags,
-             &match?(
-               %{"code" => "RESERVED_FACT", "data" => %{"field" => "elder_hears_done"}},
-               &1
-             )
-           ),
-           inspect(diags)
+    assert {:error, diags} =
+             Loka.ContentSource.compile(dir, [
+               declare,
+               {"areas/village.json",
+                %{
+                  "rooms" => %{},
+                  "reactions" => %{
+                    this => %{
+                      "on" => %{"event" => "spoken"},
+                      "once" => true,
+                      "steps" => [
+                        %{"op" => "fact.assign", "fact" => this <> "_done", "value" => true}
+                      ]
+                    }
+                  }
+                }}
+             ])
+
+    assert [%{"code" => "RESERVED_FACT", "data" => %{"field" => fact}}] = diags
+    assert fact == this <> "_done"
   end
 
   # Break: the fault's data carries no name, so Explain's `{reserved}` reads the path's last step
@@ -270,7 +276,7 @@ defmodule Loka.ContentReactionOnceTest do
 
     try do
       assert {:error, diags} = Loka.ContentSource.compile(dir, [])
-      assert Enum.any?(diags, &(&1["data"]["why"] == "once_key_long")), inspect(diags)
+      assert Enum.any?(diags, &(&1["data"]["why"] == "reaction_key_long")), inspect(diags)
     after
       File.rm!(src)
     end
