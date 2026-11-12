@@ -114,9 +114,10 @@ before(() => {
   chmodSync(join(dir, 'bin/mise'), 0o755);
   process.env.PATH = `${join(dir, 'bin')}:${process.env.PATH}`;
   execFileSync('mix', ['loka.new', 'cartridge', pristine], { cwd: REPO, stdio: 'ignore' });
-  // the capabilities no /new locks, so items.edible, items.readable and rooms.dark are offered and tried
+  // the capabilities no /new locks, so items.edible, items.readable, rooms.dark and reactions.once
+  // (its guard sits in `when`) are offered and tried
   const cart = JSON.parse(readFileSync(join(pristine, 'cartridge.json'), 'utf8'));
-  Object.assign(cart.requires.capabilities, { food: 1, readable: 1, light: 1 });
+  Object.assign(cart.requires.capabilities, { food: 1, readable: 1, light: 1, policy: 1 });
   writeFileSync(join(pristine, 'cartridge.json'), JSON.stringify(cart, null, 2));
   cpSync(pristine, join(dir, 'src'), { recursive: true });
   at = shared = scratch(join(dir, 'src'));

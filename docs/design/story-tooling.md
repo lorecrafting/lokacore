@@ -182,6 +182,11 @@ facts the compiler settled that this table assumed:
   invalid; the reserved `_at` fact has `minimum: 0` and no maximum.
 - **The `once`/`cooldown` refusals are `RESERVED_FACT`**, not a new code, which is what the survey
   row and the tips precedent name.
+- **`once` and `cooldown` need the `policy` capability.** The guard sits in the rule's `when`, and
+  `kernel/ts/play/allowed.ts:51` already maps `reactions.when` to `policy`; a cartridge that writes
+  `once` without locking `policy` is refused `UNDECLARED_CAPABILITY` at the rule. This is the same
+  capability an authored `when` already needs, not a new one, but a writer who only ever wrote
+  `on`/`steps` will meet it for the first time here.
 
 A lowered `once` step goes after the rule's own steps and a `cooldown` stamp before `once`'s assign,
 so a delayed rule records the time it fired rather than the time it was queued.
