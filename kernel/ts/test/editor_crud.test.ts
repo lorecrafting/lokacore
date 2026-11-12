@@ -262,12 +262,19 @@ test('a definition another names is refused, then every one deletes through /del
   assert.equal(status(), tree, 'a write outside the scratch cartridge');
 });
 
-/** The repo's changed files past Beads, which flushes on its own (a /new writing to the repo shows). */
+/** The repo's changed files past Beads (it flushes on its own) and `play.test.ts`'s dirty probe,
+ * which that file writes inside ROOT to make a tree unclean and removes in its `finally`. Two files
+ * run in parallel: without the exclusion the probe lands in this listing and fails the
+ * "a write outside the scratch cartridge" check (loka-lvo9i). */
 function status() {
-  return execFileSync('git', ['status', '--porcelain', '--', '.', ':!.beads'], {
-    cwd: REPO,
-    encoding: 'utf8',
-  });
+  return execFileSync(
+    'git',
+    ['status', '--porcelain', '--', '.', ':!.beads', ':!kernel/ts/r5s1-dirty-probe'],
+    {
+      cwd: REPO,
+      encoding: 'utf8',
+    },
+  );
 }
 
 /** author.ts drop(): the file's sha from /source, then /delete with the row key for a root file,
