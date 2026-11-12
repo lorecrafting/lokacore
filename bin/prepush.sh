@@ -32,6 +32,9 @@ if [ -n "$stale" ]; then echo "REGEN_DIRTY (bin/regen.sh rewrote these; commit t
 if touched "$ts"; then
   run TYPECHECK sh -c 'cd kernel/ts && npm run -s typecheck'
   run MOBILE_TSC sh -c 'cd mobile/app && node_modules/.bin/tsc --noEmit -p .'
+  # `tsc -b`, not --noEmit: it also builds tsconfig.node.json (which includes `test`), and CI runs
+  # exactly this. A test importing src/ pulls React and mobile into a nodenext project; only -b sees it.
+  run PANEL_TSC sh -c 'cd tools/author-panel && node_modules/.bin/tsc -b'
 fi
 if touched "$ex"; then
   run MIX_FORMAT mix format --check-formatted
