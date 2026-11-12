@@ -92,9 +92,10 @@ const ROWS: [op: Op, after: string][] = [
     SRC.replace('- Take the bowl', '- Take it #take_the_bowl'),
   ],
   // an already-explicit key keeps its suffix and only its words change
+  // a reword of a `~` with no referrer pins a free choice_<n> (rulings §2), not its line number
   [
     { reword: { line: 8, words: 'Words' } },
-    SRC.replace('\n- ~\n  * Words.', '\n- Words #todo__8\n  * Words.'),
+    SRC.replace('\n- ~\n  * Words.', '\n- Words #choice_1\n  * Words.'),
   ],
   // move a choice with its block past a sibling, indentation and all
   [
@@ -177,8 +178,15 @@ test('a .scene op refuses what the grammar cannot hold, and writes nothing', () 
   assert.match(String(given({ move: 4, by: -1 })), /no choice above/); // the first sibling
   assert.match(String(given({ move: 6, by: 1 })), /no line below/); // the block's last line
   // a reword is a choice line's words: not a `* ` narration line, not a value line, never empty and
-  // never two lines. A `~` DOES reword: it pins todo__<n>, so its referrer keeps naming it
-  assert.match(String(given({ reword: { line: 8, words: 'Words' } })), /#todo__8/);
+  // never two lines. A `~` DOES reword: with no referrer it is pinned as a free choice_<n> (§2), so
+  // it stops depending on its line number.
+  assert.match(String(given({ reword: { line: 8, words: 'Words' } })), /#choice_1/);
+  // ...and one a referrer names keeps its todo__<n>: a placeholder with referrers must not move
+  const named = (op: Op) => {
+    const r = scene(SRC, op, (k) => k === 'todo__8');
+    return 'refused' in r ? r.refused : r.after;
+  };
+  assert.match(named({ reword: { line: 8, words: 'Words' } }), /#todo__8/);
   assert.match(String(given({ reword: { line: 6, words: 'Words' } })), /only a choice line/);
   assert.match(String(given({ reword: { line: 1, words: 'Words' } })), /only a choice line/);
   assert.match(String(given({ reword: { line: 4, words: '   ' } })), /no words/);
@@ -208,6 +216,23 @@ test('a shifted `~` key under a referrer is refused at the card and at the route
   });
   assert.deepEqual(done, { status: 400, body: 'give choice 8 its words first' });
   assert.equal(read(), SRC); // nothing written
+});
+
+// Break: a reword of a `~` that a referrer names is pinned with a fresh choice_<n> instead of its
+// todo__<n>, so the referrer (a twin entry here) points at a key the scene no longer has. Rulings
+// §2: a placeholder key with referrers must not move.
+test('a reword of a `~` a referrer names keeps its todo__<n> at the card and the route', async (t) => {
+  const { ask, read, plant } = await served(t);
+  plant(SRC);
+  plant(JSON.stringify({ choices: { todo__8: { label: '~' } } }), 'scenes/guard.json');
+  const done = await ask('/restructure', {
+    file: SCENE,
+    was: sha256(SRC),
+    op: { reword: { line: 8, words: 'Words' } },
+    carry: [],
+  });
+  assert.equal(done.status, 200, JSON.stringify(done.body));
+  assert.match(read(), /- Words #todo__8/);
 });
 
 // Break: the route takes an op for a file that is not a `.scene` or a `.cut`, or one op that is not

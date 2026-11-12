@@ -1,9 +1,8 @@
-// size: allow 310, one pure function per op, each with its refusal beside it; splitting the op set would split the one guard
 // A `.cut` file's page ops and a `.scene` file's line ops (docs/design/scene-structure-rulings.md
 // §1, §3, §4): the pure functions POST /restructure and the Scene card both call. No node:fs: the
 // panel reads it. Every untouched byte is kept, and every refusal is checked here.
-import { choiceKey, freeKey, reword, TODO, type Row } from './scene_choice.ts';
-export { choiceKey, choiceLabel, rewordedChoice } from './scene_choice.ts';
+import { freeKey, reword, rows, TODO, type Row } from './scene_choice.ts';
+export { choiceKey, choiceLabel, rewordedChoice, rows } from './scene_choice.ts';
 /** `n` is a file line (from 1); a reword names its choice by `line` and the words it becomes. */
 export type Op =
   | { add: { after: number; kind: SceneKind; value?: string } }
@@ -14,6 +13,7 @@ export type Op =
   | { reword: { line: number; words: string } };
 type Block = [first: number, last: number]; // 0-based lines
 
+const KEYLINE = /^(npc|with|when): /;
 const END = '---';
 const isEnd = (lines: string[], [first]: Block) => lines[first].trim() === END;
 
@@ -103,18 +103,6 @@ export function cut(bytes: string, op: Op, steps = false): { after: string } | {
   const refused = ended(out);
   return refused ? { refused } : { after: out.join('\n') };
 }
-
-/** A `.scene` line as the card sees it: its indent, and on a `- ` line its key (S3's ` #<key>`). */
-
-const KEYLINE = /^(npc|with|when): /;
-export const rows = (lines: string[]): Row[] =>
-  lines.map((text, i) => {
-    const indent = text.length - text.trimStart().length;
-    const body = text.trim();
-    if (!body.startsWith('- ')) return { indent, text };
-    const label = body.slice(2);
-    return { indent, text, key: choiceKey(label, i + 1) };
-  });
 
 /** A choice's block: its line and every deeper line under it. Trailing blanks belong to neither
  * side, so a swap leaves them where they are. */
@@ -207,6 +195,7 @@ function edit(
   out: string[],
   lines: string[],
   at: number,
+  refers: (key: string) => boolean,
 ): { refused: string } | undefined {
   const text = rs[at].text.trim();
   if (!text) return { refused: `no line ${at + 1}` };
@@ -226,7 +215,7 @@ function edit(
     );
     if (typeof made_ !== 'string') return made_;
     out.splice(b + 1, 0, made_);
-  } else if ('reword' in o) return reword(o, rs, out, at);
+  } else if ('reword' in o) return reword(o, rs, out, at, refers);
   else if ('remove' in o) {
     if (KEYLINE.test(text)) return { refused: 'a key line has no Remove' };
     const [a, b] = rs[at].key === undefined ? ([at, at] as Block) : block(rs, at);
@@ -289,7 +278,7 @@ export function scene(
   const at = Number.isInteger(n) ? n - 1 : -1;
   if (at < 0 || at >= lines.length) return { refused: `no line ${n}` };
   const out = [...lines];
-  const refused = edit(o, rs, out, lines, at);
+  const refused = edit(o, rs, out, lines, at, refers);
   if (refused) return refused;
   // §2: a `~` choice keys on its line (todo__<n>), so an op that renumbers one with a referrer is
   // refused before it writes
