@@ -895,6 +895,15 @@ with it set fails to build, and the app throws when the dev cartridge flag reach
 build. The author tools below are reachable only in that bundle (a production export keeps a few dead strings) and change no protocol, save or kernel_api.
 
 - **Numbers.** The panel's Numbers tab and `bin/loka sim <cartridge dir>` ([`sim.ts`](../../kernel/ts/play/sim.ts)) report, read-only: each pool over game hours under the [measured-flows](#measured-flows-balance-tool-2) worker, XP per level with the kills that pay for it, and the [fight matrix](#fight-matrix-and-encounter-rating-balance-tool-7) (`GET /__author/numbers`; an NPC card's Run fights asks `GET /__author/fights`, the fight rows alone, without the minutes the pacing sim takes). Each report runs in a child process killed at a limit; one that does not finish says so. Nothing is written to the source tree.
+- **Roam.** `bin/loka roam <cartridge dir> [--runs N] [--steps M] [--seed S]`
+  ([`roam.ts`](../../kernel/ts/play/roam.ts)) plays the shipped cartridge at random through the real
+  authority and reports what no path reached — reactions, choices, quests, scenes and story points —
+  then a hit count per node, as one canonical JSON document. It reads the Book's own buttons
+  (`view()` plus the choices and notices it offers), so a button the Book does not show is never pressed.
+  A `fault` reply or a crashing step writes `checkpoints/roam-<seed>.json` holding that run's steps,
+  shrunk by greedy deletion, which `bin/loka check` then replays; a checkpoint of that seed already in
+  the cartridge is the author's and is kept. Nothing else is written to the source tree. It defaults to
+  10 runs of 150 presses because `view()` dominates the cost: 50 x 300 took 273 s on the M1.
 - **Keep my place.** The preview records each input the Book sends that the session saved (the
   intent, its targets as definition refs `cartridge@version:kind/key`, and each dev-clock advance
   in milliseconds) under the artifact's hash. The preview keeps one save file per kernel_api and

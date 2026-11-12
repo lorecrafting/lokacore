@@ -9,6 +9,8 @@
 # `loka story <cartridge dir>`: the Story map's model as JSON (kernel/ts/play/story.ts).
 # `loka check <cartridge dir>`: replays each checkpoints/*.json headless (kernel/ts/play/check.ts).
 # `loka sim <cartridge dir> [--seeds N] [--days D]`: balancing numbers, no limit (kernel/ts/play/sim.ts).
+# `loka roam <cartridge dir> [--runs N] [--steps M] [--seed S]`: a random player's coverage, and a
+# checkpoint for any invariant it breaks (kernel/ts/play/roam.ts).
 # mobile/app/package.json stays typeless (Metro); the warning is noise (also for `new`, whose todo runs node).
 export NODE_OPTIONS="${NODE_OPTIONS-} --disable-warning=MODULE_TYPELESS_PACKAGE_JSON"
 case "${1-}" in
@@ -25,9 +27,10 @@ todo) shift; exec node "$(dirname "$0")/../kernel/ts/play/todo.ts" "$@" ;;
 story) shift; exec node "$(dirname "$0")/../kernel/ts/play/story.ts" "$@" ;;
 check) shift; exec node "$(dirname "$0")/../kernel/ts/play/check.ts" "$@" ;;
 sim) shift; exec node "$(dirname "$0")/../kernel/ts/play/sim.ts" "$@" ;;
+roam) shift; exec node "$(dirname "$0")/../kernel/ts/play/roam.ts" "$@" ;;
 new)
   shift
   caller="$PWD"
   cd "$(dirname "$0")/.." && exec mix loka.new --cwd "$caller" "$@" ;;
-*) echo "usage: bin/loka play <artifact> [script | --replay <transcript>] | bin/loka dev [<cartridge dir>] [--watch] | bin/loka new <kind> <name> [--from <room> <direction>] [--from <cartridge dir>] [--area <area>] [--extends <key>] ... [cartridge dir] (scene <npc> <key>) | bin/loka todo <cartridge dir> | bin/loka story <cartridge dir> | bin/loka check <cartridge dir> | bin/loka sim <cartridge dir> [--seeds N] [--days D]" >&2; exit 2 ;;
+*) echo "usage: bin/loka play <artifact> [script | --replay <transcript>] | bin/loka dev [<cartridge dir>] [--watch] | bin/loka new <kind> <name> [--from <room> <direction>] [--from <cartridge dir>] [--area <area>] [--extends <key>] ... [cartridge dir] (scene <npc> <key>) | bin/loka todo <cartridge dir> | bin/loka story <cartridge dir> | bin/loka check <cartridge dir> | bin/loka sim <cartridge dir> [--seeds N] [--days D] | bin/loka roam <cartridge dir> [--runs N] [--steps M] [--seed S]" >&2; exit 2 ;;
 esac
