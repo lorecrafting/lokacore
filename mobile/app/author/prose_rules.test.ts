@@ -84,8 +84,8 @@ test("the panel hands the Book its walk keys and Enter, but not a field's or a c
 test('a line with no field says why', () => {
   assert.equal(noFieldNote('item.taken'), 'The engine writes this line.');
   assert.equal(
-    noFieldNote('room.a', 'a choice label: its key is its words'),
-    'A choice label is its key. Alt-click opens the scene.',
+    noFieldNote('room.a', 'a choice label: reword it in the scene card'),
+    "A choice's words are edited in the scene card. Alt-click opens the scene.",
   );
   assert.equal(noFieldNote(undefined), 'Not a line of words. Alt-click opens its source.');
 });

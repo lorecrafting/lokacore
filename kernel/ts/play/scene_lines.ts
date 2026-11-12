@@ -18,7 +18,15 @@ export const picks = (verb: Verb, nodes: Nodes, unlinkable: Record<string, strin
 export const scened = (rel: string | undefined) =>
   /(^|\/)(scenes|dialogues)\/[a-z0-9_]+\.scene$/.test(rel ?? '');
 
-export type Line = { n: number; text: string; verb?: Verb; value?: string; key?: string };
+export type Line = {
+  n: number;
+  text: string;
+  verb?: Verb;
+  value?: string;
+  key?: string;
+  /** A `- ` line: its words field edits the label in place, pinning the key (S3). */
+  choice?: string;
+};
 
 /** The file's lines for the card: a value line its verb and value; a `* ` line of words the text
  * key that says it (a `<role>: ` line none: POST /edit refuses it, prose.ts), by the compile's `~` map, else by its words among the
@@ -42,6 +50,9 @@ export function sceneLines(
     const n = i + 1;
     const value = VALUE.exec(t);
     if (value) return { n, text: t, verb: value[2] as Verb, value: value[3] };
+    // a choice's words: its label as written, suffix and all; the card pins the key on commit (S3)
+    const said = /^(\s*)- (.*)$/.exec(t);
+    if (said) return { n, text: t, choice: said[2] };
     const words = /^\s*\* (.*)$/.exec(t)?.[1];
     if (words === undefined) return { n, text: t };
     const found = at.get(`${rel}:${n}`) ?? own.find((k) => text[k].split('\n').includes(words));

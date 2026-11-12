@@ -6,7 +6,11 @@ import { useCallback, useState } from 'react';
 import { refusePick } from '../../../../../kernel/ts/play/card.ts';
 import { picks, sceneLines, type Line } from '../../../../../kernel/ts/play/scene_lines.ts';
 import { landed } from '../../../../../kernel/ts/play/scene_focus.ts';
-import { rows, type Op } from '../../../../../kernel/ts/play/scene_structure.ts';
+import {
+  choiceLabel,
+  rows,
+  type Op,
+} from '../../../../../kernel/ts/play/scene_structure.ts';
 import { type On } from '../../../../../kernel/ts/play/scene_trigger.ts';
 import { Input } from '../../components/ui/input.tsx';
 import { WordsField, type Context } from '../fields.tsx';
@@ -14,6 +18,7 @@ import { Header, useCard } from '../Generic.tsx';
 import { Refusal } from '../templates.tsx';
 import { RoomForm } from './Room.tsx';
 import { lineKey, RowMenu, useLanded, type Landing, type Rower } from './SceneRows.tsx';
+import { ChoiceWords } from './SceneChoiceWords.tsx';
 import { type Doc, type SceneProps, useSource } from './SceneSource.ts';
 import { Pages } from './ScenePages.tsx';
 import { Trigger } from './Trigger.tsx';
@@ -103,19 +108,31 @@ function Row({
       onKeyDown={(e) => lineKey(e, l.n, op)}
     >
       <span className="w-6 shrink-0 text-right text-muted-foreground">{l.n}</span>
-      {l.verb ? (
-        <Value line={l} keys={picks(l.verb, context.nodes, context.unlinkable)} set={(v) => set(l, v)} />
-      ) : l.key ? (
-        <div className="min-w-0 flex-1">
-          <WordsField label="" k={l.key} words={l.text.replace(/^\s*\* /, '')} />
-        </div>
-      ) : (
-        <span className="min-w-0 flex-1 truncate whitespace-pre">{l.text}</span>
-      )}
+      <Field l={l} context={context} set={set} op={op} />
       <span className="flex opacity-0 group-focus-within:opacity-100 group-hover:opacity-100">
         <RowMenu n={l.n} rs={rs} op={op} />
       </span>
     </li>
+  );
+}
+
+/** A line's editor, by what the line is: a value line's picker, a `\* ` line's words, a `- ` line's
+ * words that pin its key (rulings §2), or plain text the card does not edit. */
+function Field({ l, context, set, op }: Pick<Rows, 'set' | 'op'> & { l: Line; context: Context }) {
+  if (l.verb)
+    return <Value line={l} keys={picks(l.verb, context.nodes, context.unlinkable)} set={(v) => set(l, v)} />;
+  if (l.key)
+    return (
+      <div className="min-w-0 flex-1">
+        <WordsField label="" k={l.key} words={l.text.replace(/^\s*\* /, '')} />
+      </div>
+    );
+  if (l.choice === undefined) return <span className="min-w-0 flex-1 truncate whitespace-pre">{l.text}</span>;
+  // a choice's words: committing pins its key in the same line edit, so no referrer moves
+  return (
+    <div className="min-w-0 flex-1">
+      <ChoiceWords label={choiceLabel(l.choice)} set={(words) => op({ reword: { line: l.n, words } })} />
+    </div>
   );
 }
 

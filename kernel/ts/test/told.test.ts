@@ -98,7 +98,7 @@ test('/line answers the source line a Book line writes, its words unbound, or wh
   ]);
   assert.deepEqual(await line('dialogue.s.label', 'Take it'), [
     400,
-    'a choice label: its key is its words',
+    'a choice label: reword it in the scene card',
   ]);
   assert.equal((await line('room.none', 'nowhere'))[0], 404);
   // Break: two scenes' `* ~` lines both answer the first, so a save writes into the wrong scene;

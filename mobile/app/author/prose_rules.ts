@@ -91,7 +91,7 @@ export function relays(e: Key, target: Target) {
 export function noFieldNote(key: string | undefined, refusal?: string) {
   if (key && LINE_WORDS.has(key)) return 'The engine writes this line.';
   if (refusal?.startsWith('a choice label'))
-    return 'A choice label is its key. Alt-click opens the scene.';
+    return "A choice's words are edited in the scene card. Alt-click opens the scene.";
   return 'Not a line of words. Alt-click opens its source.';
 }
 

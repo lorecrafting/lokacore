@@ -10,6 +10,7 @@ of closed work are deleted once their lesson is folded, and linked by permalink
 Reviews before R2 live in the [legacy repository](https://github.com/lorecrafting/lokacore-v2-legacy)
 (commit `997a7a8`, `docs/rewrite-v3/reviews/`).
 
+- [S3: a choice's key, pinned when its words change (self-review)](2026-11-12-s3-choice-key-self-review.md)
 - [Review: modal scene Trigger row (loka-wfrgk.107)](2026-11-07-scene-trigger-review.md): **APPROVE**
 - [Review: a capitalised Book line opens its field (loka-wfrgk.100.2)](2026-11-07-reshaped-lines-review.md): **APPROVE WITH NOTES**
 - [Review: map + handles grow the selected room (loka-wfrgk.104)](2026-11-07-map-grow-handles-review.md): **CHANGES REQUIRED**

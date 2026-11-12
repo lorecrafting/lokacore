@@ -523,9 +523,9 @@ test('a refused save says the watcher`s reason', async () => {
 });
 
 test('a line with no field says why', async () => {
-  answer = () => [400, 'a choice label: its key is its words'];
+  answer = () => [400, 'a choice label: reword it in the scene card'];
   await page.locator('p').first().dblclick();
-  await noteSays('A choice label is its key. Alt-click opens the scene.');
+  await noteSays("A choice's words are edited in the scene card. Alt-click opens the scene.");
   await page.locator('main').click();
   assert.equal(await page.locator('.loka-note').isHidden(), true);
   await page.locator('button').dblclick();
