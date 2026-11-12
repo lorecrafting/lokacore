@@ -175,6 +175,25 @@ For the owner: a rule that fires once, or rests, without writing the fact, the `
 | **Lint sees the lowered write as deliberate**: the added assign or stamp does not trigger the narrate-or-silent rule | The write is bookkeeping, not a consequence | A `once` rule with a `narrate` step lints clean; one with no step but the lowered assign lints as today's silent rule does |
 | **Both on `after` rules**: the `once` guard is checked at delivery and again when the job runs (the rule's `when` is, `protocol/reaction.schema.json:529`) | No special case | A delayed `once` rule delivered twice before its job runs fires once |
 
+Built (`test/loka/content_reaction_once_test.exs`, `lib/loka/content/reaction_once.ex`). Two shape
+facts the compiler settled that this table assumed:
+- **The stamp fact takes no `maximum`.** `protocol/step.schema.json`'s `fact.stamp` accepts an int
+  fact with "no maximum, minimum absent or at most 0", so a bounded spec made every stamp step
+  invalid; the reserved `_at` fact has `minimum: 0` and no maximum.
+- **The `once`/`cooldown` refusals are `RESERVED_FACT`**, not a new code, which is what the survey
+  row and the tips precedent name.
+
+A lowered `once` step goes after the rule's own steps and a `cooldown` stamp before `once`'s assign,
+so a delayed rule records the time it fired rather than the time it was queued.
+
+Where the firing row is pinned: this repo has no Elixir play harness (no test drives a world), so the
+rows are split across layers rather than claimed end to end in one file. The lowering — guard beside
+the authored `when`, leaf shape, step order, both refusals — is `content_reaction_once_test.exs`. The
+guards' own truth at a clock are the kernel's, hand-computed: `kernel/ts/test/raid.test.ts:482`
+fixes `time_since ... at_least: 600` against a stamp at 1000 as false at 1599 and true at 1600, and
+`kernel/ts/test/reactions.test.ts` fixes `fact_compare`. So "fires once, rests for its seconds" is
+those two facts composed, not a separate test of the composition.
+
 ### W2: a rename rewrites the checkpoints (survey row 12)
 
 For the owner: renaming a room, NPC or dialogue does not rot the recorded paths. Ink's order-based paths and

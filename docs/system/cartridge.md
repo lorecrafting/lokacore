@@ -451,6 +451,29 @@ inline; its artifact equals the hand-keyed one byte for byte.
 - **Timed actions.** An action's events carry its start, and FD1 lands a job due inside the advance 1 s after it, in job id order (minted per command). So a list on `action_completed` naming a scripted action with a `duration` adds that duration to every stretch that has an `after`: waits count from the action's end and keep their order and spacing. The same list on `action_completed` with no `action`, while any timed scripted action exists, or on a custom event a timed action's outcome emits, is refused (`wait_inside_action`) when it has two or more delayed stretches: the duration is not known there. One delayed stretch cannot reorder, so it compiles. `action_completed` does not fire on a failed check (`scripted_action/rule.ts`), so a failure path uses `check_failed`, an event of the kind below, or one wait on the failure's own event.
 - **Known limits.** `when` is read for each stretch, so a list whose earlier step makes its own `when` false drops the later stretches; the compiler does not look for this, and a writer may use it to cancel. A list on any other event inside a long command (a check or fact change inside a timed action, a chain of events from one, a `wait` command) is not known at compile: stretches due inside the advance all land 1 s after it, and their order can differ per command. A fact step on a per-subject fact with no `npc` or `item` after a wait writes nothing, since the job has no event subject. A fault another stage finds in a later stretch (an unknown text key) names the sibling's renumbered step, under the authored file (`ponytail:` in `lib/loka/content/waits.ex`).
 
+**`once` and `cooldown`.** A rule that fires once, or rests, without writing the fact, the `not`,
+the assign and `silent`.
+- Source only, and lowered in the compile pipeline for every reaction (`lib/loka/content/reaction_once.ex`),
+  as a choice's `once` is (`dialogue_once.ex`): `"once": true` becomes the engine bool fact
+  `<rule>_done` (default false), a trailing `fact.assign ... true`, and a `not fact_compare` under
+  `all` beside the authored `when`; `"cooldown": N` (logical seconds, at least 1) becomes the engine
+  int fact `<rule>_at` (default 0, minimum 0, no maximum, as a stamp needs), a trailing `fact.stamp`
+  and a `time_since {at_least: N}` leaf.
+- The `cooldown` stamp comes before `once`'s assign, and both come after the rule's own steps, so an
+  `after` rule records the time it fired, not the time it was queued.
+- The guard sits in `when`, not only in the steps: an `after` rule's `when` is read again when its
+  job runs (`protocol/reaction.schema.json` ReactionRule), so a rule delivered twice before its job
+  runs still fires once.
+- Both fields leave the rule, so nothing in the protocol, the kernels or the reviewer changes; the
+  artifact holds facts and policy as if hand-written.
+- Refused `RESERVED_FACT` at the field that lowered it: a declared fact of either name, and an
+  authored step writing either name into play (`Position.check` reads the authored source, since the
+  lowering drops the field and the steps are otherwise indistinguishable).
+- The added assign or stamp is bookkeeping, so it does not trip the narrate-or-silent lint.
+- Samplers: `bone_taken` (`once`) and `bone_rested` (`cooldown`) in `cartridges/reactions_sampler`. The
+  lowering appends its steps after the authored ones, so a rule that writes one of its own lowered
+  facts in an authored step is refused.
+
 **Zones.** One reaction for many rooms.
 - A room's source may carry `"zones": ["<Key>", ...]`; the compiler strips it from every room.
 - A reaction with `"zone": "<Key>"` and no `on.room` is replaced by one copy per room listing

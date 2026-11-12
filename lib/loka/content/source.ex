@@ -407,15 +407,15 @@ defmodule Loka.Content.Source do
     |> put_in(["DialogueChoice", "properties", "story_point"], @choice_point)
     |> put_in(["DialogueChoice", "properties", "once"], @choice_once)
     |> update_in(["DialogueChoice", "properties"], &AskedField.source_fields/1)
+    |> update_in(["ReactionRule", "properties"], &Loka.Content.ReactionOnce.Field.source_fields/1)
     |> schedule(defs)
-    |> Map.update!(
-      "LiquidRow",
-      &put_in(&1, ["properties", "kind", "anyOf"], [
+    |> Map.update!("LiquidRow", fn r ->
+      put_in(r, ["properties", "kind", "anyOf"], [
         %{"type" => "null"},
         %{"$ref" => "Key"},
         defs["DefinitionRef"]
       ])
-    )
+    end)
   end
 
   # Toolbox row W10: a daily_schedule hour may be [case, ..., room key], or (row W26) one walking

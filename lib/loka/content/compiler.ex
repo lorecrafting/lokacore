@@ -1,4 +1,4 @@
-# size: allow 386, the source schema accessors, a reaction's lint-only silent mark stripped on compile, craft consume expansion, ancestry, static map, status source, levelling settings, replenish, trail, theft, asks, speech, construction, mounts wiring and the refused-bundle reference hold join the existing compiler boundary
+# size: allow 392, a reaction's source-only once/cooldown lowering is call wiring and the write refusal joins the diagnostic list (pun_kt2b), the source schema accessors, a reaction's lint-only silent mark stripped on compile, craft consume expansion, ancestry, static map, status source, levelling settings, replenish, trail, theft, asks, speech, construction, mounts wiring and the refused-bundle reference hold join the existing compiler boundary
 defmodule Loka.Content.Compiler do
   @moduledoc "Validates source files and builds the CompiledCartridge (05 §3–§8, 06 §20–21)."
   alias Loka.Content.{
@@ -26,7 +26,8 @@ defmodule Loka.Content.Compiler do
     Loka.Content.Skills,
     Loka.Content.Trails,
     Loka.Content.DialogueOnce,
-    Loka.Content.DialogueAsked
+    Loka.Content.DialogueAsked,
+    Loka.Content.ReactionOnce
   ]
   @facts_file %{
     "description" =>
@@ -45,10 +46,13 @@ defmodule Loka.Content.Compiler do
           {:ok, map(), [map()]} | {:error, [map()]}
   def compile(files, loaded, registry) do
     {manifest, located, d1} = manifest(of(files, :manifest), registry)
-    {defs, d2} = definitions(files, manifest)
+    {defs, d2, reserved} = definitions(files, manifest)
     {located, v2, d3} = world_content(files, manifest, defs, located)
 
-    case split([loaded, d1, d2, d3, checks(manifest, defs, v2, located, registry)], files) do
+    case split(
+           [loaded, d1, d2, d3, checks(manifest, defs, v2, located, registry, reserved)],
+           files
+         ) do
       {warnings, []} ->
         {:ok, Artifact.cartridge(manifest, defs, v2, located), warnings}
 
@@ -78,7 +82,7 @@ defmodule Loka.Content.Compiler do
   end
 
   # ponytail: one ordered check list; row 33 theft and row FD7 asks join it. # credo:disable-for-next-line /ABCSize|CyclomaticComplexity/
-  defp checks(manifest, defs, v2, located, registry) do
+  defp checks(manifest, defs, v2, located, registry, reserved) do
     Enum.concat([
       Loka.Content.Calendar.check(elem(located, 1)["calendar"] || %{}, defs, manifest),
       Loka.Content.Alternates.check(manifest, defs, located, {v2, registry}),
@@ -107,7 +111,7 @@ defmodule Loka.Content.Compiler do
       Reactions.check(manifest, defs, v2, registry),
       Dialogues.check(manifest, defs, v2, located, registry),
       Loka.Content.Links.check(defs, v2),
-      final_checks(manifest, defs, v2, located, registry)
+      final_checks(manifest, defs, v2, located, registry, reserved)
     ])
   end
 
@@ -118,10 +122,10 @@ defmodule Loka.Content.Compiler do
         Loka.Content.Bleed.check(manifest, defs, v2) ++
         Loka.Content.Status.check(manifest, defs, v2, settings)
 
-  defp final_checks(manifest, defs, v2, located, registry),
+  defp final_checks(manifest, defs, v2, located, registry, reserved),
     do:
       Loka.Content.BellCue.check(manifest, defs, located, v2) ++
-        Position.check(manifest, defs, elem(located, 1)) ++
+        Position.check(manifest, defs, elem(located, 1), reserved) ++
         Loka.Content.Trails.check(manifest, defs, v2, located, registry) ++
         Loka.Content.Spells.check(manifest, defs, registry, elem(located, 1)) ++
         Scenes.check(manifest, defs, v2, registry) ++
@@ -239,6 +243,7 @@ defmodule Loka.Content.Compiler do
   @doc false
   def facts_file, do: @facts_file
 
+  # credo:disable-for-next-line /ABCSize|CyclomaticComplexity/
   defp definitions(files, m) do
     {facts, d0} = facts(of(files, :facts))
     {facts, d4} = Position.facts(facts, m)
@@ -247,8 +252,14 @@ defmodule Loka.Content.Compiler do
     {defs, d2} = kinds(files, m)
     {facts, d5} = Enum.reduce(@engine_facts, {facts, []}, &engine_facts(&1, &2, m, defs))
     loaded = %{"fact" => facts, "resource" => resources, "attribute" => attributes}
-    defs = Loka.Content.DialogueOnce.lower(defs)
-    {Map.merge(expanded(defs, m), loaded), Enum.concat([d0, d1, d2, d3, d4, d5])}
+    # Read the authored `once`/`cooldown` here: the lowering drops them and their steps are
+    # indistinguishable from the author's own afterwards.
+    reserved = Loka.Content.ReactionOnce.names(defs)
+    writes = Loka.Content.ReactionOnce.writes(files)
+    defs = Loka.Content.DialogueOnce.lower(defs) |> then(&Loka.Content.ReactionOnce.lower(&1, m))
+
+    {Map.merge(expanded(defs, m), loaded), Enum.concat([d0, d1, d2, d3, d4, d5, writes]),
+     reserved}
   end
 
   # The facts a module adds for its own declarations (@engine_facts: scene, skill, trail, once).

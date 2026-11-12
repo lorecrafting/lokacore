@@ -39,31 +39,38 @@ defmodule Loka.Content.Position do
 
   @doc "RESERVED_FACT for content writes to engine-owned facts (row 33: the theft stolen fact too)."
   @spec check(map() | nil, map(), map()) :: [map()]
-  # ponytail: one reserved-fact scan; row 33 adds the stolen fact. # credo:disable-for-next-line /ABCSize|CyclomaticComplexity/
-  def check(m, defs, settings) when m != nil do
-    refs = reserved_refs(m, defs) ++ List.wrap(get_in(settings, ["world", "theft", "stolen"]))
+  # ponytail: one reserved-fact scan; row 33 adds the stolen fact.
+  def check(m, defs, settings, extra \\ [])
+
+  # credo:disable-for-next-line /ABCSize|CyclomaticComplexity/
+  def check(m, defs, settings, extra) when m != nil do
+    refs =
+      reserved_refs(m, defs, extra) ++ List.wrap(get_in(settings, ["world", "theft", "stolen"]))
+
     dream_refs = Enum.map(dream_names(defs), &Loka.Content.Source.ref(&1, "fact", m))
 
-    for {rel, steps, s} <- sites(defs),
+    for {rel, steps, s} <- sites(defs, extra),
         s["op"] in ["fact.assign", "fact.adjust", "fact.stamp"],
         reserved_write?(s, refs, dream_refs),
         do: diag("RESERVED_FACT", at(rel, steps ++ ["fact"]))
   end
 
-  def check(_, _, _), do: []
+  def check(_, _, _, _), do: []
 
   defp reserved_write?(s, refs, dream_refs),
     do: s["fact"] in refs or (s["fact"] in dream_refs and s["dream_owned"] != true)
 
-  defp reserved_refs(m, defs) do
-    for key <- reserved_names(m, defs),
-        do: %{
-          "cartridge_id" => m["id"],
-          "cartridge_version" => m["version"],
-          "kind" => "fact",
-          "key" => key
-        }
+  defp reserved_refs(m, defs, extra) do
+    for key <- reserved_names(m, defs) ++ extra, do: ref(m, "fact", key)
   end
+
+  defp ref(m, kind, key),
+    do: %{
+      "cartridge_id" => m["id"],
+      "cartridge_version" => m["version"],
+      "kind" => kind,
+      "key" => key
+    }
 
   defp reserved_names(m, defs) do
     engine_names(m, defs) ++
@@ -127,12 +134,41 @@ defmodule Loka.Content.Position do
 
   defp required?(m), do: Map.has_key?(m["requires"]["capabilities"], "position")
 
+  # A step's fact is a bare key before expansion and a full ref after it.
+  defp fact_name(%{"key" => key}), do: key
+  defp fact_name(key), do: key
+
+  # The rule's key: rel is a file path, a path list, or an area file with its key path.
+  defp key_of(%{"key" => key}) when is_binary(key), do: key
+  defp key_of({_path, [_, key]}), do: key
+  defp key_of({_path, key}) when is_binary(key), do: Path.basename(key, ".json")
+  defp key_of(rel) when is_binary(rel), do: Path.basename(rel, ".json")
+
+  defp key_of(rel) when is_list(rel),
+    do: rel |> List.last() |> to_string() |> Path.basename(".json")
+
+  # The lowering appends its own steps (one per field) writing this rule's reserved facts. An
+  # author's step is anything before them, including a write of another rule's lowered fact, which
+  # Position must still refuse.
+  defp own_lowering?(key, s, %{"steps" => steps}, reserved) do
+    mine = Enum.filter(["#{key}_done", "#{key}_at"], &(&1 in reserved))
+    tail = Enum.take(steps, -length(mine))
+    mine != [] and s in tail and Enum.all?(tail, &(fact_name(&1["fact"]) in mine))
+  end
+
+  defp own_lowering?(_, _, _, _), do: false
+
   # Each authored step that may fact.assign: {rel, steps to it, step}.
-  defp sites(defs) do
+  # A reaction carries the lowering's own `once`/`cooldown` steps; they write the facts the
+  # lowering reserved, so they are dropped here and the author's own writes are what remains.
+  # credo:disable-for-next-line /ABCSize|CyclomaticComplexity/
+  defp sites(defs, reserved) do
     for kind <- ~w(scripted_action reaction dialogue scene),
         {_, {rel, steps, v}} <- defs[kind],
         {at, list} <- lists(kind, v),
         {s, i} <- Enum.with_index(list),
+        not (kind == "reaction" and
+               own_lowering?(Map.get(v, "key") || key_of(rel), s, v, reserved)),
         do: {rel, steps ++ at ++ [i], s}
   end
 
