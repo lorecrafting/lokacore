@@ -91,12 +91,13 @@ test('a matched rule that did not fire names the first leaf that did not hold', 
     rule({
       causes: [{ event: 'looked' }],
       fired: false,
+      // `held` is a delivery count (why.ts held), as the kernel's own test asserts: 1 held, 0 did not.
       when: {
         op: 'all',
-        held: false,
+        held: 0,
         items: [
-          { op: 'light_off', held: true },
-          { op: 'fact_compare', held: false, fact: { key: 'lamp_oil' }, equals: 'full' },
+          { op: 'light_off', held: 1 },
+          { op: 'fact_compare', held: 0, fact: { key: 'lamp_oil' }, equals: 'full' },
         ],
       },
     }),

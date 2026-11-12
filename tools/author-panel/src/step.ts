@@ -46,14 +46,15 @@ export const lookedLine = (x: Report['reactions'][number]): Row =>
     ? { text: 'fired', ok: true, depth: 0 }
     : { text: firstFailing(x.when) ?? 'no when leaf held', ok: false, depth: 0 };
 
-// The first leaf with `held: false`, depth-first in authoring order (why.ts annotates in that order).
+// The first leaf whose `held` is 0, depth-first in authoring order (why.ts annotates in that order).
+// `held` is the number of deliveries at which that leaf held (why.ts `held`), so 0 is what failed, not false.
 const firstFailing = (p: unknown): string | undefined => {
   const walk = (x: unknown): unknown => {
     if (!x || typeof x !== 'object') return undefined;
     const at = x as { held?: unknown; items?: unknown[]; item?: unknown };
     const kids = at.items ?? (at.item ? [at.item] : []);
     // a branch's own `held` is its children's, so only a leaf's says which condition failed
-    if (!kids.length) return at.held === false ? x : undefined;
+    if (!kids.length) return at.held === 0 ? x : undefined;
     for (const kid of kids) {
       const found = walk(kid);
       if (found) return found;
