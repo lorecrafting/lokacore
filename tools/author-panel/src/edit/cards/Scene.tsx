@@ -6,7 +6,7 @@ import { ArrowDown, ArrowUp, Merge, Plus, Split, Trash2, type LucideIcon } from 
 import { useCallback, useEffect, useState } from 'react';
 import { refusePick } from '../../../../../kernel/ts/play/card.ts';
 import { picks, sceneLines, type Line } from '../../../../../kernel/ts/play/scene_lines.ts';
-import { blocks, cut, type Op } from '../../../../../kernel/ts/play/scene_structure.ts';
+import { blocks, cut, rows, type Op } from '../../../../../kernel/ts/play/scene_structure.ts';
 import { type On } from '../../../../../kernel/ts/play/scene_trigger.ts';
 import { ask, type useDiagnostics } from '../../author.ts';
 import { Button } from '../../components/ui/button.tsx';
@@ -15,6 +15,7 @@ import { WordsField, type Context } from '../fields.tsx';
 import { Header, useCard } from '../Generic.tsx';
 import { Refusal } from '../templates.tsx';
 import { RoomForm } from './Room.tsx';
+import { lineKey, RowMenu, type Rower } from './SceneRows.tsx';
 import { Trigger } from './Trigger.tsx';
 
 type Props = { rel: string; context: Context; diag: ReturnType<typeof useDiagnostics> };
@@ -56,40 +57,53 @@ export function SceneText({ rel, context, diag }: Props) {
   const words = { ...file.text, ...diag.text };
   const lines = sceneLines(rel, file.bytes, 'dialogue', words, diag.placeholders ?? {});
   const set: Setter = (l, value) => void post('set', { file: rel, line: l.n, was: l.text, value });
+  // one op is one journal entry: the row buttons and the keys both come here
+  const op: Rower = (o) => void post('restructure', { file: rel, was: file.sha256, op: o, carry: [] });
   return (
     <div className="grid min-w-0 grid-cols-1 gap-2 px-3 text-xs" aria-label="scene card">
       <Header rel={rel} diag={diag} undo={back} />
       {refused ? <Refusal boxed>{refused}</Refusal> : null}
-      <Lines lines={lines} context={context} set={set} />
+      <Lines lines={lines} context={context} set={set} op={op} bytes={file.bytes} />
     </div>
   );
 }
 
-/** The file's lines: a value line its picker, a words line its words field, the rest as written. */
+/** The file's lines, each with its row buttons (rulings §1, §5). */
 type Setter = (line: Line, value: string) => void;
-function Lines({ lines, context, set }: { lines: Line[]; context: Context; set: Setter }) {
+function Lines({ lines, context, set, op, bytes }: Rows & { lines: Line[]; context: Context }) {
+  const rs = rows(bytes.split('\n'));
   return (
     <ol className="grid gap-1 font-mono">
       {lines.map((l) => (
         // a words line keeps its field (and a draft) when its text changes; a value line remounts
-        <li key={l.key ?? `${l.n}:${l.text}`} className="flex min-w-0 items-center gap-2">
-          <span className="w-6 shrink-0 text-right text-muted-foreground">{l.n}</span>
-          {l.verb ? (
-            <Value
-              line={l}
-              keys={picks(l.verb, context.nodes, context.unlinkable)}
-              set={(value) => set(l, value)}
-            />
-          ) : l.key ? (
-            <div className="min-w-0 flex-1">
-              <WordsField label="" k={l.key} words={l.text.replace(/^\s*\* /, '')} />
-            </div>
-          ) : (
-            <span className="min-w-0 flex-1 truncate whitespace-pre">{l.text}</span>
-          )}
-        </li>
+        <Row key={l.key ?? `${l.n}:${l.text}`} l={l} context={context} set={set} op={op} rs={rs} />
       ))}
     </ol>
+  );
+}
+
+type Rows = { set: Setter; op: Rower; bytes: string };
+/** One line: a value line its picker, a words line its words field, the rest as written. */
+function Row({ l, context, set, op, rs }: Rows & { l: Line; context: Context; rs: ReturnType<typeof rows> }) {
+  return (
+    <li
+      className="group flex min-w-0 items-center gap-2"
+      onKeyDown={(e) => lineKey(e, l.n, op)}
+    >
+      <span className="w-6 shrink-0 text-right text-muted-foreground">{l.n}</span>
+      {l.verb ? (
+        <Value line={l} keys={picks(l.verb, context.nodes, context.unlinkable)} set={(v) => set(l, v)} />
+      ) : l.key ? (
+        <div className="min-w-0 flex-1">
+          <WordsField label="" k={l.key} words={l.text.replace(/^\s*\* /, '')} />
+        </div>
+      ) : (
+        <span className="min-w-0 flex-1 truncate whitespace-pre">{l.text}</span>
+      )}
+      <span className="flex opacity-0 group-focus-within:opacity-100 group-hover:opacity-100">
+        <RowMenu n={l.n} rs={rs} op={op} />
+      </span>
+    </li>
   );
 }
 

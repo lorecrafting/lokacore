@@ -30,8 +30,7 @@ export type SceneKind =
   | 'sets'
   | 'quest';
 
-/** The file's pages and its end marks, in order: a page is a run of non-blank lines, and `---` is
- * its own block that ends one (cut_files.ex paragraphs/1; lines are trimmed). */
+/** The file's pages and its end marks: a page is a run of non-blank lines, `---` its own block. */
 export function blocks(lines: string[]): Block[] {
   const out: Block[] = [];
   lines.forEach((raw, i) => {
@@ -103,8 +102,7 @@ export function cut(bytes: string, op: Op, steps = false): { after: string } | {
   return refused ? { refused } : { after: out.join('\n') };
 }
 
-/** A `.scene` line as the card sees it: its indent, and on a `- ` line its key (scene_lines.ex
- * `choice_key`; S3's explicit ` #<key>` suffix comes later). */
+/** A `.scene` line as the card sees it: its indent, and on a `- ` line its key (S3's ` #<key>`). */
 type Row = { indent: number; text: string; key?: string };
 
 const KEYLINE = /^(npc|with|when): /;
@@ -172,6 +170,27 @@ const HEADS: Record<string, string> = {
 };
 const VALUED = new Set(['needs', 'gives', 'sets', 'quest', 'once:']);
 const ONCE = new Set(['then', 'once', 'once:', 'asked', 'quest']);
+
+/** The kinds a row may add, in the toolbar's order (rulings §1, §5): the sub-lines a block already
+ * holds once are left out, so the menu offers only what the grammar would take. */
+export function offers(rs: Row[], at: number): SceneKind[] {
+  const under = rs.slice(...(block(rs, at) as [number, number]));
+  const base: SceneKind[] = [
+    'choice',
+    'speaker',
+    'words',
+    'then',
+    'needs',
+    'once:',
+    'asked',
+    'gives',
+    'sets',
+    'quest',
+  ];
+  return base.filter(
+    (k) => !(ONCE.has(k) && under.some((r) => r.text.trim().startsWith(HEADS[k]))),
+  );
+}
 
 /** The line a kind adds at `indent`, or why it cannot (`~` is the placeholder the toolbar counts). */
 function made(kind: SceneKind, indent: string, value: string | undefined, under: Row[]) {
