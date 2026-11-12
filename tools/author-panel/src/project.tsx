@@ -27,7 +27,7 @@ export function Project({ state, send, trace, said, checked, heard }: Props) {
   return (
     <Tabs defaultValue="play" className="gap-0">
       <Title state={state} />
-      <TabsList className="mx-3 mt-2 grid w-auto grid-cols-3">
+      <TabsList className="mx-3 mt-2 grid w-auto grid-cols-7">
         <TabsTrigger value="play">Play</TabsTrigger>
         <TabsTrigger value="write">Write</TabsTrigger>
         <TabsTrigger value="state">State</TabsTrigger>
