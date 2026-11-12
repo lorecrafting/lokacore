@@ -171,8 +171,8 @@ For the owner: a rule that fires once, or rests, without writing the fact, the `
 
 | Ruling | Why | Test |
 |---|---|---|
-| **Source only.** `once: true` on a reaction lowers to the engine bool fact `<rule>_done` (default false), `not fact_compare` under `all` beside the authored `when`, and a trailing silent `fact.assign … true`; `cooldown: N` (logical seconds, ≥ 1) lowers to the engine int fact `<rule>_at`, `time_since {at_least: N}` and a trailing `fact.stamp`. An authored fact of either name, or a write to it, is `RESERVED_FACT` (as tips, `docs/system/cartridge.md:1370`) | The same lowering the compiler does for a choice's `once` (`cartridge.md:1018`); the artifact is unchanged, so no protocol, kernel or reviewer | A rule with `once` fires on the first matching event and not the second in a checkpoint; with `cooldown: 60` it fires, stays silent at +30 s and fires at +61 s |
-| **Lint sees the lowered write as deliberate**: the added assign or stamp does not trigger the narrate-or-silent rule | The write is bookkeeping, not a consequence | A `once` rule with a `narrate` step lints clean; one with no step but the lowered assign lints as today's silent rule does |
+| **Source only.** `once: true` on a reaction lowers to the engine bool fact `<rule>_done` (default false), `not fact_compare` under `all` beside the authored `when`, and a trailing `fact.assign … true`; `cooldown: N` (logical seconds, ≥ 1) lowers to the engine int fact `<rule>_at`, `time_since {at_least: N}` and a trailing `fact.stamp`. An authored fact of either name, or a write to it, is `RESERVED_FACT` (as tips, `docs/system/cartridge.md:1370`) | The same lowering the compiler does for a choice's `once` (`cartridge.md:1018`); the artifact is unchanged, so no protocol, kernel or reviewer | A rule with `once` fires on the first matching event and not the second in a checkpoint; with `cooldown: 60` it fires, stays silent at +30 s and fires at +61 s |
+| **Lint sees the lowered write as deliberate**: the added assign or stamp does not trigger the narrate-or-silent rule | The write is bookkeeping, not a consequence | A `once` rule with a `narrate` step lints clean; one with no step but the lowered assign lints as today's silent rule does. Holds by construction, not by a test: `lib/loka/content/lint.ex` reads the source file before any lowering, so it never sees the added steps. A test would only pass because of that ordering, which is a change detector |
 | **Both on `after` rules**: the `once` guard is checked at delivery and again when the job runs (the rule's `when` is, `protocol/reaction.schema.json:529`) | No special case | A delayed `once` rule delivered twice before its job runs fires once |
 
 Built (`test/loka/content_reaction_once_test.exs`, `lib/loka/content/reaction_once.ex`). Two shape
@@ -182,6 +182,11 @@ facts the compiler settled that this table assumed:
   invalid; the reserved `_at` fact has `minimum: 0` and no maximum.
 - **The `once`/`cooldown` refusals are `RESERVED_FACT`**, not a new code, which is what the survey
   row and the tips precedent name.
+- **`once` and `cooldown` need the `policy` capability.** The guard sits in the rule's `when`, and
+  `kernel/ts/play/allowed.ts:51` already maps `reactions.when` to `policy`; a cartridge that writes
+  `once` without locking `policy` is refused `UNDECLARED_CAPABILITY` at the rule. This is the same
+  capability an authored `when` already needs, not a new one, but a writer who only ever wrote
+  `on`/`steps` will meet it for the first time here.
 
 A lowered `once` step goes after the rule's own steps and a `cooldown` stamp before `once`'s assign,
 so a delayed rule records the time it fired rather than the time it was queued.

@@ -255,11 +255,9 @@ defmodule Loka.Content.Compiler do
     # Read the authored `once`/`cooldown` here: the lowering drops them and their steps are
     # indistinguishable from the author's own afterwards.
     reserved = Loka.Content.ReactionOnce.names(defs)
-    writes = Loka.Content.ReactionOnce.writes(files)
     defs = Loka.Content.DialogueOnce.lower(defs) |> then(&Loka.Content.ReactionOnce.lower(&1, m))
 
-    {Map.merge(expanded(defs, m), loaded), Enum.concat([d0, d1, d2, d3, d4, d5, writes]),
-     reserved}
+    {Map.merge(expanded(defs, m), loaded), Enum.concat([d0, d1, d2, d3, d4, d5]), reserved}
   end
 
   # The facts a module adds for its own declarations (@engine_facts: scene, skill, trail, once).

@@ -96,6 +96,9 @@ test('a policy field waits for policy and an ambient for emote', () => {
     ['dialogues.choices', 'policy', 'policy'],
     ['populations', 'birth_when', 'policy'],
     ['populations', 'wander_when', 'policy'],
+    // a reaction's `once`/`cooldown` lowers a guard into `when` (reaction_once.ex), so the
+    // engine's own lowering needs policy too, not only an authored when
+    ['reactions', 'when', 'policy'],
     ['npcs', 'ambient', 'emote'],
     ['items', 'ambient', 'emote'],
     ['rooms', 'ambient', 'emote'],

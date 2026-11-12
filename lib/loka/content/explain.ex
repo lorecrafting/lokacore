@@ -102,7 +102,7 @@ defmodule Loka.Content.Explain do
          choice_order_written | A choice's `order` is the compiler's mark of a scene's written order, not a field to write. | Remove it: a scene's choices show as written, a JSON dialogue's by key.
          once_outside_choice | Line `{text}`: `once` belongs under a choice. | Move it under a `- ` line.
          once_key_taken | `once` here would make the fact `{key}`, and that fact already exists. | Rename that fact, or this choice's words.
-         once_key_long | `once` or `cooldown` here would make the fact `{key}`, longer than 64 characters. | Shorten the key that names it.
+         once_key_long | `once` here would make the fact `{key}`, longer than 64 characters. | Shorten this choice's words or the scene's key.
          bad_then | Line `{text}` is not `then: <key>` or `then: end`, or repeats a `then:`. | Name one dialogue by its key, or `end`; `~` holds the place of words, not of a key.
          then_outside_choice | Line `{text}`: `then:` belongs under a choice. | Move it under a `- ` line.
          then_and_nested | Line `{text}`: this choice already goes on to its nested choices. | Remove the `then:`, or remove the nested choices.

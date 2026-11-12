@@ -113,7 +113,8 @@ defmodule Loka.Content.Position do
       Enum.map(Map.keys(defs["skill"]), &("skill_" <> &1)),
       for({key, {_, _, %{"growth" => _}}} <- defs["skill"], do: "uses_" <> key),
       for({key, {_, _, %{"tip" => _}}} <- defs["scripted_action"], do: "seen_tip_" <> key),
-      Loka.Content.Trails.names(defs)
+      Loka.Content.Trails.names(defs),
+      Loka.Content.ReactionOnce.names(defs)
     ])
   end
 
@@ -150,13 +151,11 @@ defmodule Loka.Content.Position do
   # The lowering appends its own steps (one per field) writing this rule's reserved facts. An
   # author's step is anything before them, including a write of another rule's lowered fact, which
   # Position must still refuse.
-  defp own_lowering?(key, s, %{"steps" => steps}, reserved) do
-    mine = Enum.filter(["#{key}_done", "#{key}_at"], &(&1 in reserved))
-    tail = Enum.take(steps, -length(mine))
-    mine != [] and s in tail and Enum.all?(tail, &(fact_name(&1["fact"]) in mine))
+  # The lowering appends its steps, so the ones it added are the last few by position. Comparing
+  # by value would also match an author's own identical step written above them.
+  defp lowered_count(key, reserved) do
+    Enum.count(["#{key}_done", "#{key}_at"], &(&1 in reserved))
   end
-
-  defp own_lowering?(_, _, _, _), do: false
 
   # Each authored step that may fact.assign: {rel, steps to it, step}.
   # A reaction carries the lowering's own `once`/`cooldown` steps; they write the facts the
@@ -168,7 +167,7 @@ defmodule Loka.Content.Position do
         {at, list} <- lists(kind, v),
         {s, i} <- Enum.with_index(list),
         not (kind == "reaction" and
-               own_lowering?(Map.get(v, "key") || key_of(rel), s, v, reserved)),
+               i >= length(list) - lowered_count(Map.get(v, "key") || key_of(rel), reserved)),
         do: {rel, steps ++ at ++ [i], s}
   end
 
