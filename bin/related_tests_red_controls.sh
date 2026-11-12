@@ -46,5 +46,33 @@ printf 'zz\n' > kernel/ts/play/write.ts
 git -c user.name=t -c user.email=t@t commit -qam "source change"
 out=$(sh "$bin/related_tests.sh" . 2>&1) || bad "skip exit: $out"
 printf '%s\n' "$out" | grep -qx RELATED_TESTS_skip_no_node_modules || { bad 'a worktree without node_modules did not skip'; printf '%s\n' "$out"; }
+# Break 5: a panel type error does not dock the push (loka-vvreo: #711 pushed two of them past this
+# gate, which only ever ran kernel/ts tests). A stub tsc stands in, so no build runs here.
+rm -rf tools/author-panel && mkdir -p tools/author-panel/node_modules/.bin
+printf '#!/bin/sh\nexit 0\n' > tools/author-panel/node_modules/.bin/tsc
+chmod +x tools/author-panel/node_modules/.bin/tsc
+mkdir -p kernel/ts/node_modules && printf '#!/bin/sh\nexit 0\n' > "$tmp/stub/true"
+printf 'x\n' > tools/author-panel/Scene.tsx
+git add -A . && git -c user.name=t -c user.email=t@t commit -qm "panel change"
+is_panel_diff() { printf '%s\n' "$out" | grep -qx AUTHOR_PANEL_TSC_OK; }
+# a green panel reports OK and lets the kernel tests run as before
+out=$(PATH="$tmp/stub:$PATH" sh "$bin/related_tests.sh" . 2>&1) || bad "green panel exit: $out"
+is_panel_diff || { bad 'a green panel is not reported OK'; printf '%s\n' "$out"; }
+# a tsc that fails must dock the push, naming the panel and the failure
+printf '#!/bin/sh\nexit 1\n' > tools/author-panel/node_modules/.bin/tsc
+if out=$(PATH="$tmp/stub:$PATH" sh "$bin/related_tests.sh" . 2>&1); then bad 'a red panel exited 0'; fi
+printf '%s\n' "$out" | grep -qx AUTHOR_PANEL_TSC_FAIL || { bad 'a red panel is not named FAIL'; printf '%s\n' "$out"; }
+printf '%s\n' "$out" | grep -qx RELATED_TESTS_fail || { bad 'a red panel did not report RELATED_TESTS_fail'; printf '%s\n' "$out"; }
+# a panel diff with no installed types skips rather than claiming a typecheck
+rm -rf tools/author-panel/node_modules
+out=$(PATH="$tmp/stub:$PATH" sh "$bin/related_tests.sh" . 2>&1) || bad "panel skip exit: $out"
+printf '%s\n' "$out" | grep -qx AUTHOR_PANEL_TSC_skip_no_node_modules || { bad 'a panel without node_modules did not skip'; printf '%s\n' "$out"; }
+# Break 6: a kernel diff alone does not run tsc (it would cost a build on every kernel push).
+# A fresh branch from base, so the panel file is not in the diff at all.
+git checkout -q -B kernel-only refs/remotes/origin/main
+printf 'q\n' > kernel/ts/play/write.ts
+git -c user.name=t -c user.email=t@t commit -qam "kernel only"
+out=$(PATH="$tmp/stub:$PATH" sh "$bin/related_tests.sh" . 2>&1) || bad "kernel-only exit: $out"
+printf '%s\n' "$out" | grep -q AUTHOR_PANEL_TSC && { bad 'a kernel-only diff ran the panel typecheck'; printf '%s\n' "$out"; }
 [ "$fail" = 0 ] && echo "related_tests red controls: all pass"
 exit "$fail"

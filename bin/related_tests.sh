@@ -6,7 +6,9 @@
 # Usage: bin/related_tests.sh <worktree> [<commit>]   (default HEAD, diffed from merge-base origin/main)
 # Prints one `<seconds>s [FAIL|SLOW] <path>` line per file, then
 # RELATED_TESTS_none|skip_no_node_modules|ok|fail. Exit 1 only on red. A worktree without
-# kernel/ts/node_modules skips the run: setup costs more than the CI it saves.
+# kernel/ts/node_modules skips the run: setup costs more than the CI it saves. A diff that touches
+# tools/author-panel is typechecked there before any of this (loka-vvreo: #711 pushed two panel type
+# errors past this gate because it only ever ran kernel/ts tests).
 # A file gets RELATED_TESTS_CAP (default 60) seconds: over it, the file prints SLOW and does not dock the
 # push, because `editor_crud.test.ts` compiles the whole registry (164 s) and a gate people work around
 # catches nothing. CI's `npm run test:nosim` runs every file whatever this says.
@@ -15,7 +17,23 @@ set -u
 cd "$1" || exit 2
 rev=$(git rev-parse --verify --quiet "${2-HEAD}") || { echo "related_tests: no such commit: ${2-HEAD}" >&2; exit 2; }
 base=$(git merge-base origin/main "$rev" 2>/dev/null) || { echo RELATED_TESTS_none; exit 0; }
-files=$(git diff --no-renames --name-only "$base" "$rev" | grep -E '^kernel/ts/' || true)
+diff=$(git diff --no-renames --name-only "$base" "$rev")
+# The panel's types, before its tests: `npm run build` is `tsc -b && vite build`, and a type error is
+# what reached CI on #711 (an unused import and a missing prop, neither of which a test names).
+if printf '%s\n' "$diff" | grep -q '^tools/author-panel/'; then
+  if [ -d tools/author-panel/node_modules ]; then
+    if ( cd tools/author-panel && node_modules/.bin/tsc -b ) >/dev/null 2>&1; then
+      echo AUTHOR_PANEL_TSC_OK
+    else
+      echo AUTHOR_PANEL_TSC_FAIL
+      echo RELATED_TESTS_fail
+      exit 1
+    fi
+  else
+    echo AUTHOR_PANEL_TSC_skip_no_node_modules
+  fi
+fi
+files=$(printf '%s\n' "$diff" | grep -E '^kernel/ts/' || true)
 [ -n "$files" ] || { echo RELATED_TESTS_none; exit 0; }
 list=$(mktemp "${TMPDIR:-/tmp}/related_tests.list.XXXXXX") || exit 2
 for f in $files; do
