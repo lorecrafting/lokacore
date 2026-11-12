@@ -1,10 +1,11 @@
-// A `.cut` file's page ops (docs/design/scene-structure-rulings.md §1, §3, §4): the one pure
-// function POST /restructure (scene_card.ts) and the Scene card's page buttons both call, so every
-// refusal is checked here. No node:fs: the panel reads it. Every byte the op does not touch is kept.
+// A `.cut` file's page ops and a `.scene` file's line ops (docs/design/scene-structure-rulings.md
+// §1, §3, §4): the pure functions POST /restructure (scene_card.ts) and the Scene card's buttons
+// both call, so every refusal is checked here. No node:fs: the panel reads it. Every byte the op
+// does not touch is kept.
 
 /** `n` is a file line (from 1): a page's line, or for `split` the line that starts the new page. */
 export type Op =
-  | { add: { after: number; kind: 'page' } }
+  | { add: { after: number; kind: SceneKind; value?: string } }
   | { remove: number }
   | { move: number; by: -1 | 1 }
   | { split: number }
@@ -14,8 +15,22 @@ type Block = [first: number, last: number]; // 0-based lines
 const END = '---';
 const isEnd = (lines: string[], [first]: Block) => lines[first].trim() === END;
 
-/** The file's pages and its end marks, in order: a page is a run of non-blank lines, and `---` is
- * its own block that ends one (cut_files.ex paragraphs/1; lines are trimmed). */
+/** The `.scene` line kinds the card adds (rulings §1): the grammar's own, nothing new. */
+export type SceneKind =
+  | 'page'
+  | 'choice'
+  | 'words'
+  | 'speaker'
+  | 'then'
+  | 'needs'
+  | 'once'
+  | 'once:'
+  | 'asked'
+  | 'gives'
+  | 'sets'
+  | 'quest';
+
+/** The file's pages and its end marks: a page is a run of non-blank lines, `---` its own block. */
 export function blocks(lines: string[]): Block[] {
   const out: Block[] = [];
   lines.forEach((raw, i) => {
@@ -34,6 +49,18 @@ function ended(lines: string[]) {
   if (!said.some((l) => l !== END)) return 'a cut needs a page';
   if (said.at(-1) !== END || said.indexOf(END) !== said.length - 1)
     return '`---` closes the cut, once, under its last page';
+}
+
+/** Swap two blocks, the upper one first in file order, keeping every other byte. */
+function reorder(lines: string[], out: string[], x: Block, y: Block) {
+  const [[a0, a1], [b0, b1]] = [x, y];
+  out.splice(
+    a0,
+    b1 - a0 + 1,
+    ...lines.slice(b0, b1 + 1),
+    ...lines.slice(a1 + 1, b0),
+    ...lines.slice(a0, a1 + 1),
+  );
 }
 
 /** The cut's bytes after `op`, or why it is refused. `steps`: its `scenes/<key>.json` twin carries
@@ -61,9 +88,7 @@ export function cut(bytes: string, op: Op, steps = false): { after: string } | {
     const j = i + o.by;
     if (Math.abs(o.by) !== 1 || !all[j])
       return { refused: `no page ${o.by < 0 ? 'above' : 'below'}` };
-    const [[a0, a1], [b0, b1]] = [all[Math.min(i, j)], all[Math.max(i, j)]];
-    const part = (x: number, y: number) => lines.slice(x, y + 1);
-    out.splice(a0, b1 - a0 + 1, ...part(b0, b1), ...part(a1 + 1, b0 - 1), ...part(a0, a1));
+    reorder(lines, out, all[Math.min(i, j)], all[Math.max(i, j)]);
   } else if ('split' in o) {
     if (n - 1 === first || isEnd(lines, all[i]))
       return { refused: 'split at a page’s second line or later' };
@@ -75,4 +100,201 @@ export function cut(bytes: string, op: Op, steps = false): { after: string } | {
   } else return { refused: 'op: add, remove, move, split or join' };
   const refused = ended(out);
   return refused ? { refused } : { after: out.join('\n') };
+}
+
+/** A `.scene` line as the card sees it: its indent, and on a `- ` line its key (S3's ` #<key>`). */
+type Row = { indent: number; text: string; key?: string };
+
+const KEYLINE = /^(npc|with|when): /;
+/** The prefix of a `~` choice's key: its line number follows (scene_lines.ex `choice_key`). */
+const TODO = 'todo__';
+
+/** `choice_key`'s slug (scene_lines.ex:80-81), and `todo__<n>` for a `~` placeholder: its line
+ * keys it, which is why an insert or a move above one shifts its key. */
+const slug = (label: string) =>
+  label
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '');
+
+export const rows = (lines: string[]): Row[] =>
+  lines.map((text, i) => {
+    const indent = text.length - text.trimStart().length;
+    const body = text.trim();
+    if (!body.startsWith('- ')) return { indent, text };
+    const label = body.slice(2);
+    return { indent, text, key: label.trim() === '~' ? `${TODO}${i + 1}` : slug(label) };
+  });
+
+/** A choice's block: its line and every deeper line under it. Trailing blanks belong to neither
+ * side, so a swap leaves them where they are. */
+const block = (rs: Row[], at: number): Block => {
+  const { indent } = rs[at];
+  let end = at;
+  for (let j = at + 1; j < rs.length; j++) {
+    if (rs[j].text.trim() === '') continue;
+    if (rs[j].indent <= indent) break;
+    end = j;
+  }
+  return [at, end];
+};
+
+/** The sibling choices at `at`'s depth in file order; a shallower line closes the set. */
+function siblings(rs: Row[], at: number) {
+  const { indent } = rs[at];
+  const out: number[] = [];
+  for (let j = 0; j < rs.length; j++) {
+    const r = rs[j];
+    if (r.indent < indent && out.length) break;
+    if (r.indent === indent && r.key !== undefined) out.push(j);
+  }
+  return out;
+}
+
+/** The nearest `- ` above `at` at a shallower indent: the choice a sub-line belongs to. */
+function parent(rs: Row[], at: number) {
+  for (let j = at - 1; j >= 0; j--)
+    if (rs[j].key !== undefined && rs[j].indent < rs[at].indent) return j;
+  return -1;
+}
+
+const HEADS: Record<string, string> = {
+  then: 'then:',
+  needs: 'needs:',
+  once: 'once',
+  'once:': 'once:',
+  asked: 'asked',
+  gives: 'gives:',
+  sets: 'sets:',
+  quest: 'quest:',
+};
+const VALUED = new Set(['needs', 'gives', 'sets', 'quest', 'once:']);
+const ONCE = new Set(['then', 'once', 'once:', 'asked', 'quest']);
+
+/** The kinds a row may add, in the toolbar's order (rulings §1, §5): the sub-lines a block already
+ * holds once are left out, so the menu offers only what the grammar would take. */
+export function offers(rs: Row[], at: number): SceneKind[] {
+  const under = rs.slice(...(block(rs, at) as [number, number]));
+  const base: SceneKind[] = [
+    'choice',
+    'speaker',
+    'words',
+    'then',
+    'needs',
+    'once:',
+    'asked',
+    'gives',
+    'sets',
+    'quest',
+  ];
+  return base.filter(
+    (k) => !(ONCE.has(k) && under.some((r) => r.text.trim().startsWith(HEADS[k]))),
+  );
+}
+
+/** The line a kind adds at `indent`, or why it cannot (`~` is the placeholder the toolbar counts). */
+function made(kind: SceneKind, indent: string, value: string | undefined, under: Row[]) {
+  if (kind === 'page' || kind === 'choice') return `${indent}- ~`;
+  if (kind === 'words') return `${indent}* ~`;
+  if (kind === 'speaker')
+    return value ? `${indent}${value}: ~` : { refused: 'a speaker line names a role' };
+  const head = HEADS[kind];
+  if (!head) return { refused: `no kind ${kind}` };
+  // the ones a choice holds once (scene_files.ex:331-338): a second `then:` or `once` cannot lower.
+  // `needs:`, `sets:` and `gives:` repeat, one per fact or item
+  if (ONCE.has(kind) && under.some((r) => r.text.trim().startsWith(head)))
+    return { refused: `this choice already has \`${head}\`` };
+  return `${indent}${head}${VALUED.has(kind) ? ` ${value ?? '~'}` : ''}`;
+}
+
+/** One op's edit of `lines`, or why it is refused: `add`, `remove` or `move` (§1). */
+function edit(
+  o: Record<string, any>,
+  rs: Row[],
+  out: string[],
+  lines: string[],
+  at: number,
+): { refused: string } | undefined {
+  const text = rs[at].text.trim();
+  if (!text) return { refused: `no line ${at + 1}` };
+  if ('add' in o) {
+    // a choice goes after the line's whole block at its own depth; anything else right after the
+    // line, a sub-line two spaces deeper than a `- ` one (its block's indent)
+    const kind = o.add?.kind as SceneKind;
+    const [, b] = kind === 'choice' ? block(rs, at) : ([at, at] as Block);
+    const under = rs.slice(...(block(rs, at) as [number, number]));
+    const depth = rs[at].key === undefined ? rs[at].indent : rs[at].indent + 2;
+    const made_ = made(
+      kind,
+      ' '.repeat(kind === 'choice' ? rs[at].indent : depth),
+      o.add.value,
+      under,
+    );
+    if (typeof made_ !== 'string') return made_;
+    out.splice(b + 1, 0, made_);
+  } else if ('remove' in o) {
+    if (KEYLINE.test(text)) return { refused: 'a key line has no Remove' };
+    const [a, b] = rs[at].key === undefined ? ([at, at] as Block) : block(rs, at);
+    out.splice(a, b - a + 1);
+  } else if ('move' in o) return shifted(o, rs, out, lines, at);
+  else return { refused: 'op: add, remove or move on a .scene' };
+}
+
+/** A move by one: a choice with its block past a sibling, or a sub-line within its own block. */
+function shifted(
+  o: Record<string, any>,
+  rs: Row[],
+  out: string[],
+  lines: string[],
+  at: number,
+): { refused: string } | undefined {
+  if (Math.abs(o.by) !== 1) return { refused: 'move by one' };
+  let x: Block, y: Block;
+  if (rs[at].key !== undefined) {
+    const sibs = siblings(rs, at);
+    const here = sibs.indexOf(at);
+    const dest = here + o.by;
+    if (dest < 0 || dest >= sibs.length)
+      return { refused: `no choice ${o.by < 0 ? 'above' : 'below'}` };
+    x = block(rs, Math.min(sibs[here], sibs[dest]));
+    y = block(rs, Math.max(sibs[here], sibs[dest]));
+  } else {
+    const up = parent(rs, at);
+    const j = at + o.by;
+    const pb = up < 0 ? rs.length - 1 : block(rs, up)[1];
+    if (up < 0 || j <= up || j > pb || rs[j].indent !== rs[at].indent || rs[j].key !== undefined)
+      return { refused: `no line ${o.by < 0 ? 'above' : 'below'}` };
+    x = [Math.min(at, j), Math.min(at, j)];
+    y = [Math.max(at, j), Math.max(at, j)];
+  }
+  reorder(lines, out, x, y);
+}
+
+/** `.scene` bytes after `op`, or why it is refused (§1, §2, §4). `refers` says whether a choice key
+ * has any referrer (a twin `choices.<c>`, `riddle.choice_id`, a quest outcome, a `choice_resolved`
+ * reaction, a save): a `~` choice's key is its line number, so shifting one that has a referrer
+ * would orphan it. A changed key with no referrer goes through. */
+export function scene(
+  bytes: string,
+  op: Op,
+  refers: (key: string) => boolean = () => false,
+): { after: string } | { refused: string } {
+  const lines = bytes.split('\n');
+  const rs = rows(lines);
+  const o = (op && typeof op === 'object' ? op : {}) as Record<string, any>;
+  if (Object.keys(o).filter((k) => k !== 'by').length !== 1) return { refused: 'one op per write' };
+  const n = 'add' in o ? o.add?.after : (o.remove ?? o.move ?? o.split ?? o.join);
+  const at = Number.isInteger(n) ? n - 1 : -1;
+  if (at < 0 || at >= lines.length) return { refused: `no line ${n}` };
+  const out = [...lines];
+  const refused = edit(o, rs, out, lines, at);
+  if (refused) return refused;
+  // §2: a `~` choice keys on its line (todo__<n>), so an op that renumbers one with a referrer is
+  // refused before it writes
+  for (const [i, r] of rows(out).entries()) {
+    const key = rs[i]?.key;
+    if (!key?.startsWith(TODO) || !refers(key)) continue;
+    if (r.key !== key) return { refused: `give choice ${key.slice(TODO.length)} its words first` };
+  }
+  return { after: out.join('\n') };
 }
