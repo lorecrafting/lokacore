@@ -51,3 +51,26 @@ Running the new rows over every cartridge in the repo (not just `toolbox_showcas
 After all fixes every cartridge in `cartridges/` reports zero findings from the new rows, `test/loka/lint_baseline.txt` is unchanged, and the slice's 29 tests pass. Mutation check: each fix was reverted and its test watched fail (the `once: true` clause, the `escrow` clause, `current_state` in `self_ending?/1`, and each of the two quest-resolver paths).
 
 One process note worth keeping: the first version of this record dismissed the reviewer's `once: true` finding after checking only `protocol/*.schema.json`. The key is absent from the schemas because it is lowered before validation — absent from a schema is not evidence that a field does not exist.
+
+## Re-check 2
+
+Written 2026-11-13 16:20 UTC in the Pi harness by deploy/deepseek-ai/deepseek-v4.1-flash-1017
+
+Rechecked `2c8690dc5` only (lint_facts.ex two new `compare/4` clauses, one test). Owner's Anthropic
+subscription is paused; no tests or mutants were run.
+
+- Clause order holds: the bool/enum head needs `type in ["bool","enum"]` and the general int head is
+  general, so the two new int heads shadow only `t > maximum` cases — which must be findings.
+- `fact_compare` on an int is plain equality (policy.schema.json: "equals"), `maximum` is inclusive,
+  so `equals` above it can never hold. Genuine.
+- A fact with `maximum` but no `default` is fine: the new heads never read `default`; only the
+  general clause does (`vt["default"] || 0`).
+- The new test fails if both clauses are dropped (`at_least.(4)` would be exempted by the entitlement
+  writer and yield `[]`); its `at_least.(3) == []` assert pins the `>` boundary.
+- Finding (low, lint_facts.ex:135,145): the new heads guard on `t > max` without `is_integer(t)`, and
+  Erlang term order makes `nil`/binaries compare greater than an integer, so a malformed `at_least`
+  (or a non-int `equals`) reports "no value above N is allowed" with an empty interpolation instead
+  of falling through to the general clause's `!is_integer(t)` guard. Add `is_integer(t) and t > max`.
+- Also noted: the new heads now pre-empt the general clause's `t in ctx.values` suppression, so a
+  literal write above `maximum` is reported by this row rather than excused. Correct, but it is a
+  second behavior change; worth one sentence in the commit or a test.

@@ -134,15 +134,37 @@ defmodule Loka.Content.LintFacts do
       else: ["#{rel}: fact_compare #{f} tests #{inspect(v)}; nothing writes that value"]
   end
 
+  # A threshold above the declared maximum cannot hold whoever writes it, so the schema settles it
+  # before the writer set is consulted. `is_integer(t)` is load-bearing: Erlang term order makes nil
+  # and binaries greater than any integer, so a malformed value would report a nonsense finding.
+  defp compare(rel, %{"op" => "fact_at_least", "at_least" => t} = m, f, %{
+         fact: %{"value_type" => %{"type" => "int", "maximum" => max}}
+       })
+       when is_integer(t) and t > max,
+       do: ["#{rel}: #{m["op"]} #{f} tests #{t}; no value above #{max} is allowed"]
+
+  defp compare(rel, %{"op" => "fact_compare", "equals" => t} = m, f, %{
+         fact: %{"value_type" => %{"type" => "int", "maximum" => max}}
+       })
+       when is_integer(t) and t > max,
+       do: ["#{rel}: #{m["op"]} #{f} tests #{t}; no value above #{max} is allowed"]
+
   defp compare(rel, m, f, %{fact: %{"value_type" => %{"type" => "int"} = vt}} = ctx) do
     t = if m["op"] == "fact_at_least", do: m["at_least"], else: m["equals"]
     reach = (vt["default"] || 0) + once(ctx.adjust, f)
 
     cond do
-      !is_integer(t) or f in ctx.other -> []
-      Enum.any?(ctx.adjust, &match?({^f, _, true}, &1)) -> []
-      t <= reach or t in Map.get(ctx.values, f, []) -> []
-      true -> ["#{rel}: #{m["op"]} #{f} tests #{t}; its one-shot writes reach #{reach}"]
+      !is_integer(t) or f in ctx.other ->
+        []
+
+      Enum.any?(ctx.adjust, &match?({^f, _, true}, &1)) ->
+        []
+
+      t <= reach or t in Map.get(ctx.values, f, []) ->
+        []
+
+      true ->
+        ["#{rel}: #{m["op"]} #{f} tests #{t}; its one-shot writes reach #{reach}"]
     end
   end
 

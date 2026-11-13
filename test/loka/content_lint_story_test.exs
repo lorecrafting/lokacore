@@ -266,6 +266,27 @@ defmodule Loka.ContentLintStoryTest do
            ]
   end
 
+  test "a threshold above the fact's own maximum is a finding whoever writes it" do
+    capped = facts(%{"type" => "int", "default" => 0, "minimum" => 0, "maximum" => 3})
+    at_least = fn n -> %{"op" => "fact_at_least", "fact" => "f", "at_least" => n} end
+
+    # The schema's maximum bounds the fact whatever writes it, so a mechanic writer does not
+    # excuse a threshold above it; this is the fact a service or spell fills in.
+    written = %{"services/s.json" => %{"op" => "entitlement", "fact" => "f", "value" => true}}
+
+    assert lint(Map.merge(capped, Map.put(written, "actions/co.json", at_least.(4)))) == [
+             "actions/co.json: fact_at_least f tests 4; no value above 3 is allowed"
+           ]
+
+    # At the maximum it can still hold, so the writer exemption applies as before.
+    assert lint(Map.merge(capped, Map.put(written, "actions/co.json", at_least.(3)))) == []
+
+    # A malformed threshold is not a finding: Erlang term order puts nil and binaries above any
+    # integer, so without the is_integer guard this reports a nonsense line instead of nothing.
+    bad = %{"op" => "fact_at_least", "fact" => "f", "at_least" => "4"}
+    assert lint(Map.merge(capped, Map.put(written, "actions/co.json", bad))) == []
+  end
+
   test "a shadowed ambient set is a finding" do
     line = %{"lines" => ["text.json a"]}
     gated = Map.put(line, "when", @gated)
