@@ -13,7 +13,6 @@ defmodule Loka.Content.LintFacts do
   # A reaction on one of these runs once per quest or level, so its writes do not accumulate.
   @once ~w(quest_resolved quest_failed quest_activated level_reached)
   @compares ~w(fact_compare fact_at_least)
-  @assigns ~w(fact.assign fact.adjust fact.stamp)
 
   @doc "The fact findings: the compare rows over `sites`, and every fact's missing `meaning`."
   @spec run([{String.t(), map()}], %{String.t() => map()}, %{String.t() => map()}) :: [String.t()]
@@ -35,17 +34,32 @@ defmodule Loka.Content.LintFacts do
     |> Enum.group_by(&elem(&1, 0), &elem(&1, 1))
   end
 
-  # A fact named anywhere other than as a compare's or a plain assignment's subject may be written
-  # by a mechanic the cartridge opts into (world.theft, a skill's `learned`, a topic's `fact`, an
-  # ancestry's `faction`), so the compare rows stay silent for it. ponytail: conservative, so it
-  # under-reports rather than misfiring on the showcase.
+  # A mechanic the cartridge opts into writes a fact without any `fact.assign`: a service benefit of
+  # op `entitlement`, a spell's `learned`, a topic's `fact`, `world.theft.stolen`/`noticed`, and
+  # `world.death_credit[].fact` (cartridge.schema.json, action.schema.json). Those are the only
+  # fields that count, so a fact merely mentioned in prose keeps its compare rows.
+  @writers ~w(learned stolen noticed)
+
   defp other(sites) do
     for {_, m} <- sites,
-        f <- for({_, v} <- m, is_binary(v), do: v),
-        m["fact"] != f or (m["op"] not in @compares and m["op"] not in @assigns),
+        f <- writer(m),
         into: MapSet.new(),
         do: f
   end
+
+  defp writer(m) do
+    keys = for k <- @writers, f = m[k], is_binary(f), do: f
+    keys ++ entitlement(m)
+  end
+
+  # A service benefit, and the `fact` pairing a `value` beside it; a topic, spell or death credit
+  # names a bare `fact` with no op and no value.
+  defp entitlement(%{"op" => "entitlement"} = m), do: bare(m)
+  defp entitlement(%{"fact" => _} = m) when not is_map_key(m, "op"), do: bare(m)
+  defp entitlement(_), do: []
+
+  defp bare(%{"fact" => f}) when is_binary(f), do: [f]
+  defp bare(_), do: []
 
   # Every positive fact.adjust, with whether its site may run more than once.
   defp adjust(sites, files) do
@@ -54,19 +68,30 @@ defmodule Loka.Content.LintFacts do
         f = named(m, "fact"),
         a = m["amount"],
         is_binary(f) and is_integer(a) and a > 0,
-        do: {f, a, repeats?(files[rel], rel)}
+        do: {f, a, repeats?(files[rel], rel, files)}
   end
 
-  defp repeats?(nil, _), do: true
+  defp repeats?(nil, _, _), do: true
 
-  defp repeats?(v, rel) do
+  defp repeats?(v, rel, files) do
     case LintLabels.parts(rel) do
-      ["reactions", _] -> get_in(v, ["on", "event"]) not in @once
+      ["reactions", _] -> repeatable?(get_in(v, ["on"]), files)
       ["quests", _] -> v["repeatable"] == true
       ["scenes", _] -> false
       _ -> true
     end
   end
+
+  # A reaction on a one-shot event runs once; on a quest event it runs once per instance, so a
+  # repeatable quest makes it accumulate. Any other event may repeat.
+  defp repeatable?(%{"event" => e} = on, files) when e in @once do
+    case named(on, "quest") do
+      nil -> false
+      q -> get_in(files, ["quests/#{q}.json", "repeatable"]) == true
+    end
+  end
+
+  defp repeatable?(_, _), do: true
 
   # L1: a fact_compare on a bool or enum whose value nothing writes can never hold. L2a: a bounded
   # int compared against a value the default and the writes that happen once cannot reach.

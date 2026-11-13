@@ -150,6 +150,20 @@ defmodule Loka.ContentLintStoryTest do
     theft = %{"cartridge.json" => %{"world" => %{"theft" => %{"stolen" => "f"}}}}
 
     assert lint(Map.merge(bool, Map.put(theft, "actions/co.json", compare.(true)))) == []
+
+    # A service benefit and a spell's `learned` are writers too.
+    service = %{"services/s.json" => %{"benefit" => %{"op" => "entitlement", "fact" => "f"}}}
+    assert lint(Map.merge(bool, Map.put(service, "actions/co.json", compare.(true)))) == []
+
+    spell = %{"actions/cast.json" => %{"learned" => "f"}}
+    assert lint(Map.merge(bool, Map.put(spell, "actions/co.json", compare.(true)))) == []
+
+    # Any other mention of the fact in source is not a writer, so the row still fires.
+    prose = %{"rooms/r.json" => %{"description" => "f"}}
+
+    assert lint(Map.merge(bool, Map.put(prose, "actions/co.json", compare.(true)))) == [
+             "actions/co.json: fact_compare f tests true; nothing writes that value"
+           ]
   end
 
   test "a threshold the one-shot writes cannot reach is a finding" do
@@ -183,6 +197,26 @@ defmodule Loka.ContentLintStoryTest do
     }
 
     assert lint(Map.merge(int, Map.put(once, "actions/co.json", at_least.(5)))) == [
+             "actions/co.json: fact_at_least f tests 5; its one-shot writes reach 1"
+           ]
+
+    # A repeatable quest resolves any number of times, so a reaction on its resolution
+    # accumulates and reaches any threshold; without repeatable the same reaction runs once.
+    quest = %{"quests/errand.json" => %{"repeatable" => true}}
+
+    named = %{
+      "reactions/a.json" => %{
+        "on" => %{"event" => "quest_resolved", "quest" => "errand"},
+        "steps" => [adjust.(1)]
+      }
+    }
+
+    assert lint(Map.merge(Map.merge(int, quest), Map.put(named, "actions/co.json", at_least.(5)))) ==
+             []
+
+    plain = Map.merge(int, Map.put(named, "actions/co.json", at_least.(5)))
+
+    assert lint(plain) == [
              "actions/co.json: fact_at_least f tests 5; its one-shot writes reach 1"
            ]
   end
