@@ -27,3 +27,19 @@
 ## Claims and checks
 
 (a) Partly rejected by B1/S1. (b) rejected by B2/B3. (c) accepted: fields and pins are tightened, not relaxed. (d) accepted: choice walks, palette/keyboard wiring, and bare no-choice nodes degrade without a crash; the 20-row cap reports `more`. `label()` handles bare dialogue refs. Focused tests: 47 pass; kernel/panel typechecks, Prettier, size gate, and CI pass. `bin/mutate_diff.sh` found 89 mutants, 68 run, with 15 survivors.
+
+## Fix re-check 1 (9342b7515 / b245532f5)
+
+- Written 2026-11-13 08:21 UTC in the Pi harness by openai-codex/gpt-5.6-luna, role reviewer.
+- Model routing: the requested Opus reviewer remained unavailable; this re-check used the same **openai-codex/gpt-5.6-luna** model and high thinking level as the original record.
+
+**Verdict: APPROVE**
+
+- **B1 fixed.** Story-point choice writes fan out to scene and reaction readers; scene `on.story_point` is not a write. Pin passes; removing the story-point fan-out mutant fails it.
+- **B2 fixed.** All generated policy leaves remain rows; odd `not` depth is preserved; only known hop-1 `fact_compare` values settle. Pin passes; leaf-only mutant fails it.
+- **B3 fixed.** `settledWrites` requires a defined value, so adjust/stamp readers remain `depends`. Pin passes; the old filter mutant fails it.
+- **S1 fixed.** Readers aggregate by node/choice with ordered `via`; `neverRead` deduplicates. Pin passes; via-inclusive dedupe mutant fails it.
+
+Focused kernel test: 16/16. Kernel and panel `tsc -b`, Prettier, and TypeScript size gate pass. Panel serial suite: 66/66. Parallel `npm test` showed 64/66 (two unrelated shared Vite/Chrome card harness failures); serial success and no panel fix code indicate pre-existing contention, not this fix.
+
+CI at `9342b751594354d98c34e5ffe222ccf792ec1a48`: `ci`, `book-e2e`, and `graph-diff` completed successfully.
