@@ -28,6 +28,11 @@ C1 shipped two model fields the rest of the story tooling will want: `reach.ts` 
 `kernel/ts/play/consequences.ts` before writing another walk over that graph. Its review record is
 `docs/reviews/2026-11-13-c1-consequences-review.md` (CHANGES REQUIRED then APPROVE on re-check; all four findings fixed).
 `kernel/ts/test/live.test.ts:145` (`500 !== 404` for `/open ../none.json`) is now a four-time flake, still unfixed (loka-fq96k).
+The last nightly `ci` on `main` is **red** (`8a29a163`, 2026-11-12 20:05Z, before #721 merged): kernel's
+`editor_crud.test.ts` "every field a card draws" failed on `reactions.once edit: needs a capability the cartridge does not
+lock (policy)` — exactly the gap #721 closed. `node --test test/editor_crud.test.ts` passes 4/4 on current `main`, so the
+red is a stale head, not open work; a beads/docs-only commit starts no hosted run, so the next real push on main is
+its first fresh evidence.
 Untracked `cartridges/prologue/` is the owner's in-progress Part 1: never touch it, read it only.
 `docs/system-graph.gen.json` regenerates from it, so keep that file out of a commit while the scratch cartridge is present.
 
