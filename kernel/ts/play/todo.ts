@@ -71,8 +71,10 @@ const cutLines = (text: string): Prose[] =>
     return line && line !== '---' ? [[`line ${i + 1}`, line]] : [];
   });
 
-const blank = (line: string) => line.trim() === '~';
-const words = (text: string) => text.split(/\s+/).filter(Boolean).length;
+/** A line still to write (`~`), and the words of prose already written: the one rule the Write tab
+ * and the lines sheet both count by. */
+export const blank = (line: string) => line.trim() === '~';
+export const words = (text: string) => text.split(/\s+/).filter(Boolean).length;
 
 /** Each file holding a placeholder, in path order, with its placeholder paths and the word
  * count of its prose already written. A file that is not JSON is the compiler's to report. */
