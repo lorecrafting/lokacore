@@ -32,6 +32,22 @@ defmodule Loka.ContentLintStoryTest do
 
     assert lint(%{"quests/errand.json" => quest, "reactions/done.json" => resolve}) == []
 
+    # A dialogue's own `quest` resolves it, every choice with the choice id as the outcome
+    # (dialogue/rule.ts:211), and a scene's `on_end.quest` resolves it too (scene/sequence.ts:103).
+    talk = %{"quest" => "errand", "choices" => %{"done" => %{"label" => "l"}}}
+    assert lint(%{"quests/errand.json" => quest, "dialogues/a.json" => talk}) == []
+
+    ended = %{
+      "on" => %{"action" => "dig"},
+      "on_end" => %{"quest" => "errand", "outcome" => "done"}
+    }
+
+    assert lint(%{"quests/errand.json" => quest, "scenes/a.json" => ended}) == []
+
+    # A walk that completes itself needs no resolver, and no deadline to fail it.
+    walk = Map.put(quest, "objective", %{"evidence" => "patrol"})
+    assert lint(%{"quests/errand.json" => walk}) == []
+
     # A deadline fails the quest by itself (quest_failed, step.schema.json).
     assert lint(%{"quests/errand.json" => Map.put(quest, "deadline", %{"after" => 60000})}) == []
   end

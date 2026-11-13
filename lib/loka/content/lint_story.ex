@@ -32,23 +32,49 @@ defmodule Loka.Content.LintStory do
 
   defp in_facts(files), do: get_in(files, ["facts.json", "facts"]) || %{}
 
-  # L1, story map S6: a quest no `quest.resolve` or `quest.fail` step names, with no deadline,
-  # which would fail the quest by itself (protocol/step.schema.json, quest_failed).
+  # L1, story map S6: a quest nothing can end. Four paths end one: a `quest.resolve` or
+  # `quest.fail` step; a dialogue's own `quest`, whose every choice resolves it with the choice id
+  # as the outcome (dialogue/rule.ts:211); a scene's `on_end.quest` (scene/sequence.ts:103); and a
+  # `patrol` or `expedition` objective, which completes when the walk does. A `deadline` fails it
+  # by itself (protocol/step.schema.json, quest_failed).
   defp quests(files) do
-    done =
-      for {_, v} <- Enum.sort(files),
-          m <- walk(v),
-          m["op"] in ~w(quest.resolve quest.fail),
-          k = named(m, "quest"),
-          into: MapSet.new(),
-          do: k
-
     for {k, rel, q} <- units(files, "quests"),
-        k not in done,
         is_map_key(q, "objective"),
         !is_map_key(q, "deadline"),
+        !self_ending?(q),
+        k not in endings(files),
         do: "#{rel}: nothing resolves or fails this quest; add a quest.resolve step or a deadline"
   end
+
+  # Every path that ends a quest: a `quest.resolve` or `quest.fail` step; a dialogue's own `quest`,
+  # which every one of its choices resolves with the choice id as the outcome
+  # (dialogue/rule.ts:211); and a scene's `on_end.quest` (scene/sequence.ts:103).
+  defp endings(files) do
+    MapSet.new(
+      steps(files) ++ owned(files, "dialogues", & &1) ++ owned(files, "scenes", & &1["on_end"])
+    )
+  end
+
+  defp steps(files) do
+    for {_, v} <- Enum.sort(files),
+        m <- walk(v),
+        m["op"] in ~w(quest.resolve quest.fail),
+        k = named(m, "quest"),
+        is_binary(k),
+        do: k
+  end
+
+  defp owned(files, dir, pick) do
+    for {_, _, m} <- units(files, dir),
+        s = pick.(m),
+        is_map(s),
+        k = named(s, "quest"),
+        is_binary(k),
+        do: k
+  end
+
+  defp self_ending?(%{"objective" => %{"evidence" => e}}), do: e in ~w(patrol expedition)
+  defp self_ending?(_), do: false
 
   # A story point is authored nowhere: Dialogues.points/2 derives it from each choice's
   # "<point>/<outcome>" and each scene's `on_end`, so those are its only claims.
