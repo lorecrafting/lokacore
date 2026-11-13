@@ -128,8 +128,9 @@ function renamed(
   for (const name of names(root)) {
     const rel = `checkpoints/${name}`;
     const path = join(root, rel);
-    const found = there(path);
-    if (!found?.isFile()) refuse(400, `not a regular checkpoint: ${rel}`);
+    // A directory named `x.json` is not a checkpoint: it names nothing, so the rename leaves it
+    // alone instead of refusing every rename in the cartridge. Reading it is `loka check`'s job.
+    if (!there(path)?.isFile()) continue;
     const was = readFileSync(path, 'utf8');
     const after = moved(was, kind, from, to);
     if (after !== null) changes.push({ file: rel, before: was, after });

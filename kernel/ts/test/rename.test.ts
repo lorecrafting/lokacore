@@ -49,7 +49,7 @@ async function served(t: TestContext) {
       carry: [],
     });
   plant(SRC, ROOM);
-  return { ask, read, plant, rename };
+  return { ask, read, plant, rename, src };
 }
 
 // Break: the route rewrites a checkpoint that names the key but not under the renamed kind — an entry
@@ -94,6 +94,18 @@ test('a ref of the same key under another kind keeps its bytes', async (t) => {
   assert.equal(done.status, 200, JSON.stringify(done.body));
   assert.equal((done.body as { checkpoints: number }).checkpoints, 0);
   assert.equal(read('checkpoints/other_kind.json'), NAMES_ITEM_WELL);
+});
+
+// Break: a directory named `x.json` in `checkpoints/` makes every rename in the cartridge refuse,
+// so an unrelated stray file blocks renaming a room. It names nothing: skip it, do not refuse.
+test('a directory named like a checkpoint blocks no rename', async (t) => {
+  const { read, plant, rename, src } = await served(t);
+  plant(NAMES_WELL, 'checkpoints/named.json');
+  mkdirSync(join(src, 'checkpoints', 'stray.json'), { recursive: true });
+  const done = await rename('the_well');
+  assert.equal(done.status, 200, JSON.stringify(done.body));
+  assert.equal((done.body as { checkpoints: number }).checkpoints, 1);
+  assert.match(read('checkpoints/named.json'), /room\/the_well/);
 });
 
 // Break: the rename writes the new file but never journals the checkpoint change, so /undo restores
