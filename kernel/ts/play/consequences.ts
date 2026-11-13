@@ -97,22 +97,21 @@ export function consequences(model: Model, ref: string): Consequences {
 }
 
 /** Hop 2's rows: whatever reads what hop 1 wrote (no write of its own, not one of story.ts's links,
- * and never the same choice reading its own write), the dialogues a `then` enters, then the
- * reactions that named this choice. */
+ * and never the same choice reading its own write), then the reactions that named this choice. A
+ * dialogue a `then` enters is hop 1's own row, so it is not listed twice. */
 function hops(edges: Edge[], hop1: Edge[], node: string, choice: string | undefined): Reader[] {
   const readers: Reader[] = [];
   const seen = new Set<string>();
   const gates = gatesOf(edges, new Map(hop1.filter((e) => e.set).map((e) => [e.to, e.value])));
-  const push = (e: Edge, via: string, row = key(e.from)) => {
-    const at = inChoice(e.path);
-    const id = `${e.from}|${at ?? ''}|${via}`;
+  const push = (ref: string, at: string | undefined, via: string) => {
+    const id = `${ref}|${at ?? ''}|${via}`;
     if (seen.has(id)) return;
     seen.add(id);
     readers.push({
-      ref: e.from,
-      key: at === undefined ? row : `${row}#${at}`,
+      ref,
+      key: at === undefined ? key(ref) : `${key(ref)}#${at}`,
       via,
-      gates: gates(e.from, at),
+      gates: gates(ref, at),
     });
   };
   for (const w of hop1.filter((e) => e.set || e.op?.startsWith('quest.')))
@@ -124,12 +123,11 @@ function hops(edges: Edge[], hop1: Edge[], node: string, choice: string | undefi
         !hop1.includes(e) &&
         !(e.from === node && choice !== undefined && inChoice(e.path) === choice)
       )
-        push(e, key(w.to));
-  for (const w of hop1) if (w.op === 'then' || w.op === 'then_failed') push(w, label(w));
+        push(e.from, inChoice(e.path), key(w.to));
   // story.ts links a reaction from the dialogue whose choice it named: the row is the reaction
   for (const e of edges.filter((x) => x.from === node))
     if (e.op === 'choice_resolved' && (choice === undefined || e.choice === choice))
-      push(e, e.op, key(e.to));
+      push(e.to, undefined, e.op);
   return readers;
 }
 
