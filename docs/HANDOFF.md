@@ -4,7 +4,7 @@ The present only: open work, next steps, owner questions, and standing owner rul
 yet. Rewrite this page in place once per session, at its end; never add dated session sections. History lives in git, Beads and `docs/reviews/`; lessons
 go to [PM lessons](lessons/pm.md) ([harness patterns](decisions/owner-decision-harness-patterns-2026-10-28.md)).
 
-AS OF main after #722; written 2026-11-13 08:30 UTC in the Pi harness by deploy/deepseek-ai/deepseek-v4.1-flash-1017, PM session.
+AS OF main after #723; written 2026-11-13 14:49 UTC in the Pi harness by deploy/deepseek-ai/deepseek-v4.1-flash-1017, PM session.
 `kernel_api` is 1.159 (no contract slice since). **The owner is taking about a month off and pausing the subscription
 (2026-11-07).** Nothing is mid-merge, nothing is in flight, no agent is running.
 
@@ -27,6 +27,13 @@ C1 shipped two model fields the rest of the story tooling will want: `reach.ts` 
 `leaf` (with `neg`), and `story.ts` links carry the `choice` a `choice_resolved` named — read
 `kernel/ts/play/consequences.ts` before writing another walk over that graph. Its review record is
 `docs/reviews/2026-11-13-c1-consequences-review.md` (CHANGES REQUIRED then APPROVE on re-check; all four findings fixed).
+#723 **L1 + L2, the story-logic lints** (loka-wfrgk.115.6, closed): `lib/loka/content/lint_story.ex`, `lint_facts.ex`
+and `lint_source.ex`, wired after `LintPages` in `lib/loka/content/lint.ex`. Nine rows: a quest nothing ends; a story
+point outcome nothing consumes; a scene only its own chain claims; a `fact_changed` cycle with no `when`; a compare
+value nothing writes; a shadowed ambient set; a threshold the one-shot writes cannot reach; a fully gated dialogue; a
+fact without `meaning`. Its review record is `docs/reviews/2026-11-13-l1-l2-story-logic-review.md` — read the
+"Found after the review" section before writing another row over real cartridges: five false findings survived the
+unit tests and only appeared when the rows ran over every cartridge in `cartridges/`.
 `kernel/ts/test/live.test.ts:145` (`500 !== 404` for `/open ../none.json`) is now a four-time flake, still unfixed (loka-fq96k).
 The last nightly `ci` on `main` is **red** (`8a29a163`, 2026-11-12 20:05Z, before #721 merged): kernel's
 `editor_crud.test.ts` "every field a card draws" failed on `reactions.once edit: needs a capability the cartridge does not
@@ -39,15 +46,15 @@ Untracked `cartridges/prologue/` is the owner's in-progress Part 1: never touch 
 ## In flight at handoff
 
 Nothing. The next slice starts from main.
-
 - **#632** (loka-vduxr.64) belongs to another session (lokacore-fb). **#454** is the owner's P3 hold.
 
 ## Resume, in order
 
 1. Story tooling epic **loka-wfrgk.115**, children .1 to .12 chained in the owner's order: R1, W1, D1, K2, C1, L1 + L2, W2,
-   F1 + W4, R2, K1, then W3 and E1 before v1. Done: R1 (#716), W1 (#717), D1 (#719), K2 (#720, #721), C1 (#722).
-   **loka-wfrgk.115.6 (L1 + L2, story-logic lints in Elixir) is next** and it takes a reviewer; three lint rows plus L2b as
-   a warning, specs at `docs/design/story-tooling.md:149` and `:239`. Then W2 (.7, blocks on .6).
+   F1 + W4, R2, K1, then W3 and E1 before v1. Done: R1 (#716), W1 (#717), D1 (#719), K2 (#720, #721), C1 (#722), L1 + L2
+   (#723). **loka-wfrgk.115.7 (W2, a rename rewrites the checkpoints with `/restructure`) is next** and it takes a
+   reviewer; then .8 (F1 + W4, the facts table with `meaning` and reachable range — L2a's reach arithmetic in
+   `lint_facts.ex` is the same sum it needs).
 2. Older P1s: loka-wfrgk.94, loka-wfrgk.100.8 (key-tagged Book lines), loka-wfrgk.100.4.
 3. Housekeeping PR: loka-ebnu3, jqxb8, grdiq, wfrgk.96, and the retro items (below).
 4. P2 editor items: .97, .98, .99, .102 follow-ups, map handle placement, `bin/loka new` duplicate keys (loka-wfrgk.68).
@@ -81,8 +88,21 @@ loka-4ks2l was approved and is merged (#709). Closed `loka-wfrgk.116` as a dupli
 
 ## Learned this session (worth knowing next time)
 
+- **A schema grep is not evidence a field does not exist.** `once: true` on a reaction appears in no
+  `protocol/*.schema.json`, so a first pass dismissed a reviewer's finding about it. It is real: `reaction_once.ex`
+  lowers `once` and `cooldown` into a done-fact guard *before* validation, and `dialogue_once.ex` does the same for a
+  choice. Check `lib/loka/content/*_once.ex` and the loader before concluding a key is unused.
+- **Run a new lint row over every cartridge, not just the pinned one.** `test/loka/lint_baseline.txt` pins only
+  `toolbox_showcase`, so all 29 unit tests passed while five rows misfired on `errand_sampler`, `journal_sampler`,
+  `build_sampler` and `reactions_sampler`. The check that caught them: `for d in cartridges/*/; do mise exec -- mix
+  loka.lint "$d"; done`. Do this before handing a lint slice to review.
+- **A whole-row blind spot can pass every unit test.** Before #723's fix, the compare rows skipped a fact named by *any*
+  string in source: 29 of 60 showcase facts and 122 of 202 compare sites were silently exempt, and nothing failed.
+  When a row is meant to fire on real cartridges, count what it actually examines.
 - **A same-file second edit can silently revert the first.** Two `edit` calls on one file in one turn left the region as
-  the *original* text; only reading the file back caught it. After a double edit on one file, read the region.
+  the *original* text; only reading the file back caught it. After a double edit on one file, read the region. It bit
+  again in #723: a test edit reported success while the file still held the old body, and only the mutation check
+  (reverting the fix and watching the test pass) exposed it.
 - **The panel suite passes serially and fails in parallel on this machine.** `node --test test/*.test.ts` (the CI and
   `npm test` default) gave 63/66 on C1: three unrelated card/room tests fail on one shared dev server and Chrome with
   load 2+. `node --test --test-concurrency=1 test/*.test.ts` gave 66/66. Judge a panel failure on the serial run before
@@ -90,7 +110,10 @@ loka-4ks2l was approved and is merged (#709). Closed `loka-wfrgk.116` as a dupli
 - **`bin/subagent` async children are broken in this harness install** (`@earendil-works/chord` missing); a blocking
   `async:false` run works. The spawn also refuses at load 8+, so check `uptime` first.
 - **Opus reviewers were unavailable all session** (anthropic OAuth expired, antigravity quota, no OpenRouter credits), so
-  C1's review and its re-check ran on `openai-codex/gpt-5.6-luna`; the record states that in its own section.
+  C1's review and its re-check ran on `openai-codex/gpt-5.6-luna`; the record states that in its own section. For #723
+  the same again: `loka-review` failed on the expired Anthropic refresh token, the builtin `reviewer` timed out at 60
+  minutes, so `loka-scout` (antigravity/gemini-3.8-flash) ran it — and despite being a lookup agent it found two real
+  blockers, one of which (`once: true`) I had wrongly dismissed.
 - `wait_ci.sh` again reported success on a head where I had to confirm with `gh run list --commit`; trust the second.
 - A review record for a PR is a **local** `review-<PR>` branch, never pushed: `bin/after_merge.sh` cherry-picks it. C1's
   first record arrived on the PR branch itself (cherry-picked into the fix push) and the re-check's record went to
