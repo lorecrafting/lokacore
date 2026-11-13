@@ -11,6 +11,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 (commit `997a7a8`, `docs/rewrite-v3/reviews/`).
 
 - [Review: W3 lines sheet](2026-11-13-w3-lines-review.md): **APPROVE WITH NOTES**
+- [Written 2026-11-13 19:15 UTC in the Pi harness by deploy/deepseek-ai/deepseek-v4.1-flash-1017](2026-11-13-w2-rename-checkpoints-review.md): **APPROVE WITH NOTES**
 - [Review: L1 + L2 story-logic lints (PR #723, loka-wfrgk.115.6)](2026-11-13-l1-l2-story-logic-review.md): **CHANGES REQUIRED**
 - [Review: C1 consequence preview of a choice (PR #722, loka-wfrgk.115.5)](2026-11-13-c1-consequences-review.md): **APPROVE**
 - [S3: a choice's key, pinned when its words change (self-review)](2026-11-12-s3-choice-key-self-review.md)
