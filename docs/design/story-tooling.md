@@ -73,15 +73,22 @@ touches. articy shows the next node; BioWare's plot editor shows the flag's read
 | **Where.** The Story slot's lower section, like Trace (`Consequences <key>`, `×`); `c` on a focused choice or node row; Cmd-K `consequences <key>`; a row click selects that node | One lower-section idiom; following is reading, as S2 ruled for Trace | Keyboard only: focus a choice row, `c`, arrow to a hop-2 row, Enter selects it |
 
 Built 2026-11-13 (`kernel/ts/play/consequences.ts`, `tools/author-panel/src/storyconseq.ts` and the panel
-wiring; tests in `kernel/ts/test/consequences.test.ts` and `test/author_story.test.ts`). Five facts the build
+wiring; tests in `kernel/ts/test/consequences.test.ts` and `test/author_story.test.ts`). Eight facts the build
 settled:
 
-- **The model needed two more fields, not a second walk.** `reach.ts`'s edges now carry `value` (what a
-  `fact.assign` writes) and `leaf` (a `fact_compare`'s own policy object), and `story.ts`'s `links` exports the
-  `choice` a `choice_resolved` named. Without them a gate could not be settled from the model alone; `leaf` rides
-  only the `fact_compare` edges and `value` only the writes, so no other edge grew.
+- **The model needed three more fields, not a second walk.** `reach.ts`'s edges now carry `value` (what a
+  `fact.assign` writes), `leaf` (any policy leaf's own object, with `neg` when a `not` wraps it), and `story.ts`'s
+  `links` exports the `choice` a `choice_resolved` named. Without them a gate could not be settled from the model
+  alone; `value` rides only the writes, so no read edge grew.
 - **A gate settles only on the fact hop 1 wrote.** Any other leaf is `depends` (dashed), including a gate on a
-  fact hop 1 never touched, so the walk never guesses from a world it cannot see.
+  fact hop 1 never touched, so the walk never guesses from a world it cannot see. A `fact.adjust` or `fact.stamp`
+  writes a value only play computes, so its readers stay `depends` too — only `fact.assign` carries a `value`.
+- **Every policy leaf keeps its row.** `npc_present`, `fact_at_least`, `has_item` and the rest say `depends on
+  play` rather than vanishing: the review's first pass kept only `fact_compare`, which silently dropped gates.
+- **A story point is a write only where it is reached** (a scene's `on_end`, a choice's own `story_point`), and
+  hop 2 then asks who listens for it; a scene's `on.story_point` is a trigger and writes nothing.
+- **A reader is one row per node**, naming every write it reads (`both via a, b`), so two effects do not list the
+  same scene twice with the same gates.
 - **The Story list has no choice rows.** Its rows are parts, beats, nodes and seeds, so `c` opens on a node; a
   dialogue's panel lists its choices, each a walk of its own (`<node>#<choice>`), and a choice row's click
   walks it.

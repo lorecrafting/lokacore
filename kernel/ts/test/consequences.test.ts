@@ -149,7 +149,7 @@ test('a read of the same fact twice is one row, and a `not` gate reads the value
         roles: {},
         choices: {
           go: { steps: [fact('door_open', true)], policy: compare('door_open') },
-          shut: { policy: compare('door_open', { not: true }) },
+          shut: { policy: { op: 'not', item: compare('door_open') } },
         },
       },
     }),
@@ -240,4 +240,141 @@ test('why_words reads an annotated leaf as a verdict, and an unannotated one as 
     ok: false,
     depth: 0,
   });
+});
+
+// Break: a story point a choice reaches shows in hop 1 but hop 2 never asks who listens for it, so
+// the scene that fires on the point looks like nothing follows.
+test('a choice that reaches a story point fans out to the scenes and reactions on it', () => {
+  const c: Obj = {
+    ...base,
+    rooms: defs('room', { yard: {} }),
+    npcs: defs('npc', { bram: { room: R('room', 'yard') } }),
+    scenes: defs('scene', {
+      ash: { on: { story_point: R('story_point', 'fate'), outcome: 'burn' }, steps: [] },
+    }),
+    reactions: defs('reaction', {
+      heard: { on: { event: 'story_point_reached', story_point: R('story_point', 'fate') } },
+    }),
+    dialogues: defs('dialogue', {
+      t: {
+        npc: R('npc', 'bram'),
+        roles: {},
+        choices: { burn: { story_point: R('story_point', 'fate') } },
+      },
+    }),
+  };
+  const { hop1, hop2 } = consequences(model(c), 'f@1:dialogue/t#burn');
+  assert.deepEqual(
+    hop1.map((e) => e.key),
+    ['fate'],
+  );
+  assert.deepEqual(
+    hop2.map((r) => `${r.key} via ${r.via}`),
+    ['ash via fate', 'heard via fate'],
+  );
+});
+
+// Break: a scene's own `on.story_point` is a trigger, not a write; reading it as one listed the
+// scene as writing a point it only listens for.
+test('a scene triggered by a story point does not write it', () => {
+  const c: Obj = {
+    ...base,
+    scenes: defs('scene', {
+      ash: { on: { story_point: R('story_point', 'fate'), outcome: 'burn' }, steps: [] },
+    }),
+  };
+  assert.deepEqual(consequences(model(c), 'f@1:scene/ash').hop1, []);
+});
+
+// Break: gatesOf keeping only fact_compare leaves drops a reader's npc_present gate entirely, so a
+// reaction that only fires with bram present looks unconditional.
+test('every policy leaf a reader holds shows, and a leaf hop 1 cannot settle is only a hint', () => {
+  const c: Obj = {
+    ...base,
+    rooms: defs('room', { yard: {} }),
+    npcs: defs('npc', { bram: { room: R('room', 'yard') } }),
+    dialogues: defs('dialogue', {
+      t: {
+        npc: R('npc', 'bram'),
+        roles: {},
+        choices: { go: { steps: [fact('flag', true)] } },
+      },
+      u: {
+        npc: R('npc', 'bram'),
+        roles: {},
+        policy: {
+          op: 'all',
+          items: [compare('flag'), { op: 'npc_present', npc: R('npc', 'bram') }],
+        },
+      },
+    }),
+    facts: defs('fact', { flag: {} }),
+  };
+  assert.deepEqual(consequences(model(c), 'f@1:dialogue/t#go').hop2[0]!.gates, [
+    { text: 'fact flag on the target needs true', ok: true },
+    { text: 'npc bram is here', ok: 'depends' },
+  ]);
+});
+
+// Break: treating fact.adjust as a write whose value is known settles a gate hop 1 cannot settle —
+// `count` is 0 plus an amount only play computes, so a `count == 0` reader is not visibly out.
+test('a fact.adjust write leaves its readers undecided, not settled false', () => {
+  const c: Obj = {
+    ...base,
+    rooms: defs('room', { yard: {} }),
+    npcs: defs('npc', { bram: { room: R('room', 'yard') } }),
+    dialogues: defs('dialogue', {
+      t: {
+        npc: R('npc', 'bram'),
+        roles: {},
+        choices: {
+          poke: { steps: [{ op: 'fact.adjust', fact: R('fact', 'count'), amount: 1 }] },
+        },
+      },
+      u: { npc: R('npc', 'bram'), roles: {}, policy: compare('count') },
+    }),
+    facts: defs('fact', { count: {} }),
+  };
+  const { hop1, hop2 } = consequences(model(c), 'f@1:dialogue/t#poke');
+  assert.deepEqual(
+    hop1.map((e) => [e.key, e.what]),
+    [['count', undefined]],
+  );
+  assert.deepEqual(hop2[0]!.gates, [
+    { text: 'fact count on the target needs true', ok: 'depends' },
+  ]);
+});
+
+// Break: a reader of two writes listed once per write, so the same scene appears twice with the same
+// gates; and a fact written twice by one choice listed twice as never read.
+test('a reader of two effects is one row naming both, and a repeated write is one never-read row', () => {
+  const c: Obj = {
+    ...base,
+    rooms: defs('room', { yard: {} }),
+    npcs: defs('npc', { bram: { room: R('room', 'yard') } }),
+    scenes: defs('scene', {
+      both: {
+        variants: [{ when: { op: 'all', items: [compare('a'), compare('b')] }, description: 'x' }],
+      },
+    }),
+    dialogues: defs('dialogue', {
+      t: {
+        npc: R('npc', 'bram'),
+        roles: {},
+        choices: {
+          go: {
+            steps: [fact('a', true), fact('b', true), fact('lonely', true), fact('lonely', true)],
+          },
+        },
+      },
+    }),
+    facts: defs('fact', { a: {}, b: {}, lonely: {} }),
+  };
+  const { hop1, hop2, neverRead } = consequences(model(c), 'f@1:dialogue/t#go');
+  assert.equal(hop1.length, 4); // hop 1 stays the authored steps, one row each
+  assert.deepEqual(
+    hop2.map((r) => [r.key, r.via]),
+    [['both', 'a, b']],
+  );
+  assert.deepEqual(neverRead, ['lonely']);
 });
