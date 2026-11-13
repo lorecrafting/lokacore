@@ -280,6 +280,11 @@ defmodule Loka.ContentLintStoryTest do
 
     # At the maximum it can still hold, so the writer exemption applies as before.
     assert lint(Map.merge(capped, Map.put(written, "actions/co.json", at_least.(3)))) == []
+
+    # A malformed threshold is not a finding: Erlang term order puts nil and binaries above any
+    # integer, so without the is_integer guard this reports a nonsense line instead of nothing.
+    bad = %{"op" => "fact_at_least", "fact" => "f", "at_least" => "4"}
+    assert lint(Map.merge(capped, Map.put(written, "actions/co.json", bad))) == []
   end
 
   test "a shadowed ambient set is a finding" do

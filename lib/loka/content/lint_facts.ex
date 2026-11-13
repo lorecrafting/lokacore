@@ -135,17 +135,18 @@ defmodule Loka.Content.LintFacts do
   end
 
   # A threshold above the declared maximum cannot hold whoever writes it, so the schema settles it
-  # before the writer set is consulted. Bound in the head so the guard reads `t` directly.
+  # before the writer set is consulted. `is_integer(t)` is load-bearing: Erlang term order makes nil
+  # and binaries greater than any integer, so a malformed value would report a nonsense finding.
   defp compare(rel, %{"op" => "fact_at_least", "at_least" => t} = m, f, %{
          fact: %{"value_type" => %{"type" => "int", "maximum" => max}}
        })
-       when t > max,
+       when is_integer(t) and t > max,
        do: ["#{rel}: #{m["op"]} #{f} tests #{t}; no value above #{max} is allowed"]
 
   defp compare(rel, %{"op" => "fact_compare", "equals" => t} = m, f, %{
          fact: %{"value_type" => %{"type" => "int", "maximum" => max}}
        })
-       when t > max,
+       when is_integer(t) and t > max,
        do: ["#{rel}: #{m["op"]} #{f} tests #{t}; no value above #{max} is allowed"]
 
   defp compare(rel, m, f, %{fact: %{"value_type" => %{"type" => "int"} = vt}} = ctx) do
