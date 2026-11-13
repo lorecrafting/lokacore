@@ -4,9 +4,10 @@ The present only: open work, next steps, owner questions, and standing owner rul
 yet. Rewrite this page in place once per session, at its end; never add dated session sections. History lives in git, Beads and `docs/reviews/`; lessons
 go to [PM lessons](lessons/pm.md) ([harness patterns](decisions/owner-decision-harness-patterns-2026-10-28.md)).
 
-AS OF main after #723; written 2026-11-13 14:49 UTC in the Pi harness by deploy/deepseek-ai/deepseek-v4.1-flash-1017, PM session.
-`kernel_api` is 1.159 (no contract slice since). **The owner is taking about a month off and pausing the subscription
-(2026-11-07).** Nothing is mid-merge, nothing is in flight, no agent is running.
+AS OF main after #724; written 2026-11-13 17:05 UTC in the Pi harness by deploy/deepseek-ai/deepseek-v4.1-flash-1017, PM session.
+`kernel_api` is 1.159 (no contract slice since). **The owner is pausing the Anthropic subscription, so every reviewer
+and developer here now runs on `deploy/deepseek-ai/deepseek-v4.1-flash-1017`** (`~/.pi/agent/agents/loka-dev.md`,
+`loka-review.md` repinned 2026-11-13). **Nothing is mid-merge, nothing is in flight, no agent is running.**
 
 ## Direction (owner 2026-10-30 to 2026-11-07)
 
@@ -53,9 +54,9 @@ Nothing. The next slice starts from main.
 
 1. Story tooling epic **loka-wfrgk.115**, children .1 to .12 chained in the owner's order: R1, W1, D1, K2, C1, L1 + L2, W2,
    F1 + W4, R2, K1, then W3 and E1 before v1. Done: R1 (#716), W1 (#717), D1 (#719), K2 (#720, #721), C1 (#722), L1 + L2
-   (#723). **loka-wfrgk.115.7 (W2, a rename rewrites the checkpoints with `/restructure`) is next** and it takes a
+   (#723, #724). **loka-wfrgk.115.7 (W2, a rename rewrites the checkpoints with `/restructure`) is next** and it takes a
    reviewer; then .8 (F1 + W4, the facts table with `meaning` and reachable range — L2a's reach arithmetic in
-   `lint_facts.ex` is the same sum it needs).
+   `lint_facts.ex` is the same sum it needs). **Six slices remain: .7, .8, .9, .10, .11, .12** — see the tally below.
 2. Older P1s: loka-wfrgk.94, loka-wfrgk.100.8 (key-tagged Book lines), loka-wfrgk.100.4.
 3. Housekeeping PR: loka-ebnu3, jqxb8, grdiq, wfrgk.96, and the retro items (below).
 4. P2 editor items: .97, .98, .99, .102 follow-ups, map handle placement, `bin/loka new` duplicate keys (loka-wfrgk.68).
@@ -88,6 +89,16 @@ loka-4ks2l was approved and is merged (#709). Closed `loka-wfrgk.116` as a dupli
 2026-11-07 items are still open and unapproved; three of them closed with #710 (lvo9i, wfrgk.110, za8br).
 
 ## Learned this session (worth knowing next time)
+
+- **An exemption can be right for one row and wrong for the row beside it.** `lint_facts.ex`'s writer set skips a
+  mechanic-written fact for both compare rows. Correct for the bool/enum row ("nothing writes that value"); wrong for
+  the int row, because `value_type.maximum` bounds the fact whoever writes it. When one `cond` branch serves two
+  questions, check it answers each. Found by reading after a reviewer timed out, so #724 had no early independent pass.
+- **Erlang term order is a trap in guards.** `nil > 5`, `"five" > 5` and `:x > 5` are all **true**, so a guard like
+  `when t > max` fires on malformed input and reports nonsense. Every numeric guard over authored JSON needs
+  `is_integer(t) and`. A reviewer found this in #724; the test pinning it fails without the clause.
+- **`ci_wait.sh` lives in `~/.pi/agent/scripts/`, not `bin/`**, and takes longer than a 40-minute tool timeout on a
+  full run — check `gh pr checks <n> | grep -v pending` instead, or run it under `bg_run`.
 
 - **A schema grep is not evidence a field does not exist.** `once: true` on a reaction appears in no
   `protocol/*.schema.json`, so a first pass dismissed a reviewer's finding about it. It is real: `reaction_once.ex`
