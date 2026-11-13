@@ -140,6 +140,7 @@ test('the graph holds every DefinitionRef with its path, and the op of the step 
         to: 'f@1:fact/f_wo',
         path: '.choices.yes.steps[2].fact',
         op: 'fact.assign',
+        value: true, // what the write writes, for consequences.ts's settled gates
         set: true,
       },
     ],

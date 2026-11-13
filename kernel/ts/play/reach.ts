@@ -3,6 +3,7 @@
 // canonical JSON document. A report for authors, not a check: nothing reads its output.
 import { readFileSync } from 'node:fs';
 import { INSTALLED, loadCartridge } from '../src/index.ts';
+import { CAPABILITY_OWNERS } from '../src/contracts.gen.ts';
 import { reach } from '../src/content/cartridge_barriers.ts';
 import { engineWrittenRefs, expectedFacts } from '../src/content/cartridge_position.ts';
 import { isObj, step, type Obj } from '../src/content/cartridge_refs.ts';
@@ -10,7 +11,16 @@ import { encode, type Json } from '../src/foundation/canonical.ts';
 import { refString } from '../src/runtime/decision.ts';
 import { reads } from './reads.ts';
 
-type Edge = { from: string; to: string; path: string; op?: string; set?: true; cleared?: true };
+type Edge = {
+  from: string;
+  to: string;
+  path: string;
+  op?: string;
+  set?: true;
+  cleared?: true;
+  value?: unknown;
+  leaf?: Obj;
+};
 
 const REF = /^[^@]+@[^:]+:([a-z_]+)\/[^/]+$/; // DefinitionRefString
 const kindOf = (ref: string) => REF.exec(ref)?.[1];
@@ -34,21 +44,40 @@ const isWrite = (e: Edge) =>
   e.op === 'fact.stamp' ||
   SITES.some(([at, path]) => (kindOf(e.from) ?? e.from) === at && path.test(e.path));
 const isRead = (e: Edge) => reads(isWrite(e), kindOf(e.from));
+// A policy leaf's own object (why_words has a sentence for every one); all/any/not are the combiners
+const LEAF = new Set(
+  Object.keys(CAPABILITY_OWNERS.policy).filter((op) => !['all', 'any', 'not'].includes(op)),
+);
 
 /** Nodes: every definition of a map keyed by DefinitionRefString; edges: every DefinitionRef in it. */
 export function contentGraph(c: Obj): { nodes: { ref: string; kind: string }[]; edges: Edge[] } {
   const nodes: { ref: string; kind: string }[] = [];
   const edges: Edge[] = [];
-  // op: the `op` of the object directly holding this value (through arrays), when it has one; at: that object (not through arrays)
-  const walk = (v: unknown, from: string, path: string, op?: string, at?: Obj) => {
-    if (Array.isArray(v)) v.forEach((x, i) => walk(x, from, `${path}[${i}]`, op));
+  // op: the `op` of the object directly holding this value (through arrays), when it has one; at: that object (not through arrays); neg: an odd number of `not` wrappers above it
+  const walk = (v: unknown, from: string, path: string, op?: string, at?: Obj, neg = false) => {
+    if (Array.isArray(v)) v.forEach((x, i) => walk(x, from, `${path}[${i}]`, op, at, neg));
     if (!isObj(v)) return;
     if (typeof v.cartridge_id === 'string' && typeof v.kind === 'string') {
       const e: Edge = { from, to: refString(v as never), path, ...(op && { op }) };
       const cleared = op === 'fact.assign' && at?.value === false; // Knowledge: a false assign does not make it known
-      return void edges.push(isWrite(e) ? { ...e, set: true, ...(cleared && { cleared }) } : e); // `set`: the edge writes its fact
+      // `value` what a write writes and `leaf` the policy leaf a gate sits on (`neg` when a `not`
+      // wraps it), for consequences.ts: named sites carrying them would bloat the model for readers
+      const extra =
+        at === undefined
+          ? {}
+          : {
+              ...('value' in at && { value: at.value }),
+              ...(typeof at.op === 'string' && LEAF.has(at.op) && { leaf: at }),
+              ...(typeof at.op === 'string' && LEAF.has(at.op) && neg && { neg: true as const }),
+            };
+      return void edges.push(
+        isWrite(e)
+          ? { ...e, ...extra, set: true, ...(cleared && { cleared }) }
+          : { ...e, ...extra },
+      ); // `set`: the edge writes its fact
     }
-    for (const [k, x] of Object.entries(v)) walk(x, from, `${path}${step(k)}`, v.op, v);
+    const flipped = neg !== (v.op === 'not');
+    for (const [k, x] of Object.entries(v)) walk(x, from, `${path}${step(k)}`, v.op, v, flipped);
   };
   for (const [section, v] of Object.entries(c)) {
     const keys = isObj(v) ? Object.keys(v) : [];

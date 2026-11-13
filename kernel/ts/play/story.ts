@@ -53,11 +53,10 @@ const isOutline = (o: unknown): o is Outline =>
       ),
   );
 
-/** Each choice's `then`/`then_failed` (not `end`) as an edge to that dialogue, and each
- * `choice_resolved` reaction filtered on a choice key as an edge from every dialogue with that choice. */
-function links(c: Obj) {
+/** Each choice's `then`/`then_failed` edge, and a `choice_resolved` reaction, with its choice. */
+export function links(c: Obj) {
   const dialogues = Object.entries((c.dialogues ?? {}) as Obj) as [string, Obj][];
-  const edges: { from: string; to: string; path: string; op: string }[] = [];
+  const edges: { from: string; to: string; path: string; op: string; choice?: string }[] = [];
   for (const [from, d] of dialogues)
     for (const [choice, o] of Object.entries((d.choices ?? {}) as Record<string, Obj>))
       for (const field of ['then', 'then_failed'])
@@ -71,9 +70,10 @@ function links(c: Obj) {
   for (const [to, r] of Object.entries((c.reactions ?? {}) as Record<string, Obj>)) {
     const on = r.on as Obj;
     if (on?.event !== 'choice_resolved') continue; // the kernel's load checks choice is a string
+    const choice = on.choice as string;
     for (const [from, d] of dialogues)
-      if (isObj(d.choices) && (on.choice as string) in d.choices)
-        edges.push({ from, to, path: '.on.choice', op: 'choice_resolved' });
+      if (isObj(d.choices) && choice in d.choices)
+        edges.push({ from, to, path: '.on.choice', op: 'choice_resolved', choice });
   }
   return edges;
 }

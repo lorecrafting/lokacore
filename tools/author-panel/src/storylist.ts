@@ -2,13 +2,13 @@
 // rows, the arrow keys' moves, which rows a selection or a palette row opens, a trace's rows and
 // the palette's story rows. No React here: tested from kernel/ts/test/author_story.test.ts.
 import { reads } from '../../../kernel/ts/play/reads.ts';
+import type { Edge } from '../../../kernel/ts/play/consequences.ts';
 import type { Triggers } from '../../../kernel/ts/play/scene_trigger.ts';
 import type { MapRoom } from './map.ts';
 import { fromRef, type Item } from './shell.ts';
 
+export type { Edge };
 export type Todo = { file: string; words: number; placeholders: string[] };
-/** A content-graph link (kernel/ts/play/reach.ts): `set` when it writes its fact. */
-export type Edge = { from: string; to: string; path: string; op?: string; set?: true; cleared?: true };
 export type Beat = {
   part: number;
   n: number;
@@ -49,6 +49,8 @@ export type Story = {
 /** The kinds the list holds (design section 4.1); Trace opens on the fact, quest and story point. */
 export const KINDS = ['quest', 'story_point', 'scene', 'dialogue', 'reaction', 'action', 'fact', 'topic', 'npc'];
 export const TRACED = new Set(['fact', 'quest', 'story_point']);
+/** The kinds Consequences opens on (C1): the nodes whose steps and choices write something. */
+export const CONSEQUENCES = new Set(['dialogue', 'scene', 'reaction', 'story_point']);
 const DASHED = new Set(['time_since']); // a read the clock settles, a hint (design 4.3)
 
 export type Row = {
@@ -68,8 +70,13 @@ export type Row = {
   todo?: number;
   unreached?: boolean;
 };
-/** The lower section's one panel (rulings S2): Trace of a ref, Knowledge at a beat, or Pacing. */
-export type Lower = { panel: 'trace'; at: string } | { panel: 'knowledge'; n: number } | { panel: 'pacing' };
+/** The lower section's one panel (rulings S2; C1 adds Consequences): Trace of a ref, Consequences of a
+ * choice or node, Knowledge at a beat, or Pacing. */
+export type Lower =
+  | { panel: 'trace'; at: string }
+  | { panel: 'consequences'; at: string }
+  | { panel: 'knowledge'; n: number }
+  | { panel: 'pacing' };
 /** The list's kept state (Layout.story): the ids toggled from their default, the lower panel, the row to focus. */
 // chosen: the palette picked the focus, so the selection's reveal on mount yields to it once
 export type ListState = { fold: string[]; lower?: Lower; focus?: string; chosen?: true };
@@ -214,7 +221,7 @@ export function reveal(s: Story, st: ListState, ref: string): ListState {
   return kind && KINDS.includes(kind) ? opened(st, ['unplaced'], `unplaced/${ref}`, !!o) : st;
 }
 
-/** A palette story row (`beat:<n>`, `story:<ref>`, `trace:<ref>`): open and focus its row, and trace the third. */
+/** A palette story row (`beat:<n>`, `story:<ref>`, `trace:<ref>`, `consequences:<ref>`): open and focus its row, and open the third or fourth. */
 export function go(s: Story, st: ListState, id: string): ListState {
   const [what, ...rest] = id.split(':');
   const target = rest.join(':');
@@ -223,7 +230,9 @@ export function go(s: Story, st: ListState, id: string): ListState {
     return b ? opened(st, [`part:${b.part}`], `beat:${b.n}`, true) : st;
   }
   const next = reveal(s, st, target);
-  return what === 'trace' ? { ...next, lower: { panel: 'trace', at: target } } : next;
+  if (what === 'trace') return { ...next, lower: { panel: 'trace', at: target } };
+  if (what === 'consequences') return { ...next, lower: { panel: 'consequences', at: target } };
+  return next;
 }
 
 export type TraceRow = { label: string; ref?: string; key?: string; beat?: number; dashed?: boolean };
@@ -274,6 +283,7 @@ export function storyItems(s: Story): Item[] {
       return [
         row(`story: ${key}`, `story:${n.ref}`),
         ...(TRACED.has(n.kind) ? [row(`trace ${key}`, `trace:${n.ref}`)] : []),
+        ...(CONSEQUENCES.has(n.kind) ? [row(`consequences ${key}`, `consequences:${n.ref}`)] : []),
       ];
     });
   return [...beats, ...nodes];
