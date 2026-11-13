@@ -67,6 +67,9 @@ export function placed(rel: string) {
 }
 export const rootFile = (rel: string) =>
   ROOTS.some((r) => rel === `${r}.json`) || /^areas\/[a-z0-9_]+\.json$/.test(rel);
+/** A checkpoint is the author's own file beside the cartridge (`live.ts` NAME), never a definition:
+ * `files` skips it, so a write that follows one (`/restructure`'s rename) names it through here. */
+const checkpoint = (rel: string) => /^checkpoints\/[a-z0-9][a-z0-9_-]{0,63}\.json$/.test(rel);
 
 /** The one path guard: `rel` a normal relative path under the (real) root with no symlink on the
  * way; for `read` a listed regular file, for `create` a free place a source file may take. */
@@ -88,7 +91,8 @@ export function guarded(root: string, rel: unknown, mode: 'read' | 'create'): st
     if (at) refuse(409, `${rel} exists`);
     if (!placed(rel as string) && !rootFile(rel as string))
       refuse(400, `not a source file's place: ${rel}`);
-  } else if (!files(root).includes(rel as string)) refuse(404, `no source file ${rel}`);
+  } else if (!files(root).includes(rel as string) && !checkpoint(rel as string))
+    refuse(404, `no source file ${rel}`);
   else if (!at?.isFile()) refuse(400, `not a regular file: ${rel}`);
   return path;
 }

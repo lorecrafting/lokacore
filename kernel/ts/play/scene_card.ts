@@ -1,10 +1,12 @@
 // POST /set (docs/system/cartridge.md, Editor write path): a `.scene` file's one `npc:`, `with:`
 // or `then:` value in place, a real key; POST /edit stays words only (prose.ts).
 import { existsSync, readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { INSTALLED, loadCartridge } from '../src/index.ts';
 import type { Obj } from '../src/content/cartridge_refs.ts';
+import { names } from './checkpoints.ts';
 import { artifactBytes } from './compiled.ts';
-import { guarded, named, placed, refuse, sha256, stale } from './guard.ts';
+import { guarded, named, placed, refuse, sha256, stale, there } from './guard.ts';
 import { contentGraph } from './reach.ts';
 import { picks, VALUE, type Verb } from './scene_lines.ts';
 import { cut, scene } from './scene_structure.ts';
@@ -72,8 +74,6 @@ export function restructure(
   artifact?: string,
 ) {
   const path = guarded(root, file, 'read');
-  const ext = placed(file)?.ext;
-  if (ext !== 'cut' && ext !== 'scene') refuse(400, 'a page or line op is a .cut or .scene file’s');
   if (!Array.isArray(carry)) refuse(400, 'carry: an array of {file, was}');
   const before = readFileSync(path, 'utf8');
   if (sha256(before) !== was) stale(before);
@@ -81,6 +81,10 @@ export function restructure(
     const bytes = readFileSync(guarded(root, c?.file, 'read'), 'utf8');
     if (sha256(bytes) !== c.was) stale(bytes);
   }
+  if (op && typeof op === 'object' && 'rename' in op)
+    return renamed(root, file, before, op.rename, done);
+  const ext = placed(file)?.ext;
+  if (ext !== 'cut' && ext !== 'scene') refuse(400, 'a page or line op is a .cut or .scene file’s');
   const twin = path.replace(/\.[a-z]+$/, '.json');
   let doc: Obj = {};
   try {
@@ -91,6 +95,47 @@ export function restructure(
     ext === 'cut' ? cut(before, op, 'steps' in doc) : scene(before, op, inUse(key, doc, artifact));
   if ('refused' in answer) return refuse(400, answer.refused);
   return done(`restructure ${file}`, [{ file, before, after: answer.after }]);
+}
+
+/** The checkpoint bytes after the rename, or null when no step names `<kind>/<from>`: a checkpoint
+ * that names nothing is not parsed or written at all, so its bytes stay as the author wrote them. */
+const moved = (bytes: string, kind: string, from: string, to: string) => {
+  const after = bytes.replaceAll(`:${kind}/${from}"`, `:${kind}/${to}"`);
+  return after === bytes ? null : after;
+};
+
+/** POST /restructure's rename op (docs/design/story-tooling.md §W2): the definition's file takes its
+ * new key, and every `checkpoints/*.json` step naming `<cartridge>@<version>:<kind>/<from>` follows in
+ * the same write, so one /undo puts both back. A `kind` is the ref's own, never the folder's. */
+function renamed(
+  root: string,
+  file: string,
+  before: string,
+  { kind, from, to }: Record<string, any>,
+  done: (what: string, changes: Change[]) => Answer,
+): Answer {
+  const at = placed(file) ?? refuse(400, `${file} is not a definition file`);
+  if (!named(kind) || !named(from) || !named(to))
+    refuse(400, 'rename: {kind, from, to}: [a-z0-9_]+');
+  if (at.key !== from) refuse(400, `${file} is not ${from}`);
+  const target = `${at.area ? `areas/${at.area}/` : ''}${at.dir}/${to}.${at.ext}`;
+  guarded(root, target, 'create');
+  // the new file first: the panel's staleness check reads changes[0]'s bytes
+  const changes: Change[] = [
+    { file: target, before: null, after: before },
+    { file, before, after: null },
+  ];
+  for (const name of names(root)) {
+    const rel = `checkpoints/${name}`;
+    const path = join(root, rel);
+    const found = there(path);
+    if (!found?.isFile()) refuse(400, `not a regular checkpoint: ${rel}`);
+    const was = readFileSync(path, 'utf8');
+    const after = moved(was, kind, from, to);
+    if (after !== null) changes.push({ file: rel, before: was, after });
+  }
+  const [status, body] = done(`rename ${kind} ${from} to ${to}`, changes);
+  return [status, { ...(body as Obj), checkpoints: changes.length - 2 }];
 }
 
 /** Whether a choice key of `file`'s dialogue `key` is named anywhere but the scene's own lines: the
