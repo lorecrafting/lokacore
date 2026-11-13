@@ -107,8 +107,8 @@ hunger (`toolbox_showcase/text.json:1461`, `docs/showcase/hub-and-first-district
 - `toolbox/settle-3` is 9 commits ahead of main from 2026-10-15 with no PR: decide PR or delete before the next batch.
 - Three worktrees hold commits that are **not** in main and no PR: `design-playtest` (`design/playtest-combat`,
   4ae8f6878), `settle-3` (above), and `s3-choice-key-review` (827c997d1, a CHANGES REQUIRED record for S3 that #715
-  superseded — stale, prunable). Every other worktree is an ancestor of main and prunable; `loka-g5um8` also holds two
-  `node_modules` symlinks and a real Elixir `deps`, so removing it frees the most. `loka-vduxr.10-second` holds three
+  superseded — stale, prunable). Every other worktree sits at a commit that is an ancestor of main, except the two
+  open-PR ones (`tools-ts-lsp` is #632, `toolbox-batch-engine-bugs-e2` is #454), and is prunable. `loka-vduxr.10-second` holds three
   untracked probe tests (`kernel/ts/test/zz_dead.test.ts`, `mobile/authority/local-story/zz_esc.test.ts`,
   `zz_probe.test.ts`) and `playtest-sweep` untracked logs, a report and shots; read before removing either.
 
