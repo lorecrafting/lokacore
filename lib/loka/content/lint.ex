@@ -51,6 +51,7 @@ defmodule Loka.Content.Lint do
     |> Kernel.++(items(files))
     |> Kernel.++(fills(files))
     |> Kernel.++(Loka.Content.LintPages.run(files, text))
+    |> Kernel.++(Loka.Content.LintStory.run(files))
   end
 
   defp file(["actions", _], rel, %{"policy" => p} = r)
