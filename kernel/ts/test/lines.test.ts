@@ -53,6 +53,12 @@ put(
         scopes: ['player'],
         meaning: 'Whether Maud was met.',
       },
+      maud_visits: {
+        version: 1,
+        value_type: { type: 'int', default: 0, minimum: 0, maximum: 9 },
+        scopes: ['player'],
+        meaning: 'How many times Maud was visited.',
+      },
     },
   }),
 );
@@ -102,7 +108,13 @@ put('dialogues/maud.json', {
   policy: { op: 'fact_compare', fact: 'met_maud', equals: true },
   prompt: 'dialogue.maud.prompt',
   roles: { maud: { role: 'npc', npc: 'maud' } },
-  choices: { greet: { label: 'dialogue.maud.greet', narration: 'narration.maud.greet' } },
+  choices: {
+    greet: {
+      label: 'dialogue.maud.greet',
+      narration: 'narration.maud.greet',
+      policy: { op: 'fact_at_least', fact: 'maud_visits', at_least: 1 },
+    },
+  },
 });
 put('dialogues/fen.json', {
   npc: 'fen',
@@ -150,6 +162,18 @@ test("--speaker keeps the speaker's lines, not its definition file's", () => {
   );
 });
 
+test("a choice's own policy gates its words, not the dialogue's", () => {
+  // Break: the choice-policy branch dropped, so a gated label reports its dialogue's `when:` (or
+  // no gate at all) and a proofreader cannot tell which rule hides the option.
+  // The choice's policy covers everything inside it, its narration included: you only read that
+  // line after passing the gate and picking the option.
+  const choiceGate = 'fact maud_visits is at least 1';
+  assert.equal(row('dialogue.maud.greet')?.gate, choiceGate);
+  assert.equal(row('narration.maud.greet')?.gate, choiceGate);
+  // An ungated choice in a gated dialogue still takes the dialogue's gate.
+  assert.equal(row('dialogue.fen.prompt')?.gate, '');
+});
+
 test('a known line counts words and UTF-8 bytes, and names its source line', () => {
   // Break: bytes counted as characters ("Café" is 5 bytes, 4 characters), the word count read
   // over all lines including a `~` one, or the location taken from the wrong file or line.
@@ -176,9 +200,11 @@ test('CSV: one header and one row per key, quoted where a field holds a comma', 
     out,
     'key,words,speaker,at,gate,placeholder,bytes\na.b,2,maud,text.json:3,"x, ""y""",false,14\n',
   );
+  // The row count is the fixture's literal: 15 keys written in text.json above, plus the three
+  // the `.scene` lowers into. Never lines()'s own length: a dropped or duplicated key must fail.
   const sheet = csv(rows).split('\n');
   assert.equal(sheet[0], 'key,words,speaker,at,gate,placeholder,bytes');
-  assert.equal(sheet.length, rows.length + 2); // a final newline ends the last row
+  assert.equal(sheet.length, 18 + 2); // one header, 18 rows, and the final newline's empty string
 });
 
 // Break: the command is not wired into bin/loka, --csv prints JSON (or the header is lost), or a

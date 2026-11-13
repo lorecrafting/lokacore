@@ -8,7 +8,7 @@ import { fileURLToPath } from 'node:url';
 import { INSTALLED, loadCartridge } from '../src/index.ts';
 import { isObj, type Obj } from '../src/content/cartridge_refs.ts';
 import { artifactBytes, compiled } from './compiled.ts';
-import { files } from './todo.ts';
+import { files, blank, words } from './todo.ts';
 import { sentences } from './why_words.ts';
 
 type Dev = { canonical: string; sha256: string };
@@ -29,13 +29,12 @@ const gate = (def: Obj) =>
   sentences(def as never)
     .map((r) => r.text)
     .join('; ');
-// the words as written: a line that trims to `~` is not words yet (todo.ts's rule)
+// the words as written: `todo.ts`'s own rule and own counting, so the two sheets cannot disagree
 const written = (text: string) =>
   text
     .split('\n')
-    .filter((l) => l.trim() !== '~')
-    .flatMap((l) => l.split(/\s+/))
-    .filter(Boolean).length;
+    .filter((l) => !blank(l))
+    .reduce((n, l) => n + words(l), 0);
 const strings = (v: unknown): string[] =>
   typeof v === 'string'
     ? [v]
@@ -115,7 +114,7 @@ export function lines(dir: string, { speaker }: { speaker?: string } = {}, dev?:
         speaker: found?.speaker ?? '',
         at: where(key, text[key]!),
         gate: found?.gate ?? '',
-        placeholder: text[key]!.split('\n').some((l) => l.trim() === '~'),
+        placeholder: text[key]!.split('\n').some(blank),
         bytes: Buffer.byteLength(text[key]!, 'utf8'),
       };
     })
