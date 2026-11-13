@@ -4,7 +4,7 @@ The present only: open work, next steps, owner questions, and standing owner rul
 yet. Rewrite this page in place once per session, at its end; never add dated session sections. History lives in git, Beads and `docs/reviews/`; lessons
 go to [PM lessons](lessons/pm.md) ([harness patterns](decisions/owner-decision-harness-patterns-2026-10-28.md)).
 
-AS OF main after #714; written 2026-11-12 04:40 UTC in the Pi harness by deploy/deepseek-ai/deepseek-v4.1-flash-1017, PM session.
+AS OF main after #722; written 2026-11-13 08:30 UTC in the Pi harness by deploy/deepseek-ai/deepseek-v4.1-flash-1017, PM session.
 `kernel_api` is 1.159 (no contract slice since). **The owner is taking about a month off and pausing the subscription
 (2026-11-07).** Nothing is mid-merge, nothing is in flight, no agent is running.
 
@@ -18,45 +18,34 @@ AS OF main after #714; written 2026-11-12 04:40 UTC in the Pi harness by deploy/
 
 ## Merged since the 2026-11-07 handoff
 
-#707 S1 of the scene structure work (`.cut` page ops through `POST /restructure`, loka-wfrgk.100.5.2, closed by
-`after_merge`); #708 plain-English field guide for the kinds slice A did not cover; #709 runs the unit files a diff
-touches before `bin/push_slice.sh` pushes (loka-4ks2l: #707's one-line red test cost four days); #710 two CI flakes and
-the worktree post-check (loka-lvo9i, loka-wfrgk.110, loka-za8br); #711 S2 of the scene structure work (`.scene` line
-add, remove and move through the same `POST /restructure`, the card's row buttons and Alt keys, and §2's refusal to
-renumber a `~` choice key a twin entry, riddle, quest outcome or `choice_resolved` reaction names, loka-wfrgk.100.5.3,
-closed by `after_merge`); #712 the pre-push gate typechecks `tools/author-panel` when a diff touches it (loka-vvreo,
-four red controls); #713 S2's §5 focus rules — focus follows an op onto the moved, added or gap-closing row
-(loka-g5um8, kernel `scene_focus.ts`); #714 `session_status.sh` prints each open PR's head sha and CI conclusions
-(loka-x4ejm). Then docs and Beads only:
-`docs/worldbuilding` Act II lore (b5fa77bd3) and epic loka-wfrgk.119 (narrative intelligence and LLM co-authoring tools,
-8 open children, no work started). All three workflows green on every merged head. Untracked `cartridges/prologue/` is
-the owner's in-progress Part 1: never touch it, read it only. `docs/system-graph.gen.json` regenerates from it, so keep
-that file out of a commit while the scratch cartridge is present.
+#707 to #714 are in the previous handoff (scene structure S1/S2, the field guide, the pre-push gates, focus rules,
+`session_status.sh`). Newer: #715 S3, a choice's key pinned when its words change (loka-wfrgk.100.5.4, closed); #716 R1,
+replay saved paths against the artifact you edit; #717 W1, `bin/loka roam`; #718 `wait_ci.sh` resolves a short sha; #719 D1,
+the Step tab (in-play debugger); #720 and #721 K2, reaction `once`/`cooldown` and the policy capability it needs
+(loka-wfrgk.100.5.3, .115.4 closed); #722 **C1, the consequence preview of a choice** (loka-wfrgk.115.5, closed).
+C1 shipped two model fields the rest of the story tooling will want: `reach.ts` edges now carry `value` and every policy
+`leaf` (with `neg`), and `story.ts` links carry the `choice` a `choice_resolved` named — read
+`kernel/ts/play/consequences.ts` before writing another walk over that graph. Its review record is
+`docs/reviews/2026-11-13-c1-consequences-review.md` (CHANGES REQUIRED then APPROVE on re-check; all four findings fixed).
+`kernel/ts/test/live.test.ts:145` (`500 !== 404` for `/open ../none.json`) is now a four-time flake, still unfixed (loka-fq96k).
+Untracked `cartridges/prologue/` is the owner's in-progress Part 1: never touch it, read it only.
+`docs/system-graph.gen.json` regenerates from it, so keep that file out of a commit while the scratch cartridge is present.
 
 ## In flight at handoff
 
 Nothing. The next slice starts from main.
 
-- **#632** (loka-vduxr.64) belongs to another session (lokacore-fb). **#454** is the owner's P3 hold. Both now carry
-  `external_ref`, so `bin/session_status.sh` reports no drift.
-- A cut-only scene (no `.json`) is unreachable in the panel: **loka-cr7l7**, needs a designer ruling (show the twinless
-  `.cut`, or refuse it at compile; the second is the smaller diff). **loka-0ske4**: the panel test "a modal scene
-  switched to a quest" passes on CI but hung when rerun alone locally — pass, hang and fail are three symptoms, so this
-  needs a real diagnosis rather than another flake label.
+- **#632** (loka-vduxr.64) belongs to another session (lokacore-fb). **#454** is the owner's P3 hold.
 
 ## Resume, in order
 
-1. S3 (loka-wfrgk.100.5.4: ` #<key>` grammar in `scene_lines.ex`, compiler, takes a reviewer), one at a time
-   ([rulings](design/scene-structure-rulings.md)). S1 and S2 are on main: `POST /restructure`, `scene_structure.ts`'s
-   `cut()` and `scene()`, and the card's `SceneRows.tsx` are there to build on. The two S2 follow-ups are done: #713
-   shipped §5's focus-follows-an-op (loka-g5um8) and #712 the panel typecheck in the pre-push gate (loka-vvreo).
-2. Story tooling epic **loka-wfrgk.115**, children .1 to .12 chained in the owner's order: R1, W1, D1, K2, C1, L1 + L2, W2,
-   F1 + W4, R2, K1, then W3 and E1 before v1. K2, L1 + L2, K1 and E1 take a reviewer. R1 is done (#716) and W1 is
-   done (#717: `bin/loka roam`, its budget measured over the two-minute ruling and recorded there), so **D1 is next**.
-3. Older P1s: loka-wfrgk.94, loka-wfrgk.100.8 (key-tagged Book lines), loka-wfrgk.100.4.
-4. Housekeeping PR: loka-ebnu3, jqxb8, grdiq, wfrgk.96, and the retro items (below). loka-za8br is done (#710),
-   loka-x4ejm is done (#714). Still open from the 2026-11-11 retro: loka-y043w, loka-r7vrx, awaiting the owner's yes/no.
-5. P2 editor items: .97, .98, .99, .102 follow-ups, map handle placement, `bin/loka new` duplicate keys (loka-wfrgk.68).
+1. Story tooling epic **loka-wfrgk.115**, children .1 to .12 chained in the owner's order: R1, W1, D1, K2, C1, L1 + L2, W2,
+   F1 + W4, R2, K1, then W3 and E1 before v1. Done: R1 (#716), W1 (#717), D1 (#719), K2 (#720, #721), C1 (#722).
+   **loka-wfrgk.115.6 (L1 + L2, story-logic lints in Elixir) is next** and it takes a reviewer; three lint rows plus L2b as
+   a warning, specs at `docs/design/story-tooling.md:149` and `:239`. Then W2 (.7, blocks on .6).
+2. Older P1s: loka-wfrgk.94, loka-wfrgk.100.8 (key-tagged Book lines), loka-wfrgk.100.4.
+3. Housekeeping PR: loka-ebnu3, jqxb8, grdiq, wfrgk.96, and the retro items (below).
+4. P2 editor items: .97, .98, .99, .102 follow-ups, map handle placement, `bin/loka new` duplicate keys (loka-wfrgk.68).
 
 ## Owner calls to date (2026-11-07 session; override any)
 
@@ -73,36 +62,34 @@ Nothing. The next slice starts from main.
 - Part 1 build feedback. Older: studio defaults, weapon proficiency shape, store fees, iOS first, the save guarantee,
   #574 acceptance, #564 calls, hosting (12uz).
 
-## Retro 2026-11-11 (filed, awaiting the owner's yes/no)
+## Retros awaiting the owner's yes/no
 
-Three items, evidence in each: loka-x4ejm (session_status does not print a PR head's CI conclusion, so the handoff
-said "CI not run" when it had failed twice — **done in #714**), loka-y043w (the drift check calls a missing
-`external_ref` "no Beads issue": three false alarms a session), loka-r7vrx (the queue is 75 open with duplicates and
-nothing closed since 11-07).
+**2026-11-13 (two items):** loka-qozwj (the panel suite's parallel default races one dev server: run it
+serial, one line) and loka-8v4lx (name the reviewer fallback model in WORKFLOW and the loka-review agent
+instead of justifying a substitution per slice).
+
+**2026-11-11 (three items):** evidence in each: loka-x4ejm (session_status does not print a PR head's CI conclusion — **done in #714**),
+loka-y043w (the drift check calls a missing `external_ref` "no Beads issue": three false alarms a session),
+loka-r7vrx (the queue is 75 open with duplicates and nothing closed since 11-07).
 loka-4ks2l was approved and is merged (#709). Closed `loka-wfrgk.116` as a duplicate of `loka-za8br` while filing. The
 2026-11-07 items are still open and unapproved; three of them closed with #710 (lvo9i, wfrgk.110, za8br).
 
-Fixed this session, worth knowing next time: **a hook placed below an early return is a crash, and the panel's DOM
-tests are the only thing that catches it.** PR #713's `ea6bf13b6` put the new `useState`/`useCallback` after
-`if (!file) return`, so the loading render ran no hooks and the loaded render ran seven: React threw "Rendered more
-hooks than during the previous render" and no `.scene` card mounted (2 panel tests red). If a card gains state, keep
-the hooks above the loading return. **A worktree without `mobile/app/node_modules` or Elixir `deps` fails the pre-push
-hook for environmental reasons, not code**; `git push` then refuses, `--no-verify` is blocked by the guard (correctly),
-and the fix is `npm ci` in `mobile/app` plus `mix deps.get` in the worktree. **`legacy/` symlinks between worktrees break
-this**: a `deps` symlink to another worktree's deps makes `REGEN_FAIL`. Run the panel's own suite
-(`cd tools/author-panel && npm test`) before claiming a card change works — this session claimed the DOM tests "cannot
-be exercised locally" and CI then found a real crash.
+## Learned this session (worth knowing next time)
 
-Also: PR #711's card commit (`28556fe17`) went to CI without
-`npx tsc -b` in `tools/author-panel` and failed the `Author panel types` step on two type errors; the pre-push hook
-printed `MOBILE_TSC_OK` anyway, because `bin/related_tests.sh` only selects `kernel/ts` tests — fixed in #712, so the
-gate now covers the panel. And: `wait_ci.sh` can return 1 having merely timed out while the runs are still
-going (`wait_ci: timed out before ci and book-e2e both completed`); confirm with `gh run list --branch <branch>` before
-re-running CI. It did this twice this session while the runs were green. The panel fill flake (loka-wfrgk.110) is a
-plausible fix, not a proven one: the race needs a loaded runner and does not reproduce locally, so a revert still
-passes here. **`loka-fq96k` (`kernel/ts/test/live.test.ts:145`, `500 !== 404` for `/open ../none.json`) is now a
-three-time flake** across three unrelated diffs (`7165fa3c3`, `ac54bbc88`, `ea6bf13b6`) and clears on rerun; treat a
-kernel failure with that exact signature as the flake, but it deserves a real fix — `gh run rerun --failed` is hiding it.
+- **A same-file second edit can silently revert the first.** Two `edit` calls on one file in one turn left the region as
+  the *original* text; only reading the file back caught it. After a double edit on one file, read the region.
+- **The panel suite passes serially and fails in parallel on this machine.** `node --test test/*.test.ts` (the CI and
+  `npm test` default) gave 63/66 on C1: three unrelated card/room tests fail on one shared dev server and Chrome with
+  load 2+. `node --test --test-concurrency=1 test/*.test.ts` gave 66/66. Judge a panel failure on the serial run before
+  blaming the diff; the hang variant is loka-0ske4 (a comment now records this evidence).
+- **`bin/subagent` async children are broken in this harness install** (`@earendil-works/chord` missing); a blocking
+  `async:false` run works. The spawn also refuses at load 8+, so check `uptime` first.
+- **Opus reviewers were unavailable all session** (anthropic OAuth expired, antigravity quota, no OpenRouter credits), so
+  C1's review and its re-check ran on `openai-codex/gpt-5.6-luna`; the record states that in its own section.
+- `wait_ci.sh` again reported success on a head where I had to confirm with `gh run list --commit`; trust the second.
+- A review record for a PR is a **local** `review-<PR>` branch, never pushed: `bin/after_merge.sh` cherry-picks it. C1's
+  first record arrived on the PR branch itself (cherry-picked into the fix push) and the re-check's record went to
+  `review-722`, which merged cleanly.
 
 ## Owner's writing list (prologue; text keys, no prose from agents)
 
@@ -118,11 +105,12 @@ hunger (`toolbox_showcase/text.json:1461`, `docs/showcase/hub-and-first-district
 - P3 hold (owner 2026-10-22): draft #454, kgd.188, 2lvx, 5i4c, x6t.98. loka-x6t.126 skill-gated room depth.
 - #632 (loka-vduxr.64) belongs to another session (lokacore-fb), not the PM.
 - `toolbox/settle-3` is 9 commits ahead of main from 2026-10-15 with no PR: decide PR or delete before the next batch.
-- Worktrees sitting at main with nothing to save (`lokacore-preview`, `lokacore-session`, `loka-kgd.202-old`,
-  `.203-mut`, `.205-design-review`, `loka-vduxr.10-second`, `toolbox-authoring-batch-a-walks`). `loka-wfrgk.100.5.2`,
-  `loka-s2-scene-lines` and `loka-g5um8` are merged and prunable; `loka-g5um8` also holds two `node_modules` symlinks
-  and a real Elixir `deps` installed to make its pre-push hook run, so removing it frees the most. `playtest-sweep`
-  holds untracked logs, a report and shots worth reading before it goes.
+- Three worktrees hold commits that are **not** in main and no PR: `design-playtest` (`design/playtest-combat`,
+  4ae8f6878), `settle-3` (above), and `s3-choice-key-review` (827c997d1, a CHANGES REQUIRED record for S3 that #715
+  superseded — stale, prunable). Every other worktree is an ancestor of main and prunable; `loka-g5um8` also holds two
+  `node_modules` symlinks and a real Elixir `deps`, so removing it frees the most. `loka-vduxr.10-second` holds three
+  untracked probe tests (`kernel/ts/test/zz_dead.test.ts`, `mobile/authority/local-story/zz_esc.test.ts`,
+  `zz_probe.test.ts`) and `playtest-sweep` untracked logs, a report and shots; read before removing either.
 
 Storybook http://localhost:6006 serves main from the preview checkout (`bin/preview_update.sh`); a PR's stories need a
 Storybook run from its own worktree. The owner sends polish prompts in the conversation; loop: [PM, Live polish session](PM.md#live-polish-session),
@@ -136,7 +124,7 @@ owner guide: [polish tour](design/polish-tour.md). Screenshots: Playwright needs
 - Beads writes from the `main` checkout after `br sync --import-only`; new issues through `bin/br_create.sh`; each checkpoint is
   `bin/beads_checkpoint.sh`. Never commit `beads.db`. A child slice of an open issue gets its own child id to merge with.
 - A kernel contract slice bumps only `INSTALLED.kernel_api` to main+1 at push; parallel claims rebump on the later merge.
-- CI waits: `bin/wait_ci.sh <sha|branch>`; it can time out while runs are still going: confirm with `gh run list --commit`.
+- CI waits: `bin/wait_ci.sh <sha|branch>`; it can time out or pass while runs are still going: confirm with `gh run list --commit`.
   Merges one at a time in the main checkout via `bin/merge_pr.sh <pr> <id[,id...]>`. When `br` refuses a parent with open
   follow-up children, `br close <id> --force --reason "Merged #N"` and rerun `bin/after_merge.sh`; an untracked PR body
   draft in the worktree also stops it (remove it, rerun). A conflict after another merge goes back to the developer as
@@ -148,4 +136,3 @@ owner guide: [polish tour](design/polish-tour.md). Screenshots: Playwright needs
 - Subagents work only in their own worktrees under `~/dev/worktrees.noindex`; a fresh worktree runs `bin/worktree_setup.sh`.
   The load gate refuses spawns at load 8 or more: wait with a background until-loop, never bypass. Kill orphaned
   author servers and Playwright Chromes when load climbs (`ps` for `worktrees.noindex` and `--disable-field-trial-config`).
-- End: rewrite this page, push every branch with work, file the [retro](PM.md#retro-and-housekeeping-queue) items in Beads.
