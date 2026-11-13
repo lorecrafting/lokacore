@@ -363,8 +363,8 @@ defmodule Loka.ContentLintTest do
         ],
         do: assert(lint(Map.put(flask, rel, v)) == [], rel)
 
-    # Holding it for a quest or a scripted action guard checks the item; neither takes it out of play.
-    quest = %{"objective" => %{"policy" => has}}
+    # Holding it for a quest or a guard checks the item; neither takes it out of play.
+    quest = %{"deadline" => %{"after" => 1}, "objective" => %{"policy" => has}}
     guard = %{"policy" => has, "reason" => "reason.r"}
     assert lint(Map.merge(flask, %{"actions/r.json" => guard, "quests/q.json" => quest})) == dry
 
