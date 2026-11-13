@@ -110,12 +110,14 @@ hunger (`toolbox_showcase/text.json:1461`, `docs/showcase/hub-and-first-district
 - P3 hold (owner 2026-10-22): draft #454, kgd.188, 2lvx, 5i4c, x6t.98. loka-x6t.126 skill-gated room depth.
 - #632 (loka-vduxr.64) belongs to another session (lokacore-fb), not the PM.
 - `toolbox/settle-3` is 9 commits ahead of main from 2026-10-15 with no PR: decide PR or delete before the next batch.
-- Three worktrees hold commits that are **not** in main and no PR: `design-playtest` (`design/playtest-combat`,
-  4ae8f6878), `settle-3` (above), and `s3-choice-key-review` (827c997d1, a CHANGES REQUIRED record for S3 that #715
-  superseded — stale, prunable). Every other worktree sits at a commit that is an ancestor of main, except the two
-  open-PR ones (`tools-ts-lsp` is #632, `toolbox-batch-engine-bugs-e2` is #454), and is prunable. `loka-vduxr.10-second` holds three
-  untracked probe tests (`kernel/ts/test/zz_dead.test.ts`, `mobile/authority/local-story/zz_esc.test.ts`,
-  `zz_probe.test.ts`) and `playtest-sweep` untracked logs, a report and shots; read before removing either.
+- Worktrees: seven merged ones were removed this session (`k2rev-base`, `loka-kgd.202-old`, `.203-mut`,
+  `.205-design-review`, `review-k2`, `toolbox-authoring-batch-a-walks`, `s3-choice-key-review`), freeing about 15 GB.
+  What is left: `loka-preview` and `lokacore-session` (the polish/Storybook pair), `design-playtest`
+  (`design/playtest-combat`, 4ae8f6878 — commits not in main and no PR: decide PR or delete), `settle-3` (above),
+  `loka-vduxr.10-second` (three untracked probe tests: `kernel/ts/test/zz_dead.test.ts`,
+  `mobile/authority/local-story/zz_esc.test.ts`, `zz_probe.test.ts`), `playtest-sweep` (untracked logs, a report and
+  shots), and the two open-PR worktrees (`tools-ts-lsp` is #632, `toolbox-batch-engine-bugs-e2` is #454). Read the
+  untracked files before removing either of the two probe worktrees.
 
 Storybook http://localhost:6006 serves main from the preview checkout (`bin/preview_update.sh`); a PR's stories need a
 Storybook run from its own worktree. The owner sends polish prompts in the conversation; loop: [PM, Live polish session](PM.md#live-polish-session),
