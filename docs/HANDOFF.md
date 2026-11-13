@@ -46,6 +46,7 @@ Untracked `cartridges/prologue/` is the owner's in-progress Part 1: never touch 
 ## In flight at handoff
 
 Nothing. The next slice starts from main.
+
 - **#632** (loka-vduxr.64) belongs to another session (lokacore-fb). **#454** is the owner's P3 hold.
 
 ## Resume, in order
