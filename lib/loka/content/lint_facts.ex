@@ -49,8 +49,16 @@ defmodule Loka.Content.LintFacts do
 
   defp writer(m) do
     keys = for k <- @writers, f = m[k], is_binary(f), do: f
-    keys ++ entitlement(m)
+    keys ++ entitlement(m) ++ order(m)
   end
+
+  # A build or mend with escrow writes its `fact` true from the order until the job runs
+  # (step.schema.json, build).
+  defp order(%{"op" => op} = m) when op in ~w(build mend) do
+    if is_map_key(m, "escrow"), do: bare(m), else: []
+  end
+
+  defp order(_), do: []
 
   # A service benefit, and the `fact` pairing a `value` beside it; a topic, spell or death credit
   # names a bare `fact` with no op and no value.
@@ -75,23 +83,36 @@ defmodule Loka.Content.LintFacts do
 
   defp repeats?(v, rel, files) do
     case LintLabels.parts(rel) do
-      ["reactions", _] -> repeatable?(get_in(v, ["on"]), files)
+      ["reactions", _] -> reaction_repeats?(v, files)
       ["quests", _] -> v["repeatable"] == true
       ["scenes", _] -> false
+      # ponytail: a dialogue choice's `once: true` is not attributed, since walk/1 loses which
+      # choice a step sits in; those adjusts count as repeatable, which under-reports the row.
+      ["dialogues", _] -> true
       _ -> true
     end
   end
 
-  # A reaction on a one-shot event runs once; on a quest event it runs once per instance, so a
-  # repeatable quest makes it accumulate. Any other event may repeat.
-  defp repeatable?(%{"event" => e} = on, files) when e in @once do
+  # `once: true` lowers into a done-fact guard, so the rule fires a single time however often its
+  # event does (reaction_once.ex). Without it, a reaction on a one-shot event runs once, on a
+  # quest event once per instance, and on any other event as often as the event does.
+  defp reaction_repeats?(%{"once" => true}, _), do: false
+
+  defp reaction_repeats?(v, files) do
+    case get_in(v, ["on"]) do
+      %{"event" => e} = on when e in @once -> quest_repeats?(on, files)
+      _ -> true
+    end
+  end
+
+  # A reaction on a quest event runs once per quest instance, so only a repeatable quest lets its
+  # write accumulate.
+  defp quest_repeats?(on, files) do
     case named(on, "quest") do
       nil -> false
       q -> get_in(files, ["quests/#{q}.json", "repeatable"]) == true
     end
   end
-
-  defp repeatable?(_, _), do: true
 
   # L1: a fact_compare on a bool or enum whose value nothing writes can never hold. L2a: a bounded
   # int compared against a value the default and the writes that happen once cannot reach.

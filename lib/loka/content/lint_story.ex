@@ -73,7 +73,14 @@ defmodule Loka.Content.LintStory do
         do: k
   end
 
-  defp self_ending?(%{"objective" => %{"evidence" => e}}), do: e in ~w(patrol expedition)
+  # A quest's objective can complete itself: `current_state` is met while its policy holds,
+  # `post_activation_event` when the named item is picked up after it starts, and `patrol` or
+  # `expedition` when the walk succeeds (quest.schema.json QuestObjective). Only a quest whose
+  # objective needs an explicit step, with nothing to name it, is stranded.
+  defp self_ending?(%{"objective" => %{"evidence" => e}})
+       when e in ~w(current_state post_activation_event patrol expedition),
+       do: true
+
   defp self_ending?(_), do: false
 
   # A story point is authored nowhere: Dialogues.points/2 derives it from each choice's

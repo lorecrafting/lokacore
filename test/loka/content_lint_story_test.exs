@@ -48,6 +48,13 @@ defmodule Loka.ContentLintStoryTest do
     walk = Map.put(quest, "objective", %{"evidence" => "patrol"})
     assert lint(%{"quests/errand.json" => walk}) == []
 
+    # So does an objective met while its policy holds, or when the item is picked up after the
+    # quest starts (quest.schema.json QuestObjective): neither needs a resolver step.
+    for e <- ~w(current_state post_activation_event) do
+      self = Map.put(quest, "objective", %{"evidence" => e})
+      assert lint(%{"quests/errand.json" => self}) == []
+    end
+
     # A deadline fails the quest by itself (quest_failed, step.schema.json).
     assert lint(%{"quests/errand.json" => Map.put(quest, "deadline", %{"after" => 60000})}) == []
   end
@@ -164,6 +171,29 @@ defmodule Loka.ContentLintStoryTest do
     assert lint(Map.merge(bool, Map.put(prose, "actions/co.json", compare.(true)))) == [
              "actions/co.json: fact_compare f tests true; nothing writes that value"
            ]
+
+    # A build order with escrow writes its fact true until the job runs (step.schema.json).
+    order = %{
+      "services/s.json" => %{
+        "benefit" => %{
+          "op" => "build",
+          "structure" => "hut",
+          "site" => "lane",
+          "direction" => "north",
+          "fact" => "f",
+          "escrow" => %{"items" => ["timber"], "quantity" => 2, "custody" => "yard"}
+        }
+      }
+    }
+
+    assert lint(Map.merge(bool, Map.put(order, "actions/co.json", compare.(true)))) == []
+
+    # The same build without escrow writes nothing, so the row still fires.
+    plain = update_in(order, ["services/s.json", "benefit"], &Map.delete(&1, "escrow"))
+
+    assert lint(Map.merge(bool, Map.put(plain, "actions/co.json", compare.(true)))) == [
+             "actions/co.json: fact_compare f tests true; nothing writes that value"
+           ]
   end
 
   test "a threshold the one-shot writes cannot reach is a finding" do
@@ -217,6 +247,21 @@ defmodule Loka.ContentLintStoryTest do
     plain = Map.merge(int, Map.put(named, "actions/co.json", at_least.(5)))
 
     assert lint(plain) == [
+             "actions/co.json: fact_at_least f tests 5; its one-shot writes reach 1"
+           ]
+
+    # `once: true` lowers into a done-fact guard (reaction_once.ex), so the rule fires a single
+    # time even on an event that repeats; the same rule without it accumulates.
+    repeated = %{
+      "reactions/b.json" => %{"on" => %{"event" => "entity_died"}, "steps" => [adjust.(1)]}
+    }
+
+    guarded =
+      Map.put(repeated, "reactions/b.json", Map.put(repeated["reactions/b.json"], "once", true))
+
+    assert lint(Map.merge(int, Map.put(repeated, "actions/co.json", at_least.(5)))) == []
+
+    assert lint(Map.merge(int, Map.put(guarded, "actions/co.json", at_least.(5)))) == [
              "actions/co.json: fact_at_least f tests 5; its one-shot writes reach 1"
            ]
   end
