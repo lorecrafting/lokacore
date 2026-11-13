@@ -6,6 +6,7 @@ import type { Story } from '../../../tools/author-panel/src/storylist.ts';
 import { rank } from '../../../tools/author-panel/src/shell.ts';
 import * as list from '../../../tools/author-panel/src/storylist.ts';
 import { knowledge, pacing } from '../../../tools/author-panel/src/storyknow.ts';
+import { choicesOf, consequenceRows } from '../../../tools/author-panel/src/storyconseq.ts';
 import { contentGraph } from '../play/reach.ts';
 
 const ref = (kind: string, key: string) => `demo@1:${kind}/${key}`;
@@ -327,5 +328,84 @@ test('pacing: words per part over its bound nodes, the thin part first', () => {
   assert.deepEqual(
     fewer.filter((p) => p.thin).map((p) => p.title),
     ['B', 'D'],
+  );
+});
+
+// Break: the Consequences panel lists a dialogue's choices as rows without their own writes, walks a
+// bare node where a choice row should walk that choice, or drops the never-read row.
+test('Consequences: a dialogue lists each choice with what it writes; a choice row walks its two hops', () => {
+  const leaf = {
+    op: 'fact_compare',
+    fact: { cartridge_id: 'demo', cartridge_version: '1', kind: 'fact', key: 'f1' },
+    equals: true,
+  };
+  const s: Story = {
+    ...planted,
+    // d1's choice `yes` sets f1; the reaction `ring` reads it behind f1 == true and sets f2
+    graph: {
+      nodes,
+      edges: [
+        {
+          from: d1,
+          to: f1,
+          path: '.choices.yes.steps[0].fact',
+          op: 'fact.assign',
+          value: true,
+          set: true,
+        },
+        {
+          from: d1,
+          to: f2,
+          path: '.choices.no.steps[0].fact',
+          op: 'fact.assign',
+          value: true,
+          set: true,
+        },
+        { from: ref('reaction', 'ring'), to: f1, path: '.when', op: 'fact_compare', leaf },
+      ],
+    },
+    report: { ...planted.report, orphan_facts: { unused: [], write_only: [f2], read_only: [] } },
+  };
+  assert.deepEqual(choicesOf(s, d1), ['yes', 'no']);
+  // the dialogue's own panel: each choice heads a group, its writes sit under it
+  assert.deepEqual(
+    consequenceRows(s, d1).map((r) => [r.label, r.at ?? r.key, r.depth]),
+    [
+      ['choice', `${d1}#yes`, 0],
+      ['sets', 'f1 = true', 1],
+      ['choice', `${d1}#no`, 0],
+      ['sets', 'f2 = true', 1],
+    ],
+  );
+  // a choice row walks that choice: its write, the reader with the gate the write settles, and the
+  // write nothing reads is the `no` choice's, not this one's
+  assert.deepEqual(
+    consequenceRows(s, `${d1}#yes`).map((r) => [r.label, r.ok ?? r.key]),
+    [
+      ['sets', 'f1 = true'],
+      ['read via f1', 'ring'],
+      ['fact f1 on the target needs true', true],
+    ],
+  );
+  assert.deepEqual(
+    consequenceRows(s, `${d1}#no`).map((r) => [r.label, r.key]),
+    [
+      ['sets', 'f2 = true'],
+      ['never read', 'f2'],
+    ],
+  );
+});
+
+// Break: the palette offers Consequences on a node that writes nothing, or `consequences` opens
+// Trace (or nothing) instead of the panel keyed to that ref.
+test('the palette offers Consequences on the nodes that write and opens it on them', () => {
+  const st = list.go(planted, list.LIST, `consequences:${d1}`);
+  assert.deepEqual([st.lower, st.focus], [{ panel: 'consequences', at: d1 }, `beat:1/${d1}`]);
+  assert.deepEqual(
+    list
+      .storyItems(planted)
+      .filter((i) => i.label.startsWith('consequences'))
+      .map((i) => i.label),
+    ['consequences d1', 'consequences sp'],
   );
 });

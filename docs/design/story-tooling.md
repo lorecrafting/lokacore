@@ -72,6 +72,26 @@ touches. articy shows the next node; BioWare's plot editor shows the flag's read
 | **"Never read."** A fact hop 1 writes that no edge reads is one row, `write_only`, from `reachReport` | The cheapest catch of a dead consequence | A planted write-only fact shows the row; adding a reader removes it |
 | **Where.** The Story slot's lower section, like Trace (`Consequences <key>`, `×`); `c` on a focused choice or node row; Cmd-K `consequences <key>`; a row click selects that node | One lower-section idiom; following is reading, as S2 ruled for Trace | Keyboard only: focus a choice row, `c`, arrow to a hop-2 row, Enter selects it |
 
+Built 2026-11-13 (`kernel/ts/play/consequences.ts`, `tools/author-panel/src/storyconseq.ts` and the panel
+wiring; tests in `kernel/ts/test/consequences.test.ts` and `test/author_story.test.ts`). Five facts the build
+settled:
+
+- **The model needed two more fields, not a second walk.** `reach.ts`'s edges now carry `value` (what a
+  `fact.assign` writes) and `leaf` (a `fact_compare`'s own policy object), and `story.ts`'s `links` exports the
+  `choice` a `choice_resolved` named. Without them a gate could not be settled from the model alone; `leaf` rides
+  only the `fact_compare` edges and `value` only the writes, so no other edge grew.
+- **A gate settles only on the fact hop 1 wrote.** Any other leaf is `depends` (dashed), including a gate on a
+  fact hop 1 never touched, so the walk never guesses from a world it cannot see.
+- **The Story list has no choice rows.** Its rows are parts, beats, nodes and seeds, so `c` opens on a node; a
+  dialogue's panel lists its choices, each a walk of its own (`<node>#<choice>`), and a choice row's click
+  walks it.
+- **Scenes and story points walk their own steps** as the bare node (a scene's `on_end`, a story point's
+  outcome); `CONSEQUENCES` is what the list offers `c` and the palette on.
+- **`and N more` caps at 20 readers**, the same list the panel shows; no reading of a live world anywhere in
+  the walk.
+
+Written 2026-11-13 06:25 UTC in the Pi harness by deploy/deepseek-ai/deepseek-v4.1-flash-1017
+
 ### D1: In-play step panel (the debugger)
 
 For the owner: after each step in the Book, see what changed and which rules looked at it: Osiris's story

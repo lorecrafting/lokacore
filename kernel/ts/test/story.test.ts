@@ -268,6 +268,7 @@ test('then and choice_resolved edges: then: end draws none, then: hub one', () =
         to: ref('reaction', 'asked'),
         path: '.on.choice',
         op: 'choice_resolved',
+        choice: 'ask', // which choice it named, so a consequence walk can scope to it
       },
     ],
   );

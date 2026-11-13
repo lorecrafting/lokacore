@@ -15,6 +15,7 @@ import {
   Plus,
   Route,
   Scroll,
+  Split,
   Tag,
   Trash2,
   TriangleAlert,
@@ -60,13 +61,18 @@ type Props = {
   open: (ref: string) => void;
 };
 
-function NodeCells({ row, tab, trace }: { row: L.Row; tab: boolean; trace: () => void }) {
+function NodeCells({ row, tab, trail }: { row: L.Row; tab: boolean; trail: (panel: 'trace' | 'consequences') => void }) {
   const Icon = ICON[row.node ?? ''];
   return (
     <>
       {Icon ? <Icon {...ICONED} /> : null}
       <code className={`flex-1 truncate ${row.unreached ? 'text-muted-foreground' : ''}`}>{row.label}</code>
-      {L.TRACED.has(row.node!) ? <Ghost label={`Trace ${row.label}`} icon={Route} tab={tab} run={trace} /> : null}
+      {L.TRACED.has(row.node!) ? (
+        <Ghost label={`Trace ${row.label}`} icon={Route} tab={tab} run={() => trail('trace')} />
+      ) : null}
+      {L.CONSEQUENCES.has(row.node!) ? (
+        <Ghost label={`Consequences ${row.label}`} icon={Split} tab={tab} run={() => trail('consequences')} />
+      ) : null}
       {row.refusals ? (
         <span className="flex items-center gap-0.5 text-destructive">
           <CircleAlert {...ICONED} />
@@ -122,7 +128,7 @@ const dropBeat = (row: L.Row) =>
 function Cells({ row, a, tab }: { row: L.Row; a: Act; tab: boolean }) {
   const at = { ...a.st, focus: row.id }; // a ghost's run moves the tab row to its row, where it gave focus
   if (row.kind === 'node')
-    return <NodeCells row={row} tab={tab} trace={() => a.put({ ...at, lower: { panel: 'trace', at: row.ref! } })} />;
+    return <NodeCells row={row} tab={tab} trail={(panel) => a.put({ ...at, lower: { panel, at: row.ref! } })} />;
   if (row.kind === 'part')
     return (
       <>
@@ -169,7 +175,8 @@ const click = (a: Act, row: L.Row, alt: boolean) => {
   if (row.open !== undefined) a.put({ ...L.toggle(a.st, row.id), focus: row.id });
 };
 
-// The tree's keys (rulings S2 Keyboard): arrows, Enter selects, `f` traces, Esc closes Trace then leaves.
+// The tree's keys (rulings S2 Keyboard; C1 adds `c`): arrows, Enter selects, `f` traces, `c` opens
+// Consequences, Esc closes the lower panel then leaves.
 function keyDown(a: Act, list: L.Row[], e: React.KeyboardEvent<HTMLElement>) {
   const el = e.target as HTMLElement;
   const row = list.find((r) => r.id === el.closest<HTMLElement>('[data-id]')?.dataset.id); // a row or its ghost
@@ -179,6 +186,7 @@ function keyDown(a: Act, list: L.Row[], e: React.KeyboardEvent<HTMLElement>) {
   const run: Record<string, () => void> = {
     Enter: () => click(a, row, e.altKey),
     f: () => row.ref && L.TRACED.has(row.node!) && a.put({ ...a.st, lower: { panel: 'trace', at: row.ref } }),
+    c: () => row.ref && L.CONSEQUENCES.has(row.node!) && a.put({ ...a.st, lower: { panel: 'consequences', at: row.ref } }),
     Escape: () =>
       a.st.lower
         ? a.put({ ...a.st, lower: undefined })
