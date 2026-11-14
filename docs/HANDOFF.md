@@ -4,7 +4,7 @@ The present only: open work, next steps, owner questions, and standing owner rul
 yet. Rewrite this page in place once per session, at its end; never add dated session sections. History lives in git, Beads and `docs/reviews/`; lessons
 go to [PM lessons](lessons/pm.md) ([harness patterns](decisions/owner-decision-harness-patterns-2026-10-28.md)).
 
-AS OF main after #727; written 2026-11-14 01:21 UTC in the Pi harness by deploy/deepseek-ai/deepseek-v4.1-flash-1017, PM session.
+AS OF main after #731; written 2026-11-14 22:40 UTC in the Pi harness by deploy/deepseek-ai/deepseek-v4.1-flash-1017, PM session.
 `kernel_api` is 1.159 (no contract slice since). **The owner is pausing the Anthropic subscription, so every reviewer
 and developer here now runs on `deploy/deepseek-ai/deepseek-v4.1-flash-1017`** (`~/.pi/agent/agents/loka-dev.md`,
 `loka-review.md` repinned 2026-11-13). **Nothing is mid-merge, nothing is in flight, no agent is running.**
@@ -45,9 +45,14 @@ row and panel. `orphanFacts()` now reads its three lists off `factUsage` rows, s
 disagree. Panel is Cmd-K `facts`. W4 deviates from the spec by design (L2a has no floor; the floor is the declared
 `value_type.minimum`) and the PR body says so. Review record `docs/reviews/2026-11-14-f1-facts-w4-review.md` — two
 rechecks: one real blocker (`repeats()` inverted for quests) and one reviewer false positive it withdrew.
+#730 **K1b, conditions as story nodes** (loka-wfrgk.115.14, closed): the Story map draws a condition as a node with its
+reader edges, and the Policy block's leaf picker offers `named` with the condition keys. #731 **the panel's `npm test` runs
+serial** (loka-qozwj, closed): one flag, `--test-concurrency=1`, because every panel test file shares `harness.ts`'s one
+`bin/loka dev` server, one Chrome and one showcase copy.
 `kernel/ts/test/live.test.ts:145` (`500 !== 404` for `/open ../none.json`) is now a four-time flake, still unfixed (loka-fq96k).
-The nightly `ci` and `book-e2e` on `main` are green again (`43472560257`, 2026-11-13 17:24Z); the 2026-11-12 red was a
-stale head, not open work.
+The nightly `ci` red of 2026-11-13 (`43614268953`) was the `mobile` job's `Author panel smoke` step — the parallel panel
+suite, not a diff — and #731 is its fix; confirm on the next nightly rather than assuming. Before that, the 2026-11-12 red
+was a stale head, not open work.
 Untracked `cartridges/prologue/` is the owner's in-progress Part 1: never touch it, read it only.
 `docs/system-graph.gen.json` regenerates from it, so keep that file out of a commit while the scratch cartridge is present.
 
@@ -59,11 +64,10 @@ Nothing. The next slice starts from main.
 
 ## Resume, in order
 
-1. Story tooling epic **loka-wfrgk.115**, children .1 to .12 chained in the owner's order: R1, W1, D1, K2, C1, L1 + L2, W2,
-   F1 + W4, R2, K1, then W3 and E1 before v1. Done: R1 (#716), W1 (#717), D1 (#719), K2 (#720, #721), C1 (#722), L1 + L2
-   (#723, #724), W3 (#725), W2 (#726), F1 + W4 (#727). **loka-wfrgk.115.9 (R2, coverage chips from checkpoints) is next**;
-   then .10 (K1, named conditions). **Three slices remain: .9, .10, .12** — .12 (E1) is P3 and parked for Opus (it needs a
-   protocol change, a kernel change and a `kernel_api` bump).
+1. Story tooling epic **loka-wfrgk.115** is **complete except E1**: children .1 to .11, .13 and .14 are all done — R1 (#716),
+   W1 (#717), D1 (#719), K2 (#720, #721), C1 (#722), L1 + L2 (#723, #724), W3 (#725), W2 (#726), F1 + W4 (#727), R2 (#728),
+   K1 (#729), K1b (#730). **One slice remains: .12 (E1, a conditional page in a modal scene)** — P3, parked until a beat needs
+   it, and it needs a protocol change, a kernel change and a `kernel_api` bump, so it wants an Opus design session.
 2. Older P1s: loka-wfrgk.94, loka-wfrgk.100.8 (key-tagged Book lines), loka-wfrgk.100.4.
 3. Housekeeping PR: loka-ebnu3, jqxb8, grdiq, wfrgk.96, and the retro items (below).
 4. P2 editor items: .97, .98, .99, .102 follow-ups, map handle placement, `bin/loka new` duplicate keys (loka-wfrgk.68).
@@ -85,9 +89,9 @@ Nothing. The next slice starts from main.
 
 ## Retros awaiting the owner's yes/no
 
-**2026-11-13 (two items):** loka-qozwj (the panel suite's parallel default races one dev server: run it
-serial, one line) and loka-8v4lx (name the reviewer fallback model in WORKFLOW and the loka-review agent
-instead of justifying a substitution per slice).
+**2026-11-13 (two items):** loka-qozwj (**approved and shipped in #731**: the panel suite's parallel default raced
+one dev server) and loka-8v4lx (name the reviewer fallback model in WORKFLOW and the loka-review agent
+instead of justifying a substitution per slice — still awaiting the owner).
 
 **2026-11-11 (three items):** evidence in each: loka-x4ejm (session_status does not print a PR head's CI conclusion — **done in #714**),
 loka-y043w (the drift check calls a missing `external_ref` "no Beads issue": three false alarms a session),
@@ -122,10 +126,11 @@ loka-4ks2l was approved and is merged (#709). Closed `loka-wfrgk.116` as a dupli
   the *original* text; only reading the file back caught it. After a double edit on one file, read the region. It bit
   again in #723: a test edit reported success while the file still held the old body, and only the mutation check
   (reverting the fix and watching the test pass) exposed it.
-- **The panel suite passes serially and fails in parallel on this machine.** `node --test test/*.test.ts` (the CI and
-  `npm test` default) gave 63/66 on C1: three unrelated card/room tests fail on one shared dev server and Chrome with
-  load 2+. `node --test --test-concurrency=1 test/*.test.ts` gave 66/66. Judge a panel failure on the serial run before
-  blaming the diff; the hang variant is loka-0ske4 (a comment now records this evidence).
+- **The panel suite passed serially and failed in parallel** until #731 made `--test-concurrency=1` its default:
+  `node --test test/*.test.ts` gave 63/66 on C1 (three unrelated card/room tests on one shared dev server and Chrome,
+  load 2+), the serial run 66/66 on the same commit, and the same race took the nightly `mobile` job red. A flake that
+  reproduces on main is a harness bug, not a diff: fix the harness, then confirm on the next nightly. The hang variant
+  is loka-0ske4.
 - **`bin/subagent` async children are broken in this harness install** (`@earendil-works/chord` missing); a blocking
   `async:false` run works. The spawn also refuses at load 8+, so check `uptime` first.
 - **Opus reviewers were unavailable all session** (anthropic OAuth expired, antigravity quota, no OpenRouter credits), so
