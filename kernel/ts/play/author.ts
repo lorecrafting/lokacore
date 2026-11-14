@@ -223,7 +223,9 @@ function enqueue() {
       if (!ok || !good) return;
       lint(); // both go after the page has the artifact, so neither delays the preview
       const { canonical, sha256 } = good;
-      return recheck(source, canonical, sha256).then((c) => live?.push({ checkpoints: c }));
+      return recheck(source, canonical, sha256).then(({ checked, covered }) =>
+        live?.push({ checkpoints: checked, covered }),
+      );
     })
     .catch((e) => console.error(`Not updated: ${(e as Error).message}`)); // a thrown build must not end the watch
 }

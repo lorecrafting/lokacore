@@ -5,6 +5,7 @@ import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
 import { frozenClock, replay, type Step } from '../../../mobile/app/author/place.ts';
+import type { DecisionResult } from '../src/contracts.gen.ts';
 import {
   KERNEL_ID,
   openGame,
@@ -30,6 +31,17 @@ function memory(sql: DatabaseSync): Db {
 
 /** `undefined` when the whole path is accepted, else why it stopped. */
 export function replayed(bundled: Bundled, steps: Step[]): string | undefined {
+  return play(bundled, steps).failed;
+}
+
+/** One path replayed on `bundled`, handing every decision the session saved to `each` with the game
+ * that made it (R2 reads its narration and events). The replay stops at the first step it does not
+ * save and accept, and says why; a caller wanting partial coverage ignores that. */
+export type Each = (
+  game: { dialogueOf: (continuation: string) => string | undefined },
+  d: DecisionResult,
+) => void;
+export function play(bundled: Bundled, steps: Step[], each?: Each): { failed?: string } {
   const sql = new DatabaseSync(':memory:');
   let moved = 0;
   let id = 0; // mutate-skip: any start gives unique ids
@@ -40,7 +52,20 @@ export function replayed(bundled: Bundled, steps: Step[]): string | undefined {
       time: frozenClock(() => moved),
       dev: true, // a recorded cheat replays here as in the preview
     });
-    return replay(steps, game, (ms) => (moved += ms), undefined).failed; // off the browser: no budget
+    // A session emits `completion` on a pulse, not on `invoke`, so the saved decision is read off the
+    // reply here; `replay` keeps only the failure.
+    const watched = each
+      ? {
+          ...game,
+          invoke: (intent: Parameters<typeof game.invoke>[0]) => {
+            const reply = game.invoke(intent);
+            if (reply.kind === 'saved') each(game, reply.decision);
+            return reply;
+          },
+        }
+      : game;
+    const { failed } = replay(steps, watched, (ms) => (moved += ms), undefined); // off the browser: no budget
+    return { failed };
   } finally {
     sql.close();
   }
@@ -56,14 +81,24 @@ export function names(source: string): string[] {
     : [];
 }
 
-/** Why this checkpoint does not replay, or `undefined` when it does. A file that is not a
- * checkpoint, or a cartridge that does not load, is the reason: the editor must not hide either. */
-export function replayed1(source: string, file: string, bundled: Bundled): string | undefined {
+/** One checkpoint file's steps; `undefined` when the file is not one, which R1's verdict says. */
+export function stepsOf(source: string, file: string): Step[] | undefined {
   try {
     const { steps } = JSON.parse(readFileSync(join(source, 'checkpoints', file), 'utf8')) as {
       steps: Step[];
     };
-    if (!Array.isArray(steps) || !steps.length)
+    return Array.isArray(steps) ? steps : undefined;
+  } catch {
+    return undefined; // unreadable is not a checkpoint either
+  }
+}
+
+/** Why this checkpoint does not replay, or `undefined` when it does. A file that is not a
+ * checkpoint, or a cartridge that does not load, is the reason: the editor must not hide either. */
+export function replayed1(source: string, file: string, bundled: Bundled): string | undefined {
+  try {
+    const steps = stepsOf(source, file);
+    if (!steps || !steps.length)
       throw new Error('a checkpoint is {"steps": [...]} with at least one step');
     return replayed(bundled, steps);
   } catch (e) {

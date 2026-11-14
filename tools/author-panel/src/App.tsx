@@ -223,6 +223,7 @@ function Slot({ layout, set, story, book, pick, diag, refused }: Shell & { refus
         go={(room) => book.send({ op: 'go_to_room', room })}
         open={(ref) => void ask('open', { key: fromRef(ref)?.key ?? ref, file: story?.files[ref] ?? story?.bundled[ref] })}
         changes={diag.changes}
+        covered={diag.covered}
       />
     </>
   );

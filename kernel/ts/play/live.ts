@@ -1,10 +1,9 @@
 // Fast loop (docs/system/cartridge.md#author-preview): `bin/loka dev --watch` keeps one loopback
 // server-sent-events stream to the open author page. A text-only change travels as an overlay of
-// text values over the artifact the page already runs; nothing here writes a file, so the overlay
-// can never be bundled. Checkpoints (named recorded paths) are the one thing the page writes, as
-// plain files under the source tree's `checkpoints/`, which the compiler skips. The author column
-// asks here for a Book line's source (`POST /open`) and the rule explainer (`POST /why`), the
-// Story map for its model (`GET /story`, story.ts).
+// text values over the artifact the page runs, so nothing here can be bundled. Checkpoints (named
+// recorded paths, R1, and R2's coverage) are the one thing the page writes: plain files under the
+// source tree's `checkpoints/`, which the compiler skips. The author column asks here for a Book
+// line's source (`POST /open`), its rule explainer (`POST /why`) and the Story map (`GET /story`).
 import { execFile, spawn } from 'node:child_process';
 import {
   existsSync,
@@ -47,6 +46,7 @@ export type Message = {
   unconfirmed?: { key: string; at: string }[];
   placeholders?: Record<string, string>; // each `~` key's file:line, from the compile (/line)
   checkpoints?: import('./checkpoints.ts').Checked[]; // R1: this artifact's replays (§2)
+  covered?: import('./covered_type.ts').Covered; // R2: what those replays reached by name
   timings?: Timings; // the last compile's, kept like the rest: the editor tells them apart by `at`
 };
 /** One compile's milliseconds: the compile, then its push or write (a refusal: its notice). */
