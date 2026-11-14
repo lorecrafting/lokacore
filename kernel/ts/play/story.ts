@@ -1,8 +1,9 @@
 // The Story map's model (docs/system/cartridge.md#content-reports; docs/rnd/story-map-design-2026-11-05.md
 // section 11 S1): reach.ts's graph and report over the compiled artifact, the dialogue links it cannot
 // see (a choice's `then` is a key, a reaction's `choice_resolved` names a choice), the `~`
-// placeholders, the compiler's diagnostics by node, and outline.json's beats with their status and
-// the seeds-and-payoffs check. size: allow 310, F1's facts row (storyfacts.ts)
+// placeholders, the compiler's diagnostics by node, and outline.json's beats.
+// size: allow 312, K1's condition nodes: the compile substitutes a `named` leaf away, so a
+// condition is read from the source (conditions.ts), not the artifact.
 import { existsSync, readFileSync } from 'node:fs';
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import { createHash } from 'node:crypto';
@@ -12,6 +13,7 @@ import { isObj, step, type Obj } from '../src/content/cartridge_refs.ts';
 import { encode, type Json } from '../src/foundation/canonical.ts';
 import { artifactBytes, compiled } from './compiled.ts';
 import { contentGraph, factUsage, reachReport } from './reach.ts';
+import { conditionGraph } from './conditions.ts';
 import { placed } from './guard.ts';
 import { bundled, files, todo, type Todo } from './todo.ts';
 import {
@@ -141,6 +143,10 @@ export function story(source: string, dev: Dev, diagnostics: Diagnostic[]) {
   graph.edges.push(...links(c));
   const report = reachReport(c);
   const { refs, defs } = shortRefs(c, graph.nodes);
+  // a condition is substituted away at compile, so its node and reader edges come from the source
+  const conditions = conditionGraph(source, graph.nodes[0]?.ref.split(':')[0] ?? '', refs);
+  graph.nodes.push(...conditions.nodes);
+  graph.edges.push(...conditions.edges);
   const todos = todoByNode(source, refs, defs);
   const byNode: Record<string, Diagnostic[]> = {};
   for (const d of diagnostics) add(byNode, nodeOf(d.rel, refs), d);
@@ -161,6 +167,7 @@ export function story(source: string, dev: Dev, diagnostics: Diagnostic[]) {
     words: wordsByNode(defs, (c.text ?? {}) as Record<string, unknown>),
     names: names(defs, (c.text ?? {}) as Obj), // the Hierarchy's and palette's `key · name`
     choices: choiceCounts(c),
+    conditions: conditions.nodes.map((n) => n.ref), // K1's conditions, by node ref
     hidden: hiddenSkills(c), // the cards' add menus and links (allowed.ts, link.ts)
     unlinkable: unlinkable(c),
     shorts: shorts(refs, defs), // what Bind may write

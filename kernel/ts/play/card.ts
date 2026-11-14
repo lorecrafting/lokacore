@@ -299,6 +299,9 @@ export const constraintOnly = (branches: Obj[]) =>
 export const tagHidden = (branches: Obj[], k = tagOf(branches)) =>
   k ? { [k]: { 'ui:widget': 'hidden' } } : {};
 
+/** Whether `branch` is a `Policy`'s `named` leaf (K1): its tag const is `named`. */
+export const isNamed = (branch: Obj | undefined) => constOf(branch, 'op') === 'named';
+
 /** The card's state label: Hold first, then a compile in flight, then an artifact older than the source. */
 export const status = (held: boolean, pending: boolean, compiled: boolean) =>
   held ? 'held' : pending ? 'compiling' : compiled ? null : 'stale';

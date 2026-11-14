@@ -3,7 +3,7 @@
 // kernel/ts/play/card.ts. Every other union in a generic card is drawn by it too.
 import { useState } from 'react';
 import type { FieldProps, RJSFSchema } from '@rjsf/utils';
-import { branchOf, constraintOnly, start, tagHidden } from '../../../../../kernel/ts/play/card.ts';
+import { branchOf, constraintOnly, isNamed, start, tagHidden } from '../../../../../kernel/ts/play/card.ts';
 import { offered } from '../../../../../kernel/ts/play/rules.ts';
 import { uiSchema } from '../../../../../kernel/ts/play/ui_schema.ts';
 
@@ -30,6 +30,14 @@ const option = (each: Record<string, unknown>[], i: number) => (
  * step draws the divider before the rules that run later. The picker's label counts an array item
  * from 1, as the owner does; its name ends in the 0-based index (chrome rulings §7).
  */
+/** A branch's form: its own titles, its tag hidden, and K1's `named` leaf keying on a condition. */
+const branchForm = (branches: RJSFSchema[], each: Record<string, unknown>[], at: number) => ({
+  ...tagHidden(branches as never),
+  ...each[at],
+  ...(isNamed(branches[at] as never) && { key: { 'ui:field': 'ConditionKey' } }),
+  'ui:label': false,
+});
+
 export function Rules(p: FieldProps) {
   const { registry, schema, formData, fieldPathId } = p;
   const [picked, pick] = useState(-1);
@@ -62,7 +70,7 @@ export function Rules(p: FieldProps) {
         <registry.fields.SchemaField
           {...p}
           schema={branches[at]}
-          uiSchema={{ ...tagHidden(branches as never), ...each[at], 'ui:label': false }}
+          uiSchema={branchForm(branches, each, at)}
         />
       ) : null}
     </div>
