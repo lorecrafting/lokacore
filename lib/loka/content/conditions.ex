@@ -172,7 +172,10 @@ defmodule Loka.Content.Conditions do
   end
 
   defp names(%{"op" => "named", "key" => key} = leaf) when map_size(leaf) == 2, do: [key]
-  defp names(%{} = v), do: Enum.flat_map(v, &names/1)
+  # A map iterates as {key, value} pairs, so the pair is taken apart by hand; a tuple that reached
+  # names/1 whole would fall to the catch-all and a cycle nested inside an op's arguments would go
+  # unseen.
+  defp names(%{} = v), do: Enum.flat_map(v, fn {_key, value} -> names(value) end)
   defp names(l) when is_list(l), do: Enum.flat_map(l, &names/1)
   defp names(_), do: []
 

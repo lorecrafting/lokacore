@@ -86,6 +86,30 @@ defmodule Loka.ContentConditionsTest do
     assert ds == [d("CONDITION_CYCLE", "conditions/trusts")]
   end
 
+  # Break: a cycle reached only through a Policy's own arguments is missed, because a map iterates
+  # as {key, value} pairs and a pair handed to the leaf-walker whole matches nothing, so the walk
+  # finds no names and the pair inlines forever. The flat cycles above still pass with that break.
+  test "a cycle reached only through a nested op is CONDITION_CYCLE at both files", %{dir: dir} do
+    files =
+      Map.merge(gated(%{"op" => "named", "key" => "trusts"}), %{
+        "conditions/found_tracks.json" => %{
+          "op" => "any",
+          "items" => [@leaf, %{"op" => "named", "key" => "trusts"}]
+        },
+        "conditions/trusts.json" => %{
+          "op" => "all",
+          "items" => [%{"op" => "named", "key" => "found_tracks"}]
+        }
+      })
+
+    assert {:error, ds} = compile(dir, files)
+
+    assert ds == [
+             d("CONDITION_CYCLE", "conditions/found_tracks"),
+             d("CONDITION_CYCLE", "conditions/trusts")
+           ]
+  end
+
   # Break: an unknown condition name is dropped (reads as no condition) instead of refused, so a
   # gate the author meant to write silently always holds.
   test "a named leaf naming no condition is UNRESOLVED_REFERENCE at the use site", %{dir: dir} do
