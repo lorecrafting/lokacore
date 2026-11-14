@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { test } from 'node:test';
-import { pickKind, start } from '../play/card.ts';
+import { isNamed, pickKind, start } from '../play/card.ts';
 import { offered } from '../play/rules.ts';
 
 const defs = JSON.parse(
@@ -42,4 +42,14 @@ test('the steps picker offers only the ops its node kind compiles', () => {
   assert.equal(offered(at('narrate'), 'dialogue'), true);
   assert.equal(offered(defs.Policy.anyOf[0], 'reaction'), true);
   assert.equal(offered(at('damage'), 'room'), true);
+});
+
+// Break: the condition picker is attached to every Policy branch, so a `fact.adjust` leaf's `key`
+// field becomes a condition list and an author can no longer name the fact to adjust.
+test('only the named leaf is told apart by its tag, so only it keys on a condition', () => {
+  const named = { properties: { op: { const: 'named' }, key: {} } };
+  const fact = { properties: { op: { const: 'fact.adjust' }, fact: {}, amount: {} } };
+  assert.equal(isNamed(named), true);
+  assert.equal(isNamed(fact), false);
+  assert.equal(isNamed(undefined), false);
 });
