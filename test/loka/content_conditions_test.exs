@@ -110,6 +110,34 @@ defmodule Loka.ContentConditionsTest do
            ]
   end
 
+  # Break: two conditions files claim one key and the later read silently replaces the earlier, so a
+  # cartridge whose author split one name across two files compiles with whichever file the loader
+  # happened to read last, and the other is never reported. The area holds a room of its own, so no
+  # area_empty fault joins the two.
+  test "two files claiming one condition key are DUPLICATE_DEFINITION at both", %{dir: dir} do
+    files =
+      Map.merge(gated(@named), %{
+        "conditions/found_tracks.json" => @leaf,
+        "areas/fen/rooms/reed_bank.json" => %{
+          "name" => "room.reed_path.title",
+          "description" => "room.reed_path.description",
+          "exits" => %{"north" => %{"to" => "reed_path"}}
+        },
+        "areas/fen/conditions/found_tracks.json" => %{
+          "op" => "fact_compare",
+          "fact" => "fen_tracks_found",
+          "equals" => false
+        }
+      })
+
+    assert {:error, ds} = compile(dir, files)
+
+    assert ds == [
+             d("DUPLICATE_DEFINITION", "areas/fen/conditions/found_tracks"),
+             d("DUPLICATE_DEFINITION", "conditions/found_tracks")
+           ]
+  end
+
   # Break: an unknown condition name is dropped (reads as no condition) instead of refused, so a
   # gate the author meant to write silently always holds.
   test "a named leaf naming no condition is UNRESOLVED_REFERENCE at the use site", %{dir: dir} do
