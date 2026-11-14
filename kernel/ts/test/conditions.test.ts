@@ -95,6 +95,17 @@ test('a condition inside an area bundle is a node, and the area reads it', () =>
   assert.deepEqual(nodes, [{ ref: `${S}condition/tide`, kind: 'condition' }]);
 });
 
+test('a condition key at the root and in an area folder is one node, not two', () => {
+  // Break: pushing a node per matching file, so the same key found twice gives the map two nodes at
+  // one ref and the reader edge lands on only one of them.
+  const src = planted('dup', { tide: { fact: { key: 'has_lantern' } } }, {});
+  const area = join(src, 'areas', 'harbour', 'conditions');
+  mkdirSync(area, { recursive: true });
+  writeFileSync(join(area, 'tide.json'), JSON.stringify({ fact: { key: 'has_lantern' } }));
+  const { nodes } = conditionGraph(src, 'scene_sampler@0.0.1', refs, {});
+  assert.deepEqual(nodes, [{ ref: `${S}condition/tide`, kind: 'condition' }]);
+});
+
 test('a bundle member naming a condition is a reader, through the bundled refs', () => {
   // Break: resolving a site's owner with `placed()` alone, which has no owner for an area bundle's
   // `areas/<a>.json`, so the member's `named` leaves produce no reader edge and the condition reads

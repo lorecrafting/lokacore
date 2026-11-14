@@ -36,6 +36,38 @@ function leaves(v: unknown, path = '', into: { path: string; key: string }[] = [
   return into;
 }
 
+/** The condition file's own leaves, or a bundle member's section of the bundle, into `push`. */
+function walk(
+  source: string,
+  cartridge: string,
+  refs: Map<string, string>,
+  members: Map<string, string>,
+  push: (from: string | undefined, value: unknown) => void,
+) {
+  // a key at the root AND inside an area folder would otherwise give one condition two nodes
+  const seen = new Set<string>();
+  for (const rel of files(source)) {
+    const key = CONDITION.exec(rel)?.[1];
+    if (key !== undefined) {
+      if (seen.has(key)) continue;
+      seen.add(key);
+      push(ref(cartridge, key), held(source, rel));
+      continue;
+    }
+    // a definition in a file of its own (a bundle member has none, so `members` holds it instead)
+    const at = placed(rel);
+    const own = at && `${at.ext === 'scene' ? 'dialogues' : at.dir}/${at.key}`;
+    if (own && !members.has(own)) push(refs.get(own), held(source, rel));
+  }
+  // a bundle member: its own section of the bundle, so its leaves are its own and not the bundle's
+  for (const [bundledKey, bundleFile] of members) {
+    const value = held(source, bundleFile) as Record<string, Record<string, unknown>> | undefined;
+    if (!isObj(value)) continue;
+    const [section, member] = bundledKey.split('/');
+    if (isObj(value[section!])) push(refs.get(bundledKey), value[section!]![member!]);
+  }
+}
+
 /**
  * The condition nodes and their reader edges: one node per condition file, and an edge from every
  * definition that names it (a condition naming another is itself a reader, so a chain shows).
@@ -50,35 +82,16 @@ export function conditionGraph(
   bundles: Record<string, string>,
 ) {
   const members = new Map(Object.entries(bundles));
-  const nodes: Nodes = [];
+  const nodes: Nodes = files(source).flatMap((rel) => {
+    const key = CONDITION.exec(rel)?.[1];
+    return key === undefined ? [] : [{ ref: ref(cartridge, key), kind: 'condition' }];
+  });
   const edges: Edge[] = [];
-  const push = (from: string | undefined, value: unknown) => {
+  walk(source, cartridge, refs, members, (from, value) => {
     if (from === undefined) return;
     for (const leaf of leaves(value))
       edges.push({ from, to: ref(cartridge, leaf.key), path: leaf.path, op: 'named' });
-  };
-
-  for (const rel of files(source)) {
-    const key = CONDITION.exec(rel)?.[1];
-    if (key !== undefined) {
-      nodes.push({ ref: ref(cartridge, key), kind: 'condition' });
-      push(ref(cartridge, key), held(source, rel));
-      continue;
-    }
-    // a definition in a file of its own (a bundle member has none, so `members` holds it instead)
-    const at = placed(rel);
-    const own = at && `${at.ext === 'scene' ? 'dialogues' : at.dir}/${at.key}`;
-    if (own && !members.has(own)) push(refs.get(own), held(source, rel));
-  }
-
-  // a bundle member: its own section of the bundle, so its leaves are its own and not the bundle's
-  for (const [bundledKey, bundleFile] of members) {
-    const value = held(source, bundleFile) as Record<string, Record<string, unknown>> | undefined;
-    if (!isObj(value)) continue;
-    // a bundle's own sections, so each member's leaves belong to that member and not to the bundle
-    const [section, member] = bundledKey.split('/');
-    if (!isObj(value[section!])) continue;
-    push(refs.get(bundledKey), value[section!]![member!]);
-  }
-  return { nodes, edges };
+  });
+  // the same key found twice is one node, not two at one ref
+  return { nodes: nodes.filter((n, i) => nodes.findIndex((m) => m.ref === n.ref) === i), edges };
 }
