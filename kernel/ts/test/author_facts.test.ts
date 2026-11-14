@@ -147,6 +147,29 @@ test('a quest counts its adjust unless it is repeatable, as L2a does', () => {
   assert.equal(reach({ [ref('quest', 'again')]: quest(true) }), 1); // repeatable: no count
 });
 
+// Break: the reaction's one-shot-event rule inverted, so a one-shot quest's reaction stops counting
+// toward the ceiling. L2a (`lib/loka/content/lint_facts.ex:103-114`) repeats a reaction on a `@once`
+// event only when its quest exists and is repeatable; otherwise the write is once-only and counts.
+// `ring` writes 10 to a default-1 fact: on a one-shot quest 1 + 10 = 11, on a repeatable one 1.
+test('a reaction on a quest event counts unless that quest is repeatable', () => {
+  const reaction = (quest?: string) => ({
+    on: { event: 'quest_resolved', ...(quest ? { quest: to(quest) } : {}) },
+    steps: [{ op: 'fact.adjust', fact: to(mood), amount: 10 }],
+  });
+  const reach = (reactions: object, withQuests: object) =>
+    factUsage({ ...planted, quests: withQuests, reactions } as never).find((r) => r.key === 'mood')!
+      .reach;
+  const q = (repeatable?: true) => ({ ...(repeatable ? { repeatable } : {}), steps: [] });
+  const once = ref('quest', 'once');
+  const again = ref('quest', 'again');
+  const ring = (quest?: string) => ({ [ref('reaction', 'ring')]: reaction(quest) });
+
+  assert.equal(reach(ring(once), { [once]: q() }), 11); // one-shot quest: 1 + 10
+  assert.equal(reach(ring(again), { [again]: q(true) }), 1); // repeatable quest: no count
+  assert.equal(reach(ring(), {}), 11); // no quest named: once-only, still counts
+  assert.equal(reach(ring('demo@1:quest/missing'), { [once]: q() }), 11); // missing quest
+});
+
 // The panel's view of a Story: `factRows` keeps `factUsage`'s order (worst first) and its range.
 test('factRows keeps the sort and copies the range', () => {
   const s = { facts: rows } as unknown as Story;
