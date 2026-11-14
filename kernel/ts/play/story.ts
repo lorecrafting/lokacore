@@ -1,9 +1,8 @@
 // The Story map's model (docs/system/cartridge.md#content-reports; docs/rnd/story-map-design-2026-11-05.md
-// section 11 S1): reach.ts's content graph and reach report over the compiled artifact, plus the
-// dialogue links it cannot see (a choice's `then` is a key, a reaction's `choice_resolved` names a
-// choice), the `~` placeholders and the compiler's diagnostics by node, and outline.json's beats
-// with their status and the seeds-and-payoffs check. live.ts serves it as `GET /story`;
-// `bin/loka story <cartridge dir>` prints it. Potential findings for authors, not a check.
+// section 11 S1): reach.ts's graph and report over the compiled artifact, the dialogue links it cannot
+// see (a choice's `then` is a key, a reaction's `choice_resolved` names a choice), the `~`
+// placeholders, the compiler's diagnostics by node, and outline.json's beats with their status and
+// the seeds-and-payoffs check. size: allow 310, F1's facts row (storyfacts.ts)
 import { existsSync, readFileSync } from 'node:fs';
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import { createHash } from 'node:crypto';
@@ -12,7 +11,7 @@ import { INSTALLED, loadCartridge } from '../src/index.ts';
 import { isObj, step, type Obj } from '../src/content/cartridge_refs.ts';
 import { encode, type Json } from '../src/foundation/canonical.ts';
 import { artifactBytes, compiled } from './compiled.ts';
-import { contentGraph, reachReport } from './reach.ts';
+import { contentGraph, factUsage, reachReport } from './reach.ts';
 import { placed } from './guard.ts';
 import { bundled, files, todo, type Todo } from './todo.ts';
 import {
@@ -154,6 +153,7 @@ export function story(source: string, dev: Dev, diagnostics: Diagnostic[]) {
     files: sources,
     bundled: inBundle,
     report,
+    facts: factUsage(c), // F1's table (storyfacts.ts); `range` is the compiler's, added by the panel
     todo: todos,
     diagnostics: byNode,
     outline: beats(source, { refs, defs, todos, unreached }),

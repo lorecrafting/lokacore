@@ -9,6 +9,7 @@ import { engineWrittenRefs, expectedFacts } from '../src/content/cartridge_posit
 import { isObj, step, type Obj } from '../src/content/cartridge_refs.ts';
 import { encode, type Json } from '../src/foundation/canonical.ts';
 import { refString } from '../src/runtime/decision.ts';
+import type { FactUsage } from './fact_usage.ts';
 import { reads } from './reads.ts';
 
 type Edge = {
@@ -21,6 +22,10 @@ type Edge = {
   value?: unknown;
   leaf?: Obj;
 };
+
+/** A fact's row in F1's table: its source spec as declared, its edges' counts, which side is
+ * missing, and W4's relief: the highest value its once-only writes reach (L2a's sum). */
+export type { FactUsage };
 
 const REF = /^[^@]+@[^:]+:([a-z_]+)\/[^/]+$/; // DefinitionRefString
 const kindOf = (ref: string) => REF.exec(ref)?.[1];
@@ -138,22 +143,100 @@ export function reachReport(c: Obj) {
     orphan_items: refs('items')
       .filter((i) => template(i) && !inbound(i).length)
       .sort(),
-    orphan_facts: orphanFacts(c, inbound),
+    orphan_facts: orphanFacts(factUsage(c)),
   };
 }
 
 // N2: facts nothing names, only writes or only reads; the facts the engine owns are left out
-function orphanFacts(c: Obj, inbound: (ref: string) => Edge[]) {
+function orphanFacts(rows: FactUsage[]) {
+  const refs = (status?: string) => rows.filter((r) => r.status === status).map((r) => r.ref);
+  return { unused: refs('unused'), write_only: refs('write_only'), read_only: refs('read_only') };
+}
+
+// king of the statuses, worst first: an orphan before a fact both sides use (F1's sort); `both` is
+// absent from the list, so it sorts after every status in it
+const TROUBLE = ['read_only', 'write_only', 'unused'];
+
+// A reaction on one of these runs once per quest or level, so its writes do not accumulate
+// (lib/loka/content/lint_facts.ex:14)
+const ONCE = new Set(['quest_resolved', 'quest_failed', 'quest_activated', 'level_reached']);
+
+/** Whether one definition's `fact.adjust` may run more than once, L2a's rule
+ * (`lib/loka/content/lint_facts.ex:64-120`): a scene's writes happen once, a quest's unless it is
+ * repeatable, a reaction's when it is `once` or sits on a one-shot event of a quest that is not
+ * repeatable. Everything else may repeat. ponytail: a dialogue choice's `once` is not attributed
+ * here either, so those count as repeating, like L2a. */
+function repeats(c: Obj, section: string, def: Obj): boolean {
+  if (section === 'scenes') return false;
+  if (section === 'quests') return def.repeatable !== true;
+  if (section !== 'reactions') return true;
+  if (def.once === true) return false;
+  const on = def.on as Obj | undefined;
+  if (!isObj(on) || !ONCE.has(String(on.event))) return true;
+  const q = isObj(on.quest) ? refString(on.quest as never) : undefined;
+  return q === undefined || (c.quests as Obj)?.[q]?.repeatable !== true;
+}
+
+/** Every positive `fact.adjust` amount inside `v`, added to `out` per fact ref. */
+function amounts(v: unknown, out: Map<string, number>) {
+  if (Array.isArray(v)) return v.forEach((x) => amounts(x, out));
+  if (!isObj(v)) return;
+  if (v.op === 'fact.adjust' && isObj(v.fact) && typeof v.amount === 'number' && v.amount > 0) {
+    const ref = refString(v.fact as never);
+    out.set(ref, (out.get(ref) ?? 0) + v.amount);
+  }
+  Object.values(v).forEach((x) => amounts(x, out));
+}
+
+/** Every positive `fact.adjust` amount a fact's once-only writes add, by fact ref: the `once` sum
+ * of L2a (`lib/loka/content/lint_facts.ex:148`), so W4's ceiling cannot drift from the lint's. */
+function onceAmounts(c: Obj): Map<string, number> {
+  const out = new Map<string, number>();
+  for (const [section, v] of Object.entries(c))
+    if (isObj(v))
+      for (const [ref, def] of Object.entries(v))
+        if (REF.test(ref) && isObj(def) && !repeats(c, section, def)) amounts(def, out);
+  return out;
+}
+
+/** Every declared fact with its type, default, scopes, meaning, its read and write counts and which
+ * side is missing (F1 and W4 of docs/design/story-tooling.md), worst first then by key. The facts
+ * the engine owns are left out: the compiler's reserved ones and every engine write site. */
+export function factUsage(c: Obj): FactUsage[] {
+  const { edges } = contentGraph(c);
   const engine = new Set([
     ...Object.keys(expectedFacts(c)).map((k) => `${c.manifest.id}@${c.manifest.version}:fact/${k}`),
     ...engineWrittenRefs(c),
   ]);
-  const facts = Object.keys((c.facts ?? {}) as Obj).filter((f) => !engine.has(f));
-  return {
-    unused: facts.filter((f) => !inbound(f).length).sort(),
-    write_only: facts.filter((f) => inbound(f).length && !inbound(f).some(isRead)).sort(),
-    read_only: facts.filter((f) => inbound(f).length && !inbound(f).some(isWrite)).sort(),
+  const all = Object.entries((c.facts ?? {}) as Obj).filter(([ref]) => !engine.has(ref));
+  const grown = onceAmounts(c);
+  const count = (ref: string) => {
+    const into = edges.filter((e) => e.to === ref);
+    const write = into.filter(isWrite).length;
+    return { write, read: into.filter((e) => isRead(e)).length };
   };
+  // a fact no edge names is unused; writes without reads, or reads without writes, name the gap
+  const status = ({ read, write }: { read: number; write: number }) =>
+    !read && !write ? 'unused' : !read ? 'write_only' : !write ? 'read_only' : 'both';
+  const rank = (f: FactUsage) => {
+    const i = TROUBLE.indexOf(f.status);
+    return i < 0 ? TROUBLE.length : i;
+  };
+  return all
+    .map(([ref, spec]) => {
+      const n = count(ref);
+      const v = (spec.value_type ?? {}) as FactUsage['value_type'];
+      const reach = (typeof v.default === 'number' ? v.default : 0) + (grown.get(ref) ?? 0);
+      return {
+        ref,
+        key: ref.slice(ref.lastIndexOf('/') + 1),
+        ...spec,
+        ...n,
+        status: status(n),
+        reach,
+      };
+    })
+    .sort((a, b) => rank(a) - rank(b) || a.key.localeCompare(b.key)) as FactUsage[];
 }
 
 if (import.meta.main) {
