@@ -12,6 +12,7 @@ import type { SetLayout } from './columns.tsx';
 import { COMMANDS, fromRef, GROUPS, named, newCommand, STARTER, WORLD, type Layout, type Selection } from './shell.ts';
 import { FlowView } from './flow.tsx';
 import { StoryList } from './storylist.tsx';
+import type { Covered } from '../../../kernel/ts/play/covered_type.ts';
 
 type Pick = (s: Selection) => void;
 
@@ -177,8 +178,9 @@ export function MapSlot({
   story,
   refused,
   changes,
+  covered,
   ...m
-}: { layout: Layout; set: SetLayout; story?: Story; refused?: string; changes: Change[] } & Omit<MapProps, 'story' | 'segment'>) {
+}: { layout: Layout; set: SetLayout; story?: Story; refused?: string; changes: Change[]; covered?: Covered } & Omit<MapProps, 'story' | 'segment'>) {
   const segment = <Segment layout={layout} set={set} />;
   return (
     <section
@@ -198,7 +200,7 @@ export function MapSlot({
       ) : layout.map === 'flow' && story ? (
         <FlowView story={story} layout={layout} set={set} segment={segment} pick={m.pick} open={m.open} changes={changes} />
       ) : story ? (
-        <StoryList story={story} layout={layout} set={set} segment={segment} pick={m.pick} open={m.open} />
+        <StoryList story={story} layout={layout} set={set} segment={segment} pick={m.pick} open={m.open} covered={covered ?? {}} />
       ) : (
         <div className="p-2">
           {segment}

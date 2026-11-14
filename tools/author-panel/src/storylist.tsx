@@ -1,5 +1,7 @@
 // The map slot's Story segment (docs/design/editor-map-and-story-rulings.md S2): the list as a
 // role="tree" and Trace under it. The rules live in storylist.ts; this file maps rows to elements.
+// size: allow 332, R2's chip is drawn by the node row it colours; the one toggle beside the segment
+// belongs with them rather than alone in a file
 import {
   BookOpen,
   ChevronDown,
@@ -8,6 +10,7 @@ import {
   Film,
   Flag,
   Hand,
+  EyeOff,
   Lightbulb,
   Link,
   MessageCircle,
@@ -23,6 +26,7 @@ import {
   Zap,
 } from 'lucide-react';
 import { useEffect, useMemo, useRef } from 'react';
+import type { Covered } from '../../../kernel/ts/play/covered_type.ts';
 import type { Story } from './author.ts';
 import { Button } from './components/ui/button.tsx';
 import type { SetLayout } from './columns.tsx';
@@ -44,6 +48,24 @@ export const ICON: Record<string, typeof Flag> = {
   npc: User,
 };
 const SCROLL = 'loka.editor.story.scroll';
+// R2's chip (docs/design/story-tooling.md `### R2`): 16 px of colour with the checkpoint names in
+// its title, so the owner reads the list rather than JSON. Solid when a recorded path reaches the
+// node, a dashed outline when none does; the Compile card's count says a cartridge has no
+// checkpoints at all, so no chip would be the truth there.
+function Chip({ row }: { row: L.Row }) {
+  const at = row.covered?.join(', ');
+  const said = at ? `covered by ${at}` : 'no checkpoint reaches this';
+  return (
+    <span
+      title={said}
+      className={`size-4 shrink-0 rounded-sm ${
+        at ? 'bg-emerald-500/80' : 'border border-dashed border-muted-foreground'
+      }`}
+    >
+      <span className="sr-only">{said}</span>
+    </span>
+  );
+}
 let saving: ReturnType<typeof setTimeout> | undefined;
 // the scroll is kept once it rests, not on every scroll event
 const save = (el: HTMLElement) => {
@@ -59,6 +81,7 @@ type Props = {
   segment: React.ReactNode;
   pick: (s: Selection) => void;
   open: (ref: string) => void;
+  covered: Covered; // R2: what the recorded paths reach, from the watcher's push
 };
 
 function NodeCells({ row, tab, trail }: { row: L.Row; tab: boolean; trail: (panel: 'trace' | 'consequences') => void }) {
@@ -67,6 +90,7 @@ function NodeCells({ row, tab, trail }: { row: L.Row; tab: boolean; trail: (pane
     <>
       {Icon ? <Icon {...ICONED} /> : null}
       <code className={`flex-1 truncate ${row.unreached ? 'text-muted-foreground' : ''}`}>{row.label}</code>
+      {row.uncovered === undefined ? null : <Chip row={row} />}
       {L.TRACED.has(row.node!) ? (
         <Ghost label={`Trace ${row.label}`} icon={Route} tab={tab} run={() => trail('trace')} />
       ) : null}
@@ -248,19 +272,39 @@ function TreeRow({ row, a, chosen, tab }: { row: L.Row; a: Act; chosen: boolean;
   );
 }
 
+/** R2's `uncovered` filter as a toggle: on, only what no recorded path reaches; a cartridge with no
+ * checkpoints gets no button, since nothing is known to hide. */
+function OnlyButton({ st, a, known }: { st: L.ListState; a: Act; known: boolean }) {
+  if (!known) return null;
+  const only = st.only === 'uncovered';
+  return (
+    <Button
+      variant={only ? 'secondary' : 'ghost'}
+      size="icon-xs"
+      title={only ? 'Show every node' : 'Show only what no checkpoint reaches'}
+      aria-label="Uncovered only"
+      aria-pressed={only}
+      onClick={() => a.put({ ...st, only: only ? undefined : 'uncovered' })}
+    >
+      <EyeOff {...ICONED} />
+    </Button>
+  );
+}
+
 /** The Story segment: the list, its `dim` note and, when tracing, Trace in the lower half. */
 export function StoryList(props: Props) {
-  const { story, layout, set, segment } = props;
+  const { story, layout, set, segment, covered } = props;
   const st = layout.story ?? L.LIST;
   const a: Act = { st, put: (next) => set((l) => ({ ...l, story: next })), pick: props.pick, open: props.open };
   const tree = useRef<HTMLUListElement>(null);
   const selRef = useSync(props, tree, a);
-  const list = useMemo(() => L.rows(story, st), [story, st]);
+  const list = useMemo(() => L.rows(story, st, covered), [story, st, covered]);
   const note = L.note(story);
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       <header className="flex h-8 shrink-0 items-center gap-1 px-2">
         {segment}
+        <OnlyButton st={st} a={a} known={Object.keys(covered).length > 0} />
         <PacingButton story={story} a={a} />
       </header>
       {note ? <p className="truncate px-2 text-xs text-muted-foreground">{note}</p> : null}

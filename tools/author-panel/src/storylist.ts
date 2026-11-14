@@ -1,10 +1,13 @@
 // The Story list and Trace (docs/design/editor-map-and-story-rulings.md S2): the tree's visible
 // rows, the arrow keys' moves, which rows a selection or a palette row opens, a trace's rows and
 // the palette's story rows. No React here: tested from kernel/ts/test/author_story.test.ts.
+// size: allow 328, R2's coverage rows (`covered`, `uncovered`, the uncovered filter) sit beside the
+// rows they colour; the trace panel and palette rows come out together when this next needs room
 import { reads } from '../../../kernel/ts/play/reads.ts';
 import type { Edge } from '../../../kernel/ts/play/consequences.ts';
 import type { Triggers } from '../../../kernel/ts/play/scene_trigger.ts';
 import type { MapRoom } from './map.ts';
+import type { Covered } from '../../../kernel/ts/play/covered_type.ts';
 import { fromRef, type Item } from './shell.ts';
 
 export type { Edge };
@@ -69,6 +72,8 @@ export type Row = {
   refusals?: number;
   todo?: number;
   unreached?: boolean;
+  covered?: string[]; // R2: the checkpoint names that reach it; absent when none do
+  uncovered?: boolean; // R2: nothing reaches it (the `uncovered` filter and the chip's colour)
 };
 /** The lower section's one panel (rulings S2; C1 adds Consequences): Trace of a ref, Consequences of a
  * choice or node, Knowledge at a beat, or Pacing. */
@@ -79,7 +84,8 @@ export type Lower =
   | { panel: 'pacing' };
 /** The list's kept state (Layout.story): the ids toggled from their default, the lower panel, the row to focus. */
 // chosen: the palette picked the focus, so the selection's reveal on mount yields to it once
-export type ListState = { fold: string[]; lower?: Lower; focus?: string; chosen?: true };
+// only: R2's `uncovered` filter (docs/design/story-tooling.md `### R2`)
+export type ListState = { fold: string[]; lower?: Lower; focus?: string; chosen?: true; only?: 'uncovered' };
 export const LIST: ListState = { fold: [] };
 
 export const outlineOf = (s: Story) => (s.outline && 'beats' in s.outline ? s.outline : undefined);
@@ -103,19 +109,22 @@ export const SWATCH: Record<string, string> = {
 
 const plural = (n: number, one: string) => `${n} ${one}${n === 1 ? '' : 's'}`;
 
-function nodeRow(s: Story, ref: string, parent: string, level: number, off: Set<string>): Row {
+function nodeRow(s: Story, ref: string, parent: string, level: number, off: Set<string>, at: Covered = {}, known = Object.keys(at).length > 0): Row {
   const sel = fromRef(ref);
   const key = sel?.key ?? ref;
   const diags = s.diagnostics[ref] ?? [];
   const todo = (s.todo[ref] ?? []).reduce((n, t) => n + t.placeholders.length, 0);
   const unreached = off.has(ref);
+  const covered = at[ref];
   const name = [
     `${key}, ${sel?.kind}`,
     diags.length && plural(diags.length, 'refusal'),
     todo && `${todo} ~`,
     unreached && 'unreached',
+    covered?.length && `covered by ${covered.join(', ')}`,
   ].filter(Boolean);
   const words = diags.map((d) => [d.code, d.path].filter(Boolean).join(' ')).join('\n');
+  const reached = covered?.length ? `covered: ${covered.join(', ')}` : '';
   return {
     id: `${parent}/${ref}`,
     level,
@@ -123,16 +132,17 @@ function nodeRow(s: Story, ref: string, parent: string, level: number, off: Set<
     kind: 'node',
     label: key,
     name: name.join(', '),
-    ...(words && { title: words }),
+    ...((words || reached) && { title: [words, reached].filter(Boolean).join('\n') }),
     ref,
     node: sel?.kind,
     refusals: diags.length,
     todo,
     unreached,
+    ...(covered?.length ? { covered } : known && { uncovered: true }),
   };
 }
 
-type Ctx = { s: Story; st: ListState; outlined: boolean; off: Set<string> };
+type Ctx = { s: Story; st: ListState; outlined: boolean; off: Set<string>; at: Covered };
 // A row with children: its `open` flag, then its children when open.
 const branch = (c: Ctx, row: Row, kids: () => Row[]): Row[] => {
   const open = isOpen(c.st, row.id, c.outlined);
@@ -154,7 +164,7 @@ function beatRows(c: Ctx, b: Outline['beats'][number]): Row[] {
     n: b.n,
     status: b.status,
   };
-  const kids = () => b.nodes.map((r) => nodeRow(c.s, r, id, 3, c.off));
+  const kids = () => b.nodes.map((r) => nodeRow(c.s, r, id, 3, c.off, c.at));
   return b.nodes.length ? branch(c, row, kids) : [row];
 }
 
@@ -171,10 +181,14 @@ function seedRows(c: Ctx, o?: Outline): Row[] {
   return loose.length ? branch(c, row, () => loose) : [];
 }
 
-/** The visible rows, in order: the outline's parts with their beats and bound nodes, Seeds, then Unplaced. */
-export function rows(s: Story, st: ListState): Row[] {
+/** The visible rows, in order: the outline's parts with their beats and bound nodes, Seeds, then
+ * Unplaced. `at` is R2's coverage (kernel/ts/play/covered.ts), empty until the watcher pushes one;
+ * with `st.only` set, only what nothing reaches is shown (the `uncovered` filter). */
+export function rows(s: Story, st: ListState, at: Covered = {}): Row[] {
   const o = outlineOf(s);
-  const c: Ctx = { s, st, outlined: !!o, off: new Set(Object.values(s.report.unreachable).flat()) };
+  const c: Ctx = { s, st, outlined: !!o, off: new Set(Object.values(s.report.unreachable).flat()), at };
+  // before the watcher's first answer nothing is known about any node, so the filter shows all
+  if (st.only === 'uncovered' && Object.keys(at).length) return uncoveredRows(c, o);
   const parts = (o?.parts ?? []).flatMap((title, i) => {
     const label = [`Part ${i + 1}`, title].filter(Boolean).join('  ');
     const row: Row = { id: `part:${i}`, level: 1, kind: 'part', label, name: label };
@@ -184,9 +198,33 @@ export function rows(s: Story, st: ListState): Row[] {
   const unplaced = s.graph.nodes.filter((n) => KINDS.includes(n.kind) && !bound.has(n.ref));
   const label = `Unplaced (${unplaced.length})`;
   const tail = branch(c, { id: 'unplaced', level: 1, kind: 'part', label, name: label }, () =>
-    unplaced.map((n) => nodeRow(s, n.ref, 'unplaced', 2, c.off)),
+    unplaced.map((n) => nodeRow(s, n.ref, 'unplaced', 2, c.off, c.at)),
   );
   return [...parts, ...seedRows(c, o), ...tail];
+}
+
+/** R2's `uncovered` filter: the beats and nodes nothing reaches. A beat stays when any node it binds
+ * is uncovered, and its parts arrive open so the rows are visible rather than folded away. Before the
+ * watcher has pushed any coverage the whole list stays: nothing is known, so nothing is hidden. */
+function uncoveredRows(c: Ctx, o: Outline | undefined): Row[] {
+  const loose = (ref: string) => !c.at[ref]?.length;
+  const beats = (o?.beats ?? []).filter((b) => b.nodes.some(loose));
+  const parts = (o?.parts ?? []).flatMap((title, i) => {
+    const mine = beats.filter((b) => b.part === i);
+    if (!mine.length) return [];
+    const label = [`Part ${i + 1}`, title].filter(Boolean).join('  ');
+    const head: Row = { id: `part:${i}`, level: 1, kind: 'part', label, name: label, open: true };
+    return [head, ...mine.flatMap((b) => beatRows(c, b))];
+  });
+  const rest = c.s.graph.nodes.filter((n) => KINDS.includes(n.kind) && loose(n.ref));
+  const label = `Unplaced (${rest.length})`;
+  const tail: Row[] = rest.length
+    ? [
+        { id: 'unplaced', level: 1, kind: 'part', label, name: label, open: true },
+        ...rest.map((n) => nodeRow(c.s, n.ref, 'unplaced', 2, c.off, c.at)),
+      ]
+    : [];
+  return [...parts, ...tail];
 }
 
 /** The `dim` line over the list: why there are no beats, if there are none. */

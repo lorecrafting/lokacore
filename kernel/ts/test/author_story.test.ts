@@ -10,13 +10,14 @@ import { choicesOf, consequenceRows } from '../../../tools/author-panel/src/stor
 import { contentGraph } from '../play/reach.ts';
 
 const ref = (kind: string, key: string) => `demo@1:${kind}/${key}`;
-const [q1, d1, f1, f2] = [
+const [q1, d1, f1, f2, sp] = [
   ref('quest', 'q1'),
   ref('dialogue', 'd1'),
   ref('fact', 'f1'),
   ref('fact', 'f2'),
+  ref('story_point', 'sp'),
 ];
-const nodes = [q1, d1, f1, f2, ref('story_point', 'sp'), ref('room', 'hall')].map((r) => ({
+const nodes = [q1, d1, f1, f2, sp, ref('room', 'hall')].map((r) => ({
   ref: r,
   kind: r.split(':')[1]!.split('/')[0]!,
 }));
@@ -408,4 +409,40 @@ test('the palette offers Consequences on the nodes that write and opens it on th
       .map((i) => i.label),
     ['consequences d1', 'consequences sp'],
   );
+});
+
+// R2 (docs/design/story-tooling.md `### R2`): the chip's names and the `uncovered` filter.
+// Break: a node with no coverage and a node whose coverage is unknown both read as uncovered, the
+// filter keeps a covered node, or the beat holding it is not kept.
+test('a node names its checkpoints; the uncovered filter keeps the beats holding uncovered nodes', () => {
+  const at = { [q1]: ['gate', 'mill'], [d1]: ['gate'] };
+  const shut = list.toggle(list.LIST, 'beat:1');
+  const by = Object.fromEntries(list.rows(planted, shut, at).map((r) => [r.id, r]));
+  assert.deepEqual(by[`beat:1/${q1}`]!.covered, ['gate', 'mill']);
+  assert.equal(by[`beat:1/${q1}`]!.name, 'q1, quest, 3 ~, covered by gate, mill');
+  assert.equal(by[`beat:1/${q1}`]!.title, 'covered: gate, mill'); // no refusals, so the names alone
+  assert.equal(by[`beat:1/${d1}`]!.uncovered, undefined);
+  // q1 and d1 are reached, so beat 1 and part 0 go; beat 2 binds no node and goes with them. The
+  // unbound nodes stay, and f2's read-only status does not make it covered.
+  const only = list.rows(planted, { ...list.LIST, only: 'uncovered' }, at);
+  assert.deepEqual(
+    only.map((r) => r.id),
+    ['unplaced', `unplaced/${f1}`, `unplaced/${f2}`, `unplaced/${sp}`],
+  );
+  assert.deepEqual(only[1]!.covered, undefined);
+  assert.equal(only[1]!.uncovered, true);
+});
+
+// Break: before the watcher's first coverage push, every node reads unreached and the list hides
+// behind the filter.
+test('with no coverage pushed yet nothing claims a node is uncovered', () => {
+  const rows = list.rows(planted, { ...list.LIST, only: 'uncovered' });
+  assert.deepEqual(
+    rows.map((r) => r.id),
+    ids(planted, list.LIST), // the whole list, as if the filter were off
+  );
+  const open = list.toggle(list.LIST, 'unplaced'); // Unplaced starts shut, so its nodes are not rows
+  const by = Object.fromEntries(list.rows(planted, open).map((r) => [r.id, r]));
+  assert.equal(by[`unplaced/${f1}`]!.uncovered, undefined);
+  assert.equal(by[`unplaced/${f1}`]!.covered, undefined);
 });
