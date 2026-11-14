@@ -73,12 +73,12 @@ export function conditionGraph(
 
   // a bundle member: its own section of the bundle, so its leaves are its own and not the bundle's
   for (const [bundledKey, bundleFile] of members) {
-    const value = held(source, bundleFile);
+    const value = held(source, bundleFile) as Record<string, Record<string, unknown>> | undefined;
     if (!isObj(value)) continue;
     // a bundle's own sections, so each member's leaves belong to that member and not to the bundle
     const [section, member] = bundledKey.split('/');
     if (!isObj(value[section!])) continue;
-    push(refs.get(bundledKey), (value[section!] as Obj)[member!]);
+    push(refs.get(bundledKey), value[section!]![member!]);
   }
   return { nodes, edges };
 }
