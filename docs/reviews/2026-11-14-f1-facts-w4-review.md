@@ -65,3 +65,57 @@ Findings:
 
 Not re-opened: the panel wiring, `story.ts`'s allowance and `orphanFacts`'s new shape; the sort,
 counts and empty-range rules above need no change.
+
+## RECHECK (2026-11-14)
+
+Written 2026-11-14 03:05 UTC in the Pi harness by deploy/deepseek-ai/deepseek-v4.1-flash-1017 (role reviewer)
+
+Reviewed only the fix commit `80713a03b` on `story/f1-facts-w4` and the two findings of the record
+above. Verdict: **REQUEST CHANGES** — the quest branch is fixed, the reaction branch is now inverted
+the other way, and no test covers it.
+
+### 1. Blocker (quest branch) — fixed
+
+`kernel/ts/play/reach.ts:172` now reads `return def.repeatable === true;`. `repeats()` answers "may
+run more than once"; L2a's `repeats?` (`lib/loka/content/lint_facts.ex:78`) answers the same
+question with `v["repeatable"] == true`, and `adjust/2` keeps the amount when `repeats?` is false.
+Same truth table. Mutant run: inverting the branch to `def.repeatable !== true` fails
+`a quest counts its adjust unless it is repeatable, as L2a does` (`11` vs `1`); restoring it passes.
+
+### 2. Blocker (reaction branch) — still wrong, inverted by this fix
+
+`kernel/ts/play/reach.ts:178` now reads `return q !== undefined && (c.quests as Obj)?.[q]?.repeatable === true;`.
+That is the opposite of L2a. `reaction_repeats?` (`lint_facts.ex:103`) returns
+`quest_repeats?(on, files)`, and `quest_repeats?` (`:110-114`) is true only when the named quest
+exists **and** is repeatable. So on a `@once` event (`quest_resolved quest_failed quest_activated
+level_reached`, `lint_facts.ex:14`) a reaction counts as once-only when the quest is *absent or not
+repeatable* — exactly the pre-fix `q === undefined || repeatable !== true`. The lint's own comment
+(`:99-102`) states the behaviour: "Without it, a reaction on a one-shot event runs once". A one-shot
+quest fires once, so its reaction's adjust belongs in W4's ceiling; the new code drops it, and a
+repeatable quest's is now counted in.
+
+Not visible in any current assertion: no test or fixture puts a reaction on a quest event, so `gold`
+stays at 16 and the suite is green. Mutant run: replacing line 178 with `return true;` leaves all
+seven tests passing, which is this very regression. The doc comment above `repeats()`
+(`reach.ts:165-169`) was rewritten in the same commit and now describes the inverted rule, so it
+does not catch it either.
+
+Fix: restore `return q === undefined || (c.quests as Obj)?.[q]?.repeatable !== true;` and add one
+test that names the break — two reactions on `quest_resolved`, one of a one-shot quest and one of a
+`repeatable` quest, with a default-1 fact: the one-shot one must reach 1 + its amount, the
+repeatable one must stay 1.
+
+### 3. Major (`gold` label) — fixed
+
+`kernel/ts/test/author_facts.test.ts:112-122` splits the label on `' · '` and compares nine cells
+(`gold`, `int`, `2`, `story`, `''`, `5`, `1`, `both`, `0..16`). Those cells are the planted fixture's
+own values (default 2, scope `story`, no `meaning`, five writes, one read, the ceiling `0..16`
+asserted independently at `:89`), not a copied run output, and the empty meaning cell is a real gap
+in the join rather than a restatement of one string. The test passes (7/7, `npx tsx --test
+kernel/ts/test/author_facts.test.ts`).
+
+### 4. Major (the new quest test's numbers) — accepted
+
+`11` is the spec's own arithmetic: L2a's sum is the default (1, `mood`) plus the once-only write (10),
+and `1` is the repeatable quest's write left out. Both are literals in the test, and the `11`/`1`
+pair is what makes the inverted branch fail, so they are not derived from the implementation.
