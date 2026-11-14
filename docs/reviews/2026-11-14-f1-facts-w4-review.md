@@ -119,3 +119,39 @@ kernel/ts/test/author_facts.test.ts`).
 `11` is the spec's own arithmetic: L2a's sum is the default (1, `mood`) plus the once-only write (10),
 and `1` is the repeatable quest's write left out. Both are literals in the test, and the `11`/`1`
 pair is what makes the inverted branch fail, so they are not derived from the implementation.
+
+## RECHECK 2 (2026-11-14)
+
+Written 2026-11-14 00:37 UTC in the Pi harness by deploy/deepseek-ai/deepseek-v4.1-flash-1017 (role reviewer)
+
+Reviewed only the fix commits `6ba05595d` and `5fe0ced52` and the two open items of the previous
+sections. Verdict: **APPROVE**.
+
+**I was wrong in the previous pass about the reaction branch** — my proposed line answered "is
+once-only" and inverting it inside `repeats()` turned a correct line into a wrong one.
+
+### 1. Reaction branch (was finding 2) — the head's code is right
+
+`kernel/ts/play/reach.ts:178` returns `q !== undefined && (c.quests as Obj)?.[q]?.repeatable ===
+true;`. `repeats()` answers "may run more than once", and on a `@once` event
+(`quest_resolved quest_failed quest_activated level_reached`, `lint_facts.ex:14`) L2a's
+`reaction_repeats?` → `quest_repeats?` (`lint_facts.ex:103-114`) is true only when the named quest
+exists and is `repeatable`; no quest named, a missing quest, and a one-shot quest all give `false`
+(once-only, so the write counts). The line matches that table on all four cases; my earlier
+`q === undefined || repeatable !== true` would have made the no-quest case repeat, i.e. drop a
+write the lint counts.
+
+Mutant run, reproduced here: replacing line 178 with exactly my proposed line fails the new test
+`a reaction on a quest event counts unless that quest is repeatable` (actual `1`, expected `11`),
+and the suite returns 7/7 with the file restored (`npx tsx --test kernel/ts/test/author_facts.test.ts`).
+
+### 2. Lint failure (`as never`) — fixed
+
+`5fe0ced52` drops the test's `as never` casts on real types; `sh bin/check_as_never.sh` now exits 0
+(baseline 0). My first record missed it.
+
+### 3. Not re-opened
+
+The quest branch (`=== true`), the `gold` label split and the test's `11`/`1`/`11`/`11` literals
+stand as settled in the sections above; the new test file's four assertions are hand-worked and each
+names the break it guards.

@@ -10,7 +10,7 @@ of closed work are deleted once their lesson is folded, and linked by permalink
 Reviews before R2 live in the [legacy repository](https://github.com/lorecrafting/lokacore-v2-legacy)
 (commit `997a7a8`, `docs/rewrite-v3/reviews/`).
 
-- [Review: F1 Facts table + W4 reachable range](2026-11-14-f1-facts-w4-review.md)
+- [Review: F1 Facts table + W4 reachable range](2026-11-14-f1-facts-w4-review.md): **APPROVE**
 - [Review: W3 lines sheet](2026-11-13-w3-lines-review.md): **APPROVE WITH NOTES**
 - [Written 2026-11-13 19:15 UTC in the Pi harness by deploy/deepseek-ai/deepseek-v4.1-flash-1017](2026-11-13-w2-rename-checkpoints-review.md): **APPROVE WITH NOTES**
 - [Review: L1 + L2 story-logic lints (PR #723, loka-wfrgk.115.6)](2026-11-13-l1-l2-story-logic-review.md): **CHANGES REQUIRED**
