@@ -1,8 +1,9 @@
 // The Story map's model (docs/system/cartridge.md#content-reports; docs/rnd/story-map-design-2026-11-05.md
 // section 11 S1): reach.ts's graph and report over the compiled artifact, the dialogue links it cannot
 // see (a choice's `then` is a key, a reaction's `choice_resolved` names a choice), the `~`
-// placeholders, the compiler's diagnostics by node, and outline.json's beats with their status and
-// the seeds-and-payoffs check. size: allow 310, F1's facts row (storyfacts.ts)
+// placeholders, the compiler's diagnostics by node, and outline.json's beats.
+// size: allow 312, K1's condition nodes: the compile substitutes a `named` leaf away, so a
+// condition is read from the source (conditions.ts), not the artifact.
 import { existsSync, readFileSync } from 'node:fs';
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import { createHash } from 'node:crypto';
@@ -12,6 +13,7 @@ import { isObj, step, type Obj } from '../src/content/cartridge_refs.ts';
 import { encode, type Json } from '../src/foundation/canonical.ts';
 import { artifactBytes, compiled } from './compiled.ts';
 import { contentGraph, factUsage, reachReport } from './reach.ts';
+import { conditionGraph } from './conditions.ts';
 import { placed } from './guard.ts';
 import { bundled, files, todo, type Todo } from './todo.ts';
 import {
@@ -132,6 +134,10 @@ const ownFiles = (source: string, refs: Map<string, string>) => {
   return Object.fromEntries(pairs.filter(([ref]) => ref)) as Record<string, string>;
 };
 
+/** A ref's prefix, `<id>@<version>`, as every node the artifact yields already reads. */
+const cartridgeOf = (c: Obj) =>
+  `${(c.manifest as Obj).id as string}@${(c.manifest as Obj).version as string}`;
+
 /** The model for `source` compiled to `dev`, with the compile's diagnostics. */
 export function story(source: string, dev: Dev, diagnostics: Diagnostic[]) {
   const loaded = loadCartridge(artifactBytes(dev), INSTALLED);
@@ -141,6 +147,11 @@ export function story(source: string, dev: Dev, diagnostics: Diagnostic[]) {
   graph.edges.push(...links(c));
   const report = reachReport(c);
   const { refs, defs } = shortRefs(c, graph.nodes);
+  // a condition is substituted away at compile, so its node and reader edges come from the source;
+  // a bundle's members have no file of their own, so `refs` gains their `${section}/${key}` keys
+  const { nodes, edges } = conditionGraph(source, cartridgeOf(c), refs, bundled(source));
+  graph.nodes.push(...nodes);
+  graph.edges.push(...edges);
   const todos = todoByNode(source, refs, defs);
   const byNode: Record<string, Diagnostic[]> = {};
   for (const d of diagnostics) add(byNode, nodeOf(d.rel, refs), d);

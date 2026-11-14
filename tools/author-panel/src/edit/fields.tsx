@@ -161,9 +161,8 @@ export const FieldName = (p: FieldProps) => (
 
 /** Picker: a definition key, offered from the story's nodes of the kind the field's path names; an
  * unknown one is refused at the field and never reaches the draft. */
-function DefinitionRef(p: FieldProps) {
+function Picker(p: FieldProps, kind: string) {
   const list = `${p.fieldPathId.$id}-keys`;
-  const kind = pickKind(p.fieldPathId.path);
   const keys = choices(kind, context(p).nodes);
   const [bad, setBad] = useState<string>(); // a refused id: shown, never sent
   const [kept, keep] = useState<unknown>(); // the value at focus: a refused keystroke puts it back
@@ -201,9 +200,15 @@ function DefinitionRef(p: FieldProps) {
 /** A field the definition does not have yet: nothing until the add menu reveals it. */
 const Hidden = () => null;
 
+/** A definition key, of the kind its field's path names (a reference field). */
+const DefinitionRef = (p: FieldProps) => Picker(p, pickKind(p.fieldPathId.path));
+/** A named condition's key (K1): `conditions/<key>.json`, offered where a Policy writes `named`. */
+const ConditionKey = (p: FieldProps) => Picker(p, 'condition');
+
 export const fields = {
   TextKey,
   DefinitionRef,
+  ConditionKey,
   Policy: Rules,
   Step: Rules,
   AnyOfField: Rules,

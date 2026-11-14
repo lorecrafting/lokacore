@@ -1,6 +1,7 @@
 // The Story map's model (docs/rnd/story-map-design-2026-11-05.md section 11 S1) over a planted copy
 // of scene_sampler: two dialogues joined by `then` (one in an area folder), a choice_resolved
 // reaction, a room no exit reaches and an outline.json.
+// size: allow 516, K1b's condition nodes sit with the rest of the map's model.
 import assert from 'node:assert/strict';
 import { execFileSync, spawnSync } from 'node:child_process';
 import {
@@ -222,6 +223,49 @@ test('an edge that assigns a fact is set, one that reads it is not', () => {
     [ref('reaction', 'bell_after'), true], // scene_sampler's own fact.assign
     [ref('room', 'shed'), undefined],
   ]);
+});
+
+// Break: a condition is drawn only from the artifact, so it never appears at all (the compile
+// substitutes every `named` leaf away); or the reader edge points from the condition to its reader.
+test('a condition is a node with the definitions naming it as readers, from the real source', () => {
+  // its own copy: a planted room would change the shared src every later test reads
+  const own = join(dir, 'conditions-src');
+  cpSync(src, own, { recursive: true });
+  const at = (rel: string, value: unknown) => writeFileSync(join(own, rel), JSON.stringify(value));
+  mkdirSync(join(own, 'conditions'), { recursive: true });
+  at('conditions/trusts.json', { op: 'fact_compare', fact: 'bell_heard', equals: true });
+  at('conditions/both.json', { op: 'named', key: 'trusts' });
+  const room = JSON.parse(readFileSync(join(own, 'rooms/village_green.json'), 'utf8'));
+  at('rooms/village_green.json', {
+    ...room,
+    variants: [{ when: { op: 'named', key: 'both' }, description: 'room.village_green.title' }],
+  });
+  const built = join(dir, 'conditions-artifact.json');
+  execFileSync('mix', ['loka.compile', own, built, '--allow-placeholders'], {
+    cwd: root,
+    stdio: 'ignore',
+  });
+  const [, canon, hash] = /^\{"cartridge":(.*),"content_hash":"([0-9a-f]{64})"\}$/s.exec(
+    readFileSync(built, 'utf8'),
+  )!;
+  const { graph } = story(own, { canonical: canon!, sha256: hash! }, []) as {
+    graph: { nodes: { ref: string; kind: string }[]; edges: { from: string; to: string }[] };
+  };
+  const cond = graph.nodes
+    .filter((n) => n.kind === 'condition')
+    .map((n) => n.ref)
+    .sort();
+  assert.deepEqual(cond, [ref('condition', 'both'), ref('condition', 'trusts')]);
+  assert.deepEqual(
+    graph.edges
+      .filter((e) => e.to.startsWith(ref('condition', '')) && e.from !== e.to)
+      .map((e) => [e.from, e.to])
+      .sort(),
+    [
+      [ref('condition', 'both'), ref('condition', 'trusts')],
+      [ref('room', 'village_green'), ref('condition', 'both')],
+    ],
+  );
 });
 
 // Break: Pacing counts a key's words twice, a `~` as a word, misses scene or inline prose, or

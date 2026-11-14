@@ -53,8 +53,8 @@ export type Story = {
 };
 
 /** The kinds the list holds (design section 4.1); Trace opens on the fact, quest and story point. */
-export const KINDS = ['quest', 'story_point', 'scene', 'dialogue', 'reaction', 'action', 'fact', 'topic', 'npc'];
-export const TRACED = new Set(['fact', 'quest', 'story_point']);
+export const KINDS = 'quest story_point scene dialogue reaction action fact topic npc condition'.split(' ');
+export const TRACED = new Set(['fact', 'quest', 'story_point', 'condition']);
 /** The kinds Consequences opens on (C1): the nodes whose steps and choices write something. */
 export const CONSEQUENCES = new Set(['dialogue', 'scene', 'reaction', 'story_point']);
 const DASHED = new Set(['time_since']); // a read the clock settles, a hint (design 4.3)

@@ -11,6 +11,7 @@ import { Ajv2020 } from 'ajv/dist/2020.js';
 import {
   FORM_DEFAULTS,
   addable,
+  isNamed,
   added,
   addedHere,
   definitionOf,
