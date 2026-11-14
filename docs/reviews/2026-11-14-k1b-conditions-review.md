@@ -85,21 +85,3 @@ Duplicate `named` sites in one definition are two edges on one pair, which `trac
 row — no double count. The tests' expected refs are hand-written, not read back from the model.
 
 CI at `1d9b1f9d2`: `ci`, `book-e2e` and `graph-diff` all completed successfully.
-
-## RECHECK 2026-11-14 (fixes `1d9b1f9d2`, `ff5c0060b`)
-
-Written 2026-11-14 19:27 UTC in the Pi harness by deploy/deepseek-ai/deepseek-v4.1-flash-1017
-
-Verdict: **APPROVE**. Head `ff5c0060b`; nine findings, seven re-checked, all fixed.
-
-| # | Finding | Disposition |
-|---|---|---|
-| 1 | Blocker: picker untested | Fixed. `branchForm` lives in `tools/author-panel/src/edit/blocks/branch_form.ts:6` and `test/rules.test.ts:5` imports it directly (no React render). Mutant I ran: replaced `isNamed(...)` with `true` → `only the named leaf keys on a condition` fails (`1d9b1f9d2`). |
-| 2 | Major: bundle members had no `from` | Fixed. `todo.ts:23` `bundled()` maps `${section}/${key}` → `areas/<a>.json`; `conditions.ts:75-82` splits the key and pushes `refs.get(bundledKey)` over `value[section][member]`, so a member gets its own node ref as `from` (`kernel/ts/test/conditions.test.ts:98`). |
-| 3 | Major: area-folder conditions | Fixed for discovery: `conditions.ts:16` `/^(?:areas\/[a-z0-9_]+\/)?conditions\/([a-z0-9_]+)\.json$/` yields the node (`test:82`). Residual nit, not re-opened as blocking: a key present both at `conditions/k.json` and `areas/a/conditions/k.json` produces the same node ref twice (probe: two `scene_sampler@0.0.1:condition/tide` entries); only reachable if the compiler accepts both, and no such cartridge exists. |
-| 4 | Major: id source | Fixed. `story.ts:138-139` `cartridgeOf(c)` reads `c.manifest` → `<id>@<version>`; `conditions.ts:18` yields `<id>@<version>:condition/<key>`, the `DefinitionRefString` shape `reach.ts:30` and `shell.ts:80` `REF` accept, matching every other node ref. |
-| 5 | Minor: Flow lane / depends | Fixed. `flow.ts:31` `condition` lane; `flowread.ts:71-73` maps a `named` edge to `key(e.to)` only when `fromRef(e.to)?.kind === 'condition'`; `fromRef` returns undefined on a non-matching ref, so no dereference of a missing node. |
-| 6 | Minor: picker test | Fixed. `branch_form.ts:10-17` merges `...each[at]` then `key: {...each[at].key, 'ui:field': 'ConditionKey'}`, which is what `test:23-26` asserts. |
-| 7 | Tests | Fixed. `npx tsx --test test/conditions.test.ts test/story.test.ts`: 22 tests, 22 pass, 0 fail; expected values are hand-counted literals. `test/rules.test.ts`: 2 pass. `sh bin/check_as_never.sh` exits 0. |
-
-No `gh run list --commit ff5c0060b` runs at review time (branch not pushed).
