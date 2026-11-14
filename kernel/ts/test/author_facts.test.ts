@@ -70,7 +70,7 @@ const planted = {
   },
 };
 
-const rows = factUsage(planted as never);
+const rows = factUsage(planted);
 const by = Object.fromEntries(rows.map((r) => [r.key, r]));
 
 // Break: the sort puts a both-sides fact above an orphan, hiding the gap the table exists to show.
@@ -142,7 +142,7 @@ test('a quest counts its adjust unless it is repeatable, as L2a does', () => {
     steps: [{ op: 'fact.adjust', fact: to(mood), amount: 10 }],
   });
   const reach = (withQuests: object) =>
-    factUsage({ ...planted, quests: withQuests } as never).find((r) => r.key === 'mood')!.reach;
+    factUsage({ ...planted, quests: withQuests }).find((r) => r.key === 'mood')!.reach;
   assert.equal(reach({ [ref('quest', 'once')]: quest() }), 11); // 1 + 10
   assert.equal(reach({ [ref('quest', 'again')]: quest(true) }), 1); // repeatable: no count
 });
@@ -157,8 +157,7 @@ test('a reaction on a quest event counts unless that quest is repeatable', () =>
     steps: [{ op: 'fact.adjust', fact: to(mood), amount: 10 }],
   });
   const reach = (reactions: object, withQuests: object) =>
-    factUsage({ ...planted, quests: withQuests, reactions } as never).find((r) => r.key === 'mood')!
-      .reach;
+    factUsage({ ...planted, quests: withQuests, reactions }).find((r) => r.key === 'mood')!.reach;
   const q = (repeatable?: true) => ({ ...(repeatable ? { repeatable } : {}), steps: [] });
   const once = ref('quest', 'once');
   const again = ref('quest', 'again');
