@@ -3,11 +3,13 @@
 // the palette's story rows. No React here: tested from kernel/ts/test/author_story.test.ts.
 import { reads } from '../../../kernel/ts/play/reads.ts';
 import type { Edge } from '../../../kernel/ts/play/consequences.ts';
+import type { FactUsage } from '../../../kernel/ts/play/fact_usage.ts';
 import type { Triggers } from '../../../kernel/ts/play/scene_trigger.ts';
 import type { MapRoom } from './map.ts';
 import { fromRef, type Item } from './shell.ts';
 
 export type { Edge };
+export type { FactUsage };
 export type Todo = { file: string; words: number; placeholders: string[] };
 export type Beat = {
   part: number;
@@ -32,6 +34,7 @@ export type Story = {
     orphan_facts: { unused: string[]; write_only: string[]; read_only: string[] };
   };
   outline: Outline | { refused: string } | null;
+  facts: FactUsage[]; // F1's table (storyfacts.ts)
   todo: Record<string, Todo[]>;
   diagnostics: Record<string, { code?: string; path?: string }[]>;
   files: Record<string, string>;
@@ -70,12 +73,13 @@ export type Row = {
   todo?: number;
   unreached?: boolean;
 };
-/** The lower section's one panel (rulings S2; C1 adds Consequences): Trace of a ref, Consequences of a
- * choice or node, Knowledge at a beat, or Pacing. */
+/** The lower section's one panel (rulings S2; C1 adds Consequences, F1 adds Facts): Trace of a ref,
+ * Consequences of a choice or node, Knowledge at a beat, Pacing, or the Facts table. */
 export type Lower =
   | { panel: 'trace'; at: string }
   | { panel: 'consequences'; at: string }
   | { panel: 'knowledge'; n: number }
+  | { panel: 'facts' }
   | { panel: 'pacing' };
 /** The list's kept state (Layout.story): the ids toggled from their default, the lower panel, the row to focus. */
 // chosen: the palette picked the focus, so the selection's reveal on mount yields to it once
@@ -221,10 +225,12 @@ export function reveal(s: Story, st: ListState, ref: string): ListState {
   return kind && KINDS.includes(kind) ? opened(st, ['unplaced'], `unplaced/${ref}`, !!o) : st;
 }
 
-/** A palette story row (`beat:<n>`, `story:<ref>`, `trace:<ref>`, `consequences:<ref>`): open and focus its row, and open the third or fourth. */
+/** A palette story row (`facts:`, `beat:<n>`, `story:<ref>`, `trace:<ref>`, `consequences:<ref>`): open the
+ * table, or open and focus its row and its third or fourth panel. */
 export function go(s: Story, st: ListState, id: string): ListState {
   const [what, ...rest] = id.split(':');
   const target = rest.join(':');
+  if (what === 'facts') return { ...st, lower: { panel: 'facts' } };
   if (what === 'beat') {
     const b = outlineOf(s)?.beats.find((x) => String(x.n) === target);
     return b ? opened(st, [`part:${b.part}`], `beat:${b.n}`, true) : st;
@@ -267,14 +273,18 @@ export function trace(s: Story, ref: string): TraceRow[] {
   ];
 }
 
-/** The palette's story rows (rulings S2 Cmd-K): `beat <n> <title>`, `story: <key>`, `trace <key>`. */
+/** The palette's story rows (rulings S2 Cmd-K): `beat <n> <title>`, F1's `facts`, `story: <key>`,
+ * `trace <key>`. */
 export function storyItems(s: Story): Item[] {
-  const beats = (outlineOf(s)?.beats ?? []).map((b) => ({
-    kind: 'story' as const,
-    label: [`beat ${b.n}`, b.title].filter(Boolean).join(' '),
-    detail: 'beat',
-    id: `beat:${b.n}`,
-  }));
+  const beats: Item[] = [
+    ...(outlineOf(s)?.beats ?? []).map((b) => ({
+      kind: 'story' as const,
+      label: [`beat ${b.n}`, b.title].filter(Boolean).join(' '),
+      detail: 'beat',
+      id: `beat:${b.n}`,
+    })),
+    { kind: 'story' as const, label: 'facts', detail: 'facts', id: 'facts:' },
+  ];
   const nodes = s.graph.nodes
     .filter((n) => KINDS.includes(n.kind))
     .flatMap((n) => {

@@ -1,10 +1,11 @@
 // The Story segment's lower section (docs/design/editor-map-and-story-rulings.md S2): one panel at a
-// time, Trace, Knowledge or Pacing, each row a node a click selects.
-import { Gauge, X } from 'lucide-react';
+// time, Trace, Knowledge, Pacing or the Facts table, each row a node a click selects.
+import { Gauge, Table2, X } from 'lucide-react';
 import type { Story } from './author.ts';
 import { Button } from './components/ui/button.tsx';
 import { fromRef, type Selection } from './shell.ts';
 import * as C from './storyconseq.ts';
+import * as F from './storyfacts.ts';
 import * as K from './storyknow.ts';
 import * as L from './storylist.ts';
 
@@ -47,11 +48,40 @@ function ConsequenceButton({ r, a }: { r: C.ConsequenceRow; a: Act }) {
   );
 }
 
+// A facts row (F1): the whole table row's words (its key first), a click traces that fact.
+function FactButton({ r, a }: { r: F.FactRow; a: Act }) {
+  return (
+    <button
+      type="button"
+      className="flex h-7 w-full items-center gap-2 px-4 text-left text-muted-foreground"
+      onClick={() => a.put({ ...a.st, lower: { panel: 'trace', at: r.ref } })}
+    >
+      <span className={`truncate ${r.status === 'both' ? '' : 'text-warning'}`}>{r.label}</span>
+    </button>
+  );
+}
+
+// The Facts table (F1): its ceiling is W4's relief, so the caveat says which it is.
+function factPanel(story: Story, a: Act): [React.ReactNode, string, React.ReactNode[]] {
+  const rows = F.factRows(story);
+  const head = (
+    <p className="px-4 py-1 text-xs text-muted-foreground">
+      {['key', 'type', 'default', 'scope', 'meaning', 'set', 'read', 'status', 'range'].join(' · ')}
+    </p>
+  );
+  return [
+    'Facts',
+    'range: the declared minimum to what its one-shot writes reach',
+    [head, ...rows.map((r, i) => <FactButton key={i} r={r} a={a} />)],
+  ];
+}
+
 const keyed = (label: string) => (ref: string): L.TraceRow => ({ label, ref, key: fromRef(ref)?.key ?? ref });
 
 // The lower section's one panel: its title, its caveat line (Knowledge and Pacing assume the outline
 // order; Consequences shows a gate only a hint unless the walk settled it) and its rows.
 function lower(story: Story, p: L.Lower, a: Act): [title: React.ReactNode, caveat: string | undefined, rows: React.ReactNode[]] {
+  if (p.panel === 'facts') return factPanel(story, a);
   if (p.panel === 'trace') {
     const key = fromRef(p.at)?.key ?? p.at;
     const title = (
@@ -92,7 +122,16 @@ function lower(story: Story, p: L.Lower, a: Act): [title: React.ReactNode, cavea
 
 export function LowerPanel({ story, p, a }: { story: Story; p: L.Lower; a: Act }) {
   const [title, caveat, rows] = lower(story, p, a);
-  const name = p.panel === 'trace' ? 'Trace' : p.panel === 'consequences' ? 'Consequences' : p.panel === 'knowledge' ? 'Knowledge' : 'Pacing';
+  const name =
+    p.panel === 'trace'
+      ? 'Trace'
+      : p.panel === 'consequences'
+        ? 'Consequences'
+        : p.panel === 'knowledge'
+          ? 'Knowledge'
+          : p.panel === 'facts'
+            ? 'Facts'
+            : 'Pacing';
   return (
     <section aria-label={name} className="max-h-1/2 shrink-0 overflow-auto border-t">
       <header className="flex h-8 items-center justify-between px-2">
@@ -108,6 +147,16 @@ export function LowerPanel({ story, p, a }: { story: Story; p: L.Lower; a: Act }
         ))}
       </ul>
     </section>
+  );
+}
+
+/** Facts opens from the Story header (F1): the table is worth a click, not only a Cmd-K row. */
+export function FactsButton({ a }: { a: Act }) {
+  const open = () => a.put({ ...a.st, lower: { panel: 'facts' } });
+  return (
+    <Button variant="ghost" size="icon-xs" title="Facts" aria-label="Facts" onClick={open}>
+      <Table2 {...ICONED} />
+    </Button>
   );
 }
 
