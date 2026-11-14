@@ -4,7 +4,7 @@ The present only: open work, next steps, owner questions, and standing owner rul
 yet. Rewrite this page in place once per session, at its end; never add dated session sections. History lives in git, Beads and `docs/reviews/`; lessons
 go to [PM lessons](lessons/pm.md) ([harness patterns](decisions/owner-decision-harness-patterns-2026-10-28.md)).
 
-AS OF main after #724; written 2026-11-13 17:05 UTC in the Pi harness by deploy/deepseek-ai/deepseek-v4.1-flash-1017, PM session.
+AS OF main after #727; written 2026-11-14 01:21 UTC in the Pi harness by deploy/deepseek-ai/deepseek-v4.1-flash-1017, PM session.
 `kernel_api` is 1.159 (no contract slice since). **The owner is pausing the Anthropic subscription, so every reviewer
 and developer here now runs on `deploy/deepseek-ai/deepseek-v4.1-flash-1017`** (`~/.pi/agent/agents/loka-dev.md`,
 `loka-review.md` repinned 2026-11-13). **Nothing is mid-merge, nothing is in flight, no agent is running.**
@@ -35,12 +35,19 @@ value nothing writes; a shadowed ambient set; a threshold the one-shot writes ca
 fact without `meaning`. Its review record is `docs/reviews/2026-11-13-l1-l2-story-logic-review.md` — read the
 "Found after the review" section before writing another row over real cartridges: five false findings survived the
 unit tests and only appeared when the rows ran over every cartridge in `cartridges/`.
+#725 **W3, the proofreading sheet**; #726 **W2, a rename rewrites the checkpoints** (loka-wfrgk.115.7, closed):
+`POST /restructure` takes `op: {rename: {kind, from, to}}` and rewrites every `checkpoints/*.json` step naming
+`<cartridge>@<version>:<kind>/<from>` in the same `done` call, so one `/undo` restores both.
+#727 **F1 + W4, the Facts table** (loka-wfrgk.115.8, closed): `kernel/ts/play/fact_usage.ts` (`FactUsage`, no imports so
+the panel's `tsc -b` can read it), `kernel/ts/play/reach.ts` `factUsage()` + `onceAmounts()` (the reach ceiling mirrors
+L2a's `repeats?`/`once` rules exactly), `tools/author-panel/src/storyfacts.ts` (`factRows`/`range`), the `facts` palette
+row and panel. `orphanFacts()` now reads its three lists off `factUsage` rows, so the Story report and the table cannot
+disagree. Panel is Cmd-K `facts`. W4 deviates from the spec by design (L2a has no floor; the floor is the declared
+`value_type.minimum`) and the PR body says so. Review record `docs/reviews/2026-11-14-f1-facts-w4-review.md` — two
+rechecks: one real blocker (`repeats()` inverted for quests) and one reviewer false positive it withdrew.
 `kernel/ts/test/live.test.ts:145` (`500 !== 404` for `/open ../none.json`) is now a four-time flake, still unfixed (loka-fq96k).
-The last nightly `ci` on `main` is **red** (`8a29a163`, 2026-11-12 20:05Z, before #721 merged): kernel's
-`editor_crud.test.ts` "every field a card draws" failed on `reactions.once edit: needs a capability the cartridge does not
-lock (policy)` — exactly the gap #721 closed. `node --test test/editor_crud.test.ts` passes 4/4 on current `main`, so the
-red is a stale head, not open work; a beads/docs-only commit starts no hosted run, so the next real push on main is
-its first fresh evidence.
+The nightly `ci` and `book-e2e` on `main` are green again (`43472560257`, 2026-11-13 17:24Z); the 2026-11-12 red was a
+stale head, not open work.
 Untracked `cartridges/prologue/` is the owner's in-progress Part 1: never touch it, read it only.
 `docs/system-graph.gen.json` regenerates from it, so keep that file out of a commit while the scratch cartridge is present.
 
@@ -54,9 +61,9 @@ Nothing. The next slice starts from main.
 
 1. Story tooling epic **loka-wfrgk.115**, children .1 to .12 chained in the owner's order: R1, W1, D1, K2, C1, L1 + L2, W2,
    F1 + W4, R2, K1, then W3 and E1 before v1. Done: R1 (#716), W1 (#717), D1 (#719), K2 (#720, #721), C1 (#722), L1 + L2
-   (#723, #724). **loka-wfrgk.115.7 (W2, a rename rewrites the checkpoints with `/restructure`) is next** and it takes a
-   reviewer; then .8 (F1 + W4, the facts table with `meaning` and reachable range — L2a's reach arithmetic in
-   `lint_facts.ex` is the same sum it needs). **Six slices remain: .7, .8, .9, .10, .11, .12** — see the tally below.
+   (#723, #724), W3 (#725), W2 (#726), F1 + W4 (#727). **loka-wfrgk.115.9 (R2, coverage chips from checkpoints) is next**;
+   then .10 (K1, named conditions). **Three slices remain: .9, .10, .12** — .12 (E1) is P3 and parked for Opus (it needs a
+   protocol change, a kernel change and a `kernel_api` bump).
 2. Older P1s: loka-wfrgk.94, loka-wfrgk.100.8 (key-tagged Book lines), loka-wfrgk.100.4.
 3. Housekeeping PR: loka-ebnu3, jqxb8, grdiq, wfrgk.96, and the retro items (below).
 4. P2 editor items: .97, .98, .99, .102 follow-ups, map handle placement, `bin/loka new` duplicate keys (loka-wfrgk.68).

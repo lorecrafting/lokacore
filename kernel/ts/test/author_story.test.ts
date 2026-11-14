@@ -53,6 +53,7 @@ const story = (outline: Story['outline']): Story => ({
     ],
   },
   map: [],
+  facts: [],
   words: {},
   names: {},
   choices: {},
@@ -395,6 +396,19 @@ test('Consequences: a dialogue lists each choice with what it writes; a choice r
       ['never read', 'f2'],
     ],
   );
+});
+
+// Break: the palette's `facts` row opens nothing, or opens a panel keyed to a ref instead of F1's
+// table (design F1: Cmd-K `facts` opens it).
+test('the palette offers facts once and opens the table', () => {
+  assert.deepEqual(
+    list
+      .storyItems(planted)
+      .filter((i) => i.label === 'facts')
+      .map((i) => i.id),
+    ['facts:'],
+  );
+  assert.deepEqual(list.go(planted, list.LIST, 'facts:').lower, { panel: 'facts' });
 });
 
 // Break: the palette offers Consequences on a node that writes nothing, or `consequences` opens

@@ -1,6 +1,6 @@
 // The map slot's Story segment (docs/design/editor-map-and-story-rulings.md S2): the list as a
 // role="tree" and Trace under it. The rules live in storylist.ts; this file maps rows to elements.
-// size: allow 332, R2's chip is drawn by the node row it colours; the one toggle beside the segment
+// size: allow 333, R2's chip is drawn by the node row it colours; the toggles beside the segment
 // belongs with them rather than alone in a file
 import {
   BookOpen,
@@ -33,7 +33,7 @@ import type { SetLayout } from './columns.tsx';
 import { edit, shown } from './mapwire.ts';
 import { fromRef, type Layout, type Selection } from './shell.ts';
 import * as L from './storylist.ts';
-import { ICONED, LowerPanel, PacingButton, type Act } from './storylower.tsx';
+import { FactsButton, ICONED, LowerPanel, PacingButton, type Act } from './storylower.tsx';
 
 /** Each story kind's icon (the List's rows and Flow's chips): a quest is a scroll, a story point a flag. */
 export const ICON: Record<string, typeof Flag> = {
@@ -304,6 +304,7 @@ export function StoryList(props: Props) {
     <div className="flex min-h-0 flex-1 flex-col">
       <header className="flex h-8 shrink-0 items-center gap-1 px-2">
         {segment}
+        <FactsButton a={a} />
         <OnlyButton st={st} a={a} known={Object.keys(covered).length > 0} />
         <PacingButton story={story} a={a} />
       </header>

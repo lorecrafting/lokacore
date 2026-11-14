@@ -6,6 +6,8 @@
 # mix loka.new (any cwd; the cartridge dir, default the cwd, and a new cartridge's path resolve
 # against the caller's cwd).
 # `loka todo <cartridge dir>`: the `~` placeholders still to write, by file (kernel/ts/play/todo.ts).
+# `loka lines <cartridge dir> [--speaker <key>] [--csv]`: the proofreading sheet, one row per text
+# key with its speaker, source line, gate and byte length (kernel/ts/play/lines.ts).
 # `loka story <cartridge dir>`: the Story map's model as JSON (kernel/ts/play/story.ts).
 # `loka check <cartridge dir>`: replays each checkpoints/*.json headless (kernel/ts/play/check.ts).
 # `loka sim <cartridge dir> [--seeds N] [--days D]`: balancing numbers, no limit (kernel/ts/play/sim.ts).
@@ -24,6 +26,7 @@ dev)
     set -- --watch
   done ;;
 todo) shift; exec node "$(dirname "$0")/../kernel/ts/play/todo.ts" "$@" ;;
+lines) shift; exec node "$(dirname "$0")/../kernel/ts/play/lines.ts" "$@" ;;
 story) shift; exec node "$(dirname "$0")/../kernel/ts/play/story.ts" "$@" ;;
 check) shift; exec node "$(dirname "$0")/../kernel/ts/play/check.ts" "$@" ;;
 sim) shift; exec node "$(dirname "$0")/../kernel/ts/play/sim.ts" "$@" ;;
@@ -32,5 +35,5 @@ new)
   shift
   caller="$PWD"
   cd "$(dirname "$0")/.." && exec mix loka.new --cwd "$caller" "$@" ;;
-*) echo "usage: bin/loka play <artifact> [script | --replay <transcript>] | bin/loka dev [<cartridge dir>] [--watch] | bin/loka new <kind> <name> [--from <room> <direction>] [--from <cartridge dir>] [--area <area>] [--extends <key>] ... [cartridge dir] (scene <npc> <key>) | bin/loka todo <cartridge dir> | bin/loka story <cartridge dir> | bin/loka check <cartridge dir> | bin/loka sim <cartridge dir> [--seeds N] [--days D] | bin/loka roam <cartridge dir> [--runs N] [--steps M] [--seed S]" >&2; exit 2 ;;
+*) echo "usage: bin/loka play <artifact> [script | --replay <transcript>] | bin/loka dev [<cartridge dir>] [--watch] | bin/loka new <kind> <name> [--from <room> <direction>] [--from <cartridge dir>] [--area <area>] [--extends <key>] ... [cartridge dir] (scene <npc> <key>) | bin/loka todo <cartridge dir> | bin/loka lines <cartridge dir> [--speaker <key>] [--csv] | bin/loka story <cartridge dir> | bin/loka check <cartridge dir> | bin/loka sim <cartridge dir> [--seeds N] [--days D] | bin/loka roam <cartridge dir> [--runs N] [--steps M] [--seed S]" >&2; exit 2 ;;
 esac

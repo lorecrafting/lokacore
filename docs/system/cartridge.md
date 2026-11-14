@@ -927,6 +927,12 @@ build. The author tools below are reachable only in that bundle (a production ex
   shrunk by greedy deletion, which `bin/loka check` then replays; a checkpoint of that seed already in
   the cartridge is the author's and is kept. Nothing else is written to the source tree. It defaults to
   10 runs of 150 presses because `view()` dominates the cost: 50 x 300 took 273 s on the M1.
+- **Lines sheet.** `bin/loka lines <cartridge dir> [--speaker <key>] [--csv]`
+  ([`lines.ts`](../../kernel/ts/play/lines.ts)) lists every text key of the compiled cartridge as
+  one row — its words, its speaker (a dialogue's or scene's `npc`) or else the node that owns it, the
+  source `file:line` it is written on, its gate in the panel's own sentence form
+  ([`why_words.ts`](../../kernel/ts/play/why_words.ts)), the `~` flag, and its byte length — as CSV
+  or JSON, for proofreading an area in order. Nothing is written to the source tree.
 - **Keep my place.** The preview records each input the Book sends that the session saved (the
   intent, its targets as definition refs `cartridge@version:kind/key`, and each dev-clock advance
   in milliseconds) under the artifact's hash. The preview keeps one save file per kernel_api and
