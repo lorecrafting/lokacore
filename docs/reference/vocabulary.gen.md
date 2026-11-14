@@ -579,6 +579,14 @@ True once at least at_least time has passed since the time stored in a number fa
 | item | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Reads the item placed in the world from this definition. |
 | npc | [DefinitionRef](source-kinds.gen.md#definitionref) |  | Reads the NPC placed in the world from this definition. |
 
+### `named`
+
+A condition written once in the conditions folder and read here by its name; it is replaced by that condition, so the artifact never carries this leaf.
+
+| Field | Type | Required | Meaning |
+|---|---|---|---|
+| key | [Key](source-kinds.gen.md#key) | yes | The condition's name. |
+
 ## Events
 
 ### `fact_changed`

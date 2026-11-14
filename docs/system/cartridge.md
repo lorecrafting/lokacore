@@ -19,6 +19,7 @@ its NPC and item definitions with the rest of the world's definitions and text:
 | `behaviours/<name>.json`; `npcs/` and `items/` `behaviours` | source only: `{"reactions": {"<rule>": ReactionRule without key}}`, and the NPC's or item's `["<name>", ...]` (or `{"behaviour": "<name>", "with": {...}}` entries); the compiler expands each to copies and strips both ([Source shortcuts](#source-shortcuts)) |
 | `areas/<name>.json` | an area bundle: several definitions of any of those directories in one file, `{"<dir>": {"<key>": definition without key}}` ([Source shortcuts](#source-shortcuts)) |
 | `areas/<area>/<dir>/<key>.json` (`.scene`, `.cut` as at the root) | an area folder: the file `<dir>/<key>.json` would be, owned by the area `<area>` ([Area folders](#area-folders)) |
+| `conditions/<key>.json` | source only: one Policy, read wherever source writes `{"op": "named", "key": "<key>"}` and substituted at compile ([Named conditions](#source-shortcuts)) |
 | `outline.json` | author notes, not content: the Story map's beats, `{"parts": [{title?, minutes?, beats: [{n, title?, nodes?, seeds?, pays?}]}]}` ([schema](../../schemas/source/outline.schema.json)); the compiler skips it, and `bin/loka story <cartridge>` (`GET /story` in the author preview) reports each beat built, `~` or missing and each seed without a later payoff and payoff without an earlier seed ([design](../rnd/story-map-design-2026-11-05.md)) |
 
 `requires.kernel_api` is a range `{at_least, below}` with `at_least < below` (`KERNEL_API_RANGE_INVALID` at `cartridge.requires.kernel_api`, compiler); the loader refuses an installed API outside it (`KERNEL_API_UNSUPPORTED`). `at_least` rises only when the content uses a newer kernel feature; a contract bump alone changes `INSTALLED.kernel_api` and never a cartridge (the save pin carries the kernel_api, [save.md](save.md#opening-a-story); loka-daha). Floors raised by contract bumps before loka-daha (the dialogue cartridges at 1.124, the showcase at 1.126; 2026-10-30) stand; they are not lowered. No field carries its own floor; a cartridge released later states the API it was compiled against here.
@@ -166,6 +167,7 @@ What the compiler checks (`lib/loka/content/*.ex` moduledocs; codes in
   (`SCHEMA_VIOLATION` at `location.item`). NPC and body custody is unchanged.
 - items and NPCs start somewhere real with no containment cycle and within capacity
   (`CONTAINMENT_CYCLE`, `CAPACITY_EXCEEDED`); details are reachable (`UNREACHABLE_DETAIL`);
+  named conditions hold no cycle (`CONDITION_CYCLE`, [Named conditions](#source-shortcuts));
 - barriers: each exit's barrier and its reciprocal face name the same one (`BARRIER_MISMATCH`);
   an item's `barrier` (a container's lid, c1-locks) names a barrier (`UNRESOLVED_REFERENCE`)
   that no exit and no other item names (`BARRIER_MISMATCH` at the item's `barrier`); no locked
@@ -281,9 +283,9 @@ The compiler rewrites the source before any other stage reads it (`Loka.Content.
 so `mix loka.compile` and `mix loka.lint` see the same flattened definitions. The order is: open
 area bundles, refuse repeated definitions, flatten `extends`, lower inline prose, expand
 behaviours, expand zone rules, refuse repeated definitions again, split waits, refuse repeated
-definitions again. The artifact
-never carries a bundle, `extends`, `abstract`, a prose marker, a behaviour, a zone or a wait;
-the loader is unchanged.
+definitions again, substitute named conditions. The artifact
+never carries a bundle, `extends`, `abstract`, a prose marker, a behaviour, a zone, a wait or a
+named condition; the loader is unchanged.
 
 **Actions with outcomes.** Every player action is `actions/<key>.json`. A file with `command`
 names a built-in command and is checked as an ActionDefinition; a file without it carries
@@ -303,6 +305,23 @@ author still writes the key alone. The refusals:
 A built-in action and a scripted action cannot share a key: two files cannot, and a bundled
 definition beside a file is `DUPLICATE_DEFINITION` at both sites (`actions/<key>`,
 `areas/<name>.actions.<key>`).
+
+**Named conditions.** `conditions/<key>.json` holds one Policy, and
+`{"op": "named", "key": "<key>"}` is accepted wherever a Policy is written in source. The
+compiler substitutes the named Policy, with its own `named` leaves substituted too, so a
+condition may read another. Substitution happens in this stage, before any check, so the site is
+checked as the author had written the condition out there: references, fact types, declared
+capabilities and nesting all report at the use site, and the artifact and the loader never see a
+`named` leaf. Four refusals:
+
+| Case | Code | Path | data |
+|---|---|---|---|
+| a condition that is not a Policy | the Policy's own codes | `conditions/<key>.<field>` | as any Policy |
+| a condition reaches itself through `named`, directly or not | `CONDITION_CYCLE` | each condition's file (`conditions/<key>`) | `{}` |
+| a `named` leaf names no condition | `UNRESOLVED_REFERENCE` | the leaf's `key` member (`rooms/hut.variants[0].when.key`) | `{"target": "<key>"}` |
+
+A condition on a cycle, or one that is not a Policy, stays known, so a site reading it adds no
+second cause (`Loka.Content.Conditions`).
 
 **Area bundles.** `areas/<name>.json` (a `.json` directly in `areas/<area>/` is `UNKNOWN_FIELD`) holds
 `{"<dir>": {"<key>": <definition without key>}}`, where each `<dir>` is a definition directory
