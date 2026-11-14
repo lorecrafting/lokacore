@@ -46,7 +46,9 @@ their rules and red controls remain available for resumption.
   Chrome against `bin/loka dev --watch` on the toolbox showcase; the quest card fits a 280 px inspector, the shell's
   serious or critical axe violations equal a pinned baseline, and a warm Flow graph open and a filter's relayout are within `BUDGET.flowOpen` and `flowUpdate`.
   `bin/check_all.sh` sets `TEST_REPORTER=dot` (the `npm test` scripts default to `spec`): one dot per
-  passing test, failures printed in full.
+  passing test, failures printed in full. The panel's `npm test` runs its files one at a time
+  (`--test-concurrency=1`): every file shares `harness.ts`'s one `bin/loka dev` server, one Chrome and
+  one showcase copy, so parallel files raced each other's writes and boot (loka-qozwj).
 - Size: source files at most 300 lines, test files 500, each function clause (and `fn`/arrow)
   40, in every tracked Elixir, TypeScript and `.mjs` file (`*.gen.*` exempt), `mobile/` included:
   `elixir bin/check_size.exs`, `node bin/check_ts_size.mjs`. With no paths the TypeScript check
