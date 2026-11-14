@@ -29,6 +29,7 @@ defmodule Loka.Content.Explain do
          UNRESOLVED_REFERENCE | Nothing is called `{target}`. | Add it to text.json (or under this file's roles), or change the name.
          UNREACHABLE_DETAIL | No room text ever mentions the detail `{field}`. | Link to it from the description or another detail, or remove it.
          CONTAINMENT_CYCLE | These things contain each other. | Change one location so the chain ends in a room.
+         CONDITION_CYCLE | These conditions read each other, so none of them can be worked out. | Remove one `named` so the chain ends at a condition written out in full.
          CAPACITY_EXCEEDED | This container holds {held} but has room for {capacity}. | Raise its capacity or start it with less.
          TOUCH_LINK_MISSING | This line has no link to `{target}`, so a phone player cannot tap it. | Link it in the text: `[words](key)`.
          UNKNOWN_COMMAND | `{field}` names a command this cartridge may not use. | Use a command from the action reference in docs/system/cartridge.md.

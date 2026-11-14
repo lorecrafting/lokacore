@@ -251,9 +251,15 @@ Yarn's smart variables.
 
 | Ruling | Why | Test |
 |---|---|---|
-| **`conditions/<key>.json` holds one Policy; `{"op": "named", "key": "<k>"}` is accepted wherever a Policy is written in source and replaced by that Policy at compile** (`Loka.Content.Resolve`'s stage, before type checks); a cycle is `CONDITION_CYCLE` at the file; an unknown key `UNRESOLVED_REFERENCE` | The artifact never carries the leaf: no protocol, kernel or reviewer; the owner rule allows compile-time shortcuts (`docs/system/owner-rules.md:117`) | Two sites name it: the artifact is byte-identical to the hand-inlined cartridge; a cycle is refused |
+| **`conditions/<key>.json` holds one Policy; `{"op": "named", "key": "<k>"}` is accepted wherever a Policy is written in source and replaced by that Policy when the source lowerers run** (`Loka.Content.Conditions`, ahead of any check); a cycle is `CONDITION_CYCLE` at the file; an unknown key `UNRESOLVED_REFERENCE` | The artifact never carries the leaf: no protocol, kernel or reviewer; the owner rule allows compile-time shortcuts (`docs/system/owner-rules.md:117`) | Two sites name it: the artifact is byte-identical to the hand-inlined cartridge; a cycle is refused |
 | **The Story map shows a condition as a node with its readers; the Trace answers "where is `~k` read"** | The point of a name is to find it | `GET /story` lists the node with two reader edges |
 | **The card**: the Policy block's leaf picker offers `named` with the keys | One more leaf in the picker | the picker lists it |
+
+One protocol change follows: `CONDITION_CYCLE` joins `DiagnosticCode` (beside `CONTAINMENT_CYCLE`),
+because a cycle is a new refusal no existing code names. The artifact still never carries the leaf,
+so the kernel, the content hash of every existing cartridge and the loader are untouched; the compiler
+half is [loka-wfrgk.115.10](../../docs/system/cartridge.md#source-shortcuts), the panel half
+loka-wfrgk.115.14.
 
 ### W3: a lines sheet (survey row 14)
 

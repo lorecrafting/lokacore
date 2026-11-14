@@ -3280,6 +3280,22 @@
             "at_least"
           ],
           "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "A condition written once in the conditions folder and read here by its name; it is replaced by that condition, so the artifact never carries this leaf.",
+          "properties": {
+            "key": {
+              "$ref": "#/$defs/Key",
+              "description": "The condition's name."
+            },
+            "op": { "const": "named" }
+          },
+          "required": [
+            "op",
+            "key"
+          ],
+          "type": "object"
         }
       ],
       "description": "A condition: a test on the world, such as a fact's value or where the player is. Combine tests with all, any and not."
@@ -7332,6 +7348,18 @@
               "description": "Reads the NPC placed in the world from this definition."
             },
             "op": { "const": "time_since" }
+          },
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "A condition written once in the conditions folder and read here by its name; it is replaced by that condition, so the artifact never carries this leaf.",
+          "properties": {
+            "key": {
+              "$ref": "#/$defs/Key",
+              "description": "The condition's name."
+            },
+            "op": { "const": "named" }
           },
           "type": "object"
         }
