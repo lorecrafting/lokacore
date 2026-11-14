@@ -108,6 +108,18 @@ test('a row carries every column in order, its type and its joined scopes', () =
     'seen · bool · false · story · has seen the mill · 1 · 0 · write_only · ',
   );
   assert.equal(row('gold').label, 'gold · int · 2 · story ·  · 5 · 1 · both · 0..16');
+  // `gold` has no meaning, so the join of nine cells puts the gap between two separators
+  assert.deepEqual(row('gold').label.split(' · '), [
+    'gold',
+    'int',
+    '2',
+    'story',
+    '',
+    '5',
+    '1',
+    'both',
+    '0..16',
+  ]);
   assert.equal(row('gold').scopes.join(' '), 'story');
 });
 
@@ -118,6 +130,21 @@ test('the fact the compiler reserves for the engine is left out of the table', (
     rows.some((r) => r.key === 'position'),
     false,
   );
+});
+
+// Break: the quest repeat rule inverted, so a repeatable quest's write inflates the ceiling and a
+// one-shot quest's is dropped. L2a (`lib/loka/content/lint_facts.ex:76`) counts a quest's adjust
+// only when it fires once, i.e. when `repeatable` is not true: `once` writes 10 to a default-1 fact
+// and reaches 11; `again` writes the same 10 and stays 1.
+test('a quest counts its adjust unless it is repeatable, as L2a does', () => {
+  const quest = (repeatable?: true) => ({
+    ...(repeatable ? { repeatable } : {}),
+    steps: [{ op: 'fact.adjust', fact: to(mood), amount: 10 }],
+  });
+  const reach = (withQuests: object) =>
+    factUsage({ ...planted, quests: withQuests } as never).find((r) => r.key === 'mood')!.reach;
+  assert.equal(reach({ [ref('quest', 'once')]: quest() }), 11); // 1 + 10
+  assert.equal(reach({ [ref('quest', 'again')]: quest(true) }), 1); // repeatable: no count
 });
 
 // The panel's view of a Story: `factRows` keeps `factUsage`'s order (worst first) and its range.

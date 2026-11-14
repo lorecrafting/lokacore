@@ -162,19 +162,20 @@ const TROUBLE = ['read_only', 'write_only', 'unused'];
 const ONCE = new Set(['quest_resolved', 'quest_failed', 'quest_activated', 'level_reached']);
 
 /** Whether one definition's `fact.adjust` may run more than once, L2a's rule
- * (`lib/loka/content/lint_facts.ex:64-120`): a scene's writes happen once, a quest's unless it is
- * repeatable, a reaction's when it is `once` or sits on a one-shot event of a quest that is not
- * repeatable. Everything else may repeat. ponytail: a dialogue choice's `once` is not attributed
- * here either, so those count as repeating, like L2a. */
+ * (`lib/loka/content/lint_facts.ex:64-120`): a scene's write happens once, a quest's repeats only
+ * when it is `repeatable`, and a reaction's repeats unless it is `once` or sits on a one-shot event
+ * (`@once` there) of a quest that is not repeatable. Anything else — a dialogue choice, an action —
+ * may repeat. ponytail: a dialogue choice's `once` is not attributed here either, so those count as
+ * repeating, like L2a. */
 function repeats(c: Obj, section: string, def: Obj): boolean {
   if (section === 'scenes') return false;
-  if (section === 'quests') return def.repeatable !== true;
+  if (section === 'quests') return def.repeatable === true;
   if (section !== 'reactions') return true;
   if (def.once === true) return false;
   const on = def.on as Obj | undefined;
   if (!isObj(on) || !ONCE.has(String(on.event))) return true;
   const q = isObj(on.quest) ? refString(on.quest as never) : undefined;
-  return q === undefined || (c.quests as Obj)?.[q]?.repeatable !== true;
+  return q !== undefined && (c.quests as Obj)?.[q]?.repeatable === true;
 }
 
 /** Every positive `fact.adjust` amount inside `v`, added to `out` per fact ref. */
