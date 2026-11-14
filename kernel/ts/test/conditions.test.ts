@@ -46,7 +46,7 @@ test('a condition read by two definitions is one node with two reader edges', ()
       village_green: { details: { gate: { if: { op: 'named', key: 'trusts' } } } },
     },
   );
-  const { nodes, edges } = conditionGraph(src, 'scene_sampler@0.0.1', refs);
+  const { nodes, edges } = conditionGraph(src, 'scene_sampler@0.0.1', refs, {});
   assert.deepEqual(nodes, [{ ref: `${S}condition/trusts`, kind: 'condition' }]);
   assert.deepEqual(edges.map((e) => [e.from, e.to]).sort(), [
     [`${S}room/ferry_landing`, `${S}condition/trusts`],
@@ -62,7 +62,7 @@ test('a condition naming another is itself a reader, so the chain shows', () => 
     { trusts, both: { all: [{ op: 'named', key: 'trusts' }, { fact: { key: 'has_lantern' } }] } },
     { ferry_landing: { details: { gate: { if: { op: 'named', key: 'both' } } } } },
   );
-  const { nodes, edges } = conditionGraph(src, 'scene_sampler@0.0.1', refs);
+  const { nodes, edges } = conditionGraph(src, 'scene_sampler@0.0.1', refs, {});
   assert.deepEqual(nodes.map((n) => n.ref).sort(), [`${S}condition/both`, `${S}condition/trusts`]);
   assert.deepEqual(edges.map((e) => [e.from, e.to]).sort(), [
     [`${S}condition/both`, `${S}condition/trusts`],
@@ -71,9 +71,58 @@ test('a condition naming another is itself a reader, so the chain shows', () => 
 });
 
 test('a cartridge with no conditions folder reports no condition node', () => {
-  // Break: synthesising a node for every `named` leaf, so a cartridge that never had conditions
-  // still grows a phantom node and the map shows a condition nothing can open.
+  // Break: a node per condition file, so a cartridge that never had conditions still grows one per
+  // `named` leaf and the map shows a condition nothing can open. (scene_sampler has no `named` leaf,
+  // so the mutant is emitting a node for every file in `conditions/` — absent here.)
   const src = join(dir, 'none');
   cpSync(join(root, 'cartridges/scene_sampler'), src, { recursive: true });
-  assert.deepEqual(conditionGraph(src, 'scene_sampler@0.0.1', refs), { nodes: [], edges: [] });
+  assert.deepEqual(conditionGraph(src, 'scene_sampler@0.0.1', refs, {}), { nodes: [], edges: [] });
+});
+
+test('a condition inside an area bundle is a node, and the area reads it', () => {
+  // Break: accepting only `conditions/<key>.json`, so a condition the compiler accepts inside an area
+  // gets no node while the edge to it is still drawn — a dangling edge to a condition nothing opens.
+  const src = planted('area', {}, {});
+  const area = join(src, 'areas', 'harbour', 'conditions');
+  mkdirSync(area, { recursive: true });
+  mkdirSync(join(src, 'areas', 'harbour', 'rooms'), { recursive: true });
+  writeFileSync(join(area, 'tide.json'), JSON.stringify({ fact: { key: 'has_lantern' } }));
+  writeFileSync(
+    join(src, 'areas', 'harbour', 'rooms', 'quay.json'),
+    JSON.stringify({ key: 'quay', details: { wharf: { if: { op: 'named', key: 'tide' } } } }),
+  );
+  const { nodes } = conditionGraph(src, 'scene_sampler@0.0.1', refs, {});
+  assert.deepEqual(nodes, [{ ref: `${S}condition/tide`, kind: 'condition' }]);
+});
+
+test('a bundle member naming a condition is a reader, through the bundled refs', () => {
+  // Break: resolving a site's owner with `placed()` alone, which has no owner for an area bundle's
+  // `areas/<a>.json`, so the member's `named` leaves produce no reader edge and the condition reads
+  // as unreferenced.
+  const src = planted('bundle', { trusts }, {});
+  const area = join(src, 'areas', 'harbour');
+  mkdirSync(area, { recursive: true });
+  writeFileSync(
+    join(area, 'harbour.json'),
+    JSON.stringify({
+      key: 'harbour',
+      rooms: {
+        quay: {
+          name: { prose: 'Quay' },
+          description: { prose: 'The wharf.' },
+          exits: {},
+          details: { wharf: { if: { op: 'named', key: 'trusts' } } },
+        },
+      },
+    }),
+  );
+  // shortRefs keys every node, a bundle member included, as `<dir>/<key>`
+  const withBundle = new Map(refs).set('rooms/quay', `${S}room/quay`);
+  const { edges } = conditionGraph(src, 'scene_sampler@0.0.1', withBundle, {
+    'rooms/quay': 'areas/harbour/harbour.json',
+  });
+  assert.deepEqual(
+    edges.map((e) => [e.from, e.to]),
+    [[`${S}room/quay`, `${S}condition/trusts`]],
+  );
 });

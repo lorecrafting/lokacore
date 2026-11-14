@@ -12,7 +12,8 @@ import { files } from './todo.ts';
 export type Edge = { from: string; to: string; path: string; op: string };
 export type Nodes = { ref: string; kind: string }[];
 
-const CONDITION = /^conditions\/([a-z0-9_]+)\.json$/;
+/** A condition, at the root or inside an area's bundle (`source.ex:255` places both). */
+const CONDITION = /^(?:areas\/[a-z0-9_]+\/)?conditions\/([a-z0-9_]+)\.json$/;
 /** A condition's node ref, in a definition's own shape, so places() and shell.ts find it. */
 const ref = (cartridge: string, key: string) => `${cartridge}:condition/${key}`;
 
@@ -36,31 +37,48 @@ function leaves(v: unknown, path = '', into: { path: string; key: string }[] = [
 }
 
 /**
- * The condition nodes and their reader edges: one node per `conditions/<key>.json`, and an edge from
- * every definition that names it (a condition naming another is itself a reader, so a chain shows).
- * `refs` maps a short `<dir>/<key>` to its node ref, as story.ts's shortRefs builds it; `cartridge` is
- * the artifact's cartridge_id, which a ref starts with.
+ * The condition nodes and their reader edges: one node per condition file, and an edge from every
+ * definition that names it (a condition naming another is itself a reader, so a chain shows).
+ * `refs` maps a short `<dir>/<key>` to its node ref, as story.ts's shortRefs builds it, and also
+ * each bundle member's `${section}/${key}`; `bundles` maps that key to the file holding the member.
+ * `cartridge` is the artifact's ref prefix.
  */
-export function conditionGraph(source: string, cartridge: string, refs: Map<string, string>) {
-  const all = files(source).map(
-    (rel) => [rel, CONDITION.exec(rel)?.[1] as string | undefined] as const,
-  );
-  const nodes: Nodes = all.flatMap(([, key]) =>
-    key === undefined ? [] : [{ ref: ref(cartridge, key), kind: 'condition' }],
-  );
+export function conditionGraph(
+  source: string,
+  cartridge: string,
+  refs: Map<string, string>,
+  bundles: Record<string, string>,
+) {
+  const members = new Map(Object.entries(bundles));
+  const nodes: Nodes = [];
   const edges: Edge[] = [];
-  for (const [rel, key] of all) {
-    // the file's owner: a condition itself, or the definition whose source file it is (an area
-    // bundle's member has no file of its own, so no node to draw from)
-    const at = placed(rel);
-    const from =
-      key === undefined
-        ? refs.get(at ? `${at.ext === 'scene' ? 'dialogues' : at.dir}/${at.key}` : '')
-        : ref(cartridge, key);
-    if (from === undefined) continue;
-    const value = held(source, rel);
-    for (const leaf of value === undefined ? [] : leaves(value))
+  const push = (from: string | undefined, value: unknown) => {
+    if (from === undefined) return;
+    for (const leaf of leaves(value))
       edges.push({ from, to: ref(cartridge, leaf.key), path: leaf.path, op: 'named' });
+  };
+
+  for (const rel of files(source)) {
+    const key = CONDITION.exec(rel)?.[1];
+    if (key !== undefined) {
+      nodes.push({ ref: ref(cartridge, key), kind: 'condition' });
+      push(ref(cartridge, key), held(source, rel));
+      continue;
+    }
+    // a definition in a file of its own (a bundle member has none, so `members` holds it instead)
+    const at = placed(rel);
+    const own = at && `${at.ext === 'scene' ? 'dialogues' : at.dir}/${at.key}`;
+    if (own && !members.has(own)) push(refs.get(own), held(source, rel));
+  }
+
+  // a bundle member: its own section of the bundle, so its leaves are its own and not the bundle's
+  for (const [bundledKey, bundleFile] of members) {
+    const value = held(source, bundleFile);
+    if (!isObj(value)) continue;
+    // a bundle's own sections, so each member's leaves belong to that member and not to the bundle
+    const [section, member] = bundledKey.split('/');
+    if (!isObj(value[section!])) continue;
+    push(refs.get(bundledKey), (value[section!] as Obj)[member!]);
   }
   return { nodes, edges };
 }

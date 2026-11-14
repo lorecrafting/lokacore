@@ -1,7 +1,7 @@
 // The Story map's model (docs/rnd/story-map-design-2026-11-05.md section 11 S1) over a planted copy
 // of scene_sampler: two dialogues joined by `then` (one in an area folder), a choice_resolved
 // reaction, a room no exit reaches and an outline.json.
-// size: allow 512, K1b's condition nodes sit with the rest of the map's model.
+// size: allow 516, K1b's condition nodes sit with the rest of the map's model.
 import assert from 'node:assert/strict';
 import { execFileSync, spawnSync } from 'node:child_process';
 import {
@@ -248,11 +248,14 @@ test('a condition is a node with the definitions naming it as readers, from the 
   const [, canon, hash] = /^\{"cartridge":(.*),"content_hash":"([0-9a-f]{64})"\}$/s.exec(
     readFileSync(built, 'utf8'),
   )!;
-  const { graph, conditions } = story(own, { canonical: canon!, sha256: hash! }, []) as {
+  const { graph } = story(own, { canonical: canon!, sha256: hash! }, []) as {
     graph: { nodes: { ref: string; kind: string }[]; edges: { from: string; to: string }[] };
-    conditions: string[];
   };
-  assert.deepEqual(conditions.sort(), [ref('condition', 'both'), ref('condition', 'trusts')]);
+  const cond = graph.nodes
+    .filter((n) => n.kind === 'condition')
+    .map((n) => n.ref)
+    .sort();
+  assert.deepEqual(cond, [ref('condition', 'both'), ref('condition', 'trusts')]);
   assert.deepEqual(
     graph.edges
       .filter((e) => e.to.startsWith(ref('condition', '')) && e.from !== e.to)

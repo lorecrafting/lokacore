@@ -67,7 +67,10 @@ export function card(s: Story, ref: string) {
     ...out.filter((e) => laneOf(e.to)).map(verb),
     ...s.graph.edges.filter((e) => e.to === ref && laneOf(e.from)).map((e) => `← ${key(e.from)}`),
   ].filter((r, i, a) => a.indexOf(r) === i);
-  const conditions = out.filter((e) => !solid(e) && e.op).map((e) => e.op!);
+  // a condition read names the condition, not the leaf's op: `named → trusts`, not `named`
+  const conditions = out
+    .filter((e) => !solid(e) && e.op)
+    .map((e) => (e.op === 'named' && fromRef(e.to)?.kind === 'condition' ? key(e.to) : e.op!));
   const anchors = out.filter((e) => !laneOf(e.to) && fromRef(e.to)).map((e) => key(e.to));
   return {
     rows: rows.slice(0, F.rows),

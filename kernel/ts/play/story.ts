@@ -134,6 +134,10 @@ const ownFiles = (source: string, refs: Map<string, string>) => {
   return Object.fromEntries(pairs.filter(([ref]) => ref)) as Record<string, string>;
 };
 
+/** A ref's prefix, `<id>@<version>`, as every node the artifact yields already reads. */
+const cartridgeOf = (c: Obj) =>
+  `${(c.manifest as Obj).id as string}@${(c.manifest as Obj).version as string}`;
+
 /** The model for `source` compiled to `dev`, with the compile's diagnostics. */
 export function story(source: string, dev: Dev, diagnostics: Diagnostic[]) {
   const loaded = loadCartridge(artifactBytes(dev), INSTALLED);
@@ -143,10 +147,11 @@ export function story(source: string, dev: Dev, diagnostics: Diagnostic[]) {
   graph.edges.push(...links(c));
   const report = reachReport(c);
   const { refs, defs } = shortRefs(c, graph.nodes);
-  // a condition is substituted away at compile, so its node and reader edges come from the source
-  const conditions = conditionGraph(source, graph.nodes[0]?.ref.split(':')[0] ?? '', refs);
-  graph.nodes.push(...conditions.nodes);
-  graph.edges.push(...conditions.edges);
+  // a condition is substituted away at compile, so its node and reader edges come from the source;
+  // a bundle's members have no file of their own, so `refs` gains their `${section}/${key}` keys
+  const { nodes, edges } = conditionGraph(source, cartridgeOf(c), refs, bundled(source));
+  graph.nodes.push(...nodes);
+  graph.edges.push(...edges);
   const todos = todoByNode(source, refs, defs);
   const byNode: Record<string, Diagnostic[]> = {};
   for (const d of diagnostics) add(byNode, nodeOf(d.rel, refs), d);
@@ -167,7 +172,6 @@ export function story(source: string, dev: Dev, diagnostics: Diagnostic[]) {
     words: wordsByNode(defs, (c.text ?? {}) as Record<string, unknown>),
     names: names(defs, (c.text ?? {}) as Obj), // the Hierarchy's and palette's `key · name`
     choices: choiceCounts(c),
-    conditions: conditions.nodes.map((n) => n.ref), // K1's conditions, by node ref
     hidden: hiddenSkills(c), // the cards' add menus and links (allowed.ts, link.ts)
     unlinkable: unlinkable(c),
     shorts: shorts(refs, defs), // what Bind may write

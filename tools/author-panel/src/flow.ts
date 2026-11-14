@@ -28,6 +28,7 @@ export const LANES = [
   { lane: 'dialogue', kinds: ['dialogue', 'scene'], shape: 'rounded-md' },
   { lane: 'reaction', kinds: ['reaction', 'action'], shape: 'rounded-md' },
   { lane: 'fact', kinds: ['fact', 'topic'], shape: 'rounded-none' },
+  { lane: 'condition', kinds: ['condition'], shape: 'rounded-none' },
 ];
 const LANE = new Map(LANES.flatMap((l) => l.kinds.map((k) => [k, l])));
 export const laneOf = (ref: string) => LANE.get(fromRef(ref)?.kind ?? '');
