@@ -3,7 +3,7 @@
 // kernel/ts/play/card.ts. Every other union in a generic card is drawn by it too.
 import { useState } from 'react';
 import type { FieldProps, RJSFSchema } from '@rjsf/utils';
-import { branchOf, constraintOnly, start, tagHidden } from '../../../../../kernel/ts/play/card.ts';
+import { branchOf, constraintOnly, start } from '../../../../../kernel/ts/play/card.ts';
 import { branchForm } from './branch_form.ts';
 import { offered } from '../../../../../kernel/ts/play/rules.ts';
 import { uiSchema } from '../../../../../kernel/ts/play/ui_schema.ts';
