@@ -57,8 +57,9 @@ second table can drift from `OWNERS`/`NEEDS`), and `AddMenu` (`tools/author-pane
 all seven card sites. The bead's second symptom ("Add then writes a `dev` row") needed no fix: no `'dev'` literal exists
 and `added()` already returns `undefined` when the author must choose.
 The nightly `ci` red of 2026-11-13 (`43614268953`) was the `mobile` job's `Author panel smoke` step — the parallel panel
-suite, not a diff — and #731 is its fix, merged 2026-11-14; **not yet confirmed on a nightly**, since the newest run
-(`6db240794`, 16:11) predates it. The first thing to check next session is that run's `mobile` job.
+suite, not a diff — and #731 is its fix, merged 2026-11-14. **Confirmed:** the `mobile` job on `4b33ab690` (a push past
+#731) is `success`; the nightly `6db240794` that `bin/session_status.sh` still prints predates the merge, so that flag is
+stale, not open work.
 **A worktree symlink can break every Elixir job.** #732 was closed for it: `git add -A` in a worktree staged a link named
 `_build` pointing at an absolute home path, so `mix` found a file where it needs its build directory
 (`_build/test/lib/boundary: not a directory`) and `elixir`, `kernel` and `mobile` died identically while `main` was green.
@@ -81,9 +82,8 @@ Nothing. The next slice starts from main.
    K1 (#729), K1b (#730). **One slice remains: .12 (E1, a conditional page in a modal scene)** — P3, parked until a beat needs
    it, and it needs a protocol change, a kernel change and a `kernel_api` bump, so it wants an Opus design session.
 2. Older P1s: loka-wfrgk.100.8 (key-tagged Book lines), loka-wfrgk.100.4, loka-vduxr.102 (the field guide, P1).
-3. Confirm #731 on a nightly `ci` run (`mobile` job); it is the last unverified fix from 2026-11-14.
-4. Housekeeping PR: loka-ebnu3, jqxb8, grdiq, wfrgk.96, and the retro items (below).
-5. P2 editor items: .97, .98, .99, .102 follow-ups, map handle placement.
+3. Housekeeping PR: loka-ebnu3, jqxb8, grdiq, wfrgk.96, and the retro items (below).
+4. P2 editor items: .97, .98, .99, .102 follow-ups, map handle placement.
 
 ## Owner calls to date (2026-11-07 session; override any)
 
