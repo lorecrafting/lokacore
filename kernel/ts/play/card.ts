@@ -7,7 +7,9 @@ import { change, type Op, type Step } from './edit_model.ts';
 import type { Surfaces, Ui } from './ui_schema.ts';
 
 type Obj = Record<string, unknown>;
-const plain = (v: unknown): v is Obj => typeof v === 'object' && v !== null && !Array.isArray(v);
+/** A plain object (not null, not an array): the shape a draft and a definition both are. */
+export const plain = (v: unknown): v is Obj =>
+  typeof v === 'object' && v !== null && !Array.isArray(v);
 // rjsf fills each drawn absent object field with `{}` (nested), which no author wrote
 const empty = (v: unknown): boolean =>
   v === undefined || (plain(v) && Object.values(v).every(empty));
@@ -420,8 +422,8 @@ export const removed = (doc: Obj, f: string): Obj => {
 export const addedHere = (a: { kind: string; room: string }, key: string, menu: string[]) =>
   a.room === key && menu.includes(a.kind) ? a.kind : undefined;
 
-import { allowed, awaits } from './allowed.ts';
-export { allowed, awaits };
+import { allowed, awaits, blocked, gate, type Blocked } from './allowed.ts';
+export { allowed, awaits, blocked, gate, type Blocked };
 
 /** The generic card's add menu (a command action's, right.tsx's fallback): `only` narrows the
  * registry's fields, then the cartridge's capabilities gate them as the compiler does

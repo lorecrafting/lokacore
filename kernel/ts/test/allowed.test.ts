@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { test } from 'node:test';
-import { added, allowed, held } from '../play/card.ts';
+import { added, allowed, blocked, held } from '../play/card.ts';
 import { contentGraph } from '../play/reach.ts';
 
 const defs = JSON.parse(
@@ -130,4 +130,26 @@ test('an added capacity starts at the items the compiled graph places inside, at
   assert.deepEqual(cap('c@1:item/box'), { capacity: 2 });
   assert.deepEqual(cap('c@1:item/a'), { capacity: 1 }); // holds nothing
   assert.deepEqual(cap('c@1:room/hall'), { capacity: 1 }); // the box and jar are in the hall, not items in it
+});
+
+// Break: a field the registry holds disappears from the add menu with no reason, so the author cannot
+// tell "your cartridge lacks schedule" from "this card cannot hold it" (loka-wfrgk.94's go/no-go F8).
+// The two halves must partition the menu: nothing listed twice, nothing lost between them.
+test("a menu's refused fields come back with the reason, and the halves partition the menu", () => {
+  const npc = ['ask', 'attack', 'daily_schedule', 'hp', 'name_variants', 'shop'];
+  // the cartridge declares schedule and not speech: daily_schedule is addable, ask is refused for it
+  const caps = { schedule: 1, description_variant: 1 };
+  assert.deepEqual(blocked('npcs', npc, caps), [
+    { field: 'ask', caps: ['speech', 'topic'], needs: false }, // OWNERS: 'speech topic'
+    { field: 'attack', caps: ['combat'], needs: true }, // world.combat and the NPC's hp too
+    { field: 'shop', caps: ['commerce'], needs: false },
+  ]);
+  // the halves partition: every registry field the card offered lands in exactly one
+  const yes = allowed('npcs', npc, caps);
+  const no = blocked('npcs', npc, caps).map((b) => b.field);
+  assert.deepEqual([...yes, ...no].sort(), [...npc].sort());
+  // a field whose only bar is a need the definition fails: no capability missing, so caps is empty
+  assert.deepEqual(blocked('npcs', ['daily_schedule'], { schedule: 1 }, { spawn_template: true }), [
+    { field: 'daily_schedule', caps: [], needs: true }, // calendar.ex template_schedules
+  ]);
 });

@@ -4,7 +4,7 @@
 // policy the Rules block's. Every write is the generic card's (useCard), each first held to what the
 // compiler accepts of a dialogue's choices (kernel/ts/play/choice.ts).
 import { useState } from 'react';
-import { addable, allowed, choices } from '../../../../../kernel/ts/play/card.ts';
+import { addable, choices, gate } from '../../../../../kernel/ts/play/card.ts';
 import { refuseNew } from '../../../../../kernel/ts/play/choice.ts';
 import { refuseLink } from '../../../../../kernel/ts/play/link.ts';
 import type { useDiagnostics } from '../../author.ts';
@@ -41,12 +41,13 @@ function useGated(base: Card, hidden: string[]) {
 }
 
 /** The fields the Mechanics menu offers: allowed, and none that a choice refuses (a quest beside a
- * choice's accept). */
+ * choice's accept). A refused choice is the card's own rule, not a capability, so it is dropped from
+ * both halves: `blocked` names only what cartridge.json or a missing field would fix. */
 function mechanics(dir: string, cart: Cart, caps: object | undefined, draft: Doc, revealed: string[], hidden: string[]) {
   const offered = addable(dir, registry, draft, revealed);
-  return (caps ? allowed(dir, offered, caps, draft, cart?.world, hidden) : []).filter(
-    (f) => !refuseNew(draft, { ...draft, [f]: true }, hidden),
-  );
+  const both = gate(dir, offered, caps, draft, cart?.world, hidden);
+  const refused = (f: string) => refuseNew(draft, { ...draft, [f]: true }, hidden);
+  return { allowed: both.allowed.filter((f) => !refused(f)), blocked: both.blocked };
 }
 
 export function Dialogue({ rel, context, diag }: Props) {
@@ -58,19 +59,19 @@ export function Dialogue({ rel, context, diag }: Props) {
   const cart = useCartridge(diag);
   const caps = cart && (cart.requires?.capabilities ?? {});
   if (!saved) return <p className="px-3 text-xs text-muted-foreground">Loading {rel}</p>;
-  const menu = mechanics(saved.dir, cart, caps, draft, card.revealed, hidden);
+  const { allowed: menu, blocked } = mechanics(saved.dir, cart, caps, draft, card.revealed, hidden);
   const required = ((defs[DEF] as { required?: string[] } | undefined)?.required ?? []) as string[];
   const words = WORDS.filter((f) => draft[f] !== undefined);
   return (
     <div className="grid min-w-0 grid-cols-1 gap-2 px-3 text-xs" aria-label="dialogue card">
       <Header rel={rel} diag={diag} undo={card.undo ? card.back : undefined} />
-      {card.refused ? <Refusal boxed>{card.refused}</Refusal> : null}
-      {no ? <Refusal boxed>{no}</Refusal> : null}
+      {card.refused || no ? <Refusal boxed>{card.refused ?? no}</Refusal> : null}
       <Words draft={draft} context={context} fields={words} />
       <Links card={card} keys={choices('dialogue', context.nodes)} into={context.unlinkable} />
       <Mechanics
         card={card}
         menu={menu}
+        blocked={blocked}
         {...adding(card, defs, DEF)}
         fixed={required} // a name is removable
       />

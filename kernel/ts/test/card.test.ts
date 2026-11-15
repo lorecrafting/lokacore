@@ -48,7 +48,7 @@ import {
 } from '../play/card.ts';
 import { paired, menuOf } from '../play/action.ts';
 import { change } from '../play/edit_model.ts';
-import { capabilityRow } from '../play/allowed.ts';
+import { capabilityRow, blocked } from '../play/allowed.ts';
 import { json } from '../play/write.ts';
 
 const SOURCE = join(import.meta.dirname, '../../../schemas/source');
