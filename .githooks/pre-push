@@ -10,6 +10,11 @@ while read -r _ local_sha _ remote_sha; do
   for c in $(git rev-list "$local_sha" --not --remotes); do
     git log -1 --format=%B "$c" | grep -qE '/Users/|worktrees\.noindex/' && { echo "pre-push: commit $c's message names a local path (/Users/ or worktrees.noindex/); reword it" >&2; exit 1; }
   done
+  # Pushing to main itself: status-only and documentation commits only (docs/PM.md:92, and ci.yml
+  # never runs on main, so code pushed there is gated by nothing). bin/main_guard.py says which lane.
+  [ "$(git rev-parse --abbrev-ref HEAD)" = main ] && [ "$local_sha" != "${LOKA_PREPUSH_OK-}" ] && {
+    "$(git rev-parse --show-toplevel)/bin/main_guard.py" "${remote_sha:-$z}" "$local_sha" || exit 1
+  }
   [ "$local_sha" = "${LOKA_PREPUSH_OK-}" ] && continue # bin/pm_merge.sh just passed prepush.sh on this sha
   [ "$remote_sha" = "$z" ] && { skip=0; continue; }
   files=$(git diff --name-only "$remote_sha" "$local_sha" 2>/dev/null) || { skip=0; continue; }
