@@ -35,6 +35,14 @@ const remembered = join(dirname(out), 'world');
 const args = process.argv.slice(2);
 if (args.join() === '--watch' && existsSync(remembered))
   args.unshift(readFileSync(remembered, 'utf8'));
+if (args.join() === '--watch' && !existsSync(remembered)) {
+  // A first run, or a cleaned checkout: nothing remembers a world (loka-wfrgk.98).
+  console.error(
+    'No world specified, and none remembered yet (the last one watched is remembered once you open one).\n' +
+      'Name one: bin/author.sh cartridges/<name>, then open another from the globe.',
+  );
+  process.exit(2);
+}
 const [dir, flag, ...rest] = args;
 if (!dir || dir === '--watch' || (flag !== undefined && flag !== '--watch') || rest.length) {
   console.error(

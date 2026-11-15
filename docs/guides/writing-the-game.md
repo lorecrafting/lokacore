@@ -42,7 +42,7 @@ It starts the cartridge watcher (`bin/loka dev … --watch`), the Book preview (
 `npm run author`) and the author panel (`tools/author-panel`, installed on its first run). Open
 http://localhost:19009: the Book fills the page and the panel is the pane on the right (the cartridge's title,
 then Compile with its lint notes folded behind their count, then Play, Write, State, Why, Find and Numbers;
-the source line at the foot). The globe at the left of the Book's toolbar switches worlds or makes a new one (blank, or a copy); `bin/author.sh` with no folder reopens the last world. It wears the Book's light palette and type. Ports: `LOKA_AUTHOR_PORT` (watcher, 19008), `LOKA_PREVIEW_PORT` (Book, 19006), `LOKA_PANEL_PORT` (panel, 19009).
+the source line at the foot). The globe at the left of the Book's toolbar switches worlds or makes a new one (blank, or a copy); `bin/author.sh` with no folder reopens the last world named that way, and on a first run (nothing remembered yet) it says so instead of failing silently. Ports: `LOKA_AUTHOR_PORT` (watcher, 19008), `LOKA_PREVIEW_PORT` (Book, 19006), `LOKA_PANEL_PORT` (panel, 19009); if one is already taken, `bin/author.sh` names the process holding it. It wears the Book's light palette and type.
 
 A dev save made before the Book kept its save across edits may still show "The save could not be opened": clear the preview's site data once (the browser's storage for http://localhost:19009) and it does not come back.
 

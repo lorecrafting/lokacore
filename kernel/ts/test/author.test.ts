@@ -45,6 +45,21 @@ const dev = (env: Record<string, string>) =>
     env: { PATH: `${dir}:${process.env.PATH}`, LOKA_DEV_CARTRIDGE: out, STUB_ART: good, ...env },
   });
 
+// Breaks: a first run (or a cleaned checkout) prints only the usage line, so the author is told to
+// "fix what it printed above" and nothing names the way in (loka-wfrgk.98).
+test('with no world given and none remembered, it names the way in', () => {
+  const fresh = join(dir, 'no-world');
+  mkdirSync(fresh, { recursive: true });
+  const run = spawnSync(process.execPath, [`${ROOT}kernel/ts/play/author.ts`, '--watch'], {
+    encoding: 'utf8',
+    env: { PATH: `${dir}:${process.env.PATH}`, LOKA_DEV_CARTRIDGE: join(fresh, 'current.json') },
+  });
+  assert.equal(run.status, 2);
+  assert.match(run.stderr, /none remembered yet/);
+  assert.match(run.stderr, /bin\/author\.sh cartridges\/<name>/);
+  assert.doesNotMatch(run.stderr, /^usage:/m);
+});
+
 // Breaks: a failed compile, or an artifact the kernel refuses (here a wrong content hash), replaces
 // or removes the last good preview artifact, or exits 0 so the author thinks it is live.
 test('a failed compile or a refused artifact keeps the last good artifact', () => {
