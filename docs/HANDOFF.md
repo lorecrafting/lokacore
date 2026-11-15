@@ -106,6 +106,11 @@ Nothing. The next slice starts from main.
 one dev server) and loka-8v4lx (name the reviewer fallback model in WORKFLOW and the loka-review agent
 instead of justifying a substitution per slice — still awaiting the owner).
 
+**2026-11-15 (one item):** loka-7vnzm (a worktree symlink named `_build` rode into a commit and broke every Elixir
+job; the `git diff --stat` line that named it was skipped because the error looked like infrastructure). Its two
+cheap fixes are already in #733 (`.gitignore` lost the trailing slash; `bin/worktree_setup.sh` refuses a link); the
+retro asks whether a pre-push check should refuse a tracked symlink or absolute path at all.
+
 **2026-11-11 (three items):** evidence in each: loka-x4ejm (session_status does not print a PR head's CI conclusion — **done in #714**),
 loka-y043w (the drift check calls a missing `external_ref` "no Beads issue": three false alarms a session),
 loka-r7vrx (the queue is 75 open with duplicates and nothing closed since 11-07).
