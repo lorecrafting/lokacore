@@ -1,4 +1,4 @@
-// size: allow 325, the field's open, save, put-back (with a palette Delete's), walk keys and add-here menu share its state
+// size: allow 335, the field's open, save, put-back (with a palette Delete's), walk keys and add-here menu share its state; a refused /open names its reason
 // E5, prose in the Book (docs/design/prose-in-the-book-rulings.md): a double-click turns a line
 // into its field, Cmd-Z puts back, `]`/`[` walk the `~` lines. Drawn over the Book from here:
 // panel.tsx requires this only in the author preview, so a player build never holds it.
@@ -71,7 +71,21 @@ const button = (name: string, run: () => void) => {
   b.onclick = run;
   return b;
 };
-const open = (key: string, words: string) => void api('/open', { key, words });
+/** Opens `key`'s source line; a refusal names the reason rather than doing nothing (loka-wfrgk.100.6).
+ *  A 404 is stale words: the compile has moved on since this page drew, so /open has no line to name.
+ *  The note goes under the line that was asked for, where the author clicked. */
+const open = (key: string, words: string) =>
+  void api('/open', { key, words }).then(([status]) => {
+    if (status === 200) return;
+    const el = lines().find((l) => keyOf(l) === key);
+    say(
+      el,
+      status === 404
+        ? 'Changed since the last compile: this page is behind the cartridge. Wait for the compile, or press Cmd-E.'
+        : `The editor could not open that line (HTTP ${status}).`,
+      true,
+    );
+  });
 
 /** The marks, after every Book render: `~` bars, unconfirmed lines, the palette, the counts. */
 function reapply() {

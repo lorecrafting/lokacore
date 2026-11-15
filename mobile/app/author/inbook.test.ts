@@ -1,4 +1,4 @@
-// size: allow 660, one editor's keys, saves, conflicts, add-here and capitalised titles walked over one stubbed page
+// size: allow 675, one editor's keys, saves, conflicts, add-here, a refused /open and capitalised titles walked over one stubbed page
 // E5's in-Book editor (docs/design/prose-in-the-book-rulings.md) in headless Google Chrome, over a
 // page of plain lines and a stubbed /__author route; the Book itself is the walk's (web-preview.md).
 import assert from 'node:assert/strict';
@@ -656,4 +656,18 @@ test('an answer after Esc leaves the next field alone', async () => {
   reread.open();
   await settle();
   assert.equal(await page.locator('.loka-note').isHidden(), true);
+});
+
+// Breaks: /open's 404 was discarded (void api('/open', ...)), so stale words -- a page drawn before
+// the cartridge recompiled -- opened nothing and said nothing, and the author had no way to know
+// the page was behind (loka-wfrgk.100.6).
+test('a line whose words changed since the compile says so instead of opening nothing', async () => {
+  // Only /open refuses: a /line 404 would stop the save the note depends on.
+  answer = (path) => (path.startsWith('/line') ? [200, RAIN] : [404, { kept: [] }]);
+  // A key this page does not draw: the words the card named changed since the compile.
+  await page.evaluate(() => postMessage({ op: 'edit', key: 'a.gone' }, '*'));
+  await settle();
+  await noteSays(
+    'Changed since the last compile: this page is behind the cartridge. Wait for the compile, or press Cmd-E.',
+  );
 });
