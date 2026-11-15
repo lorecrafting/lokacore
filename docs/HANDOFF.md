@@ -4,7 +4,7 @@ The present only: open work, next steps, owner questions, and standing owner rul
 yet. Rewrite this page in place once per session, at its end; never add dated session sections. History lives in git, Beads and `docs/reviews/`; lessons
 go to [PM lessons](lessons/pm.md) ([harness patterns](decisions/owner-decision-harness-patterns-2026-10-28.md)).
 
-AS OF main after #733; written 2026-11-15 02:36 UTC in the Pi harness by deploy/deepseek-ai/deepseek-v4.1-flash-1017, PM session.
+AS OF main after ff954162a; written 2026-11-15 08:06 UTC in the Pi harness by deploy/deepseek-ai/deepseek-v4.1-flash-1017, PM session.
 `kernel_api` is 1.159 (no contract slice since). **The owner is pausing the Anthropic subscription, so every reviewer
 and developer here now runs on `deploy/deepseek-ai/deepseek-v4.1-flash-1017`** (`~/.pi/agent/agents/loka-dev.md`,
 `loka-review.md` repinned 2026-11-13). **Nothing is mid-merge, nothing is in flight, no agent is running.**
@@ -81,9 +81,19 @@ Nothing. The next slice starts from main.
    W1 (#717), D1 (#719), K2 (#720, #721), C1 (#722), L1 + L2 (#723, #724), W3 (#725), W2 (#726), F1 + W4 (#727), R2 (#728),
    K1 (#729), K1b (#730). **One slice remains: .12 (E1, a conditional page in a modal scene)** — P3, parked until a beat needs
    it, and it needs a protocol change, a kernel change and a `kernel_api` bump, so it wants an Opus design session.
-2. Older P1s: loka-wfrgk.100.8 (key-tagged Book lines), loka-wfrgk.100.4, loka-vduxr.102 (the field guide, P1).
-3. Housekeeping PR: loka-ebnu3, jqxb8, grdiq, wfrgk.96, and the retro items (below).
-4. P2 editor items: .97, .98, .99, .102 follow-ups, map handle placement.
+2. The authoring-readiness plan (owner agreed 2026-11-15). Phase 0 is **done** (ff954162a): `.98` and
+   `.99` are closed — `bin/author.sh` no longer fails on a first run, and a stale panel or a held port is
+   named instead of dying. Remaining phases, in this order:
+   - **Phase 1 (the core loop):** `.100.8` first — a key on the element, looked up by element, never
+     re-derived from words. It unblocks `.100.4`, `.100.6`, `.100.7`. Attempted once and reverted; read
+     the bead comment before starting so the dead end is not repeated.
+   - **Phase 2 (green means green):** flakes fq96k (`live.test.ts:145`), 0ske4 (panel test hangs instead
+     of failing), `.96` (NPC card timeout).
+   - **Phase 3 (learn it without me):** `.97` (the writer guide still documents the old tab panel) and
+     `.102.1`.
+   Deferred on purpose: `.115.12` (E1), `loka-wfrgk.119` (LLM co-authoring epic), `vduxr.58` area folders.
+3. Older P1s: `loka-vduxr.102` (the field guide).
+4. Housekeeping PR: loka-ebnu3, jqxb8, grdiq, and the retro items (below).
 
 ## Owner calls to date (2026-11-07 session; override any)
 
@@ -118,6 +128,19 @@ loka-4ks2l was approved and is merged (#709). Closed `loka-wfrgk.116` as a dupli
 2026-11-07 items are still open and unapproved; three of them closed with #710 (lvo9i, wfrgk.110, za8br).
 
 ## Learned this session (worth knowing next time)
+
+- **A symptom's obvious fix can be the wrong layer.** `.100.8` reads "tag each line with its key", and
+  extending the existing `~` zero-width marks looks like the minimal change. It is not: marking leaves
+  every lookup still keyed by *words*, rewrites the strings the Book reads out as accessible names, and
+  makes the panel's own `seen` bindings disagree with the render. The bead says it plainly — put the key
+  on the *element* and look it up by element. When a fix fights the test suite that much, the tests are
+  usually describing the contract and the fix is at the wrong layer.
+- **`seen` in `mobile/app/author/panel.tsx:32` is module-level and never cleared.** That is why one shared
+  wording costs the *rest of the session* rather than one page. Worth knowing before sizing `.100.8`.
+- **A composed line cannot carry one key.** "Talk to " + an NPC's name is two keys in one line, so any
+  element-key attribute needs a story for that (the sibling follow-up `.100.7`).
+- **Write the test before the render change when the change rewrites text.** Asserting on visible words
+  needs one strip helper in the harness; discovering that after the fact cost three rewrites.
 
 - **An exemption can be right for one row and wrong for the row beside it.** `lint_facts.ex`'s writer set skips a
   mechanic-written fact for both compare rows. Correct for the bool/enum row ("nothing writes that value"); wrong for
