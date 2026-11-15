@@ -89,7 +89,11 @@ Steps 5 and 6 (fix, re-review) are in [WORKFLOW](WORKFLOW.md#loop).
    After the last of several close merges, run
    `bin/sync_pr.sh <branch>` once for every open PR (merges `origin/main`, regenerates the review index on a conflict there, docs check, push); then check `docs/decisions/README.md` order (newest first) by hand, as it is only union-merged.
    The owner, or the PM when the owner asks or for status-only commits (ROADMAP status lines,
-   Beads export, decisions index lines, the [PM handoff](HANDOFF.md)), may push to `main` directly; never for unreviewed code or past a red check. Before `bin/merge_pr.sh` the PM edits the
+   Beads export, decisions index lines, the [PM handoff](HANDOFF.md)), may push to `main` directly; never for unreviewed code or past a red check. `bin/main_guard.py`
+   enforces this at the push (`.githooks/pre-push`; `bin/main_guard_red_controls.sh` keeps it honest):
+   a push to `main` is refused unless every changed file is status-only or documentation, because
+   `ci.yml` does not run on `main` and a code commit pushed there is gated by **nothing** —
+   `bin/prepush.sh` runs no package test suite. Code goes to a branch; the green branch head is the gate. Before `bin/merge_pr.sh` the PM edits the
    ROADMAP status-only lines (slice done, PR link, slice count) uncommitted and passes the subject; the script commits them on `main`; any other
    ROADMAP change goes through a PR ([owner decision](decisions/owner-decision-process-speedup-2026-10-03.md)).
    `bin/after_merge.sh` (run by `bin/merge_pr.sh`) does that bookkeeping after the PM's
