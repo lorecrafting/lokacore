@@ -1,7 +1,8 @@
 // The Quest card (docs/rnd/gui-editor-design-2026-11-04.md §4.4, E6d): the name opens in the Book,
 // the mechanics (deadline, exchange, expedition, patrol, journal, offer) are added and removed as the
 // capabilities allow; the objective is the Rules block's, the rest the form's (pickers by kind).
-import { addable, allowed } from '../../../../../kernel/ts/play/card.ts';
+import {
+  gate, addable } from '../../../../../kernel/ts/play/card.ts';
 import type { useDiagnostics } from '../../author.ts';
 import type { Context } from '../fields.tsx';
 import { adding, Header, useCard, useCartridge } from '../Generic.tsx';
@@ -23,7 +24,7 @@ export function Quest({ rel, context, diag }: Props) {
   if (!saved) return <p className="px-3 text-xs text-muted-foreground">Loading {rel}</p>;
   const caps = cart && (cart.requires?.capabilities ?? {});
   const offered = addable(saved.dir, registry, draft, card.revealed);
-  const menu = caps ? allowed(saved.dir, offered, caps, draft, cart?.world) : [];
+  const { allowed: menu, blocked } = gate(saved.dir, offered, caps, draft, cart?.world);
   const required = ((defs[DEF] as { required?: string[] } | undefined)?.required ?? []) as string[];
   const words = WORDS.filter((f) => draft[f] !== undefined); // an inherited name is the parent's
   return (
@@ -31,7 +32,7 @@ export function Quest({ rel, context, diag }: Props) {
       <Header rel={rel} diag={diag} undo={card.undo ? card.back : undefined} />
       {card.refused ? <Refusal boxed>{card.refused}</Refusal> : null}
       <Words draft={draft} context={context} fields={words} />
-      <Mechanics card={card} menu={menu} {...adding(card, defs, DEF)} fixed={required} />
+      <Mechanics card={card} blocked={blocked} menu={menu} {...adding(card, defs, DEF)} fixed={required} />
       <RoomForm rel={rel} card={card} context={context} diag={diag} defs={defs} own={words} />
     </div>
   );

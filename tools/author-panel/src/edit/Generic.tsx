@@ -13,7 +13,7 @@ import {
   apart,
   awaits,
   applied,
-  cardMenu,
+  addable,
   definitionOf,
   described,
   diff,
@@ -24,13 +24,15 @@ import {
   unlisted,
 } from '../../../../kernel/ts/play/card.ts';
 import { uiSchema } from '../../../../kernel/ts/play/ui_schema.ts';
-import { capabilityRow, unready } from '../../../../kernel/ts/play/allowed.ts';
+import { capabilityRow, cardMenuWith, unready } from '../../../../kernel/ts/play/allowed.ts';
 import { ask, type useDiagnostics } from '../author.ts';
 import { Button } from '../components/ui/button.tsx';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../components/ui/dropdown-menu.tsx';
 import { fields, type Context } from './fields.tsx';
 import { Refusal, templates } from './templates.tsx';
 import registry from './registry.json';
+export { AddMenu } from './AddMenu.tsx';
+
+import { AddMenu } from './AddMenu.tsx';
 
 const validator = customizeValidator({ AjvClass: Ajv2020 });
 
@@ -146,33 +148,6 @@ export function useCard(rel: string, diag: Diag) {
   return { ...card, refused: held ?? refused };
 }
 
-/** The registry's fields this definition lacks, each with its schema description: choosing one reveals its empty field. */
-export function AddMenu({ fields: menu, reveal, about = () => undefined }: {
-  fields: string[];
-  reveal: (f: string) => void;
-  about?: (f: string) => string | undefined;
-}) {
-  if (!menu.length) return null;
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button type="button" size="xs" variant="outline" aria-label="Add a field" className="justify-self-start">
-          Add…
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="start" className="max-w-80">
-        {menu.map((f) => (
-          <DropdownMenuItem key={f} textValue={f} onSelect={() => reveal(f)} className="grid gap-0 text-xs">
-            <span>{f}</span>
-            {about(f) ? <span className="text-muted-foreground">{about(f)}</span> : null}
-          </DropdownMenuItem>
-        ))}
-      </DropdownMenuContent>
-    </DropdownMenu>
-  );
-}
-
-/** The file, the compile state (held, compiling, stale) and Undo of the last change. */
 export function Header({ rel, diag, undo }: { rel: string; diag: Diag; undo?: () => void }) {
   const label = status(!!diag.held, !!diag.pending, diag.compiled);
   return (
@@ -247,13 +222,14 @@ export function Generic({ rel, context, diag, only = (f) => f }: GenericProps) {
   const def = definitionOf(defs, dir, draft); // a prose field added writes its key `~`
   const { add, about } = adding(card, defs, def);
   const ui = hidden(drawn, dir, registry, draft, card.revealed);
-  const menu = cardMenu(dir, registry, draft, card.revealed, cart, (m) => only(m, defs));
+  const fields = only(addable(dir, registry, draft, card.revealed), defs);
+  const { allowed: menu, blocked } = cardMenuWith(dir, fields, cart, draft);
   return (
     <div className="grid min-w-0 grid-cols-1 gap-2 px-3 text-xs" aria-label="Card">
       <Header rel={rel} diag={diag} undo={card.undo ? card.back : undefined} />
       {card.refused ? <Refusal boxed>{card.refused}</Refusal> : null}
       <CardForm rel={rel} card={card} context={context} diag={diag} ui={ui} />
-      <AddMenu fields={menu} reveal={add} about={about} />
+      <AddMenu fields={menu} blocked={blocked} reveal={add} about={about} />
     </div>
   );
 }

@@ -3,7 +3,8 @@
 // and failure outcome come and go together; target, policy, check and outcome steps are the Rules
 // blocks in the form. A built-in command action stays the generic card.
 import { paired, menuOf } from '../../../../../kernel/ts/play/action.ts';
-import { addable, allowed } from '../../../../../kernel/ts/play/card.ts';
+import {
+  gate, addable } from '../../../../../kernel/ts/play/card.ts';
 import type { useDiagnostics } from '../../author.ts';
 import type { Context } from '../fields.tsx';
 import { adding, Generic, Header, useCard, useCartridge } from '../Generic.tsx';
@@ -29,14 +30,14 @@ export function Action({ rel, context, diag }: Props) {
   const caps = cart && (cart.requires?.capabilities ?? {});
   const offered = menuOf(addable('actions', registry, draft, card.revealed), defs);
   // the whole cartridge.json: a duration's need is its top-level time_policy (card.ts NEEDS)
-  const menu = caps ? allowed('actions', offered, caps, draft, cart) : [];
+  const { allowed: menu, blocked } = gate('actions', offered, caps, draft, cart);
   const required = ((defs[DEF] as { required?: string[] } | undefined)?.required ?? []) as string[];
   return (
     <div className="grid min-w-0 grid-cols-1 gap-2 px-3 text-xs" aria-label="action card">
       <Header rel={rel} diag={diag} undo={card.undo ? card.back : undefined} />
       {card.refused ? <Refusal boxed>{card.refused}</Refusal> : null}
       <Words draft={draft} context={context} fields={['name']} />
-      <Mechanics card={card} menu={menu} {...adding(card, defs, DEF)} fixed={required} />
+      <Mechanics card={card} blocked={blocked} menu={menu} {...adding(card, defs, DEF)} fixed={required} />
       <RoomForm rel={rel} card={card} context={context} diag={diag} defs={defs} own={['name']} />
     </div>
   );

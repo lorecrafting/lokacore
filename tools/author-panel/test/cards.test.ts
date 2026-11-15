@@ -117,6 +117,33 @@ test("the room's Mechanics menu shows each option's description", async () => {
   }
 });
 
+// Break: a field the registry holds vanishes from the Add menu when the cartridge lacks its capability,
+// so the author sees no option and no reason and hunts the docs (loka-wfrgk.94, the day-one symptom:
+// daily_schedule, room details and schedule cases alike). The showcase lacks `emote`, so a room's
+// `ambient` is refused for a capability the author can declare, and it must say which.
+test("the Mechanics menu greys a refused field and names the capability to declare", async () => {
+  const page = await open({ right: 420, selection: { kind: 'room', key: 'fell_top' } });
+  try {
+    const add = page.getByLabel('Mechanics').getByLabel('Add a field');
+    await add.waitFor({ timeout: boot });
+    await add.click();
+    const ambient = page
+      .getByRole('menuitem')
+      .filter({ has: page.getByText('ambient', { exact: true }) });
+    await ambient.waitFor({ timeout: boot });
+    // greyed, and not clickable: picking it must not write a field the compiler refuses
+    assert.equal(await ambient.getAttribute('aria-disabled'), 'true');
+    assert.match((await ambient.textContent()) ?? '', /needs emote in cartridge\.json/);
+    // a field the cartridge does allow stays addable, so the list did not merely go all-grey
+    const variants = page
+      .getByRole('menuitem')
+      .filter({ has: page.getByText('dark', { exact: true }) });
+    assert.notEqual(await variants.getAttribute('aria-disabled'), 'true');
+  } finally {
+    await page.close();
+  }
+});
+
 // Break: a switch to a quest writes a key outside the compiled quests or no outcome (valid_source?,
 // scenes.ex:149-156), picking another quest writes the old one, or a typed quest outcome never
 // reaches the file (Enter, blur), or another scene's quest and outcome (letter_read's, scenes.ex:274-292)

@@ -4,8 +4,8 @@
 // write is the generic card's (useCard: POST /change, Undo, Hold, refusals at the field).
 import { useRef, useState } from 'react';
 import {
+  gate,
   addable,
-  allowed,
   choices,
   placed,
   placement,
@@ -51,11 +51,10 @@ export function Entity({ rel, context, diag }: Props) {
   const defs = (saved?.schema as { $defs?: Record<string, never> } | undefined)?.$defs ?? {};
   const cart = useCartridge(diag);
   if (!saved) return <p className="px-3 text-xs text-muted-foreground">Loading {rel}</p>;
-  const def = DEF[saved.dir];
-  const at = saved.dir === 'npcs' ? 'room' : 'location';
+  const [def, at] = [DEF[saved.dir], saved.dir === 'npcs' ? 'room' : 'location'];
   const caps = cart && (cart.requires?.capabilities ?? {});
   const offered = addable(saved.dir, registry, draft, card.revealed);
-  const menu = caps ? allowed(saved.dir, offered, caps, draft, cart?.world) : [];
+  const { allowed: menu, blocked } = gate(saved.dir, offered, caps, draft, cart?.world);
   const required = ((defs[def] as { required?: string[] } | undefined)?.required ?? []) as string[];
   return (
     <div
@@ -69,6 +68,7 @@ export function Entity({ rel, context, diag }: Props) {
       <Mechanics
         card={card}
         menu={menu}
+        blocked={blocked}
         {...adding(card, defs, def, context.held)}
         fixed={[...WORDS, at, ...required]}
       />
