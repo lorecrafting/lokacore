@@ -23,7 +23,7 @@ import {
 } from './place.ts';
 import { factRows, shown, type Canon } from './shown.ts';
 import { worded } from '../book/words.ts';
-import { bind, clicked } from './prose_rules.ts';
+import { bind, clicked, lost } from './prose_rules.ts';
 
 export { frozenClock } from './place.ts';
 
@@ -203,6 +203,13 @@ const OPS = new Set([
 let panel: { to: Window; origin: string } | undefined;
 const tell = (sent: object) => panel?.to.postMessage({ loka: 'author', ...sent }, panel.origin);
 const stateOf = (game: Opened) => ({
+  // The words a collision cost, and whether the page draws them now: `onPage` is what decides
+  // whether clearing `seen` per render would be enough (docs/rnd/line-key-binding-2026-11-15.md).
+  lost: [...lost].map(([words, keys]) => ({
+    words,
+    keys: [...keys],
+    onPage: [...document.querySelectorAll('[dir="auto"]')].some((el) => el.textContent === words),
+  })),
   hash: chapter.sha256,
   title: canon().manifest.title,
   placeNote,

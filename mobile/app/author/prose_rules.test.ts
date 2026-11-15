@@ -7,6 +7,7 @@ import { color } from '../book/tokens.ts';
 import {
   bind,
   clicked,
+  lost,
   selects,
   shortcut,
   noFieldNote,
@@ -171,4 +172,11 @@ test("a clicked line's key: its words or the capital lowered, none when two keys
   assert.equal(clicked(seen, said, 'the lost oar').key, 'item.oar.short', 'one key drawn twice');
   bind(seen, 'the lost oar', 'quest.oar.name');
   assert.equal(clicked(seen, said, 'the lost oar').key, undefined, 'two keys, one words');
+  // Break: the probe misses the collision, so the measurement counts zero and the design note's
+  // first step decides on nothing (loka-wfrgk.100.8). Both keys, once.
+  assert.deepEqual([...(lost.get('the lost oar') ?? [])].sort(), [
+    'item.oar.short',
+    'quest.oar.name',
+  ]);
+  assert.equal(lost.has('brass lantern'), false, 'one key drawing words lost nothing');
 });

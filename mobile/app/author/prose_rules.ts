@@ -14,7 +14,13 @@ export const saving = (draft: string, words: string) =>
 export const bind = (seen: Map<string, string>, words: string, key: string) => {
   const was = seen.get(words);
   seen.set(words, was === undefined || was === key ? key : '');
+  if (was !== undefined && was !== key) lost.set(words, new Set([was, key]));
 };
+
+/** The words such a collision cost, and the keys that claimed them: the author preview reports them
+ *  in the Book's state so the loss can be measured, not guessed (loka-wfrgk.100.8,
+ *  docs/rnd/line-key-binding-2026-11-15.md). */
+export const lost = new Map<string, Set<string>>();
 /** The seen words naming a drawn line: exact, or with the letter cap() raised lowered. None when
  *  both forms, or two keys, claim it: a wrong write is worse than no field (journal_sampler's oar). */
 export function drawnWords(seen: Map<string, string>, t: string) {
