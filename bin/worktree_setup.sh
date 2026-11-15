@@ -3,6 +3,12 @@
 # bin/check_all.sh needs, and node_modules wherever a package-lock.json exists.
 set -eu
 cd "$(dirname "$0")/.."
+# A symlinked deps/_build is not covered by .gitignore's older '/_build/' (a trailing slash matches
+# directories only, and a link is not one), so `git add -A` stages an absolute home path; on a fresh
+# runner mix then finds a file where it needs its build directory (loka-wfrgk.94).
+for d in deps _build; do
+  [ ! -L "$d" ] || { echo "worktree_setup: $d is a symlink; run bin/worktree_setup.sh from a fresh worktree" >&2; exit 1; }
+done
 mise exec -- mix deps.get --check-locked
 main=$(git worktree list --porcelain | sed -n '1s/^worktree //p')
 for d in $(git ls-files package-lock.json '*/package-lock.json' | sed 's|/*package-lock.json$||; s|^$|.|'); do
