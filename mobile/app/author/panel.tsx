@@ -23,7 +23,7 @@ import {
 } from './place.ts';
 import { factRows, shown, type Canon } from './shown.ts';
 import { worded } from '../book/words.ts';
-import { bind, clicked, lost } from './prose_rules.ts';
+import { bind, clicked, lost, nextPage } from './prose_rules.ts';
 
 export { frozenClock } from './place.ts';
 
@@ -259,7 +259,8 @@ export function useAuthorPanel(tools: Tools, game: Opened | undefined) {
     };
     window.addEventListener('message', onMessage);
     document.addEventListener('click', onClick, true);
-    const unsubscribe = game.subscribe(state);
+    // Bindings are per page: a wording drawn here must not cost a later page its field.
+    const unsubscribe = game.subscribe(() => (nextPage(seen), state()));
     // a text overlay redraws in place
     const unlisten = listen((message) => (inBook?.heard(message), latest.current.redraw({})));
     const stop = inBook?.start({ seen, said, tell, redraw: () => latest.current.redraw({}) });

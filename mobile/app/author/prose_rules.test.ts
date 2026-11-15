@@ -8,6 +8,7 @@ import {
   bind,
   clicked,
   lost,
+  nextPage,
   selects,
   shortcut,
   noFieldNote,
@@ -191,4 +192,17 @@ test("a clicked line's key: its words or the capital lowered, none when two keys
     'item.oar.short',
     'quest.oar.name',
   ]);
+});
+
+// Break: the bindings outlive the page, so two keys that share a wording on one page cost that
+// wording's field on every later page too -- the 'rest of the session' a PM report described. The
+// showcase has 59 such families (`item.egg_01..04.bare` all draw 'egg'), none sharing a page.
+test('a page change drops the bindings, so a later page opens its own field', () => {
+  const seen = new Map<string, string>();
+  bind(seen, 'egg', 'item.egg_01.bare');
+  bind(seen, 'egg', 'item.egg_02.bare'); // both on this page: neither opens
+  assert.equal(clicked(seen, new Map(), 'egg').key, undefined);
+  nextPage(seen);
+  bind(seen, 'egg', 'item.egg_03.bare'); // the next page draws one of them
+  assert.equal(clicked(seen, new Map(), 'egg').key, 'item.egg_03.bare');
 });

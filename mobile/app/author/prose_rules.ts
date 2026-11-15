@@ -23,6 +23,12 @@ export const bind = (seen: Map<string, string>, words: string, key: string) => {
  *  in the Book's state so the loss can be measured, not guessed (loka-wfrgk.100.8,
  *  docs/rnd/line-key-binding-2026-11-15.md). */
 export const lost = new Map<string, Set<string>>();
+
+/** A page's bindings are dropped between pages: a wording drawn on one page must not cost its field
+ *  on a later one. Measured, not guessed: 59 of the showcase's 156 shared wordings are one sampler
+ *  family (`item.egg_01..04`), which never share a page, so scoping by page removes them for free
+ *  while the safety rule below still refuses a real same-page pair (loka-wfrgk.100.8). */
+export const nextPage = (seen: Map<string, string>) => seen.clear();
 /** The seen words naming a drawn line: exact, or with the letter cap() raised lowered. None when
  *  both forms, or two keys, claim it: a wrong write is worse than no field (journal_sampler's oar). */
 export function drawnWords(seen: Map<string, string>, t: string) {
