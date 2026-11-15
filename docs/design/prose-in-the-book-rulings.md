@@ -33,7 +33,9 @@ Author mode is the `?dev=1` dev-cartridge page only; a release, test or e2e bund
 ## Known limits
 
 - Hold is one flag for the whole watcher: a page that set it releases it on leaving, even if another open page wants it held; a Hold whose page died without `pagehide` stays until toggled. Accepted (one author, one page).
-- A line is found by its shown words (`seen` in `panel.tsx`); two keys with identical words resolve to one. Existing behaviour, not widened.
+- A line is found by its shown words (`seen` in `panel.tsx`); two keys with identical words lose their
+  field until a reword. Existing behaviour, not widened: the element-key fix and its limits are
+  [the line-key binding note](../rnd/line-key-binding-2026-11-15.md) (loka-wfrgk.100.8).
 
 ## Proposed check
 
