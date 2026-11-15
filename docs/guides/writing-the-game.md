@@ -40,11 +40,38 @@ bin/author.sh cartridges/<name>
 
 It starts the cartridge watcher (`bin/loka dev … --watch`), the Book preview (`mobile/app`,
 `npm run author`) and the author panel (`tools/author-panel`, installed on its first run). Open
-http://localhost:19009: the Book fills the page and the panel is the pane on the right (the cartridge's title,
-then Compile with its lint notes folded behind their count, then Play, Write, State, Why, Find and Numbers;
-the source line at the foot). The globe at the left of the Book's toolbar switches worlds or makes a new one (blank, or a copy); `bin/author.sh` with no folder reopens the last world named that way, and on a first run (nothing remembered yet) it says so instead of failing silently. Ports: `LOKA_AUTHOR_PORT` (watcher, 19008), `LOKA_PREVIEW_PORT` (Book, 19006), `LOKA_PANEL_PORT` (panel, 19009); if one is already taken, `bin/author.sh` names the process holding it. It wears the Book's light palette and type.
+http://localhost:19009: the Book fills the page, with the panel's columns beside it ([the shell](#the-shell), below).
+The globe at the left of the Book's toolbar switches worlds or makes a new one (blank, or a copy); `bin/author.sh` with no folder reopens the last world named that way, and on a first run (nothing remembered yet) it says so instead of failing silently. Ports: `LOKA_AUTHOR_PORT` (watcher, 19008), `LOKA_PREVIEW_PORT` (Book, 19006), `LOKA_PANEL_PORT` (panel, 19009); if one is already taken, `bin/author.sh` names the process holding it. It wears the Book's light palette and type.
 
 A dev save made before the Book kept its save across edits may still show "The save could not be opened": clear the preview's site data once (the browser's storage for http://localhost:19009) and it does not come back.
+
+## The shell
+
+The panel is three columns around the Book, each foldable with a divider you drag (arrow keys nudge it
+16 px, Shift 64):
+
+- **Left**: the cartridge's rooms, NPCs, items and quests, with a search box. The pin marks the room the
+  Book is in; the play button beside a row starts the Book from there (**Play from here**), which is how
+  you test one scene without walking the whole chapter.
+- **Middle**: the map, in three views — **Map** (rooms and their exits), **Story** (what the scene
+  graph reaches) and **Flow** (how a rule fired). Click a node to select it; the map follows the
+  selection. Cmd-scroll zooms.
+- **Right**: the inspector for the selection — the card for that room, NPC, item, quest or scene, with
+  its purpose-built fields. A scene has no form: its card is the `.cut` page buttons and the `on` switch.
+- **The slot** under the left column holds the story list. `[` and `]` walk the Book's lines; `{` and `}`
+  walk the ones with no key.
+
+Double-click a line in the Book to edit it in place. **Cmd-E** opens the selection's source line in
+`$LOKA_EDITOR` (default `code --goto`); if the words changed outside the editor since the last compile,
+the answer is 404 and the line cannot open — wait for the compile, or Cmd-E again after it. **Cmd-K** is the
+palette of everything you can do from where you are. **Cmd-.** holds the Book: saves stop replaying
+and queue as *N waiting* until you hold it off again, which is how you type several lines before the
+page catches up. **Cmd-\\** folds the left column and **Cmd-/** the right. Cmd-Z puts back the last
+write. These work in the Book and in the panel.
+
+Saves compile on their own: the page replays what you had done. A refused write says why in the
+inspector and changes nothing; **Undo** in the header reverts it once.
+
 
 ## Write a scene
 
