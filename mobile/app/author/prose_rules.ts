@@ -14,7 +14,9 @@ export const saving = (draft: string, words: string) =>
 export const bind = (seen: Map<string, string>, words: string, key: string) => {
   const was = seen.get(words);
   seen.set(words, was === undefined || was === key ? key : '');
-  if (was !== undefined && was !== key) lost.set(words, new Set([was, key]));
+  // The collision is between two real keys; '' is the "no field" mark, not a claimant.
+  if (was !== undefined && was !== key && was !== '' && key !== '')
+    lost.set(words, new Set([was, key]));
 };
 
 /** The words such a collision cost, and the keys that claimed them: the author preview reports them

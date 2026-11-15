@@ -179,4 +179,16 @@ test("a clicked line's key: its words or the capital lowered, none when two keys
     'quest.oar.name',
   ]);
   assert.equal(lost.has('brass lantern'), false, 'one key drawing words lost nothing');
+  // Break: the probe records the "no field" mark ('') as a claimant, so a line already refused
+  // reads as a fresh collision and every sample names '' instead of the keys that clashed.
+  assert.deepEqual([...(lost.get('the lost oar') ?? [])].sort(), [
+    'item.oar.short',
+    'quest.oar.name',
+  ]);
+  // ...and a third key does not rewrite the pair: the collision already recorded is the real one.
+  bind(seen, 'the lost oar', 'item.oar.other');
+  assert.deepEqual([...(lost.get('the lost oar') ?? [])].sort(), [
+    'item.oar.short',
+    'quest.oar.name',
+  ]);
 });
