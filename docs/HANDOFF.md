@@ -4,7 +4,7 @@ The present only: open work, next steps, owner questions, and standing owner rul
 yet. Rewrite this page in place once per session, at its end; never add dated session sections. History lives in git, Beads and `docs/reviews/`; lessons
 go to [PM lessons](lessons/pm.md) ([harness patterns](decisions/owner-decision-harness-patterns-2026-10-28.md)).
 
-AS OF main after #731; written 2026-11-14 22:40 UTC in the Pi harness by deploy/deepseek-ai/deepseek-v4.1-flash-1017, PM session.
+AS OF main after #733; written 2026-11-15 02:36 UTC in the Pi harness by deploy/deepseek-ai/deepseek-v4.1-flash-1017, PM session.
 `kernel_api` is 1.159 (no contract slice since). **The owner is pausing the Anthropic subscription, so every reviewer
 and developer here now runs on `deploy/deepseek-ai/deepseek-v4.1-flash-1017`** (`~/.pi/agent/agents/loka-dev.md`,
 `loka-review.md` repinned 2026-11-13). **Nothing is mid-merge, nothing is in flight, no agent is running.**
@@ -50,9 +50,21 @@ reader edges, and the Policy block's leaf picker offers `named` with the conditi
 serial** (loka-qozwj, closed): one flag, `--test-concurrency=1`, because every panel test file shares `harness.ts`'s one
 `bin/loka dev` server, one Chrome and one showcase copy.
 `kernel/ts/test/live.test.ts:145` (`500 !== 404` for `/open ../none.json`) is now a four-time flake, still unfixed (loka-fq96k).
+#733 **F8, the add menu names why a field is refused** (loka-wfrgk.94, closed): `kernel/ts/play/allowed.ts` splits its
+predicate into `fits`; `blocked` returns the refused fields as `{ field, caps, needs }` off that same predicate (so no
+second table can drift from `OWNERS`/`NEEDS`), and `AddMenu` (`tools/author-panel/src/edit/AddMenu.tsx`, moved out of
+`Generic.tsx` at its size ceiling) draws them disabled with `needs emote in cartridge.json`. `gate`/`cardMenuWith` feed
+all seven card sites. The bead's second symptom ("Add then writes a `dev` row") needed no fix: no `'dev'` literal exists
+and `added()` already returns `undefined` when the author must choose.
 The nightly `ci` red of 2026-11-13 (`43614268953`) was the `mobile` job's `Author panel smoke` step — the parallel panel
-suite, not a diff — and #731 is its fix; confirm on the next nightly rather than assuming. Before that, the 2026-11-12 red
-was a stale head, not open work.
+suite, not a diff — and #731 is its fix, merged 2026-11-14; **not yet confirmed on a nightly**, since the newest run
+(`6db240794`, 16:11) predates it. The first thing to check next session is that run's `mobile` job.
+**A worktree symlink can break every Elixir job.** #732 was closed for it: `git add -A` in a worktree staged a link named
+`_build` pointing at an absolute home path, so `mix` found a file where it needs its build directory
+(`_build/test/lib/boundary: not a directory`) and `elixir`, `kernel` and `mobile` died identically while `main` was green.
+`.gitignore` said `/_build/` and `/deps/`; a trailing slash matches directories, not links, so both lost it, and
+`bin/worktree_setup.sh` now refuses to run through such a link. #733 is the same tree with clean history — when a branch
+is young and unsaved by anyone else, rebuild it rather than force-pushing (`AGENTS.md` forbids the push).
 Untracked `cartridges/prologue/` is the owner's in-progress Part 1: never touch it, read it only.
 `docs/system-graph.gen.json` regenerates from it, so keep that file out of a commit while the scratch cartridge is present.
 
@@ -68,9 +80,10 @@ Nothing. The next slice starts from main.
    W1 (#717), D1 (#719), K2 (#720, #721), C1 (#722), L1 + L2 (#723, #724), W3 (#725), W2 (#726), F1 + W4 (#727), R2 (#728),
    K1 (#729), K1b (#730). **One slice remains: .12 (E1, a conditional page in a modal scene)** — P3, parked until a beat needs
    it, and it needs a protocol change, a kernel change and a `kernel_api` bump, so it wants an Opus design session.
-2. Older P1s: loka-wfrgk.94, loka-wfrgk.100.8 (key-tagged Book lines), loka-wfrgk.100.4.
-3. Housekeeping PR: loka-ebnu3, jqxb8, grdiq, wfrgk.96, and the retro items (below).
-4. P2 editor items: .97, .98, .99, .102 follow-ups, map handle placement, `bin/loka new` duplicate keys (loka-wfrgk.68).
+2. Older P1s: loka-wfrgk.100.8 (key-tagged Book lines), loka-wfrgk.100.4, loka-vduxr.102 (the field guide, P1).
+3. Confirm #731 on a nightly `ci` run (`mobile` job); it is the last unverified fix from 2026-11-14.
+4. Housekeeping PR: loka-ebnu3, jqxb8, grdiq, wfrgk.96, and the retro items (below).
+5. P2 editor items: .97, .98, .99, .102 follow-ups, map handle placement.
 
 ## Owner calls to date (2026-11-07 session; override any)
 
@@ -108,6 +121,15 @@ loka-4ks2l was approved and is merged (#709). Closed `loka-wfrgk.116` as a dupli
 - **Erlang term order is a trap in guards.** `nil > 5`, `"five" > 5` and `:x > 5` are all **true**, so a guard like
   `when t > max` fires on malformed input and reports nonsense. Every numeric guard over authored JSON needs
   `is_integer(t) and`. A reviewer found this in #724; the test pinning it fails without the clause.
+- **A green sibling is the fastest way to prove a red is yours.** Three jobs died with the same
+  `_build/test/lib/boundary: not a directory`, which reads like a runner flake. One command settled it:
+  `gh run view <nightly> --json jobs` showed `main`'s `elixir` **success** on the same runner image, so the
+  fault had to be in my head, and `git diff --stat origin/main...HEAD` printed `_build | 1 +`. Check the
+  sibling before re-running anything: a rerun cost 25 minutes and returned the identical error.
+- **A dotfile pattern with a trailing slash misses symlinks.** `/_build/` and `/deps/` match directories only;
+  the worktree's `ln -s` links were stageable, and one rode into a commit as an absolute home path.
+- **Read `git diff --stat <base>...HEAD` before trusting "my diff is TypeScript-only".** It printed the
+  offending line and I skipped it because the error *looked* like infrastructure.
 - **`ci_wait.sh` lives in `~/.pi/agent/scripts/`, not `bin/`**, and takes longer than a 40-minute tool timeout on a
   full run — check `gh pr checks <n> | grep -v pending` instead, or run it under `bg_run`.
 
