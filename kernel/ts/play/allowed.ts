@@ -152,8 +152,21 @@ export const unready = (doc: Obj) => {
   ];
 };
 
-/** The menu's fields whose capability `requires.capabilities` (`caps`) declares and whose other needs
- * the definition (`doc`), cartridge.json's `world` and the hidden skills' keys meet; others would not compile. */
+/** Why a field the registry holds is not in a card's add menu: the owning capabilities the cartridge
+ * lacks (`caps`), and whether one of the field's own needs fails (`needs`: a field the definition
+ * lacks, or the world's shape — the card names the first only). */
+export type Blocked = { field: string; caps: string[]; needs: boolean };
+
+/** Whether the compiler would take field `f`: every `OWNERS` capability `requires.capabilities` (`caps`)
+ * declares, and the field's own need (definition `doc`, cartridge.json's `world`, the hidden skills' keys)
+ * met. `allowed` and `blocked` are its two halves, so the halves cannot disagree. */
+const fits = (kind: string, f: string, caps: object, doc: Obj, world: Obj, hidden: string[]) => {
+  const owners = OWNERS[`${kind}.${f}`]?.split(' ') ?? [];
+  const need = NEEDS[`${kind}.${f}`];
+  return owners.every((o) => Object.hasOwn(caps, o)) && (!need || need(doc, world, hidden));
+};
+
+/** The menu's fields the compiler would take; the rest would not compile (UNDECLARED_CAPABILITY). */
 export const allowed = (
   kind: string,
   menu: string[],
@@ -161,12 +174,26 @@ export const allowed = (
   doc: Obj = {},
   world: Obj = {},
   hidden: string[] = [],
-) =>
-  menu.filter((f) => {
-    const owners = OWNERS[`${kind}.${f}`]?.split(' ') ?? [];
-    const need = NEEDS[`${kind}.${f}`];
-    return owners.every((o) => Object.hasOwn(caps, o)) && (!need || need(doc, world, hidden));
-  });
+) => menu.filter((f) => fits(kind, f, caps, doc, world, hidden));
+
+/** The menu's fields it would not, each with why. An unexplained absence is the bug (loka-wfrgk.94): the
+ * author sees the option greyed with its reason, not gone. `caps` is read from the same `OWNERS` that
+ * refused it, so it cannot drift from `allowed`; `needs` says a definition field the card would want. */
+export const blocked = (
+  kind: string,
+  menu: string[],
+  caps: object,
+  doc: Obj = {},
+  world: Obj = {},
+  hidden: string[] = [],
+): Blocked[] =>
+  menu
+    .filter((f) => !fits(kind, f, caps, doc, world, hidden))
+    .map((f) => ({
+      field: f,
+      caps: (OWNERS[`${kind}.${f}`]?.split(' ') ?? []).filter((o) => !Object.hasOwn(caps, o)),
+      needs: !!NEEDS[`${kind}.${f}`],
+    }));
 
 // rjsf names an added map row `newKey`, which requires.capabilities refuses (requires.ex:52
 // UNKNOWN_CAPABILITY): the row takes the registry's first portable capability not yet listed, at its version
@@ -179,5 +206,38 @@ export const capabilityRow = (doc: Obj) => {
   return {
     ...doc,
     requires: { ...(doc.requires as Obj), capabilities: { ...rest, [next.key]: next.version } },
+  };
+};
+
+/** `allowed` and `blocked` in one pass, the two halves of one menu (a card draws them together). */
+export const gate = (
+  kind: string,
+  menu: string[],
+  caps: object | undefined,
+  doc: Obj = {},
+  world: Obj = {},
+  hidden: string[] = [],
+): { allowed: string[]; blocked: Blocked[] } =>
+  caps
+    ? {
+        allowed: allowed(kind, menu, caps, doc, world, hidden),
+        blocked: blocked(kind, menu, caps, doc, world, hidden),
+      }
+    : { allowed: [], blocked: [] };
+
+/** The add menu of a card whose registry fields `addable` yields: the fields the cartridge takes, and the
+ * ones it refuses with why. `cart` absent means cartridge.json is unread, so the menu stays empty. */
+export const cardMenuWith = (
+  kind: string,
+  fields: string[],
+  cart: { requires?: { capabilities?: object }; world?: Record<string, unknown> } | undefined,
+  doc: unknown = {},
+): { allowed: string[]; blocked: Blocked[] } => {
+  if (!cart) return { allowed: [], blocked: [] };
+  const caps = cart.requires?.capabilities ?? {};
+  const mine = (doc && typeof doc === 'object' && !Array.isArray(doc) ? doc : {}) as Obj; // a half-typed draft
+  return {
+    allowed: allowed(kind, fields, caps, mine, cart.world),
+    blocked: blocked(kind, fields, caps, mine, cart.world),
   };
 };

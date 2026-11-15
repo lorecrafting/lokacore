@@ -6,7 +6,8 @@ import type { FieldProps, UiSchema } from '@rjsf/utils';
 import {
   addable,
   addedHere,
-  allowed,
+  type Blocked,
+  gate,
   detailed,
   hidden,
   proseKey,
@@ -48,14 +49,14 @@ export function Room({ rel, context, diag, offer }: Props) {
   const draft = (card.draft ?? {}) as Doc;
   const defs = (saved?.schema as { $defs?: Record<string, never> } | undefined)?.$defs ?? {};
   const cart = useCartridge(diag);
-  const menu =
+  const { allowed: menu, blocked } =
     saved && cart
-      ? allowed(
+      ? gate(
           saved.dir,
           addable(saved.dir, registry, draft, card.revealed),
           cart.requires?.capabilities ?? {},
         )
-      : [];
+      : { allowed: [], blocked: [] };
   const { add, about } = adding(card, defs, 'source.RoomDefinition');
   useEffect(() => void (saved && offer(menu)), [rel, !!saved, menu.join()]);
   useEffect(() => () => offer([]), []); // eslint-disable-line react-hooks/exhaustive-deps
@@ -73,7 +74,7 @@ export function Room({ rel, context, diag, offer }: Props) {
       {card.refused ? <Refusal boxed>{card.refused}</Refusal> : null}
       <Words draft={draft} context={context} fields={['name', 'description']} />
       <Exits room={context.key} exits={draft.exits ?? {}} />
-      <Mechanics card={card} menu={menu} add={add} about={about} />
+      <Mechanics card={card} menu={menu} blocked={blocked} add={add} about={about} />
       <RoomForm rel={rel} card={card} context={context} diag={diag} defs={defs} details />
     </div>
   );
@@ -120,12 +121,14 @@ function Exits({ room, exits }: { room: string; exits: NonNullable<Doc['exits']>
 export function Mechanics({
   card,
   menu,
+  blocked,
   add,
   about,
   fixed = OWN,
 }: {
   card: Card;
   menu: string[];
+  blocked?: Blocked[];
   add: (f: string) => void;
   about: (f: string) => string | undefined;
   fixed?: string[];
@@ -145,7 +148,7 @@ export function Mechanics({
             </Button>
           </div>
         ))}
-      <AddMenu fields={menu} reveal={add} about={about} />
+      <AddMenu fields={menu} blocked={blocked} reveal={add} about={about} />
     </section>
   );
 }
