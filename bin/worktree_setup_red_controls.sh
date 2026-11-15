@@ -46,3 +46,15 @@ if PATH="$t/stub:$PATH" sh bin/worktree_setup.sh 2> /dev/null || [ -e node_modul
 rm -f "$t/main/node_modules/unreadable" # the control above leaves it so the clone fails
 out=$(PATH="$t/stub:$PATH" sh bin/worktree_setup.sh 2>&1) || { echo "worktree_setup control failed: the post-check failed the run" >&2; exit 1; }
 case $out in *missing:*node_modules/.bin/prettier*) ;; *) echo "worktree_setup control failed: a missing install went unnamed: $out" >&2; exit 1 ;; esac
+
+# A symlinked _build made AFTER setup (a lone developer pointing a worktree at main's build) is what
+# the real incident was: git add -A then staged an absolute home path, because .gitignore's older
+# '/_build/' matched directories only. The guard must run when setup runs, not only at creation.
+for d in deps _build; do
+  rm -rf "$d" && ln -s "$t/main" "$d"
+  if PATH="$t/stub:$PATH" sh bin/worktree_setup.sh > /dev/null 2>&1; then
+    echo "worktree_setup control failed: a symlinked $d was accepted" >&2
+    exit 1
+  fi
+  rm "$d"
+done
