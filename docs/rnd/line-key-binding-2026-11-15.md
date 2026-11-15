@@ -51,8 +51,12 @@ So the attribute mechanism exists and is proven. What is missing is only that `k
 Carry the key on the element. One place.
 
 1. **`noted`** (`book/words.ts:191`) already receives `(words, key)` for every line — engine lines too
-   (`:213`) — and every render site (`lines.tsx:140`, `logs.ts:257`) already holds a `text` function
-   keyed by text key. Expose the key to the render as a value, not a side effect.
+   (`:213`) — but the key stops there: it is a side effect into `seen`, and the render never sees it.
+   `rendered` (`book/logs.ts:46`) holds `line.key` and **drops it** — `DetailLine` (`:58-64`) is strings and
+   plain objects with no key on any variant. So this is not "one place": it needs a key on `DetailLine`,
+   set in `rendered`, and read in `LogLine` (`lines.tsx:130`), where nothing about a key is known today.
+   Corrected 2026-11-15 after reading the render chain; the original text of this step claimed the key
+   already reached the render, which it does not.
 2. **Tag the element** in `lines.tsx`, next to the existing `name` spread, dev-only and only when the key
    is known: `data-loka-key`. This is exactly what `inbook.ts:112` does for its field, and it does not
    touch the text, so no `accessibilityLabel` changes.
@@ -92,6 +96,19 @@ and count how many are simultaneously visible. If they are not, fix the scope of
 - Double-click either line: the in-Book editor opens **its own** source line.
 - The release build carries no attribute and no `seen` lookup (the module is already dropped).
 - A joined line's behavior is unchanged, and `.100.7` stays open.
+
+## When measuring first, note this
+
+The measurement this note asks for above (cross-view vs same-view) has since been run statically over
+the showcase's `text.json`: **156** wordings are drawn by two or more text keys, of which **59** are one
+sampler family (`item.egg_01..04`, never on one page) and **97** are cross-family. The 59 were fixed by
+clearing the bindings per page (`nextPage`, `prose_rules.ts:60`, shipped 323d3ac10, no attribute
+needed) — which is what this note predicted: measure before building. The 97 remain and are what the
+attribute is for.
+
+The live walk called for above (`bin/measure_collisions.mjs`) cannot be driven past the first page: the
+showcase opens on a tutorial overlay that needs real play to dismiss. The 97 are therefore still
+unmeasured for same-view overlap, and the attribute should be justified by a real edit that needs it.
 
 ## What I would refuse
 
