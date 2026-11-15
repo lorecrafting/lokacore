@@ -9,6 +9,7 @@ import {
   rmSync,
   readdirSync,
   readFileSync,
+  symlinkSync,
   writeFileSync,
 } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -93,6 +94,14 @@ test('open: a text key opens its definition, inline prose its words, in LOKA_EDI
   // not its key's line there; or a key elsewhere pulls the open out of the file.
   assert.equal(openAt(dir, { key: 'room.a', file: 'text.json' }), 'text.json:2');
   assert.equal(openAt(dir, { key: 'room.a', file: 'one.json' }), 'one.json:1');
+  // Breaks: a `file` outside the cartridge falls back to a key lookup, so POST /open answers a line
+  // in the tree for a path the author never named, or throws and answers 500 for a path that is not
+  // there (loka-fq96k: 500 !== 404).
+  assert.equal(openAt(dir, { key: 'room.a', file: '../none.json' }), undefined);
+  // Breaks: a tree file that vanished between the walk and its read throws out of sourcesOf, and the
+  // server answers 500 to any route that was only looking for a key (loka-fq96k's live 500).
+  symlinkSync(join(dir, 'gone.json'), join(dir, 'dangle.json'));
+  assert.doesNotThrow(() => sourcesOf(dir, 'room.a')); // it answers a line, not a 500
   assert.equal(sourceOf(dir, 'room.b', 'line five'), undefined);
   // Break: Alt-click on a scene line answers 404, since a scene holds neither `"key":` nor a JSON
   // string; a prompt arrives joined, a choice label as itself.

@@ -47,6 +47,11 @@ before(async () => {
   browser = await chromium.launch({ channel: 'chrome' });
   await (await open(QUEST)).close();
   boot = 10_000; // booted: a mutant that blanks the card fails each open in seconds, inside mutate.sh's cap
+  // Playwright's action timeout is unlimited by default, so a click, fill or selectOption on a
+  // control that never settles waits forever: the suite hangs instead of naming the break
+  // (loka-0ske4, loka-wfrgk.96). An action is bounded like a `waitFor`, once booted; a test that
+  // legitimately needs longer says so on that call.
+  browser.contexts().forEach((c) => c.setDefaultTimeout(boot));
 });
 after(async () => {
   await browser?.close();

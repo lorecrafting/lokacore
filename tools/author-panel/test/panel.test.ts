@@ -344,7 +344,7 @@ test('an NPC card draws its Combat and Schedule blocks', async () => {
   const reread = page.waitForResponse((r) => r.url().includes('/__author/schema/')); // the card's reload after the write
   await add.click();
   await (await reread).finished();
-  await page.waitForTimeout(50); // the reload rendered
+  await schedule.getByRole('textbox', { name: 'hour 13' }).waitFor({ timeout: boot }); // loka-wfrgk.96
   const again = page.waitForResponse((r) => r.url().includes('/__author/schema/'));
   await add.click();
   const file = join(dir, 'showcase/areas/low_wardle/npcs/warden.json');
@@ -352,8 +352,8 @@ test('an NPC card draws its Combat and Schedule blocks', async () => {
   for (let t = 0; written().length < 4 && t < 50; t++) await page.waitForTimeout(100);
   assert.deepEqual(written(), ['0', '1', '13', '14']);
   await (await again).finished();
-  await page.waitForTimeout(50);
   const hour = schedule.getByRole('textbox', { name: 'hour 14' });
+  await hour.waitFor({ timeout: boot }); // rendered, not 50 ms
   await hour.fill('99');
   await hour.blur();
   await schedule.getByText('an hour is below 24').waitFor();

@@ -48,11 +48,19 @@ export function edit(
  * (as a JSON string, or a scene line that says their first line). */
 export function sourcesOf(source: string, key: string, words?: string) {
   const all = files(source);
+  // A live server watches the tree the author saves into, so a file listed a moment ago can be gone
+  // (an editor's .part, a rename) by the time it is read: skip it rather than answer 500 for a
+  // request that only needed to not find a key (loka-fq96k).
+  const read = (rel: string) => {
+    try {
+      return readFileSync(join(source, rel), 'utf8');
+    } catch {
+      return null;
+    }
+  };
   const find = (hit: (line: string) => boolean, rels = all) =>
     rels.flatMap((rel) =>
-      readFileSync(join(source, rel), 'utf8')
-        .split('\n')
-        .flatMap((l, i) => (hit(l) ? [`${rel}:${i + 1}`] : [])),
+      (read(rel) ?? '').split('\n').flatMap((l, i) => (hit(l) ? [`${rel}:${i + 1}`] : [])),
     );
   const defined = find((l) => l.includes(`"${key}":`));
   const first = words?.trim().split('\n')[0];
@@ -137,9 +145,13 @@ export const sourceOf = (source: string, key: string, words?: string) =>
 /** POST /open's line: the selection's own file (Cmd-E on a `.loka` or `.scene`) at its key's line
  * there, else its first; with no file, its key's. */
 export const openAt = (source: string, sent: { key?: unknown; words?: string; file?: string }) =>
-  sent.file && files(source).includes(sent.file)
-    ? (sourcesOf(source, String(sent.key)).find((at) => at.startsWith(`${sent.file}:`)) ??
-      `${sent.file}:1`)
+  sent.file
+    ? files(source).includes(sent.file)
+      ? (sourcesOf(source, String(sent.key)).find((at) => at.startsWith(`${sent.file}:`)) ??
+        `${sent.file}:1`)
+      : // a file outside the cartridge is refused, never opened: an outside path is not a
+        // selection to fall back from by key (loka-fq96k).
+        undefined
     : sourceOf(source, String(sent.key), sent.words);
 
 /** GET /line?key=&words=: the source line a Book line's field writes (the compile's `places` for
