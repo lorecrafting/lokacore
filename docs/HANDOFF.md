@@ -239,6 +239,9 @@ loka-4ks2l was approved and is merged (#709). Closed `loka-wfrgk.116` as a dupli
 - **Prettier must come from the repo root.** `node_modules/.bin/prettier` is 3.9.9 (the gate's); `npx prettier`
   inside `tools/author-panel` resolved another version and reformatted 40 unrelated lines of `Generic.tsx`. It
   reverted cleanly, but only because the diff was read before committing.
+- **`bin/beads_checkpoint.sh` commits `docs/HANDOFF.md` too.** It is the one command that writes both files, its
+  default subject is `Beads: checkpoint`, and it pushed this session's handoff under that message before the message
+  could be written. Pass the subject: `bin/beads_checkpoint.sh "Handoff: <what changed>"`.
 - **The PM's `ci_wait.sh` reports failure on green heads.** See the retro below: short shas, skipped jobs, and three
   silent single-line exits this session. Until it is fixed, check `gh pr checks <n>` by hand.
 
