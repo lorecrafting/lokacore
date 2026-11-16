@@ -174,20 +174,38 @@ type FormProps = {
 };
 
 const removes = (t: EventTarget) => !!(t as Element).closest?.('button[aria-label="Remove"]');
+/** How long after the last change a blur's write waits for the typing in that field to settle. */
+const settle = 200;
+/**
+ * A blur's write, once the typing settles. A zero tick fired under the first keystroke of the field
+ * clicked into next, writing `2` of the `21` being typed: two writes for one edit, Undo left on `2`
+ * (loka-wfrgk.90). The wait still covers what the tick was for: rjsf sends a map key's rename after
+ * its setState, past the blur, and its Remove drops the focused button so no blur follows.
+ */
+function useSettled(commit: () => void) {
+  const stamp = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const soon = useCallback(() => {
+    clearTimeout(stamp.current);
+    stamp.current = setTimeout(() => {
+      stamp.current = undefined;
+      commit();
+    }, settle);
+  }, [commit]);
+  useEffect(() => () => clearTimeout(stamp.current), []);
+  return { soon, waiting: () => !!stamp.current };
+}
 
 /** The card's form: rjsf draws the file under `ui`, each blur commits, refusals at their field. */
 export function CardForm({ rel, card, context, diag, ui, fields: picks = fields }: FormProps) {
   // rjsf keeps an added row's key in its own state: a renamed row redraws
   const [rows, remount] = useReducer((n: number) => n + 1, 0); // mutate-skip: a redraw key; any start or step redraws
-  const change = (doc: unknown, row = capabilityRow(doc as never)) =>
+  const { soon, waiting } = useSettled(card.commit);
+  const change = (doc: unknown, row = capabilityRow(doc as never)) => {
     void (row !== doc && remount(), card.change(row));
+    if (waiting()) soon(); // typing after the blur: the write waits for it to settle
+  };
   return (
-    // after the blur's own change lands: rjsf sends a map key's rename after its setState, past the blur;
-    // rjsf's Remove drops the focused button, so no blur follows: it commits once its change lands
-    <div
-      onBlur={() => setTimeout(card.commit)}
-      onClick={(e) => removes(e.target) && setTimeout(card.commit)}
-    >
+    <div onBlur={soon} onClick={(e) => removes(e.target) && setTimeout(card.commit)}>
       <CardFormBase
         key={rows}
         schema={card.saved!.schema}
