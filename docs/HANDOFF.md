@@ -4,7 +4,7 @@ The present only: open work, next steps, owner questions, and standing owner rul
 yet. Rewrite this page in place once per session, at its end; never add dated session sections. History lives in git, Beads and `docs/reviews/`; lessons
 go to [PM lessons](lessons/pm.md) ([harness patterns](decisions/owner-decision-harness-patterns-2026-10-28.md)).
 
-AS OF main after 7071c9073 (PR #737); written 2026-11-16 04:32 UTC in the Pi harness by deploy/deepseek-ai/deepseek-v4.1-flash-1017, PM session.
+AS OF main after 137ba40d9 (PR #740); written 2026-11-16 11:26 UTC in the Pi harness by deploy/deepseek-ai/deepseek-v4.1-flash-1017, PM session.
 `kernel_api` is 1.159 (no contract slice since). **The owner is pausing the Anthropic subscription, so every reviewer
 and developer here now runs on `deploy/deepseek-ai/deepseek-v4.1-flash-1017`** (`~/.pi/agent/agents/loka-dev.md`,
 `loka-review.md` repinned 2026-11-13). **Nothing is mid-merge, nothing is in flight, no agent is running.**
@@ -102,6 +102,21 @@ since 11-07") closed because the number dropped.
 
 Nothing. The next slice starts from main.
 
+**This session (2026-11-16, second half) merged three PRs, all opened and closed by this PM:**
+#739 **loka-kgd.223, the flows crash** (closed): `one_container_per_item` and `containment_acyclic` admitted only an
+edible item to the terminal consumed holder, but a death-created corpse decaying to it and a cured bandage were both
+lawful — so an accepted step made both world invariants false and `flows.ts:175` crashed on seed 4 step 130 after
+323 s. One rule now names the holder's lawful occupants (edible, bandage, death-created corpse) in
+`kernel/ts/src/runtime/created.ts`, and the creation guard and both world invariants call it, so the three cannot
+drift. Verified on current main: `bin/loka sim cartridges/toolbox_showcase --seeds 16 --days 3` runs every seed to
+completion, and the nightly `sim (fresh)`/`sim (showcase)` jobs are green (323 s / 191 s).
+#740 **loka-wfrgk.90, the half-typed write** (closed): the card's form committed a blur's edit on a zero-delay timer;
+a keystroke landing before that timer ran wrote `2` of the `21` being typed, then the next blur wrote `21` — two
+writes for one edit and Undo on `2`. `useSettled` in `tools/author-panel/src/edit/Generic.tsx` waits 200 ms for the
+typing to settle, re-armed by each change, and still covers what the tick was for (rjsf's map-key rename and
+Remove's dropped focus). #688's earlier attempt guarded only the button-blur path, never reproduced, was reverted.
+#738 (loka-2bp1n, loka-2zak, closed): slice size in the developer rules, and a narration brief names its fixtures.
+
 - **#632** (loka-vduxr.64) belongs to another session (lokacore-fb). **#454** is the owner's P3 hold.
 
 ## Resume, in order
@@ -156,6 +171,16 @@ guide documents the three-column shell, Cmd-K, Cmd-E and double-click-to-edit) �
 
 ## Retros awaiting the owner's yes/no
 
+**2026-11-16 (one new item):** loka-nrrk1 — **the PM's `ci_wait.sh` reports failure on green heads.** Evidence: on PR
+#740's head `18568fed55` it exited 1 while `gh run list --commit` showed `graph-diff`, `ci` and `book-e2e` all
+`success`, and `gh pr checks 740` showed every other job `pass` with `sim` and `walk` merely `skipping` (the normal
+state for a diff touching neither cartridge). Three tasks this session (`be4fd552d`, `b507857c0`, `baa27ef41`) wrote
+only the bare sha, 11-12 bytes, about a minute after launch. Its three faults are ones the repo's own `bin/wait_ci.sh`
+already fixed and documents: short-sha resolution (`bin/wait_ci.sh:10-16`), both gating workflows required, and "no
+runs found" named apart from "timed out". Fix: replace the Pi-side copy with the repo's script. Expected saving: one
+hand check or one misread red per PR, 2-4 minutes a session. The Pi-side script lives outside the repo, so this is a
+change to the owner's install, not a PR.
+
 **2026-11-13 (two items):** loka-qozwj (**approved and shipped in #731**: the panel suite's parallel default raced
 one dev server) and loka-8v4lx (name the reviewer fallback model in WORKFLOW and the loka-review agent
 instead of justifying a substitution per slice — still awaiting the owner).
@@ -197,6 +222,26 @@ loka-4ks2l was approved and is merged (#709). Closed `loka-wfrgk.116` as a dupli
 - **`rg -r` is *replace*.** `rg -rn foo mobile/` rewrote the results through a replacement pattern and printed
   `'[n"]'` for every match. Three times in one session, and the garbled output nearly became a false conclusion
   about where `dir="auto"` is set. Plain `rg` is already recursive.
+- **A crash report's line number outlives its cause.** `flows.ts:175` was the invariant's holder rule (kgd.223).
+  Re-run the repro before believing the line: `bin/loka sim <cartridge> --seeds N --days D` compiles the cartridge
+  itself and cannot read a stale artifact, while `node kernel/ts/play/flows.ts <file>` reads whatever file you hand
+  it. Six background tasks from the earlier session replayed a pre-fix artifact left in the temp directory and each
+  "failed" identically; the current code ran 16 seeds to completion. That scratch artifact and its harness script were
+  deleted this session: while they existed, every rerun "proved" a fixed bug was live.
+- **A zero-delay timer is not "after this event".** `setTimeout(card.commit)` reads the draft when it fires, and an
+  input event can be dispatched first — under CPU throttle it reliably is. When a deferred read must see the state at
+  request time, snapshot it then, or debounce until the input settles. The ticket said "reads `latest` late" and it
+  was right; two of my fixes moved the timer without closing the window.
+- **The test tsconfig has no DOM lib.** `tools/author-panel/tsconfig.node.json` compiles `test/` with
+  `lib: ["ES2023"]` and `types: ["node"]`, so `page.evaluate(() => document.querySelector(...))` is a type error in
+  CI while a plain `tsc` beside the tests passes. Pass a string, as `tools/author-panel/test/map.test.ts:332` does, and
+  run `npx tsc -b` in `tools/author-panel` (what the `mobile` job runs), not `tsc --noEmit -p .`.
+- **Prettier must come from the repo root.** `node_modules/.bin/prettier` is 3.9.9 (the gate's); `npx prettier`
+  inside `tools/author-panel` resolved another version and reformatted 40 unrelated lines of `Generic.tsx`. It
+  reverted cleanly, but only because the diff was read before committing.
+- **The PM's `ci_wait.sh` reports failure on green heads.** See the retro below: short shas, skipped jobs, and three
+  silent single-line exits this session. Until it is fixed, check `gh pr checks <n>` by hand.
+
 - **`ci.yml` never runs on `main`, so "I ran it locally" is not a gate.** The two-lane decision makes a green
   *branch* head the gate and leaves `main` to a nightly plus by-hand runs. `bin/prepush.sh` covers sizes,
   prettier, regen, `tsc`, docs, sounds and a few targeted red controls — but **no package test suite**. Two commits
