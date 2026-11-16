@@ -234,14 +234,15 @@ test("a blur and the next field's first keystroke write the settled value once",
     const to = page.locator('#root_name_variants_0_when_to');
     await from.waitFor({ timeout: boot });
     await from.click();
-    await page.evaluate(() => {
+    // a string: the test tsconfig has no DOM lib
+    await page.evaluate(`(() => {
       // the next field takes the focus (the blur) and types its first key before that tick runs
-      const set = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')!.set!;
-      const next = document.querySelector<HTMLInputElement>('#root_name_variants_0_when_to')!;
+      const set = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set;
+      const next = document.querySelector('#root_name_variants_0_when_to');
       next.focus();
       set.call(next, '2');
       next.dispatchEvent(new Event('input', { bubbles: true }));
-    });
+    })()`);
     await to.pressSequentially('1', { delay: 120 });
     await page.getByRole('tab').first().click(); // out of the card: its last blur writes
     for (let t = 0; !writes.length && t < 50; t++) await page.waitForTimeout(100);
