@@ -28,7 +28,9 @@ On a screen wider than a tablet (a desktop browser), the Book is a centred colum
 than a tablet (the page column [token](../../mobile/app/book/tokens.ts)), with the paper colour on
 both sides (owner, 2026-10-30). Everything the Book draws stays in that column: the page, its
 foot, the footer, the status line, the say field and overlays; only the night sky spans the
-window. A phone, narrower than the column, fills the screen.
+window, and it draws on a dark page only in a room open to the weather (the room's `exposed`
+tag, [cartridge](cartridge.md): a sheltered room at night keeps its dark page with no stars over
+it; owner 2026-11-16). A phone, narrower than the column, fills the screen.
 
 ## Room page anatomy
 

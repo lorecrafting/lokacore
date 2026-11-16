@@ -14,7 +14,7 @@ registerHooks({
   load: (url, c, next) =>
     url === 'test:palette-react' ? reactShim('globalThis.hook') : next(url, c),
 });
-const { contrast, paletteOf, useShownPalette } = await import('./palette.ts');
+const { contrast, paletteOf, starsShow, useShownPalette } = await import('./palette.ts');
 
 // Breaks: a phase shows the wrong palette, an unknown or inherited name ('constructor') or a world
 // without a calendar shows anything but light (docs/system/book-ui.md#world-and-status-entry).
@@ -175,4 +175,15 @@ test('a flip during a same-polarity fade switches at once', () => {
   fade.frame(750);
   assert.equal(fade.render(color.dusk), color.dusk);
   assert.equal(fade.frames.length, 0);
+});
+
+// Breaks: stars drawn by the palette alone, so a lit cave or a house at night shows a sky over it
+// though the room is not open to the weather; or the tag required on every room, so an existing
+// cartridge that names no tag loses the sky it has always drawn (loka-x6t.6).
+test('stars draw at night only in a room open to the weather', () => {
+  const night = paletteOf('night');
+  assert.equal(starsShow(night, true), true, 'night, exposed: stars');
+  assert.equal(starsShow(night, undefined), false, 'night, no tag: sheltered, no stars');
+  assert.equal(starsShow(paletteOf('day'), true), false, 'day, exposed: no stars');
+  assert.equal(starsShow(paletteOf('dusk'), true), false, 'dusk, exposed: no stars');
 });
