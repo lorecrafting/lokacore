@@ -317,6 +317,15 @@ When you jump to a checkpoint and an edit has made one of its steps impossible, 
 step and offers **drop this step and continue**. It starts over and replays the path without that step. Save under the same name to
 keep the shorter path.
 
+## Read the area index
+
+`bin/loka index cartridges/<name>` writes `areas/INDEX.md` and one `areas/<area>/INDEX.md` for a
+cartridge that has areas. The first says what each area holds, which room exits and transports cross
+between areas, the entry and which root definitions two or more areas name; an area's own page says
+what it holds and what crosses its border. Read it before opening files, and let `bin/regen.sh`
+rewrite it: an edited index is stale (CI's `REGEN_DIRTY`). A cartridge with no `areas/` folder gets
+none. What belongs in each area is the [Builders' Guide](../BUILDERS-GUIDE.md#cartridge-layout).
+
 ## Read an error
 
 A broken edit keeps the last good page; the panel's Compile card says what broke, as

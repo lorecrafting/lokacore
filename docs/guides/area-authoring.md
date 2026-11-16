@@ -20,6 +20,7 @@ Rules 5, 7, 9, 10 and 12 follow owner and PM rulings on the pass-1 questions (Q4
 13. A tag query matches only the items it means: list what it matches. (WIRING, M8a: oil on any `metal` item opens the gate.)
 14. Every item has a source and a sink; a vessel that must be filled has a fill source in reach. (WIRING, M8c: the dry flask.)
 15. The top (normal) band of a resource starts below its maximum, and no description variant shadows a later one. (WIRING, UK: "normal" starts at 100%, so 99 warns; W1: tide.)
+16. A thing lives in the area that uses it; what two areas use lives at the root; rooms are the border. (WIRING, E14: a shop's stock item sat in the keep's folder and the market could not name it; the rule is [the border rule](../BUILDERS-GUIDE.md#cartridge-layout).) Read the generated `areas/INDEX.md` first: it names what is used by two areas and what crosses a border, and a crossing to a second area's non-room is a compile error.
 
 Run `mix loka.lint cartridges/<id>` before review: it checks parts of rules 4, 6, 11 and 15 ([CHECKS.md](../CHECKS.md)).
 
