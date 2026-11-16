@@ -1,4 +1,4 @@
-// size: allow 320, the two generated pages share one compile, one ref walk and one grouping table: the root page's counts, borders, entry and root names, and an area's sections and crossings
+// size: allow 330, the two generated pages share one compile, one ref walk and one grouping table: the root page's counts, borders, entry and root names, and an area's sections and crossings
 // The generated area index (docs/system/cartridge.md#content-reports): `bin/loka index <cartridge dir>`
 // writes `areas/INDEX.md` and one `areas/<area>/INDEX.md`, so an agent reads a world's shape before it
 // opens a file (docs/BUILDERS-GUIDE.md#cartridge-layout). It compiles the source as `check.ts` does,
@@ -164,21 +164,27 @@ function borders(area: string, own: Def[], cross: Cross[]) {
   ];
 }
 
-/** The room-to-room borders of the whole world: each exit that crosses, then each transport whose
- * boarding room and destination sit in two areas (docs/rnd design section 6, `Borders`). */
+/** The world's borders (docs/rnd design section 6, `Borders`; exit or transport): each room exit
+ * whose two rooms sit in different areas, then each transport whose boarding room and destination do.
+ * The exits come from the room's own `exits`, so a room that names another area's room elsewhere (a
+ * lock's `visited_count`) is a crossing but never a border with a made-up direction. */
 function worldBorders(cross: Cross[]) {
   const side = (area: string | null) => area ?? '(root)';
-  const exits = cross
-    .filter((c) => c.from.kind === 'room' && c.to.kind === 'room' && c.to.area !== c.from.area)
-    .filter((c) => /^exits\.[a-z_]+\.to$/.test(c.at))
-    .map((c) => `${side(c.from.area)} --${c.from.key} ${c.at.split('.')[1]}--> ${where(c.to)}`);
+  const crossing = (from: Def, to: Def) => from.area !== to.area;
+  const exits = cross.flatMap((c) => {
+    const dir = /^exits\.([a-z_]+)\.to$/.exec(c.at)?.[1];
+    return dir && crossing(c.from, c.to)
+      ? [`${side(c.from.area)} --${c.from.key} ${dir}--> ${where(c.to)}`]
+      : [];
+  });
   const transports = [
     ...new Set(cross.filter((c) => c.from.kind === 'transport').map((c) => c.from)),
   ].flatMap((t) => {
     const room = cross.find((c) => c.from === t && c.at === 'room')?.to;
     const to = cross.find((c) => c.from === t && c.at === 'destination')?.to;
-    if (!room || !to || room.area === to.area) return [];
-    return [`${side(room.area)} --${t.key}--> ${where(to)}`];
+    return room && to && crossing(room, to)
+      ? [`${side(room.area)} --${t.key}--> ${where(to)}`]
+      : [];
   });
   return [...exits, ...transports].sort();
 }

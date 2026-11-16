@@ -4,7 +4,16 @@
 // below is hand-written from the format rules and never read back from the generator. Breaks are
 // named per test.
 import assert from 'node:assert/strict';
-import { cpSync, existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { spawnSync } from 'node:child_process';
+import {
+  chmodSync,
+  cpSync,
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { after, test } from 'node:test';
@@ -21,10 +30,11 @@ const ref = (key: string) => ({
   kind: 'room',
   key,
 });
-const room = (name: string, exits: Record<string, string>) => ({
+const room = (name: string, exits: Record<string, string>, extra: object = {}) => ({
   name: { prose: name },
   description: { prose: `${name} here.` },
   exits: Object.fromEntries(Object.entries(exits).map(([dir, to]) => [dir, { to }])),
+  ...extra,
 });
 const item = (keywords: string[], location: object) => ({
   keywords,
@@ -55,19 +65,32 @@ const FIXTURE = {
       kernel_api: { at_least: '1.0', below: '2.0' },
       content_schema: 1,
       rule_ir: 1,
-      capabilities: { movement: 1, containment: 1 },
+      capabilities: { movement: 1, containment: 1, schedule: 1, alternates: 1, knowledge: 1 },
       client_features: [],
     },
     supported_profiles: ['offline_private'],
     entry: ref('awakening_clearing'),
   },
   'areas/hollow/rooms/awakening_clearing.json': room('Clearing', { north: 'high_terrace' }),
-  'areas/hollow/rooms/high_terrace.json': room('High terrace', {
-    north: 'thinning',
-    south: 'awakening_clearing',
-  }),
+  // Its lock names a room of another area: a crossing, but not a border (it has no direction).
+  'areas/hollow/rooms/high_terrace.json': room(
+    'High terrace',
+    { north: 'thinning', south: 'awakening_clearing' },
+    {
+      locks: { enter: { op: 'visited_count', room: 'thinning', at_least: 1 } },
+    },
+  ),
   'areas/edge/rooms/thinning.json': room('Thinning', { south: 'high_terrace' }),
   'areas/deep.json': { rooms: { well: room('Well', {}) } },
+  // Maren walks out of her area in the day: a room named across a border, from a non-room.
+  'areas/hollow/npcs/maren.json': {
+    keywords: ['maren'],
+    name: { prose: 'Maren' },
+    room_line: { prose: 'A [maren](maren) stands here.' },
+    description: { prose: 'Tall.' },
+    room: 'high_terrace',
+    daily_schedule: { 9: 'thinning' },
+  },
   'areas/hollow/items/cloak.json': item(['cloak'], { in: 'item', item: 'rope' }),
   'areas/edge/items/boots.json': item(['boots'], { in: 'item', item: 'rope' }),
   // A holder: two areas' items start inside it, so it belongs at the root.
@@ -109,7 +132,7 @@ test('the root index counts each area, and lists a border as area --room directi
       '| ------------------------- | ----- | ---- | ----- | ------ | --------- | --------- | ----- |',
       '| [deep](deep/INDEX.md)     | 1     | 0    | 0     | 0      | 0         | 0         | 0     |',
       '| [edge](edge/INDEX.md)     | 1     | 0    | 1     | 0      | 0         | 0         | 0     |',
-      '| [hollow](hollow/INDEX.md) | 2     | 0    | 1     | 0      | 0         | 0         | 0     |',
+      '| [hollow](hollow/INDEX.md) | 2     | 1    | 1     | 0      | 0         | 0         | 0     |',
       '| (root)                    | 0     | 0    | 1     | 0      | 0         | 0         | 0     |',
       '',
       'Borders (exit or transport): edge --thinning south--> hollow/high_terrace; hollow --high_terrace north--> edge/thinning',
@@ -135,11 +158,14 @@ test('an area index lists its rooms, then what crosses the border in both direct
       'awakening_clearing [entry]  exits: north high_terrace',
       'high_terrace  exits: north -> edge/thinning, south awakening_clearing',
       '',
+      '## NPCs (1)',
+      'maren @high_terrace  daily_schedule.9 -> edge/thinning',
+      '',
       '## Items (1)',
       'cloak in items/rope',
       '',
       '## Crosses the border',
-      "Names other areas' rooms: high_terrace.exits.north.to -> edge/thinning",
+      "Names other areas' rooms: maren.daily_schedule.9 -> edge/thinning; high_terrace.exits.north.to -> edge/thinning; high_terrace.locks.enter.room -> edge/thinning",
       'Names the root: items/rope (cloak)',
       '',
     ].join('\n'),
@@ -179,6 +205,20 @@ test('a transport into an area is a border, and a flat cartridge has no index', 
     '(root) --lane south--> south/south_post; (root) --north_road--> south/south_post; ' +
       'south --south_post north--> rooms/lane; south --south_road--> rooms/north_post',
   );
+  // Both of a transport's rooms in one area is no border: only the two room exits cross.
+  const inside = join(tmp, 'fast_travel_inside');
+  cpSync(join(root, 'cartridges/fast_travel_sampler'), inside, { recursive: true });
+  mkdirSync(join(inside, 'areas/south/rooms'), { recursive: true });
+  for (const key of ['north_post', 'south_post'])
+    cpSync(join(inside, `rooms/${key}.json`), join(inside, `areas/south/rooms/${key}.json`));
+  rmSync(join(inside, 'rooms/north_post.json'));
+  rmSync(join(inside, 'rooms/south_post.json'));
+  const inner = compiled(inside);
+  if (typeof inner === 'string') throw new Error(`fast_travel_sampler does not compile: ${inner}`);
+  assert.match(
+    indexes(inside, inner)!['areas/INDEX.md']!,
+    /^Borders \(exit or transport\): \(root\) --lane north--> south\/north_post; \(root\) --lane south--> south\/south_post; south --north_post south--> rooms\/lane; south --south_post north--> rooms\/lane$/m,
+  );
   const flatDir = tree(join(tmp, 'flat'), {
     'cartridge.json': {
       ...(FIXTURE['cartridge.json'] as object),
@@ -199,4 +239,39 @@ test('writes every page it names, making the folder a bundle-only area lacks', (
   const dir = tree(join(tmp, 'written'), FIXTURE);
   assert.deepEqual(writeIndexes(dir, dev), Object.keys(pages));
   for (const rel of Object.keys(pages)) assert.equal(existsSync(join(dir, rel)), true, rel);
+});
+
+// Break: `bin/loka` has no `index` arm (the arguments fall through to the usage line), a flat
+// cartridge exits non-zero instead of saying so, or a bad argument list is not a usage error.
+test('bin/loka index writes the pages and says so for a cartridge with none', () => {
+  // mise is stubbed as CI has none (as check.test.ts); mix comes from PATH.
+  const bin = join(tmp, 'bin');
+  mkdirSync(bin, { recursive: true });
+  writeFileSync(join(bin, 'mise'), '#!/bin/sh\nshift 2\nexec "$@"\n');
+  chmodSync(join(bin, 'mise'), 0o755);
+  const env = { ...process.env, PATH: `${bin}:${process.env.PATH}` };
+  const source = tree(join(tmp, 'cli'), FIXTURE);
+  const index = (...args: string[]) =>
+    spawnSync(join(root, 'bin/loka'), ['index', ...args], { encoding: 'utf8', env });
+  const run = index(source);
+  assert.equal(run.status, 0, run.stderr);
+  assert.equal(
+    run.stdout,
+    ['areas/INDEX.md', 'areas/deep/INDEX.md', 'areas/edge/INDEX.md', 'areas/hollow/INDEX.md']
+      .map((rel) => `${rel}\n`)
+      .join(''),
+  );
+  assert.equal(index().status, 2); // usage
+  assert.equal(index(source, 'extra').status, 2);
+  const flat = tree(join(tmp, 'cli-flat'), {
+    'cartridge.json': {
+      ...(FIXTURE['cartridge.json'] as object),
+      id: 'flat_fixture',
+      entry: { ...ref('a'), cartridge_id: 'flat_fixture' },
+    },
+    'rooms/a.json': room('A', {}),
+  });
+  const none = index(flat);
+  assert.equal(none.status, 0, none.stderr); // a flat cartridge is not an error
+  assert.match(none.stderr, /no areas\/ folder/);
 });
