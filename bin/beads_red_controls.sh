@@ -73,7 +73,7 @@ expected='drift: a is in_progress but PR #5 is MERGED
 drift: b is closed but PR #6 is still OPEN
 drift: c is closed but PR #6 is still OPEN
 drift: e is in_progress but PR #10 is CLOSED
-drift: open PR #9 has no Beads issue'
+drift: open PR #9 has no linked issue (an unlinked issue is likely: br update <id> --external-ref https://github.com/<owner>/<repo>/pull/9)'
 if [ "$(python3 bin/beads_pr_drift.py "$case_file" "$case_file.states")" != "$expected" ]; then
   echo 'Beads drift control failed: drift lines differ' >&2
   exit 1
