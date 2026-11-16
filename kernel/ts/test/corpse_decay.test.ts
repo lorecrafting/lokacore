@@ -11,6 +11,7 @@ import { base } from '../src/runtime/apply.ts';
 import { gameView } from '../src/view/view.ts';
 import type { World } from '../src/runtime/decision.ts';
 import { runDecay } from '../src/mechanics/death/job.ts';
+import { holds } from '../src/runtime/world.ts';
 import type { DeltaOp, EntityId, JobId } from '../src/contracts.gen.ts';
 
 const showcase = fragment('protocol/fixtures/toolbox_showcase_hash.json');
@@ -214,4 +215,25 @@ test('the guard admits a corpse created and decayed in one proposal', () => {
   const result = compose(state, delta) as object;
   assert.equal('fault' in result, false, JSON.stringify(result));
   assert.ok(check('delta_preconditions_hold', { state, delta, result }));
+});
+
+// Breaks: a world invariant that admits only an edible item to the terminal consumed holder, so a
+// lawfully decayed corpse (compose and the creation guard both allow it) breaks the world; and one
+// that admits anything there at all.
+test('a decayed corpse keeps every containment invariant, and nothing else may join it', () => {
+  const { world, corpse, goblin } = died();
+  const late = elapsed(world, 25200 + 15000, 2).world;
+  assert.equal(late.state.containers[corpse], world.consumed);
+  for (const id of ['one_container_per_item', 'containment_acyclic'])
+    assert.ok(holds(id, late), id);
+  // A living NPC is neither eaten nor decayed: the holder refuses it.
+  const odd = {
+    ...late,
+    state: {
+      ...late.state,
+      containers: { ...late.state.containers, [goblin]: world.consumed! },
+    },
+  };
+  for (const id of ['one_container_per_item', 'containment_acyclic'])
+    assert.equal(holds(id, odd), false, id);
 });

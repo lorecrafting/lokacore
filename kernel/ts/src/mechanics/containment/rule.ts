@@ -26,7 +26,7 @@ import { chainRefused } from '../locks.ts';
 import { carrying, giveRefused, putRefused, recipient } from './shared.ts';
 import { itemLine } from './line.ts';
 import { stolen, theftRefused } from './theft.ts';
-import { movable } from '../../runtime/created.ts';
+import { movable, terminal } from '../../runtime/created.ts';
 
 // A Take's refusals; any other code faults.
 const REFUSED: readonly string[] = ['not_present', 'permission_denied', 'too_heavy', 'over_load'];
@@ -108,7 +108,7 @@ export const invariants: Readonly<Record<string, (world: World) => boolean>> = {
       return (
         has(world.rooms, c) ||
         has(world.state.containers, c) ||
-        (c === world.consumed && world.entities[id].kind === 'item' && !!world.entities[id].edible)
+        (c === world.consumed && terminal(world, id))
       );
     }),
   // Every container is a room or a contained entity, so with no cycle (the linear observation
@@ -116,12 +116,11 @@ export const invariants: Readonly<Record<string, (world: World) => boolean>> = {
   containment_acyclic: (world) =>
     keys(world.state.containers).every((id) => {
       const c = world.state.containers[id];
-      const e = world.entities[id];
       return (
         id !== world.consumed &&
         (has(world.rooms, c) ||
           has(world.state.containers, c) ||
-          (c === world.consumed && e?.kind === 'item' && !!e.edible))
+          (c === world.consumed && terminal(world, id)))
       );
     }) &&
     check('containment_acyclic', {

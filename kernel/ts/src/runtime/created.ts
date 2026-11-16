@@ -22,6 +22,15 @@ export function movable(world: World, id: EntityId): boolean {
   return !origin || (origin.kind === 'spawned' && origin.role === 'loot');
 }
 
+/**
+ * Who may sit in the terminal consumed holder (D4): an eaten or spent edible or bandage item, and
+ * a decayed death-created corpse. Compose and the world's containment invariants share this one rule.
+ */
+export const terminal = (world: World, id: string): boolean =>
+  world.state.created?.[id]?.origin.kind === 'death' ||
+  (world.entities[id]?.kind === 'item' &&
+    (!!world.entities[id]!.edible || !!world.entities[id]!.bandage));
+
 export function hydrate(world: World, state: State, loading = false): World | undefined {
   if (!loading && state.created === world.state.created && state.built === world.state.built)
     return { ...world, state };
@@ -248,13 +257,7 @@ function custodyValid(world: World): boolean {
   const done = new Set<string>();
   const held: Record<string, number> = {};
   for (const [id, container] of Object.entries(world.state.containers)) {
-    if (
-      id === world.consumed ||
-      (container === world.consumed &&
-        world.state.created?.[id]?.origin.kind !== 'death' &&
-        (world.entities[id]?.kind !== 'item' ||
-          (!world.entities[id].edible && !world.entities[id].bandage)))
-    )
+    if (id === world.consumed || (container === world.consumed && !terminal(world, id)))
       return false;
     if (!world.knownEntities[id] && !world.state.created?.[id]) return false;
     held[container] = (held[container] ?? 0) + 1;

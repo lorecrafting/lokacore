@@ -826,7 +826,9 @@ corpse to the corpse's room in EntityId order, then transfers the corpse to D4's
 [consumed holder](#d4-homes-finite-apples-and-eat-selected-contract): no event, no line, nothing destroyed; nested items stay in their
 bags. A spilled player corpse's items are public room items. A corpse not in a room at the
 due time only completes the job. A decay setting requires food@1 (the consumed holder);
-none set means no job and identical bytes.
+none set means no job and identical bytes. The terminal holder then holds three kinds and
+both world invariants (`one_container_per_item`, `containment_acyclic`) admit each: an eaten
+or spent item (edible or bandage) and a decayed death-created corpse.
 
 Victim words. An NPC's death-created corpse's GameView entry carries `victim`, the victim's
 `short` TextKey as the viewer sees it; the corpse's authored text may bind `{victim}`
