@@ -4,7 +4,7 @@ The present only: open work, next steps, owner questions, and standing owner rul
 yet. Rewrite this page in place once per session, at its end; never add dated session sections. History lives in git, Beads and `docs/reviews/`; lessons
 go to [PM lessons](lessons/pm.md) ([harness patterns](decisions/owner-decision-harness-patterns-2026-10-28.md)).
 
-AS OF main after ff954162a; written 2026-11-15 08:06 UTC in the Pi harness by deploy/deepseek-ai/deepseek-v4.1-flash-1017, PM session.
+AS OF main after 69f3438fe (PR #734); written 2026-11-16 01:26 UTC in the Pi harness by openai-codex/gpt-5.5-codex, PM session.
 `kernel_api` is 1.159 (no contract slice since). **The owner is pausing the Anthropic subscription, so every reviewer
 and developer here now runs on `deploy/deepseek-ai/deepseek-v4.1-flash-1017`** (`~/.pi/agent/agents/loka-dev.md`,
 `loka-review.md` repinned 2026-11-13). **Nothing is mid-merge, nothing is in flight, no agent is running.**
@@ -69,6 +69,14 @@ is young and unsaved by anyone else, rebuild it rather than force-pushing (`AGEN
 Untracked `cartridges/prologue/` is the owner's in-progress Part 1: never touch it, read it only.
 `docs/system-graph.gen.json` regenerates from it, so keep that file out of a commit while the scratch cartridge is present.
 
+**This session (2026-11-15 to 11-16).** #733 **F8, the add menu names why a field is refused** (`.94`, closed). #734
+**`bin/main_guard.py`** (loka-vh0cy, closed) — see the rule at the bottom of this page, because it was written to stop a
+mistake made in this same session. Then, directly on `main`: `.98` + `.99` (**Phase 0**, ff954162a — a first run and a
+held port are named instead of dying); `.68` closed as **already fixed** in 4519bac76 (key re-sorting), both symptoms
+verified gone; `.100.6` (0ded416bb — a refused `/open` writes why under the asked-for line); `.100.8`'s sampler half
+(323d3ac10 — bindings end with the page, closing 59 of 156); `.68` and `.100.6` are behaviour, not just bookkeeping.
+Phase 2 shipped as 527fd4071 and Phase 3 as the `.97` writer guide, both earlier in the session.
+
 ## In flight at handoff
 
 Nothing. The next slice starts from main.
@@ -77,23 +85,35 @@ Nothing. The next slice starts from main.
 
 ## Resume, in order
 
-1. Story tooling epic **loka-wfrgk.115** is **complete except E1**: children .1 to .11, .13 and .14 are all done — R1 (#716),
-   W1 (#717), D1 (#719), K2 (#720, #721), C1 (#722), L1 + L2 (#723, #724), W3 (#725), W2 (#726), F1 + W4 (#727), R2 (#728),
-   K1 (#729), K1b (#730). **One slice remains: .12 (E1, a conditional page in a modal scene)** — P3, parked until a beat needs
-   it, and it needs a protocol change, a kernel change and a `kernel_api` bump, so it wants an Opus design session.
-2. The authoring-readiness plan (owner agreed 2026-11-15). Phase 0 is **done** (ff954162a): `.98` and
-   `.99` are closed — `bin/author.sh` no longer fails on a first run, and a stale panel or a held port is
-   named instead of dying. Remaining phases, in this order:
-   - **Phase 1 (the core loop):** `.100.8` first — a key on the element, looked up by element, never
-     re-derived from words. It unblocks `.100.4`, `.100.6`, `.100.7`. Attempted once and reverted; read
-     the bead comment before starting so the dead end is not repeated.
-   - **Phase 2 (green means green):** flakes fq96k (`live.test.ts:145`), 0ske4 (panel test hangs instead
-     of failing), `.96` (NPC card timeout).
-   - **Phase 3 (learn it without me):** `.97` (the writer guide still documents the old tab panel) and
-     `.102.1`.
-   Deferred on purpose: `.115.12` (E1), `loka-wfrgk.119` (LLM co-authoring epic), `vduxr.58` area folders.
-3. Older P1s: `loka-vduxr.102` (the field guide).
-4. Housekeeping PR: loka-ebnu3, jqxb8, grdiq, and the retro items (below).
+1. **The owner is writing Part 1 in the editor.** That is the point of the queue below, not a parallel task:
+   `bin/author.sh`, restart it after each merge. File friction as it appears and fix the blockers at once.
+   Four beads are open *because* they want the owner's input, not an agent's:
+   - **`.100.5`** (scene structure editable in the GUI) — reverses ruling 11, so it needs a design pass first
+     (designer + PM). Do not start it blind; the first real restructuring attempt is the input.
+   - **`cr7l7`** (a `.cut` with no `.json` twin is unreachable) — a designer call between showing the twinless
+     scene or making the compiler refuse it. Option 2 rejects valid content to paper over an editor gap.
+   - **`.100.7`** (wrapped/composed lines do not open their field) — needs a multi-key decision no bead states;
+     a composed line legitimately holds several keys, so `data-loka-key` cannot carry it. Do not bundle it with `.100.8`.
+   - **`.100.4`** (card words field follow-ups: undo, `/line` retry, re-read after outside change).
+2. **`.100.8` remainder: 97 of 156.** The sampler families (59) are closed by per-page clearing
+   (`nextPage`, `prose_rules.ts`, shipped 323d3ac10). The rest needs the `data-loka-key` attribute, and that is
+   **bigger than `docs/rnd/line-key-binding-2026-11-15.md` first claimed** — corrected in 06ab70e75: `rendered`
+   (`mobile/app/book/logs.ts:46`) holds `line.key` and drops it, `DetailLine` (`:58-64`) has no key on any variant,
+   and `LogLine` (`mobile/app/book/lines.tsx:130`) therefore never sees one. Work: a key on `DetailLine`, set in
+   `rendered`, read in `LogLine`, plus `closest('[data-loka-key]')` at both lookup sites (`keyOf` in
+   `mobile/app/author/inbook.ts:44`; `panel.tsx:217`, which uses `e.target` and must walk up).
+   **Do not build it speculatively** — how many of the 97 ever share a screen is still unmeasured, because
+   `bin/measure_collisions.mjs` cannot get past the showcase's tutorial overlay. Build it when a real edit needs
+   two same-screen duplicates told apart.
+3. Story tooling epic **loka-wfrgk.115** is **complete except E1** (`.12`): P3, parked until a beat needs it; it
+   needs a protocol change, a kernel change and a `kernel_api` bump, so it wants an Opus design session.
+4. Older P1s: `loka-vduxr.102` (the field guide), `.102.1` (spec cites from `$comment`).
+5. Housekeeping: 74 open. Old P3 batch: loka-ebnu3, jqxb8, grdiq, and the retro items (below).
+
+**Phase 0, 2 and 3 of the authoring-readiness plan are done** — do not re-plan them. Phase 0 was ff954162a
+(`.98`, `.99`); Phase 2 was 527fd4071 (`fq96k`, `0ske4`, `.96` — all three now closed, and `fq96k` turned out to be a
+real route bug: an outside-file fallback plus an unreadable tree file becoming a 500); Phase 3 was `.97` (the writer
+guide documents the three-column shell, Cmd-K, Cmd-E and double-click-to-edit) — also closed.
 
 ## Owner calls to date (2026-11-07 session; override any)
 
@@ -129,6 +149,20 @@ loka-4ks2l was approved and is merged (#709). Closed `loka-wfrgk.116` as a dupli
 
 ## Learned this session (worth knowing next time)
 
+- **`ci.yml` never runs on `main`, so "I ran it locally" is not a gate.** The two-lane decision makes a green
+  *branch* head the gate and leaves `main` to a nightly plus by-hand runs. `bin/prepush.sh` covers sizes,
+  prettier, regen, `tsc`, docs, sounds and a few targeted red controls — but **no package test suite**. So a code
+  commit pushed to `main` is gated by nothing. Two were: 323d3ac10 (`panel.tsx`, `prose_rules.ts`) and
+  0ded416bb (`inbook.ts`), four minutes of local green standing in for the gate. Nothing broke — the manual run
+  43760788051 passed on `main` afterwards — but the rule at `docs/PM.md:92` ("never for unreviewed code") was
+  broken, and reading it earlier in the session did not stop it. `bin/main_guard.py` (#734) now refuses it.
+  **Check what the gate actually covers, not what you assume it covers.**
+- **`bin/merge_pr.sh` takes a Beads id, not a branch name.** Passed `tools/main-guard`; the merge landed and only
+  then did `br close tools/main-guard` fail, leaving the PR merged with no bead transition. It accepted the bad
+  argument without complaint and failed after the irreversible step. Check the second argument.
+- **`rg -r` is *replace*.** `rg -rn foo mobile/` rewrote the results through a replacement pattern and printed
+  `'[n"]'` for every match. Three times in one session, and the garbled output nearly became a false conclusion
+  about where `dir="auto"` is set. Plain `rg` is already recursive.
 - **A symptom's obvious fix can be the wrong layer.** `.100.8` reads "tag each line with its key", and
   extending the existing `~` zero-width marks looks like the minimal change. It is not: marking leaves
   every lookup still keyed by *words*, rewrites the strings the Book reads out as accessible names, and
@@ -207,6 +241,10 @@ hunger (`toolbox_showcase/text.json:1461`, `docs/showcase/hub-and-first-district
 - P3 hold (owner 2026-10-22): draft #454, kgd.188, 2lvx, 5i4c, x6t.98. loka-x6t.126 skill-gated room depth.
 - #632 (loka-vduxr.64) belongs to another session (lokacore-fb), not the PM.
 - `toolbox/settle-3` is 9 commits ahead of main from 2026-10-15 with no PR: decide PR or delete before the next batch.
+- **Both stashes are dropped** (2026-11-16): each was a stale `.beads/issues.jsonl` snapshot from a `br`-era
+  workflow; Beads is the live store, so neither could be applied meaningfully. `git stash list` is now empty.
+- `/tmp/continuation-prompt.md` is a harness file, not this repo's. The session it described is finished;
+  do not treat its contents as current work.
 - Worktrees: seven merged ones were removed this session (`k2rev-base`, `loka-kgd.202-old`, `.203-mut`,
   `.205-design-review`, `review-k2`, `toolbox-authoring-batch-a-walks`, `s3-choice-key-review`), freeing about 15 GB.
   What is left: `loka-preview` and `lokacore-session` (the polish/Storybook pair), `design-playtest`
