@@ -25,11 +25,17 @@ test('committed combat line indices come from pinned keys and structured receipt
         cartridge: {
           world: {
             combat: {
-              narration: { player_hit: 'authored.strike', npc_died: 'authored.fall' },
+              narration: {
+                player_hit: 'authored.strike',
+                npc_died: 'authored.fall',
+                // The same key the death's own narration names below: the spec's default, so one key
+                // can be told in a fight and off one (loka-kgd.222).
+                player_died: 'authored.death',
+              },
               tiers: [{ at_percent: 50, npc_hit: 'authored.maul' }],
               conditions: [{ at_percent: 75, text: 'authored.cuts' }],
             },
-            death: { narration: { woke: 'authored.woke' } },
+            death: { narration: { woke: 'authored.woke', player_died: 'authored.death' } },
           },
         },
       },
@@ -155,6 +161,29 @@ test('committed combat line indices come from pinned keys and structured receipt
       undefined,
       undefined,
     ]);
+    // Break (loka-kgd.222): a catch-up receipt that ran rounds and then killed the player off a fight
+    // routed the fall line to the Combat log by its key, so the dead page's room log, which is what
+    // the Book draws there, never ended with it. Off a fight the fall line is the room's, and the
+    // fight's own death keeps both (the Combat page shows every closing line).
+    const ranRounds = [{ op: 'encounter.advance', writer_group: 1 }];
+    const rounds = {
+      events: [{ payload: { type: 'attack_result' } }, { payload: { type: 'entity_died' } }],
+    };
+    assert.deepEqual(
+      cut('elapsed', { ...rounds, delta: { ops: ranRounds } }, [
+        'authored.strike',
+        'authored.death',
+      ]),
+      [undefined, [0]],
+    );
+    assert.deepEqual(
+      cut(
+        'elapsed',
+        { ...rounds, delta: { ops: [{ op: 'encounter.close', writer_group: 0 }, ...ranRounds] } },
+        ['authored.strike', 'authored.death'],
+      ),
+      [undefined, [0, 1]],
+    );
   } finally {
     sql.close();
     rmSync(folder, { recursive: true, force: true });

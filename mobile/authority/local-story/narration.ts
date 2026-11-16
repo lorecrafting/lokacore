@@ -83,6 +83,17 @@ const latest = (s: Story, command_id: string | undefined, before: number | null)
     before,
   );
 
+const bleedKeys = (s: Story) =>
+  Object.values(s.world.cartridge.bleeds ?? {}).flatMap((bleed) => Object.values(bleed.narration));
+
+// A player's death that closes no encounter is the dead page's, whose log is the room's (book-ui.md,
+// Dead page); its key is the room's even on a receipt that also ran rounds (loka-kgd.222).
+const offFightFall = (s: Story, d: Accepted) =>
+  d.events.some((e) => e.payload.type === 'entity_died' && !e.payload.victim_definition) &&
+  !d.delta.ops.some((o) => o.op === 'encounter.close')
+    ? s.world.cartridge.world?.death?.narration?.player_died
+    : undefined;
+
 // Combat lines: a receipt opening an encounter (book-ui.md, Opening), attack, pack, skip, bleed.
 export function combatLines(s: Story, d: Accepted, lines: NonNullable<Accepted['narration']>) {
   const root = d.delta.ops.some(
@@ -109,16 +120,15 @@ export function combatLines(s: Story, d: Accepted, lines: NonNullable<Accepted['
       ? [n.helper_joined, n.primary_changed, n.pack_withdrew, ...Object.values(n.enemy_fled)]
       : [];
   });
-  const bleedKeys = Object.values(s.world.cartridge.bleeds ?? {}).flatMap((bleed) =>
-    Object.values(bleed.narration),
-  );
+  const fall = offFightFall(s, d);
   return lines.flatMap((line, i) =>
-    root ||
-    keys.includes(line?.key) ||
-    packKeys.includes(line?.key) ||
-    line?.bindings?.status !== undefined || // only a status-skipped blow binds status (x6t.30)
-    (bleedKeys.includes(line?.key) && !!engaged(s.world, s.world.body)) ||
-    (d.outcome === 'bandaged' && d.encounter_id === engaged(s.world, s.world.body)?.id)
+    (root ||
+      keys.includes(line?.key) ||
+      packKeys.includes(line?.key) ||
+      line?.bindings?.status !== undefined || // only a status-skipped blow binds status (x6t.30)
+      (bleedKeys(s).includes(line?.key) && !!engaged(s.world, s.world.body)) ||
+      (d.outcome === 'bandaged' && d.encounter_id === engaged(s.world, s.world.body)?.id)) &&
+    line?.key !== fall
       ? [i]
       : [],
   );
