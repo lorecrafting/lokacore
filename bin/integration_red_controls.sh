@@ -109,7 +109,7 @@ git fetch -q origin
 [ "$(git rev-parse HEAD)" = "$(git rev-parse origin/main)" ] && [ "$(git log -1 --format=%s)" = 'ROADMAP status: X merged (#7)' ] \
   && [ -f f ] && [ "$(git show origin/main:docs/ROADMAP.md)" = r2 ] || bad 'after_merge success: main not pulled, committed and pushed'
 [ "$(git show origin/main:.beads/issues.jsonl)" = "$(printf '{"id":"base"}\n{"id":"local-write"}\n{"id":"closed loka-a"}')" ] || { bad 'after_merge success: export lost a write'; git show origin/main:.beads/issues.jsonl; }
-grep -qx 'sync --merge' "$R.br" && grep -qx 'close loka-a --reason Merged #7' "$R.br" || { bad 'after_merge success: br calls'; cat "$R.br"; }
+grep -qx 'sync --merge' "$R.br" && grep -qx 'close loka-a --force --reason Merged #7' "$R.br" || { bad 'after_merge success: br calls'; cat "$R.br"; }
 [ ! -d "$R.wt" ] && ! git rev-parse -q --verify pr > /dev/null && ! git rev-parse -q --verify review-7 > /dev/null \
   && ! git ls-remote --exit-code --heads origin pr > /dev/null || bad 'after_merge success: worktree or refs left'
 # Break: main moved the export too (loka-kovp): the run refuses, or main's row or the local write is lost.
@@ -127,7 +127,7 @@ amk; git checkout -q review-7; echo rec > rec; git add rec; git commit -qm rec; 
 (cd "$M" && git checkout -q -b pr2 origin/pr && echo rec > rec && git add rec && git commit -qm picked && git push -q origin pr2:pr \
   && git checkout -q main && git merge -q --no-ff pr2 -m merge2 && git push -q origin main)
 am cherry-picked 0
-! git rev-parse -q --verify review-7 > /dev/null && grep -qx 'close loka-a --reason Merged #7' "$R.br" || bad 'after_merge cherry-picked: review-7 left or issue not closed'
+! git rev-parse -q --verify review-7 > /dev/null && grep -qx 'close loka-a --force --reason Merged #7' "$R.br" || bad 'after_merge cherry-picked: review-7 left or issue not closed'
 # Break: a records-only review-7 not in main (no fix round, loka-o0pw) is refused or deleted unpicked,
 # a README clash with a record main gained meanwhile stops the pick, or the pick is left unpushed
 # when nothing else is staged (export already on main, issue already closed).
@@ -151,7 +151,7 @@ echo extra > extra; git add extra; git commit -q --amend -m mrg; git checkout -q
 am merge-in-review 1; [ "$(git rev-parse HEAD)" = "$head" ] && [ ! -s "$R.br" ] && git rev-parse -q --verify review-7 > /dev/null || bad 'after_merge merge-in-review: changed something'
 # Break: a checkout whose own after_merge.sh is behind main runs the old copy (here it exits 9 before doing anything).
 STALE=1 amk; unset STALE; rc=0; BR_LOG=$R.br PR_STATE=MERGED PATH="$tmp/brstub:$PATH" capped sh bin/after_merge.sh 7 loka-a > "$R.out" 2>&1 || rc=$?
-git fetch -q origin; [ "$rc" = 0 ] && grep -qx 'close loka-a --reason Merged #7' "$R.br" && [ "$(git rev-parse HEAD)" = "$(git rev-parse origin/main)" ] \
+git fetch -q origin; [ "$rc" = 0 ] && grep -qx 'close loka-a --force --reason Merged #7' "$R.br" && [ "$(git rev-parse HEAD)" = "$(git rev-parse origin/main)" ] \
   || { bad "after_merge stale-script: exit $rc, old copy ran or main not pulled"; sed 's/^/  /' "$R.out"; }
 # Break: a rerun (the failed first run already closed the issue) dies at br close, or closes it again.
 amk; export ISSUE_STATUS=closed; am rerun-closed 0; unset ISSUE_STATUS; git fetch -q origin
@@ -168,7 +168,7 @@ am concurrent-write 0; git fetch -q origin
 [ "$(git show origin/main:.beads/issues.jsonl | tail -1)" = concurrent ] && git diff --quiet || bad 'after_merge concurrent-write: export not committed and pushed'
 # Break: an id after the first in a comma list is not closed (loka-4zvw).
 amk; rc=0; BR_LOG=$R.br PR_STATE=MERGED PATH="$tmp/brstub:$PATH" capped sh "$bin/after_merge.sh" 7 loka-a,loka-b > "$R.out" 2>&1 || rc=$?
-[ "$rc" = 0 ] && grep -qx 'close loka-a --reason Merged #7' "$R.br" && grep -qx 'close loka-b --reason Merged #7' "$R.br" \
+[ "$rc" = 0 ] && grep -qx 'close loka-a --force --reason Merged #7' "$R.br" && grep -qx 'close loka-b --force --reason Merged #7' "$R.br" \
   || { bad "after_merge several-ids: exit $rc or an id not closed"; cat "$R.br"; }
 
 # --- mutate.sh -----------------------------------------------------------------------------

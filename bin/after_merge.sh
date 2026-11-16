@@ -70,9 +70,12 @@ if [ -n "$picks" ]; then
     || { git cherry-pick --abort; die "cherry-pick of review-$pr failed; main pulled, nothing else changed"; }
 fi
 # A rerun after a failed Beads commit finds the issue closed already.
+# --force: the PR's own follow-ups are children created while it was open, so the parent closes and
+# they stay open and tracked; without it every merged parent with a follow-up failed here and needed
+# a hand `br close --force` plus a rerun (loka-grdiq).
 for i in $(echo "$id" | tr , ' '); do
   [ "$(br show "$i" --json | python3 -c 'import json,sys; print(json.load(sys.stdin)[0]["status"])')" = closed ] \
-    || br1 close "$i" --reason "Merged #$pr" || die "br close $i failed"
+    || br1 close "$i" --force --reason "Merged #$pr" || die "br close $i failed"
 done
 [ -z "$wt" ] || git worktree remove "$wt" || die "worktree for $branch not removed (uncommitted work?)"
 ! git rev-parse -q --verify "refs/heads/$branch" > /dev/null || git branch -q -d "$branch" || die "$branch is not merged; not deleted"
