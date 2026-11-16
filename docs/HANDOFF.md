@@ -4,7 +4,7 @@ The present only: open work, next steps, owner questions, and standing owner rul
 yet. Rewrite this page in place once per session, at its end; never add dated session sections. History lives in git, Beads and `docs/reviews/`; lessons
 go to [PM lessons](lessons/pm.md) ([harness patterns](decisions/owner-decision-harness-patterns-2026-10-28.md)).
 
-AS OF main after 137ba40d9 (PR #740); written 2026-11-16 11:26 UTC in the Pi harness by deploy/deepseek-ai/deepseek-v4.1-flash-1017, PM session.
+AS OF main after c7d851454 (PR #743); written 2026-11-16 22:20 UTC in the Pi harness by deploy/deepseek-ai/deepseek-v4.1-flash-1017, PM session.
 `kernel_api` is 1.159 (no contract slice since). **The owner is pausing the Anthropic subscription, so every reviewer
 and developer here now runs on `deploy/deepseek-ai/deepseek-v4.1-flash-1017`** (`~/.pi/agent/agents/loka-dev.md`,
 `loka-review.md` repinned 2026-11-13). **Nothing is mid-merge, nothing is in flight, no agent is running.**
@@ -100,9 +100,9 @@ since 11-07") closed because the number dropped.
 
 ## In flight at handoff
 
-Nothing. The next slice starts from main.
+**#744 (loka-x6t.6, stars only outdoors) is open with CI running.** Nothing else is in flight.
 
-**This session (2026-11-16, second half) merged three PRs, all opened and closed by this PM:**
+**This session (2026-11-16, third block) merged five PRs, all opened and closed by this PM:**
 #739 **loka-kgd.223, the flows crash** (closed): `one_container_per_item` and `containment_acyclic` admitted only an
 edible item to the terminal consumed holder, but a death-created corpse decaying to it and a cured bandage were both
 lawful — so an accepted step made both world invariants false and `flows.ts:175` crashed on seed 4 step 130 after
@@ -110,11 +110,17 @@ lawful — so an accepted step made both world invariants false and `flows.ts:17
 `kernel/ts/src/runtime/created.ts`, and the creation guard and both world invariants call it, so the three cannot
 drift. Verified on current main: `bin/loka sim cartridges/toolbox_showcase --seeds 16 --days 3` runs every seed to
 completion, and the nightly `sim (fresh)`/`sim (showcase)` jobs are green (323 s / 191 s).
-#740 **loka-wfrgk.90, the half-typed write** (closed): the card's form committed a blur's edit on a zero-delay timer;
-a keystroke landing before that timer ran wrote `2` of the `21` being typed, then the next blur wrote `21` — two
-writes for one edit and Undo on `2`. `useSettled` in `tools/author-panel/src/edit/Generic.tsx` waits 200 ms for the
-typing to settle, re-armed by each change, and still covers what the tick was for (rjsf's map-key rename and
-Remove's dropped focus). #688's earlier attempt guarded only the button-blur path, never reproduced, was reverted.
+#740 **loka-wfrgk.90, the half-typed write — an incomplete fix that #743 replaced.** The card's form committed a
+blur's edit on a zero-delay timer; a keystroke landing before that timer ran wrote `2` of the `21` being typed, then
+the next blur wrote `21`. #740 made the tick a 200 ms wait — but that wait restarts on every keystroke, so a write
+stayed armed while the author typed and fired on whatever was half-typed when it expired (a 528 ms gap between the
+two keys reproduced it). #743's CI caught it. `onInput` now **cancels** the waiting write and each blur arms it
+again, so a write only runs on words settled when focus left; `onInput` and not `change`, because rjsf renames a map
+key by a setState after its blur. The #740 test passed with the bug present — its first keystroke landed inside one
+`settle`. It now waits 450 ms between keys and is mutation-checked two ways.
+#743 **loka-9ack** (closed): `polish_session.sh close` ran only `catalogue.test.ts`, while book-e2e's storybook job
+runs `tsc -p .storybook` — so a bad `.stories.tsx` passed `close` and went red after the push (the #513/#520/#527
+class, three times). `close` runs it now, with a red control.
 #738 (loka-2bp1n, loka-2zak, closed): slice size in the developer rules, and a narration brief names its fixtures.
 
 - **#632** (loka-vduxr.64) belongs to another session (lokacore-fb). **#454** is the owner's P3 hold.
@@ -142,12 +148,22 @@ Remove's dropped focus). #688's earlier attempt guarded only the button-blur pat
    two same-screen duplicates told apart.
 3. Story tooling epic **loka-wfrgk.115** is **complete except E1** (`.12`): P3, parked until a beat needs it; it
    needs a protocol change, a kernel change and a `kernel_api` bump, so it wants an Opus design session.
-4. Older P1s: `loka-vduxr.102` (the field guide), `.102.1` (spec cites from `$comment`).
-5. Housekeeping: **10 open** (was 74). The 55 closed this session were verified already-fixed, duplicates or
-   procedural advice. What is left: loka-7anzq and loka-atj0g (both verified already done in `merge_pr.sh` /
-   `wait_ci.sh`, close on sight), loka-7vnzm (the only one with work left: a pre-push refusal for a tracked symlink),
-   loka-fd8km (needs a `br` upstream fix, not ours), loka-e9ey (`@tmcp/transport-http` override), and `wfrgk.54`
-   (E6c2 self-review, four files, deferred behind Part 1).
+4. Older P1s: `loka-vduxr.102` (the field guide), `.102.1` — **blocked on a missing carrier, not a missing reader**
+   (checked this session). The bead says to move each removed spec cite into the schema node's `$comment` and read it
+   there. That carrier does not exist: `lib/loka/content/source_schema.ex:62` writes exactly one `$comment` per file,
+   at its head, and no per-node one is ever set. A per-node cite key must be added to the generated schemas first
+   (`schemas/source/`, `protocol/`), so it is a schema slice of its own. Scale today: 11 `§` cites in
+   `schemas/source/*.json`, 23 in `lib/loka/content/*.ex`.
+5. Housekeeping: **2 open, 4 deferred** under the label (was 74, then 10). The 55 closed this session were verified already-fixed, duplicates or
+   procedural advice. This session closed **loka-wfrgk.117** (generators no longer read an
+   untracked cartridge: both now filter per cartridge, since the red control plants a transcript *inside* a tracked
+   cartridge) and **loka-fd8km** (`bin/lib/beads_sync.sh` no longer `git pull`s, which raced a concurrent fetch and
+   rewrote `FETCH_HEAD`). Both in #741. **Open (2):** `wfrgk.54` (E6c2 self-review, four files, deferred behind Part 1) and `vduxr.64`
+   (done in #632, awaiting that PR's merge). **Deferred (4):** `rvbmn` (a Walk-head check in push_slice),
+   `00p0u` (a combat narration routing check), `7anzq` and `atj0g` — but read the next line first.
+   `7anzq` and `atj0g` are **already fixed** (`bin/after_merge.sh:73-78` passes `--force` for a PR's own
+   follow-ups; `bin/pm_merge.sh:44-48` refuses a schema change with no review record) so they close on sight.
+   `7vnzm` was closed: the `.gitignore` and `worktree_setup.sh` halves shipped in #733.
 
 **Phase 0, 2 and 3 of the authoring-readiness plan are done** — do not re-plan them. Phase 0 was ff954162a
 (`.98`, `.99`); Phase 2 was 527fd4071 (`fq96k`, `0ske4`, `.96` — all three now closed, and `fq96k` turned out to be a
@@ -171,7 +187,10 @@ guide documents the three-column shell, Cmd-K, Cmd-E and double-click-to-edit) �
 
 ## Retros awaiting the owner's yes/no
 
-**2026-11-16 (one new item):** loka-wpw6x — **the PM's `ci_wait.sh` reports failure on green heads.** Evidence: on PR
+**2026-11-16 (one new item, DONE):** loka-wpw6x — **the PM's `ci_wait.sh` reports failure on green heads.** Fixed
+this session: the Pi-side copy is deleted and `~/.pi/agent/AGENTS.md` points at the repo's `bin/wait_ci.sh` (which
+resolves a short sha, requires both gating workflows and names "no runs found" apart from a timeout). No owner action.
+Evidence: on PR
 #740's head `18568fed55` it exited 1 while `gh run list --commit` showed `graph-diff`, `ci` and `book-e2e` all
 `success`, and `gh pr checks 740` showed every other job `pass` with `sim` and `walk` merely `skipping` (the normal
 state for a diff touching neither cartridge). Three tasks this session (`be4fd552d`, `b507857c0`, `baa27ef41`) wrote
@@ -203,6 +222,18 @@ loka-4ks2l was approved and is merged (#709). Closed `loka-wfrgk.116` as a dupli
 
 ## Learned this session (worth knowing next time)
 
+- **A test that passes with its bug present proves nothing, and this session produced two.** #740's test for the
+  half-typed write asserted one write, but its first keystroke landed inside the 200 ms window, so it only ever
+  exercised the fast path — #743's CI failed on a slow runner. The fix for `.90` was itself wrong for the same
+  reason: I reasoned about the timer instead of measuring it, and only a `console.log` trace of `soon`/`change` in
+  the real browser showed the timer re-arming on each keystroke. **Run the mutant before believing a green test**,
+  and when a timing bug is suspected, instrument the running page rather than reason about the code.
+- **`tsc -p . --noEmit` is weaker than `tsc -b`.** The panel's `noUnusedLocals` fired only in build mode, so a local
+  "typecheck clean" still failed `bin/related_tests.sh` at push. Use the same command CI uses (`tsc -b`, which is
+  what `npm run build` runs).
+- **A separate slice needs its branch before its commit.** I committed `loka-x6t.6` on the `#743` branch and would
+  have folded it into that PR; `merge_pr.sh`'s "main is not checked out here" refusal is what caught it. Branch
+  first, then commit.
 - **A backlog of tickets mostly describes work already done.** Of 55 closed housekeeping items, 13 were already
   fixed and 22 were procedural advice that never should have been a ticket. Before doing one, **verify the fault
   still exists**: `ls bin/*_hash.py` returned nothing, `git grep` found the fix, one `sleep`-child spawn proved the
