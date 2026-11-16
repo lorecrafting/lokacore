@@ -138,7 +138,16 @@ for i, (f, n, old, new, label) in enumerate(rows):
     log = os.path.join(tmp, '%d.out' % i)
     cmd = narrow(f, log)
     if cmd and f not in base_red:  # an unmutated red run would make every mutant look killed
-        base_red[f] = subprocess.run(['sh', '-c', narrow(f, os.devnull)]).returncode != 0
+        r = subprocess.run(['sh', '-c', narrow(f, os.devnull)], capture_output=True, text=True)
+        base_red[f] = r.returncode != 0
+        if r.returncode == 144:
+            # Not a red suite: the checkout cannot run it (no node_modules, deps or _build in a throwaway
+            # worktree), and every row reported BASELINE-RED cost an agent a hand rerun. Say so once and
+            # stop rather than print a table of false verdicts (loka-ebnu3).
+            print('mutate_diff: cannot run %s in this checkout (exit 144); run it in an installed worktree\n%s'
+                  % (f, (r.stdout or r.stderr or '').strip()[-800:]), file=sys.stderr)
+            shutil.rmtree(tmp, ignore_errors=True)
+            sys.exit(144)
     kind = 'BASELINE-RED' if cmd and base_red[f] else None if cmd else 'NO-TESTS'
     plan.append((kind, f, n, label, log))
     if kind is None:
