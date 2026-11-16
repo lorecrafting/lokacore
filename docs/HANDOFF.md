@@ -4,7 +4,7 @@ The present only: open work, next steps, owner questions, and standing owner rul
 yet. Rewrite this page in place once per session, at its end; never add dated session sections. History lives in git, Beads and `docs/reviews/`; lessons
 go to [PM lessons](lessons/pm.md) ([harness patterns](decisions/owner-decision-harness-patterns-2026-10-28.md)).
 
-AS OF main after 69f3438fe (PR #734); written 2026-11-16 01:26 UTC in the Pi harness by openai-codex/gpt-5.5-codex, PM session.
+AS OF main after 7071c9073 (PR #737); written 2026-11-16 04:32 UTC in the Pi harness by deploy/deepseek-ai/deepseek-v4.1-flash-1017, PM session.
 `kernel_api` is 1.159 (no contract slice since). **The owner is pausing the Anthropic subscription, so every reviewer
 and developer here now runs on `deploy/deepseek-ai/deepseek-v4.1-flash-1017`** (`~/.pi/agent/agents/loka-dev.md`,
 `loka-review.md` repinned 2026-11-13). **Nothing is mid-merge, nothing is in flight, no agent is running.**
@@ -69,13 +69,34 @@ is young and unsaved by anyone else, rebuild it rather than force-pushing (`AGEN
 Untracked `cartridges/prologue/` is the owner's in-progress Part 1: never touch it, read it only.
 `docs/system-graph.gen.json` regenerates from it, so keep that file out of a commit while the scratch cartridge is present.
 
-**This session (2026-11-15 to 11-16).** #733 **F8, the add menu names why a field is refused** (`.94`, closed). #734
-**`bin/main_guard.py`** (loka-vh0cy, closed) — see the rule at the bottom of this page, because it was written to stop a
-mistake made in this same session. Then, directly on `main`: `.98` + `.99` (**Phase 0**, ff954162a — a first run and a
-held port are named instead of dying); `.68` closed as **already fixed** in 4519bac76 (key re-sorting), both symptoms
-verified gone; `.100.6` (0ded416bb — a refused `/open` writes why under the asked-for line); `.100.8`'s sampler half
-(323d3ac10 — bindings end with the page, closing 59 of 156); `.68` and `.100.6` are behaviour, not just bookkeeping.
-Phase 2 shipped as 527fd4071 and Phase 3 as the `.97` writer guide, both earlier in the session.
+**This session (2026-11-15 to 11-16).** First half: #733 **F8, the add menu names why a field is refused** (`.94`,
+closed); #734 **`bin/main_guard.py`** (loka-vh0cy, closed) — see the rule at the bottom of this page, because it was
+written to stop a mistake made in this same session; then, directly on `main`: `.98` + `.99` (**Phase 0**, ff954162a —
+a first run and a held port are named instead of dying); `.68` closed as **already fixed** in 4519bac76 (key
+re-sorting), both symptoms verified gone; `.100.6` (0ded416bb — a refused `/open` writes why under the asked-for line);
+`.100.8`'s sampler half (323d3ac10 — bindings end with the page, closing 59 of 156); Phase 2 shipped as 527fd4071 and
+Phase 3 as the `.97` writer guide.
+
+Second half: #735 **the drift line names the actual mistake** (loka-y043w, closed):
+`bin/beads_pr_drift.py` printed "open PR #N has no Beads issue" for a bead that merely lacks an `external_ref`, which
+cost three false alarms a session; it now prints the `br update <id> --external-ref ...` to run, and
+`bin/beads_red_controls.sh` pins both wordings. #736 **`after_merge` closes a merged parent that has open follow-ups**
+(loka-grdiq, closed): a PR's own follow-up children are created while it is open, so `br close` refused it and every
+such merge needed a hand `--force` plus a rerun; the bead-closing loop now passes `--force`. #737 **`mutate_diff` names
+an unrunnable checkout** (loka-ebnu3, closed): with no `node_modules`/`deps`/`_build` it printed a table of
+`BASELINE-RED` rows that read as verdicts, and the baseline now exits 144 with the reason and the last 800 bytes of
+output.
+
+**The housekeeping queue was drained: 74 open to 10.** 55 were closed with a reason naming a category, and the shape
+they shared is the finding: **most described work already done.** `lfdsb`/`8r5eq` were the same item and
+`bin/worktree_setup.sh:12,30` already runs `mix deps.get --check-locked` and `npm ci`; `273d`'s four `*_hash.py`
+generators do not exist; `fsfq` had `.gitignore:26`; `h3cny` was fixed in 3579a5d1a (verified by spawning two
+`sleep 300` children under a 2s cap: no survivors); `h5hh9`'s premise was made obsolete by the two-lane decision
+(the size check runs on the PR head, not in `after_merge`); `7anzq` and `atj0g` were already in `merge_pr.sh` and
+`wait_ci.sh`. `cr7l7` is **not a bug**: the compiler refuses an orphan `.cut` (`This cutscene has nothing to start it`)
+and the panel lists scenes from `story.ts:2`, which reads the compiled artifact, so an uncompilable file can never
+appear. 22 were procedural advice that was never a ticket, and `loka-r7vrx` ("the queue is 75 open with nothing closed
+since 11-07") closed because the number dropped.
 
 ## In flight at handoff
 
@@ -87,14 +108,13 @@ Nothing. The next slice starts from main.
 
 1. **The owner is writing Part 1 in the editor.** That is the point of the queue below, not a parallel task:
    `bin/author.sh`, restart it after each merge. File friction as it appears and fix the blockers at once.
-   Four beads are open *because* they want the owner's input, not an agent's:
+   Three beads are open *because* they want the owner's input, not an agent's:
    - **`.100.5`** (scene structure editable in the GUI) — reverses ruling 11, so it needs a design pass first
      (designer + PM). Do not start it blind; the first real restructuring attempt is the input.
-   - **`cr7l7`** (a `.cut` with no `.json` twin is unreachable) — a designer call between showing the twinless
-     scene or making the compiler refuse it. Option 2 rejects valid content to paper over an editor gap.
    - **`.100.7`** (wrapped/composed lines do not open their field) — needs a multi-key decision no bead states;
      a composed line legitimately holds several keys, so `data-loka-key` cannot carry it. Do not bundle it with `.100.8`.
    - **`.100.4`** (card words field follow-ups: undo, `/line` retry, re-read after outside change).
+   `cr7l7` left this list: it is closed as not-a-bug (see above).
 2. **`.100.8` remainder: 97 of 156.** The sampler families (59) are closed by per-page clearing
    (`nextPage`, `prose_rules.ts`, shipped 323d3ac10). The rest needs the `data-loka-key` attribute, and that is
    **bigger than `docs/rnd/line-key-binding-2026-11-15.md` first claimed** — corrected in 06ab70e75: `rendered`
@@ -108,7 +128,11 @@ Nothing. The next slice starts from main.
 3. Story tooling epic **loka-wfrgk.115** is **complete except E1** (`.12`): P3, parked until a beat needs it; it
    needs a protocol change, a kernel change and a `kernel_api` bump, so it wants an Opus design session.
 4. Older P1s: `loka-vduxr.102` (the field guide), `.102.1` (spec cites from `$comment`).
-5. Housekeeping: 74 open. Old P3 batch: loka-ebnu3, jqxb8, grdiq, and the retro items (below).
+5. Housekeeping: **10 open** (was 74). The 55 closed this session were verified already-fixed, duplicates or
+   procedural advice. What is left: loka-7anzq and loka-atj0g (both verified already done in `merge_pr.sh` /
+   `wait_ci.sh`, close on sight), loka-7vnzm (the only one with work left: a pre-push refusal for a tracked symlink),
+   loka-fd8km (needs a `br` upstream fix, not ours), loka-e9ey (`@tmcp/transport-http` override), and `wfrgk.54`
+   (E6c2 self-review, four files, deferred behind Part 1).
 
 **Phase 0, 2 and 3 of the authoring-readiness plan are done** — do not re-plan them. Phase 0 was ff954162a
 (`.98`, `.99`); Phase 2 was 527fd4071 (`fq96k`, `0ske4`, `.96` — all three now closed, and `fq96k` turned out to be a
@@ -136,6 +160,11 @@ guide documents the three-column shell, Cmd-K, Cmd-E and double-click-to-edit) �
 one dev server) and loka-8v4lx (name the reviewer fallback model in WORKFLOW and the loka-review agent
 instead of justifying a substitution per slice — still awaiting the owner).
 
+**Closed this session, no owner action needed:** loka-y043w (the drift check's message; **shipped in #735**),
+loka-r7vrx (the queue was 75 open with nothing closed; **the queue is 10**), loka-grdiq and loka-ebnu3 and
+loka-h3cny (merge/mutation tooling; **#736, #737, 3579a5d1a**). The retros fired, got fixed, and closed, which is
+what was missing from the previous ten days.
+
 **2026-11-15 (one item):** loka-7vnzm (a worktree symlink named `_build` rode into a commit and broke every Elixir
 job; the `git diff --stat` line that named it was skipped because the error looked like infrastructure). Its two
 cheap fixes are already in #733 (`.gitignore` lost the trailing slash; `bin/worktree_setup.sh` refuses a link); the
@@ -149,20 +178,34 @@ loka-4ks2l was approved and is merged (#709). Closed `loka-wfrgk.116` as a dupli
 
 ## Learned this session (worth knowing next time)
 
-- **`ci.yml` never runs on `main`, so "I ran it locally" is not a gate.** The two-lane decision makes a green
-  *branch* head the gate and leaves `main` to a nightly plus by-hand runs. `bin/prepush.sh` covers sizes,
-  prettier, regen, `tsc`, docs, sounds and a few targeted red controls — but **no package test suite**. So a code
-  commit pushed to `main` is gated by nothing. Two were: 323d3ac10 (`panel.tsx`, `prose_rules.ts`) and
-  0ded416bb (`inbook.ts`), four minutes of local green standing in for the gate. Nothing broke — the manual run
-  43760788051 passed on `main` afterwards — but the rule at `docs/PM.md:92` ("never for unreviewed code") was
-  broken, and reading it earlier in the session did not stop it. `bin/main_guard.py` (#734) now refuses it.
-  **Check what the gate actually covers, not what you assume it covers.**
-- **`bin/merge_pr.sh` takes a Beads id, not a branch name.** Passed `tools/main-guard`; the merge landed and only
-  then did `br close tools/main-guard` fail, leaving the PR merged with no bead transition. It accepted the bad
-  argument without complaint and failed after the irreversible step. Check the second argument.
+- **A backlog of tickets mostly describes work already done.** Of 55 closed housekeeping items, 13 were already
+  fixed and 22 were procedural advice that never should have been a ticket. Before doing one, **verify the fault
+  still exists**: `ls bin/*_hash.py` returned nothing, `git grep` found the fix, one `sleep`-child spawn proved the
+  timeout. Closing an already-fixed bead is the correct outcome, not a shortcut. The corollary: a 74-item queue whose
+  headline retro says "nothing closed since 11-07" is not a workload, it is a record of unverified assumptions.
+- **A claim of "I verified it" must name the check.** I asserted `dreams.ex` accepted three choices with a duplicate
+  and wrote a fix and a test; `protocol/scene.schema.json:304-307` caps `choices` at `maxItems: 2`, so the state is
+  unreachable and the test failed. Reading the function is not running the system. Ask "what did I execute?" before
+  "what did I read?".
+- **A `bg_run` can exit 0 while its output says `no such file or directory`.** A wrong script path printed a zsh error
+  and still returned success, and the terminal notification reported `exit-code 0`. Read the log, not the exit code,
+  for anything whose success matters — the same lesson the repo already has about `ci_wait` on the wrong head.
+- **`bin/merge_pr.sh` refuses when the checkout is on the PR's branch.** After pushing #737 this checkout was still on
+  `fix/mutate-144` and the gate said `main is not checked out here` — correct refusal, wrong state. `git checkout main`
+  first. This is the same class of error as the bead-id-instead-of-branch one already recorded below, and the guards
+  caught both.
 - **`rg -r` is *replace*.** `rg -rn foo mobile/` rewrote the results through a replacement pattern and printed
   `'[n"]'` for every match. Three times in one session, and the garbled output nearly became a false conclusion
   about where `dir="auto"` is set. Plain `rg` is already recursive.
+- **`ci.yml` never runs on `main`, so "I ran it locally" is not a gate.** The two-lane decision makes a green
+  *branch* head the gate and leaves `main` to a nightly plus by-hand runs. `bin/prepush.sh` covers sizes,
+  prettier, regen, `tsc`, docs, sounds and a few targeted red controls — but **no package test suite**. Two commits
+  went to `main` gated by four minutes of local green. Nothing broke, but the rule at `docs/PM.md:92` ("never for
+  unreviewed code") was broken, and reading it earlier in the session did not stop it. `bin/main_guard.py` (#734)
+  now refuses it. **Check what the gate actually covers, not what you assume it covers.**
+- **`bin/merge_pr.sh` takes a Beads id, not a branch name.** Passed `tools/main-guard`; the merge landed and only
+  then did `br close tools/main-guard` fail, leaving the PR merged with no bead transition. It accepted the bad
+  argument without complaint and failed after the irreversible step. Check the second argument.
 - **A symptom's obvious fix can be the wrong layer.** `.100.8` reads "tag each line with its key", and
   extending the existing `~` zero-width marks looks like the minimal change. It is not: marking leaves
   every lookup still keyed by *words*, rewrites the strings the Book reads out as accessible names, and
