@@ -216,3 +216,40 @@ test("a modal scene's cut pages move by their buttons and one Undo restores the 
     await page.close();
   }
 });
+
+// Break (loka-wfrgk.90): a blur's write waits a tick, and a zero tick fired under the first keystroke
+// of the field clicked into next: the walk's `21` written first as `2`, then `21` by the next blur —
+// two writes for one edit, and Undo left on the half-typed `2`. Typed with the focus moved into the
+// next field in the same task as the blur, which a slowed main thread does on its own.
+test("a blur and the next field's first keystroke write the settled value once", async () => {
+  const page = await open({ right: 420, selection: { kind: 'npc', key: 'hob' } });
+  const file = join(dir, 'showcase/areas/hub/npcs/hob.json');
+  const was = readFileSync(file, 'utf8');
+  const writes: unknown[] = [];
+  page.on('request', (r) => {
+    if (r.url().includes('/__author/change')) writes.push(r.postDataJSON()?.ops);
+  });
+  try {
+    const from = page.locator('#root_name_variants_0_when_from');
+    const to = page.locator('#root_name_variants_0_when_to');
+    await from.waitFor({ timeout: boot });
+    await from.click();
+    // a string: the test tsconfig has no DOM lib
+    await page.evaluate(`(() => {
+      // the next field takes the focus (the blur) and types its first key before that tick runs
+      const set = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set;
+      const next = document.querySelector('#root_name_variants_0_when_to');
+      next.focus();
+      set.call(next, '2');
+      next.dispatchEvent(new Event('input', { bubbles: true }));
+    })()`);
+    await to.pressSequentially('1', { delay: 120 });
+    await page.getByRole('tab').first().click(); // out of the card: its last blur writes
+    for (let t = 0; !writes.length && t < 50; t++) await page.waitForTimeout(100);
+    await page.waitForTimeout(1000); // a second, half-typed write would have landed by now
+    assert.deepEqual(writes, [[{ path: ['name_variants', 0, 'when', 'to'], value: 21 }]]);
+  } finally {
+    writeFileSync(file, was);
+    await page.close();
+  }
+});
