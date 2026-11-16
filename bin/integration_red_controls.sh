@@ -439,14 +439,15 @@ git update-ref -d refs/remotes/origin/main; cc push docs/z.md 'code=true sim_wal
 # (the story views read the fixture this run rewrites; a lib/ or capability registry change rebuilds every fixture; the containers generator
 # runs for its own or its frozen inputs' diff only); a fixture of another cartridge, or a frozen one, is rebuilt, or a `value` one, or one a
 # merge took a side of, is not; a transcript pin that is no known answer keeps its stale hash (on any line, each line its own stale pin), or one pinned
-# to another known answer of its cartridge is rewritten, or one of a cartridge with no compiled fixture stops regen; a fixed lint finding stays in the baseline; a new finding is pinned instead of failing regen.
+# to another known answer of its cartridge is rewritten, or one of a cartridge with no compiled fixture stops regen; a fixed lint finding stays in the baseline; a new finding is pinned instead of failing regen; a changed cartridge's areas/ index is not rewritten, an unchanged one's or a flat one's is, or an untracked cartridge's is read (loka-wfrgk.117).
 mkdir "$tmp/rg"; cat > "$tmp/rg/mise" <<'SH'
 #!/bin/sh
 shift 2; echo "$*" >> "$RG_LOG"
 case $* in *loka.lint*) echo "lint: ${RG_LINT:-finding}" >&2; exit 1 ;; esac
 SH
 chmod +x "$tmp/rg/mise"
-R=$(mktemp -d); cd "$R"; git init -q -b main; mkdir -p bin kernel/ts mobile/app protocol/fixtures cartridges/a/transcripts cartridges/b cartridges/c/transcripts test/loka
+R=$(mktemp -d); cd "$R"; git init -q -b main; mkdir -p bin kernel/ts mobile/app protocol/fixtures cartridges/a/transcripts cartridges/a/areas cartridges/b cartridges/c/transcripts test/loka
+echo '# areas' > cartridges/a/areas/INDEX.md # a/ is an area cartridge; b/ has no areas/ folder
 cp "$bin/regen.sh" bin/; : > bin/review_index.sh; : > bin/source_reference.py; echo 'print("containers", file=open(__import__("os").environ["RG_LOG"], "a"))' > test/loka/cartridge_containers_hash.py
 printf 'echo "$2" >> "$RG_LOG"; perl -pi -e s/old/new/ "$2"\n' > bin/regen_hash_fixture.sh
 for c in a b; do printf '{\n  "description": "x",\n  "canonical": "{\\"manifest\\":{\\"id\\":\\"%s\\"}}",\n  "sha256": "old"\n}\n' $c > protocol/fixtures/${c}_hash.json; done
@@ -458,8 +459,16 @@ rg() { RG_LOG=$R.$1 PATH="$tmp/rg:$PATH" capped sh bin/regen.sh > /dev/null 2>&1
 echo y > cartridges/a/y; rg a
 grep -qx 'protocol/fixtures/a_hash.json' "$R.a" && grep -qx 'protocol/fixtures/containers_cartridge_a_hash.json' "$R.a" && ! grep -qE 'protocol/fixtures/([bv]|containers_sampler)|^containers' "$R.a" && grep -q stories:views "$R.a" && ! grep -q loka.lint "$R.a" \
   || bad "regen: wrong generators for a cartridges/a change: $(tr '\n' ' ' < "$R.a")"
+grep -qx 'sh bin/loka index cartridges/a' "$R.a" || bad "regen: a changed area cartridge's index was not rewritten: $(tr '\n' ' ' < "$R.a")"
 [ "$(grep -c '"new"' cartridges/a/transcripts/t.jsonl)" = 2 ] || bad "regen: a stale transcript pin was kept: $(cat cartridges/a/transcripts/t.jsonl)"
 grep -q '"kept"' cartridges/a/transcripts/k.jsonl || bad 'regen: a transcript pinned to a known answer was rewritten'
+git add . && git commit -qm a; git update-ref refs/remotes/origin/main HEAD
+# `d` is tracked and has an areas/ folder but is unchanged: only a changed cartridge is indexed. `b` is
+# changed and has no areas/ folder: nothing to write, so it is not compiled for an index it cannot have.
+mkdir -p cartridges/d/areas; echo '# d' > cartridges/d/areas/INDEX.md; echo x > cartridges/d/x
+git add cartridges/d && git commit -qm d; git update-ref refs/remotes/origin/main HEAD; echo y > cartridges/b/y; rg t
+! grep -q 'index cartridges/d' "$R.t" || bad 'regen: an unchanged area cartridge was indexed'
+! grep -q 'index cartridges/b' "$R.t" || bad 'regen: a flat cartridge was compiled for an index it cannot have'
 git add . && git commit -qm a; git update-ref refs/remotes/origin/main HEAD; mkdir lib; echo x > lib/x; rg l
 grep -qx 'protocol/fixtures/a_hash.json' "$R.l" && grep -qx 'protocol/fixtures/b_hash.json' "$R.l" || bad "regen: a lib/ change did not rebuild every fixture: $(tr '\n' ' ' < "$R.l")"
 git add . && git commit -qm l; git update-ref refs/remotes/origin/main HEAD; echo x > protocol/capability_registry.json; rg r
@@ -470,6 +479,9 @@ git update-ref -d refs/remotes/origin/main; rg b
 grep -qx 'protocol/fixtures/b_hash.json' "$R.b" && grep -qx 'protocol/fixtures/v_hash.json' "$R.b" && grep -qx containers "$R.b" && ! grep -qE 'sampler_v1' "$R.b" && [ "$(grep -nE '^containers$|containers_cartridge_a' "$R.b" | cut -d: -f2 | tr '\n' ' ')" = 'containers protocol/fixtures/containers_cartridge_a_hash.json ' ] \
   || bad "regen: no diff did not rebuild every compiled fixture and the containers ones, or rebuilt a frozen one, or compiled containers_cartridge_* before the generator: $(tr '\n' ' ' < "$R.b")"
 [ "$(cat test/loka/lint_baseline.txt)" = "$(printf '# header\ntoolbox_showcase lint: finding')" ] || bad "regen: lint baseline is: $(cat test/loka/lint_baseline.txt)"
+# An untracked cartridge is the owner's uncommitted world: its index is not the repo's (loka-wfrgk.117).
+mkdir -p cartridges/u/areas; echo '# u' > cartridges/u/areas/INDEX.md; rg u
+! grep -q 'index cartridges/u' "$R.u" || bad 'regen: an untracked cartridge was compiled for its index'
 if RG_LINT=new RG_LOG=$R.n PATH="$tmp/rg:$PATH" capped sh bin/regen.sh > /dev/null 2> "$R.n.err" || ! grep -qx 'toolbox_showcase lint: new' "$R.n.err" \
   || grep -q new test/loka/lint_baseline.txt; then bad "regen: a new lint finding was pinned or not named: $(cat "$R.n.err")"; fi
 # --- check_impact_fixtures.sh ----------------------------------------------------------------
