@@ -217,10 +217,11 @@ test("a modal scene's cut pages move by their buttons and one Undo restores the 
   }
 });
 
-// Break (loka-wfrgk.90): a blur's write waits a tick, and a zero tick fired under the first keystroke
-// of the field clicked into next: the walk's `21` written first as `2`, then `21` by the next blur —
-// two writes for one edit, and Undo left on the half-typed `2`. Typed with the focus moved into the
-// next field in the same task as the blur, which a slowed main thread does on its own.
+// Break (loka-wfrgk.90): a blur's write waits `settle`, but the wait restarts on every keystroke, so a
+// gap longer than `settle` between two keys of one field writes what is typed so far: the walk's `21`
+// written first as `2`, then `21` by the next blur - two writes for one edit, and Undo left on the
+// half-typed `2`. The gap is spelled out (twice `settle`) rather than left to a slowed main thread,
+// which is what made this pass with the bug present: the first key landed inside one `settle`.
 test("a blur and the next field's first keystroke write the settled value once", async () => {
   const page = await open({ right: 420, selection: { kind: 'npc', key: 'hob' } });
   const file = join(dir, 'showcase/areas/hub/npcs/hob.json');
@@ -243,6 +244,7 @@ test("a blur and the next field's first keystroke write the settled value once",
       set.call(next, '2');
       next.dispatchEvent(new Event('input', { bubbles: true }));
     })()`);
+    await page.waitForTimeout(450); // longer than `settle`: a waiting write has fired by now
     await to.pressSequentially('1', { delay: 120 });
     await page.getByRole('tab').first().click(); // out of the card: its last blur writes
     for (let t = 0; !writes.length && t < 50; t++) await page.waitForTimeout(100);

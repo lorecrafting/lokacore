@@ -181,6 +181,12 @@ const settle = 200;
  * clicked into next, writing `2` of the `21` being typed: two writes for one edit, Undo left on `2`
  * (loka-wfrgk.90). The wait still covers what the tick was for: rjsf sends a map key's rename after
  * its setState, past the blur, and its Remove drops the focused button so no blur follows.
+ *
+ * Typing cancels it instead of restarting it: restarting kept a write armed for as long as the author
+ * kept typing, and it fired on whatever was typed when the wait ran out (the walk's `21` sent as `2`
+ * after a 528 ms gap). A blur arms the write, a keystroke cancels it, and the blur that leaves the
+ * field arms it again with the words settled. Only a real `input` cancels: rjsf renames a map key by
+ * a setState after its blur, and that change must still reach the write the blur armed.
  */
 function useSettled(commit: () => void) {
   const stamp = useRef<ReturnType<typeof setTimeout>>(undefined);
@@ -191,21 +197,25 @@ function useSettled(commit: () => void) {
       commit();
     }, settle);
   }, [commit]);
+  const stop = useCallback(() => {
+    clearTimeout(stamp.current);
+    stamp.current = undefined;
+  }, []);
   useEffect(() => () => clearTimeout(stamp.current), []);
-  return { soon, waiting: () => !!stamp.current };
+  return { soon, stop };
 }
 
 /** The card's form: rjsf draws the file under `ui`, each blur commits, refusals at their field. */
 export function CardForm({ rel, card, context, diag, ui, fields: picks = fields }: FormProps) {
   // rjsf keeps an added row's key in its own state: a renamed row redraws
   const [rows, remount] = useReducer((n: number) => n + 1, 0); // mutate-skip: a redraw key; any start or step redraws
-  const { soon, waiting } = useSettled(card.commit);
+  const { soon, stop } = useSettled(card.commit);
   const change = (doc: unknown, row = capabilityRow(doc as never)) => {
     void (row !== doc && remount(), card.change(row));
-    if (waiting()) soon(); // typing after the blur: the write waits for it to settle
   };
   return (
-    <div onBlur={soon} onClick={(e) => removes(e.target) && setTimeout(card.commit)}>
+    // A keystroke cancels the write the blur armed; the next blur arms it again with the words settled.
+    <div onBlur={soon} onInput={stop} onClick={(e) => removes(e.target) && setTimeout(card.commit)}>
       <CardFormBase
         key={rows}
         schema={card.saved!.schema}

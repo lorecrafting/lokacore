@@ -67,8 +67,10 @@ close)
   if [ -z "$(git -C "$wt" rev-list origin/main..HEAD)" ]; then
     echo "$me: no commits on $b; no push, no PR"
   else
-    # A detached component doc comment otherwise fails only on hosted CI, after the push (loka-iu6x).
-    (cd "$wt/mobile/app" && mise exec -- node --test --test-reporter=dot catalogue.test.ts) || die 'catalogue.test.ts failed: fix the doc comment; nothing pushed'
+    # A detached component doc comment otherwise fails only on hosted CI, after the push (loka-iu6x),
+    # and so does a stories file the app's tsconfig excludes: book-e2e's storybook job runs
+    # `tsc -p .storybook`, which the smoke script shares, and close skipped it (loka-9ack).
+    (cd "$wt/mobile/app" && mise exec -- node --test --test-reporter=dot catalogue.test.ts && mise exec -- npx tsc -p .storybook) || die 'catalogue.test.ts or the stories type check failed: fix it; nothing pushed'
     git -C "$wt" push -q -u origin "$b" || die 'push failed; the session stays served'
     url=$(cd "$wt" && $GH pr list --head "$b" --state open --json url --jq '.[0].url // empty') || die 'gh pr list failed'
     [ -n "$url" ] || url=$(cd "$wt" && $GH pr create --base main --head "$b" --fill) || die 'gh pr create failed'

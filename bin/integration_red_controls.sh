@@ -648,10 +648,12 @@ cat > "$tmp/srv/mise" <<'SH'
 shift; [ "$1" = -- ] && shift
 echo "$(pwd -P) $*" >> "$MISE_LOG"
 case $* in
+  # Before *storybook*: `tsc -p .storybook` would otherwise take the port branch and sleep.
+  *'-p .storybook'*) exit "${STORY_RC:-0}" ;;
+  *catalogue.test.ts*) exit "${CAT_RC:-0}" ;;
   *storybook* | *expo*) for a; do port=$a; done ;;
   *web:preview*) port=$LOKA_PREVIEW_PORT ;;
   'npm ci'*) mkdir -p node_modules; exit 0 ;;
-  *catalogue.test.ts*) exit "${CAT_RC:-0}" ;;
   *) exit 0 ;;
 esac
 exec perl -MIO::Socket::INET -e 'my $s = IO::Socket::INET->new(LocalAddr => "127.0.0.1", LocalPort => shift, Listen => 1, ReuseAddr => 1) or die "listen: $!"; sleep 120' "$port" loka-stub "$@"
@@ -735,6 +737,12 @@ git -C "$S" add new-token.ts; git -C "$S" commit -qm tweak
 export CAT_RC=1; run polish_session.sh close catalogue-red 1; unset CAT_RC
 ! git ls-remote --exit-code --heads origin "$day-2" > /dev/null && [ ! -s "$R.gh" ] && [ "$(cwd $sbp)" = "$S/mobile/app" ] \
   || bad 'polish_session close catalogue-red: pushed, opened a PR, or the session not served'
+# Break: close pushes a stories file book-e2e's type check rejects; #513/#520/#527 each went red
+# after close said OK, because the app's tsconfig excludes stories (loka-9ack).
+export STORY_RC=1; : > "$R.mise"; run polish_session.sh close stories-red 1; unset STORY_RC
+! git ls-remote --exit-code --heads origin "$day-2" > /dev/null && [ ! -s "$R.gh" ] && [ "$(cwd $sbp)" = "$S/mobile/app" ] \
+  && grep -q 'tsc -p .storybook' "$R.mise" \
+  || bad 'polish_session close stories-red: pushed, opened a PR, left the session unserved, or never ran the stories type check'
 touch "$P/x"; run polish_session.sh close dirty-preview 1; rm "$P/x"
 [ "$(cwd $sbp)" = "$S/mobile/app" ] || bad 'polish_session close dirty-preview: no Storybook left serving the session'
 run polish_session.sh close close 0
@@ -920,7 +928,9 @@ case "$out" in PUSH_EXIT=1*) ;; *) bad "push_slice: a red touched unit file prin
 git reset -q --hard origin/slice
 # --- .githooks/pre-push, format_on_edit.sh ----------------------------------------------------
 # Break (loka-ivjq.19): a new commit whose message names a home or worktree path is pushed; a clean one is refused.
-R=$(mktemp -d); cd "$R"; git init -q; mkdir bin; printf '#!/bin/sh\nexit 0\n' > bin/prepush.sh; chmod +x bin/prepush.sh; git add .
+# On a branch other than main: these cases are about the message scan, and main runs bin/main_guard.py,
+# which this throwaway repo does not have (it read as a failing message check).
+R=$(mktemp -d); cd "$R"; git init -q -b slice; mkdir bin; printf '#!/bin/sh\nexit 0\n' > bin/prepush.sh; chmod +x bin/prepush.sh; git add .
 z=0000000000000000000000000000000000000000
 for m in 'clean 0' 'see /Users/x/f 1' 'in worktrees.noindex/x 1'; do
   git commit -qm "${m% *}" --allow-empty; rc=0
