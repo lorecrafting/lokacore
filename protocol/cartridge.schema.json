@@ -4,483 +4,345 @@
   "description": "The compiled cartridge, its artifact file and the compiler and loader diagnostics (05 §8, §11, §12, §20; 08 §6; 14 §R4). R4 minimal: the frozen kinds only; rooms, NPCs, schedules, quests, dialogue, assets and localization join with their features, under a new format tag.",
   "$defs": {
     "CompiledCartridge": {
-      "description": "The semantic payload a cartridge hash covers (05 §11 'Hash domains and attestations'): the manifest with its compatibility requirements, the exact capability lock (exactly requires.capabilities until a registry dependency exists; the loader rejects a difference with LOCK_MANIFEST_MISMATCH), and the normalized definitions of the frozen kinds, each map keyed by DefinitionRefString so canonical key order orders it. A key's cartridge_id and cartridge_version are the manifest's id and version and its last segment is the definition's key; the compiler guarantees this and the loader rejects a mismatch (ARTIFACT_DEFINITION_KEY_MISMATCH); the subset cannot express it. format is the hash domain tag and selects the variant. Compatibility (PM ruling, R5 S1 review A7/F3): adding an OPTIONAL field to an existing definition kind, or an optional new definition map, keeps the tag, because an artifact without it keeps its bytes, hash and meaning; a change in the meaning or requirement of an existing field (a field made required, removed or reinterpreted) takes a new tag. Loaders stay fail-closed: an older loader rejects a field it does not know as UNKNOWN_FIELD, and kernel_api ranges govern which loader a cartridge needs. No certificate, signature, package or catalog field belongs here (CAR-10). In R4 the authored cartridge.json is exactly the CartridgeManifest object form (kernel_api as {at_least, below}, capabilities as key to version); the string forms (\">=1.3 <2.0\", key@version) are not accepted yet.",
-      "oneOf": [
-        {
-          "type": "object",
-          "properties": {
-            "format": {
-              "type": "string",
-              "const": "loka-cartridge-v1"
-            },
-            "manifest": {
-              "$ref": "manifest.schema.json#/$defs/CartridgeManifest"
-            },
-            "lock": {
-              "$ref": "capability.schema.json#/$defs/CapabilityLock"
-            },
-            "facts": {
-              "description": "The cartridge's fact declarations, keyed by DefinitionRefString of kind fact.",
-              "type": "object",
-              "propertyNames": {
-                "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):fact/[a-z][a-z0-9_]{0,63}$"
-              },
-              "additionalProperties": {
-                "$ref": "fact.schema.json#/$defs/FactSpec"
-              }
-            },
-            "actions": {
-              "description": "The cartridge's action definitions, keyed by DefinitionRefString of kind action.",
-              "type": "object",
-              "propertyNames": {
-                "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):action/[a-z][a-z0-9_]{0,63}$"
-              },
-              "additionalProperties": {
-                "$ref": "action.schema.json#/$defs/ActionDefinition"
-              }
-            }
-          },
-          "required": [
-            "format",
-            "manifest",
-            "lock",
-            "facts",
-            "actions"
-          ],
-          "additionalProperties": false,
-          "description": "loka-cartridge-v1 (R4): the frozen kinds of R4 only."
+      "description": "The semantic payload a cartridge hash covers (05 §11 'Hash domains and attestations'): the manifest with its compatibility requirements, the exact capability lock (exactly requires.capabilities until a registry dependency exists; the loader rejects a difference with LOCK_MANIFEST_MISMATCH), and the normalized definitions of the frozen kinds, each map keyed by DefinitionRefString so canonical key order orders it. A key's cartridge_id and cartridge_version are the manifest's id and version and its last segment is the definition's key; the compiler guarantees this and the loader rejects a mismatch (ARTIFACT_DEFINITION_KEY_MISMATCH); the subset cannot express it. format is the hash domain tag, loka-cartridge-v2; loka-cartridge-v1, the frozen kinds of R4 without rooms, an entry or text, is retired, and the loader rejects it as UNKNOWN_FORMAT. Compatibility (PM ruling, R5 S1 review A7/F3): adding an OPTIONAL field to an existing definition kind, or an optional new definition map, keeps the tag, because an artifact without it keeps its bytes, hash and meaning; a change in the meaning or requirement of an existing field (a field made required, removed or reinterpreted) takes a new tag. Loaders stay fail-closed: an older loader rejects a field it does not know as UNKNOWN_FIELD, and kernel_api ranges govern which loader a cartridge needs. No certificate, signature, package or catalog field belongs here (CAR-10). In R4 the authored cartridge.json is exactly the CartridgeManifest object form (kernel_api as {at_least, below}, capabilities as key to version); the string forms (\">=1.3 <2.0\", key@version) are not accepted yet.",
+      "type": "object",
+      "properties": {
+        "format": {
+          "type": "string",
+          "const": "loka-cartridge-v2"
         },
-        {
+        "manifest": {
+          "$ref": "manifest.schema.json#/$defs/CartridgeManifest"
+        },
+        "lock": {
+          "$ref": "capability.schema.json#/$defs/CapabilityLock"
+        },
+        "facts": {
+          "description": "The cartridge's fact declarations, keyed by DefinitionRefString of kind fact.",
           "type": "object",
-          "properties": {
-            "format": {
-              "type": "string",
-              "const": "loka-cartridge-v2"
-            },
-            "manifest": {
-              "$ref": "manifest.schema.json#/$defs/CartridgeManifest"
-            },
-            "lock": {
-              "$ref": "capability.schema.json#/$defs/CapabilityLock"
-            },
-            "facts": {
-              "description": "The cartridge's fact declarations, keyed by DefinitionRefString of kind fact.",
-              "type": "object",
-              "propertyNames": {
-                "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):fact/[a-z][a-z0-9_]{0,63}$"
-              },
-              "additionalProperties": {
-                "$ref": "fact.schema.json#/$defs/FactSpec"
-              }
-            },
-            "actions": {
-              "description": "The cartridge's action definitions, keyed by DefinitionRefString of kind action.",
-              "type": "object",
-              "propertyNames": {
-                "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):action/[a-z][a-z0-9_]{0,63}$"
-              },
-              "additionalProperties": {
-                "$ref": "action.schema.json#/$defs/ActionDefinition"
-              }
-            },
-            "rooms": {
-              "description": "The cartridge's rooms, keyed by DefinitionRefString of kind room (never empty: entry names one of them).",
-              "type": "object",
-              "propertyNames": {
-                "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):room/[a-z][a-z0-9_]{0,63}$"
-              },
-              "additionalProperties": {
-                "$ref": "room.schema.json#/$defs/RoomDefinition"
-              }
-            },
+          "propertyNames": {
+            "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):fact/[a-z][a-z0-9_]{0,63}$"
+          },
+          "additionalProperties": {
+            "$ref": "fact.schema.json#/$defs/FactSpec"
+          }
+        },
+        "actions": {
+          "description": "The cartridge's action definitions, keyed by DefinitionRefString of kind action.",
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):action/[a-z][a-z0-9_]{0,63}$"
+          },
+          "additionalProperties": {
+            "$ref": "action.schema.json#/$defs/ActionDefinition"
+          }
+        },
+        "rooms": {
+          "description": "The cartridge's rooms, keyed by DefinitionRefString of kind room (never empty: entry names one of them).",
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):room/[a-z][a-z0-9_]{0,63}$"
+          },
+          "additionalProperties": {
+            "$ref": "room.schema.json#/$defs/RoomDefinition"
+          }
+        },
+        "items": {
+          "description": "The cartridge's items, keyed by DefinitionRefString of kind item; absent when it has none (R5 S4, an optional map: the tag stays).",
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):item/[a-z][a-z0-9_]{0,63}$"
+          },
+          "additionalProperties": {
+            "$ref": "entity.schema.json#/$defs/ItemDefinition"
+          }
+        },
+        "npcs": {
+          "description": "The cartridge's NPCs, keyed by DefinitionRefString of kind npc; absent when it has none (R5 S4, an optional map: the tag stays).",
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):npc/[a-z][a-z0-9_]{0,63}$"
+          },
+          "additionalProperties": {
+            "$ref": "entity.schema.json#/$defs/NpcDefinition"
+          }
+        },
+        "scripted_actions": {
+          "description": "The cartridge's scripted actions (action.schema.json ScriptedAction), keyed by DefinitionRefString of kind action; absent when it has none (R5 S5, an optional map: the tag stays).",
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):action/[a-z][a-z0-9_]{0,63}$"
+          },
+          "additionalProperties": {
+            "$ref": "action.schema.json#/$defs/ScriptedAction"
+          }
+        },
+        "resources": {
+          "description": "The cartridge's resources (resource.schema.json ResourceSpec), keyed by DefinitionRefString of kind resource; absent when it has none (R5 S6b, an optional map: the tag stays). The compiler adds the default pools hp, ma and mv, resource@1 and schedule@1 (wait, so an exhausted body can regenerate) to every cartridge; an artifact without them (older or hand-built) has no pools, and its moves cost nothing.",
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):resource/[a-z][a-z0-9_]{0,63}$"
+          },
+          "additionalProperties": {
+            "$ref": "resource.schema.json#/$defs/ResourceSpec"
+          }
+        },
+        "attributes": {
+          "description": "The cartridge's attributes (AttributeSpec), keyed by DefinitionRefString of kind attribute; absent when it has none (C1 c1-attributes, an optional map: the tag stays). Its kind and the policy leaves stat_compare and resource_compare need attribute@1 in the lock.",
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):attribute/[a-z][a-z0-9_]{0,63}$"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/AttributeSpec"
+          }
+        },
+        "ancestries": {
+          "description": "Choices a character makes once, such as an ancestry, each under its own name.",
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[a-z][a-z0-9_]{0,63}$"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/AncestrySpec"
+          }
+        },
+        "entry": {
+          "description": "The room a new run's player starts in (00a §12 manifest entry); a room of this cartridge.",
+          "$ref": "identity.schema.json#/$defs/DefinitionRef"
+        },
+        "text": {
+          "$ref": "text.schema.json#/$defs/TextCatalog"
+        },
+        "alternates": {
+          "description": "Variety for narration: for a text key, other keys to use in its place; each time the line is told, one of them is picked.",
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[a-z][a-z0-9_.]{0,127}$"
+          },
+          "additionalProperties": {
+            "type": "array",
+            "minItems": 1,
             "items": {
-              "description": "The cartridge's items, keyed by DefinitionRefString of kind item; absent when it has none (R5 S4, an optional map: the tag stays).",
-              "type": "object",
-              "propertyNames": {
-                "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):item/[a-z][a-z0-9_]{0,63}$"
-              },
-              "additionalProperties": {
-                "$ref": "entity.schema.json#/$defs/ItemDefinition"
-              }
-            },
-            "npcs": {
-              "description": "The cartridge's NPCs, keyed by DefinitionRefString of kind npc; absent when it has none (R5 S4, an optional map: the tag stays).",
-              "type": "object",
-              "propertyNames": {
-                "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):npc/[a-z][a-z0-9_]{0,63}$"
-              },
-              "additionalProperties": {
-                "$ref": "entity.schema.json#/$defs/NpcDefinition"
-              }
-            },
-            "scripted_actions": {
-              "description": "The cartridge's scripted actions (action.schema.json ScriptedAction), keyed by DefinitionRefString of kind action; absent when it has none (R5 S5, an optional map: the tag stays).",
-              "type": "object",
-              "propertyNames": {
-                "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):action/[a-z][a-z0-9_]{0,63}$"
-              },
-              "additionalProperties": {
-                "$ref": "action.schema.json#/$defs/ScriptedAction"
-              }
-            },
-            "resources": {
-              "description": "The cartridge's resources (resource.schema.json ResourceSpec), keyed by DefinitionRefString of kind resource; absent when it has none (R5 S6b, an optional map: the tag stays). The compiler adds the default pools hp, ma and mv, resource@1 and schedule@1 (wait, so an exhausted body can regenerate) to every v2 cartridge; an artifact without them (older or hand-built) has no pools, and its moves cost nothing.",
-              "type": "object",
-              "propertyNames": {
-                "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):resource/[a-z][a-z0-9_]{0,63}$"
-              },
-              "additionalProperties": {
-                "$ref": "resource.schema.json#/$defs/ResourceSpec"
-              }
-            },
-            "attributes": {
-              "description": "The cartridge's attributes (AttributeSpec), keyed by DefinitionRefString of kind attribute; absent when it has none (C1 c1-attributes, an optional map: the tag stays). Its kind and the policy leaves stat_compare and resource_compare need attribute@1 in the lock.",
-              "type": "object",
-              "propertyNames": {
-                "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):attribute/[a-z][a-z0-9_]{0,63}$"
-              },
-              "additionalProperties": {
-                "$ref": "#/$defs/AttributeSpec"
-              }
-            },
-            "ancestries": {
-              "description": "Authored once-only character choices (attribute@1), keyed by choice Key.",
-              "type": "object",
-              "propertyNames": {
-                "pattern": "^[a-z][a-z0-9_]{0,63}$"
-              },
-              "additionalProperties": {
-                "$ref": "#/$defs/AncestrySpec"
-              }
-            },
-            "entry": {
-              "description": "The room a new run's player starts in (00a §12 manifest entry); a room of this cartridge.",
-              "$ref": "identity.schema.json#/$defs/DefinitionRef"
-            },
-            "text": {
-              "$ref": "text.schema.json#/$defs/TextCatalog"
-            },
-            "alternates": {
-              "description": "Narration variety (alternates@1, toolbox row W7): a text key's alternates, each a key of the text catalog; a committed narration line with that key shows one of the key and its alternates, chosen by a hash of the command id and the key (mechanics.md narration variety), never the authority RNG.",
-              "type": "object",
-              "propertyNames": {
-                "pattern": "^[a-z][a-z0-9_.]{0,127}$"
-              },
-              "additionalProperties": {
-                "type": "array",
-                "minItems": 1,
-                "items": {
-                  "$ref": "text.schema.json#/$defs/TextKey"
-                }
-              }
-            },
-            "barriers": {
-              "description": "The cartridge's barriers, keyed by DefinitionRefString of kind barrier; absent when it has none (R5 S7, an optional map: the tag stays).",
-              "type": "object",
-              "propertyNames": {
-                "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):barrier/[a-z][a-z0-9_]{0,63}$"
-              },
-              "additionalProperties": {
-                "$ref": "room.schema.json#/$defs/BarrierDefinition"
-              }
-            },
-            "quests": {
-              "description": "The cartridge's quests, keyed by DefinitionRefString of kind quest; absent when it has none (Early R7/R8 Q, an optional map: the tag stays).",
-              "type": "object",
-              "propertyNames": {
-                "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):quest/[a-z][a-z0-9_]{0,63}$"
-              },
-              "additionalProperties": {
-                "$ref": "quest.schema.json#/$defs/QuestDefinition"
-              }
-            },
-            "dialogues": {
-              "description": "The cartridge's dialogues, keyed by DefinitionRefString of kind dialogue; absent when it has none (Early R7/R8 D1, an optional map: the tag stays).",
-              "type": "object",
-              "propertyNames": {
-                "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):dialogue/[a-z][a-z0-9_]{0,63}$"
-              },
-              "additionalProperties": {
-                "$ref": "dialogue.schema.json#/$defs/DialogueDefinition"
-              }
-            },
-            "story_points": {
-              "description": "The cartridge's story points (23 §3), keyed by DefinitionRefString of kind story_point; absent when it has none (Early R7/R8 D2, an optional map: the tag stays).",
-              "type": "object",
-              "propertyNames": {
-                "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):story_point/[a-z][a-z0-9_]{0,63}$"
-              },
-              "additionalProperties": {
-                "$ref": "#/$defs/StoryPointDefinition"
-              }
-            },
-            "reactions": {
-              "description": "The cartridge's reaction rules, keyed by DefinitionRefString of kind reaction; absent when it has none (Early R7/R8 R, an optional map: the tag stays).",
-              "type": "object",
-              "propertyNames": {
-                "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):reaction/[a-z][a-z0-9_]{0,63}$"
-              },
-              "additionalProperties": {
-                "$ref": "reaction.schema.json#/$defs/ReactionRule"
-              }
-            },
-            "calendar": {
-              "$ref": "#/$defs/Calendar"
-            },
-            "world": {
-              "$ref": "#/$defs/WorldSettings"
-            },
-            "speech": {
-              "description": "Word bar S2 (speech@1): phrases, the cartridge's static say words, each a speech@1 Word, offered to every actor with no fact gate; GameView projects them as phrases. In source it is cartridge.json's speech, beside world.",
-              "type": "object",
-              "properties": {
-                "phrases": {
-                  "description": "The words every player can say, as chips in the say bar.",
-                  "type": "array",
-                  "minItems": 1,
-                  "items": {
-                    "$ref": "action.schema.json#/$defs/Word"
-                  }
-                }
-              },
-              "required": [
-                "phrases"
-              ],
-              "additionalProperties": false
-            },
-            "chapters": {
-              "description": "Optional ordered chapter markers; absent preserves earlier cartridge bytes and meaning.",
-              "type": "array",
-              "minItems": 1,
-              "items": {
-                "$ref": "#/$defs/Chapter"
-              }
-            },
-            "scenes": {
-              "description": "Optional modal scene definitions, owned by scene@1, keyed by scene DefinitionRefString.",
-              "type": "object",
-              "propertyNames": {
-                "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):scene/[a-z][a-z0-9_]{0,63}$"
-              },
-              "additionalProperties": {
-                "$ref": "scene.schema.json#/$defs/SceneDefinition"
-              }
-            },
-            "skills": {
-              "description": "Declared topics and their mapped player knowledge facts.",
-              "type": "object",
-              "propertyNames": {
-                "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):skill/[a-z][a-z0-9_]{0,63}$"
-              },
-              "additionalProperties": {
-                "$ref": "#/$defs/SkillDefinition"
-              }
-            },
-            "topics": {
-              "description": "Declared topics and their mapped player knowledge facts.",
-              "type": "object",
-              "propertyNames": {
-                "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):topic/[a-z][a-z0-9_]{0,63}$"
-              },
-              "additionalProperties": {
-                "$ref": "#/$defs/TopicDefinition"
-              }
-            },
-            "liquids": {
-              "type": "object",
-              "propertyNames": {
-                "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):liquid/[a-z][a-z0-9_]{0,63}$"
-              },
-              "additionalProperties": {
-                "$ref": "liquid.schema.json#/$defs/LiquidDefinition"
-              }
-            },
-            "populations": {
-              "type": "object",
-              "propertyNames": {
-                "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):population/[a-z][a-z0-9_]{0,63}$"
-              },
-              "additionalProperties": {
-                "$ref": "cartridge.schema.json#/$defs/PopulationPlan"
-              }
-            },
-            "replenish": {
-              "description": "Replenish (toolbox row 19b, docs/system/mechanics.md Replenish): scheduled moves of conserved items from a reserve holder to a target holder up to a cap, keyed by DefinitionRefString of kind replenish.",
-              "type": "object",
-              "propertyNames": {
-                "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):replenish/[a-z][a-z0-9_]{0,63}$"
-              },
-              "additionalProperties": {
-                "$ref": "cartridge.schema.json#/$defs/ReplenishPlan"
-              }
-            },
-            "services": {
-              "type": "object",
-              "propertyNames": {
-                "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):service/[a-z][a-z0-9_]{0,63}$"
-              },
-              "additionalProperties": {
-                "$ref": "service.schema.json#/$defs/ServiceDefinition"
-              }
-            },
-            "transports": {
-              "type": "object",
-              "propertyNames": {
-                "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):transport/[a-z][a-z0-9_]{0,63}$"
-              },
-              "additionalProperties": {
-                "$ref": "transport.schema.json#/$defs/TransportDefinition"
-              }
-            },
-            "bleeds": {
-              "type": "object",
-              "propertyNames": {
-                "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):bleed/[a-z][a-z0-9_]{0,63}$"
-              },
-              "additionalProperties": {
-                "$ref": "cartridge.schema.json#/$defs/BleedDefinition"
-              }
-            },
-            "emotes": {
-              "description": "NPC emotes (G9, emote@1, docs/system/mechanics.md NPC emotes): the cartridge's emote table, keyed by DefinitionRefString of kind emote; a reaction's emote step plays one.",
-              "type": "object",
-              "propertyNames": {
-                "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):emote/[a-z][a-z0-9_]{0,63}$"
-              },
-              "additionalProperties": {
-                "$ref": "cartridge.schema.json#/$defs/EmoteDefinition"
-              }
-            },
-            "statuses": {
-              "type": "object",
-              "propertyNames": {
-                "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):status/[a-z][a-z0-9_]{0,63}$"
-              },
-              "additionalProperties": {
-                "$ref": "cartridge.schema.json#/$defs/StatusDefinition"
-              }
-            },
-            "structures": {
-              "type": "object",
-              "propertyNames": {
-                "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):structure/[a-z][a-z0-9_]{0,63}$"
-              },
-              "additionalProperties": {
-                "$ref": "cartridge.schema.json#/$defs/StructureDefinition"
-              }
-            },
-            "layout": {
-              "type": "array",
-              "items": {
-                "$ref": "cartridge.schema.json#/$defs/MapPosition"
-              },
-              "minItems": 1
-            }
-          },
-          "required": [
-            "format",
-            "manifest",
-            "lock",
-            "facts",
-            "actions",
-            "rooms",
-            "entry",
-            "text"
-          ],
-          "additionalProperties": false,
-          "description": "loka-cartridge-v2 (R5 slice 1): v1 plus rooms, the entry room and the default-locale text catalog. The compiler emits v2 exactly when the source has rooms, an entry or a text catalog, so a cartridge without rooms keeps its v1 bytes and hash."
-        }
-      ],
-      "examples": [
-        {
-          "format": "loka-cartridge-v1",
-          "manifest": {
-            "api_version": "loka/v3",
-            "id": "hello_sampler",
-            "version": "0.0.1",
-            "title": "Hello Sampler",
-            "requires": {
-              "kernel_api": {
-                "at_least": "1.0",
-                "below": "2.0"
-              },
-              "content_schema": 1,
-              "rule_ir": 1,
-              "capabilities": {
-                "movement": 1,
-                "containment": 1,
-                "inspectable_detail": 1,
-                "description_variant": 1,
-                "equipment": 1,
-                "fact": 1,
-                "policy": 1,
-                "target_resolution": 1,
-                "narration": 1,
-                "quest": 1,
-                "dialogue": 1,
-                "topic": 1,
-                "check": 1,
-                "schedule": 1
-              },
-              "client_features": []
-            },
-            "supported_profiles": [
-              "offline_private"
-            ]
-          },
-          "lock": {
-            "format": "loka-capability-lock-v1",
-            "capabilities": {
-              "movement": 1,
-              "containment": 1,
-              "inspectable_detail": 1,
-              "description_variant": 1,
-              "equipment": 1,
-              "fact": 1,
-              "policy": 1,
-              "target_resolution": 1,
-              "narration": 1,
-              "quest": 1,
-              "dialogue": 1,
-              "topic": 1,
-              "check": 1,
-              "schedule": 1
-            }
-          },
-          "facts": {
-            "hello_sampler@0.0.1:fact/village_arrived": {
-              "key": "village_arrived",
-              "version": 1,
-              "value_type": {
-                "type": "bool",
-                "default": false
-              },
-              "scopes": [
-                "instance"
-              ],
-              "meaning": "The lantern was fetched for Bram; the village green reads differently."
-            }
-          },
-          "actions": {
-            "hello_sampler@0.0.1:action/talk": {
-              "key": "talk",
-              "name": "actions.talk",
-              "target": {
-                "kind": "entity",
-                "scopes": [
-                  "room_occupants"
-                ]
-              },
-              "command": "talk",
-              "priority": 100,
-              "input": [],
-              "policy": {
-                "op": "target_present"
-              },
-              "accessibility": "actions.talk.a11y"
+              "$ref": "text.schema.json#/$defs/TextKey"
             }
           }
         },
+        "barriers": {
+          "description": "The cartridge's barriers, keyed by DefinitionRefString of kind barrier; absent when it has none (R5 S7, an optional map: the tag stays).",
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):barrier/[a-z][a-z0-9_]{0,63}$"
+          },
+          "additionalProperties": {
+            "$ref": "room.schema.json#/$defs/BarrierDefinition"
+          }
+        },
+        "quests": {
+          "description": "The cartridge's quests, keyed by DefinitionRefString of kind quest; absent when it has none (Early R7/R8 Q, an optional map: the tag stays).",
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):quest/[a-z][a-z0-9_]{0,63}$"
+          },
+          "additionalProperties": {
+            "$ref": "quest.schema.json#/$defs/QuestDefinition"
+          }
+        },
+        "dialogues": {
+          "description": "The cartridge's dialogues, keyed by DefinitionRefString of kind dialogue; absent when it has none (Early R7/R8 D1, an optional map: the tag stays).",
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):dialogue/[a-z][a-z0-9_]{0,63}$"
+          },
+          "additionalProperties": {
+            "$ref": "dialogue.schema.json#/$defs/DialogueDefinition"
+          }
+        },
+        "story_points": {
+          "description": "The cartridge's story points (23 §3), keyed by DefinitionRefString of kind story_point; absent when it has none (Early R7/R8 D2, an optional map: the tag stays).",
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):story_point/[a-z][a-z0-9_]{0,63}$"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/StoryPointDefinition"
+          }
+        },
+        "reactions": {
+          "description": "The cartridge's reaction rules, keyed by DefinitionRefString of kind reaction; absent when it has none (Early R7/R8 R, an optional map: the tag stays).",
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):reaction/[a-z][a-z0-9_]{0,63}$"
+          },
+          "additionalProperties": {
+            "$ref": "reaction.schema.json#/$defs/ReactionRule"
+          }
+        },
+        "calendar": {
+          "$ref": "#/$defs/Calendar"
+        },
+        "world": {
+          "$ref": "#/$defs/WorldSettings"
+        },
+        "speech": {
+          "description": "Words the player can say anywhere: phrases, offered to every player on the word bar.",
+          "type": "object",
+          "properties": {
+            "phrases": {
+              "description": "The words every player can say, as chips in the say bar.",
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "action.schema.json#/$defs/Word"
+              }
+            }
+          },
+          "required": [
+            "phrases"
+          ],
+          "additionalProperties": false
+        },
+        "chapters": {
+          "description": "Optional chapter markers, in order.",
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/Chapter"
+          }
+        },
+        "scenes": {
+          "description": "Optional modal scene definitions, owned by scene@1, keyed by scene DefinitionRefString.",
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):scene/[a-z][a-z0-9_]{0,63}$"
+          },
+          "additionalProperties": {
+            "$ref": "scene.schema.json#/$defs/SceneDefinition"
+          }
+        },
+        "skills": {
+          "description": "Declared topics and their mapped player knowledge facts.",
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):skill/[a-z][a-z0-9_]{0,63}$"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/SkillDefinition"
+          }
+        },
+        "topics": {
+          "description": "Declared topics and their mapped player knowledge facts.",
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):topic/[a-z][a-z0-9_]{0,63}$"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/TopicDefinition"
+          }
+        },
+        "liquids": {
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):liquid/[a-z][a-z0-9_]{0,63}$"
+          },
+          "additionalProperties": {
+            "$ref": "liquid.schema.json#/$defs/LiquidDefinition"
+          }
+        },
+        "populations": {
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):population/[a-z][a-z0-9_]{0,63}$"
+          },
+          "additionalProperties": {
+            "$ref": "cartridge.schema.json#/$defs/PopulationPlan"
+          }
+        },
+        "replenish": {
+          "description": "Replenish (toolbox row 19b, docs/system/mechanics.md Replenish): scheduled moves of conserved items from a reserve holder to a target holder up to a cap, keyed by DefinitionRefString of kind replenish.",
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):replenish/[a-z][a-z0-9_]{0,63}$"
+          },
+          "additionalProperties": {
+            "$ref": "cartridge.schema.json#/$defs/ReplenishPlan"
+          }
+        },
+        "services": {
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):service/[a-z][a-z0-9_]{0,63}$"
+          },
+          "additionalProperties": {
+            "$ref": "service.schema.json#/$defs/ServiceDefinition"
+          }
+        },
+        "transports": {
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):transport/[a-z][a-z0-9_]{0,63}$"
+          },
+          "additionalProperties": {
+            "$ref": "transport.schema.json#/$defs/TransportDefinition"
+          }
+        },
+        "bleeds": {
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):bleed/[a-z][a-z0-9_]{0,63}$"
+          },
+          "additionalProperties": {
+            "$ref": "cartridge.schema.json#/$defs/BleedDefinition"
+          }
+        },
+        "emotes": {
+          "description": "NPC emotes (G9, emote@1, docs/system/mechanics.md NPC emotes): the cartridge's emote table, keyed by DefinitionRefString of kind emote; a reaction's emote step plays one.",
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):emote/[a-z][a-z0-9_]{0,63}$"
+          },
+          "additionalProperties": {
+            "$ref": "cartridge.schema.json#/$defs/EmoteDefinition"
+          }
+        },
+        "statuses": {
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):status/[a-z][a-z0-9_]{0,63}$"
+          },
+          "additionalProperties": {
+            "$ref": "cartridge.schema.json#/$defs/StatusDefinition"
+          }
+        },
+        "structures": {
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[a-z][a-z0-9_]{0,63}@(?=[0-9.]{5,64}:)(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*):structure/[a-z][a-z0-9_]{0,63}$"
+          },
+          "additionalProperties": {
+            "$ref": "cartridge.schema.json#/$defs/StructureDefinition"
+          }
+        },
+        "layout": {
+          "type": "array",
+          "items": {
+            "$ref": "cartridge.schema.json#/$defs/MapPosition"
+          },
+          "minItems": 1
+        }
+      },
+      "required": [
+        "format",
+        "manifest",
+        "lock",
+        "facts",
+        "actions",
+        "rooms",
+        "entry",
+        "text"
+      ],
+      "additionalProperties": false,
+      "examples": [
         {
           "format": "loka-cartridge-v2",
           "manifest": {
@@ -603,98 +465,6 @@
       ],
       "additionalProperties": false,
       "examples": [
-        {
-          "content_hash": "fe17f082e3f22187e008b34491af5ed1b053fdc4615058ce47011ee0180d84f2",
-          "cartridge": {
-            "format": "loka-cartridge-v1",
-            "manifest": {
-              "api_version": "loka/v3",
-              "id": "hello_sampler",
-              "version": "0.0.1",
-              "title": "Hello Sampler",
-              "requires": {
-                "kernel_api": {
-                  "at_least": "1.0",
-                  "below": "2.0"
-                },
-                "content_schema": 1,
-                "rule_ir": 1,
-                "capabilities": {
-                  "movement": 1,
-                  "containment": 1,
-                  "inspectable_detail": 1,
-                  "description_variant": 1,
-                  "equipment": 1,
-                  "fact": 1,
-                  "policy": 1,
-                  "target_resolution": 1,
-                  "narration": 1,
-                  "quest": 1,
-                  "dialogue": 1,
-                  "topic": 1,
-                  "check": 1,
-                  "schedule": 1
-                },
-                "client_features": []
-              },
-              "supported_profiles": [
-                "offline_private"
-              ]
-            },
-            "lock": {
-              "format": "loka-capability-lock-v1",
-              "capabilities": {
-                "movement": 1,
-                "containment": 1,
-                "inspectable_detail": 1,
-                "description_variant": 1,
-                "equipment": 1,
-                "fact": 1,
-                "policy": 1,
-                "target_resolution": 1,
-                "narration": 1,
-                "quest": 1,
-                "dialogue": 1,
-                "topic": 1,
-                "check": 1,
-                "schedule": 1
-              }
-            },
-            "facts": {
-              "hello_sampler@0.0.1:fact/village_arrived": {
-                "key": "village_arrived",
-                "version": 1,
-                "value_type": {
-                  "type": "bool",
-                  "default": false
-                },
-                "scopes": [
-                  "instance"
-                ],
-                "meaning": "The lantern was fetched for Bram; the village green reads differently."
-              }
-            },
-            "actions": {
-              "hello_sampler@0.0.1:action/talk": {
-                "key": "talk",
-                "name": "actions.talk",
-                "target": {
-                  "kind": "entity",
-                  "scopes": [
-                    "room_occupants"
-                  ]
-                },
-                "command": "talk",
-                "priority": 100,
-                "input": [],
-                "policy": {
-                  "op": "target_present"
-                },
-                "accessibility": "actions.talk.a11y"
-              }
-            }
-          }
-        },
         {
           "content_hash": "c72b59ac7353dcf055438427dcaa59bcb1c2474058531aab5686116d16e7b671",
           "cartridge": {
@@ -949,7 +719,7 @@
       ]
     },
     "Calendar": {
-      "description": "calendar@1: authored logical units per hour, hours per day, displayed subdivisions, and optional ordered solar/lunar cuts. Cut starts are inclusive; the compiler checks order, cycle bounds and schedule/window hours (lib/loka/content/calendar.ex). Toolbox row 31 adds the season and tide cycles and the weather table (one weighted entry per calendar day, chosen by a hash of the world id and the day).",
+      "description": "The game's clock: how many time units make an hour, hours in a day, the parts of the day shown to the player, and optional sun and moon phases. Seasons, tides and a weather table can be added.",
       "type": "object",
       "properties": {
         "start": {"description":"The logical time a new world begins at.",
@@ -968,23 +738,23 @@
           "type": "integer",
           "minimum": 1
         },
-        "solar": {
+        "solar": {"description":"The parts of the day, such as dawn, day, dusk and night, each starting at a time into the day.",
           "type": "array",
           "minItems": 1,
           "items": {
             "$ref": "#/$defs/CalendarCut"
           }
         },
-        "lunar": {
+        "lunar": {"description":"The moon's phases: a repeating cycle with a length and named phases.",
           "$ref": "#/$defs/CalendarCycle"
         },
-        "season": {
+        "season": {"description":"The seasons: a repeating cycle with a length and named phases.",
           "$ref": "#/$defs/CalendarCycle"
         },
-        "tide": {
+        "tide": {"description":"The tides: a repeating cycle with a length and named phases.",
           "$ref": "#/$defs/CalendarCycle"
         },
-        "weather": {
+        "weather": {"description":"The possible weathers. Each day gets one, weighted by each entry's weight; the same world and day always get the same weather.",
           "type": "array",
           "minItems": 1,
           "maxItems": 32,
@@ -1031,7 +801,7 @@
       ]
     },
     "CalendarCycle": {
-      "description": "A repeating cycle of ordered cuts in logical time units (lunar; season and tide, toolbox row 31): the phase at time t is the last cut at or before ((t - origin) mod period); the first cut starts at 0.",
+      "description": "A repeating cycle, such as the moon, seasons or tides: a period and the phases it passes through, each starting at a point in the cycle (the first at 0).",
       "type": "object",
       "properties": {
         "period": {"description":"Length of the cycle in logical units.",
@@ -1042,7 +812,7 @@
           "type": "integer",
           "minimum": 0
         },
-        "phases": {
+        "phases": {"description":"The named phases in order, each with the time it starts; the first starts at 0.",
           "type": "array",
           "minItems": 1,
           "items": {
@@ -1074,7 +844,7 @@
       ]
     },
     "WeatherEntry": {
-      "description": "One weather of a calendar's weather table (toolbox row 31): each calendar day takes one entry with probability weight / total weight, by a hash of the world id and the day, never the authority RNG. wet: an exposed room's flame will not light (light@1 ignite). Phases are unique in the table.",
+      "description": "One kind of weather and its weight: a day gets it with chance weight out of the total. wet stops fires lighting in rooms open to the sky.",
       "type": "object",
       "properties": {
         "phase": {"description":"The weather's name, lowercase letters, digits and underscores; unique in the table.",
@@ -1138,7 +908,7 @@
       ]
     },
     "DiagnosticCode": {
-      "description": "A diagnostic code: a closed set, one code per distinct cause (08 §6: repair loops read codes and data, never prose). INVALID_JSON: a source file is not JSON (RFC 8259, UTF-8); in the loader, the artifact is not UTF-8 or fails the canonical decoder (loka-numeric-v1), duplicate keys included, path empty, data {}; DUPLICATE_KEY: an object in a source file repeats a key (Elixir's JSON keeps the first silently, so the compiler checks it); UNKNOWN_FIELD: a field outside the registered schema (05 §5); the validator's unknown_property; in the loader, path the validator's, data {}; SCHEMA_VIOLATION: any other schema error; a dialogue without a choice is too_few_items at its choices, a story point without an outcome at its outcomes, and a quest journal's empty hints object at its hints (the subset has no minProperties); data.error is its ErrorCode (error_registry.json); a v2 source (rooms, an entry or text.json) without an entry is missing_property at cartridge.entry; in the loader, path the validator's; MISSING_MANIFEST: the cartridge has no cartridge.json (05 §3); path is cartridge; DUPLICATE_DEFINITION: two definitions in one cartridge have one DefinitionRef (03 §2, 05 §4; other cartridges' refs differ, CAR-01), or a scripted action's key is an action's of the cartridge or a registered command type (an engine verb's), one ActionSet identity with two definitions (06 §19), path the scripted action (actions/ring_bell), data {}; or a dialogue's key is a registered command type's, an action's, a scripted action's or a quest's (its talk is one ActionSet identity), path the dialogue (dialogues/bram), data {}; or a dialogue role is named actor (the actor is always a participant), path the role (dialogues/bram.roles.actor), data {}; or a dialogue choice's story_point or a scene's on_end claims a story point outcome an earlier site already claims, path that later site (dialogues/bram.choices.carry.story_point or scenes/bell_rung.on_end), data {}; or two scripted actions' checks have one key, one check DefinitionRef with two definitions (step.schema.json Check), path each such scripted action's check (actions/pick_lock.check), data {}; or a scripted action's check and a dialogue choice's (step.schema.json Check, toolbox row 14), or two choices' checks, have one key, path each such check (dialogues/guard.choices.persuade.check), data {}; FACT_NAME_COLLISION: two authored fact names map to one key after each . becomes _ (owner decision, IMPORT.md); FACT_DEFAULT_INVALID: a fact default is outside its enum values or int bounds (fact.schema.json FactType); UNRESOLVED_REFERENCE: a reference names no definition (CAR-02, A10); an exit's to or the entry names no room of this cartridge (05 §17), or, in v2, a room's title or description, a detail's description (path rooms/well_lane.details.bucket.description) or a description variant's (rooms/well_lane.variants[0].description) or an action's label or accessibility, or an item's or NPC's short, room_line, room-line variant or description has no text catalog entry; an item's location or an NPC's room names no definition of that kind in this cartridge; an exit's barrier names no barrier of this cartridge (path rooms/cell.exits.east.barrier), or an item's barrier none (path items/trunk.barrier, data {target}), or a barrier's key_item no item of it (barriers/cell_door.key_item), or a barrier's short has no text catalog entry; a scripted action's target room names no room of this cartridge, or its detail no detail of that room (data {target} the detail key), a scripted action's fact.assign fact no fact of it, or its label or narration has no text catalog entry; a reaction's trigger filter naming a definition (fact, room, quest, item, victim npc, story_point, barrier, scene, liquid kind), or a fact.assign fact of its steps, names no such definition of this cartridge (path reactions/gossip.on.fact); a dialogue's npc or quest, a role's npc or item, or a fact.assign fact or the accept of a choice names no definition of that kind in this cartridge, its npc is none of its npc roles (path dialogues/bram.npc, data {target} the npc), or a choice's hand_over item names no item role or its to no npc role (path dialogues/bram.choices.leave.hand_over.to, data {target} the role name), or a dialogue's prompt or a choice's label or narration has no text catalog entry (path dialogues/bram.choices.carry.narration); a quest's title, offer label or journal stage or outcome text has no text catalog entry (paths quests/lantern.offer.label, quests/lantern.journal.active, quests/lantern.journal.outcomes.carry, data {target}), or its objective's item_acquired names no item of this cartridge (path quests/lantern.objective.item_acquired); a key of a room's action contribution names no registered command, action or scripted action of this cartridge (data {target} the key, path rooms/belfry.actions[0].actions[1]); a stat_compare's attribute or a resource_compare's resource names no attribute or resource of this cartridge (path the member, actions/pray.policy.attribute, data {target}); or a touch link in the catalog string of a room's, detail's, variant's, item's or NPC's text names no target: a link's target is the detail, item or NPC it names, a link without a target key in a detail's, item's or NPC's own text is that thing itself, and a target key names a detail of the room (in a room's or its details' text), an item or an NPC of the cartridge, so a link without one in a room's own text has none (data target is then the link as written), data {target} (the DefinitionRefString or the TextKey), path the reference (rooms/ferry_landing.exits.north.to, cartridge.entry, rooms/ferry_landing.title, actions/talk.label); CONTAINMENT_CYCLE: an item's location leads, through the items it starts in, back to itself (invariant containment_acyclic), path its location's item member (items/satchel.location.item), data {}; CAPACITY_EXCEEDED: more items start in an item or NPC than its capacity (invariant containment_acyclic), path its capacity (items/satchel.capacity), data {capacity, held}; TOUCH_LINK_MISSING (compiler only, severity warning, the build succeeds): a room's description or one of its description variants has no touch link to one of the room's details, or an item's or NPC's room line or one of its room-line variants has none to that item or NPC (owner decision 2026-09-25, Q3; text.schema.json TextCatalog), path the text key's member (rooms/ferry_landing.variants[0].description, items/lantern.room_line), data {target} (the detail, item or NPC key); UNREACHABLE_DETAIL: a room's detail's first alias, which names it when a lookup is ambiguous, is also an alias of another detail of that room, or has an empty word or starts with at, the, a or an, so no lookup picks it by that name (room.schema.json InspectableDetail), path the detail (rooms/ferry_landing.details.lamp_post), data {}; UNKNOWN_COMMAND: an action's command is not in the command registry (action.schema.json ActionDefinition), or is run_job, which is authority-internal and never built from an invocation (04 §1); FACT_TYPE_MISMATCH: a fact_compare value, a scripted action's fact.assign value in any outcome, or a reaction's or dialogue choice's fact.assign value, is not of the fact's type (06 §21: typed policy AST), path the value (actions/ring_bell.outcomes.success.steps[0].value); UNKNOWN_CAPABILITY: a key in requires.capabilities is not registered at that version (A10, Gate R4); SERVER_ONLY_CAPABILITY: an offline_private cartridge requires a server_only capability (05 §6, C4); KERNEL_API_RANGE_INVALID: the kernel_api range is empty or reversed, at_least not below below (05 §3; a malformed version string is SCHEMA_VIOLATION); PINNED_VERSION_UNSUPPORTED: content_schema or rule_ir is a version the compiler or installed kernel does not implement (05 §3; both implement 1 now), data {field, declared, supported}; in the loader, path .cartridge.manifest.requires.<field>; UNDECLARED_CAPABILITY: a definition uses a command, event or policy op (a scripted action step uses the event it produces: fact.assign fact_changed, event.emit custom_event; a reaction uses its trigger's event, on.event, and each fact.assign's fact_changed, path its op; a story point uses story_point_reached, path its first claim in path order, a choice's story_point or a scene's on_end), or is of a definition kind (a room, a room's detail, a room's or detail's description variant, a scripted action, a barrier, a reaction, a dialogue, an attribute), whose owning capability (capability_registry.json) the manifest does not require (05 §6), path the room or barrier file for a room or barrier, attributes.<key> for an attribute, rooms/<key>.details.<detail> for a detail, rooms/<key>.variants[i] or rooms/<key>.details.<detail>.variants[i] for a variant, data {capability} (the owner's key), suggested_capabilities [its key@version]; NESTING_TOO_DEEP: the compiled artifact would nest a definition deeper than the canonical depth limit (loka-numeric-v1), data {maximum}; the author's file is valid JSON, so this is not INVALID_JSON, while the loader reports a too-deep artifact as INVALID_JSON; ARTIFACT_TOO_LARGE: the artifact file exceeds ArtifactSize, checked before decoding, path empty, data {bytes, maximum}; UNKNOWN_FORMAT: the artifact's cartridge.format is absent or neither loka-cartridge-v1 nor loka-cartridge-v2, path .cartridge.format, data {}; CONTENT_HASH_MISMATCH: content_hash differs from the hash of cartridge (05 §11, CAR-05), path .content_hash, data {declared, computed}; ARTIFACT_DEFINITION_KEY_MISMATCH: a definition map key's cartridge_id or cartridge_version differs from the manifest's id or version, or its key from the definition's key (a kind other than its map's fails the propertyNames pattern, SCHEMA_VIOLATION); the schema cannot express this check; path the map member (.cartridge.facts[\"...\"]), one diagnostic per differing field, data {field, declared, expected} with field cartridge_id, cartridge_version or key; LOCK_MANIFEST_MISMATCH: lock.capabilities differs from manifest.requires.capabilities for a key, which in R4 must be equal (path .cartridge.lock.capabilities.<key> even when the lock lacks it, data {capability, required, locked}, the absent side omitted); a registry-dependency closure will change this rule under a new format tag; CAPABILITY_NOT_INSTALLED: the lock names a key@version the installed kernel lacks (05 §6), path .cartridge.lock.capabilities.<key>, data {capability: key@version}; KERNEL_API_UNSUPPORTED: the installed kernel_api is outside the manifest's range (05 §3), path .cartridge.manifest.requires.kernel_api, data {installed}; FACT_SCOPE_UNSUPPORTED: loader only; the installed kernel cannot read a fact of these scopes: the TypeScript kernel hosts one private world, which has a player (the actor's CharacterId) and an instance (its WorldContextId) but no party or realm, and fact_compare names no scope, so it reads a fact at the one scope the fact allows; a fact whose scopes are not exactly one of player or instance fails, path .cartridge.facts[\"...\"].scopes, data {}; a per_subject fact (toolbox row W2: an entity or pair fact) is keyed by a subject too, so it may be named only by a fact_compare's, fact.assign's or fact.adjust's fact, a reaction's fact_changed trigger or world.group's member, stay or fight (toolbox rows G8 and 22a, read at each NPC) or world.mount's riding (row 43b, read at each mount NPC), path any other reference to it; a fact_compare of one names exactly one of subject, npc or item, path the leaf; a subject, npc or item on a fact_compare or reaction fact.assign of any other fact, a second one, or an npc that is a spawn template, path that member; CLIENT_FEATURE_UNSUPPORTED: the installed app lacks a required client feature (CAR-07), path .cartridge.manifest.requires.client_features[i], data {feature}. EMPTY_TIME_WINDOW: a time_window policy node's from equals its to, a window that never holds (policy.schema.json), path the node (actions/ring.policy), data {}; OUTCOME_MISMATCH: a scripted action with a check has no failure outcome, or one without a check has one (action.schema.json ScriptedAction), path the scripted action's outcomes (actions/pry_lid.outcomes), data {}; or a dialogue choice claims a story point outcome but its dialogue resolves no quest, so the choice could reach it again (StoryPointDefinition), path the choice's story_point (dialogues/bram.choices.carry.story_point), data {}; or a dialogue choice's check (toolbox row 14) is on a choice with a field other than label, narration, steps, availability and check, or a skill.acquire step, or in a dialogue with a quest or riddle, path the check (dialogues/guard.choices.persuade.check), data {}; or a dialogue choice's accept is in a dialogue that resolves a quest (accepting would resolve it), path the accept (dialogues/bram_offer.choices.accept.accept), or on a choice with a hand_over (activation and acquisition in one decision conflict), path the hand_over (dialogues/bram_offer.choices.accept.hand_over), data {}; RESOURCE_SPEC_INVALID: a resource's bounds are reversed or its start is outside them (resource.schema.json ResourceSpec), path the resource (resources.resources.hp), data {}; or a condition band table (resource.schema.json BandTable) has cuts not strictly descending, a last cut other than 0 or a repeated key, path the table (resources.resources.mv.bands, cartridge.world.bands), data {}. BARRIER_MISMATCH: an exit with a barrier and its reciprocal face (its destination's exit in the opposite compass direction, when that leads back to its room; a connection's identity is its room and direction) do not name the same barrier, or the reciprocal face is missing (21 §5 Barrier: both faces reference one state; 05 §25 coherent connections; one-sided barriers are not yet declarable), path the exit (rooms/cell.exits.east), each face that has a barrier or faces one reported, data {}; or an item's barrier is also named by an exit or another item (21 §5 as amended by c1-locks: an item's barrier has one site), path each such item's barrier (items/trunk.barrier), data {}. BARRIER_UNREACHABLE_KEY: a locked barrier on an exit of a room reachable from the entry, or on an item in reach (a container's lid, c1-locks), has a key that never comes within reach, or no key_item (05 §17 reachability): rooms are reached from the entry through exits without a barrier or whose barrier starts open, closed, or locked with a key already in reach, and an item is in reach when it starts in a reached room or inside an item in reach whose barrier is absent, not locked, or locked with its key in reach (initial states and locations only: no scripted actions, facts or NPCs; so a key inside its own locked chest, or two chests holding each other's keys, is reported); a key_item that names no item is UNRESOLVED_REFERENCE instead; path the barrier (barriers/cell_door), data {}. Also (toolbox row W22, Beads loka-kgd.96) a reaction barrier.set step with to locked whose named barrier, or any barrier carrying its tag, has no key_item, path the step's to (reactions/fire.steps[1].to), data {}. RESERVED_FACT: under position@1 the engine owns the fact position (the compiler adds it, cartridge.md Compiler; only rules/position.ts writes it): in the compiler, an authored fact named position, path facts.facts.position, or a fact.assign of it in a scripted action outcome, a reaction's steps or a dialogue choice's steps, path the step's fact (actions/nap.outcomes.success.steps[0].fact, reactions/gossip.steps[0].fact, dialogues/bram.choices.leave.steps[0].fact); data {}; reading it (fact_compare, a reaction's on.fact) is allowed, and without position@1 a fact named position is the cartridge's own. A scripted action's cost, threshold check or resource.adjust step whose resource names no resource of the cartridge is UNRESOLVED_REFERENCE at that resource member (actions/pick_lock.costs[0].resource), data {target}; so is world.movement.cost's resource (cartridge.world.movement.cost.resource), and an authored band key without a band.<key> catalog entry is UNRESOLVED_REFERENCE at the key (resources.resources.mv.bands[0].key, cartridge.world.bands[0].key), data {target} the text key. The loader checks an artifact in this order and stops at the first stage that fails, before any save mutation (CAR-07), reporting the first of that stage's diagnostics in list order (Diagnostic): ArtifactSize (ARTIFACT_TOO_LARGE); canonical decode (INVALID_JSON); cartridge.format (UNKNOWN_FORMAT); CartridgeArtifact (UNKNOWN_FIELD, SCHEMA_VIOLATION); content_hash (CONTENT_HASH_MISMATCH); definition keys (ARTIFACT_DEFINITION_KEY_MISMATCH); lock against requirements (LOCK_MANIFEST_MISMATCH); the installed kernel and app (CAPABILITY_NOT_INSTALLED, FACT_SCOPE_UNSUPPORTED, KERNEL_API_UNSUPPORTED, PINNED_VERSION_UNSUPPORTED, CLIENT_FEATURE_UNSUPPORTED). The loader re-checks the content_schema and rule_ir pins: the artifact crosses a trust boundary. The enum is unchanged: the compiler emits every other code (KERNEL_API_RANGE_INVALID included) and the loader trusts a hash-valid artifact's references and rules, so a dangling reference or containment cycle there is a runtime error (cartridge.md Artifact and loader). Chapters: chapter 0 with story_point or outcome is UNKNOWN_FIELD at that member, data {}; a later chapter without story_point is SCHEMA_VIOLATION at that member, data {error: missing_property}; an unresolved title, story_point or outcome is UNRESOLVED_REFERENCE at that member, data {target} the text key, full reference string or outcome key. A counted trigger whose quest and choice id are also named by another dialogue is OUTCOME_MISMATCH at cartridge.chapters[i].story_point (compiler), data {}. Only selected outcomes count, otherwise all do (mechanics.md Chapters). Scene definitions resolve their story-point outcome and narrate text, reject duplicate on at each colliding scenes/<key>.on, and enforce ordered steps with SCHEMA_VIOLATION not_in_enum at first misplaced steps[i].type; scene_<key> facts are RESERVED_FACT at facts.facts.scene_<key> or the existing scripted action/reaction/dialogue write-site paths. See mechanics.md scene@1 and cartridge.md Compiler. INVALID_TIME_POLICY: an opted-in real_elapsed scripted action declares nonzero duration; path its duration, data {}; or a quest journal declares hints (real minutes) without time_policy.profile real_elapsed, path the hints member (quests/find_key.journal.hints), data {}. VISITS_UNRECORDED (compiler only, severity warning, the build succeeds): a policy uses visited_count but requires.capabilities lacks knowledge@1, so no visit is recorded and the leaf never holds (mechanics.md narration variety), path cartridge.requires.capabilities, data {}, suggested_capabilities [knowledge@1]. HOSTILE_QUEST_SPEAKER (compiler only, severity warning, the build succeeds): a dialogue whose npc declares disposition.hostile has a choice with accept, hand_over, receive or escort, which that NPC refuses while hostile (mechanics.md Standing and disposition), path the dialogue's npc, data {}. ALLY_ENGAGE_UNUSED (compiler only, severity warning, the build succeeds): an NPC in world.combat.allies has a disposition.engage line, which an ally never plays, path the allies entry, data {}. ENTRY_INVALID (error): a speaker has more than one dialogue with entry true, or a keyword dialogue has it, path the dialogue's entry, data {}. ENTRY_GUESSED (compiler only, severity warning, the build succeeds): Talk opens data.target only by inference (a loop tie, the first key with no condition, or the first of several free links a failed entry leads to; mechanics.md Branching dialogue), path the dialogue's npc. ENTRY_UNUSED (compiler only, severity warning): data.target never opens because its speaker has an entry dialogue and nothing that opens leads to it, path the dialogue's npc. FALL_THROUGH_SPENT (compiler only, severity warning): data.target has a when and its only free way on shuts itself once taken, with no other Talk for the speaker, path the dialogue's policy. SITTING_SPENT (compiler only, severity warning): every choice of a hub is once per sitting, so the last one closes the talk, path the dialogue's choices. RETURN_CLOSED (compiler only, severity warning): a then back to data.target comes after a choice sets the fact its when reads, so going back closes the talk, path the dialogue's policy. LOOP_SPEAKER and SPEAKER_ELSEWHERE (compiler only, severity warning): a speaker reached only through a then loop, and a then to a speaker in another room, path the dialogue. SITE_EXIT_CONFLICT: a room's site names a compass direction in which the room authors an exit, so a building there would face an existing exit (cartridge.md Structure and site declarations), path the direction (rooms/lane.site.directions[0]), data {}; and a site's structure that names no structure of the cartridge is UNRESOLVED_REFERENCE at it (rooms/lane.site.structures[0]), data {target}.",
+      "description": "A diagnostic code: a closed set, one code per distinct cause (08 §6: repair loops read codes and data, never prose). INVALID_JSON: a source file is not JSON (RFC 8259, UTF-8); in the loader, the artifact is not UTF-8 or fails the canonical decoder (loka-numeric-v1), duplicate keys included, path empty, data {}; DUPLICATE_KEY: an object in a source file repeats a key (Elixir's JSON keeps the first silently, so the compiler checks it); UNKNOWN_FIELD: a field outside the registered schema (05 §5); the validator's unknown_property; in the loader, path the validator's, data {}; SCHEMA_VIOLATION: any other schema error; a dialogue without a choice is too_few_items at its choices, a story point without an outcome at its outcomes, and a quest journal's empty hints object at its hints (the subset has no minProperties); data.error is its ErrorCode (error_registry.json); a source without an entry is missing_property at cartridge.entry; in the loader, path the validator's; MISSING_MANIFEST: the cartridge has no cartridge.json (05 §3); path is cartridge; DUPLICATE_DEFINITION: two definitions in one cartridge have one DefinitionRef (03 §2, 05 §4; other cartridges' refs differ, CAR-01), or a scripted action's key is an action's of the cartridge or a registered command type (an engine verb's), one ActionSet identity with two definitions (06 §19), path the scripted action (actions/ring_bell), data {}; or a dialogue's key is a registered command type's, an action's, a scripted action's or a quest's (its talk is one ActionSet identity), path the dialogue (dialogues/bram), data {}; or a dialogue role is named actor (the actor is always a participant), path the role (dialogues/bram.roles.actor), data {}; or a dialogue choice's story_point or a scene's on_end claims a story point outcome an earlier site already claims, path that later site (dialogues/bram.choices.carry.story_point or scenes/bell_rung.on_end), data {}; or two scripted actions' checks have one key, one check DefinitionRef with two definitions (step.schema.json Check), path each such scripted action's check (actions/pick_lock.check), data {}; or a scripted action's check and a dialogue choice's (step.schema.json Check, toolbox row 14), or two choices' checks, have one key, path each such check (dialogues/guard.choices.persuade.check), data {}; FACT_NAME_COLLISION: two authored fact names map to one key after each . becomes _ (owner decision, IMPORT.md); FACT_DEFAULT_INVALID: a fact default is outside its enum values or int bounds (fact.schema.json FactType); UNRESOLVED_REFERENCE: a reference names no definition (CAR-02, A10); an exit's to or the entry names no room of this cartridge (05 §17), or a room's title or description, a detail's description (path rooms/well_lane.details.bucket.description) or a description variant's (rooms/well_lane.variants[0].description) or an action's label or accessibility, or an item's or NPC's short, room_line, room-line variant or description has no text catalog entry; an item's location or an NPC's room names no definition of that kind in this cartridge; an exit's barrier names no barrier of this cartridge (path rooms/cell.exits.east.barrier), or an item's barrier none (path items/trunk.barrier, data {target}), or a barrier's key_item no item of it (barriers/cell_door.key_item), or a barrier's short has no text catalog entry; a scripted action's target room names no room of this cartridge, or its detail no detail of that room (data {target} the detail key), a scripted action's fact.assign fact no fact of it, or its label or narration has no text catalog entry; a reaction's trigger filter naming a definition (fact, room, quest, item, victim npc, story_point, barrier, scene, liquid kind), or a fact.assign fact of its steps, names no such definition of this cartridge (path reactions/gossip.on.fact); a dialogue's npc or quest, a role's npc or item, or a fact.assign fact or the accept of a choice names no definition of that kind in this cartridge, its npc is none of its npc roles (path dialogues/bram.npc, data {target} the npc), or a choice's hand_over item names no item role or its to no npc role (path dialogues/bram.choices.leave.hand_over.to, data {target} the role name), or a dialogue's prompt or a choice's label or narration has no text catalog entry (path dialogues/bram.choices.carry.narration); a quest's title, offer label or journal stage or outcome text has no text catalog entry (paths quests/lantern.offer.label, quests/lantern.journal.active, quests/lantern.journal.outcomes.carry, data {target}), or its objective's item_acquired names no item of this cartridge (path quests/lantern.objective.item_acquired); a key of a room's action contribution names no registered command, action or scripted action of this cartridge (data {target} the key, path rooms/belfry.actions[0].actions[1]); a stat_compare's attribute or a resource_compare's resource names no attribute or resource of this cartridge (path the member, actions/pray.policy.attribute, data {target}); or a touch link in the catalog string of a room's, detail's, variant's, item's or NPC's text names no target: a link's target is the detail, item or NPC it names, a link without a target key in a detail's, item's or NPC's own text is that thing itself, and a target key names a detail of the room (in a room's or its details' text), an item or an NPC of the cartridge, so a link without one in a room's own text has none (data target is then the link as written), data {target} (the DefinitionRefString or the TextKey), path the reference (rooms/ferry_landing.exits.north.to, cartridge.entry, rooms/ferry_landing.title, actions/talk.label); CONTAINMENT_CYCLE: an item's location leads, through the items it starts in, back to itself (invariant containment_acyclic), path its location's item member (items/satchel.location.item), data {}; CONDITION_CYCLE: a condition in conditions/ reaches itself through named, directly or through other conditions, a condition that never expands (cartridge.md Named conditions), path the condition's file (conditions/trusts), data {}; CAPACITY_EXCEEDED: more items start in an item or NPC than its capacity (invariant containment_acyclic), path its capacity (items/satchel.capacity), data {capacity, held}; TOUCH_LINK_MISSING (compiler only, severity warning, the build succeeds): a room's description or one of its description variants has no touch link to one of the room's details, or an item's or NPC's room line or one of its room-line variants has none to that item or NPC (owner decision 2026-09-25, Q3; text.schema.json TextCatalog), path the text key's member (rooms/ferry_landing.variants[0].description, items/lantern.room_line), data {target} (the detail, item or NPC key); UNREACHABLE_DETAIL: a room's detail's first alias, which names it when a lookup is ambiguous, is also an alias of another detail of that room, or has an empty word or starts with at, the, a or an, so no lookup picks it by that name (room.schema.json InspectableDetail), path the detail (rooms/ferry_landing.details.lamp_post), data {}; UNKNOWN_COMMAND: an action's command is not in the command registry (action.schema.json ActionDefinition), or is run_job, which is authority-internal and never built from an invocation (04 §1); FACT_TYPE_MISMATCH: a fact_compare value, a scripted action's fact.assign value in any outcome, or a reaction's or dialogue choice's fact.assign value, is not of the fact's type (06 §21: typed policy AST), path the value (actions/ring_bell.outcomes.success.steps[0].value); UNKNOWN_CAPABILITY: a key in requires.capabilities is not registered at that version (A10, Gate R4); SERVER_ONLY_CAPABILITY: an offline_private cartridge requires a server_only capability (05 §6, C4); KERNEL_API_RANGE_INVALID: the kernel_api range is empty or reversed, at_least not below below (05 §3; a malformed version string is SCHEMA_VIOLATION); PINNED_VERSION_UNSUPPORTED: content_schema or rule_ir is a version the compiler or installed kernel does not implement (05 §3; both implement 1 now), data {field, declared, supported}; in the loader, path .cartridge.manifest.requires.<field>; UNDECLARED_CAPABILITY: a definition uses a command, event or policy op (a scripted action step uses the event it produces: fact.assign fact_changed, event.emit custom_event; a reaction uses its trigger's event, on.event, and each fact.assign's fact_changed, path its op; a story point uses story_point_reached, path its first claim in path order, a choice's story_point or a scene's on_end), or is of a definition kind (a room, a room's detail, a room's or detail's description variant, a scripted action, a barrier, a reaction, a dialogue, an attribute), whose owning capability (capability_registry.json) the manifest does not require (05 §6), path the room or barrier file for a room or barrier, attributes.<key> for an attribute, rooms/<key>.details.<detail> for a detail, rooms/<key>.variants[i] or rooms/<key>.details.<detail>.variants[i] for a variant, data {capability} (the owner's key), suggested_capabilities [its key@version]; NESTING_TOO_DEEP: the compiled artifact would nest a definition deeper than the canonical depth limit (loka-numeric-v1), data {maximum}; the author's file is valid JSON, so this is not INVALID_JSON, while the loader reports a too-deep artifact as INVALID_JSON; ARTIFACT_TOO_LARGE: the artifact file exceeds ArtifactSize, checked before decoding, path empty, data {bytes, maximum}; UNKNOWN_FORMAT: the artifact's cartridge.format is absent or not loka-cartridge-v2, path .cartridge.format, data {}; CONTENT_HASH_MISMATCH: content_hash differs from the hash of cartridge (05 §11, CAR-05), path .content_hash, data {declared, computed}; ARTIFACT_DEFINITION_KEY_MISMATCH: a definition map key's cartridge_id or cartridge_version differs from the manifest's id or version, or its key from the definition's key (a kind other than its map's fails the propertyNames pattern, SCHEMA_VIOLATION); the schema cannot express this check; path the map member (.cartridge.facts[\"...\"]), one diagnostic per differing field, data {field, declared, expected} with field cartridge_id, cartridge_version or key; LOCK_MANIFEST_MISMATCH: lock.capabilities differs from manifest.requires.capabilities for a key, which in R4 must be equal (path .cartridge.lock.capabilities.<key> even when the lock lacks it, data {capability, required, locked}, the absent side omitted); a registry-dependency closure will change this rule under a new format tag; CAPABILITY_NOT_INSTALLED: the lock names a key@version the installed kernel lacks (05 §6), path .cartridge.lock.capabilities.<key>, data {capability: key@version}; KERNEL_API_UNSUPPORTED: the installed kernel_api is outside the manifest's range (05 §3), path .cartridge.manifest.requires.kernel_api, data {installed}; FACT_SCOPE_UNSUPPORTED: loader only; the installed kernel cannot read a fact of these scopes: the TypeScript kernel hosts one private world, which has a player (the actor's CharacterId) and an instance (its WorldContextId) but no party or realm, and fact_compare names no scope, so it reads a fact at the one scope the fact allows; a fact whose scopes are not exactly one of player or instance fails, path .cartridge.facts[\"...\"].scopes, data {}; a per_subject fact (toolbox row W2: an entity or pair fact) is keyed by a subject too, so it may be named only by a fact_compare's, fact.assign's or fact.adjust's fact, a reaction's fact_changed trigger or world.group's member, stay or fight (toolbox rows G8 and 22a, read at each NPC) or world.mount's riding (row 43b, read at each mount NPC), path any other reference to it; a fact_compare of one names exactly one of subject, npc or item, path the leaf; a subject, npc or item on a fact_compare or reaction fact.assign of any other fact, a second one, or an npc that is a spawn template, path that member; CLIENT_FEATURE_UNSUPPORTED: the installed app lacks a required client feature (CAR-07), path .cartridge.manifest.requires.client_features[i], data {feature}. EMPTY_TIME_WINDOW: a time_window policy node's from equals its to, a window that never holds (policy.schema.json), path the node (actions/ring.policy), data {}; OUTCOME_MISMATCH: a scripted action with a check has no failure outcome, or one without a check has one (action.schema.json ScriptedAction), path the scripted action's outcomes (actions/pry_lid.outcomes), data {}; or a dialogue choice claims a story point outcome but its dialogue resolves no quest, so the choice could reach it again (StoryPointDefinition), path the choice's story_point (dialogues/bram.choices.carry.story_point), data {}; or a dialogue choice's check (toolbox row 14) is on a choice with a field other than label, narration, steps, availability and check, or a skill.acquire step, or in a dialogue with a quest or riddle, path the check (dialogues/guard.choices.persuade.check), data {}; or a dialogue choice's accept is in a dialogue that resolves a quest (accepting would resolve it), path the accept (dialogues/bram_offer.choices.accept.accept), or on a choice with a hand_over (activation and acquisition in one decision conflict), path the hand_over (dialogues/bram_offer.choices.accept.hand_over), data {}; RESOURCE_SPEC_INVALID: a resource's bounds are reversed or its start is outside them (resource.schema.json ResourceSpec), path the resource (resources.resources.hp), data {}; or a condition band table (resource.schema.json BandTable) has cuts not strictly descending, a last cut other than 0 or a repeated key, path the table (resources.resources.mv.bands, cartridge.world.bands), data {}. BARRIER_MISMATCH: an exit with a barrier and its reciprocal face (its destination's exit in the opposite compass direction, when that leads back to its room; a connection's identity is its room and direction) do not name the same barrier, or the reciprocal face is missing (21 §5 Barrier: both faces reference one state; 05 §25 coherent connections; one-sided barriers are not yet declarable), path the exit (rooms/cell.exits.east), each face that has a barrier or faces one reported, data {}; or an item's barrier is also named by an exit or another item (21 §5 as amended by c1-locks: an item's barrier has one site), path each such item's barrier (items/trunk.barrier), data {}. BARRIER_UNREACHABLE_KEY: a locked barrier on an exit of a room reachable from the entry, or on an item in reach (a container's lid, c1-locks), has a key that never comes within reach, or no key_item (05 §17 reachability): rooms are reached from the entry through exits without a barrier or whose barrier starts open, closed, or locked with a key already in reach, and an item is in reach when it starts in a reached room or inside an item in reach whose barrier is absent, not locked, or locked with its key in reach (initial states and locations only: no scripted actions, facts or NPCs; so a key inside its own locked chest, or two chests holding each other's keys, is reported); a key_item that names no item is UNRESOLVED_REFERENCE instead; path the barrier (barriers/cell_door), data {}. Also (toolbox row W22, Beads loka-kgd.96) a reaction barrier.set step with to locked whose named barrier, or any barrier carrying its tag, has no key_item, path the step's to (reactions/fire.steps[1].to), data {}. RESERVED_FACT: under position@1 the engine owns the fact position (the compiler adds it, cartridge.md Compiler; only rules/position.ts writes it): in the compiler, an authored fact named position, path facts.facts.position, or a fact.assign of it in a scripted action outcome, a reaction's steps or a dialogue choice's steps, path the step's fact (actions/nap.outcomes.success.steps[0].fact, reactions/gossip.steps[0].fact, dialogues/bram.choices.leave.steps[0].fact); data {}; reading it (fact_compare, a reaction's on.fact) is allowed, and without position@1 a fact named position is the cartridge's own. A scripted action's cost, threshold check or resource.adjust step whose resource names no resource of the cartridge is UNRESOLVED_REFERENCE at that resource member (actions/pick_lock.costs[0].resource), data {target}; so is world.movement.cost's resource (cartridge.world.movement.cost.resource), and an authored band key without a band.<key> catalog entry is UNRESOLVED_REFERENCE at the key (resources.resources.mv.bands[0].key, cartridge.world.bands[0].key), data {target} the text key. The loader checks an artifact in this order and stops at the first stage that fails, before any save mutation (CAR-07), reporting the first of that stage's diagnostics in list order (Diagnostic): ArtifactSize (ARTIFACT_TOO_LARGE); canonical decode (INVALID_JSON); cartridge.format (UNKNOWN_FORMAT); CartridgeArtifact (UNKNOWN_FIELD, SCHEMA_VIOLATION); content_hash (CONTENT_HASH_MISMATCH); definition keys (ARTIFACT_DEFINITION_KEY_MISMATCH); lock against requirements (LOCK_MANIFEST_MISMATCH); the installed kernel and app (CAPABILITY_NOT_INSTALLED, FACT_SCOPE_UNSUPPORTED, KERNEL_API_UNSUPPORTED, PINNED_VERSION_UNSUPPORTED, CLIENT_FEATURE_UNSUPPORTED). The loader re-checks the content_schema and rule_ir pins: the artifact crosses a trust boundary. The enum is unchanged: the compiler emits every other code (KERNEL_API_RANGE_INVALID included) and the loader trusts a hash-valid artifact's references and rules, so a dangling reference or containment cycle there is a runtime error (cartridge.md Artifact and loader). Chapters: chapter 0 with story_point or outcome is UNKNOWN_FIELD at that member, data {}; a later chapter without story_point is SCHEMA_VIOLATION at that member, data {error: missing_property}; an unresolved title, story_point or outcome is UNRESOLVED_REFERENCE at that member, data {target} the text key, full reference string or outcome key. A counted trigger whose quest and choice id are also named by another dialogue is OUTCOME_MISMATCH at cartridge.chapters[i].story_point (compiler), data {}. Only selected outcomes count, otherwise all do (mechanics.md Chapters). Scene definitions resolve their story-point outcome and narrate text, reject duplicate on at each colliding scenes/<key>.on, and enforce ordered steps with SCHEMA_VIOLATION not_in_enum at first misplaced steps[i].type; scene_<key> facts are RESERVED_FACT at facts.facts.scene_<key> or the existing scripted action/reaction/dialogue write-site paths. See mechanics.md scene@1 and cartridge.md Compiler. INVALID_TIME_POLICY: an opted-in real_elapsed scripted action declares nonzero duration; path its duration, data {}; or a quest journal declares hints (real minutes) without time_policy.profile real_elapsed, path the hints member (quests/find_key.journal.hints), data {}. VISITS_UNRECORDED (compiler only, severity warning, the build succeeds): a policy uses visited_count but requires.capabilities lacks knowledge@1, so no visit is recorded and the leaf never holds (mechanics.md narration variety), path cartridge.requires.capabilities, data {}, suggested_capabilities [knowledge@1]. HOSTILE_QUEST_SPEAKER (compiler only, severity warning, the build succeeds): a dialogue whose npc declares disposition.hostile has a choice with accept, hand_over, receive or escort, which that NPC refuses while hostile (mechanics.md Standing and disposition), path the dialogue's npc, data {}. ALLY_ENGAGE_UNUSED (compiler only, severity warning, the build succeeds): an NPC in world.combat.allies has a disposition.engage line, which an ally never plays, path the allies entry, data {}. ENTRY_INVALID (error): a speaker has more than one dialogue with entry true, or a keyword dialogue has it, path the dialogue's entry, data {}. ENTRY_GUESSED (compiler only, severity warning, the build succeeds): Talk opens data.target only by inference (a loop tie, the first key with no condition, or, joined by ' or ', the free links a failed entry leads to, up to the first that always opens, and past them to what they lead to when none does; mechanics.md Branching dialogue), path the dialogue's npc. ENTRY_UNUSED (compiler only, severity warning): data.target never opens because its speaker has an entry dialogue and nothing that opens leads to it, path the dialogue's npc. FALL_THROUGH_SPENT (compiler only, severity warning): data.target has a when and its only free way on shuts itself once taken, with no other Talk for the speaker, path the dialogue's policy. SITTING_SPENT (compiler only, severity warning): every choice of a hub is once per sitting, so the last one closes the talk, path the dialogue's choices. HUB_SHUT (compiler only, severity warning): a plain answer of a hub sets a fact so its own when fails, with no then, check or patrol, so the hub reopens with every choice refused and only closing works (behavior.ts hub; mechanics.md Branching dialogue), path the choice (dialogues/jailer.choices.pay), data {target} the dialogue key. RETURN_CLOSED (compiler only, severity warning): a then back to data.target comes after a choice sets the fact its when reads, so going back closes the talk, path the dialogue's policy. LOOP_SPEAKER and SPEAKER_ELSEWHERE (compiler only, severity warning): a speaker reached only through a then loop, and a then to a speaker in another room, path the dialogue. SITE_EXIT_CONFLICT: a room's site names a compass direction in which the room authors an exit, so a building there would face an existing exit (cartridge.md Structure and site declarations), path the direction (rooms/lane.site.directions[0]), data {}; and a site's structure that names no structure of the cartridge is UNRESOLVED_REFERENCE at it (rooms/lane.site.structures[0]), data {target}.",
       "enum": [
         "INVALID_JSON",
         "DUPLICATE_KEY",
@@ -1151,6 +921,7 @@
         "UNRESOLVED_REFERENCE",
         "UNREACHABLE_DETAIL",
         "CONTAINMENT_CYCLE",
+        "CONDITION_CYCLE",
         "CAPACITY_EXCEEDED",
         "TOUCH_LINK_MISSING",
         "UNKNOWN_COMMAND",
@@ -1190,7 +961,8 @@
         "ENTRY_UNUSED",
         "RETURN_CLOSED",
         "FALL_THROUGH_SPENT",
-        "SITTING_SPENT"
+        "SITTING_SPENT",
+        "HUB_SHUT"
       ],
       "examples": [
         "UNRESOLVED_REFERENCE",
@@ -1295,17 +1067,17 @@
       ]
     },
     "WorldSettings": {
-      "description": "The cartridge's world settings (owner decision world parameters; 00 §4 and 04 §15 as amended 2026-10-02), each optional with an engine default: movement.cost, what a move costs the body (movement@1; default 1 mv when the cartridge declares mv), its resource a pool of this cartridge (UNRESOLVED_REFERENCE otherwise); movement.terrain, the percent each destination room tag scales that cost by (row 43a; default none); movement without cost, or with terrain; bands, the condition band table of every pool without its own (resource.schema.json BandTable; default the 04 §15 table). An optional field of loka-cartridge-v2: the tag stays, and the compiler writes it only when the source authors it. In source it is cartridge.json's world, beside entry.",
+      "description": "Settings for the whole world, each optional with a default: what a move costs (movement.cost, by default 1 mv), how room tags change that cost (movement.terrain), and the condition words for any pool without its own (bands).",
       "type": "object",
       "properties": {
         "movement": {"description":"What a move costs the body, and how destination room tags scale it.",
           "type": "object",
           "properties": {
-            "cost": {
+            "cost": {"description":"What one move costs the body, such as 1 movement point.",
               "$ref": "action.schema.json#/$defs/ActionCost"
             },
             "terrain": {
-              "description": "Terrain movement costs (row 43a; docs/system/mechanics.md, Terrain movement costs): a room tag to the percent a move into a room carrying it scales the fare by, applied after status cost_percent, in the room's authored tag order, rounded down each step. The key pattern repeats the entity.schema.json Tag enum, so a Tag added there is refused here until this list follows (fail closed).",
+              "description": "Move cost by room tag, in percent of the usual: 100 leaves it unchanged, 50 halves it and 200 doubles moves into rooms with that tag.",
               "type": "object",
               "propertyNames": {
                 "pattern": "^(air|bed|burnable|chasm|cool|cursed|exposed|forge|fragile|lamp|liquid_holding|marsh|metal|road|rod|rug|sharp|silver|warm|water|waterproof|windproof|wooden)$"
@@ -1323,7 +1095,7 @@
           "$ref": "resource.schema.json#/$defs/BandTable"
         },
         "carry": {
-          "description": "Opts into the voluntary Take ceiling (docs/system/mechanics.md containment@1); every item must author mass_grams. No engine default.",
+          "description": "Opts into the voluntary Take ceiling; every item must author mass_grams. No engine default.",
           "type": "object",
           "properties": {
             "max_grams": {"description":"The Take ceiling, in grams.",
@@ -1337,30 +1109,30 @@
           "additionalProperties": false
         },
         "derived": {
-          "description": "Opts into stats derived from the player's attributes (docs/system/mechanics.md derived stats, toolbox row 2; attribute@1). Each table's bonus is added to the authored number it modifies: hit_chance to the attack profile's chance (clamped 0..100), damage to both damage_min and damage_max (clamped at 0), carry_grams to carry.max_grams (clamped at 0), hp_max to the player body's hp maximum (clamped at the pool minimum). hit_chance and damage need world.combat; carry_grams needs world.carry. An NPC keeps its authored profile unless it declares attributes (toolbox row G3): then hit_chance and damage apply to its attack with its own values.",
+          "description": "Opts into stats derived from the player's attributes. Each table's bonus is added to the authored number it modifies: hit_chance to the attack profile's chance (clamped 0..100), damage to both damage_min and damage_max (clamped at 0), carry_grams to carry.max_grams (clamped at 0), hp_max to the player body's hp maximum (clamped at the pool minimum). hit_chance and damage need world.combat; carry_grams needs world.carry. An NPC keeps its authored profile unless it declares attributes: then hit_chance and damage apply to its attack with its own values.",
           "type": "object",
           "properties": {
-            "hit_chance": {
+            "hit_chance": {"description":"Bonus to the player's chance to hit, by attribute value.",
               "$ref": "cartridge.schema.json#/$defs/DerivedStat"
             },
-            "damage": {
+            "damage": {"description":"Bonus to the player's damage, by attribute value.",
               "$ref": "cartridge.schema.json#/$defs/DerivedStat"
             },
-            "carry_grams": {
+            "carry_grams": {"description":"Bonus to how much the player can carry, in grams, by attribute value.",
               "$ref": "cartridge.schema.json#/$defs/DerivedStat"
             },
-            "hp_max": {
+            "hp_max": {"description":"Bonus to the player's maximum hit points, by attribute value.",
               "$ref": "cartridge.schema.json#/$defs/DerivedStat"
             }
           },
           "additionalProperties": false
         },
         "gear_budget": {
-          "description": "Balance tool 6b (docs/system/cartridge.md item affect declarations; attribute@1): the signed affect total an item in each slot may carry at intended level 1 (per_slot) and what each level above 1 adds (per_level). The engine ignores it at runtime; only the power report reads it.",
+          "description": "For balancing only: how much bonus an item in each slot may carry at level 1 (per_slot), and how much each level above 1 adds (per_level). It does not change play; only the power report reads it.",
           "type": "object",
           "properties": {
             "per_slot": {
-              "description": "Keyed by SlotKey (entity.schema.json), at least one (a compiler check, SCHEMA_VIOLATION too_few_items: the subset has no minProperties); a slot it omits is unbudgeted, never 0.",
+              "description": "The gear budget for each equipment slot, such as head or hands; a slot not listed has no budget.",
               "type": "object",
               "propertyNames": {
                 "pattern": "^(head|neck|body|cloak|arms|hands|finger|waist|legs|feet|wield|off_hand|light)$"
@@ -1384,7 +1156,7 @@
           "additionalProperties": false
         },
         "levelling": {
-          "description": "Opts into experience and levelling (docs/system/mechanics.md experience and levelling, toolbox row 4; attribute@1). thresholds are the strictly increasing experience totals that reach levels 2, 3 and so on; points_per_level the attribute points each level grants; kills the experience a credited kill of each NPC definition grants; level_up the receipt line when a decision reaches a new level. Every number is the cartridge's.",
+          "description": "Opts into experience and levelling. thresholds are the strictly increasing experience totals that reach levels 2, 3 and so on; points_per_level the attribute points each level grants; kills the experience a credited kill of each NPC definition grants; level_up the receipt line when a decision reaches a new level. Every number is the cartridge's.",
           "type": "object",
           "properties": {
             "thresholds": {"description":"Strictly increasing experience totals that reach levels 2, 3 and so on.",
@@ -1438,20 +1210,20 @@
           ],
           "additionalProperties": false
         },
-        "death": {
+        "death": {"description":"What happens when a player or NPC dies: corpses, how long they last and how the player comes back.",
           "$ref": "cartridge.schema.json#/$defs/DeathSettings"
         },
-        "combat": {
+        "combat": {"description":"How fights run: the player's own attack, time between rounds and the lines told.",
           "$ref": "cartridge.schema.json#/$defs/CombatSettings"
         },
-        "death_credit": {
+        "death_credit": {"description":"NPCs whose death is credited to the player: killing one sets a true-or-false player fact.",
           "type": "array",
           "items": {
             "$ref": "cartridge.schema.json#/$defs/DeathCredit"
           },
           "minItems": 1
         },
-        "water": {
+        "water": {"description":"Deep water: who may dive, how long they can stay under before drowning and which rooms connect.",
           "$ref": "water.schema.json#/$defs/WaterSettings"
         },
         "bell_cue": {"description":"A line told in the listed rooms when the fact turns true.",
@@ -1479,7 +1251,7 @@
           "additionalProperties": false
         },
         "group": {
-          "description": "Toolbox rows G8, 22a and 22b: member, stay and fight each name a bool pair fact read at each NPC; wage pays every member amount of a conserved resource each `every` clock units (docs/system/cartridge.md#group-declarations).",
+          "description": "Groups of NPCs: member, stay and fight each name a true-or-false fact read at each NPC; wage pays every member amount of a resource every `every` clock units.",
           "type": "object",
           "properties": {
             "member": {"description":"A bool pair fact, read at each NPC: this NPC is in the player's group.",
@@ -1520,7 +1292,7 @@
           "additionalProperties": false
         },
         "mount": {
-          "description": "Toolbox row 43b: riding names a bool pair fact, per subject and scoped to player, read at each NPC with a mount declaration; such an NPC carries its rider (docs/system/cartridge.md#mount-declarations).",
+          "description": "Riding names a bool pair fact, per subject and scoped to player, read at each NPC with a mount declaration; such an NPC carries its rider.",
           "type": "object",
           "properties": {
             "riding": {"description":"A bool pair fact, per subject and scoped to player: the player rides this NPC.",
@@ -1533,7 +1305,7 @@
           "additionalProperties": false
         },
         "trails": {
-          "description": "Toolbox row W13 (mechanics.md Tracks and trails): a trail is fresh while now minus its time is below fresh_for (logical seconds); a passed track check appends leads[<exit>], one per direction some room's exit uses.",
+          "description": "A trail is fresh while now minus its time is below fresh_for (logical seconds); a passed track check appends leads[<exit>], one per direction some room's exit uses.",
           "type": "object",
           "properties": {
             "fresh_for": {"description":"A trail is fresh while now minus its time is below this, in logical seconds.",
@@ -1572,7 +1344,7 @@
           "additionalProperties": false
         },
         "theft": {
-          "description": "Toolbox rows 33 and 34 (mechanics.md Theft, fence and witnessed offense): take may lift an item a living NPC in the actor's room directly holds. The victim notices when the actor's level in skill is below the victim's value of attribute (absent: 0); every other living NPC there that is not blind and the actor's body is not concealed from also sees. Containment alone sets the per_subject instance bool fact stolen true on the item; a seen theft emits custom_event noticed (subject: the thief's body) and says narration.seen, an unseen one narration.unseen.",
+          "description": "Take may lift an item a living NPC in the actor's room directly holds. The victim notices when the actor's level in skill is below the victim's value of attribute (absent: 0); every other living NPC there that is not blind and the actor's body is not concealed from also sees. Containment alone sets the per_subject instance bool fact stolen true on the item; a seen theft emits custom_event noticed (subject: the thief's body) and says narration.seen, an unseen one narration.unseen.",
           "type": "object",
           "properties": {
             "skill": {"description":"The victim notices when the actor's level in this skill is below the victim's attribute.",
@@ -1614,7 +1386,7 @@
           "additionalProperties": false
         },
         "construction": {
-          "description": "Built rooms S1 (construction@1): max_total, the most structures built in this world at once.",
+          "description": "Building limits: max_total is the most structures that can stand in the world at once.",
           "type": "object",
           "properties": {
             "max_total": {"description":"The most structures built in this world at once.",
@@ -1628,7 +1400,7 @@
           "additionalProperties": false
         },
         "identity": {
-          "description": "Toolbox rows W15 and FD9 (mechanics.md Recognition and earned titles): the player's displayed name, the text key name, varied by name_variants (TextVariants, first match wins; subject target is the player's body). GameView projects it as actor_name.",
+          "description": "The player's name as shown, with optional variants that change it while their condition holds.",
           "type": "object",
           "properties": {
             "name": {"description":"Text key of the player's displayed name.",
@@ -1669,7 +1441,7 @@
       ]
     },
     "Chapter": {
-      "description": "An ordered chapter marker (mechanics.md Chapters): name is a catalog key; only chapter 0 lacks a story_point, and it has no outcome. Later chapters name a story point and optionally one of its outcome keys (checked at the reference stage).",
+      "description": "An ordered chapter marker: name is a catalog key; only chapter 0 lacks a story_point, and it has no outcome. Later chapters name a story point and optionally one of its outcome keys (checked at the reference stage).",
       "type": "object",
       "properties": {
         "name": {"description":"Text key of its name.",
@@ -1703,7 +1475,7 @@
       ]
     },
     "DerivedStat": {
-      "description": "One stat's attribute bonus (docs/system/mechanics.md derived stats): floor(sum of per_point * (value - pivot) over terms / divisor), rounded toward minus infinity; value is the player's attribute as attribute@1 reads it. Every number is the cartridge's; divisor defaults to 1.",
+      "description": "One stat's bonus from attributes: for each term, the attribute's value minus pivot, times per_point; the sum is divided by divisor (default 1) and rounded down.",
       "type": "object",
       "properties": {
         "terms": {"description":"The attributes that make up the bonus; each adds per_point times (the attribute's value minus pivot).",
@@ -1760,7 +1532,7 @@
     },
     "Revival": {
       "type": "object",
-      "description": "loka-kgd.206: what a client shows a player between death and waking: the lines in order, over seconds of wall-clock time. Presentation only; the kernel restores the body at once and exposes this as GameView.revival.",
+      "description": "What the player sees between dying and waking: lines shown in order, over a number of real seconds. It changes nothing in the game.",
       "properties": {
         "lines": {"description":"The revival lines, shown in order.",
           "type": "array",
@@ -1823,7 +1595,7 @@
         },
         "penalty": {
           "type": "object",
-          "description": "What a player's death costs (toolbox row 47). experience: the body loses floor(experience * percent / 100), never below the threshold of its current level, and narration is told once; it needs world.levelling. items: corpse (the default) moves what the body held into the corpse; kept leaves it on the body.",
+          "description": "What dying costs the player. experience: a percent of experience lost, but never below the start of the current level (needs levelling in the world settings). items: corpse (the default) moves what the player held into the corpse; kept leaves it with the player.",
           "properties": {
             "experience": {"description":"Experience lost on death; needs world.levelling.",
               "type": "object",
@@ -1843,7 +1615,7 @@
               ],
               "additionalProperties": false
             },
-            "items": {"description":"corpse (the default) moves what the body held into the corpse; kept leaves it on the body.",
+            "items": {"description":"What happens to what the body held: corpse (the default) moves it into the corpse; kept leaves it on the body.",
               "enum": [
                 "corpse",
                 "kept"
@@ -1854,7 +1626,7 @@
         },
         "narration": {
           "type": "object",
-          "description": "A player's death lines outside a combat round (loka-3w3q). player_died: the fall line a bleed or status tick death tells after its tick line (default world.combat.narration.player_died; a drowning tells world.water.drowned instead). woke: told once after every player death, combat included, after the penalty line.",
+          "description": "A player's death lines outside a combat round. player_died: the fall line a bleed or status tick death tells after its tick line (default world.combat.narration.player_died; a drowning tells world.water.drowned instead). woke: told once after every player death, combat included, after the penalty line.",
           "properties": {
             "player_died": {"description":"The fall line a bleed or status tick death tells after its tick line.",
               "$ref": "text.schema.json#/$defs/TextKey"
@@ -1865,7 +1637,7 @@
           },
           "additionalProperties": false
         },
-        "revival": {
+        "revival": {"description":"What the player sees between dying and waking: lines shown in order, for its seconds.",
           "$ref": "#/$defs/Revival"
         }
       },
@@ -1876,7 +1648,7 @@
         "restore"
       ],
       "additionalProperties": false,
-      "description": "Fixed corpse templates, same-body return room and pool restoration; requires death@1 (docs/system/cartridge.md).",
+      "description": "What happens at death: the corpse made for the player and for NPCs, the room the player wakes in, and how their pools are restored.",
       "examples": [
         {
           "player_corpse": {
@@ -1907,7 +1679,7 @@
     "CombatSettings": {
       "type": "object",
       "properties": {
-        "player_attack": {
+        "player_attack": {"description":"The player's unarmed attack: chance to hit and damage range.",
           "$ref": "entity.schema.json#/$defs/AttackProfile"
         },
         "interval": {"description":"Clock units between combat rounds.",
@@ -1949,31 +1721,31 @@
             "shot_miss": {"description":"Told when a ranged first strike misses. Required when any item declares weapon.ranged.",
               "$ref": "text.schema.json#/$defs/TextKey"
             },
-            "player_volley": {"description":"Swings (loka-kgd.200): the summary line before the player's strike line when its profile makes more than one swing and some but not all hit, and more than one; binds count and hits. No key, no line.",
+            "player_volley": {"description":"Swings: the summary line before the player's strike line when its profile makes more than one swing and some but not all hit, and more than one; binds count and hits. No key, no line.",
               "$ref": "text.schema.json#/$defs/TextKey"
             },
-            "player_volley_all": {"description":"Swings (loka-kgd.200): the summary line before the player's strike line when its profile makes more than one swing and every one hit; binds count and hits. No key, no line.",
+            "player_volley_all": {"description":"Swings: the summary line before the player's strike line when its profile makes more than one swing and every one hit; binds count and hits. No key, no line.",
               "$ref": "text.schema.json#/$defs/TextKey"
             },
-            "player_volley_one": {"description":"Swings (loka-kgd.200): the summary line before the player's strike line when its profile makes more than one swing and exactly one hit; binds count and hits. No key, no line.",
+            "player_volley_one": {"description":"Swings: the summary line before the player's strike line when its profile makes more than one swing and exactly one hit; binds count and hits. No key, no line.",
               "$ref": "text.schema.json#/$defs/TextKey"
             },
-            "npc_volley": {"description":"Swings (loka-kgd.200): the summary line before an NPC's strike line when its profile makes more than one swing and some but not all hit, and more than one; binds count and hits. No key, no line.",
+            "npc_volley": {"description":"Swings: the summary line before an NPC's strike line when its profile makes more than one swing and some but not all hit, and more than one; binds count and hits. No key, no line.",
               "$ref": "text.schema.json#/$defs/TextKey"
             },
-            "npc_volley_all": {"description":"Swings (loka-kgd.200): the summary line before an NPC's strike line when its profile makes more than one swing and every one hit; binds count and hits. No key, no line.",
+            "npc_volley_all": {"description":"Swings: the summary line before an NPC's strike line when its profile makes more than one swing and every one hit; binds count and hits. No key, no line.",
               "$ref": "text.schema.json#/$defs/TextKey"
             },
-            "npc_volley_one": {"description":"Swings (loka-kgd.200): the summary line before an NPC's strike line when its profile makes more than one swing and exactly one hit; binds count and hits. No key, no line.",
+            "npc_volley_one": {"description":"Swings: the summary line before an NPC's strike line when its profile makes more than one swing and exactly one hit; binds count and hits. No key, no line.",
               "$ref": "text.schema.json#/$defs/TextKey"
             },
-            "ally_volley": {"description":"Swings (loka-kgd.200): the summary line before an ally's strike line when its profile makes more than one swing and some but not all hit, and more than one; binds count and hits. No key, no line.",
+            "ally_volley": {"description":"Swings: the summary line before an ally's strike line when its profile makes more than one swing and some but not all hit, and more than one; binds count and hits. No key, no line.",
               "$ref": "text.schema.json#/$defs/TextKey"
             },
-            "ally_volley_all": {"description":"Swings (loka-kgd.200): the summary line before an ally's strike line when its profile makes more than one swing and every one hit; binds count and hits. No key, no line.",
+            "ally_volley_all": {"description":"Swings: the summary line before an ally's strike line when its profile makes more than one swing and every one hit; binds count and hits. No key, no line.",
               "$ref": "text.schema.json#/$defs/TextKey"
             },
-            "ally_volley_one": {"description":"Swings (loka-kgd.200): the summary line before an ally's strike line when its profile makes more than one swing and exactly one hit; binds count and hits. No key, no line.",
+            "ally_volley_one": {"description":"Swings: the summary line before an ally's strike line when its profile makes more than one swing and exactly one hit; binds count and hits. No key, no line.",
               "$ref": "text.schema.json#/$defs/TextKey"
             },
             "player_died": {"description":"Told when the player falls in a combat round; also the default fall line for tick deaths.",
@@ -2018,11 +1790,11 @@
           "additionalProperties": false
         },
         "target_choice": {
-          "description": "Opts into target choice (docs/system/mechanics.md, toolbox row 6a): during a roster encounter the player's attack on another present active member makes it the primary the player strikes.",
+          "description": "Opts into target choice: during a roster encounter the player's attack on another present active member makes it the primary the player strikes.",
           "const": true
         },
         "allies": {
-          "description": "Authored NPCs that fight beside the player (docs/system/mechanics.md, toolbox row 6b, narration ally_hit and ally_miss): the first listed one living in the encounter room strikes the player's target each round, is never an attack target, and its kill credits the player.",
+          "description": "Authored NPCs that fight beside the player: the first listed one living in the encounter room strikes the player's target each round, is never an attack target, and its kill credits the player.",
           "type": "array",
           "items": {
             "$ref": "identity.schema.json#/$defs/DefinitionRef"
@@ -2030,11 +1802,11 @@
           "minItems": 1
         },
         "initiative": {
-          "description": "Opts into Diku rounds (docs/system/mechanics.md, Diku rounds): each round draws initiative for which side strikes first, Attack resolves round 1 at once, and the combat narration binds {attacker} and {target}.",
+          "description": "Opts into Diku rounds: each round draws initiative for which side strikes first, Attack resolves round 1 at once, and the combat narration binds {attacker} and {target}.",
           "const": true
         },
         "tiers": {
-          "description": "Damage tiers (docs/system/mechanics.md, Diku rounds), highest at_percent first: a hit whose hp loss reaches at_percent of the target's hp maximum is told with the first such tier's key for that perspective instead of the plain hit key.",
+          "description": "Damage tiers, highest at_percent first: a hit whose hp loss reaches at_percent of the target's hp maximum is told with the first such tier's key for that perspective instead of the plain hit key.",
           "type": "array",
           "items": {
             "type": "object",
@@ -2051,7 +1823,7 @@
           "minItems": 1
         },
         "conditions": {
-          "description": "Condition lines (docs/system/mechanics.md, Diku rounds), highest at_percent first: after each round, the first row the player's living foe's hp reaches is told, binding {target}.",
+          "description": "Condition lines, highest at_percent first: after each round, the first row the player's living foe's hp reaches is told, binding {target}.",
           "type": "array",
           "items": {
             "type": "object",
@@ -2319,7 +2091,7 @@
       "description": "A declared localized topic mapped to its player Boolean knowledge fact."
     },
     "ReplenishPlan": {
-      "description": "One replenish entry (docs/system/cartridge.md Replenish declarations): each due job moves up to count of items, lowest EntityId first, from the holder from to the holder to until to holds cap of them, then schedules the next at its due time plus every. A move never exceeds to's declared capacity. The compiler (lib/loka/content/replenish.ex) refuses a template location, a holder with no placed entity (a spawn-template NPC or template item), an item holder that is not a container, an item to when any listed item is a container, from equal to to, duplicate items and an unresolved item or holder.",
+      "description": "A periodic restocking rule that transfers items from a source container to a destination up to a target count. Runs repeatedly on a timer to keep shops or containers supplied.",
       "type": "object",
       "properties": {
         "key": {
@@ -2747,7 +2519,7 @@
       "additionalProperties": false
     },
     "StructureDefinition": {
-      "description": "Built rooms S1 (construction@1; cartridge.md Structure and site declarations): one structure a player may build at a room's site (RoomDefinition.site). Its key; name and description, the text keys of the room it becomes; optional variants (DescriptionVariant) and tags (Tag) as a room's; optional locks.enter, the policy the mover must hold to come into the built room, as a room's (toolbox row G7). Nothing builds in S1: the cartridge declares and both compilers check. Built rooms S3: optional max_per_owner, the most rooms of this structure one character may own at once; an order at the cap is refused service.construction_full. Built rooms S4: optional weathering, a status of this cartridge the room gets when it is raised (and again when mended); optional ruin, the status a mend cures (a reaction applies it, typically on weathering's status_expired), the mend benefit refuses service.nothing_to_mend unless ruin is active on the room.",
+      "description": "A buildable room or building a player can construct at a dedicated site. Defines the resulting room name, description, entry conditions, and durability statuses.",
       "type": "object",
       "properties": {
         "key": {
@@ -2759,7 +2531,7 @@
         "description": {"description":"Text key of the description of the room this structure becomes.",
           "$ref": "text.schema.json#/$defs/TextKey"
         },
-        "variants": {
+        "variants": {"description":"Alternative descriptions for the built room, shown when specific conditions hold.",
           "type": "array",
           "items": {
             "$ref": "room.schema.json#/$defs/DescriptionVariant"
@@ -2778,7 +2550,7 @@
         "locks": {"description":"Rules for the built room; enter is the policy a mover must meet to come in.",
           "type": "object",
           "properties": {
-            "enter": {
+            "enter": {"description":"The policy a character must meet to enter the built room.",
               "$ref": "policy.schema.json#/$defs/Policy"
             }
           },
@@ -2811,7 +2583,7 @@
       ]
     },
     "EmoteDefinition": {
-      "description": "NPC emotes (G9, emote@1; cartridge.md Emote declarations): one canned emote an NPC performs. Its key; others, the text key of the line every reader but the target reads ({actor}, the emoter); optional to, the forms with a target: to.others for the other readers ({actor}, {target}) and to.you for the target ({actor}). No label and no self form: only NPCs emote.",
+      "description": "A canned social expression an NPC performs in the room, with different text for observers and targets.",
       "examples": [
         {
           "key": "bow",
@@ -2854,7 +2626,7 @@
       "additionalProperties": false
     },
     "StatusDefinition": {
-      "description": "Toolbox row 1: one authored timed status on a body. Every tick_every seconds until duration ends, per_tick (signed) is added to resource, saturating at the pool bounds; a negative hp result at zero runs the death sequence. Applied by a reaction status.apply; ended by expiry, an edible that cures it, or death. A reapplication while active refreshes ends_at and keeps the pending tick. Optional modifies (row 2c) adds attribute modifiers, read at use while active; a status with modifies may omit per_tick, and then never ticks (its one job is the expiry).",
+      "description": "A temporary or lasting condition on a body that modifies stats, inflicts periodic damage or healing, or alters capabilities.",
       "examples": [
         {
           "key": "poison",
@@ -2892,26 +2664,26 @@
               "const": "permanent"
             }
           ],
-          "description": "Logical seconds, or permanent (toolbox row W8): no expiry and no job, kept by the same-body return, ended only by a cure; a permanent status that declares per_tick ticks until cured, with no ends_at (loka-rn3b)."
+          "description": "How long the status lasts in seconds, or permanent until cured."
         },
         "tick_every": {"description":"Seconds between ticks.",
           "type": "integer",
           "minimum": 1,
           "maximum": 2147483647
         },
-        "resource": {"description":"The pool per_tick changes; omitted only beside ticks (compiler SCHEMA_VIOLATION).",
+        "resource": {"description":"The pool adjusted on each tick; omitted when multiple pools are listed under ticks.",
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
         },
         "ticks": {
-          "description": "loka-kgd.209: several pools one tick changes, each by its signed per_tick (never 0), in place of resource and per_tick (compiler SCHEMA_VIOLATION beside either).",
+          "description": "Multiple pools adjusted on each tick, each with its own amount.",
           "type": "array",
           "items": {
             "type": "object",
             "properties": {
-              "resource": {
+              "resource": {"description":"The pool adjusted on each tick.",
                 "$ref": "identity.schema.json#/$defs/DefinitionRef"
               },
-              "per_tick": {
+              "per_tick": {"description":"Amount added to or subtracted from the pool on each tick.",
                 "type": "integer",
                 "minimum": -2147483647,
                 "maximum": 2147483647
@@ -2930,7 +2702,7 @@
           "type": "integer",
           "minimum": -2147483647,
           "maximum": 2147483647,
-          "description": "Signed; never 0, required unless modifies, fear, blocks, allows, resistances, perception, concealment or movement is present or duration is permanent (compiler SCHEMA_VIOLATION)."
+          "description": "Amount added to or subtracted from the pool on each tick."
         },
         "name": {"description":"Text key of its name.",
           "$ref": "text.schema.json#/$defs/TextKey"
@@ -2946,15 +2718,15 @@
             },
             "expired": {
               "$ref": "text.schema.json#/$defs/TextKey",
-              "description": "Told when a timed status ends; required unless duration is permanent (compiler SCHEMA_VIOLATION, loka-rn3b)."
+              "description": "Text told when a timed status ends; required unless duration is permanent."
             },
             "observed": {
               "$ref": "text.schema.json#/$defs/TextKey",
-              "description": "Row G3 (loka-kgd.176): told when a first application lands on an NPC or item in the player's room that the player perceives, or on the room the player stands in (loka-x6t.37); with none, such a holder is silent."
+              "description": "Text told when a status is applied to an NPC or item in the player room that the player perceives."
             },
             "skipped": {
               "$ref": "text.schema.json#/$defs/TextKey",
-              "description": "Told, whole, when this status bars its holder's combat blow (loka-x6t.30); with none, the round tells the engine line combat.skipped, its bindings.status this status's name."
+              "description": "Text told when this status prevents its holder from taking an action in combat."
             }
           },
           "required": [
@@ -2970,21 +2742,21 @@
           "items": {
             "$ref": "entity.schema.json#/$defs/ItemAffect"
           },
-          "description": "Toolbox row 2c: while the status is active on a holder, each modifier is added to the holder's attribute as attribute@1 reads it."
+          "description": "Modifiers added to the holder attributes while the status is active."
         },
         "kind": {
           "enum": [
             "buff",
             "debuff"
           ],
-          "description": "Toolbox row loka-x6t.64: the status icon's polarity, shown as GameView ConditionView.kind; wins over the polarity derived from the effect fields."
+          "description": "Whether the condition is beneficial (buff) or harmful (debuff), determining its display icon."
         },
         "fear": {
           "const": true,
-          "description": "Toolbox row W21: while active on a pack member, its C4 flight is attempted on its every opponent turn, whatever its hp; may stand in for per_tick."
+          "description": "When true, forces the character to attempt fleeing combat on every turn."
         },
         "cues": {
-          "description": "Cues active while this status is active on a holder, from the holder's room (toolbox row G6).",
+          "description": "Sensory cues broadcast into the room while this status is active on a holder.",
           "$ref": "entity.schema.json#/$defs/Cues"
         },
         "blocks": {
@@ -2994,7 +2766,7 @@
           "items": {
             "$ref": "action.schema.json#/$defs/Key"
           },
-          "description": "Status reader 4: Command types (CommandPayload type) the holding body may not issue while the status is active; each names a registered command other than run_job and elapsed (compiler UNKNOWN_COMMAND); may stand in for per_tick."
+          "description": "Action and command types the character cannot perform while this status is active."
         },
         "allows": {
           "type": "array",
@@ -3003,10 +2775,10 @@
           "items": {
             "$ref": "action.schema.json#/$defs/Key"
           },
-          "description": "Status reader 4: the only Command types the holding body may issue while the status is active (a modal answer aside); named as blocks; may stand in for per_tick."
+          "description": "The only action and command types the character is permitted to perform while this status is active."
         },
         "resistances": {
-          "description": "Status reader 5: while active on the struck body (the player's or an NPC's), each entry joins the G2 resistance sum of an attack on it, before the one -100..100 clamp; may stand in for per_tick.",
+          "description": "Damage resistances and vulnerabilities added to the character while this status is active.",
           "$ref": "entity.schema.json#/$defs/Resistances"
         },
         "movement": {
@@ -3033,7 +2805,7 @@
             }
           },
           "additionalProperties": false,
-          "description": "Status reader 7: the holding body's move cost and the terrain it may cross while the status is active; may stand in for per_tick."
+          "description": "Adjustments to the character movement cost and the terrain types they can cross."
         },
         "perception": {
           "type": "object",
@@ -3045,21 +2817,21 @@
                 "see_invisible"
               ]
             },
-            "hearing": {"description":"deaf: no sound cue reaches the holder.",
+            "hearing": {"description":"When deaf, no sound cues reach the character.",
               "enum": [
                 "deaf"
               ]
             }
           },
           "additionalProperties": false,
-          "description": "Status reader 6: what the holding body perceives while the status is active. sight blind: every room is dark to it, a lit source or dark sight notwithstanding; dark_sight: sees in an unlit room as an ancestry's dark_sight does; see_invisible: sees a holder of an invisible status. hearing deaf: no sound cue reaches it. At least one field (compiler SCHEMA_VIOLATION); may stand in for per_tick."
+          "description": "Alters what the character can perceive, such as granting dark vision, seeing invisible entities, or inflicting blindness or deafness."
         },
         "concealment": {
           "enum": [
             "invisible",
             "hidden"
           ],
-          "description": "Status reader 8: while active on an NPC, the player does not see it; on the player's body, an NPC does not engage it on entry. invisible yields to a see_invisible perception; hidden to none, unless pierced_by. May stand in for per_tick."
+          "description": "Hides the character from normal sight or prevents enemies from engaging them on entry."
         },
         "pierced_by": {
           "type": "object",
@@ -3076,7 +2848,7 @@
             "attribute"
           ],
           "additionalProperties": false,
-          "description": "Toolbox row 16, only beside concealment: a seer whose attribute value (an NPC's declared value, a player's attribute@1 value) is greater than the holder's skill level sees through the concealment; a holder without a character is never pierced. No draw. While the holder is a player's body, an NPC that engages it on entry ends every active concealment status on it."
+          "description": "The attribute and skill check needed for an observer to see through this concealment."
         }
       },
       "required": [

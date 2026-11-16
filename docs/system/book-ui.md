@@ -28,7 +28,9 @@ On a screen wider than a tablet (a desktop browser), the Book is a centred colum
 than a tablet (the page column [token](../../mobile/app/book/tokens.ts)), with the paper colour on
 both sides (owner, 2026-10-30). Everything the Book draws stays in that column: the page, its
 foot, the footer, the status line, the say field and overlays; only the night sky spans the
-window. A phone, narrower than the column, fills the screen.
+window, and it draws on a dark page only in a room open to the weather (the room's `exposed`
+tag, [cartridge](cartridge.md): a sheltered room at night keeps its dark page with no stars over
+it; owner 2026-11-16). A phone, narrower than the column, fills the screen.
 
 ## Room page anatomy
 
@@ -127,7 +129,7 @@ Standalone exit directions, adjacent-sight listings and redundant navigation/
 Look headings are omitted using structured outcome/TextKeys, never English matching. Under the owner's
 explicit per-room clearing direction, the World event log scopes
 to the actual room: after a confirmed accepted action changes place, clear the old-room log
-before adding genuine new movement/quest/authored consequences. The room shown is the one the
+before adding genuine new movement/quest/authored consequences. An accepted Look action (the room title's tap) starts the room's log over the same way, as if the player had just arrived: the old lines go, then Look's own lines (owner 2026-11-06, paraphrased). The room shown is the one the
 committed receipt places the player in, never the exit's destination: an arrest (a wanted player
 walking in on an arresting guard) turns the World page to the cell, and its log carries the move's
 lines in receipt order (arrest line, then the reaction's charge). A death outside a combat round (a bleed or drain tick, drowning, in a press or an elapsed settlement) first shows the [dead page](#effects-sound-and-haptics) in the room the player died in, its log kept and ending with the death receipt's lines in receipt order (the tick, the fall line, the penalty line, `world.death.narration.woke`); only Let go turns the World page to the recovery room, whose cleared log opens with those same lines, never dropped by the room change, or holds them in the spirit state when the view carries `revival` (owner 2026-11-05, option B, paraphrased; loka-kgd.210). Such a settlement ends any away-recap holding, its earlier held lines go with the old room's log, and its own lines never enter a recap (Beads `loka-3w3q`, `loka-x6t.26`). Each narration record of a
@@ -783,7 +785,7 @@ wash and removes the swell; Flashes off removes both, leaving the value, thud an
 
 **Falling.** The player's death is a committed fact from the receipt, never a view diff, a rendered line or a room name. It is one S4: pending cues clear, music and beds cut at once, and one heavy haptic is the last thing felt: in a fight the thud's own, which is never cut; outside one, the death cue's. In a fight the fatal blow's wash falls to the fatal hold (the reddest the dim and warning ink bear at 4.5:1; its look is in the [catalogue](../BOOK-UI-COMPONENTS.md)) and holds there, still, with no pulse and no fade, until the page turns; the screen's edges hold a deeper bloodshot red, feathered inward and gone before the page margins, so no ink sits on it (owner 2026-11-02, loka-kgd.204; Flashes off: no peak, the hold rises over the settle time; reduced motion: the same still edges, the half wash, no swell, over the hold set at once). A death outside a fight has no blow, so no peak: the fatal hold and edges arrive with the turn to the dead page below and rise over the settle time, in every mode (reduced motion: set at once). The death sound plays once (for now the book's close: no Falling cue is recorded yet). There is no countdown: the held red says the player is dead, and the closed Combat page's one foot, or the dead page's, reads **Let go** ([Closure](#live-combat-response-m6-a)), which goes to World as Back to World does, or, when the view carries `revival`, to the Spirit state below. Waking has no chord: the page lands on the palette of the current in-game hour, because death does not move the clock, and the current room's bed returns. No palette change marks the fall. ([Designer rulings](../design/effects-batch-2-rulings.md).)
 
-**Dead page.** A player death outside a fight (a bleed, drain or status tick, drowning; in a press or an elapsed settlement) shows the same death as a fight's closed Combat page, on the World page (owner 2026-11-05, option B, paraphrased; loka-kgd.210). A death whose receipt closes an encounter, whatever killed, is the Combat page's ([Closure](#live-combat-response-m6-a)), never this. **Where.** The World page of the room the player died in, its title kept from the view before the death receipt (as the Combat page keeps its encounter title), though the receipt has already moved the player: the recovery room is not drawn until Let go. **What shows.** The room title; the room's log, kept, ending with the death receipt's lines in receipt order (the tick, the death line, the penalty line, the waking line), as the Combat page shows every closing line; and one foot control, **Let go** (`LABEL.letGo`). The room's paragraphs are not drawn, and, as in the spirit state, the status row, running head, minimap and joystick, say field and Contents button are not drawn, catching up included. **The death line.** The receipt's own fall line, no new words: `world.death.narration.player_died` (default `world.combat.narration.player_died`), or `world.water.drowned` for a drowning. **Look and sound.** Falling above: the fatal hold and edges, held still until the page turns; one heavy haptic from the death cue; music and beds cut. **Turn.** From any page, World, a detail or conversation, Map, Journal, Character or Contents, the Book turns to the dead page with the death; already on that room's World page, the page does not turn and the layout changes in place. Focus goes to the title; the live region reads the death lines once. **Let go.** Local, no engine verb: the turn to the World page of the room the player is now in, through the existing room-change flow, its log cleared then opened with the receipt's lines (World and status entry); with `revival`, into the Spirit state below, its held lines starting at the receipt's. **A scene or chapter.** World time runs in scenes ([owner rules](owner-rules.md)), so a tick can kill inside one; a scene's progress survives death ([save](save.md)). The dead page shows first; Let go then shows the scene or chapter card the view carries, and the spirit state does not begin (as a scene arriving ends it). **Reopen.** Nothing is stored: a reopen before Let go shows the World page of the recovery room, solid, as after a Combat closure. A fault ends the dead page the same way.
+**Dead page.** A player death outside a fight (a bleed, drain or status tick, drowning; in a press or an elapsed settlement) shows the same death as a fight's closed Combat page, on the World page (owner 2026-11-05, option B, paraphrased; loka-kgd.210). A death whose receipt closes an encounter, whatever killed, is the Combat page's ([Closure](#live-combat-response-m6-a)), never this. **Where.** The World page of the room the player died in, its title kept from the view before the death receipt (as the Combat page keeps its encounter title), though the receipt has already moved the player: the recovery room is not drawn until Let go. **What shows.** The room title; the room's log, kept, ending with the death receipt's lines in receipt order (the tick, the death line, the penalty line, the waking line), as the Combat page shows every closing line (a later receipt's lines wait, unread, for Let go); and one foot control, **Let go** (`LABEL.letGo`). The room's paragraphs are not drawn, and, as in the spirit state, the status row, running head, minimap and joystick, say field and Contents button are not drawn, catching up included. **The death line.** The receipt's own fall line, no new words: `world.death.narration.player_died` (default `world.combat.narration.player_died`), or `world.water.drowned` for a drowning. **Look and sound.** Falling above: the fatal hold and edges, held still until the page turns; one heavy haptic from the death cue; music and beds cut. **Turn.** From any page, World, a detail or conversation, Map, Journal, Character or Contents, the Book turns to the dead page with the death; already on that room's World page, the page does not turn and the layout changes in place. Focus goes to the title; the live region reads the death lines once. **A second death** before Let go (a tick in the room the player now is in) changes nothing on the page: title, log and lines stay the first death's, and its receipt's lines wait, unread, with every later line; its cue and haptic play as any death's (Falling), the held red already there with no new peak (loka-kgd.218). **Let go.** Local, no engine verb: the turn to the World page of the room the player is now in, through the existing room-change flow, its log cleared then opened with every waiting line in receipt order (both deaths' after two; World and status entry); with `revival`, into the Spirit state below, its held lines starting at the receipt's. **A scene or chapter.** World time runs in scenes ([owner rules](owner-rules.md)), so a tick can kill inside one; a scene's progress survives death ([save](save.md)). The dead page shows first; Let go then shows the scene or chapter card the view carries, and the spirit state does not begin (as a scene arriving ends it). **Reopen.** Nothing is stored: a reopen before Let go shows the World page of the recovery room, solid, as after a Combat closure. A fault ends the dead page the same way.
 
 **Spirit state.** Built (loka-kgd.205); its open items settled 2026-11-04 ([rulings](../design/spirit-state-rulings.md)). Only when the view carries [`revival`](mechanics.md#death1--corpse-custody-and-same-body-return-m5-b-foundation) (else Let go goes to World as above), Let go, from the Combat page or the dead page, turns to the World page of the room the player is now in, in the spirit state. Its clock starts when that page lands, in wall-clock time, never from the receipt; nothing is stored. **Look.** A held under-ink layer, the highest in the chooser, so no fatal hold, vignette or glow shows with it: the spirit blue (pale by day and dawn, deep at dusk and night; its look is in the catalogue) under the page's ink, its foot included, inside the page column, never over the night sky; every text role keeps 4.5:1 ([tokens](../BOOK-UI-COMPONENTS.md#design-tokens)). It arrives with the page turn, set, in every mode; still, with no breathing. Opaque cards stay solid. Storm draws no light on it. **What shows.** The room title, its paragraphs drawn as plain prose (no link looks, nothing pressable), the log, and in the foot one Action card, the rise card, the Book's only control. The status row (line, icons, experience rule), running head, minimap and joystick, say field and Contents button are not drawn. **Lines.** The return receipt's lines (the waking line, a greeting) and any line arriving meanwhile are held, as the away recap holds lines, and go to the log in order at the rise. The revival lines dry into the log one by one: with n lines over `seconds`, line k (from 0) at k × `seconds` / (n − 1) after the page lands, so the first is at once and the last at zero (one line: at once); they stay in the log after the rise and are read once by the live region as log lines. **The rise card.** Before zero it is the unavailable form, its label plain, with the [status icon's](#conditions-details) countdown ring at its leading edge draining from full to empty over `seconds` (steps under reduced motion); a press sends nothing, gives warning and reads no sentence. At zero the ring is gone and the card is available; the Book does not rise on its own. Focus on the card stays on it; focus anywhere else does not move, so zero makes no announcement of its own (the last revival line marks it). Its accessible name is its label, the same at every tick; before zero it is disabled with the whole seconds remaining as its value (on the web, where a button carries no value, as its description: "4 seconds", "1 second"), read when focus lands, never announced per tick. **Rise.** A press sends nothing (no engine verb) and gives the selection haptic. The layer fades out over the palette cross-fade time (a plain fade under reduced motion; Flashes off the same, being no flash); the page does not turn; every hidden control returns at once, with no arrival effect; the held lines go to the log; focus goes to the room title. **Sound.** The room's bed returns on landing through `mix.muffle` and opens over the bed cross-fade at the rise; no other cue; thunder stays muffled. **Interruptions.** Backgrounded, the clock runs on: on return the page shows what is due then, its due lines in order, each drying once. A reopen shows the World page solid, its unplayed lines gone. An encounter, a chapter or a scene arriving ends the state at once, solid, with the held lines logged and the rest of the revival dropped. Catching up keeps the spirit layout (no joystick, no status line); a fault ends the state the same way, and the normal Book shows with it.
 
@@ -908,9 +910,17 @@ reasons and limits: [prose in the Book rulings](../design/prose-in-the-book-ruli
   pushed change alters the field's line.
 - **Hold** shows in the panel header (a toggle and `Held · N waiting`), never in the Book;
   leaving the page releases a Hold it set.
-- **No field.** A double-click on a line that is not words opens nothing; a note under it, until
-  the next click or key, read politely: `A choice label is its key. Alt-click opens the scene.`,
+- **No field.** A double-click on a line that is not words opens nothing; a note under it, in a
+  row of its own (the lines below move down by its height while it shows and back when it goes,
+  with no motion; a note never covers a line, loka-wfrgk.39), until the next click or key, read politely: `A choice label is its key. Alt-click opens the scene.`,
   `The engine writes this line.`, else `Not a line of words. Alt-click opens its source.`
+- **Add here** (E6a, #649). While the panel's selection is a room, a click on that room's line in the
+  Book (the line the panel's `select` marks) shows the no-field note under it: `Add here`, then one
+  button per registry field the room lacks, in the panel's order; nothing when it lacks none. It is
+  the same note ([author-mode marks](../BOOK-UI-COMPONENTS.md#component-catalogue)) and lasts until
+  the next click or key. A pick is the panel's card writing that field's least valid value (a text key is `~`; a
+  key or choice the author must make is only revealed, not written), undone by the card's Undo, and
+  asks for no second note. Nothing is added from the Book without a pick.
 - Nothing here animates (the scroll to a landed line is instant under reduced motion).
 
 ## Future boundaries
@@ -982,13 +992,14 @@ and foregrounds its own full Book page, like dialogue, including when another or
 or menu was open and when reopening a saved encounter. The page shows
 committed combat narration, and renders only currently available Stand and directionless Flee actions as complete typed
 invocations. The kernel still permits Look and Scan in a fight; the page offers neither (Look:
-owner 2026-11-04, until the combat hotbar is designed). The combat restriction is applied after all
+owner 2026-11-04; the [hotbar](#combat-hotbar) holds skills and spell words, not Look). The combat restriction is applied after all
 ordinary contributions, so no blocked action or alias is exposed by a hidden ordinary page.
 Attack initiates combat from the NPC page; it is not usable again during an open encounter
 and is not shown on the combat page.
 Flee lets the engine choose a random currently legal exit; success shows the actual resulting
-room. All offered combat actions appear as a vertical dialogue-style list below the log inside
-the same ScrollView, not a fixed strip. No unavailable or future skill actions are invented. World time continues
+room. Stand, Flee, a bandage and each foe's pick lists appear as a vertical dialogue-style list below the log inside
+the same ScrollView; the player's skills and untargeted spell words are the page's one fixed strip, the
+[Combat hotbar](#combat-hotbar) (owner 2026-11-05). No unavailable or future skill actions are invented. World time continues
 while the combat page is open.
 
 **Rounds.** The page follows its newest line as other growing pages do (Page: it follows the end
@@ -1008,7 +1019,7 @@ a boar!' / 'A boar attacks you!'"; loka-kgd.207). It is kept for the encounter, 
 reads **Combat** when the opener is unknown (an old save, a fallen pack opener after a reload, a
 cartridge without the keys or the foe's name words). Nothing else names the foe above the log: no foe
 name, band phrase or target line (owner 2026-11-02, loka-kgd.204); the log opens the page, and each live foe's **Cast a spell on** list ("Cast a spell on the goblin…") comes last among the cards. Your own bleeding and condition lines draw nowhere on the Combat page: they stay
-on the status icon row and Character, so a reader never takes your hunger for the raider's
+on the status icon row and Character, so a reader never takes your wound for the raider's
 (pass-1 C2b, as loka-x6t.15). **Closure.** On
 every committed closure (opponent death, player death and inn return, successful Flee, any
 other end) the Combat page stays the shown page, as a one-reply conversation does: its log ending with the closing
@@ -1030,8 +1041,10 @@ structured committed receipt metadata (an encounter present after the receipt th
 pre-command view lacked, or gone after it), never rendered prose; ordinary room events draw
 only in the World log even when delivered in the same receipt as combat, except the closing receipt,
 whose lines all draw on the ended page too (the arrival room's description after a Flee or inn
-return reads there, once). This replaces the earlier
-persistent bottom strip; see the [owner combat-page decision](../decisions/owner-decision-m6-a-combat-pane-2026-10-04.md).
+return reads there, once). This replaced the earlier
+persistent action strip ([owner combat-page decision](../decisions/owner-decision-m6-a-combat-pane-2026-10-04.md));
+the [Combat hotbar](#combat-hotbar) (owner 2026-11-05) brings back a strip for skills and spell words only, and the
+cards stay in the scroll.
 
 A committed dodge or block reads once from the structured attack result and authored text; a
 miss has its own line. During an encounter a held item's legal combat use (a bandage on a bleed)
@@ -1103,6 +1116,71 @@ The GameView may offer these; the Book draws no control for them, on any page:
 Any other World-level action (a door verb or an action with no target) with no control fails the
 Book harness's stranded-verb check, which lists this section (`UNDRAWN_VERBS`).
 
+## Combat hotbar
+
+The Combat page's one fixed strip (owner 2026-11-05, paraphrased: Inked style, fixed at the page's bottom,
+four slots, author order for v1, the list from the last slot, no captions). Its look is the
+[Inked icon style guide](../design/icon-style-guide.md); this section is what it holds and does.
+
+**Why a strip here and cards everywhere else.** The [combat-page decision](../decisions/owner-decision-m6-a-combat-pane-2026-10-04.md)
+put every action in the scroll because a card carries a target and a reason sentence and belongs beside the line
+it answers. A skill or an untargeted spell word has neither: it is the same press every round, and the player's hand
+rests on it while the log grows. So the hotbar is fixed under the scroll on the Combat page only; Stand, Flee, a
+bandage and each foe's **Cast a spell on…** list stay cards in the scroll ([Live combat response](#live-combat-response-m6-a)),
+and no other page gets a strip. The scroll ends above the strip, so its last card and the newest line are never
+under it.
+
+**Slots.** Four, left to right, in the GameView's order (the cartridge's authoring order; configurable later,
+loka-x6t.111). They fill from the player's offered untargeted scripted actions (the GameView `actions` with no
+target that are not the page's own verbs: stand, flee, bandage, cast, look, scan, move), then the untargeted
+learned words of `spell_words`, available or [unavailable](#unavailable-actions) alike (a barred skill keeps its
+place; a vanished one gives it up). The first three take the first three slots; the fourth is the opener. A slot
+with nothing to hold shows the style guide's empty form: not focusable, no name, so the row keeps its positions.
+No skill and no word: no strip (the page is as before the hotbar). An aimed spell (cartridge `aimed`) is never a
+slot: it stays in its target's **Cast a spell on…** list ([Word bar](#word-bar)).
+
+**The opener.** The fourth slot opens the skill and spell list (loka-x6t.110) over the cards as a
+[PickList](../BOOK-UI-COMPONENTS.md): every untargeted skill and spell word, slots included, each in its ActionCard
+form (available, or unavailable with its reason sentence), in the same order. It shares the page's one-open-list
+state, so opening it closes a foe's list and the reverse; it opens at the scroll's end and the page follows it.
+The opener is never barred or cooling; with nothing beyond the three slots it still opens (the list is the
+long form of the strip, with the words the strip omits). Escape or a second press closes it.
+
+**A press.** Ready: sends the slot's invocation as its card would (the scripted action; or the GameView's
+wordless twin of Cast with that word); the receipt's lines land in the log and the page keeps the strip. Barred:
+exposed disabled, still focusable and pressable; the press sends nothing and shows the slot's `reasonSentence`
+once, as an unavailable card does. Cooling: barred until the cooldown ends; the engine refuses an early press
+(action `cooldown`), and the Book never lets one through to be refused.
+
+**Cooldown timing.** The wedge shows the share of the cooldown already elapsed and reaches full ink at the end;
+the presenter keeps no clock and projects from the confirmed view's `time`, as the condition ring does
+(ConditionView `ends_at`, `duration`). The GameView gives the same pair on the slot's entry: an AdvertisedAction or
+SpellWord refused `cooldown` carries `ends_at` and `duration` (kernel_api 1.159, [protocol](protocol.md#gameview);
+the pair is together or absent, and absent when the end would overflow), and CombatView carries the round
+`interval`. The wedge's share is `(time - (ends_at - duration)) / duration`, clamped to 0..1. A cooling entry with
+no pair (the overflow case) shows the barred form with its reason word. The Book never estimates a cooldown from
+the cartridge or from the last press.
+
+**Rounds left (designer, 2026-11-05, loka-x6t.138).** No visible count anywhere: not in the glyph frame (no digit,
+[icon style guide](../design/icon-style-guide.md#grid)), no caption or badge under the slot (owner 2026-11-05: no
+captions), no count on the opener's list rows. The wedge is the slot's only visible clock, read as the condition
+ring is: a share, not a number. The count exists only as the cooling slot's
+`accessibilityValue`: `min` 0, `max` `ceil(duration / interval)`, `now` `ceil((ends_at - time) / interval)`, so a
+screen reader says the slot's name, its reason word and "n of m". A ready slot, a barred slot and a cooling entry
+with no pair carry no value.
+
+**Keyboard and screen reader.** The strip is one group named by its label key (a `LABEL` key, proposed:
+`LABEL.hotbar`), after the scroll's last card in the Tab order; slots left to right; empty slots skipped; Enter or
+Space presses; the opener's list takes Tab, Shift-Tab, Enter, Space and Escape as a PickList does. Each slot is a
+button named by its action's text (the key's words, no caption); a barred or cooling slot adds its reason word
+to the name and exposes disabled, as [unavailable actions](#unavailable-actions) do. A cooldown ending is silent (no
+announcement; the ink is back); a refused press reads its reason sentence once in the polite region, as cards do.
+
+**Word bar and chips.** No chip row in the game-world pane (owner 2026-10-23); the hotbar is the only in-fight
+place a spell word is cast from, and the Skills page's **Spells** section ([Word bar](#word-bar)) is unchanged
+outside a fight. Spell words cast from the hotbar follow the Word bar's send rule; their lines land in the Combat log.
+loka-x6t.69's engaged-state chips are superseded by the hotbar.
+
 ## Word bar
 
 The World page has no Word block (owner, mvl9qy5ut2x2). Saying is never a chip row (owner,
@@ -1121,6 +1199,8 @@ twin of Cast with that word; an accepted cast turns to World, where its line lan
 An aimed spell (cartridge `aimed`, loka-x6t.109) is never a Spells line: the GameView offers it
 on each admitted target's entry (`command: cast`, `target_ids: [target]`) and the Book lists it in
 that page's **Cast a spell…** pick list ([World](#world-and-status-entry), owner 2026-10-23).
+In a fight the same untargeted words also fill the [Combat hotbar](#combat-hotbar)'s slots and its
+opener's list, with the same send; the Skills page's section is unchanged.
 
 The one-word field ([SayField](../../mobile/app/book/SayField.tsx)) is kept, with no opener, for
 the Realm's room speech; its rules (sends, the bad-word Note, chips that only fill, closing) are

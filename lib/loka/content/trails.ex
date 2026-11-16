@@ -81,7 +81,7 @@ defmodule Loka.Content.Trails do
   def check(m, defs, v2, {_, settings}, registry) do
     trails = get_in(settings, ["world", "trails"])
 
-    leads(trails, defs, if(v2, do: elem(v2, 1), else: :unknown)) ++
+    leads(trails, defs, elem(v2, 1)) ++
       Enum.flat_map(plans(defs), &plan(&1, trails, m, registry)) ++
       for(
         {rel, c} <- tracks(defs),

@@ -192,8 +192,4 @@ test('bin/loka sim refuses bad flags and a bad cartridge in plain words', () => 
   const failed = sim(broken);
   assert.equal(failed.status, 1);
   assert.match(failed.stderr, /^not compiled: /);
-  const roomless = sim(join(ROOT, 'cartridges/hello_sampler'));
-  assert.equal(roomless.status, 1, roomless.stderr);
-  assert.match(roomless.stderr, /no rooms/);
-  assert.doesNotMatch(roomless.stderr, /TypeError/);
 });

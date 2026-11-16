@@ -478,6 +478,15 @@
    "index": 1,
    "count": 2
   },
+  "spell_words": [
+   {
+    "word": "mend",
+    "available": false,
+    "reason": {
+     "code": "unsupported_capability"
+    }
+   }
+  ],
   "time": 25200,
   "calendar_status": {
    "day": 1,

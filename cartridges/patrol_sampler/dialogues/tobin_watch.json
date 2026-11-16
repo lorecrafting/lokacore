@@ -1,0 +1,49 @@
+{
+  "npc": "tobin",
+  "roles": {
+    "leader": {
+      "role": "npc",
+      "npc": "tobin"
+    }
+  },
+  "prompt": "dialogue.watch.prompt",
+  "choices": {
+    "start": {
+      "label": "dialogue.watch.start.label",
+      "narration": "narration.watch.start",
+      "patrol": {
+        "npc": "leader",
+        "quest": "watch_rounds",
+        "transition": "start"
+      },
+      "accept": "watch_rounds"
+    },
+    "continue": {
+      "label": "dialogue.watch.continue.label",
+      "narration": "narration.watch.continue",
+      "patrol": {
+        "npc": "leader",
+        "quest": "watch_rounds",
+        "transition": "continue"
+      }
+    },
+    "rejoin": {
+      "label": "dialogue.watch.rejoin.label",
+      "narration": "narration.watch.rejoin",
+      "patrol": {
+        "npc": "leader",
+        "quest": "watch_rounds",
+        "transition": "rejoin"
+      }
+    },
+    "restart": {
+      "label": "dialogue.watch.restart.label",
+      "narration": "narration.watch.restart",
+      "patrol": {
+        "npc": "leader",
+        "quest": "watch_rounds",
+        "transition": "restart"
+      }
+    }
+  }
+}

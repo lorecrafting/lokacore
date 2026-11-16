@@ -194,7 +194,7 @@ const castCards = (
     .map(({ word }) => (
       <ActionCard
         key={word}
-        b={{ ...cast, label: `${word}, cast`, input: { word }, pick: {} }}
+        b={{ ...cast, label: LABEL.wordCast(word), input: { word }, pick: {} }}
         press={press}
       />
     ));
@@ -220,7 +220,7 @@ export function spells(p: {
       <SectionTitle>{LABEL.spells}</SectionTitle>
       {cards}
       {refused.map((s) => (
-        <ActionCard key={s.word} label={`${s.word}, cast`} reason={why(s, p.text)} />
+        <ActionCard key={s.word} label={LABEL.wordCast(s.word)} reason={why(s, p.text)} />
       ))}
       {p.view && p.press && aimed.length > 0 && (
         <PickLists

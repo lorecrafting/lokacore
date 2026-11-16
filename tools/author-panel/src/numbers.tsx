@@ -31,7 +31,7 @@ const Cols = ({ rows }: { rows: string[][] }) => (
   </table>
 );
 
-const Fight = ({ target }: { target: Target }) => (
+export const Fight = ({ target }: { target: Target }) => (
   <div>
     <p className="font-mono text-xs" title={target.target}>
       {shortName(target.target)}
@@ -146,7 +146,7 @@ export function Numbers({ hash }: { hash?: string }) {
   return (
     <div className="space-y-3 text-sm">
       <Button variant="secondary" disabled={running} onClick={run}>
-        {running ? 'Running, up to 30 s' : 'Run'}
+        {running ? 'Running, up to 90 s' /* mutate-skip: the wording of live.ts SECONDS */ : 'Run'}
       </Button>
       {note ? <p className="text-destructive">{note}</p> : null}
       {report && hash && report.hash !== hash ? (

@@ -333,7 +333,13 @@ test('withdrawn or changed-context Notice controls retain their captured stale t
       (v: any) => (v.notices[0].id = 'aaaaaaaa-0000-4000-8000-000000000072'),
       (v: any) => (v.place.id = 'aaaaaaaa-0000-4000-8000-000000000073'),
       (v: any) => (v.scene = { scene: 'changed', step: 0, line: { key: 'line' } }),
-      (v: any) => (v.combat = { encounter_id: 'changed', opponent_id: 'opponent', name: 'name' }),
+      (v: any) =>
+        (v.combat = {
+          encounter_id: 'changed',
+          opponent_id: 'opponent',
+          name: 'name',
+          interval: 150,
+        }),
     ]) {
       let projection: any = {
         ...initial,

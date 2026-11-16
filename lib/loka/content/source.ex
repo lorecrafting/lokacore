@@ -1,4 +1,4 @@
-# size: allow 449, the scene-file and cutscene entries, the scene overlap refusal, the source-only choice once, a JSON supplying a scene prompt, the behaviours pass, the source schema dirs and the source-only choice story_point join the existing source-shortcut pipeline; diag/4 checks its code; an applies entry may be a bare status key (loka-kgd.209)
+# size: allow 450, the scene-file and cutscene entries, the scene overlap refusal, the source-only choice once, a JSON supplying a scene prompt, the behaviours pass, the source schema dirs and the source-only choice story_point join the existing source-shortcut pipeline; diag/4 checks its code; an applies entry may be a bare status key (loka-kgd.209); the hour kinds' titles (loka-wfrgk.74)
 defmodule Loka.Content.Source do
   @moduledoc """
   Reads a cartridge source directory, lowers its source shortcuts (load/1) and builds diagnostics
@@ -34,6 +34,7 @@ defmodule Loka.Content.Source do
           | :resources
           | :attributes
           | :layout
+          | :condition
           | {:action
              | :room
              | :item
@@ -80,8 +81,14 @@ defmodule Loka.Content.Source do
     {files, held} = Behaviours.expand(files)
     {files, zoned} = Zones.expand(files)
     {files, waited} = Waits.lower(files)
-    {files, Enum.map(faults ++ area_faults ++ clashes ++ held ++ zoned ++ waited, &bundle_diag/1)}
+    {files, named} = Loka.Content.Conditions.lower(files, contracts())
+
+    {files,
+     Enum.map(faults ++ area_faults ++ clashes ++ held ++ zoned ++ waited, &bundle_diag/1) ++
+       Loka.Content.Conditions.diagnostics(named, &bundle_diag/1, &policy_diag/1)}
   end
+
+  defp policy_diag({{rel, steps}, value, errors}), do: schema({rel, steps}, [], value, errors)
 
   defp read(dir) do
     {files, diags} = dir |> SourceFiles.paths() |> Enum.map(&entry(&1, dir)) |> Enum.unzip()
@@ -245,6 +252,8 @@ defmodule Loka.Content.Source do
 
   defp placed({["scenes", file], ".cut"}), do: {:scene_file, {:scene, Path.rootname(file), []}}
 
+  defp placed({["conditions", file], ".json"}), do: {:condition, Path.rootname(file), []}
+
   defp placed({[dir, file], ".json"}) when is_map_key(@dirs, dir),
     do: {@dirs[dir], Path.rootname(file), []}
 
@@ -381,21 +390,6 @@ defmodule Loka.Content.Source do
     |> elem(0)
   end
 
-  # Source only (Dialogues.points/2 derives CompiledCartridge.story_points and strips it).
-  @choice_point %{
-    "description" => "<story point>/<outcome>: the outcome this choice reaches; one per outcome.",
-    "type" => "string",
-    "pattern" => "^[a-z][a-z0-9_]{0,63}/[a-z][a-z0-9_]{0,63}$"
-  }
-
-  # Source only (DialogueOnce lowers it to a fact, a step and a policy).
-  @choice_once %{
-    "description" =>
-      "This choice goes away once taken: lowered to the fact <dialogue>_<choice>_done, a step that sets it and a policy that needs it unset.",
-    "type" => "boolean",
-    "enum" => [true]
-  }
-
   # In source a DefinitionRef may also be short: the Key of this cartridge's definition.
   def contracts do
     defs = Loka.Core.Contracts.defs()
@@ -404,18 +398,17 @@ defmodule Loka.Content.Source do
     |> Map.update!("DefinitionRef", &%{"anyOf" => [%{"$ref" => "Key"}, &1]})
     # loka-kgd.209: an applies entry may be the bare status key, as a cures entry is.
     |> Map.update!("AppliedStatus", &%{"anyOf" => [%{"$ref" => "Key"}, &1]})
-    |> put_in(["DialogueChoice", "properties", "story_point"], @choice_point)
-    |> put_in(["DialogueChoice", "properties", "once"], @choice_once)
+    |> Map.update!("Policy", &Loka.Content.Conditions.widen/1)
     |> update_in(["DialogueChoice", "properties"], &AskedField.source_fields/1)
+    |> update_in(["ReactionRule", "properties"], &Loka.Content.ReactionOnce.Field.source_fields/1)
     |> schedule(defs)
-    |> Map.update!(
-      "LiquidRow",
-      &put_in(&1, ["properties", "kind", "anyOf"], [
+    |> Map.update!("LiquidRow", fn r ->
+      put_in(r, ["properties", "kind", "anyOf"], [
         %{"type" => "null"},
         %{"$ref" => "Key"},
         defs["DefinitionRef"]
       ])
-    )
+    end)
   end
 
   # Toolbox row W10: a daily_schedule hour may be [case, ..., room key], or (row W26) one walking
@@ -425,14 +418,15 @@ defmodule Loka.Content.Source do
     one = defs["ScheduleCases"]["items"]
 
     hour = [
-      %{"$ref" => "Key"},
+      %{"$ref" => "Key", "title" => "room key"},
+      Map.merge(one, %{
+        "properties" => Map.delete(one["properties"], "when"),
+        "required" => ~w(room walks),
+        "title" => "walk"
+      }),
+      Map.put(defs["DefinitionRef"], "title", "room ref"),
       %{
-        one
-        | "properties" => Map.delete(one["properties"], "when"),
-          "required" => ~w(room walks)
-      },
-      defs["DefinitionRef"],
-      %{
+        "title" => "cases",
         "type" => "array",
         "items" => %{"anyOf" => [%{"$ref" => "Key"}, one]},
         "minItems" => 2,

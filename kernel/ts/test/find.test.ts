@@ -4,7 +4,7 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { test } from 'node:test';
-import { find } from '../play/find.ts';
+import { find, users } from '../play/find.ts';
 
 const ref = (kind: string, key: string) => ({
   cartridge_id: 'c',
@@ -94,4 +94,31 @@ test('the list is capped with its total, empty asks nothing, no artifact still f
   assert.deepEqual(find(source, artifact, ''), { hits: [], total: 0, refs: [] });
   assert.deepEqual(find(source, join(source, 'none.json'), 'maud').refs, []);
   assert.equal(find(source, join(source, 'none.json'), 'maud').total, 2);
+});
+
+// Breaks: a delete refused for a same-named key of another kind or for the definition's own ref to
+// itself, or let through while a file extends it (the compile drops the parent its child needs).
+test('a definition is used by refs to it as its kind and by the files extending it', (t) => {
+  const { source } = tree(t);
+  const artifact = join(source, '../own.json');
+  const canonical = {
+    npcs: { 'c@1:npc/maud': { friend: ref('npc', 'maud') } },
+    items: { 'c@1:item/maud': {} },
+    quests: { 'c@1:quest/q': { giver: ref('npc', 'maud'), verb: ref('action', 'chop') } },
+    scripted_actions: { 'c@1:action/chop': { again: ref('action', 'chop') } },
+    rooms: { 'c@1:room/yard': {} },
+    layout: [{ room: ref('room', 'yard') }],
+  };
+  writeFileSync(artifact, JSON.stringify({ canonical: JSON.stringify(canonical) }));
+  mkdirSync(join(source, 'npcs'));
+  writeFileSync(join(source, 'npcs/guard.json'), '{ "extends": "maud" }\n');
+  assert.deepEqual(users(source, artifact, 'npcs', 'maud'), [
+    { kind: 'npc', by: 'quests/q', at: 'quests/q.json:2' },
+    { kind: 'extends', by: 'npcs/guard', at: 'npcs/guard.json:1' },
+  ]);
+  assert.deepEqual(users(source, artifact, 'items', 'maud'), []);
+  assert.deepEqual(users(source, artifact, 'actions', 'chop'), [
+    { kind: 'action', by: 'quests/q' },
+  ]);
+  assert.deepEqual(users(source, artifact, 'rooms', 'yard'), []); // its layout row goes with it
 });

@@ -76,7 +76,9 @@ defmodule Loka.Content do
   """
   @spec placeholder_lines(binary(), Path.t()) :: %{String.t() => String.t()}
   def placeholder_lines(bytes, dir) do
-    index = Loka.Content.SourceLines.index(dir)
+    held = held(bytes, dir)
+    # no `~`, no source index: it is most of a resident preview compile's time
+    index = if held == [], do: %{}, else: Loka.Content.SourceLines.index(dir)
 
     # an inline `{"prose": "~"}` over lines: its words' own line, not its field's
     prose =
@@ -85,7 +87,7 @@ defmodule Loka.Content do
         else: &1["path"]
       )
 
-    for {key, d} <- held(bytes, dir),
+    for {key, d} <- held,
         %{"rel" => rel, "line" => line} when is_binary(rel) <- [
           Loka.Content.Explain.Place.of(%{d | "path" => prose.(d)}, index)
         ],
@@ -156,16 +158,17 @@ defmodule Loka.Content do
 
   @doc """
   `new/4` calling `before_write.(path, old bytes or nil)` before each file it writes, its own
-  file in `areas/<area>/` when `area` is given; `scene`'s `from` is its NPC
-  (Loka.Content.Starters.Scene).
+  file in `areas/<area>/` when `place` is `{area, _}` and a child of the abstract `extends` when it
+  is `{_, extends}`;
+  `scene`'s `from` is its NPC (Loka.Content.Starters.Scene).
   """
-  def new(dir, kind, name, from, before_write, area \\ nil)
+  def new(dir, kind, name, from, before_write, place \\ {nil, nil})
 
-  def new(dir, "scene", key, npc, before_write, nil) when is_binary(npc),
+  def new(dir, "scene", key, npc, before_write, {nil, nil}) when is_binary(npc),
     do: Loka.Content.Starters.Scene.write(dir, key, npc, before_write)
 
-  def new(dir, kind, name, from, before_write, area),
-    do: Loka.Content.Starters.write(dir, kind, name, from, before_write, area)
+  def new(dir, kind, name, from, before_write, place),
+    do: Loka.Content.Starters.write(dir, kind, name, from, before_write, place)
 
   @doc "The kinds `new/4` knows."
   defdelegate kinds(), to: Loka.Content.Starters

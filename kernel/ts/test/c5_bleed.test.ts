@@ -5,6 +5,7 @@ import { key } from '../src/foundation/compose.ts';
 import { refString, type World } from '../src/runtime/decision.ts';
 import { resolved } from '../src/commands/actions.ts';
 import { acquisition } from '../src/mechanics/skills.ts';
+import { holds } from '../src/runtime/world.ts';
 import { command, elapsed, fixture, hp, sampler } from './c5_bleed_fixture.ts';
 
 function readyBandage(world: World) {
@@ -167,6 +168,9 @@ test('one held qualified bandage cures after one tick and keeps exact HP', () =>
   );
   assert.equal(cured.decision.kind, 'accepted', JSON.stringify(cured.decision));
   assert.equal(cured.world.state.containers[bandage], world.consumed);
+  // A spent bandage is not edible, so before the shared holder rule the world checks refused it.
+  for (const id of ['one_container_per_item', 'containment_acyclic'])
+    assert.ok(holds(id, cured.world), id);
   assert.equal(cured.world.state.bleeds![world.body]!.active, false);
   assert.equal(hp(cured.world), 8);
   const later = elapsed(cured.world, 65150, 6);

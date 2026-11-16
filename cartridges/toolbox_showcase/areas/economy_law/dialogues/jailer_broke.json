@@ -40,7 +40,8 @@
           "fact": "wanted",
           "value": false
         }
-      ]
+      ],
+      "then": "end"
     },
     "work_off": {
       "label": "dialogue.jailer.work_off",
@@ -51,7 +52,8 @@
           "fact": "wanted",
           "value": false
         }
-      ]
+      ],
+      "then": "end"
     }
   }
 }

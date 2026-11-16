@@ -81,13 +81,15 @@ defmodule Loka.ContentRestTest do
       }
   end
 
-  defp d(path) do
+  # A write site names its fact (the sentence reads it); the authored-fact site does not, as its
+  # path ends at the name.
+  defp d(path, data \\ %{}) do
     %{
       "severity" => "error",
       "code" => "RESERVED_FACT",
       "path" => path,
       "message_key" => "diagnostics.reserved_fact",
-      "data" => %{},
+      "data" => data,
       "suggested_capabilities" => []
     }
   end
@@ -98,10 +100,10 @@ defmodule Loka.ContentRestTest do
     assert {:error, ds} = compile(Path.join(dir, "writes"), true, writes())
 
     assert Enum.sort_by(ds, & &1["path"]) == [
-             d("actions/coil_rope.outcomes.success.steps[0].fact"),
-             d("dialogues/bram.choices.carry.steps[0].fact"),
+             d("actions/coil_rope.outcomes.success.steps[0].fact", %{"field" => "position"}),
+             d("dialogues/bram.choices.carry.steps[0].fact", %{"field" => "position"}),
              d("facts.facts.position"),
-             d("reactions/settle.steps[0].fact")
+             d("reactions/settle.steps[0].fact", %{"field" => "position"})
            ]
 
     assert {:ok, _, _} = compile(Path.join(dir, "reads"), true, writes(true))

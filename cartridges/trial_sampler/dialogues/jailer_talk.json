@@ -27,7 +27,8 @@
           "fact": "wanted",
           "value": false
         }
-      ]
+      ],
+      "then": "end"
     },
     "plead": {
       "label": "dialogue.jailer.plead",

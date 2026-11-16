@@ -53,6 +53,10 @@ Before handing off:
 
 Check your token count at each push and test wait. Near 180k tokens, and at 220k at the latest, stop: commit, and hand back a short state note (done, open, next) for a fresh agent. This is a hard stop.
 
+Slice size: a brief touching `kernel/` **and** Book **and** authority is two slices (loka-2zak); if it cannot fit one,
+hand back the untouched half as a named follow-up instead of stopping mid-slice. A brief that changes narration also
+lists the conformance fixtures and Storybook live play functions it breaks under Risks (loka-1whq).
+
 A developer spawned for a fix round on an existing PR skips the build, self-review and PR steps
 above and follows only the next paragraph.
 

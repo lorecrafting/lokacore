@@ -1,6 +1,6 @@
 # Status line: design rulings for loka-15g, loka-kgd.7, loka-x6t.63 and loka-x6t.134
 
-Decided, one pass, before the prologue stacks hunger, thirst, cold, tiredness and bleeding at once (beats 9 to 41). The spec is [Conditions details](../system/book-ui.md#conditions-details); this record holds the reasons. No new component, token or page type: the status icon row ([StatusIcon.tsx](../../mobile/app/book/StatusIcon.tsx)), its Tooltip and disc, and the Character page carry it all.
+Decided, one pass, before the prologue stacks fed, refreshed, cold, tired and bleeding at once (beats 9 to 41). The spec is [Conditions details](../system/book-ui.md#conditions-details); this record holds the reasons. No new component, token or page type: the status icon row ([StatusIcon.tsx](../../mobile/app/book/StatusIcon.tsx)), its Tooltip and disc, and the Character page carry it all.
 
 ## Rulings
 
@@ -23,7 +23,7 @@ Decided, one pass, before the prologue stacks hunger, thirst, cold, tiredness an
 
 ## Slice tests
 
-- At 360 px (galaxyS25), Standard size, the five prologue states (bleeding, hungry, thirsty, cold, tired) and a position: the status line is one line and the row under it shows five icons, bleeding first.
+- At 360 px (galaxyS25), Standard size, the five prologue states (bleeding, fed, refreshed, cold, tired) and a position: the status line is one line and the row under it shows five icons, bleeding first.
 - Seven statuses: five icons and "+2"; the disc's name lists the two hidden labels. Red control: cap at seven.
 - A buff arriving while the row is full: no pop; a debuff arriving pushes a buff behind the disc with no fade.
 - Seven statuses down to six: the revealed icon shows without a pop.
@@ -50,7 +50,7 @@ Owner, 2026-11-04 (paraphrased): put the status icons below the status line, mak
 The family is drawn in [statusGlyphs.ts](../../mobile/app/book/statusGlyphs.ts) to the frame above; the contact sheet (every drawing at 1× and 4× in its look, light and dark) is the review artefact, rendered from the file, not kept in the repo. Where a suggested motif did not read at 14 px the drawing changed; the list below is what is drawn. The developer wires the file into StatusIcon and adds the Storybook story (every drawing in each look, light and dark, at 360 px).
 
 - **Prologue.** bleeding: a drop with a small drop beside it. fed: a bowl with two steam curls (warm, buff look). refreshed: a mug with a handle (the sprout read as a weed; a mug says "a drink"). cold (and chilled): a six-armed snowflake. tired: a closed eye, three lashes down.
-- **Debuffs.** hungry: an empty bowl, a spoon across it. thirsty: an empty tall glass, a tilted dry line. parched: a drop struck through. poisoned: a round vial, a bubble inside. burning: a flame. shocked: a lightning bolt. stunned: an inward spiral (three stars on an arc read as a frown). wet: a drop over a ripple. soaked: a drop over two waves. overheated: a thermometer. windburnt: three swept wind lines. afraid: a wide eye, small pupil, two tremble marks. cursed: a ghost with two eyes (the spiral went to stunned). hushed: a speech bubble struck through (the finger over lips had no silhouette). scarred: a line crossed by three stitches. gored: two flared horns, one U (one horn read as a feather). bruised: a plaster with its pad bar (the blotch read as a target). notched: an upright blade with a nick, cross-guard and grip. wanted: a notice with a pin and one line. word_travels: two arcs spreading from a dot.
+- **Debuffs.** parched: a drop struck through (drought, not thirst: the showcase's `condition.parched`). hungry and thirsty: retired (First icons row), no drawing; the two paths still in statusGlyphs.ts go with the file's next edit. poisoned: a round vial, a bubble inside. burning: a flame. shocked: a lightning bolt. stunned: an inward spiral (three stars on an arc read as a frown). wet: a drop over a ripple. soaked: a drop over two waves. overheated: a thermometer. windburnt: three swept wind lines. afraid: a wide eye, small pupil, two tremble marks. cursed: a ghost with two eyes (the spiral went to stunned). hushed: a speech bubble struck through (the finger over lips had no silhouette). scarred: a line crossed by three stitches. gored: two flared horns, one U (one horn read as a feather). bruised: a plaster with its pad bar (the blotch read as a target). notched: an upright blade with a nick, cross-guard and grip. wanted: a notice with a pin and one line. word_travels: two arcs spreading from a dot.
 - **Buffs.** well_fed: fed's bowl. hearty: a heart. well_rested: a crescent moon and a small star. blessed: a halo over a round head (rays read as a dish). mighty and might: two stacked upward chevrons. inspired: a four-point spark. warded: a shield. warm: a small sun.
 - **Neutral.** hidden: an eye struck through. disguised: a domino mask. hound_dream: a paw print.
 - **Never in the row** (statuses on things or NPCs): spoiling, rot, growing, growing_croft, withered, ruin, weathering, hen_fed, spent, furious. No drawing.

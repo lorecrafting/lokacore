@@ -12,12 +12,14 @@ chmod +x "$t/stub/mise"
 cd "$t/main"
 git init -q . && mkdir bin node_modules && cp "$src/worktree_setup.sh" bin/
 echo node_modules > .gitignore; echo A > package-lock.json && cksum < package-lock.json > node_modules/.loka-lock-cksum
+mkdir sub && echo S > sub/package-lock.json # a nested package main never installed
 git add -A . && git -c user.name=t -c user.email=t@t commit -qm init
 git worktree add -q "$t/wt" -b wt
 mkdir -p node_modules/.cache "$t/wt/node_modules.tmp/x" # main's cache; a partial clone left by an earlier run
 cd "$t/wt"
 PATH="$t/stub:$PATH" sh bin/worktree_setup.sh
 [ ! -L node_modules ] && [ -f node_modules/.loka-lock-cksum ] && [ ! -e node_modules.tmp ] || { echo 'worktree_setup control failed: matching lockfile not cloned' >&2; exit 1; }
+[ -f sub/node_modules/.loka-lock-cksum ] || { echo 'worktree_setup control failed: nested lockfile not installed' >&2; exit 1; }
 [ ! -e node_modules/.cache ] || { echo "worktree_setup control failed: main's .cache cloned" >&2; exit 1; }
 echo stale > node_modules/.loka-lock-cksum
 PATH="$t/stub:$PATH" sh bin/worktree_setup.sh
@@ -37,3 +39,22 @@ echo A > "$t/main/package-lock.json" && rm "$t/main/node_modules/DRIFT"
 echo stale > node_modules/.loka-lock-cksum
 touch "$t/main/node_modules/unreadable" && chmod 000 "$t/main/node_modules/unreadable"
 if PATH="$t/stub:$PATH" sh bin/worktree_setup.sh 2> /dev/null || [ -e node_modules.tmp ]; then echo 'worktree_setup control failed: a failed clone exited 0 or left node_modules.tmp' >&2; exit 1; fi
+# A worktree left without a package's node_modules names it (loka-za8br): the old script exited 0 and
+# said nothing, so the missing install surfaced later as Metro's "Unable to resolve expo".
+# The stub's npm ci leaves node_modules without .bin/prettier, so the root check names it. The old
+# script said nothing and exited 0, and the gap surfaced later as the commit hook failing.
+rm -f "$t/main/node_modules/unreadable" # the control above leaves it so the clone fails
+out=$(PATH="$t/stub:$PATH" sh bin/worktree_setup.sh 2>&1) || { echo "worktree_setup control failed: the post-check failed the run" >&2; exit 1; }
+case $out in *missing:*node_modules/.bin/prettier*) ;; *) echo "worktree_setup control failed: a missing install went unnamed: $out" >&2; exit 1 ;; esac
+
+# A symlinked _build made AFTER setup (a lone developer pointing a worktree at main's build) is what
+# the real incident was: git add -A then staged an absolute home path, because .gitignore's older
+# '/_build/' matched directories only. The guard must run when setup runs, not only at creation.
+for d in deps _build; do
+  rm -rf "$d" && ln -s "$t/main" "$d"
+  if PATH="$t/stub:$PATH" sh bin/worktree_setup.sh > /dev/null 2>&1; then
+    echo "worktree_setup control failed: a symlinked $d was accepted" >&2
+    exit 1
+  fi
+  rm "$d"
+done

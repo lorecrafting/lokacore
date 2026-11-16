@@ -32,7 +32,7 @@ export function loadCartridge(bytes: Uint8Array, installed: Installed): LoadResu
     return fail([diag('INVALID_JSON', '')]);
   }
   const c = isObj(doc) ? (doc as Obj).cartridge : undefined;
-  if (!isObj(c) || !['loka-cartridge-v1', 'loka-cartridge-v2'].includes(c.format))
+  if (!isObj(c) || c.format !== 'loka-cartridge-v2')
     return fail([diag('UNKNOWN_FORMAT', '.cartridge.format')]);
   const computed = hash(c);
   const stages = [

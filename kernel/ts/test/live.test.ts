@@ -9,6 +9,7 @@ import {
   rmSync,
   readdirSync,
   readFileSync,
+  symlinkSync,
   writeFileSync,
 } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -16,7 +17,7 @@ import { join } from 'node:path';
 import { test } from 'node:test';
 import { ROOT } from '../play/obs.ts';
 import { lastRun, limited, lintLines, serve, textOnly } from '../play/live.ts';
-import { sourceOf, sourcesOf } from '../play/prose.ts';
+import { openAt, sourceOf, sourcesOf } from '../play/prose.ts';
 
 const was = { format: 1, rooms: { a: { name: 'room.a' } }, text: { 'room.a': 'line one' } };
 
@@ -39,8 +40,8 @@ test('a change outside text is not text-only, even with the same text', () => {
 // `checkpoints/`; a body without a steps array is saved and breaks the next replay.
 test('checkpoints: a name is a file under checkpoints/, the body a steps array', async (t) => {
   const dir = mkdtempSync(join(tmpdir(), 'loka-live-'));
-  const port = 20000 + Math.floor(Math.random() * 20000);
-  const server = serve(port, dir, join(dir, 'none.json'));
+  const server = serve(0, dir, join(dir, 'none.json'));
+  const port = await server.port;
   t.after(() => server.close());
   const at = (path: string, init?: RequestInit) => fetch(`http://127.0.0.1:${port}${path}`, init);
   const steps = [{ advance: 1 }];
@@ -89,6 +90,18 @@ test('open: a text key opens its definition, inline prose its words, in LOKA_EDI
   assert.equal(sourceOf(dir, 'room.a'), 'text.json:2');
   assert.equal(sourceOf(dir, 'rooms.a.name', 'line two'), 'rooms/a.json:3');
   assert.equal(sourceOf(dir, 'room.c'), 'one.json:1');
+  // Breaks (Flow/Map open sends the node's file, loka-wfrgk.69): a file's open lands on its line 1,
+  // not its key's line there; or a key elsewhere pulls the open out of the file.
+  assert.equal(openAt(dir, { key: 'room.a', file: 'text.json' }), 'text.json:2');
+  assert.equal(openAt(dir, { key: 'room.a', file: 'one.json' }), 'one.json:1');
+  // Breaks: a `file` outside the cartridge falls back to a key lookup, so POST /open answers a line
+  // in the tree for a path the author never named, or throws and answers 500 for a path that is not
+  // there (loka-fq96k: 500 !== 404).
+  assert.equal(openAt(dir, { key: 'room.a', file: '../none.json' }), undefined);
+  // Breaks: a tree file that vanished between the walk and its read throws out of sourcesOf, and the
+  // server answers 500 to any route that was only looking for a key (loka-fq96k's live 500).
+  symlinkSync(join(dir, 'gone.json'), join(dir, 'dangle.json'));
+  assert.doesNotThrow(() => sourcesOf(dir, 'room.a')); // it answers a line, not a 500
   assert.equal(sourceOf(dir, 'room.b', 'line five'), undefined);
   // Break: Alt-click on a scene line answers 404, since a scene holds neither `"key":` nor a JSON
   // string; a prompt arrives joined, a choice label as itself.
@@ -105,10 +118,12 @@ test('open: a text key opens its definition, inline prose its words, in LOKA_EDI
   writeFileSync(join(dir, 'scenes/c.cut'), 'Bell one.\nBell two.\n---\n');
   assert.equal(sourceOf(dir, 'dialogue.n.prompt', 'Rain falls.'), 'scenes/n.scene:2');
   assert.equal(sourceOf(dir, 'scene.c.steps.0.text', 'Bell one.\nBell two.'), 'scenes/c.cut:1');
-  // Break: a `~` scene line resolves to an unrelated JSON `"~"` alone, and its field writes there.
+  // Break: a `~` scene line resolves to an unrelated JSON `"~"`, and its field writes there.
   writeFileSync(join(dir, 'two.json'), '{"room.d": "~"}\n');
   writeFileSync(join(dir, 'scenes/q.scene'), 'npc: maud\n* ~\n');
-  assert.deepEqual(sourcesOf(dir, 'dialogue.q.prompt', '~'), ['two.json:1', 'scenes/q.scene:2']);
+  assert.deepEqual(sourcesOf(dir, 'dialogue.q.prompt', '~'), ['scenes/q.scene:2']);
+  // Break: a scene's words edited outside the Book open another scene's line that says them.
+  assert.deepEqual(sourcesOf(dir, 'dialogue.q.prompt', 'Rain falls.'), []);
   const log = join(dir, 'opened');
   // Written aside and renamed: `> log` creates the file empty before printf fills it, and the
   // existsSync poll below read that empty file on CI (loka-vduxr.30).
@@ -118,17 +133,25 @@ test('open: a text key opens its definition, inline prose its words, in LOKA_EDI
     { mode: 0o755 },
   );
   process.env.LOKA_EDITOR = `${join(dir, 'ed')} --goto`; // split on spaces, no shell
-  const port = 20000 + Math.floor(Math.random() * 20000);
-  const server = serve(port, dir, join(dir, 'none.json'));
+  const server = serve(0, dir, join(dir, 'none.json'));
+  const port = await server.port;
   t.after(() => server.close());
   const post = (path: string, sent: object) =>
     fetch(`http://127.0.0.1:${port}${path}`, { method: 'POST', body: JSON.stringify(sent) });
   const opened = await post('/open', { key: 'room.a' });
   assert.equal(opened.status, 200);
   assert.equal(await opened.json(), 'text.json:2');
-  for (let i = 0; i < 50 && !existsSync(log); i++) await new Promise((r) => setTimeout(r, 20));
+  // A poll on the file, bounded (no test timeout is set) at 5 s for a loaded CI runner.
+  for (let i = 0; i < 250 && !existsSync(log); i++) await new Promise((r) => setTimeout(r, 20));
   assert.equal(readFileSync(log, 'utf8'), `${join(dir, 'text.json')}:2`);
   assert.equal((await post('/open', { key: 'room.b', words: 'line five' })).status, 404);
+  // Break: Cmd-E on a selection whose file has no `"key":` line (a .scene, a room) answers 404,
+  // or a `file` outside the source tree is opened.
+  assert.equal(
+    await (await post('/open', { key: 'z', file: 'scenes/z.scene' })).json(),
+    'scenes/z.scene:1',
+  );
+  assert.equal((await post('/open', { key: 'room.b', file: '../none.json' })).status, 404);
   assert.equal((await fetch(`http://127.0.0.1:${port}/open`)).status, 404); // a GET is not a post
   const bad = await fetch(`http://127.0.0.1:${port}/open`, { method: 'POST', body: '{' });
   assert.equal(bad.status, 400);
@@ -161,9 +184,10 @@ test('open: a text key opens its definition, inline prose its words, in LOKA_EDI
   const rows = readFileSync(`${root}cartridges/scene_sampler/transcripts/scene.jsonl`, 'utf8')
     .trim()
     .split('\n');
-  const scene = serve(port + 1, dir, `${root}protocol/fixtures/cartridge_scene_hash.json`);
+  const scene = serve(0, dir, `${root}protocol/fixtures/cartridge_scene_hash.json`);
+  const scenePort = await scene.port;
   t.after(() => scene.close());
-  const told = await fetch(`http://127.0.0.1:${port + 1}/why`, {
+  const told = await fetch(`http://127.0.0.1:${scenePort}/why`, {
     method: 'POST',
     body: JSON.stringify({ trace: ['{"event":"trace.run","ids":{"run_id":"old"}}', ...rows] }),
   });
@@ -171,7 +195,7 @@ test('open: a text key opens its definition, inline prose its words, in LOKA_EDI
   const { reactions } = (await told.json()) as { reactions: { rule: string; fired: number }[] };
   assert.equal(reactions.find((r) => r.rule.endsWith('reaction/bell_after'))?.fired, 1);
   const toScene = (sent: object) =>
-    fetch(`http://127.0.0.1:${port + 1}/why`, { method: 'POST', body: JSON.stringify(sent) });
+    fetch(`http://127.0.0.1:${scenePort}/why`, { method: 'POST', body: JSON.stringify(sent) });
   // Break: a run with no step yet answers as a failure to explain, not with what to do
   const none = await toScene({ trace: [rows[0]] });
   assert.equal(none.status, 400);
@@ -185,9 +209,10 @@ test('open: a text key opens its definition, inline prose its words, in LOKA_EDI
   ]);
   // Break: an artifact the kernel will not load reaches the explainer, not its own diagnostic
   writeFileSync(join(dir, 'bad.json'), '{"canonical":"{}","sha256":"x"}');
-  const refused = serve(port + 2, dir, join(dir, 'bad.json'));
+  const refused = serve(0, dir, join(dir, 'bad.json'));
+  const refusedPort = await refused.port;
   t.after(() => refused.close());
-  const unloaded = await fetch(`http://127.0.0.1:${port + 2}/why`, {
+  const unloaded = await fetch(`http://127.0.0.1:${refusedPort}/why`, {
     method: 'POST',
     body: JSON.stringify({ trace: [run('a')] }),
   });
@@ -227,8 +252,8 @@ test('find is served from the source and artifact the watcher was given', async 
   const dir = mkdtempSync(join(tmpdir(), 'loka-find-route-'));
   t.after(() => rmSync(dir, { recursive: true, force: true }));
   writeFileSync(join(dir, 'text.json'), '{"a": "Old Maud"}\n');
-  const port = 21000 + Math.floor(Math.random() * 20000);
-  const server = serve(port, dir, join(dir, 'none.json'));
+  const server = serve(0, dir, join(dir, 'none.json'));
+  const port = await server.port;
   t.after(() => server.close());
   const found = await fetch(`http://127.0.0.1:${port}/find?q=${encodeURIComponent('old maud')}`);
   assert.equal(found.status, 200);
@@ -242,9 +267,9 @@ test('find is served from the source and artifact the watcher was given', async 
 test('GET /numbers: reports on the dev artifact', async (t) => {
   // Break: handing the dev {canonical, sha256} form to the reports, which refuse it.
   const dir = mkdtempSync(join(tmpdir(), 'loka-live-'));
-  const port = 20000 + Math.floor(Math.random() * 20000);
   const artifact = join(dir, 'dev.json');
-  const server = serve(port, dir, artifact);
+  const server = serve(0, dir, artifact);
+  const port = await server.port;
   t.after(() => {
     server.close();
     rmSync(dir, { recursive: true, force: true });
@@ -268,6 +293,9 @@ test('GET /numbers: reports on the dev artifact', async (t) => {
   const hunger = told.pacing.report.pools.pools.find((p) => p.pool.endsWith('resource/hunger'));
   assert.deepEqual(hunger?.empty, { seeds: 4, hour: 10 });
   assert.deepEqual(told.fights.report.targets, []);
+  // Break: Run fights waits on the pacing sim, minutes on the showcase (loka-wfrgk.79, review 683 #2)
+  const fought = await (await fetch(`http://127.0.0.1:${port}/fights`)).json();
+  assert.deepEqual(fought, { hash: sha256, fights: told.fights });
 });
 
 test('limited: a report past its limit is killed and says so; a failing one gives its words', async () => {

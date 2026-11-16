@@ -41,14 +41,24 @@ const room = (w: World, key: string) => w.roomIds[`toolbox_showcase@0.0.1:room/$
 const body = (w: World) => bodyOf(w, w.character)!;
 const sat = (w: World) => step(w, cmd(w, { type: 'sit' }), 1).world;
 
+const level = (w: World, at: number, points: Record<string, number> = {}) => {
+  const allocated = Object.entries(points).map(([k, n]) => ({
+    attribute: ref('attribute', k),
+    points: n,
+  }));
+  return stepDev(w, cmd(w, { type: 'dev_set_level', level: at, allocated }), 1);
+};
+const CHA = 'toolbox_showcase@0.0.1:attribute/cha';
+
 const patched = (w: World, state: object) => ({ ...w, state: { ...w.state, ...state } }) as World;
 
 // Break: `step`, the path every other host and transcript takes, reaches the dev rule.
-test('the ordinary step refuses both cheats', () => {
+test('the ordinary step refuses every cheat', () => {
   const w = fresh();
   for (const payload of [
     { type: 'dev_go_to_room', room: ref('room', 'boar_run') },
     { type: 'dev_set_fact', fact: ref('fact', 'cellar_disarmed'), value: true },
+    { type: 'dev_set_level', level: 2 },
   ])
     assert.equal(code(step(w, cmd(w, payload), 1)), 'permission_denied');
 });
@@ -273,4 +283,48 @@ test('set fact refuses a per-subject fact', () => {
   const facts = { ...w.cartridge.facts, [at]: { ...w.cartridge.facts[at]!, per_subject: true } };
   const subjects = { ...w, cartridge: { ...w.cartridge, facts } } as World;
   assert.equal(code(set(subjects, 'cellar_disarmed', true)), 'invalid_state');
+});
+
+// Break: the row is not written, the level's threshold is off by one, or a count lands elsewhere.
+test('set level writes the threshold and the allocated points', () => {
+  const two = level(fresh(), 2, { cha: 1 });
+  assert.equal(code(two), 'accepted');
+  assert.deepEqual(two.world.state.levelling?.[two.world.character], {
+    experience: 30,
+    allocated: { [CHA]: 1 },
+  });
+  const three = level(two.world, 3);
+  assert.deepEqual(three.world.state.levelling?.[two.world.character]?.experience, 100);
+  assert.equal(code(level(three.world, 2)), 'accepted'); // down while the points still fit
+  assert.equal(code(level(two.world, 3, { cha: 1 })), 'accepted'); // up with the count held
+  assert.equal(code(level(fresh(), 2, { cha: 0 })), 'accepted'); // a zero count on an empty row
+  assert.equal(code(level(level(fresh(), 2).world, 2, { cha: 1 })), 'accepted'); // a point at the same level
+});
+
+// Break: a refusal dropped lets the row hold negative unspent points, a falling count (a compose
+// fault, not a refusal), an undeclared attribute or a level past the last threshold.
+test('set level refuses what the row cannot hold', () => {
+  const w = fresh();
+  assert.equal(code(level(w, 2, { nope: 1 })), 'not_found');
+  assert.equal(code(level(w, 4, { cha: 1 })), 'invalid_state'); // thresholds [30, 100]: level 3 is the top
+  assert.equal(code(level(w, 2, { cha: 2 })), 'invalid_state'); // one point per level
+  assert.equal(code(level(w, 1)), 'invalid_state'); // the row it already holds
+  const two = level(w, 2, { cha: 1 }).world;
+  const three = level(w, 3, { cha: 2 }).world;
+  assert.equal(code(level(three, 3, { cha: 1 })), 'invalid_state'); // a count never falls
+  assert.equal(code(level(two, 1)), 'invalid_state'); // the spent point no longer fits
+  const none = {
+    ...w,
+    cartridge: { ...w.cartridge, world: { ...w.cartridge.world, levelling: undefined } },
+  } as World;
+  assert.equal(code(level(none, 2)), 'invalid_state');
+});
+
+// Break: the cheat's write reaches the levelling closing or level_reached (dev@1 sets the row and
+// nothing more), so a preview tells a level_up line or springs a level reaction.
+test('set level tells no line and raises no level_reached', () => {
+  const { decision } = level(fresh(), 2, { cha: 1 });
+  assert.ok(decision.kind === 'accepted');
+  assert.equal(decision.narration, undefined);
+  assert.deepEqual(decision.events, []);
 });

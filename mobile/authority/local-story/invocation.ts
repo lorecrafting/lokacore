@@ -174,7 +174,7 @@ function decided(s: Story, id: Identified) {
   // Without host.dev a dev_* key is an action no set holds: resolve answers unsupported_capability.
   const dev =
     s.host.dev === true &&
-    (id.invocation.action_key === 'dev_go_to_room' || id.invocation.action_key === 'dev_set_fact');
+    ['dev_go_to_room', 'dev_set_fact', 'dev_set_level'].includes(id.invocation.action_key);
   const command = dev ? resolveDev(s.world, id) : resolve(s.world, id);
   const next: ReturnType<typeof step> =
     'kind' in command

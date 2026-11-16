@@ -4,7 +4,7 @@
 // perform's target_id, item_id.
 import { LIMITS } from '../contracts.gen.ts';
 import type { AdvertisedAction, CharacterId, EntityId, Key } from '../contracts.gen.ts';
-import { admission, refusal, type ActionSet } from '../commands/actions.ts';
+import { admission, cooling, refusal, type ActionSet } from '../commands/actions.ts';
 import { bodyOf, type Steps, type World } from '../runtime/decision.ts';
 import { toolHeld } from '../mechanics/lookups.ts';
 import { fits } from '../mechanics/scripted_action/shared.ts';
@@ -28,6 +28,7 @@ export function useActions(
     .flatMap((a) => {
       const shown = { action_key: a.key, label: a.label, target: a.target, input: a.input };
       const admitted = admission(world, a.scripted!, actor, body);
+      const cooled = admitted === 'cooldown' && cooling(world, a.scripted!, actor);
       const pairs: AdvertisedAction[] = [];
       for (const id of Object.keys(world.entities)) {
         if (++steps.n > LIMITS.query_steps)
@@ -41,7 +42,7 @@ export function useActions(
         const listed = { ...shown, target_ids: [ids.target_id, ids.item_id] };
         pairs.push(
           typeof admitted === 'string'
-            ? { ...listed, available: false, reason: { code: admitted } }
+            ? { ...listed, available: false, reason: { code: admitted }, ...cooled }
             : { ...listed, available: true },
         );
       }

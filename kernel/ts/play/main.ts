@@ -1,4 +1,3 @@
-// size: allow 305, the terminal client: session, turn projection, lookups, answers and replay
 import { locationLine } from './text.ts';
 import { replayRecords } from './replay.ts';
 // `loka play <artifact> [script|--replay <transcript>]`; game_trace is replay input (ADR-075 §4); byte-identical.
@@ -8,7 +7,7 @@ import { createInterface } from 'node:readline';
 import { encode, hash, type Json } from '../src/foundation/canonical.ts';
 import type { Command, CommandPayload, EntityId } from '../src/contracts.gen.ts';
 import { commandId } from '../src/foundation/id_source.ts';
-import { INSTALLED, loadCartridge, type Cartridge } from '../src/index.ts';
+import { INSTALLED, loadCartridge } from '../src/index.ts';
 import { gameView } from '../src/view/view.ts';
 import { spoken } from './spoken.ts';
 import { units } from '../src/mechanics/calendar.ts';
@@ -53,9 +52,7 @@ if (!loaded.ok) {
   fail(`cannot load ${artifact}: ${encode((record as { data: Json }).data)}\ndiagnostic: ${rel}`);
 }
 const { hash: content_hash } = loaded;
-const cartridge = loaded.cartridge as Cartridge;
-if (cartridge.format !== 'loka-cartridge-v2')
-  fail('this cartridge has no rooms (loka-cartridge-v1)');
+const cartridge = loaded.cartridge;
 
 function fail(message: string): never {
   process.stderr.write(`${message}\n`);

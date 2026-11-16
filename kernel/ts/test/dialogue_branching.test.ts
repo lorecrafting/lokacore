@@ -1,4 +1,4 @@
-// size: allow 670, every branching rule's pins beside each other
+// size: allow 690, every branching rule's pins beside each other
 // loka-vduxr.10 on the compiled persuade sampler: per-choice conditions, links between dialogues,
 // a check's two ways on, the hand-off, narrate steps, int fact thresholds and narration variants.
 import { decide } from '../src/mechanics/dialogue/rule.ts';
@@ -71,6 +71,27 @@ test('nothing left ends the talk, and a stale row still draws its options, each 
     [
       ['a', false, 'invalid_state'],
       ['z', false, 'invalid_state'],
+    ],
+  );
+});
+
+// Pins the hub reopen the HUB_SHUT warning exists for (loka-vduxr.35): an answer that fails the
+// dialogue's own policy, with no `then`, reopens the hub with every choice refused.
+// Breaks: the reopen reads the dialogue policy (ends the talk), or the refused row draws available.
+test('an answer that fails its dialogue policy reopens the hub with every choice refused', () => {
+  const g = play(
+    content({ a: plain({ steps: [set('flag')] }), z: plain() }, {}, (c) => {
+      c.dialogues[`${P}:dialogue/guard`].policy = is('flag', false);
+    }),
+  );
+  g.opened();
+  assert.ok(opens(g.choose('a')));
+  assert.deepEqual(validate('GameView', gameView(g.world())), []);
+  assert.deepEqual(
+    g.view().choices.map((o: any) => [o.choice_id, o.available]),
+    [
+      ['a', false],
+      ['z', false],
     ],
   );
 });
@@ -600,12 +621,17 @@ test('a failed default Talk opens only what a free choice leads to: the shared c
     check: checked({}),
     payment: { payment: { from: 'guard', resource: ref('resource', 'pennies'), amount: 1 } },
     policy: { policy: is('flag', true) },
+    teach: { steps: [{ op: 'skill.acquire', skill: ref('skill', 'intimidate') }] },
   };
   for (const { name, dialogues, opens } of JSON.parse(readFileSync(file, 'utf8'))) {
     const g = play(
       content({}, {}, (c) => {
         const model = c.dialogues[`${P}:dialogue/guard`];
         delete c.dialogues[`${P}:dialogue/guard`];
+        Object.assign(c.skills[`${P}:skill/intimidate`], {
+          hidden: true,
+          prerequisite: is('flag', true),
+        });
         c.npcs[`${P}:npc/other`] = { ...structuredClone(c.npcs[`${P}:npc/guard`]), key: 'other' };
         for (const { key, npc, choices, entry, closed, name: label } of dialogues) {
           const made = Object.entries<any>(choices).map(([id, { gate, ...rest }]) => [

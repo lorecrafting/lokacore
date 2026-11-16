@@ -2,7 +2,8 @@
 # Diff-derived mutants (developer.md step 2, reviewer.md step 3): one bin/mutate.sh mutant per change
 # on each line <base>...HEAD added to a TS (.ts .tsx .mjs) or Elixir (.ex) source file, run against
 # the test files that reach the module one import hop away (TS: a test whose relative import resolves
-# to it or to a source importing it; Elixir: an .exs file naming it or a `mix xref callers` caller).
+# to it or to a source importing it, and for a .tsx a test marked `mutate-covers: <dir>`, <dir> from the
+# test's package, holding it: a browser test renders them all; Elixir: an .exs file naming it or a `mix xref callers` caller).
 # Prints the mutant count first, then one row per mutant: the result
 # (red-narrow = killed, SURVIVED, NO-TESTS when no test imports it, NOT-UNIQUE when the line is not
 # unique in its file, BASELINE-RED when the unmutated tests already fail), file:line, the change,
@@ -98,6 +99,9 @@ def imports(path, stem):  # path has a relative import resolving to stem (or ste
         p = re.sub(r'\.(ts|tsx|mjs|js)$', '', os.path.normpath(os.path.join(os.path.dirname(path), s)))
         if stem in (p, p + '/index'):
             return True
+def covers(test, mod):  # a browser test's `mutate-covers: <dir>` (from its package): every .tsx under it
+    return mod.endswith('.tsx') and any(mod.startswith(os.path.normpath(os.path.join(home(test, 'package.json'), d)) + '/')
+                                        for d in re.findall(r'mutate-covers: (\S+)', text[test]))
 def modules(path):
     return re.findall(r'defmodule\s+([\w.]+)', open(path, errors='replace').read())
 cmds = {}
@@ -115,7 +119,7 @@ def narrow(mod, log):
         else:
             stems = [os.path.splitext(mod)[0]]
             stems += [os.path.splitext(s)[0] for s in sources if imports(s, stems[0])]
-            hit = [t for t in tests if not t.endswith('.exs') and any(imports(t, s) for s in stems)]
+            hit = [t for t in tests if not t.endswith('.exs') and (any(imports(t, s) for s in stems) or covers(t, mod))]
             pkgs = {}
             for t in hit:
                 pkgs.setdefault(home(t, 'package.json'), []).append(t)
@@ -134,7 +138,16 @@ for i, (f, n, old, new, label) in enumerate(rows):
     log = os.path.join(tmp, '%d.out' % i)
     cmd = narrow(f, log)
     if cmd and f not in base_red:  # an unmutated red run would make every mutant look killed
-        base_red[f] = subprocess.run(['sh', '-c', narrow(f, os.devnull)]).returncode != 0
+        r = subprocess.run(['sh', '-c', narrow(f, os.devnull)], capture_output=True, text=True)
+        base_red[f] = r.returncode != 0
+        if r.returncode == 144:
+            # Not a red suite: the checkout cannot run it (no node_modules, deps or _build in a throwaway
+            # worktree), and every row reported BASELINE-RED cost an agent a hand rerun. Say so once and
+            # stop rather than print a table of false verdicts (loka-ebnu3).
+            print('mutate_diff: cannot run %s in this checkout (exit 144); run it in an installed worktree\n%s'
+                  % (f, (r.stdout or r.stderr or '').strip()[-800:]), file=sys.stderr)
+            shutil.rmtree(tmp, ignore_errors=True)
+            sys.exit(144)
     kind = 'BASELINE-RED' if cmd and base_red[f] else None if cmd else 'NO-TESTS'
     plan.append((kind, f, n, label, log))
     if kind is None:

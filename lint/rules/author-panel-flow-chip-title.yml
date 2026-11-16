@@ -1,0 +1,13 @@
+id: author-panel-flow-chip-title
+language: tsx
+severity: error
+message: 'A Flow chip has no title (rulings S3 Tests): the hover card replaces the tooltip, and the accessible name carries its words.'
+files: [tools/author-panel/src/flow*.tsx]
+rule:
+  kind: jsx_attribute
+  has: { kind: property_identifier, regex: '^title$' }
+  inside:
+    any:
+      - kind: jsx_opening_element
+      - kind: jsx_self_closing_element
+    has: { kind: jsx_attribute, has: { kind: property_identifier, regex: '^data-ref$' } }

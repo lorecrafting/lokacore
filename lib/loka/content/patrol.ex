@@ -156,7 +156,7 @@ defmodule Loka.Content.Patrol do
     valid =
       case resolve(p["quest"], "quest", ctx.m, ctx.defs) do
         {_, _, q} ->
-          (q["patrol"] && get_in(d, ["roles", p["npc"], "npc"]) == q["patrol"]["npc"]) and
+          is_map(q["patrol"]) and get_in(d, ["roles", p["npc"], "npc"]) == q["patrol"]["npc"] and
             not is_map_key(d, "quest") and
             if(p["transition"] == "start",
               do: o["accept"] == p["quest"],

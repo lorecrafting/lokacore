@@ -83,6 +83,22 @@ test('a dev host decides both cheats and a reopen holds them', () => {
   assert.deepEqual(disarmed(again.facts()), [true]);
 });
 
+// Break: dev_set_level is missing from the host gate (refused on dev) or the gate is dropped (decided on a release).
+test('set level is refused without dev and holds across a dev reopen', () => {
+  const level = { level: 2, allocated: [{ attribute: ref('attribute', 'cha'), points: 1 }] };
+  const a = sqliteHost();
+  const release = openGame(a.db, bundle, a.host);
+  const refused = release.invoke(cheat('dev_set_level', level, release.view().token));
+  assert.equal(answer(refused), 'unsupported_capability');
+  assert.equal(release.view().view.levelling?.level, 1);
+  const b = sqliteHost();
+  const game = openGame(b.db, bundle, { ...b.host, dev: true });
+  assert.equal(answer(game.invoke(cheat('dev_set_level', level, game.view().token))), 'accepted');
+  const again = openGame(b.db, bundle, { ...b.host, dev: true }).view().view;
+  assert.equal(again.levelling?.level, 2);
+  assert.equal(again.attributes?.find((x) => x.attribute.key === 'cha')?.value, 7);
+});
+
 const another = (t: { type: string; default: unknown; values?: unknown[] }) =>
   t.type === 'bool'
     ? !t.default

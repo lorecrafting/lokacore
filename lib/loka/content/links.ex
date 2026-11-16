@@ -13,11 +13,10 @@ defmodule Loka.Content.Links do
   @link ~r/\[([^\[\]]+)\](?:\(([^()]*)\))?/
 
   @doc """
-  The link diagnostics of a v2 source's rooms, details, items and NPCs (`{entry, text}`; nil
-  for v1), warnings included (severity warning).
+  The link diagnostics of the source's rooms, details, items and NPCs (`{entry, text}`),
+  warnings included (severity warning).
   """
-  @spec check(map(), {term(), map() | :unknown} | nil) :: [map()]
-  def check(_, nil), do: []
+  @spec check(map(), {term(), map() | :unknown}) :: [map()]
   def check(_, {_, :unknown}), do: []
 
   def check(defs, {_, text}) do

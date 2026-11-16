@@ -1,0 +1,14 @@
+{
+  "on": {
+    "event": "item_acquired",
+    "item": "bone"
+  },
+  "cooldown": 300,
+  "steps": [
+    {
+      "op": "fact.assign",
+      "fact": "crow_fed",
+      "value": true
+    }
+  ]
+}

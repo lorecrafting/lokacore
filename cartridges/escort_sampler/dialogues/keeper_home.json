@@ -1,0 +1,31 @@
+{
+  "npc": "keeper",
+  "quest": "homeward",
+  "policy": {
+    "op": "escort_state",
+    "quest": "homeward",
+    "state": "following"
+  },
+  "prompt": "dialogue.keeper_home.prompt",
+  "roles": {
+    "keeper": {
+      "role": "npc",
+      "npc": "keeper"
+    },
+    "child": {
+      "role": "npc",
+      "npc": "child"
+    }
+  },
+  "choices": {
+    "home": {
+      "label": "dialogue.home.label",
+      "narration": "narration.home",
+      "escort": {
+        "npc": "child",
+        "quest": "homeward",
+        "transition": "complete"
+      }
+    }
+  }
+}

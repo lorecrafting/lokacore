@@ -1,3 +1,4 @@
+# size: allow 381, one table per gate; the editor gate plants one file per control
 # Red controls plant violations, require checks to fail, and clean their own files.
 # Refuse occupied paths before planting; exclusive creation closes the race. AST: ast-grep test.
 root = Path.expand("..", __DIR__)
@@ -196,7 +197,97 @@ controls = [
    }, ~w(node --test kernel/ts/test/transcripts.test.ts), "walk_red.jsonl: replay differs"}
 ]
 
-controls = controls ++ toolbox
+# Editor gate controls (toolbox_page.exs): a planted registry, baseline or main's baseline, each
+# at tmp/red-editor-<name>.*; the files not planted are the committed ones.
+editor_registry = "tools/author-panel/src/edit/registry.json"
+editor_baseline = "test/loka/editor_generic_baseline.txt"
+editor = JSON.decode!(File.read!(Path.join(root, editor_registry)))
+base = File.read!(Path.join(root, editor_baseline))
+card = &Map.put(editor, "services.name", Map.put(editor["services.name"], "edit", &1))
+# a card unregistered: its rows generic again (as services.name is), not in the shrunk baseline
+uncard = fn re ->
+  Map.new(editor, &if(elem(&1, 0) =~ re, do: {elem(&1, 0), editor["services.name"]}, else: &1))
+end
+
+world = ~r/^(cartridge|resources|attributes|populations|transports|barriers)\./
+
+editor_controls =
+  for {name, planted, expect} <- [
+        # the walker reaches the ambient fields emote@1 declares (loka-8ghm), under if/then/else
+        {"rooms-ambient", %{registry: Map.delete(editor, "rooms.ambient")},
+         "rooms.ambient: no create surface"},
+        {"npcs-ambient", %{registry: Map.delete(editor, "npcs.ambient")},
+         "npcs.ambient: no create surface"},
+        {"items-ambient", %{registry: Map.delete(editor, "items.ambient")},
+         "items.ambient: no create surface"},
+        {"treatment", %{registry: Map.delete(editor, "treatment:reverie")},
+         "treatment:reverie: no create surface"},
+        {"stale", %{registry: Map.put(editor, "rooms.nosuch", editor["rooms.name"])},
+         "rooms.nosuch: no such source-schema path"},
+        {"component", %{registry: card.("nope.tsx")}, "services.name: no edit surface"},
+        {"unlisted", %{baseline: String.replace(base, "services.name.edit\n", "")},
+         "services.name.edit: generic but not in the baseline"},
+        {"room-card", %{registry: uncard.(~r/^rooms\./)},
+         "rooms.name.edit: generic but not in the baseline"},
+        {"npc-card", %{registry: uncard.(~r/^npcs\./)},
+         "npcs.name.edit: generic but not in the baseline"},
+        {"item-card", %{registry: uncard.(~r/^items\./)},
+         "items.name.edit: generic but not in the baseline"},
+        {"quest-card", %{registry: uncard.(~r/^quests\./)},
+         "quests.name.edit: generic but not in the baseline"},
+        {"dialogue-card", %{registry: uncard.(~r/^dialogues\./)},
+         "dialogues.name.edit: generic but not in the baseline"},
+        {"world-card", %{registry: uncard.(world)},
+         "cartridge.title.edit: generic but not in the baseline"},
+        {"rules-block",
+         %{registry: uncard.(~r/^(actions\.(policy|check)|reactions\.(on|when|steps))$/)},
+         "reactions.on.edit: generic but not in the baseline"},
+        {"combat-schedule-blocks",
+         %{registry: uncard.(~r/^(npcs\.(hp|attack|daily_schedule)|items\.weapon)$/)},
+         "npcs.daily_schedule.edit: generic but not in the baseline"},
+        {"action-card", %{registry: uncard.(~r/^actions\./)},
+         "actions.cooldown.edit: generic but not in the baseline"},
+        {"reaction-card", %{registry: uncard.(~r/^reactions\./)},
+         "reactions.zone.edit: generic but not in the baseline"},
+        {"scene-card", %{registry: uncard.(~r/^(scenes\.treatment|treatment:reverie)$/)},
+         "scenes.treatment.edit: generic but not in the baseline"},
+        {"escape", %{registry: card.("../App.tsx")}, "services.name: no edit surface"},
+        {"bespoke", %{registry: card.("RedCard.tsx"), card: ""},
+         "services.name.edit: no longer generic"},
+        {"grown", %{main: String.replace(base, "services.name.edit\n", "")},
+         "services.name.edit: not in main's baseline"}
+      ] do
+    files =
+      for {k, v} <- planted,
+          into: %{},
+          do: {
+            if(k == :card,
+              do: "tools/author-panel/src/edit/RedCard.tsx",
+              else: "tmp/red-editor-#{name}.#{k}"
+            ),
+            if(is_map(v), do: JSON.encode!(v), else: v)
+          }
+
+    at = &if(planted[&1], do: "tmp/red-editor-#{name}.#{&1}", else: &2)
+
+    {"editor gate: #{name}", files,
+     ~w(elixir bin/toolbox_page.exs --check docs/features.json docs/MECHANICS-TOOLBOX.md
+        docs/toolbox.gen.json) ++
+       [
+         at.(:registry, editor_registry),
+         at.(:baseline, editor_baseline),
+         at.(:main, editor_baseline)
+       ], expect}
+  end
+
+# main's baseline unreadable (a path main lacks): --check raises instead of skipping shrink-only
+unread =
+  {"editor gate: main unreadable", %{"tmp/red-editor-unread.baseline" => base},
+   ~w(elixir bin/toolbox_page.exs --check docs/features.json docs/MECHANICS-TOOLBOX.md
+      docs/toolbox.gen.json #{editor_registry} tmp/red-editor-unread.baseline),
+   "cannot read origin/main:tmp/red-editor-unread.baseline"}
+
+controls = controls ++ toolbox ++ editor_controls ++ [unread]
 
 for {_, files, _, _} <- controls, {rel, _} <- files do
   if File.exists?(Path.join(root, rel)),

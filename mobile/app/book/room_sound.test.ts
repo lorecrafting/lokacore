@@ -100,6 +100,9 @@ test('place.sound and place.exposed reach the bed and the sky', () => {
   // Breaks: waking is not told apart, so the wake room's piece plays (plan 14).
   assert.equal(g.bed[3], 'woke', 'waking spends the piece');
   assert.equal(heard({ died: 'fatal', ended: fight }), true, 'a later fight won');
+  // Breaks: the recovery room's bed plays under the dead page (book-ui.md, Dead page).
+  assert.equal(heard({ died: 'bled', dead: {} }), false, 'the dead page');
+  assert.equal(heard({ died: 'bled' }), true, 'Let go');
   const shown = nodes(
     BookView({
       palette: color.light,

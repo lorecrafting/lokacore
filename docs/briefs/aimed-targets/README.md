@@ -52,14 +52,13 @@ at merge.
   (`mobile/app/walkthrough/toolbox_showcase.walk.ts:217,221`), as does `mobile/app/book/cast_death.test.ts:42-43`.
 - Engine test sampler: `cartridges/spell_effects_sampler` (flamma at a wight hp 8, fire 50 -> 4 after one bolt; lux
   ignites `orb`). Edit it in-test, never on disk.
-- Douse: `cartridges/toolbox_showcase/text.json:33` `"actions.quench": "Quench"`. `band.quenched` is the THIRST band
-  (`resources.json:72`), not a fire band: leave it ("quenched" thirst is correct). `use_sampler`'s "Quench a cart" is
-  that sampler's own text: untouched.
+- Douse: `cartridges/toolbox_showcase/text.json:33` `"actions.quench"`. `use_sampler`'s "Quench a cart" is that
+  sampler's own text: untouched.
 
 ## Slice 1: loka-x6t.109.1, douse wording (S, content)
 
-Goal. `cartridges/toolbox_showcase/text.json` `actions.quench` "Quench" -> "Douse". Keep `narration.quench`,
-`item.smithy_bucket.description` and `band.quenched`. Regenerate `protocol/fixtures/toolbox_showcase_hash.json`
+Goal. `cartridges/toolbox_showcase/text.json` `actions.quench` "Quench" -> "Douse". Keep `narration.quench` and
+`item.smithy_bucket.description`. Regenerate `protocol/fixtures/toolbox_showcase_hash.json`
 (`bin/regen_hash_fixture.sh`, then replace the old sha in the showcase transcripts and live `.sql` files, then
 `npm run stories:views`, as the room words batch did). `docs/showcase/magic-district.md:118,157` "Quench the bier" ->
 "Douse the bier". Fix any walkthrough or story that taps "Quench" in the showcase.

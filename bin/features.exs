@@ -16,6 +16,15 @@
 #   elixir bin/features.exs [--check [rows.json]]
 root = Path.expand("..", __DIR__)
 
+# Tracked cartridges only: an owner's uncommitted world in the main checkout is not the repo's
+# (loka-wfrgk.117, as bin/system_graph_homes.exs:37).
+{tracked, 0} = System.cmd("git", ["-C", root, "ls-files", "cartridges"], cd: root)
+
+tracked_cartridges =
+  tracked
+  |> String.split("\n", trim: true)
+  |> MapSet.new(&(&1 |> Path.split() |> Enum.at(1)))
+
 for f <- ~w(canonical.ex contracts/schema.ex contracts.ex),
     do: Code.require_file(f, Path.join(root, "lib/loka/core"))
 
@@ -35,6 +44,7 @@ derived = fn e ->
   transcripts =
     Path.wildcard(Path.join(root, "cartridges/*/transcripts/#{e["key"]}.jsonl"))
     |> Enum.map(&Path.relative_to(&1, root))
+    |> Enum.filter(&MapSet.member?(tracked_cartridges, &1 |> Path.split() |> Enum.at(1)))
 
   %{
     "implemented" => exists?.(rule) or ruleless,

@@ -16,6 +16,8 @@
     "test:sim:showcase": "node --test --test-reporter=${TEST_REPORTER:-spec} --test-name-pattern=showcase test/sim.test.ts"
   },
   "devDependencies": {
+    "@rjsf/utils": "6.11.1",
+    "@rjsf/validator-ajv8": "6.11.1",
     "@types/node": "24.13.6",
     "ajv": "^8.20.0",
     "typescript": "6.0.3"

@@ -34,13 +34,23 @@ export function caughtUp(game: Pulsed) {
   return why ? `${last.kind} ${why}` : last.kind;
 }
 
+// The browser's budget for one advance, in game minutes: delivery is synchronous and its cost follows game
+// time; on the toolbox showcase (rate 50) 60,600 minutes took 14 s and 1094 view emits while 3000 took 0.3 s
+// (loka-wfrgk.55). `bin/loka check` replays off the browser with no budget.
+export const ADVANCE_BUDGET_MINUTES = 3000;
+// The panel's ceil(minutes * 60000 / rate), so the whole budget converts to an ms the limit accepts.
+const limit = (rate: number) => Math.ceil((ADVANCE_BUDGET_MINUTES * 60_000) / rate);
+
 /** The dev clock moved by `ms`, delivered now and recorded only if delivered; else what stopped it. */
 export function advanced(
   ms: number,
   moveClock: (ms: number) => void,
   game: Pulsed,
   keep: (step: Step) => void,
+  rate: number,
 ) {
+  if (ms > limit(rate))
+    return `Advance: ${Math.floor((ms * rate) / 60_000)} game minutes is over the ${ADVANCE_BUDGET_MINUTES}-minute budget for one advance; advance less.`;
   moveClock(ms);
   const how = caughtUp(game);
   if (how !== 'ready') return `Advance: ${how}; not recorded.`;
@@ -109,7 +119,8 @@ const describe = (reply: Reply) => {
 /** The panel's dev-only ask (docs/system/cartridge.md#author-preview), by definition key. */
 export type Cheat =
   | { op: 'go_to_room'; room: string }
-  | { op: 'set_fact'; fact: string; value: boolean | number | string };
+  | { op: 'set_fact'; fact: string; value: boolean | number | string }
+  | { op: 'set_level'; level: number; points: Record<string, number> };
 
 /** A cheat as the ordinary invocation the session decides and records. */
 export function cheatIntent(
@@ -123,13 +134,22 @@ export function cheatIntent(
     kind,
     key,
   });
+  const input =
+    cheat.op === 'go_to_room'
+      ? { room: ref('room', cheat.room) }
+      : cheat.op === 'set_fact'
+        ? { fact: ref('fact', cheat.fact), value: cheat.value }
+        : {
+            level: cheat.level,
+            allocated: Object.entries(cheat.points).map(([key, points]) => ({
+              attribute: ref('attribute', key),
+              points,
+            })),
+          };
   return {
-    action_key: cheat.op === 'go_to_room' ? 'dev_go_to_room' : 'dev_set_fact',
+    action_key: `dev_${cheat.op}`,
     target_ids: [],
-    input:
-      cheat.op === 'go_to_room'
-        ? { room: ref('room', cheat.room) }
-        : { fact: ref('fact', cheat.fact), value: cheat.value },
+    input,
     view_freshness_token: token,
   } as unknown as Intent;
 }
@@ -145,14 +165,26 @@ const REFUSED: Record<Cheat['op'], Record<string, string>> = {
     invalid_state:
       'already that value, the wrong type or range, per subject, owned by a mechanic, or the ancestry choice is still open',
   },
+  set_level: {
+    not_found: 'no such attribute in this cartridge',
+    invalid_state:
+      'already that level and those points, no levelling, past the top level, fewer points than already allocated, or more points than the level grants',
+  },
 };
+const LABEL: Record<Cheat['op'], string> = {
+  go_to_room: 'Go to room',
+  set_fact: 'Set fact',
+  set_level: 'Set level',
+};
+/** Whether the panel's message is a cheat the Book sends as an intent. */
+export const isCheat = (asked: { op: string }): asked is Cheat => Object.hasOwn(LABEL, asked.op);
 
 /** The author's plain words for a cheat's reply; empty when it was accepted. */
 export function cheatNote(op: Cheat['op'], reply: Reply) {
   if (reply.kind === 'saved' && reply.decision.kind === 'accepted') return '';
   const code =
     reply.kind === 'saved' && reply.decision.kind === 'rejected' && reply.decision.error.code;
-  return `${op === 'go_to_room' ? 'Go to room' : 'Set fact'} ${reply.kind === 'pending' ? 'not confirmed' : 'refused'}: ${(code && REFUSED[op][code]) || describe(reply)}.`;
+  return `${LABEL[op]} ${reply.kind === 'pending' ? 'not confirmed' : 'refused'}: ${(code && REFUSED[op][code]) || describe(reply)}.`;
 }
 
 /**
@@ -222,7 +254,12 @@ const wellFormed = (step: Step | null) =>
       step.intent.target_ids.every((t) => typeof t === 'string')));
 
 /** Sends the steps in order; the first the session does not save and accept stops the replay, named. */
-export function replay(steps: Step[], game: Replayable, moveClock: (ms: number) => void): Outcome {
+export function replay(
+  steps: Step[],
+  game: Replayable,
+  moveClock: (ms: number) => void,
+  rate: number | undefined, // the cartridge's time_policy rate; undefined: no budget (off the browser)
+): Outcome {
   for (const [i, step] of steps.entries()) {
     if (!wellFormed(step))
       return {
@@ -234,6 +271,12 @@ export function replay(steps: Step[], game: Replayable, moveClock: (ms: number) 
       const name = `step ${i + 1} (advance ${step.advance})`;
       if (!Number.isSafeInteger(step.advance) || step.advance < 0)
         return { done: i, failed: `${name}: not whole milliseconds`, refused: true };
+      if (rate !== undefined && step.advance > limit(rate))
+        return {
+          done: i,
+          failed: `${name}: over the ${ADVANCE_BUDGET_MINUTES}-minute budget`,
+          refused: true,
+        };
       moveClock(step.advance);
       const after = caughtUp(game);
       if (after !== 'ready') return { done: i, failed: `${name}: ${after}` };

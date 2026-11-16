@@ -9,11 +9,11 @@ import { test, type TestContext } from 'node:test';
 import { serve } from '../play/live.ts';
 
 /** A source tree with one text.json line, served; `ask` posts, `events` is what a new page gets. */
-function served(t: TestContext, release = () => {}) {
+async function served(t: TestContext, release = () => {}) {
   const src = realpathSync(mkdtempSync(join(tmpdir(), 'loka-told-')));
   writeFileSync(join(src, 'text.json'), '{\n  "room.a": "old words"\n}\n');
-  const port = 20000 + Math.floor(Math.random() * 20000);
-  const live = serve(port, src, join(src, 'none.json'), release);
+  const live = serve(0, src, join(src, 'none.json'), { release });
+  const port = await live.port;
   t.after(() => (live.close(), rmSync(src, { recursive: true, force: true })));
   const call = (path: string, sent?: string, headers: Record<string, string> = {}) =>
     new Promise<{ status: number; text: string }>((done, fail) => {
@@ -42,7 +42,7 @@ test('/edit shows its words before the compile, marks them on a refused one, cle
   // Breaks: words that wait for the compile (the Book lags the save); a refused save shown; an
   // overlay push that drops them; a refused compile with no unconfirmed line; a good compile
   // that keeps the marks.
-  const { live, ask, events } = served(t);
+  const { live, ask, events } = await served(t);
   const was = '  "room.a": "old words"';
   const edit = { file: 'text.json', line: 2, key: 'room.a' };
   assert.equal(await ask('/edit', { ...edit, was: '  "room.a": "x"', words: 'no' }), 409);
@@ -70,7 +70,7 @@ test('a pagehide beacon (text/plain, the page origin) releases the Hold', async 
   // Break: a /hold that needs application/json or refuses the page origin: sendBeacon sends a
   // text/plain string, so a Hold the page set would outlive the page.
   let released = 0;
-  const { live, ask, call } = served(t, () => released++);
+  const { live, ask, call } = await served(t, () => released++);
   assert.equal(await ask('/hold', { on: true }), 200);
   const beacon = { origin: 'http://localhost:19009', 'content-type': 'text/plain;charset=UTF-8' };
   assert.equal((await call('/hold', '{"on":false}', beacon)).status, 200);
@@ -80,7 +80,7 @@ test('a pagehide beacon (text/plain, the page origin) releases the Hold', async 
 test('/line answers the source line a Book line writes, its words unbound, or why it has none', async (t) => {
   // Breaks: the field opening on the bound or escaped words (a save writes them into the source);
   // a scene line's `* ` kept in the field; a choice label opening a field.
-  const { call, src } = served(t);
+  const { call, src } = await served(t);
   writeFileSync(join(src, 'more.json'), '{\n  "room.q": "say \\"hi\\" ~",\n  "n": 1\n}\n');
   mkdirSync(join(src, 'scenes'));
   writeFileSync(join(src, 'scenes/s.scene'), 'dialogue s\n  * Rain ~\n  - Take it\n');
@@ -98,22 +98,23 @@ test('/line answers the source line a Book line writes, its words unbound, or wh
   ]);
   assert.deepEqual(await line('dialogue.s.label', 'Take it'), [
     400,
-    'a choice label: its key is its words',
+    'a choice label: reword it in the scene card',
   ]);
   assert.equal((await line('room.none', 'nowhere'))[0], 404);
   // Break: two scenes' `* ~` lines both answer the first, so a save writes into the wrong scene;
-  // with no map, the one `* ~` there is may be another key's (409: wait for the compile).
+  // with no map, the one `* ~` there is (its own scene's too) may be another key's (409: wait for
+  // the compile).
   writeFileSync(join(src, 'scenes/t.scene'), 'dialogue t\n  * ~\n');
   assert.equal((await line('dialogue.t.prompt', '~'))[0], 409);
   writeFileSync(join(src, 'scenes/u.scene'), 'dialogue u\n  * ~\n');
-  assert.equal((await line('dialogue.u.prompt', '~'))[0], 400);
+  assert.equal((await line('dialogue.u.prompt', '~'))[0], 409);
 });
 
 test("/line finds a `~` key's own line by the compile's map, among many `~` lines", async (t) => {
   // Breaks: every `~` line (each scene's, a cut's, a room's, text.json's) is a candidate, so with
   // two the field is refused (400) or opens another key's line; a one-line `{"prose": "~"}`
   // refused as not words.
-  const { live, call, src } = served(t);
+  const { live, call, src } = await served(t);
   writeFileSync(join(src, 'text.json'), '{\n  "room.a": "~",\n  "room.b": "~"\n}\n');
   mkdirSync(join(src, 'scenes'));
   mkdirSync(join(src, 'rooms'));
@@ -152,7 +153,7 @@ test("/line finds a `~` key's own line by the compile's map, among many `~` line
 test('an outside save that moves a `~` line before the compile: /line waits for the compile', async (t) => {
   // Break: /line trusts the map's line, or guesses the one `* ~` left, which names no key, so it
   // opens a line that may be another key's and /edit overwrites it.
-  const { live, call, src } = served(t);
+  const { live, call, src } = await served(t);
   mkdirSync(join(src, 'scenes'));
   const scene = join(src, 'scenes/s.scene');
   writeFileSync(scene, 'npc: bram\n* ~\nbram: Asked.\n');
@@ -165,7 +166,7 @@ test("an outside save that adds or drops a `~` line: /line stops trusting the ma
   // Break: /line trusts any `~` at the map's line, so a `* ~` pasted (or the key's own line cut)
   // there from outside opens another line in the key's field and /edit writes it; or the Book's own
   // fill of one `~` makes the map distrusted, so the next `~` in the run is refused before the compile.
-  const { live, call, ask, src } = served(t);
+  const { live, call, ask, src } = await served(t);
   mkdirSync(join(src, 'scenes'));
   const scene = join(src, 'scenes/s.scene');
   writeFileSync(scene, 'npc: bram\n* ~\n* ~\n* ~\n');
@@ -198,7 +199,7 @@ test("an outside save that adds or drops a `~` line: /line stops trusting the ma
 test('/line never trusts a place in a file it cannot read', async (t) => {
   // Break: a vanished placed file counts the same (unreadable) at the map and at /line, so the map
   // stays trusted and /line fails on the read instead of answering by the words.
-  const { live, call } = served(t);
+  const { live, call } = await served(t);
   live.push({ placeholders: { 'dialogue.g.a': 'scenes/gone.scene:2' } });
   const { status, text } = await call('/line?key=dialogue.g.a&words=~');
   assert.deepEqual([status, JSON.parse(text)], [404, 'no source line for dialogue.g.a']);
@@ -206,7 +207,7 @@ test('/line never trusts a place in a file it cannot read', async (t) => {
 
 test('a 200 /undo shows the old words it sent at once, before the compile', async (t) => {
   // Break: the Book keeps the undone words until the next compile (seconds when cold).
-  const { call, ask, events } = served(t);
+  const { call, ask, events } = await served(t);
   const was = '  "room.a": "old words"';
   const sent = { file: 'text.json', line: 2, key: 'room.a', was, words: 'new words' };
   const { id } = JSON.parse((await call('/edit', JSON.stringify(sent))).text);
@@ -215,4 +216,106 @@ test('a 200 /undo shows the old words it sent at once, before the compile', asyn
   assert.equal((await events()).text['room.a'], 'new words');
   assert.equal(await ask('/undo', back), 200);
   assert.equal((await events()).text['room.a'], 'old words');
+});
+
+test('/line opens an inline prose key in its own definition, whoever else holds its words', async (t) => {
+  // Breaks (loka-wfrgk.100.3): an item keyword, another room, a bundle sibling or a nested field
+  // holding the same words makes /line refuse two lines or open the other one.
+  const { call, src } = await served(t);
+  const room = (name: string, description: string) =>
+    `{\n  "name": ${name},\n  "description": ${description},\n  "exits": {}\n}\n`;
+  mkdirSync(join(src, 'rooms'));
+  writeFileSync(join(src, 'rooms/a.json'), room('{"prose": "Hall"}', '{"prose": "x"}'));
+  writeFileSync(join(src, 'rooms/b.json'), room('{"prose": "Yard"}', '\n    {"prose": "x"}'));
+  const detail = '{"prose": "z"},\n  "details": {"n": {\n    "description": {"prose": "z"}\n  }}';
+  writeFileSync(join(src, 'rooms/c.json'), room('{"prose": "z"}', detail));
+  mkdirSync(join(src, 'items'));
+  const lamp =
+    '{\n  "keywords": ["x", "lamp"],\n  "name": {"prose": "lamp"},\n  "room": "a",\n  "room_line": {"prose": "x"}\n}\n';
+  writeFileSync(join(src, 'items/lamp.json'), lamp);
+  mkdirSync(join(src, 'areas'));
+  const area =
+    '{"rooms": {"d": {\n  "description": {"prose": "x"}\n}, "e": {\n  "description": {"prose": "x"}\n}}}\n';
+  writeFileSync(join(src, 'areas/w.json'), area);
+  const line = async (key: string, words: string) => {
+    const { status, text } = await call(`/line?key=${key}&words=${words}`);
+    return [status, status === 200 ? JSON.parse(text) : text];
+  };
+  const at = (file: string, n: number, was: string, words: string) => [
+    200,
+    { file, line: n, was, words },
+  ];
+  assert.deepEqual(
+    await line('room.a.description', 'x'),
+    at('rooms/a.json', 3, '  "description": {"prose": "x"},', 'x'),
+  );
+  assert.deepEqual(
+    await line('room.b.description', 'x'),
+    at('rooms/b.json', 4, '    {"prose": "x"},', 'x'),
+  );
+  assert.deepEqual(
+    await line('room.d.description', 'x'),
+    at('areas/w.json', 2, '  "description": {"prose": "x"}', 'x'),
+  );
+  assert.deepEqual(
+    await line('item.lamp.name', 'lamp'),
+    at('items/lamp.json', 3, '  "name": {"prose": "lamp"},', 'lamp'),
+  );
+  assert.deepEqual(
+    await line('room.c.name', 'z'),
+    at('rooms/c.json', 2, '  "name": {"prose": "z"},', 'z'),
+  );
+  assert.deepEqual(
+    await line('room.c.description', 'z'),
+    at('rooms/c.json', 3, '  "description": {"prose": "z"},', 'z'),
+  );
+  assert.deepEqual(
+    await line('room.c.details.n.description', 'z'),
+    at('rooms/c.json', 5, '    "description": {"prose": "z"}', 'z'),
+  );
+  assert.deepEqual(
+    await line('room.e.description', 'x'),
+    at('areas/w.json', 4, '  "description": {"prose": "x"}', 'x'),
+  );
+  // a `room_line` lowers to `<key>.room` (prose.ex step/1), beside an NPC's `room` field
+  assert.deepEqual(
+    await line('item.lamp.room', 'x'),
+    at('items/lamp.json', 5, '  "room_line": {"prose": "x"}', 'x'),
+  );
+  // inherited words (`extends`, flattened before lowering) are its parent's line
+  writeFileSync(join(src, 'rooms/g.json'), room('{"prose": "Gate"}', '{"prose": "Arch"}'));
+  writeFileSync(join(src, 'rooms/f.json'), '{\n  "extends": "g",\n  "exits": {}\n}\n');
+  assert.deepEqual(
+    await line('room.f.description', 'Arch'),
+    at('rooms/g.json', 3, '  "description": {"prose": "Arch"},', 'Arch'),
+  );
+  // a label whose key is its words (at column 0): the words, not the key; a label named `room`
+  // is no `room_line`
+  writeFileSync(
+    join(src, 'items/bell.json'),
+    '{"labels": {\n"ring": {"prose": "ring"},\n"room": {"prose": "ring"}\n}}\n',
+  );
+  assert.deepEqual(
+    await line('item.bell.labels.ring', 'ring'),
+    at('items/bell.json', 2, '"ring": {"prose": "ring"},', 'ring'),
+  );
+  assert.deepEqual(
+    await line('item.bell.labels.room', 'ring'),
+    at('items/bell.json', 3, '"room": {"prose": "ring"}', 'ring'),
+  );
+  // two fields with the same words on one line: found (worded's refusal), not 'no source line'
+  writeFileSync(
+    join(src, 'rooms/h.json'),
+    '{"name": {"prose": "Q"}, "description": {"prose": "Q"}, "exits": {}}\n',
+  );
+  assert.deepEqual(await line('room.h.name', 'Q'), [400, '"not a line of words"']);
+  // a half-saved extending file cannot tell: its parent's line still opens
+  writeFileSync(join(src, 'rooms/f.json'), '{\n  "extends": "g",\n');
+  assert.deepEqual(
+    await line('room.f.description', 'Arch'),
+    at('rooms/g.json', 3, '  "description": {"prose": "Arch"},', 'Arch'),
+  );
+  // words edited outside the Book before the compile: its own line is gone, so no other's line
+  assert.equal((await line('room.b.name', 'Hall'))[0], 404);
+  assert.equal((await line('item.lamp.name', 'x'))[0], 404);
 });

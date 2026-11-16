@@ -1,7 +1,7 @@
 // The rules of E5's in-Book editing (docs/design/prose-in-the-book-rulings.md), apart from the
 // DOM so node tests reach them; inbook.ts draws them.
 import { LINE_WORDS } from '../../packages/game-view/line_words.ts';
-import { color } from '../book/tokens.ts';
+import { color, size, space, type } from '../book/tokens.ts';
 
 /** A pasted newline or tab is one space: /edit takes one line. */
 export const oneLine = (typed: string) => typed.replace(/\r\n|[\r\n\t]/g, ' ');
@@ -9,6 +9,41 @@ export const oneLine = (typed: string) => typed.replace(/\r\n|[\r\n\t]/g, ' ');
 /** What leaving the field does with the draft. */
 export const saving = (draft: string, words: string) =>
   !draft.trim() ? 'empty' : draft === words ? 'unchanged' : 'save';
+
+/** Bind drawn words to a key; words two keys draw bind to none ('') so neither opens. */
+export const bind = (seen: Map<string, string>, words: string, key: string) => {
+  const was = seen.get(words);
+  seen.set(words, was === undefined || was === key ? key : '');
+  // The collision is between two real keys; '' is the "no field" mark, not a claimant.
+  if (was !== undefined && was !== key && was !== '' && key !== '')
+    lost.set(words, new Set([was, key]));
+};
+
+/** The words such a collision cost, and the keys that claimed them: the author preview reports them
+ *  in the Book's state so the loss can be measured, not guessed (loka-wfrgk.100.8,
+ *  docs/rnd/line-key-binding-2026-11-15.md). */
+export const lost = new Map<string, Set<string>>();
+
+/** A page's bindings are dropped between pages: a wording drawn on one page must not cost its field
+ *  on a later one. Measured, not guessed: 59 of the showcase's 156 shared wordings are one sampler
+ *  family (`item.egg_01..04`), which never share a page, so scoping by page removes them for free
+ *  while the safety rule below still refuses a real same-page pair (loka-wfrgk.100.8). */
+export const nextPage = (seen: Map<string, string>) => seen.clear();
+/** The seen words naming a drawn line: exact, or with the letter cap() raised lowered. None when
+ *  both forms, or two keys, claim it: a wrong write is worse than no field (journal_sampler's oar). */
+export function drawnWords(seen: Map<string, string>, t: string) {
+  const found = [...new Set([t, t.charAt(0).toLowerCase() + t.slice(1)])].filter((w) =>
+    seen.has(w),
+  );
+  return found.length === 1 && seen.get(found[0]) ? found[0] : undefined;
+}
+
+/** A clicked line's key, and the words Alt-click opens: the file's, else the drawn text. */
+export function clicked(seen: Map<string, string>, said: Map<string, string>, text: string) {
+  const w = drawnWords(seen, text);
+  const key = w && seen.get(w);
+  return { key, words: (key && said.get(key)) || text };
+}
 
 // A `~` line's words are tagged with its key's number in zero-width marks, so two `~` lines on one
 // page name two keys (the Book shows `~` alike; `seen` would resolve both to one).
@@ -42,6 +77,16 @@ export function walk(e: Key, typing: boolean) {
   return Object.hasOwn(asked, e.key) ? asked[e.key as keyof typeof asked] : undefined;
 }
 
+/** The editor shortcut a Book key asks the panel for (palette, Hold, open source, collapse a
+ * column), or undefined: Cmd-Z and the walk keys stay the Book's. */
+export const shortcut = (e: Key) =>
+  (e.metaKey || e.ctrlKey) && !e.altKey && ['k', '.', 'e', '\\', '/'].includes(e.key)
+    ? e.key
+    : undefined;
+/** Whether a Book line (its text key `kind.key.field`) belongs to the selected definition. */
+export const selects = (textKey: string | undefined, kind: string, key: string) =>
+  !!textKey?.startsWith(`${kind}.${key}.`);
+
 /** Whether the panel hands a key to the Book: a walk key or Cmd-Z, or Enter anywhere but a text
  * field or a control (whose Enter is its own). */
 export function relays(e: Key, target: Target) {
@@ -60,7 +105,7 @@ export function relays(e: Key, target: Target) {
 export function noFieldNote(key: string | undefined, refusal?: string) {
   if (key && LINE_WORDS.has(key)) return 'The engine writes this line.';
   if (refusal?.startsWith('a choice label'))
-    return 'A choice label is its key. Alt-click opens the scene.';
+    return "A choice's words are edited in the scene card. Alt-click opens the scene.";
   return 'Not a line of words. Alt-click opens its source.';
 }
 
@@ -75,4 +120,29 @@ export function paletteNear(rgb: string) {
         .map((h, n) => parseInt(h, 16) - page[n]),
     );
   return Object.values(color).sort((a, b) => far(a.bg) - far(b.bg))[0];
+}
+
+const label = `${type.label.fontSize}px/${type.label.lineHeight}px ${type.label.fontFamily}`;
+
+/** The Book's author marks (inbook.ts). */
+export const CSS = `
+[data-loka-todo]{position:relative}
+[data-loka-todo]::before{content:"";position:absolute;left:-${space.lg}px;top:0;bottom:0;width:${size.speechBar}px;background:var(--loka-warning)}
+[data-loka-landed]::before{background:var(--loka-action)}
+[data-loka-selected]{background:color-mix(in srgb,var(--loka-action) 14%,transparent)}
+[data-loka-landed],[data-loka-field]{outline:${size.focus}px solid var(--loka-action);outline-offset:${size.focus}px}
+[data-loka-field]{background:var(--loka-card);color:var(--loka-fg);caret-color:var(--loka-action)}
+[data-loka-unconfirmed]{text-decoration:underline wavy var(--loka-warning)}
+[data-loka-a11y]::after{content:", " attr(data-loka-a11y);position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.loka-note{position:absolute;font:${label};letter-spacing:${type.label.letterSpacing}px;color:var(--loka-dim);background:var(--loka-card);z-index:10} /* mutate-skip: paint, not logic */
+.loka-note[data-warn]{color:var(--loka-warning)}
+.loka-note button{font:inherit;color:var(--loka-action);background:none;border:0;padding:0 0 0 ${space.md}px;cursor:pointer}`;
+
+/** The computed paper under `el`: its first ancestor with a background. */
+export function paper(el: Element | null): string {
+  for (; el; el = el.parentElement) {
+    const bg = getComputedStyle(el).backgroundColor;
+    if (bg && bg !== 'transparent' && !bg.endsWith(', 0)')) return bg;
+  }
+  return 'rgb(235, 230, 215)';
 }

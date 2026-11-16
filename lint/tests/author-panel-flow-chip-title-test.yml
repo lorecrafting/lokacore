@@ -1,0 +1,7 @@
+id: author-panel-flow-chip-title
+valid:
+  - "const a = <button data-ref={c.id} aria-label={c.name} />;"
+  - "const b = <Button disabled title='S4'>Play to here</Button>;"
+invalid:
+  - "const a = <button data-ref={c.id} title={c.name} />;"
+  - "const a = <button title={c.name} data-ref={c.id}>x</button>;"

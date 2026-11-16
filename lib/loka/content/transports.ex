@@ -21,7 +21,6 @@ defmodule Loka.Content.Transports do
   end
 
   def check(nil, _, _), do: []
-  def check(_, _, nil), do: []
 
   def check(m, defs, {_, text}) do
     routes = for {_, {rel, [], t}} <- defs["transport"], do: {rel, t}

@@ -1,0 +1,9 @@
+{
+  "keywords": [
+    "child"
+  ],
+  "name": "npc.child.short",
+  "room_line": "npc.child.room",
+  "description": "npc.child.description",
+  "room": "green"
+}

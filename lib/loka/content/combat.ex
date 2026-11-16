@@ -18,9 +18,8 @@ defmodule Loka.Content.Combat do
   defp put_ref(settings, path, f),
     do: if(get_in(settings, path), do: update_in(settings, path, f), else: settings)
 
-  @spec check(map() | nil, map(), {term(), map()}, {term(), map() | :unknown} | nil) :: [map()]
+  @spec check(map() | nil, map(), {term(), map()}, {term(), map() | :unknown}) :: [map()]
   def check(nil, _, _, _), do: []
-  def check(_, _, _, nil), do: []
 
   def check(m, defs, {_, settings}, {_, text}) do
     combat = get_in(settings, ["world", "combat"])

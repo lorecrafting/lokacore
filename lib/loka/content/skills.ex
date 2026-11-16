@@ -129,14 +129,15 @@ defmodule Loka.Content.Skills do
 
   defp itself(_, _, _), do: []
 
+  @doc "Whether the skill `ref` names is hidden (Homestead hs-14)."
+  def hidden?(ref, m, defs),
+    do: match?({_, _, %{"hidden" => true}}, Loka.Content.Refs.resolve(ref, "skill", m, defs))
+
   # Homestead hs-14 (secret): no shown skill's qualification and no dialogue policy reads a hidden
   # skill, and no labeled talk or riddle dialogue teaches one.
-  defp secret(m, defs) do
-    hidden? =
-      &match?({_, _, %{"hidden" => true}}, Loka.Content.Refs.resolve(&1, "skill", m, defs))
-
-    shown_qualifications(defs, hidden?) ++ dialogues(defs, hidden?)
-  end
+  defp secret(m, defs),
+    do:
+      shown_qualifications(defs, &hidden?(&1, m, defs)) ++ dialogues(defs, &hidden?(&1, m, defs))
 
   defp shown_qualifications(defs, hidden?),
     do:

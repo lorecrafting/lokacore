@@ -48,8 +48,9 @@ done
 # A transcript pin that is no known answer of its cartridge (matched as kernel/ts/test/transcripts.test.ts
 # matches: its fixture globs, manifest id and sha256) is stale after a cartridge change or a merge: it
 # becomes the hash of the cartridge's compiled fixture. A cartridge without one keeps its pins.
+# Tracked cartridges only: an owner's uncommitted world is not the repo's (loka-wfrgk.117).
 python3 - "$FROZEN" <<'PY'
-import fnmatch, glob, json, os, re, sys
+import fnmatch, glob, json, os, re, subprocess, sys
 kats, compiled = set(), {}
 for p in sorted(glob.glob('protocol/fixtures/*_hash.json')):  # sorted: one answer whatever the directory order
     name, d = os.path.basename(p), json.load(open(p, encoding='utf-8'))
@@ -58,9 +59,10 @@ for p in sorted(glob.glob('protocol/fixtures/*_hash.json')):  # sorted: one answ
     if any(fnmatch.fnmatch(name, g) for g in ('cartridge_*hash.json', 'containers_*hash.json', 'toolbox_showcase_hash.json', '*_sampler_hash.json')):
         kats.add((m['id'], d['sha256']))
     if not re.match(sys.argv[1], name): compiled[m['id']] = d['sha256']
+tracked = {p.split('/')[1] for p in subprocess.run(['git', 'ls-files', 'cartridges'], capture_output=True, text=True, check=True).stdout.split()}
 for t in glob.glob('cartridges/*/transcripts/*.jsonl'):
     cid, text = t.split('/')[1], open(t, encoding='utf-8', newline='').read()
-    if cid not in compiled: continue
+    if cid not in compiled or cid not in tracked: continue
     for pin in {json.loads(line)['ids']['content_hash'] for line in text.splitlines() if line}:  # every line: a merge can mix them
         if (cid, pin) not in kats: text = text.replace(pin, compiled[cid])
     open(t, 'w', encoding='utf-8', newline='').write(text)

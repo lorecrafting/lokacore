@@ -1,18 +1,10 @@
+// size: allow 335, the field's open, save, put-back (with a palette Delete's), walk keys and add-here menu share its state; a refused /open names its reason
 // E5, prose in the Book (docs/design/prose-in-the-book-rulings.md): a double-click turns a line
 // into its field, Cmd-Z puts back, `]`/`[` walk the `~` lines. Drawn over the Book from here:
 // panel.tsx requires this only in the author preview, so a player build never holds it.
-import { size, space, type } from '../book/tokens.ts';
 import type { Message } from './live.ts';
-import {
-  noFieldNote,
-  oneLine,
-  paletteNear,
-  saving,
-  step,
-  textField,
-  unwritten,
-  walk,
-} from './prose_rules.ts';
+import { noFieldNote, oneLine, CSS, paletteNear, paper, saving, step } from './prose_rules.ts';
+import { drawnWords, textField, unwritten, walk, selects, shortcut } from './prose_rules.ts';
 
 export { tagged } from './prose_rules.ts';
 type Hooks = {
@@ -23,21 +15,7 @@ type Hooks = {
 };
 type At = { file: string; line: number; was: string; words: string };
 type Field = { el: HTMLElement; kept: Node[]; shown: string; key: string; at: At; busy?: boolean };
-
 const LOCAL = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/;
-const label = `${type.label.fontSize}px/${type.label.lineHeight}px ${type.label.fontFamily}`;
-const CSS = `
-[data-loka-todo]{position:relative}
-[data-loka-todo]::before{content:"";position:absolute;left:-${space.lg}px;top:0;bottom:0;width:${size.speechBar}px;background:var(--loka-warning)}
-[data-loka-landed]::before{background:var(--loka-action)}
-[data-loka-landed],[data-loka-field]{outline:${size.focus}px solid var(--loka-action);outline-offset:${size.focus}px}
-[data-loka-field]{background:var(--loka-card);color:var(--loka-fg);caret-color:var(--loka-action)}
-[data-loka-unconfirmed]{text-decoration:underline wavy var(--loka-warning)}
-[data-loka-a11y]::after{content:", " attr(data-loka-a11y);position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
-.loka-note{position:absolute;font:${label};letter-spacing:${type.label.letterSpacing}px;color:var(--loka-dim);z-index:10}
-.loka-note[data-warn]{color:var(--loka-warning)}
-.loka-note button{font:inherit;color:var(--loka-action);background:none;border:0;padding:0 0 0 ${space.md}px;cursor:pointer}`;
-
 const enc = encodeURIComponent;
 async function api(path: string, sent?: object): Promise<[number, any]> {
   const init = sent && { method: 'POST', body: JSON.stringify(sent) };
@@ -52,17 +30,21 @@ const edits: (At & { id: number; key: string; draft: string })[] = []; // /edit 
 let unconfirmed = new Set<string>();
 let field: Field | undefined;
 let opening = false; // a /line in flight: a second double-click opens nothing
+let putting = Promise.resolve(); // the Cmd-Z presses, in order
 let landed: HTMLElement | undefined;
+let selected: { kind: string; key: string; add?: string[] } = { kind: '', key: '' }; // the panel's selection: its lines are marked
+let asked = false; // a Book click: the selection's add-here menu shows once the panel offers it
 let counted = '';
-let note: HTMLDivElement;
+let note: HTMLDivElement, spaced: HTMLElement | undefined; // spaced: the line the note sits under
 const observer =
   typeof MutationObserver === 'undefined' ? undefined : new MutationObserver(reapply);
 const watch = () =>
   observer?.observe(document.body, { childList: true, subtree: true, characterData: true });
-
+const drawn = (el: Node) => drawnWords(hooks.seen, el.textContent ?? ''); // as text() gave them
+const keyOf = (el: Node) => hooks.seen.get(drawn(el)!);
 const lines = () =>
-  [...document.querySelectorAll<HTMLElement>('[dir="auto"]')].filter((el) =>
-    hooks.seen.has(el.textContent ?? ''),
+  [...document.querySelectorAll<HTMLElement>('[dir="auto"]')].filter(
+    (el) => drawn(el) !== undefined,
   );
 
 /** Writes `text` (and any buttons) under `el`; empty hides it. */
@@ -75,9 +57,12 @@ function say(
   note.replaceChildren(text, ...buttons.map(([name, run]) => button(name, run)));
   note.toggleAttribute('data-warn', warn);
   note.hidden = !el || !text;
+  spaced?.style.removeProperty('margin-bottom');
+  spaced = note.hidden ? undefined : el; // book-ui.md, No field: the lines below make room
   if (!el) return;
   const r = el.getBoundingClientRect();
   Object.assign(note.style, { left: `${r.left + scrollX}px`, top: `${r.bottom + scrollY}px` });
+  if (spaced) el.style.marginBottom = `${note.offsetHeight}px`;
 }
 const button = (name: string, run: () => void) => {
   const b = document.createElement('button');
@@ -86,7 +71,21 @@ const button = (name: string, run: () => void) => {
   b.onclick = run;
   return b;
 };
-const open = (key: string, words: string) => void api('/open', { key, words });
+/** Opens `key`'s source line; a refusal names the reason rather than doing nothing (loka-wfrgk.100.6).
+ *  A 404 is stale words: the compile has moved on since this page drew, so /open has no line to name.
+ *  The note goes under the line that was asked for, where the author clicked. */
+const open = (key: string, words: string) =>
+  void api('/open', { key, words }).then(([status]) => {
+    if (status === 200) return;
+    const el = lines().find((l) => keyOf(l) === key);
+    say(
+      el,
+      status === 404
+        ? 'Changed since the last compile: this page is behind the cartridge. Wait for the compile, or press Cmd-E.'
+        : `The editor could not open that line (HTTP ${status}).`,
+      true,
+    );
+  });
 
 /** The marks, after every Book render: `~` bars, unconfirmed lines, the palette, the counts. */
 function reapply() {
@@ -97,11 +96,12 @@ function reapply() {
   const todo = all.filter((el) => unwritten(el.textContent!));
   for (const el of all) {
     const marks = [
-      unconfirmed.has(hooks.seen.get(el.textContent!)!) && 'unconfirmed',
+      unconfirmed.has(keyOf(el)!) && 'unconfirmed',
       todo.includes(el) && 'still to write',
     ].filter(Boolean);
     el.toggleAttribute('data-loka-todo', todo.includes(el));
     el.toggleAttribute('data-loka-unconfirmed', marks.includes('unconfirmed'));
+    el.toggleAttribute('data-loka-selected', selects(keyOf(el), selected.kind, selected.key));
     if (marks.length) el.setAttribute('data-loka-a11y', marks.join(', '));
     else el.removeAttribute('data-loka-a11y');
   }
@@ -110,22 +110,25 @@ function reapply() {
   if (counts !== counted) hooks.tell({ todoHere: JSON.parse((counted = counts)) });
 }
 async function openField(el: HTMLElement) {
-  const key = hooks.seen.get(el.textContent ?? '');
+  const key = keyOf(el);
   if (!key || field || opening) return say(el, key ? '' : noFieldNote(undefined));
   opening = true;
   const [status, at] = await api(
     `/line?key=${enc(key)}&words=${enc(hooks.said.get(key) ?? '')}`,
   ).finally(() => (opening = false));
+  el = el.isConnected ? el : lineOf(key)!; // a click's select render can remount it while /line waits
+  if (!el) return;
   if (status !== 200) return say(el, noFieldNote(key, typeof at === 'string' ? at : undefined));
-  field = { el, kept: [...el.childNodes], shown: el.textContent!, key, at }; // as drawn (a `~`'s marks too): React rewrites a change
+  field = { el, kept: [...el.childNodes], shown: drawn(el)!, key, at }; // as text() gave it (a `~`'s marks too): React rewrites a change
   observer?.disconnect(); // the field is not a Book render
   el.replaceChildren(at.words);
   el.contentEditable = 'plaintext-only';
   el.setAttribute('data-loka-field', '');
   el.focus();
   getSelection()?.selectAllChildren(el);
-  getSelection()?.collapseToEnd();
+  if (!unwritten(at.words)) getSelection()?.collapseToEnd(); // a bare `~` stays selected: typing replaces it
   el.addEventListener('keydown', onFieldKey);
+  el.addEventListener('keyup', onFieldUp);
   el.addEventListener('beforeinput', onInput);
   el.addEventListener('blur', onBlur);
   caption();
@@ -137,6 +140,7 @@ function close() {
   const had = document.activeElement === el; // not when a blur saved: focus stays where it went
   field = undefined;
   el.removeEventListener('keydown', onFieldKey);
+  el.removeEventListener('keyup', onFieldUp);
   el.removeEventListener('beforeinput', onInput);
   el.removeEventListener('blur', onBlur);
   el.replaceChildren(...kept); // React's own nodes, so its next render finds them
@@ -156,6 +160,8 @@ function onFieldKey(e: KeyboardEvent) {
   e.preventDefault(); // one line: Enter saves, Shift-Enter does nothing
   if (!e.shiftKey) void save();
 }
+// a space's keyup would press a button around the line (a room title's) and blur the field
+const onFieldUp = (e: KeyboardEvent) => e.key === ' ' && e.preventDefault();
 function onInput(e: InputEvent) {
   if (e.inputType === 'insertParagraph' || e.inputType === 'insertLineBreak') e.preventDefault();
   const text = e.dataTransfer?.getData('text/plain') ?? e.data;
@@ -165,7 +171,6 @@ function onInput(e: InputEvent) {
   }
 }
 const onBlur = () => void save();
-
 async function save() {
   if (!field || field.busy) return;
   const f = field;
@@ -198,6 +203,16 @@ async function conflict(f: Field) {
 }
 
 async function putBack() {
+  // a palette Delete leaves no line to put back from: undo it first, or Cmd-Z skips it (loka-wfrgk.92)
+  const [, journal] = await api('/journal');
+  const newest = Array.isArray(journal) ? journal[0] : undefined; // newest first
+  if (newest?.what.startsWith('delete ')) {
+    const file = newest.what.slice('delete '.length);
+    const [status] = await api('/undo', { id: newest.id });
+    return hooks.tell({
+      note: status === 200 ? `put back ${file}` : `${file} changed since; not put back.`,
+    });
+  }
   const last = edits.pop();
   if (!last) return hooks.tell({ note: 'Nothing of yours to put back.' });
   const [status] = await api('/undo', last); // its key and old words: the Book shows them at once
@@ -210,9 +225,12 @@ async function putBack() {
 }
 /** A Book key outside any field: walk, Enter on the landed line, Cmd-Z. */
 function onKey(e: KeyboardEvent, inField = typing(e.target), relayed = false) {
+  const asks = !relayed && shortcut(e);
+  // the panel's, though the Book has the focus
+  if (asks) return void (e.preventDefault?.(), hooks.tell({ shortcut: asks }));
   if ((e.metaKey || e.ctrlKey) && !e.shiftKey && e.key === 'z' && !inField) {
     e.preventDefault?.();
-    return void putBack();
+    return void (putting = putting.catch(() => {}).then(putBack)); // after the last press: its journal
   }
   const onLanded = relayed || e.target === document.body || e.target === landed; // not a choice's Enter
   if (e.key === 'Enter' && landed && !inField && onLanded) {
@@ -232,20 +250,46 @@ function onKey(e: KeyboardEvent, inField = typing(e.target), relayed = false) {
 const onDouble = (e: MouseEvent) => {
   if (field?.el.contains(e.target as Node)) return; // a word picked in the field
   let el = e.target as HTMLElement | null;
-  while (el && el !== document.body && !hooks.seen.has(el.textContent ?? '')) el = el.parentElement;
+  while (el && el !== document.body && drawn(el) === undefined) el = el.parentElement;
   void openField(el && el !== document.body ? el : (e.target as HTMLElement));
 };
 const hush = () => field || say(undefined); // a note lasts until the next click or key
-const onClick = () => {
-  hush();
+/** The add-here menu under the selected line (Book UI "Author mode (dev only)"): a pick goes to the panel's card. */
+function offer() {
+  const el = lines().find((l) => l.hasAttribute('data-loka-selected'));
+  if (!asked || !el || !selected.add?.length) return;
+  asked = false;
+  const room = selected.key;
+  say(
+    el,
+    'Add here',
+    false,
+    selected.add.map((f) => [f, () => hooks.tell({ add: { kind: f, room } })]),
+  );
+}
+const onClick = (e: Event) => {
+  asked = lines().some((l) => l.contains(e.target as Node)); // a Book line asks; the menu, nothing
+  hush(); // (it empties the note)
+  if ((e.target as Element).closest?.('[data-loka-selected]')) offer();
   if (!landed) return;
   landed.removeAttribute('data-loka-landed');
   landed = undefined; // Enter is the page's again
   reapply();
 };
 const onRelay = (e: MessageEvent) => {
-  if (LOCAL.test(e.origin) && e.data?.op === 'key') onKey(e.data, !!field, true); // an open field holds the keys
+  if (!LOCAL.test(e.origin)) return;
+  if (e.data?.op === 'key') onKey(e.data, !!field, true); // an open field holds the keys
+  if (e.data?.op === 'select') ((selected = e.data), reapply(), offer()); // {kind, key, add?}
+  if (e.data?.op === 'edit') edit(String(e.data.key));
 };
+const lineOf = (key: string) => lines().find((l) => keyOf(l) === key);
+/** Opens the field of text key `key`'s line; one not on this page opens in the owner's editor. */
+function edit(key: string) {
+  const el = lineOf(key);
+  if (el) return void openField(el);
+  hooks.tell({ note: `${key} is not on this page; opened in your editor.` });
+  open(key, hooks.said.get(key) ?? '');
+}
 /** The words a Book render shows for `key`: the open field's, held until it closes, else undefined. */
 export const frozen = (key: string) => (field?.key === key ? field.shown : undefined);
 /** Tells the counts again (a panel that just said hello missed them). */
@@ -288,13 +332,4 @@ export function start(given: Hooks) {
     style.remove();
     note.remove();
   };
-}
-
-/** The computed paper under `el`: its first ancestor with a background. */
-function paper(el: Element | null): string {
-  for (; el; el = el.parentElement) {
-    const bg = getComputedStyle(el).backgroundColor;
-    if (bg && bg !== 'transparent' && !bg.endsWith(', 0)')) return bg;
-  }
-  return 'rgb(235, 230, 215)';
 }

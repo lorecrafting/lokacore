@@ -32,8 +32,8 @@ test('placeholders by file with the words written; checkpoints and done files ar
     { file: 'text.json', words: 4, placeholders: ['a.t'] },
   ];
   assert.deepEqual(todo(dir), rows);
-  const port = 20000 + Math.floor(Math.random() * 20000);
-  const server = serve(port, dir, join(dir, 'none.json'));
+  const server = serve(0, dir, join(dir, 'none.json'));
+  const port = await server.port;
   t.after(() => server.close());
   const got = await fetch(`http://127.0.0.1:${port}/todo`);
   assert.equal(got.status, 200);

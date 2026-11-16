@@ -200,7 +200,7 @@ Format rules: one line per definition, key first, `@room` for a placement, `->` 
 ## 7. `bin/loka new`
 
 - `bin/loka new area <name> [dir]` writes `areas/<name>/rooms/<name>.json` (a starter room) and the layout row. It replaces the present `areas` kind, which writes a bundle `areas/<name>.json` with one room (`starters/templates.ex:85`). Pre-production: the bundle starter goes.
-- `--area <name>` after any pair places that pair's own file under `areas/<name>/<dir>/`. It refuses when the area has no room yet, except for `rooms`: `no rooms in areas/<name> yet: bin/loka new area <name> first`.
+- `--area <name>` after any pair places every new file of that pair (its own and a population's or transport's companions) under `areas/<name>/<dir>/`. It refuses when the area has no room yet, except for `rooms`: `no rooms in areas/<name> yet: bin/loka new area <name> first`.
 - `rooms <name> --from <room> <direction>` joins the new room to `<room>`'s area. `--area` with `--from` makes a border room on purpose. `--from` finds `<room>`'s file wherever it is (`rooms/`, `areas/*/rooms/`, a bundle), not only `rooms/<room>.json`.
 - Placements: a starter that needs a room (an item, an NPC) takes the first room of its own area when `--area` is given, else the entry, as today.
 - `scene <npc> <key>` writes under the NPC's area (`areas/<a>/scenes/<key>.scene`), or `scenes/` for a root NPC.

@@ -1,0 +1,39 @@
+{
+  "npc": "child",
+  "policy": {
+    "op": "all",
+    "items": [
+      {
+        "op": "quest_state",
+        "quest": "homeward",
+        "state": "active"
+      },
+      {
+        "op": "not",
+        "item": {
+          "op": "escort_state",
+          "quest": "homeward",
+          "state": "following"
+        }
+      }
+    ]
+  },
+  "prompt": "dialogue.child_escort.prompt",
+  "roles": {
+    "child": {
+      "role": "npc",
+      "npc": "child"
+    }
+  },
+  "choices": {
+    "rescue": {
+      "label": "dialogue.rescue.label",
+      "narration": "narration.rescue",
+      "escort": {
+        "npc": "child",
+        "quest": "homeward",
+        "transition": "start"
+      }
+    }
+  }
+}

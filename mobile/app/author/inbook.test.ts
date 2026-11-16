@@ -1,9 +1,11 @@
+// size: allow 675, one editor's keys, saves, conflicts, add-here, a refused /open and capitalised titles walked over one stubbed page
 // E5's in-Book editor (docs/design/prose-in-the-book-rulings.md) in headless Google Chrome, over a
 // page of plain lines and a stubbed /__author route; the Book itself is the walk's (web-preview.md).
 import assert from 'node:assert/strict';
 import { after, afterEach, before, beforeEach, test } from 'node:test';
 import { build } from 'esbuild';
 import { chromium, type Browser, type Page } from 'playwright';
+import { cap } from '../book/words.ts';
 import type { start } from './inbook.ts';
 
 const ORIGIN = 'http://localhost:19999'; // the relay takes only a local origin; the route answers, no server
@@ -67,7 +69,7 @@ beforeEach(async () => {
       seen.set(el.textContent, key);
       said.set(key, words);
     }
-    (w as unknown as { said: typeof said }).said = said;
+    Object.assign(w, { said, seen });
     w.inbook.start({ seen, said, tell: (m) => w.told.push(m), redraw: () => {} });
   }, LINES);
 });
@@ -76,6 +78,7 @@ afterEach(() => assert.deepEqual(thrown, []));
 
 const told = () => page.evaluate(() => (window as unknown as { told: object[] }).told);
 const note = () => page.locator('.loka-note').textContent();
+const hidden = async () => (await page.waitForTimeout(200), page.locator('.loka-note').isHidden());
 const noteSays = (text: string) =>
   page.waitForFunction((t) => document.querySelector('.loka-note')?.textContent === t, text);
 const told1 = async (act: () => Promise<unknown>) => {
@@ -114,6 +117,122 @@ test('a double-click opens the source words; Enter saves them to that line and c
       .first()
       .evaluate((el) => el === document.activeElement),
   );
+});
+
+// A line the Book draws through cap() (an NPC page title, a menu title): text() saw its file's words.
+const STRANGER = {
+  file: 'text.json',
+  line: 31,
+  was: 'a hooded stranger',
+  words: 'a hooded stranger',
+};
+const capitalised = (key: string, words: string) =>
+  page.evaluate(
+    ([key, words, shown]) => {
+      const w = window as unknown as { seen: Map<string, string>; said: Map<string, string> };
+      const el = document.querySelector('main')!.appendChild(document.createElement('h1'));
+      el.dir = 'auto';
+      const cut = shown.lastIndexOf(' ');
+      const inner = Object.assign(document.createElement('span'), {
+        textContent: shown.slice(0, cut),
+      });
+      el.append(inner, shown.slice(cut)); // a nested Text: a double-click lands on part of the line
+      w.seen.set(words, key);
+      w.said.set(key, words);
+    },
+    [key, words, cap(words)], // drawn as the Book's cap() draws a title
+  );
+
+// Breaks: the lookup matches a drawn line's words exactly only, so a capitalised NPC title says
+// "Not a line of words"; the field shows or saves the capitalised form, not the file's; or the
+// words held while it is open are the capitalised ones, so the key's other uses capitalise too;
+// or a double-click on a nested part of the line does not climb to the line.
+test("a capitalised title opens its key's field with the file's words; Enter saves that line", async () => {
+  await capitalised('npc.stranger.short', 'a hooded stranger');
+  answer = (path) => (path.startsWith('/line') ? [200, STRANGER] : [200, { id: 7 }]);
+  await page.locator('h1 span').dblclick();
+  const field = page.locator('[data-loka-field]');
+  assert.equal(await field.textContent(), 'a hooded stranger');
+  assert.equal(asked[0].path, '/line?key=npc.stranger.short&words=a%20hooded%20stranger');
+  const frozen = () => page.evaluate(() => (window as any).inbook.frozen('npc.stranger.short'));
+  assert.equal(await frozen(), 'a hooded stranger', 'a lowercase use of the key stays lowercase');
+  await page.keyboard.type(', cloaked');
+  await page.keyboard.press('Enter');
+  await page.waitForFunction(() => !document.querySelector('[data-loka-field]'));
+  assert.deepEqual(posted('/edit'), [
+    { ...STRANGER, words: 'a hooded stranger, cloaked', key: 'npc.stranger.short' },
+  ]);
+  assert.equal(await page.locator('h1').textContent(), 'A hooded stranger');
+});
+
+// Breaks: the card's Edit in Book finds a capitalised menu title by exact words only, so it opens
+// the owner's editor although the line is on this page.
+test("the card's Edit in Book opens a capitalised menu title's field", async () => {
+  await capitalised('item.lantern.name', 'brass lantern');
+  answer = () => [200, { ...STRANGER, was: 'brass lantern', words: 'brass lantern' }];
+  await page.evaluate(() => postMessage({ op: 'edit', key: 'item.lantern.name' }, '*'));
+  await page.locator('h1[data-loka-field]').waitFor();
+  assert.equal(await page.locator('h1').textContent(), 'brass lantern');
+  assert.deepEqual(posted('/open'), []);
+});
+
+// Breaks: a title two keys draw alike (journal_sampler: quest.oar.title "The lost oar", the
+// item page's cap(item.oar.short) "the lost oar") opens one key's field, exact or lowered first,
+// so Enter writes the other key's line; or Edit in Book opens it under the wrong key.
+test('a title two keys draw alike opens no field, from either key', async () => {
+  await capitalised('item.oar.short', 'the lost oar');
+  await page.evaluate(() => (window as any).seen.set('The lost oar', 'quest.oar.title'));
+  await page.locator('h1 span').dblclick();
+  await noteSays('Not a line of words. Alt-click opens its source.');
+  for (const key of ['item.oar.short', 'quest.oar.title'])
+    await page.evaluate((key) => postMessage({ op: 'edit', key }, '*'), key);
+  await settle(); // each key's line is not on this page, so it opens in the owner's editor
+  assert.deepEqual(
+    posted('/open').map((b: any) => b.key),
+    ['item.oar.short', 'quest.oar.title'],
+  );
+  assert.equal(await page.locator('[data-loka-field]').count(), 0);
+});
+
+const TILDE = { file: 'a.loka', line: 4, was: '~', words: '~' };
+
+// Breaks: a bare `~` opens with the caret after it, so typing saves "~Ab, c'd": a stray `~` in
+// the prose, and the line drops out of Still to write (a placeholder is a line that trims to `~`).
+test('typing in a bare ~ line replaces the ~', async () => {
+  answer = (path) => (path.startsWith('/line') ? [200, TILDE] : [200, { id: 7 }]);
+  await page.locator('p').nth(1).dblclick();
+  await page.locator('[data-loka-field]').waitFor();
+  await page.keyboard.type("Ab, c'd");
+  await page.keyboard.press('Enter');
+  await page.waitForFunction(() => !document.querySelector('[data-loka-field]'));
+  assert.deepEqual(posted('/edit'), [{ ...TILDE, words: "Ab, c'd", key: 'a.one' }]);
+});
+
+// Breaks: the fix empties a bare `~` on open instead of selecting it, so the field no longer
+// shows the line as written; Esc must still leave the line and the file as they were.
+test('a bare ~ opens showing ~; Esc writes nothing and restores the line', async () => {
+  const drawn = await page.locator('p').nth(1).textContent(); // `~` and its key's marks
+  answer = () => [200, TILDE];
+  await page.locator('p').nth(1).dblclick();
+  assert.equal(await page.locator('[data-loka-field]').textContent(), '~');
+  await page.keyboard.press('Escape');
+  assert.equal(await page.locator('p').nth(1).textContent(), drawn);
+  assert.deepEqual(posted('/edit'), []);
+});
+
+// Breaks: a space's keyup presses the button around a line (a room title's): the field blurs and
+// saves the words typed so far.
+test('a space mid-edit in a line inside a button keeps the field open', async () => {
+  await page.evaluate(() => {
+    const button = document.querySelector('button')!;
+    button.append(document.querySelector('p')!);
+    button.onclick = () => button.focus(); // a Book press takes the focus
+  });
+  await page.locator('button p').dblclick();
+  await page.locator('[data-loka-field]').waitFor();
+  await page.keyboard.type(' at dusk');
+  assert.equal(await page.locator('[data-loka-field]').textContent(), 'Rain falls. at dusk');
+  assert.deepEqual(posted('/edit'), []);
 });
 
 // Breaks: Esc or an untouched field writes, an emptied field saves, or a paste keeps its newline.
@@ -181,6 +300,77 @@ test('a click ends the landing; the panel relays the walk keys', async () => {
   await page.locator('[data-loka-field]').waitFor();
 });
 
+// Breaks: the panel's selection marks no line, or every line; Cmd-K in the Book is lost to the
+// panel; editing a key not on the page does nothing; a foreign origin moves the selection.
+test('the selection marks its lines; the panel`s shortcuts and edits reach it from the Book', async () => {
+  await page.evaluate(() => {
+    const w = window as unknown as { seen: Map<string, string> };
+    const el = document.querySelector('main')!.appendChild(document.createElement('p'));
+    el.dir = 'auto';
+    el.textContent = 'A hut.';
+    w.seen.set('A hut.', 'room.hut.title');
+    postMessage({ op: 'select', kind: 'room', key: 'hut' }, '*');
+  });
+  await page.waitForFunction(() => document.querySelectorAll('[data-loka-selected]').length === 1);
+  const data = { op: 'select', kind: 'room', key: 'barn' };
+  await page.evaluate(
+    (d) => dispatchEvent(new MessageEvent('message', { data: d, origin: 'https://example.com' })),
+    data,
+  );
+  assert.equal(
+    await page.locator('[data-loka-selected]').count(),
+    1,
+    'a foreign page moves no selection',
+  );
+  await page.evaluate(() => postMessage({ op: 'select', kind: 'room', key: 'barn' }, '*'));
+  await page.waitForFunction(() => !document.querySelector('[data-loka-selected]'));
+  assert.deepEqual(await told1(() => page.keyboard.press('ControlOrMeta+k')), { shortcut: 'k' });
+  await page.evaluate(() => postMessage({ op: 'edit', key: 'a.rain' }, '*'));
+  await page.locator('[data-loka-field]').waitFor();
+  await page.keyboard.press('Escape');
+  const gone = () => postMessage({ op: 'edit', key: 'b.gone' }, '*');
+  assert.deepEqual(await told1(() => page.evaluate(gone)), {
+    note: 'b.gone is not on this page; opened in your editor.',
+  });
+  assert.deepEqual(posted('/open'), [{ key: 'b.gone', words: '' }]);
+});
+
+// Breaks: a Book click on a room offers no add-here menu (when the card's offer follows the click,
+// or when the room is already selected), a pick tells another field or room, or an offer no Book
+// click asked for (the card's next list after a pick or a click off every line) or an empty one
+// pops the menu; or the note covers the next line or leaves it moved (book-ui.md, No field).
+test('a Book click on the selected room offers add-here; a pick tells the panel', async () => {
+  const offer = () =>
+    postMessage({ op: 'select', kind: 'room', key: 'hut', add: ['ambient', 'dark'] }, '*');
+  await page.evaluate(() => {
+    const w = window as unknown as { seen: Map<string, string> };
+    const el = document.querySelector('main')!.appendChild(document.createElement('p'));
+    Object.assign(el, { dir: 'auto', textContent: 'A hut.' });
+    w.seen.set('A hut.', 'room.hut.title');
+    el.insertAdjacentHTML('afterend', '<style>main p { margin: 0 0 4px }</style><p>Below.</p>'); // own
+  });
+  const hut = page.locator('p', { hasText: 'A hut.' });
+  const box = (s: string) => page.$eval(s, (e) => e.getBoundingClientRect().toJSON());
+  const at = (await box('main > :last-child')).top;
+  await hut.click(); // the click selects in the panel first; its card's offer follows
+  await page.evaluate(offer);
+  await noteSays('Add hereambientdark');
+  assert.ok((await box('main > :last-child')).top >= (await box('.loka-note')).bottom);
+  const dark = page.locator('.loka-note button', { hasText: 'dark' });
+  assert.deepEqual(await told1(() => dark.click()), { add: { kind: 'dark', room: 'hut' } });
+  assert.equal((await box('main > :last-child')).top, at); // back with the note hidden
+  await page.evaluate(offer);
+  assert.equal(await hidden(), true); // the offer has landed
+  await hut.click();
+  await noteSays('Add hereambientdark');
+  await page.evaluate(() => postMessage({ op: 'select', kind: 'room', key: 'hut', add: [] }, '*'));
+  await hut.click(); // a card with nothing to add offers no empty menu
+  assert.equal(await hidden(), true);
+  await page.mouse.click(1, 1); // off every line: the card's next offer is not asked for
+  await page.evaluate(offer);
+  assert.equal(await hidden(), true);
+});
+
 // Breaks: Cmd-Z puts back nothing, the wrong id, or hides a 409 behind a success note; or sends
 // not the old words, so the Book shows them only after the next compile.
 test('Cmd-Z puts back this page`s edits one per press, then says none are left', async () => {
@@ -199,6 +389,39 @@ test('Cmd-Z puts back this page`s edits one per press, then says none are left',
   assert.deepEqual(await told1(() => page.keyboard.press('ControlOrMeta+z')), {
     note: 'Nothing of yours to put back.',
   });
+});
+
+// Breaks (loka-wfrgk.92): Cmd-Z after a palette Delete puts back the page's edit instead, so the
+// deleted file is out of reach and the edit lost; or it undoes the Delete again on the next press.
+test('Cmd-Z puts back a palette Delete first, then this page`s edit', async () => {
+  await openFirst();
+  await page.keyboard.type('!');
+  await page.keyboard.press('Enter');
+  await page.waitForFunction(() => !document.querySelector('[data-loka-field]'));
+  await page.locator('main').click();
+  const journal = [{ id: 9, what: 'delete areas/x.json' }]; // newest first: the Delete came after
+  const plain = answer;
+  answer = (path, body) => {
+    if (path === '/journal') return [200, journal];
+    if (body?.id === 9) journal.unshift({ id: 10, what: 'undo delete areas/x.json' });
+    return plain(path, body);
+  };
+  await page.route(`${ORIGIN}/__author/journal`, (r) => r.abort(), { times: 1 }); // a restart
+  await page.keyboard.press('ControlOrMeta+z');
+  for (let t = 0; !thrown.length && t < 50; t++) await page.waitForTimeout(100);
+  assert.equal(thrown.splice(0).length, 1); // shown as a page error; the next presses still run
+  const n = (await told()).length;
+  await page.keyboard.press('ControlOrMeta+z'); // two presses at once: each takes its own entry
+  await page.keyboard.press('ControlOrMeta+z');
+  await page.waitForFunction((n) => (window as unknown as { told: [] }).told.length > n + 1, n);
+  assert.deepEqual((await told()).slice(n), [
+    { note: 'put back areas/x.json' },
+    { note: 'put back a.loka:3' },
+  ]);
+  assert.deepEqual(
+    posted('/undo').map((b) => b.id),
+    [9, 7],
+  );
 });
 
 test('a 409 put-back names the file and offers its source', async () => {
@@ -300,9 +523,9 @@ test('a refused save says the watcher`s reason', async () => {
 });
 
 test('a line with no field says why', async () => {
-  answer = () => [400, 'a choice label: its key is its words'];
+  answer = () => [400, 'a choice label: reword it in the scene card'];
   await page.locator('p').first().dblclick();
-  await noteSays('A choice label is its key. Alt-click opens the scene.');
+  await noteSays("A choice's words are edited in the scene card. Alt-click opens the scene.");
   await page.locator('main').click();
   assert.equal(await page.locator('.loka-note').isHidden(), true);
   await page.locator('button').dblclick();
@@ -329,6 +552,27 @@ test('a double-click while a field is opening opens nothing more', async () => {
   await settle();
   assert.equal(await page.locator('[data-loka-field]').count(), 1);
   assert.equal(asked.filter((a) => a.path.startsWith('/line')).length, 1);
+});
+
+// Breaks: a click's select render remounts the line while /line waits; the field opens off the page.
+test('a double-click opens the field on a line remounted while it was opening', async () => {
+  const { gate, open } = held();
+  answer = async () => (await gate, [200, RAIN]);
+  await page.locator('p').first().dblclick();
+  await page.$eval('p', (p) => p.replaceWith(p.cloneNode(true)));
+  open();
+  assert.equal(await page.locator('[data-loka-field]').textContent(), 'Rain falls.');
+});
+
+// Breaks: a line gone from the page while /line waits throws in openField.
+test('a line gone while its field was opening opens nothing', async () => {
+  const { gate, open } = held();
+  answer = async () => (await gate, [200, RAIN]);
+  await page.locator('p').first().dblclick();
+  await page.$eval('p', (p) => p.remove());
+  open();
+  await settle();
+  assert.equal(await page.locator('[data-loka-field]').count(), 0);
 });
 
 // Breaks: a Book render while the field is open shows the newer words, not those it opened on.
@@ -412,4 +656,18 @@ test('an answer after Esc leaves the next field alone', async () => {
   reread.open();
   await settle();
   assert.equal(await page.locator('.loka-note').isHidden(), true);
+});
+
+// Breaks: /open's 404 was discarded (void api('/open', ...)), so stale words -- a page drawn before
+// the cartridge recompiled -- opened nothing and said nothing, and the author had no way to know
+// the page was behind (loka-wfrgk.100.6).
+test('a line whose words changed since the compile says so instead of opening nothing', async () => {
+  // Only /open refuses: a /line 404 would stop the save the note depends on.
+  answer = (path) => (path.startsWith('/line') ? [200, RAIN] : [404, { kept: [] }]);
+  // A key this page does not draw: the words the card named changed since the compile.
+  await page.evaluate(() => postMessage({ op: 'edit', key: 'a.gone' }, '*'));
+  await settle();
+  await noteSays(
+    'Changed since the last compile: this page is behind the cartridge. Wait for the compile, or press Cmd-E.',
+  );
 });

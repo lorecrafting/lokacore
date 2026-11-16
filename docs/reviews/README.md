@@ -10,15 +10,75 @@ of closed work are deleted once their lesson is folded, and linked by permalink
 Reviews before R2 live in the [legacy repository](https://github.com/lorecrafting/lokacore-v2-legacy)
 (commit `997a7a8`, `docs/rewrite-v3/reviews/`).
 
+- [Review: K1b conditions as story nodes and the named leaf](2026-11-14-k1b-conditions-review.md): **APPROVE**
+- [Review: K1 named conditions](2026-11-14-k1-named-review.md): **APPROVE**
+- [Review: F1 Facts table + W4 reachable range](2026-11-14-f1-facts-w4-review.md): **APPROVE**
+- [Review: W3 lines sheet](2026-11-13-w3-lines-review.md): **APPROVE WITH NOTES**
+- [Written 2026-11-13 19:15 UTC in the Pi harness by deploy/deepseek-ai/deepseek-v4.1-flash-1017](2026-11-13-w2-rename-checkpoints-review.md): **APPROVE WITH NOTES**
+- [Review: L1 + L2 story-logic lints (PR #723, loka-wfrgk.115.6)](2026-11-13-l1-l2-story-logic-review.md): **CHANGES REQUIRED**
+- [Review: C1 consequence preview of a choice (PR #722, loka-wfrgk.115.5)](2026-11-13-c1-consequences-review.md): **APPROVE**
+- [S3: a choice's key, pinned when its words change (self-review)](2026-11-12-s3-choice-key-self-review.md)
+- [Review: modal scene Trigger row (loka-wfrgk.107)](2026-11-07-scene-trigger-review.md): **APPROVE**
+- [Review: a capitalised Book line opens its field (loka-wfrgk.100.2)](2026-11-07-reshaped-lines-review.md): **APPROVE WITH NOTES**
+- [Review: map + handles grow the selected room (loka-wfrgk.104)](2026-11-07-map-grow-handles-review.md): **CHANGES REQUIRED**
+- [Review: Hierarchy New + and kind-header + (loka-wfrgk.108)](2026-11-07-hierarchy-new-review.md): **CHANGES REQUIRED**
+- [Review: Field guide B, Add menus with descriptions and the generated field guide (loka-wfrgk.102.3)](2026-11-07-field-guide-b-review.md): **APPROVE WITH NOTES**
+- [Review: Field guide A, plain-English field help for prologue Part 1 kinds (loka-wfrgk.102 A)](2026-11-07-field-guide-a-review.md): **CHANGES REQUIRED**
+- [Review: generated keys for New, names in Hierarchy rows](2026-11-07-auto-keys-review.md): **APPROVE WITH NOTES**
+- [Review: ruled batch 3, map least zoom, second death waits, author note margin, Hotbar story words](2026-11-06-ruled-batch-3-review.md): **CHANGES REQUIRED**
+- [Review: /line opens an inline prose key's own definition line (loka-wfrgk.100.3)](2026-11-06-loka-wfrgk.100.3-review.md): **APPROVE WITH NOTES**
+- [Review: engine follow-ups (loka-vduxr.35, loka-vduxr.78, loka-wfrgk.51, loka-kgd.220)](2026-11-06-engine-followups-review.md): **CHANGES REQUIRED**
+- [Review: Editor walk P2 (PR #686, loka-wfrgk.61-.64, .67-.71, .80)](2026-11-06-editor-walk-p2-review.md): **APPROVE WITH NOTES**
+- [Review: editor walk P1, dev save survives edits, palette New for every kind, Delete refused while named](2026-11-06-editor-walk-p1-review.md): **APPROVE WITH NOTES**
+- [Review: editor walk C, schedule hour kinds, status duration, one-way Undo, last variant, Run fights](2026-11-06-editor-walk-c-review.md): **CHANGES REQUIRED**
+- [Review: Editor P2 follow-ups (PR #688, loka-wfrgk.84.1, .88, .90, .93)](2026-11-06-editor-p2-followups-review.md): **APPROVE**
+- [Review: editor nit batch B2, story list, Flow and picker nits](2026-11-06-editor-nits-b2-review.md): **APPROVE WITH NOTES**
+- [Review: editor nit batch B, cards, lint and content-report nits](2026-11-06-editor-nits-b-review.md): **CHANGES REQUIRED**
+- [Review: Editor nit batch A, map, shell and Book death-page fixes (PR #677)](2026-11-06-editor-nits-a-review.md): **CHANGES REQUIRED**
+- [Review: editor gaps, Story beats, room detail, New outline, set delete, add-menu gates and seeds](2026-11-06-editor-gaps-review.md): **APPROVE**
+- [Review: author panel, palette Undo brings back a palette Delete](2026-11-06-editor-delete-undo-review.md): **APPROVE**
+- [Review: editor coverage A, CRUD matrix, card round-trip, route-caller tests](2026-11-06-editor-coverage-a-review.md): **APPROVE**
+- [Review: inline words field on every card words row (loka-wfrgk.100.1)](2026-11-06-card-words-field-review.md): **APPROVE WITH NOTES**
+- [Review: a blank world's first room is placed on the map](2026-11-06-blank-world-map-review.md): **APPROVE WITH NOTES**
+- [Review: editor world picker and New world (loka-vduxr.65)](2026-11-05-world-picker-review.md): **APPROVE WITH NOTES**
+- [Review: Story map S2, the List view and Trace in the map slot (PR #646, loka-wfrgk.18.2)](2026-11-05-story-map-s2-review.md): **APPROVE WITH NOTES**
 - [Review: Story map S1, the story model (PR #620, loka-wfrgk.18)](2026-11-05-story-map-s1-review.md): **APPROVE WITH NOTES**
 - [Review: author panel lint covers .scene and .cut (PR #630, loka-vduxr.50)](2026-11-05-scene-lint-review.md): **CHANGES REQUIRED**
+- [Review: Story map S3, the Flow graph in the left slot (loka-wfrgk.18.7)](2026-11-05-s3-flow-review.md): **CHANGES REQUIRED**
 - [Review: retire hunger and thirst (PR #618, loka-vduxr.61)](2026-11-05-retire-hunger-review.md): **APPROVE WITH NOTES**
+- [Review: resident `mix loka.compile --serve` for the editor (loka-wfrgk.16)](2026-11-05-resident-compiler-review.md): **APPROVE WITH NOTES**
 - [Review: replay of failed and unknown commits, and a test hang (PR #627, loka-vduxr.42, loka-votey)](2026-11-05-replay-failed-unknown-review.md): **CHANGES REQUIRED**
+- [Review: author panel smoke in Chrome, `mutate-covers` (loka-wfrgk.41)](2026-11-05-panel-smoke-review.md): **APPROVE WITH NOTES**
 - [Review: scene@1 opening scene, `on {start: true}` (PR #622, loka-g5hh.3)](2026-11-05-opening-scene-review.md): **APPROVE WITH NOTES**
+- [Review: a death outside a fight shows the dead page, then Let go (PR #634, loka-kgd.210)](2026-11-05-offfight-death-review.md): **CHANGES REQUIRED**
+- [Review: `bin/loka new --extends <key>` (PR #659, loka-wfrgk.45)](2026-11-05-new-extends-review.md): **CHANGES REQUIRED**
 - [Review: an open conversation re-words an edited line; stale `~` map by line count (PR #625, loka-wfrgk.19)](2026-11-05-loka-wfrgk.19-review.md): **APPROVE WITH NOTES**
+- [Review: hotbar engine data, cooldown end and length, round interval (PR #658, loka-x6t.135)](2026-11-05-hotbar-engine-data-review.md): **APPROVE WITH NOTES**
+- [Review: generic inspector card fits on long text keys (loka-wfrgk.40)](2026-11-05-generic-card-overflow-review.md): **APPROVE**
+- [Review: fix batch (loka-kgd.219, loka-wfrgk.55, loka-wfrgk.44, loka-wfrgk.49)](2026-11-05-fix-batch-674-review.md): **CHANGES REQUIRED**
 - [Review: Editor E5, prose in the Book (PR #617, loka-vduxr.53)](2026-11-05-editor-e5-prose-review.md): **APPROVE WITH NOTES**
+- [Review: editor drag a template into a room (loka-wfrgk.13)](2026-11-05-editor-drag-template-review.md): **CHANGES REQUIRED**
+- [Review: Editor E6e, World inspector card (PR #651, loka-wfrgk.8)](2026-11-05-e6e-world-review.md): **CHANGES REQUIRED**
+- [Review: Editor E6d.2 Scene cards, `.scene` lines via `/set` (loka-wfrgk.50)](2026-11-05-e6d2-scene-cards-review.md): **APPROVE**
+- [Review: Editor E6d part one, Quest and Dialogue cards (PR #669, loka-wfrgk.6)](2026-11-05-e6d-story-review.md): **CHANGES REQUIRED**
+- [Review: Editor E6c part two, Reaction and Action inspector cards (PR #668, loka-wfrgk.46)](2026-11-05-e6c2-reaction-action-review.md): **CHANGES REQUIRED**
+- [Review: Editor E6c part one, Rules block (PR #660, loka-wfrgk.5)](2026-11-05-e6c-rules-review.md): **CHANGES REQUIRED**
+- [Review: Editor E6b.2, bespoke Combat and Schedule blocks (PR #672, loka-wfrgk.42)](2026-11-05-e6b2-combat-schedule-review.md): **CHANGES REQUIRED**
+- [Review: Editor E6b, NPC and Item inspector cards (PR #656, loka-wfrgk.4)](2026-11-05-e6b-npc-item-review.md): **CHANGES REQUIRED**
+- [Review: Editor E6a, Room inspector card and the Book's add-here (PR #649, loka-wfrgk.3)](2026-11-05-e6a-room-review.md): **CHANGES REQUIRED**
+- [Review: Editor E4b, generic inspector card on rjsf 6 (PR #645, loka-wfrgk.12)](2026-11-05-e4b-generic-card-review.md): **CHANGES REQUIRED**
+- [Review: Editor E4a, edit model, schema walker, registry and strict gate (PR #642, loka-wfrgk.11)](2026-11-05-e4a-edit-model-review.md): **APPROVE WITH NOTES**
+- [Review: Editor E3b, map edits in the left column (PR #644, loka-wfrgk.7)](2026-11-05-e3b-map-edits-review.md): **CHANGES REQUIRED**
+- [Review: Editor E3a, the always-on map (PR #641, loka-vduxr.52)](2026-11-05-e3a-map-review.md): **CHANGES REQUIRED**
+- [Review: Editor E2, the three-column shell (PR #631, loka-wfrgk.10)](2026-11-05-e2-shell-review.md): **CHANGES REQUIRED**
+- [Review: Editor E2 shell, fix round and owner walk (PR #631, loka-wfrgk.10)](2026-11-05-e2-shell-fable-review.md): **APPROVE WITH NOTES**
+- [Review: dialogue warnings match Talk (loka-vduxr.32, loka-69yuw)](2026-11-05-dialogue-warning-parity-review.md): **APPROVE WITH NOTES**
+- [Review: Dialogue choice tree on the Dialogue card (loka-wfrgk.53)](2026-11-05-dialogue-choice-tree-review.md): **CHANGES REQUIRED**
+- [Review: dev cheat Set level and attribute points (loka-x6t.137 part 2)](2026-11-05-dev-set-level-review.md): **APPROVE WITH NOTES**
 - [Review: death and level bug batch (PR #623; loka-3tc7, loka-g5hh.2.11, loka-dbtxr (a))](2026-11-05-death-level-bugs-review.md): **CHANGES REQUIRED**
+- [Review: one cartridge format, drop v1 and `Topics.grants/2` (PR #635, loka-9x5y, loka-1b68q)](2026-11-05-compiler-one-format-review.md): **APPROVE WITH NOTES**
 - [Review: combat title names who started the fight (PR #621, loka-kgd.207)](2026-11-05-combat-title-review.md): **APPROVE**
+- [Review: Combat hotbar, the Inked strip under the Combat page (loka-x6t.136)](2026-11-05-combat-hotbar-review.md): **APPROVE WITH NOTES**
 - [Review: Area layout S3, layout lint and `bin/loka new --area` (PR #624, loka-vduxr.58.3)](2026-11-05-area-layout-s3-review.md): **APPROVE WITH NOTES**
 - [Second review: revival contract and save effect, PR #599 (loka-kgd.206)](2026-11-04-wayside-shrine-revival-second-review.md): **APPROVE WITH NOTES**
 - [Review: world.death.revival and the Wayside Shrine keeper, PR #599 (loka-kgd.206)](2026-11-04-wayside-shrine-review.md): **APPROVE**

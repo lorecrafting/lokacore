@@ -4,13 +4,13 @@
   "description": "DialogueDefinition (06 §17, §18, §33, §37, §43; 04 §5.3 Choice/continuation resolution; 21 §20), owned by dialogue@1.",
   "$defs": {
     "SpokenKeyword": {
-      "description": "An authored spoken keyword (speech@1; toolbox row G9): 1 to 32 lowercase ASCII letters, compared with a case-folded say, whisper or shout word.",
+      "description": "An authored spoken keyword: 1 to 32 lowercase ASCII letters, compared with a case-folded say, whisper or shout word.",
       "type": "string",
       "pattern": "^[a-z]{1,32}$",
       "examples": ["ward"]
     },
     "DialogueDefinition": {
-      "description": "One dialogue node (06 §17; Early R7/R8 D1), keyed in CompiledCartridge.dialogues by DefinitionRefString of kind dialogue, owned by dialogue@1 (a cartridge with one requires it): its key, also the stable action key of its talk (no action's, scripted action's, quest's or registered command's: DUPLICATE_DEFINITION) and the beat of the choice it opens; npc, the speaker, whose talk the actor's ActionSet offers while the speaker is in the actor's room, and which is one of the npc roles (a speaker may have several dialogues: a talk to it opens the first, in key order, whose policy holds, and is invalid_state when none does); policy, the talk's availability, rechecked at Choose; prompt, the text key of the pending choice's prompt; roles, the participants talk binds to EntityIds in the durable choice (06 §33, §43: bound once, never re-resolved by name), each an npc that must be in the actor's room or an item the actor's body must hold when a choice is made (else not_present or not_owned), never named actor (the actor is always a participant: DUPLICATE_DEFINITION); quest, the quest a choice resolves through quest@1's resolution, with the choice_id as its outcome (absent in a dialogue with an accept choice, so accepting never resolves: OUTCOME_MISMATCH); and choices, at least one (a compiler check: the subset has no minProperties), each with its label, its narration line (committed with the actor's body and every role pinned), its fact.assign consequences and an optional hand_over of an item role to an npc role. Choices list by order, then key. API1.9 optionally adds riddle: its existing choice_id, lowercase canonical answer, ordered uppercase letter bank containing every answer letter with multiplicity, and wrong-answer narration text key.",
+      "description": "A conversation with an NPC: who speaks (npc), when it is offered (policy), the question shown (prompt) and the choices the player can pick. Talking to an NPC opens its first dialogue, by key, whose condition holds. It can name a quest the choices resolve, and a riddle.",
       "type": "object",
       "properties": {
         "key": {
@@ -19,7 +19,7 @@
         "npc": {"description":"The speaker, also an npc role.",
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
         },
-        "policy": {
+        "policy": {"description":"When this conversation is offered: a condition the player must meet.",
           "$ref": "policy.schema.json#/$defs/Policy"
         },
         "prompt": {"description":"Text key of the pending choice's prompt.",
@@ -37,7 +37,7 @@
         "quest": {"description":"The quest a choice resolves, with the choice id as its outcome.",
           "$ref": "identity.schema.json#/$defs/DefinitionRef"
         },
-        "choices": {
+        "choices": {"description":"The options the player can pick, each with a short id, a button label and what happens.",
           "type": "object",
           "propertyNames": {
             "pattern": "^[a-z][a-z0-9_]{0,63}$"
@@ -82,11 +82,11 @@
           "additionalProperties": false
         },
         "entry": {
-          "description": "An optional marker: true, talk to this speaker opens this dialogue and no other of theirs but keyword ones, over the inferred entry (dialogue@1), at most one per speaker and not on a keyword dialogue; false, talk never opens it, only a `then` does.",
+          "description": "Optional. true: talking to this speaker opens this dialogue instead of the one it would pick (at most one per speaker, not on a keyword dialogue). false: talking never opens it; only another dialogue's then does.",
           "type": "boolean"
         },
         "keyword": {
-          "description": "Toolbox row G9 (speech@1): a say or whisper of this word to the speaker opens this dialogue, which talk never offers or opens; no riddle.",
+          "description": "A word that, said or whispered to the speaker, opens this dialogue. Talking never opens it.",
           "$ref": "#/$defs/SpokenKeyword"
         },
         "name": {
@@ -150,7 +150,7 @@
       ]
     },
     "DialogueRole": {
-      "description": "A dialogue role's participant, as action.schema.json NarrationParticipant's npc or item branch (the actor is implicit): an NPC or item of this cartridge (else UNRESOLVED_REFERENCE).",
+      "description": "Who plays this role in the conversation: an NPC or item of this game.",
       "oneOf": [
         {"description":"An NPC of this cartridge takes this role.",
           "type": "object",
@@ -198,7 +198,7 @@
       ]
     },
     "DialogueChoice": {
-      "description": "One option of a dialogue (06 §17, §43): label and narration its text keys; steps, its effects in order (Steps of the dialogue choice context, docs/system/cartridge.md Steps and checks; a fact.assign sets a declared fact of the cartridge at the one scope it allows, a value of its type, as a scripted action's: fact@1 emits fact_changed when the value changes); hand_over, the item role the actor's body gives to the npc role (an item_acquired with that NPC as holder, as give); accept, a quest of this cartridge the choice activates as quest@1's activation does (quest.activate at player scope and quest_activated; the choose is invalid_state when accept_quest would be: the actor already has an instance of it, or its offer, if declared, has a policy that fails), never with a hand_over (activation and acquisition in one decision conflict: OUTCOME_MISMATCH). The choose that selects it applies all of them, resolves the dialogue's quest or activates the accepted one, and resolves the choice in one decision; its outcome is the choice_id. API1.7 receive {item, from} transfers the selected bound NPC-held item into the actor body, only while resolving a quest before API1.10; API1.10 also permits nonterminal receive. Receive is never combined with accept/hand_over. API1.7 fact.adjust applies a safe integer amount to a declared bounded integer fact using checked addition then authored bounds, lowered to fact.assign. Optional (toolbox row 14): check (step.schema.json Check, kind opposed), an opposed check made when the choice is chosen; a checked choice carries only label, narration, narration_variants, steps, availability, check, policy, then and then_failed, in a dialogue with no quest and no riddle, and its steps grant no skill (else OUTCOME_MISMATCH at its check). policy, the option's own condition, read with the speaker as target at the view, the choose and the talk: while it fails the option is not drawn and its choose is invalid_state. then, the key of a dialogue (of any speaker) that the accepted answer opens next as the conversation's new row, or end, which ends the conversation; a dialogue reached this way is no talk of its own and never reopens itself. then_failed, the same for a failed check; refused without check. narration_variants, words read instead of narration by the first when that holds before the answer's writes.",
+      "description": "One option the player can pick in a conversation: its button text, the line it tells, and what it does (steps, a quest to accept, an item to hand over). It can also have a condition that hides it, a check with what opens next on success (then) or failure (then_failed), or then: end to close the conversation.",
       "type": "object",
       "properties": {
         "label": {"description":"Text key of the option.",
@@ -207,7 +207,7 @@
         "narration": {"description":"Text key of what the actor reads on choosing.",
           "$ref": "text.schema.json#/$defs/TextKey"
         },
-        "steps": {
+        "steps": {"description":"What happens when the player picks this option, in order.",
           "type": "array",
           "items": { "$ref": "step.schema.json#/$defs/Step" }
         },
@@ -303,7 +303,7 @@
             "transition"
           ],
           "additionalProperties": false,
-          "description": "API1.11 escort@1: npc names a bound NPC role. Start/rejoin are nonterminal; complete resolves the dialogue’s same quest."
+          "description": "Starts, rejoins or completes an escort: npc names the NPC who follows the player. start and rejoin keep the conversation going; complete finishes the dialogue's quest."
         },
         "exchange": {"description":"A quest item exchange.",
           "const": true
@@ -358,23 +358,23 @@
         "check": {"description":"An opposed check made when chosen.",
           "$ref": "step.schema.json#/$defs/Check"
         },
-        "policy": {
+        "policy": {"description":"When this option is shown: a condition the player must meet, checked with the speaker.",
           "$ref": "policy.schema.json#/$defs/Policy"
         },
-        "order": {"description":"Display position among this dialogue's choices, lowest first; a choice with none follows, and a tie or none sorts by key. The compiler writes it for a scene set in an unsorted order.",
+        "order": {"description":"Where this choice is listed, lowest first; choices without one come after, and ties are sorted by key.",
           "type": "integer",
           "minimum": 1
         },
-        "sitting": {"description":"Taken, this choice leaves the reopened hub until the conversation next opens. Only on a plain answer of a dialogue that reopens; the compiler refuses the rest.",
+        "sitting": {"description":"Once taken, this choice is hidden until the conversation is next opened. Only on a plain answer in a dialogue that reopens.",
           "const": true
         },
-        "then": {
+        "then": {"description":"The conversation to go to next, or end to finish talking.",
           "$ref": "action.schema.json#/$defs/Key"
         },
-        "then_failed": {
+        "then_failed": {"description":"The conversation to go to next when this option's check fails.",
           "$ref": "action.schema.json#/$defs/Key"
         },
-        "narration_variants": {
+        "narration_variants": {"description":"Other lines read on choosing, each used while its condition holds.",
           "$ref": "entity.schema.json#/$defs/TextVariants"
         },
         "asked_when": {

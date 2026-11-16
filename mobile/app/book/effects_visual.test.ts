@@ -400,7 +400,7 @@ test('reduced motion holds the sting on hp alone for the beat, and leaving the p
 });
 
 // Breaks: the card's blur runs over a fight, an ending, a scene or ancestry page drawn over the
-// card (their turns lose the curl), another page, or a chapter page with no chapter to name.
+// card (their turns lose the curl), the dead page, another page, or a chapter page with no chapter to name.
 test('only a chapter page with a chapter is a card', () => {
   const screen = (view: object, ended = false) => ({ view, ended }) as never;
   const chapter = { kind: 'chapter' } as never;
@@ -408,6 +408,7 @@ test('only a chapter page with a chapter is a card', () => {
   assert.equal(chapterCard(screen(on), chapter), true);
   assert.equal(chapterCard(screen({ ...on, combat: {} }), chapter), false);
   assert.equal(chapterCard(screen(on, true), chapter), false);
+  assert.equal(chapterCard({ view: on, dead: {} } as never, chapter), false);
   assert.equal(chapterCard(screen({ ...on, scene: {} }), chapter), false);
   assert.equal(chapterCard(screen({ ...on, ancestry_choices: [] }), chapter), false);
   assert.equal(chapterCard(screen(on), { kind: 'dialogue' } as never), false);

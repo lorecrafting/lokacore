@@ -4,15 +4,15 @@
   "description": "ReactionRule (21 \u00a73.4, \u00a711; 06 \u00a714; 04 \u00a75.2-\u00a75.4), owned by reaction@1.",
   "$defs": {
     "ReactionRule": {
-      "description": "Typed reaction owned by reaction@1. Every registered event kind can trigger; each optional filter must equal its payload field (W1). Every delivery runs for the command actor; quest resolution verifies the source instance; a status.apply hits the event's subject or its named item (docs/system/mechanics.md reaction@1). Steps may assign facts (an entity or pair fact, toolbox row W2, at its named npc's or item's instance, else at the event's subject when that is an NPC, item or detail; no subject, no write) or activate a quest on quest_resolved. API1.12 adds typed quest.resolve and quest.fail on fact_changed. Deliveries use one writer group and the existing FIFO budgets; faults commit nothing.",
+      "description": "A rule that runs steps when something happens in the game: when names the event (such as a fact changing), any filters must match it, and the steps then change the world, such as setting a fact or starting a quest.",
       "type": "object",
       "properties": {
         "key": {
           "$ref": "action.schema.json#/$defs/Key"
         },
-        "on": {
+        "on": {"description":"What sets this reaction off: one event, optionally narrowed to a room, item, NPC and so on. Example: {\"event\": \"item_acquired\", \"item\": \"key\"}.",
           "oneOf": [
-            {
+            {"description":"A fact's value changed.",
               "type": "object",
               "properties": {
                 "event": {
@@ -28,7 +28,7 @@
               ],
               "additionalProperties": false
             },
-            {
+            {"description":"Someone entered a room.",
               "type": "object",
               "properties": {
                 "event": {
@@ -39,7 +39,7 @@
                 },
                 "npc": {
                   "$ref": "identity.schema.json#/$defs/DefinitionRef",
-                  "description": "The entrant is this NPC's authored instance (toolbox row W3)."
+                  "description": "The one entering is the NPC placed in the world from this definition."
                 }
               },
               "required": [
@@ -50,14 +50,14 @@
             },
             {
               "type": "object",
-              "description": "Toolbox row G9 (speech@1): one spoken event per NPC that heard the word.",
+              "description": "Someone said a word an NPC heard; fires once for each NPC that heard it.",
               "properties": {
                 "event": {
                   "const": "spoken"
                 },
                 "npc": {
                   "$ref": "identity.schema.json#/$defs/DefinitionRef",
-                  "description": "The hearer is this NPC's authored instance."
+                  "description": "The one hearing is the NPC placed in the world from this definition."
                 },
                 "word": {"description":"The word that fires it.",
                   "$ref": "dialogue.schema.json#/$defs/SpokenKeyword"
@@ -73,7 +73,7 @@
             },
             {
               "type": "object",
-              "description": "Toolbox row 4 (attribute@1): a character reached a level.",
+              "description": "A character reached a level.",
               "properties": {
                 "event": {
                   "const": "level_reached"
@@ -91,14 +91,14 @@
             },
             {
               "type": "object",
-              "description": "Toolbox row FD7 (speech@1): the actor asked an NPC about a topic.",
+              "description": "The player asked an NPC about a topic.",
               "properties": {
                 "event": {
                   "const": "asked"
                 },
                 "npc": {
                   "$ref": "identity.schema.json#/$defs/DefinitionRef",
-                  "description": "The asked NPC is this NPC's authored instance."
+                  "description": "The NPC asked is the one placed in the world from this definition."
                 },
                 "topic": {"description":"Only this topic.",
                   "$ref": "identity.schema.json#/$defs/DefinitionRef"
@@ -112,7 +112,7 @@
               ],
               "additionalProperties": false
             },
-            {
+            {"description":"A quest was completed with an outcome.",
               "type": "object",
               "properties": {
                 "event": {
@@ -132,7 +132,7 @@
               ],
               "additionalProperties": false
             },
-            {
+            {"description":"The player rested.",
               "type": "object",
               "properties": {
                 "event": {
@@ -148,7 +148,7 @@
               ],
               "additionalProperties": false
             },
-            {
+            {"description":"An item came into someone's hands: picked up, bought, given, harvested or stolen.",
               "type": "object",
               "properties": {
                 "event": {
@@ -156,7 +156,7 @@
                 },
                 "witness": {
                   "$ref": "identity.schema.json#/$defs/DefinitionRef",
-                  "description": "Toolbox row FD5: this NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness."
+                  "description": "The NPC placed in the world from this definition, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness."
                 },
                 "item": {"description":"Only this item.",
                   "$ref": "identity.schema.json#/$defs/DefinitionRef"
@@ -167,7 +167,7 @@
               ],
               "additionalProperties": false
             },
-            {
+            {"description":"An item was dropped.",
               "type": "object",
               "properties": {
                 "event": {
@@ -175,7 +175,7 @@
                 },
                 "witness": {
                   "$ref": "identity.schema.json#/$defs/DefinitionRef",
-                  "description": "Toolbox row FD5: this NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness."
+                  "description": "The NPC placed in the world from this definition, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness."
                 },
                 "item": {"description":"Only this item.",
                   "$ref": "identity.schema.json#/$defs/DefinitionRef"
@@ -189,7 +189,7 @@
               ],
               "additionalProperties": false
             },
-            {
+            {"description":"A creature was shooed away from an item.",
               "type": "object",
               "properties": {
                 "event": {
@@ -207,7 +207,7 @@
               ],
               "additionalProperties": false
             },
-            {
+            {"description":"A quest started.",
               "type": "object",
               "properties": {
                 "event": {
@@ -222,7 +222,7 @@
               ],
               "additionalProperties": false
             },
-            {
+            {"description":"A choice was put in front of the player, in a conversation, a scene or speech.",
               "type": "object",
               "properties": {
                 "event": {
@@ -234,7 +234,7 @@
               ],
               "additionalProperties": false
             },
-            {
+            {"description":"The player picked an option in a choice.",
               "type": "object",
               "properties": {
                 "event": {
@@ -249,7 +249,7 @@
               ],
               "additionalProperties": false
             },
-            {
+            {"description":"A story point was reached.",
               "type": "object",
               "properties": {
                 "event": {
@@ -267,7 +267,7 @@
               ],
               "additionalProperties": false
             },
-            {
+            {"description":"A custom event sent by an event.emit step.",
               "type": "object",
               "properties": {
                 "event": {
@@ -282,7 +282,7 @@
               ],
               "additionalProperties": false
             },
-            {
+            {"description":"A scripted action finished.",
               "type": "object",
               "properties": {
                 "event": {
@@ -290,7 +290,7 @@
                 },
                 "witness": {
                   "$ref": "identity.schema.json#/$defs/DefinitionRef",
-                  "description": "Toolbox row FD5: this NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness."
+                  "description": "The NPC placed in the world from this definition, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness."
                 },
                 "action": {"description":"Only this action.",
                   "$ref": "action.schema.json#/$defs/Key"
@@ -301,7 +301,7 @@
               ],
               "additionalProperties": false
             },
-            {
+            {"description":"A check passed.",
               "type": "object",
               "properties": {
                 "event": {
@@ -309,7 +309,7 @@
                 },
                 "witness": {
                   "$ref": "identity.schema.json#/$defs/DefinitionRef",
-                  "description": "Toolbox row FD5: this NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness."
+                  "description": "The NPC placed in the world from this definition, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness."
                 },
                 "check": {"description":"Only the check with this key.",
                   "$ref": "action.schema.json#/$defs/Key"
@@ -320,7 +320,7 @@
               ],
               "additionalProperties": false
             },
-            {
+            {"description":"A check failed.",
               "type": "object",
               "properties": {
                 "event": {
@@ -328,7 +328,7 @@
                 },
                 "witness": {
                   "$ref": "identity.schema.json#/$defs/DefinitionRef",
-                  "description": "Toolbox row FD5: this NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness."
+                  "description": "The NPC placed in the world from this definition, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness."
                 },
                 "check": {"description":"Only the check with this key.",
                   "$ref": "action.schema.json#/$defs/Key"
@@ -339,7 +339,7 @@
               ],
               "additionalProperties": false
             },
-            {
+            {"description":"A door or other barrier changed state, such as opened or locked.",
               "type": "object",
               "properties": {
                 "event": {
@@ -357,7 +357,7 @@
               ],
               "additionalProperties": false
             },
-            {
+            {"description":"A scene ended.",
               "type": "object",
               "properties": {
                 "event": {
@@ -372,7 +372,7 @@
               ],
               "additionalProperties": false
             },
-            {
+            {"description":"Someone died.",
               "type": "object",
               "properties": {
                 "event": {
@@ -380,7 +380,7 @@
                 },
                 "witness": {
                   "$ref": "identity.schema.json#/$defs/DefinitionRef",
-                  "description": "Toolbox row FD5: this NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness."
+                  "description": "The NPC placed in the world from this definition, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness."
                 },
                 "victim": {"description":"Only this victim.",
                   "$ref": "identity.schema.json#/$defs/DefinitionRef"
@@ -394,7 +394,7 @@
               ],
               "additionalProperties": false
             },
-            {
+            {"description":"An attack hit or missed.",
               "type": "object",
               "properties": {
                 "event": {
@@ -402,18 +402,18 @@
                 },
                 "witness": {
                   "$ref": "identity.schema.json#/$defs/DefinitionRef",
-                  "description": "Toolbox row FD5: this NPC's authored instance, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness."
+                  "description": "The NPC placed in the world from this definition, alive in the event subject's room, sees the subject (not blind, the subject not concealed from it); an event's subject is never its own witness."
                 },
                 "hit": {"description":"Only hits, or only misses.",
                   "type": "boolean"
                 },
                 "attacker": {
                   "$ref": "identity.schema.json#/$defs/DefinitionRef",
-                  "description": "The attacker is this NPC's authored instance (loka-kgd.79); a player's blow never matches."
+                  "description": "The attacker is the NPC placed in the world from this definition; a player's blow never matches."
                 },
                 "target": {
                   "$ref": "identity.schema.json#/$defs/DefinitionRef",
-                  "description": "The target is this NPC's authored instance (row 39); a blow on the player never matches."
+                  "description": "The target is this NPC itself; a blow on the player never matches."
                 }
               },
               "required": [
@@ -421,7 +421,7 @@
               ],
               "additionalProperties": false
             },
-            {
+            {"description":"A vessel was filled with a liquid.",
               "type": "object",
               "properties": {
                 "event": {
@@ -436,7 +436,7 @@
               ],
               "additionalProperties": false
             },
-            {
+            {"description":"A liquid was poured out.",
               "type": "object",
               "properties": {
                 "event": {
@@ -451,7 +451,7 @@
               ],
               "additionalProperties": false
             },
-            {
+            {"description":"Someone drank a liquid.",
               "type": "object",
               "properties": {
                 "event": {
@@ -467,7 +467,7 @@
               "additionalProperties": false
             },
             {
-              "description": "The world's hourly calendar event (toolbox row W25; schedule@1): no filters; a status lands on the actor's body.",
+              "description": "Fires at the start of every hour of the game day.",
               "type": "object",
               "properties": {
                 "event": {
@@ -479,7 +479,7 @@
               ],
               "additionalProperties": false
             },
-            {
+            {"description":"An active status took effect again, such as poison each tick.",
               "type": "object",
               "properties": {
                 "event": { "const": "status_ticked" },
@@ -490,7 +490,7 @@
             },
             {
               "type": "object",
-              "description": "Toolbox row G3 reader 2.",
+              "description": "A status was put on someone.",
               "properties": {
                 "event": { "const": "status_applied" },
                 "status": {"description":"Only this status.", "$ref": "identity.schema.json#/$defs/DefinitionRef" }
@@ -498,7 +498,7 @@
               "required": ["event"],
               "additionalProperties": false
             },
-            {
+            {"description":"A status wore off.",
               "type": "object",
               "properties": {
                 "event": { "const": "status_expired" },
@@ -507,7 +507,7 @@
               "required": ["event"],
               "additionalProperties": false
             },
-            {
+            {"description":"A quest failed.",
               "type": "object",
               "properties": {
                 "event": { "const": "quest_failed" },
@@ -519,20 +519,20 @@
             }
           ]
         },
-        "when": {
+        "when": {"description":"A condition that must also hold for the reaction to run.",
           "$ref": "policy.schema.json#/$defs/Policy"
         },
         "silent": {
-          "description": "Author-time only (mix loka.lint, pass-1 row 3): the rule writes state without a narrate step on purpose. The compiler drops it, so a compiled cartridge never carries it.",
+          "description": "Says the rule changes things without telling the player, on purpose, so the checker does not warn. Used only while writing; the finished game drops it.",
           "const": true
         },
         "after": {
-          "description": "Toolbox row FD1: the steps run this many logical seconds after delivery, as a reaction job for the delivery's actor, when `when` holds at both times; due no earlier than 1 s after the proposal's clock.",
+          "description": "The steps run this many logical seconds after delivery, as a reaction job for the delivery's actor, when `when` holds at both times; due no earlier than 1 s after the proposal's clock.",
           "type": "integer",
           "minimum": 1,
           "maximum": 2147483647
         },
-        "steps": {
+        "steps": {"description":"What happens, in order.",
           "type": "array",
           "items": { "$ref": "step.schema.json#/$defs/Step" }
         }

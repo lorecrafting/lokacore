@@ -3,10 +3,15 @@
 # bin/check_all.sh needs, and node_modules wherever a package-lock.json exists.
 set -eu
 cd "$(dirname "$0")/.."
+# A symlinked deps/_build is not covered by .gitignore's older '/_build/' (a trailing slash matches
+# directories only, and a link is not one), so `git add -A` stages an absolute home path; on a fresh
+# runner mix then finds a file where it needs its build directory (loka-wfrgk.94).
+for d in deps _build; do
+  [ ! -L "$d" ] || { echo "worktree_setup: $d is a symlink; run bin/worktree_setup.sh from a fresh worktree" >&2; exit 1; }
+done
 mise exec -- mix deps.get --check-locked
 main=$(git worktree list --porcelain | sed -n '1s/^worktree //p')
-for d in . kernel/ts mobile/app; do
-  [ -f "$d/package-lock.json" ] || continue
+for d in $(git ls-files package-lock.json '*/package-lock.json' | sed 's|/*package-lock.json$||; s|^$|.|'); do
   sum=$(cksum < "$d/package-lock.json")
   # Main's install was made from this lockfile (marker of bin/lib/serve.sh) and main's lockfile still is
   # that one (a stray npm install in main changes both, not the marker; loka-0ljs): clone, else install.
@@ -25,3 +30,16 @@ for d in . kernel/ts mobile/app; do
     (cd "$d" && mise exec -- npm ci) && echo "$sum" > "$d/node_modules/.loka-lock-cksum"
   fi
 done
+
+# Name what a worktree still lacks (loka-za8br: an empty or half-cloned node_modules made every
+# developer re-install by hand and read Metro's 'Unable to resolve expo' instead of a real fault).
+# A warning, not a failure: deps may be absent on a host without Hex access, and _build is built by
+# the first `mix compile`.
+missing=
+for d in $(git ls-files package-lock.json '*/package-lock.json' | sed 's|/*package-lock.json$||; s|^$|.|'); do
+  [ -x "$d/node_modules/.bin/prettier" ] || [ "$d" != . ] || missing="$missing $d/node_modules/.bin/prettier"
+  [ -d "$d/node_modules" ] || missing="$missing $d/node_modules"
+done
+[ -d deps ] || missing="$missing deps"
+[ -z "$missing" ] || echo "worktree_setup: still missing:$missing (re-run, or install by hand)" >&2
+exit 0

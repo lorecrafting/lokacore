@@ -1,4 +1,4 @@
-# size: allow 386, the source schema accessors, a reaction's lint-only silent mark stripped on compile, craft consume expansion, ancestry, static map, status source, levelling settings, replenish, trail, theft, asks, speech, construction, mounts wiring and the refused-bundle reference hold join the existing compiler boundary
+# size: allow 392, a reaction's source-only once/cooldown lowering is call wiring and the write refusal joins the diagnostic list (pun_kt2b), the source schema accessors, a reaction's lint-only silent mark stripped on compile, craft consume expansion, ancestry, static map, status source, levelling settings, replenish, trail, theft, asks, speech, construction, mounts wiring and the refused-bundle reference hold join the existing compiler boundary
 defmodule Loka.Content.Compiler do
   @moduledoc "Validates source files and builds the CompiledCartridge (05 §3–§8, 06 §20–21)."
   alias Loka.Content.{
@@ -19,16 +19,19 @@ defmodule Loka.Content.Compiler do
   import Loka.Content.Source, only: [diag: 2, at: 2, schema: 4, ref: 3, of_kind: 2]
   import Loka.Content.Refs, only: [owners: 2, owned: 3]
 
-  # v2 manifest settings, beside entry, calendar and world
+  # manifest settings, beside entry, calendar and world
   @v2_settings ~w(chapters ancestries alternates speech)
   @engine_facts [
     Scenes,
     Loka.Content.Skills,
     Loka.Content.Trails,
     Loka.Content.DialogueOnce,
-    Loka.Content.DialogueAsked
+    Loka.Content.DialogueAsked,
+    Loka.Content.ReactionOnce
   ]
   @facts_file %{
+    "description" =>
+      "World and player state tracked by key: booleans, numbers, and strings that remember progress and choices.",
     "type" => "object",
     "properties" => %{"facts" => %{"type" => "object", "additionalProperties" => %{}}},
     "required" => ["facts"],
@@ -43,10 +46,13 @@ defmodule Loka.Content.Compiler do
           {:ok, map(), [map()]} | {:error, [map()]}
   def compile(files, loaded, registry) do
     {manifest, located, d1} = manifest(of(files, :manifest), registry)
-    {defs, d2} = definitions(files, manifest)
+    {defs, d2, reserved} = definitions(files, manifest)
     {located, v2, d3} = world_content(files, manifest, defs, located)
 
-    case split([loaded, d1, d2, d3, checks(manifest, defs, v2, located, registry)], files) do
+    case split(
+           [loaded, d1, d2, d3, checks(manifest, defs, v2, located, registry, reserved)],
+           files
+         ) do
       {warnings, []} ->
         {:ok, Artifact.cartridge(manifest, defs, v2, located), warnings}
 
@@ -59,9 +65,7 @@ defmodule Loka.Content.Compiler do
     {text, d3} = text(of(files, :text))
     {positions, d4} = Loka.Content.Layout.source(of(files, :layout), manifest, defs)
     located = Loka.Content.Layout.settings(located, positions)
-    v2 = v2(defs, located, text, files)
-
-    {located, v2, d3 ++ d4}
+    {located, {elem(located, 0), text || %{}}, d3 ++ d4}
   end
 
   # {warnings, errors}; a refused bundle or actions/ file holds back UNRESOLVED_REFERENCE (Area
@@ -78,7 +82,7 @@ defmodule Loka.Content.Compiler do
   end
 
   # ponytail: one ordered check list; row 33 theft and row FD7 asks join it. # credo:disable-for-next-line /ABCSize|CyclomaticComplexity/
-  defp checks(manifest, defs, v2, located, registry) do
+  defp checks(manifest, defs, v2, located, registry, reserved) do
     Enum.concat([
       Loka.Content.Calendar.check(elem(located, 1)["calendar"] || %{}, defs, manifest),
       Loka.Content.Alternates.check(manifest, defs, located, {v2, registry}),
@@ -93,21 +97,21 @@ defmodule Loka.Content.Compiler do
       timed_checks(manifest, defs, v2, located),
       Loka.Content.Transports.check(manifest, defs, v2),
       Water.check(manifest, defs, located, v2),
-      Loka.Content.Skills.check(manifest, defs, located, if(v2, do: elem(v2, 1), else: %{})),
+      Loka.Content.Skills.check(manifest, defs, located, elem(v2, 1)),
       Loka.Content.Death.check(manifest, defs, located, v2),
       Loka.Content.Combat.check(manifest, defs, located, v2),
       Loka.Content.Theft.check(manifest, defs, located, v2),
       Loka.Content.Mounts.check(manifest, defs, located),
       Loka.Content.Asks.check(manifest, defs),
       Loka.Content.Emotes.check(manifest, defs, v2, registry),
-      Resolve.check(manifest, if(v2, do: defs, else: %{defs | "resource" => %{}}), registry),
+      Resolve.check(manifest, defs, registry),
       Resolve.rooms(manifest, defs, v2, registry),
       ScriptedActions.check(manifest, defs, v2, registry),
       Quests.check(manifest, defs, v2, registry),
       Reactions.check(manifest, defs, v2, registry),
       Dialogues.check(manifest, defs, v2, located, registry),
       Loka.Content.Links.check(defs, v2),
-      final_checks(manifest, defs, v2, located, registry)
+      final_checks(manifest, defs, v2, located, registry, reserved)
     ])
   end
 
@@ -118,31 +122,19 @@ defmodule Loka.Content.Compiler do
         Loka.Content.Bleed.check(manifest, defs, v2) ++
         Loka.Content.Status.check(manifest, defs, v2, settings)
 
-  defp final_checks(manifest, defs, v2, located, registry),
+  defp final_checks(manifest, defs, v2, located, registry, reserved),
     do:
       Loka.Content.BellCue.check(manifest, defs, located, v2) ++
-        Position.check(manifest, defs, elem(located, 1)) ++
+        Position.check(manifest, defs, elem(located, 1), reserved) ++
         Loka.Content.Trails.check(manifest, defs, v2, located, registry) ++
         Loka.Content.Spells.check(manifest, defs, registry, elem(located, 1)) ++
         Scenes.check(manifest, defs, v2, registry) ++
-        Ancestries.check(manifest, defs, located, if(v2, do: elem(v2, 1), else: %{})) ++
+        Ancestries.check(manifest, defs, located, elem(v2, 1)) ++
         Loka.Content.Standing.check(manifest, defs) ++
         Loka.Content.Replenish.check(manifest, defs) ++
         Loka.Content.Delayed.check(manifest, defs, Resolve.trees(defs)) ++
         Loka.Content.Construction.check(manifest, defs, v2, located, registry) ++
         Loka.Content.AreaRules.check(manifest, defs)
-
-  # v2 when the source declares world content, entry/settings, text, resources or attributes.
-  defp v2(defs, {entry, settings}, text, files) do
-    if Enum.any?(
-         ~w(room item npc scripted_action barrier quest reaction dialogue scene liquid service transport population replenish structure),
-         &(defs[&1] != %{})
-       ) or
-         entry != nil or
-         settings != %{} or text != nil or
-         Enum.any?(files, &(elem(&1, 1) in [:resources, :attributes])),
-       do: {entry, text || %{}}
-  end
 
   # cartridge.json calendar is owned by calendar@1.
   defp calendar(m, cal, registry) when cal != nil do
@@ -158,7 +150,7 @@ defmodule Loka.Content.Compiler do
   defp manifest([{_, :invalid}], _), do: {nil, {nil, %{}}, []}
 
   # cartridge.json is the CartridgeManifest plus the optional entry room (00a §12), calendar and
-  # world (WorldSettings) and chapters; settings travel beside the manifest in the v2 cartridge.
+  # world (WorldSettings) and chapters; settings travel beside the manifest in the cartridge.
   defp manifest([{rel, m}], registry) do
     defs = Loka.Content.Source.contracts()
 
@@ -179,15 +171,22 @@ defmodule Loka.Content.Compiler do
 
   @doc false
   def manifest_file(defs) do
-    v2 = get_in(defs, ["CompiledCartridge", "oneOf", Access.at(1), "properties"])
+    v2 = defs["CompiledCartridge"]["properties"]
 
     defs["CartridgeManifest"]
     |> put_in(["properties", "entry"], %{
       "description" => "The room a fresh world puts the player's body in.",
       "$ref" => "DefinitionRef"
     })
-    |> put_in(["properties", "calendar"], %{"$ref" => "Calendar"})
-    |> put_in(["properties", "world"], %{"$ref" => "WorldSettings"})
+    |> put_in(["properties", "calendar"], %{
+      "description" =>
+        "The game's clock: hours in a day, parts of the day, moon, seasons and weather.",
+      "$ref" => "Calendar"
+    })
+    |> put_in(["properties", "world"], %{
+      "description" => "Settings for the whole world: combat, death, movement, water and more.",
+      "$ref" => "WorldSettings"
+    })
     |> Map.update!("properties", &Map.merge(&1, Map.take(v2, @v2_settings)))
   end
 
@@ -244,6 +243,7 @@ defmodule Loka.Content.Compiler do
   @doc false
   def facts_file, do: @facts_file
 
+  # credo:disable-for-next-line /ABCSize|CyclomaticComplexity/
   defp definitions(files, m) do
     {facts, d0} = facts(of(files, :facts))
     {facts, d4} = Position.facts(facts, m)
@@ -252,8 +252,12 @@ defmodule Loka.Content.Compiler do
     {defs, d2} = kinds(files, m)
     {facts, d5} = Enum.reduce(@engine_facts, {facts, []}, &engine_facts(&1, &2, m, defs))
     loaded = %{"fact" => facts, "resource" => resources, "attribute" => attributes}
-    defs = Loka.Content.DialogueOnce.lower(defs)
-    {Map.merge(expanded(defs, m), loaded), Enum.concat([d0, d1, d2, d3, d4, d5])}
+    # Read the authored `once`/`cooldown` here: the lowering drops them and their steps are
+    # indistinguishable from the author's own afterwards.
+    reserved = Loka.Content.ReactionOnce.names(defs)
+    defs = Loka.Content.DialogueOnce.lower(defs) |> then(&Loka.Content.ReactionOnce.lower(&1, m))
+
+    {Map.merge(expanded(defs, m), loaded), Enum.concat([d0, d1, d2, d3, d4, d5]), reserved}
   end
 
   # The facts a module adds for its own declarations (@engine_facts: scene, skill, trail, once).

@@ -27,7 +27,7 @@ type CardProps = (
       link?: string;
       asked?: boolean;
     }
-  | { label: string; onPress: () => void; expanded?: boolean }
+  | { label: string; onPress: () => void; expanded?: boolean; centred?: true }
   | {
       label: string;
       reason?: string;
@@ -55,7 +55,8 @@ type CardProps = (
  * - States: available; asked (a dialogue choice already taken: dim italic words, named with ASKED, still pressable); unavailable; unavailable, pressed; each as a card or a line.
  * - Effects: a card lifts with a selection haptic; an unavailable press does not lift, its reason
  *   dries and it gives a warning haptic. With `wait` (the rise card, book-ui.md, Spirit state) it has
- *   no reason: a countdown ring leads its label, its value the whole seconds left.
+ *   no reason: a countdown ring leads its label, the two centred, its value the whole seconds left;
+ *   ready, the rise card's label stays centred (`centred`).
  * - Story: ActionCard.stories.tsx
  */
 export function ActionCard(p: CardProps) {
@@ -92,7 +93,12 @@ function Available(
       onPress={press.commit('b' in p ? () => p.press(p.b) : p.onPress)}
       style={[card(c), lift]}
     >
-      <Text style={'b' in p && p.asked ? { ...note(c, t), ...type.italic } : prose(c, t)}>
+      <Text
+        style={[
+          'b' in p && p.asked ? { ...note(c, t), ...type.italic } : prose(c, t),
+          'onPress' in p && p.centred && { textAlign: 'center' },
+        ]}
+      >
         {/* One text node with a line break, so axe reads "label note" as the name's start. */}
         {'b' in p && p.note
           ? [label, <Text key="note" style={note(c, t)}>{`\n${p.note}`}</Text>]
@@ -103,7 +109,7 @@ function Available(
 }
 
 // An open list's rows, inset as the option's children; Escape anywhere in it closes it.
-const rows = (k: Pick, first: Ref<View>, press: (b: Button) => void, close: () => void) => (
+export const rows = (k: Pick, first: Ref<View>, press: (b: Button) => void, close: () => void) => (
   <View style={{ paddingLeft: space.lg }} {...onKey((key) => key === 'Escape' && close())}>
     <Cards>
       {k.rows.map((r, i) => (

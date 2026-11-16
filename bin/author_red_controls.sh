@@ -20,8 +20,8 @@ run() {
   { PATH="$root/stub:$PATH" perl -e 'setpgrp; exec @ARGV' sh "$root/bin/author.sh" "$@" > /dev/null 2> "$root/err"; } 2> /dev/null || got_status=$?
 }
 
-run
-expect "no argument" 2 "usage: bin/author.sh"
+run cartridges/x cartridges/y
+expect "two arguments" 2 "usage: bin/author.sh"
 run cartridges/x
 expect "watcher dies" any "The watcher stopped before the first good compile"
 mkdir -p "$root/mobile/app" && echo '{}' > "$root/mobile/app/artifact.json"

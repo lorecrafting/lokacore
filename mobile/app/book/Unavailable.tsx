@@ -122,11 +122,18 @@ const SaidReason = ({ children }: { children: string | null }) => (
   </View>
 );
 
-// A wait's body has its countdown ring before the label (book-ui.md, Spirit state).
+// A wait's body has its countdown ring before the label, the two centred (book-ui.md, Spirit state).
 function Waiting({ wait, ...body }: { wait?: Wait } & Parameters<typeof RefusedBody>[0]) {
   if (!wait) return <RefusedBody {...body} />;
   return (
-    <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.md }}>
+    <View
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: space.md,
+      }}
+    >
       <Ring fraction={wait.fraction} locked={false} />
       <RefusedBody {...body} />
     </View>

@@ -29,6 +29,7 @@ defmodule Loka.Content.Explain do
          UNRESOLVED_REFERENCE | Nothing is called `{target}`. | Add it to text.json (or under this file's roles), or change the name.
          UNREACHABLE_DETAIL | No room text ever mentions the detail `{field}`. | Link to it from the description or another detail, or remove it.
          CONTAINMENT_CYCLE | These things contain each other. | Change one location so the chain ends in a room.
+         CONDITION_CYCLE | These conditions read each other, so none of them can be worked out. | Remove one `named` so the chain ends at a condition written out in full.
          CAPACITY_EXCEEDED | This container holds {held} but has room for {capacity}. | Raise its capacity or start it with less.
          TOUCH_LINK_MISSING | This line has no link to `{target}`, so a phone player cannot tap it. | Link it in the text: `[words](key)`.
          UNKNOWN_COMMAND | `{field}` names a command this cartridge may not use. | Use a command from the action reference in docs/system/cartridge.md.
@@ -55,16 +56,17 @@ defmodule Loka.Content.Explain do
          REACTION_DRAINS_BODY | A rule that lowers a body's pool skips death, so the body could stand at 0. | Hurt it with combat, a status tick or a bleed; give this rule a positive `by`.
          BARRIER_MISMATCH | The two sides of this barrier disagree. | Name the same barrier on both, and check its rooms and direction.
          BARRIER_UNREACHABLE_KEY | The key to this barrier is out of reach without passing it. | Place the key on the near side.
-         RESERVED_FACT | The engine owns the fact name `{field}`. | Rename your fact.
+         RESERVED_FACT | The engine owns the fact name `{reserved}`. | Rename your fact.
          INVALID_TIME_POLICY | This needs a time policy the cartridge does not have, or does not fit it. | Fix time_policy in cartridge.json, or remove this.
          VISITS_UNRECORDED | A visits check can never pass, because nothing records visits. | Add `knowledge` under requires.capabilities in cartridge.json.
          SPEAKER_ELSEWHERE | This `then` leads to a speaker in another room, so the talk ends as it reaches them. | Move the speaker, or end the talk here.
          LOOP_SPEAKER | Talk opens this `then` loop at its member with the most links, so this speaker is only reached through the loop. | Give the speaker a dialogue of their own if the player should start here.
          ENTRY_INVALID | A speaker takes one `entry` dialogue, and never a keyword one. | Keep `entry: true` on one dialogue Talk can open.
-         ENTRY_GUESSED | Talk opens `{target}` here only by inference: it ties another member of its loop for most links, it comes first by key with no condition, or the dialogues with a condition that can fail lead to several, and it is the first of them. | Mark the dialogue Talk should open with `entry: true`, or leave one way on.
+         ENTRY_GUESSED | Talk opens `{target}` here only by inference: it ties another member of its loop for most links, it comes first by key with no condition, or the dialogues with a condition that can fail lead to several, and it opens the first of these whose condition holds or, when none holds, what they lead to. | Mark the dialogue Talk should open with `entry: true`, or leave one way on.
          RETURN_CLOSED | A choice in `{target}` sets the fact its `when:` reads, so going back to these choices closes the talk. | Nothing to do if that is meant; otherwise set the fact on a choice with `then: end`.
          FALL_THROUGH_SPENT | `{target}` has a `when:`, and its only free way on shuts itself once taken (`once`, or `needs:` of the fact it sets), so once it is taken and the `when:` fails, the speaker's Talk is refused. | Add a free choice that leads on and can always be taken, or a second dialogue for Talk to open.
          SITTING_SPENT | Every choice in `{target}` goes away once taken, so the last answer closes the talk until the next Talk. | Nothing to do if that is meant; otherwise add a choice with no `once` that stays.
+         HUB_SHUT | `{target}`'s answer here makes its own `when` fail, so the hub reopens with every choice refused and only closing works. | Add `then: end` (or a `then` elsewhere) to the answer.
          ENTRY_UNUSED | `{target}` never opens: its speaker has an `entry` dialogue and no dialogue that opens leads here. | Link to it from one that opens, or remove it.
          ALLY_ENGAGE_UNUSED | This ally has a `disposition.engage` line, and an ally only strikes the opponent, so the line never plays. | Remove the engage line and the `hostile` rule with it (a hostile attacker needs `engage` unless it is `unattackable: true`), or keep `hostile` and set `unattackable: true` before removing engage.
          HOSTILE_QUEST_SPEAKER | This quest speaker can turn hostile, which refuses the talk. | Choose another speaker or keep the standing up.
@@ -101,7 +103,7 @@ defmodule Loka.Content.Explain do
          choice_order_written | A choice's `order` is the compiler's mark of a scene's written order, not a field to write. | Remove it: a scene's choices show as written, a JSON dialogue's by key.
          once_outside_choice | Line `{text}`: `once` belongs under a choice. | Move it under a `- ` line.
          once_key_taken | `once` here would make the fact `{key}`, and that fact already exists. | Rename that fact, or this choice's words.
-         once_key_long | `once` here would make the fact `{key}`, longer than 64 characters. | Shorten the choice's words or the scene's key.
+         once_key_long | `once` here would make the fact `{key}`, longer than 64 characters. | Shorten this choice's words or the scene's key.
          bad_then | Line `{text}` is not `then: <key>` or `then: end`, or repeats a `then:`. | Name one dialogue by its key, or `end`; `~` holds the place of words, not of a key.
          then_outside_choice | Line `{text}`: `then:` belongs under a choice. | Move it under a `- ` line.
          then_and_nested | Line `{text}`: this choice already goes on to its nested choices. | Remove the `then:`, or remove the nested choices.
@@ -263,7 +265,8 @@ defmodule Loka.Content.Explain do
 
   defp words(%{"code" => code, "data" => data} = d) do
     {what, fix} = entry(code, d)
-    vars = vars(d)
+    # RESERVED_FACT names the fact, which is not the path's last step (`...fact`).
+    vars = Map.put(vars(d), "reserved", data["field"] || data["key"] || field(d["path"]))
     # A root-level fault has no field to name: the file itself is at fault.
     String.replace(
       "#{fill(what, vars)} #{fill(fix, vars)}#{extra(code, data, vars["field"])}",

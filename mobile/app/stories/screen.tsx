@@ -56,6 +56,7 @@ export const screenFrom = (
     confirmedRead: undefined,
     ended: undefined,
     fell: false,
+    dead: undefined,
     spirit: undefined,
     treatment: saved.view.scene?.treatment,
     ...shell,

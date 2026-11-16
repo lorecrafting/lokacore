@@ -1,5 +1,7 @@
 // A full reading page with the offered actions following its combat history.
-import { useState } from 'react';
+import { useRef, useState, type RefObject } from 'react';
+import type { View } from 'react-native';
+import { Hotbar, HotbarList } from './Hotbar.tsx';
 import type { group } from './model.ts';
 import { ActionCard, Cards, PickLists, type Shown } from './actions.tsx';
 import { picks } from './pick.ts';
@@ -15,7 +17,15 @@ import { useDry } from './press.ts';
 import type { presenter, Button } from './presenter.ts';
 import { cardKey } from './presenter.ts';
 
-function Foot(p: { label: typeof LABEL.letGo | typeof LABEL.backToWorld; onPress: () => void }) {
+/**
+ * The one foot control of an ended page: Let go or Back to World, dry until the page is read.
+ * - Use: the closed Combat page's foot, the dead page's Let go.
+ * - Story: CombatPage.stories.tsx
+ */
+export function Foot(p: {
+  label: typeof LABEL.letGo | typeof LABEL.backToWorld;
+  onPress: () => void;
+}) {
   return (
     <Reanimated.View style={useDry()}>
       <Control label={p.label} onPress={p.onPress} />
@@ -53,7 +63,7 @@ const foeLists = (
 
 // A live fight's response cards, each foe's Cast a spell on it… last. ponytail: two foes of one
 // name read alike (book-ui.md, Aimed spells off the target's page).
-function Responses(p: Props & { shown: Shown }) {
+function Responses(p: Props & { shown: Shown; opener: RefObject<View | null> }) {
   const { view, text } = p.screen;
   const casts = p.screen.buttons.filter((b) => commandOf(b) === 'cast');
   const c = view.combat!;
@@ -81,6 +91,7 @@ function Responses(p: Props & { shown: Shown }) {
           state={p.shown}
         />
       ))}
+      <HotbarList {...p.screen} press={p.press} shown={p.shown} opener={p.opener} />
     </Cards>
   );
 }
@@ -97,7 +108,8 @@ function Responses(p: Props & { shown: Shown }) {
  */
 export function Combat(p: Props) {
   const { view, text, combatLog, ended, fell } = p.screen;
-  const shown: Shown = useState(); // one for every foe's list: one list open at a time (book-ui.md)
+  const shown: Shown = useState(); // one for every foe's list and the hotbar's: one open at a time (book-ui.md)
+  const opener = useRef<View>(null);
   if (!view.combat && !ended) return null;
   // A closed encounter keeps its page: no actions, one foot control (book-ui.md, Closure).
   // Let go goes to World; with `revival` the presenter's leaveCombat makes it the spirit state.
@@ -113,9 +125,12 @@ export function Combat(p: Props) {
         title={p.screen.title ?? 'Combat'}
         foot={foot}
         scrollToEnd={combatLog.length > 0}
+        strip={
+          view.combat && <Hotbar {...p.screen} press={p.press} shown={shown} opener={opener} />
+        }
       >
         <LogLines lines={combatLog} rounds />
-        {view.combat && <Responses {...p} shown={shown} />}
+        {view.combat && <Responses {...p} shown={shown} opener={opener} />}
       </Page>
     </Blow>
   );

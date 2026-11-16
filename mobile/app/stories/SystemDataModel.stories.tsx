@@ -160,7 +160,6 @@ export const Impact: Story = {
         .getAllByRole('link')
         .map((a) => a.textContent),
     ).toEqual([
-      'cartridge_hash.json',
       'cartridge_rooms_hash.json',
       'cartridge_ferry_hash.json',
       'cartridge_lantern_hash.json',

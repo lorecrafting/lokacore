@@ -80,9 +80,29 @@ defmodule Loka.Content.SceneLines do
   def key(label),
     do: label |> String.downcase() |> String.replace(~r/[^a-z0-9]+/, "_") |> String.trim("_")
 
-  @doc "The key of the choice `label` on line `n`: a `~` placeholder has no words, so its line keys it."
+  # A ` #<key>` suffix at the very end of a `- ` line (rulings §2). The key pattern is the one
+  # `key?/1` uses for every other key; the text before the suffix is the choice's words.
+  @explicit ~r/ +#([a-z][a-z0-9_.]*)$/
+
+  @doc """
+  The words of a choice `label`, without a ` #<key>` suffix: the suffix names the key, never the
+  label, so it is not part of what the player reads (rulings §2).
+  """
+  @spec label(String.t()) :: String.t()
+  def label(label), do: Regex.replace(@explicit, label, "") |> String.trim_trailing()
+
+  @doc """
+  The key of the choice `label` on line `n`. An explicit ` #<key>` suffix keys it and is not part of
+  its words; a `~` placeholder has no words, so its line keys it (`todo__<n>`); otherwise the slug of
+  its words, as every scene before S3 did.
+  """
   @spec choice_key(String.t(), pos_integer()) :: String.t()
-  def choice_key(label, n), do: if(String.trim(label) == "~", do: "todo__#{n}", else: key(label))
+  def choice_key(label, n) do
+    case Regex.run(@explicit, label) do
+      [_, key] -> key
+      nil -> if String.trim(label) == "~", do: "todo__#{n}", else: key(label)
+    end
+  end
 
   defp step({raw, n}, s) do
     text = String.trim(raw)

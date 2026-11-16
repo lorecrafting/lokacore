@@ -37,7 +37,11 @@ Make one real edit to each (br --no-auto-import update <id> ..., e.g. main's cha
 the merge then refuses BothModified and prints how to keep a side."
   git diff --quiet HEAD origin/main -- .beads/issues.jsonl || git checkout -q HEAD -- .beads/issues.jsonl || die 'cannot reset the export'
   # Hooks off: the post-merge import is last-writer-wins and would hide a same-row conflict from the merge.
-  git -c core.hooksPath=/dev/null pull -q --ff-only origin main || die 'pull failed (main changed a dirty tracked file): set that file aside, rerun'
+  # fetch then merge a named ref, not `git pull`: FETCH_HEAD is one file shared by every worktree, so
+  # another worktree's fetch can land between pull's own fetch and its merge and it refuses with
+  # 'Cannot fast-forward to multiple branches' (loka-fd8km).
+  git -c core.hooksPath=/dev/null fetch -q origin main || die 'fetch failed'
+  git -c core.hooksPath=/dev/null merge -q --ff-only origin/main || die 'pull failed (main changed a dirty tracked file): set that file aside, rerun'
   br1 sync --merge || die "br sync --merge refused: main is fast-forwarded; the database, export and base are unchanged.
 Compare a row: br --no-auto-import show <id> --json; grep '\"id\":\"<id>\"' .beads/issues.jsonl (main's copy).
 Until this is resolved a plain br command imports main's rows over this checkout's: use only these.

@@ -55,6 +55,13 @@ defmodule Loka.Content.Steps do
   @doc "The registered ops (step.schema.json Step's branches)."
   def ops, do: Map.keys(@ops)
 
+  @doc "Each op's contexts, sorted; kernel/ts/play/step_contexts.json is its copy for the panel."
+  def contexts,
+    do:
+      Map.new(@ops, fn {op, {_, cs}} ->
+        {op, cs |> Map.keys() |> Enum.map(&to_string/1) |> Enum.sort()}
+      end)
+
   @doc """
   `steps` (a list, or one step such as a service's benefit) at `path` of `rel` in `context`
   (:reaction, :action, :choice or :service): SCHEMA_VIOLATION invalid_value at an op or field

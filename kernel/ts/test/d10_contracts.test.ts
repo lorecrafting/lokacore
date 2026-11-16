@@ -115,9 +115,7 @@ test('an unexplored stub admits no destination id or title, with a declared-key 
 
 // Breaks: an empty map-position declaration bypasses the wire's nonempty requirement.
 test('compiled map-position arrays reject empty declarations with a minItems red control', () => {
-  const cartridge: any = (DEFS as any).CompiledCartridge.oneOf.find(
-    (b: any) => b.properties.format.const === 'loka-cartridge-v2',
-  );
+  const cartridge: any = (DEFS as any).CompiledCartridge;
   const defs = { ...DEFS, D10Probe: cartridge.properties.layout } as Defs;
   assert.notDeepEqual(validate('D10Probe', [], defs), []);
   const mutant = structuredClone(defs);

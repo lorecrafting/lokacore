@@ -16,7 +16,7 @@ defmodule Loka.Content.ScriptedActions do
   defp all(defs), do: for({_, {rel, [], r}} <- defs["scripted_action"], do: {rel, r})
 
   @doc """
-  For a v2 source with a valid manifest (else none): each scripted action's owner (scripted_action), its
+  For a source with a valid manifest (else none): each scripted action's owner (scripted_action), its
   check's (check@1, by its events) is required; each outcome's steps are `Loka.Content.Steps`
   :action steps (ops, fields, owning events and references) and its check runs neither failure
   nor rating (`CheckKinds.context/4`);
@@ -32,8 +32,8 @@ defmodule Loka.Content.ScriptedActions do
   registered command's (DUPLICATE_DEFINITION: one key is one ActionSet identity); and each key of a room's action
   contribution names a registered command, an action, a scripted action or a quest (its offer).
   """
-  @spec check(map() | nil, map(), {term(), map() | :unknown} | nil, [map()]) :: [map()]
-  def check(m, _, v2, _) when m == nil or v2 == nil, do: []
+  @spec check(map() | nil, map(), {term(), map() | :unknown}, [map()]) :: [map()]
+  def check(nil, _, _, _), do: []
 
   def check(m, defs, {_, text}, registry) do
     actions = for {_, {_, [], a}} <- defs["action"], into: MapSet.new(), do: a["key"]

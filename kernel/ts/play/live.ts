@@ -1,10 +1,9 @@
 // Fast loop (docs/system/cartridge.md#author-preview): `bin/loka dev --watch` keeps one loopback
 // server-sent-events stream to the open author page. A text-only change travels as an overlay of
-// text values over the artifact the page already runs; nothing here writes a file, so the overlay
-// can never be bundled. Checkpoints (named recorded paths) are the one thing the page writes, as
-// plain files under the source tree's `checkpoints/`, which the compiler skips. The author column
-// asks here for a Book line's source (`POST /open`) and the rule explainer (`POST /why`), the
-// Story map for its model (`GET /story`, story.ts).
+// text values over the artifact the page runs, so nothing here can be bundled. Checkpoints (named
+// recorded paths, R1, and R2's coverage) are the one thing the page writes: plain files under the
+// source tree's `checkpoints/`, which the compiler skips. The author column asks here for a Book
+// line's source (`POST /open`), its rule explainer (`POST /why`) and the Story map (`GET /story`).
 import { execFile, spawn } from 'node:child_process';
 import {
   existsSync,
@@ -15,19 +14,20 @@ import {
   rmSync,
   writeFileSync,
 } from 'node:fs';
-import { createServer, type IncomingMessage, type ServerResponse } from 'node:http';
+import { createServer, type IncomingMessage, type Server, type ServerResponse } from 'node:http';
+import type { AddressInfo } from 'node:net';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { INSTALLED, loadCartridge, type Cartridge } from '../src/index.ts';
 import { artifactBytes } from './compiled.ts';
-import type { FightsReport, LevelRows, Numbers, PoolsReport, Section } from './numbers.ts';
+import type { Fights, FightsReport, LevelRows, Numbers, PoolsReport, Section } from './numbers.ts';
 import { replayRecords } from './replay.ts';
 import { todo } from './todo.ts';
 import { find } from './find.ts';
 import { why } from './why.ts';
 import { storyRoute } from './story.ts';
-import { body, editing, foreign, json } from './editing.ts';
-import { sourceOf } from './prose.ts';
+import { body, editing, foreign, type Hooks, json } from './editing.ts';
+import { openAt } from './prose.ts';
 import type { Changed } from './write.ts';
 import { sentences } from './why_words.ts';
 import { told } from './told.ts';
@@ -45,6 +45,17 @@ export type Message = {
   // the lines /edit pushed that the last compile refused (file:line); a good compile clears them
   unconfirmed?: { key: string; at: string }[];
   placeholders?: Record<string, string>; // each `~` key's file:line, from the compile (/line)
+  checkpoints?: import('./checkpoints.ts').Checked[]; // R1: this artifact's replays (§2)
+  covered?: import('./covered_type.ts').Covered; // R2: what those replays reached by name
+  timings?: Timings; // the last compile's, kept like the rest: the editor tells them apart by `at`
+};
+/** One compile's milliseconds: the compile, then its push or write (a refusal: its notice). */
+export type Timings = {
+  at: number;
+  compile: number;
+  publish: number;
+  kind: 'prose' | 'structural' | 'refusal';
+  sha256?: string; // a structural edit's artifact: the Book's `ready` names it when loaded
 };
 
 /** `mix loka.lint`'s findings (`rel: words` for a .json, .scene or .cut source, or `rel details.key: words`, on stderr; a compiler's `warning: ...` is not one) from its exit and stderr; a lint that did not run says so. */
@@ -71,7 +82,12 @@ export function textOnly(written: Canonical, next: Canonical): Record<string, st
 const NAME = /^\/checkpoints\/([a-z0-9][a-z0-9_-]{0,63})$/; // a file name, never a path
 
 /** `GET /checkpoints` lists names; `GET|PUT /checkpoints/<name>` reads or writes `{steps}`. */
-async function checkpoints(request: IncomingMessage, response: ServerResponse, source: string) {
+async function checkpoints(
+  request: IncomingMessage,
+  response: ServerResponse,
+  source: string,
+  busy: () => boolean,
+) {
   const dir = join(source, 'checkpoints');
   if (request.url === '/checkpoints' && request.method === 'GET') {
     const names = existsSync(dir) ? readdirSync(dir).filter((f) => f.endsWith('.json')) : [];
@@ -85,6 +101,8 @@ async function checkpoints(request: IncomingMessage, response: ServerResponse, s
       ? json(response, 200, JSON.parse(readFileSync(file, 'utf8')))
       : response.writeHead(404).end();
   if (request.method !== 'PUT') return response.writeHead(405).end();
+  // a checkpoint saved mid /new would land in its snapshot diff, as a write would (write.ts)
+  if (busy()) return json(response, 409, 'a /new is running');
   let steps: unknown;
   try {
     steps = (JSON.parse(await body(request)) as { steps?: unknown }).steps;
@@ -147,7 +165,7 @@ async function post(
     return json(response, 400, 'a JSON body');
   }
   if (request.url === '/open') {
-    const at = sourceOf(source, String(sent.key), sent.words);
+    const at = openAt(source, sent);
     if (!at) return json(response, 404, `no source line for ${sent.key ?? sent.words}`);
     const [editor, ...flags] = (process.env.LOKA_EDITOR ?? 'code --goto').split(' ');
     spawn(editor, [...flags, join(source, at)], { stdio: 'ignore', detached: true })
@@ -166,7 +184,7 @@ async function post(
   }
 }
 
-const SECONDS = 30; // the panel waits this long for each report; `bin/loka sim` has no limit
+const SECONDS = 90; // the panel waits this long per report: fight.ts --seeds 8 took 46 s on the showcase (M1, loka-wfrgk.79); mutate-skip: a measured limit
 const OPTS = { maxBuffer: 256 * 1024 * 1024, killSignal: 'SIGKILL' } as const;
 
 /** A report in a child, so a slow cartridge blocks no other route and is killed at the limit. */
@@ -187,21 +205,19 @@ export const limited = <T>(args: string[], seconds: number) =>
     });
   });
 
-async function numbers(artifact: string): Promise<Numbers> {
+/** The reports on the dev artifact; `fights` alone skips the pacing sim, which takes minutes (loka-wfrgk.79). */
+async function numbers(artifact: string, fights = false): Promise<Numbers | Fights> {
   const dev = JSON.parse(readFileSync(artifact, 'utf8'));
   const tmp = mkdtempSync(join(tmpdir(), 'loka-numbers-')); // the reports read a compiled artifact
   try {
     const file = join(tmp, 'artifact.json');
     writeFileSync(file, artifactBytes(dev));
     const play = (name: string) => join(import.meta.dirname, name);
-    const [pacing, fought] = await Promise.all([
-      limited<{ pools: PoolsReport; levels: LevelRows }>(
-        [play('sim.ts'), '--artifact', file, '--seeds', '4'],
-        SECONDS,
-      ),
-      limited<FightsReport>([play('fight.ts'), file, '--seeds', '8'], SECONDS),
-    ]);
-    return { hash: dev.sha256, pacing, fights: fought };
+    const fought = limited<FightsReport>([play('fight.ts'), file, '--seeds', '8'], SECONDS);
+    if (fights) return { hash: dev.sha256, fights: await fought };
+    const pace = [play('sim.ts'), '--artifact', file, '--seeds', '4'];
+    const pacing = limited<{ pools: PoolsReport; levels: LevelRows }>(pace, SECONDS);
+    return { hash: dev.sha256, pacing: await pacing, fights: await fought };
   } finally {
     rmSync(tmp, { recursive: true, force: true });
   }
@@ -209,8 +225,8 @@ async function numbers(artifact: string): Promise<Numbers> {
 
 const asked = (url: string) => new URL(url, 'http://x').searchParams.get('q') ?? '';
 
-const reply = (response: ServerResponse, artifact: string) =>
-  numbers(artifact).then((n) => json(response, 200, n));
+const reply = (response: ServerResponse, artifact: string, fights?: boolean) =>
+  numbers(artifact, fights).then((n) => json(response, 200, n));
 
 /** The column's routes, or false for a request that is not one. */
 function column(
@@ -218,10 +234,12 @@ function column(
   response: ServerResponse,
   source: string,
   artifact: string,
+  busy: () => boolean,
 ) {
-  if (request.url?.startsWith('/checkpoints')) return checkpoints(request, response, source);
+  if (request.url?.startsWith('/checkpoints')) return checkpoints(request, response, source, busy);
   if (request.url === '/todo') return json(response, 200, todo(source));
   if (request.url === '/numbers') return reply(response, artifact);
+  if (request.url === '/fights') return reply(response, artifact, true);
   if (request.url?.startsWith('/find?'))
     return json(response, 200, find(source, artifact, asked(request.url)));
   if (request.method === 'POST' && (request.url === '/open' || request.url === '/why'))
@@ -229,10 +247,18 @@ function column(
   return false;
 }
 
+/** A watcher's close, and the port it bound: a test passes 0 for a free one (random ones collided). */
+const bound = (server: Server) => ({
+  close: () => server.close(),
+  port: new Promise<number>((done) =>
+    server.once('listening', () => done((server.address() as AddressInfo).port)),
+  ),
+});
+
 /** Serves `GET /events` (each client gets the current message on connect and every push after),
- * the checkpoint routes over `source`, `GET /todo` (todo.ts), `GET /find?q=` (find.ts), `GET /numbers`, the column's `POST /open` and
+ * the checkpoint routes over `source`, `GET /todo` (todo.ts), `GET /find?q=` (find.ts), `GET /numbers`, `GET /fights` (the fight rows alone), the column's `POST /open` and
  * `POST /why`, `GET /story` (story.ts), and the editor's routes (editing.ts) after its Host and Origin checks. */
-export function serve(port: number, source: string, artifact: string, release = () => {}) {
+export function serve(port: number, source: string, artifact: string, on: Hooks = {}) {
   const clients = new Set<ServerResponse>();
   let last: Message = { text: {}, said: [], compiled: true };
   const send = (client: ServerResponse, once = {}) =>
@@ -245,11 +271,11 @@ export function serve(port: number, source: string, artifact: string, release = 
     else if ('compiled' in message || 'diagnostics' in message || 'held' in message) map.stale();
     for (const client of clients) send(client);
   }, source);
-  const editor = editing(source, said, (once) => clients.forEach((c) => send(c, once)), release);
+  const editor = editing(source, said, (o) => clients.forEach((c) => send(c, o)), on, artifact);
   const route = async (request: IncomingMessage, response: ServerResponse) => {
     if (foreign(request, response) || (await editor.route(request, response))) return;
     if (request.url === '/story') return map.answer(request, response, last.diagnostics ?? []);
-    const answered = column(request, response, source, artifact);
+    const answered = column(request, response, source, artifact, editor.busy);
     if (answered !== false) return answered;
     if (request.url !== '/events') return response.writeHead(404).end();
     response.writeHead(200, { 'content-type': 'text/event-stream', 'cache-control': 'no-cache' });
@@ -270,5 +296,5 @@ export function serve(port: number, source: string, artifact: string, release = 
       process.exit(1);
     })
     .listen(port, '127.0.0.1');
-  return { push: said.push, held: editor.held, seen: editor.seen, close: () => server.close() };
+  return { push: said.push, held: editor.held, seen: editor.seen, ...bound(server) };
 }

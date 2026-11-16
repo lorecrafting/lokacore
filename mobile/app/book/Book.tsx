@@ -22,6 +22,7 @@ import { usePaletteCurve, useReducedMotion } from './fade.ts';
 import {
   PaletteContext,
   paletteOf,
+  starsShow,
   TypeContext,
   useBookPalette,
   usePalette,
@@ -78,7 +79,8 @@ export function pressBook(p: BookProps, pr: Presenter, s: BookState, b: Button, 
   if (stale && !pr.recovered()) return s.redraw((n) => n + 1);
   const after = pr.screen(),
     before = s.current.current;
-  let next = pagesAfter(before.stack, before.view, after.view);
+  const died = !!after.dead && fell !== after.died; // as updates.ts: the dead page clears the stack
+  let next = died ? [] : pagesAfter(before.stack, before.view, after.view);
   if (
     restoring &&
     s.restoreInvocation.current === restoring &&
@@ -99,13 +101,12 @@ export function pressBook(p: BookProps, pr: Presenter, s: BookState, b: Button, 
     npcPage(before.stack.at(-1), before.view) ||
     ['shelf', 'sale'].includes(before.stack.at(-1)?.kind ?? '') ||
     POSITION_ACTIONS.includes(b.command ?? b.action_key);
-  if (next === before.stack && inline && !before.view.scene && !after.view.scene)
-    s.redraw((n) => n + 1);
-  else {
-    s.setStack(next);
-    const riffle = riffles(b.command, before.view, after.view, fell !== after.died);
-    s.setFlip((f) => ({ turn: f.turn + 1, dir: 1, riffle }));
-  }
+  s.setStack(next);
+  const fresh = died && !before.stack.length; // the World page changes in place
+  if (fresh || (next === before.stack && inline && !before.view.scene && !after.view.scene))
+    return s.redraw((n) => n + 1);
+  const riffle = riffles(b.command, before.view, after.view, fell !== after.died);
+  s.setFlip((f) => ({ turn: f.turn + 1, dir: 1, riffle }));
 }
 
 // The spirit state's clock: a redraw as its next line dries or its next second passes; Rise ends it.
@@ -187,6 +188,7 @@ const frame = { flex: 1, flexDirection: 'row', justifyContent: 'center' } as con
 export const chapterCard = (s: ViewProps['screen'], page?: ViewProps['stack'][number]) =>
   !s.view.combat &&
   !s.ended &&
+  !s.dead &&
   !s.view.scene && // Body draws these two over the chapter page
   !s.view.ancestry_choices &&
   page?.kind === 'chapter' &&
@@ -233,7 +235,7 @@ export function BookView(p: ViewProps) {
             <Heard said={p.screen.said} />
             <HapticPulse />
           </View>
-          {p.palette.bg === color.dark.bg && <NightSky />}
+          {starsShow(p.palette, p.screen.view.place.exposed) && <NightSky />}
         </SafeAreaView>
       </TypeContext>
     </PaletteContext>
@@ -261,13 +263,10 @@ function Bottom(p: BottomProps) {
   const nav = !p.page && !view.ancestry_choices && !view.scene && !shut;
   const detail = !shut && detailPage(p.page);
   if (detail && !pending && !p.screen.catchingUp && !fault) return null;
-  // Dead, the page shows only Let go, and in the spirit state only Rise, catching up included: no
-  // status line (owner 2026-11-04). A fault ends the spirit state (spirit.ts haunt).
-  if (
-    (p.screen.spirit || !!p.screen.treatment || (p.screen.fell && !p.screen.catchingUp)) &&
-    !fault
-  )
-    return null;
+  // Dead, the page shows only Let go (the dead page and the spirit state, Rise, catching up
+  // included): no status line (owner 2026-11-04). A fault ends both (spirit.ts haunt, fallen).
+  const fell = p.screen.dead || (p.screen.fell && !p.screen.catchingUp);
+  if ((p.screen.spirit || !!p.screen.treatment || fell) && !fault) return null;
   return (
     <View
       style={{

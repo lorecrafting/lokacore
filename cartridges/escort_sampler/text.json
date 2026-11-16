@@ -1,0 +1,21 @@
+{
+  "room.green.title": "~",
+  "room.green.description": "~",
+  "room.quay.title": "~",
+  "room.quay.description": "~",
+  "detail.bench": "~",
+  "npc.child.short": "~",
+  "npc.child.room": "~",
+  "npc.child.description": "~",
+  "npc.keeper.short": "~",
+  "npc.keeper.room": "~",
+  "npc.keeper.description": "~",
+  "quest.homeward.title": "~",
+  "quest.homeward.accept": "~",
+  "dialogue.child_escort.prompt": "~",
+  "dialogue.keeper_home.prompt": "~",
+  "dialogue.rescue.label": "~",
+  "dialogue.home.label": "~",
+  "narration.rescue": "~",
+  "narration.home": "~"
+}

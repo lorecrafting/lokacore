@@ -1,4 +1,4 @@
-# size: allow 326, the area folder lookups (a room or starter file in any areas/<area>/) join the starter writer
+# size: allow 330, the area folder lookups (a room or starter file in any areas/<area>/) and --extends join the starter writer
 defmodule Loka.Content.Starters do
   @moduledoc """
   `bin/loka new <kind> <name>`: writes a compiling starter for one source kind with every line a
@@ -9,14 +9,15 @@ defmodule Loka.Content.Starters do
   starter, before any write. Every starter adds the rows an existing layout.json lacks.
   """
   alias Loka.Content.Barriers
-  alias Loka.Content.Starters.{Area, Merge, Parts, Templates}
+  alias Loka.Content.Starters.{Area, Child, Copy, Merge, Parts, Templates}
 
   @doc """
   Writes the starter; `{:ok, paths it changed}` or `{:error, one line for the author}`. `from` is
   `{room, direction}`: a new room joined to an existing one by exits both ways, in that room's area
   folder. `before_write.(path, old bytes or nil)` runs before each file is written, so a caller can
-  undo; a refusal calls it for none. `area` places the starter's own file in `areas/<area>/`, and a
-  room it needs is that area's first room; with `from`, it wins (a border room).
+  undo; a refusal calls it for none. `area` places every new file of the starter in `areas/<area>/`,
+  and a room it needs is that area's first room; with `from`, it wins (a border room). `extends`
+  makes the starter's own file a child of that abstract parent (Starters.Child).
   """
   @spec write(
           Path.t(),
@@ -24,14 +25,15 @@ defmodule Loka.Content.Starters do
           String.t(),
           {String.t(), String.t()} | nil,
           (Path.t(), binary() | nil -> any()),
-          String.t() | nil
+          {String.t() | nil, String.t() | nil}
         ) :: {:ok, [Path.t()]} | {:error, String.t()}
-  def write(dir, kind, name, from \\ nil, before_write \\ fn _, _ -> :ok end, area \\ nil)
+  def write(dir, kind, name, from \\ nil, hook \\ fn _, _ -> :ok end, place \\ {nil, nil})
 
-  def write(_dir, "cartridge", path, _from, hook, _area) do
+  def write(_dir, "cartridge", path, from, hook, _place) do
     cond do
       File.exists?(Path.join(path, "cartridge.json")) -> {:error, "#{path}/cartridge.json exists"}
       valid_name(Path.basename(path)) != :ok -> valid_name(Path.basename(path))
+      from -> Copy.cartridge(from, path, hook)
       true -> put(path, Templates.cartridge(Path.basename(path)), nil, hook)
     end
   catch
@@ -39,29 +41,32 @@ defmodule Loka.Content.Starters do
   end
 
   # An area is a folder that starts with a room of its own name.
-  def write(dir, "areas", name, from, hook, nil), do: write(dir, "rooms", name, from, hook, name)
+  def write(dir, "areas", name, from, hook, {nil, up}),
+    do: write(dir, "rooms", name, from, hook, {name, up})
 
-  def write(_, "areas", name, _, _, area),
+  def write(_, "areas", name, _, _, {area, _}),
     do: {:error, "areas #{name} is its own area: drop --area #{area}"}
 
-  def write(dir, kind, name, from, hook, area) do
+  def write(dir, kind, name, from, hook, {area, extends}) do
     with :ok <- valid_name(name, kind),
          :ok <- in_cartridge(dir),
          {:ok, template} <- Map.fetch(Templates.kinds(), kind) |> or_unknown(kind),
          {:ok, area} <- Area.pick(dir, kind, area, from),
-         do: build(dir, {kind, name, from, area, own(dir, kind, name, area)}, template, hook)
+         own = own(dir, kind, name, area),
+         {:ok, up} <- Child.parent(dir, dir_of(kind), extends, own),
+         do: build(dir, {kind, name, from, area, own}, template, hook, up)
   catch
     {:bad_json, file} -> {:error, "#{file} is not valid JSON: fix it first"}
     :bad_layout -> {:error, "layout.json: every row needs a number x, y and z: fix it first"}
     {:bad_area, file} -> {:error, "#{file} needs a rooms object: fix it first"}
   end
 
-  defp build(dir, {kind, name, from, area, own}, {caps, needs, make}, hook) do
+  defp build(dir, {kind, name, from, area, own}, {caps, needs, make}, hook, up) do
     with {:ok, context} <- context(dir, needs, area),
          {:ok, context} <- placed(context, dir, kind, name, from, own) do
       files =
         make.(name, context)
-        |> Area.moved(own)
+        |> owned(dir, own, up)
         |> with_capabilities(caps)
         |> kept_lines(dir, kind)
         |> with_layout(dir, context, name)
@@ -69,6 +74,8 @@ defmodule Loka.Content.Starters do
       put(dir, files, if(from, do: nil, else: own), hook)
     end
   end
+
+  defp owned(files, dir, own, up), do: files |> Area.moved(dir, own) |> Child.extending(own, up)
 
   defp with_capabilities(files, caps) do
     declared = capabilities(caps)
@@ -113,11 +120,13 @@ defmodule Loka.Content.Starters do
   # The first key of each kind the template references (dirs only: an area bundle's npcs are not
   # scanned), plus every room, bundled ones too, for layout's completeness check.
   defp context(dir, needs, area) do
-    room_list = rooms(dir)
+    rooms = rooms(dir)
+    room_list = Enum.map(rooms, &elem(&1, 0))
     entry = with %{"entry" => e} <- read(Path.join(dir, "cartridge.json")), do: e
 
     start = %{
       "room_list" => room_list,
+      "places" => places(rooms),
       "layout" => layout_rows(dir),
       "entry" => (area && Area.first_room(dir, area)) || if(entry in room_list, do: entry)
     }
@@ -128,10 +137,13 @@ defmodule Loka.Content.Starters do
           {:halt, {:error, "no #{missing(kind)} yet: bin/loka new #{missing(kind)} <name> first"}}
 
         key ->
-          {:cont, {:ok, Map.put(acc, kind, key)}}
+          {:cont, {:ok, acc |> Map.put(kind, key) |> Map.merge(Parts.starts(dir, kind, key))}}
       end
     end)
   end
+
+  # An abstract room is no place: layout.json has no row for it (the compiler refuses one).
+  defp places(rooms), do: for({k, r} <- rooms, !match?(%{"abstract" => true}, r), do: k)
 
   defp placed(context, dir, kind, name, from, own) do
     with :ok <- new_room(dir, kind, name, context, own), do: joined(context, dir, name, from)
@@ -172,12 +184,10 @@ defmodule Loka.Content.Starters do
 
   defp with_layout(files, dir, c, name) do
     if File.exists?(Path.join(dir, "layout.json")) do
-      rooms =
-        Enum.uniq(
-          c["room_list"] ++ Enum.flat_map(files, fn {rel, b} -> rooms_in(Path.split(rel), b) end)
-        )
-
-      Map.put(files, "layout.json", Templates.with_rows(c["layout"], rooms, name, c["from"]))
+      rooms = Enum.flat_map(files, fn {rel, b} -> rooms_in(Path.split(rel), b) end)
+      rows = Templates.with_rows(c["layout"], Enum.uniq(c["places"] ++ rooms), name, c["from"])
+      # Rows need knowledge@1 (lib/loka/content/layout.ex:62).
+      files |> Map.put("layout.json", rows) |> with_capabilities(~w(knowledge))
     else
       files
     end
@@ -188,18 +198,15 @@ defmodule Loka.Content.Starters do
   defp rooms_in(_, _), do: []
 
   defp rooms(dir) do
-    bundled =
-      for a <- Path.wildcard(Path.join(dir, "areas/*.json")),
-          r <- area_rooms(a),
-          do: r
+    bundled = for a <- Path.wildcard(Path.join(dir, "areas/*.json")), r <- area_rooms(a), do: r
 
-    plain = for r <- own_files(dir, "rooms"), do: Path.basename(r, ".json")
+    plain = for f <- own_files(dir, "rooms"), do: {Path.basename(f, ".json"), read(f)}
     Enum.sort(bundled ++ plain)
   end
 
   defp area_rooms(file) do
     case read(file) do
-      %{"rooms" => %{} = rooms} -> Map.keys(rooms)
+      %{"rooms" => %{} = rooms} -> Map.to_list(rooms)
       area when is_map(area) and not is_map_key(area, "rooms") -> []
       _ -> throw({:bad_area, file})
     end
@@ -313,7 +320,7 @@ defmodule Loka.Content.Starters do
       merged ->
         hook.(path, if(File.exists?(path), do: File.read!(path)))
         File.mkdir_p!(Path.dirname(path))
-        File.write!(path, Parts.pretty(merged))
+        File.write!(path, Parts.pretty_over(merged, path))
         [path]
     end
   end

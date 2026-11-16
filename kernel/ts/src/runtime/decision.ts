@@ -59,7 +59,7 @@ import { key, type Stored } from '../foundation/compose.ts';
 import { id } from '../foundation/id_source.ts';
 import type { RngState } from '../foundation/rng.ts';
 
-export type Cartridge = Extract<CompiledCartridge, { format: 'loka-cartridge-v2' }>;
+export type Cartridge = CompiledCartridge;
 export type State = {
   readonly visited_rooms?: Readonly<Record<string, VisitedRoom>>;
   readonly observed_npcs?: Readonly<Record<string, ObservedNpc>>;

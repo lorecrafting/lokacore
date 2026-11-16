@@ -24,15 +24,18 @@ const out = join(dir, 'current.json');
 const good = join(dir, 'good.json');
 writeFileSync(good, `{"cartridge":${kat.canonical},"content_hash":"${kat.sha256}"}`);
 // `mise exec -- mix loka.compile <src> <artifact>`: the artifact is $6; a watch test, whose
-// environment is fixed at spawn, names the artifact to copy in the file $STUB_WHICH.
+// environment is fixed at spawn, names the artifact to copy in the file $STUB_WHICH. `--serve` (the
+// resident) records its pid in $STUB_WHICH.serve and compiles each tab-separated stdin line.
 writeFileSync(
   join(dir, 'mise'),
   '#!/bin/sh\n[ "$4" = loka.lint ] && { [ -f "$STUB_WHICH.slow" ] && sleep 1; echo "items/x.json: lint of $(basename "$(cat "$STUB_WHICH")")" >&2; exit 1; }\n[ -n "$STUB_ERR" ] && { echo "$STUB_ERR" >&2; exit 1; }\n' +
-    '[ -n "$STUB_WHICH" ] && STUB_ART=$(cat "$STUB_WHICH")\n' +
     // a compile logs its start and end, and waits while $STUB_WHICH.block exists
+    'c() { [ -n "$STUB_WHICH" ] && STUB_ART=$(cat "$STUB_WHICH")\n' +
     'L="$STUB_WHICH.log"; [ -n "$STUB_WHICH" ] || L=/dev/null; echo "start $(basename "$STUB_ART")" >> "$L"\n' +
     'while [ -n "$STUB_WHICH" ] && [ -f "$STUB_WHICH.block" ]; do sleep 0.05; done\n' +
-    'cp "$STUB_ART" "$6"; echo "end $(basename "$STUB_ART")" >> "$L"\n',
+    'cp "$STUB_ART" "$1"; echo "end $(basename "$STUB_ART")" >> "$L"; }\n' +
+    '[ "$5" = --serve ] || { c "$6"; exit; }\necho $$ >> "$STUB_WHICH.serve"\n' +
+    'while IFS="$(printf \'\\t\')" read -r s a rest; do c "$a"; echo \'loka.compile {"status":0,"stderr":""}\'; done\n',
 );
 chmodSync(join(dir, 'mise'), 0o755);
 
@@ -41,6 +44,21 @@ const dev = (env: Record<string, string>) =>
     encoding: 'utf8',
     env: { PATH: `${dir}:${process.env.PATH}`, LOKA_DEV_CARTRIDGE: out, STUB_ART: good, ...env },
   });
+
+// Breaks: a first run (or a cleaned checkout) prints only the usage line, so the author is told to
+// "fix what it printed above" and nothing names the way in (loka-wfrgk.98).
+test('with no world given and none remembered, it names the way in', () => {
+  const fresh = join(dir, 'no-world');
+  mkdirSync(fresh, { recursive: true });
+  const run = spawnSync(process.execPath, [`${ROOT}kernel/ts/play/author.ts`, '--watch'], {
+    encoding: 'utf8',
+    env: { PATH: `${dir}:${process.env.PATH}`, LOKA_DEV_CARTRIDGE: join(fresh, 'current.json') },
+  });
+  assert.equal(run.status, 2);
+  assert.match(run.stderr, /none remembered yet/);
+  assert.match(run.stderr, /bin\/author\.sh cartridges\/<name>/);
+  assert.doesNotMatch(run.stderr, /^usage:/m);
+});
 
 // Breaks: a failed compile, or an artifact the kernel refuses (here a wrong content hash), replaces
 // or removes the last good preview artifact, or exits 0 so the author thinks it is live.
@@ -73,12 +91,11 @@ test('watch: a text edit is pushed in place, a structural edit is written', asyn
   mkdirSync(src);
   const which = join(dir, 'which');
   writeFileSync(which, good);
-  const port = 20000 + Math.floor(Math.random() * 20000);
   const watcher = spawn(process.execPath, [`${ROOT}kernel/ts/play/author.ts`, src, '--watch'], {
     env: {
       PATH: `${dir}:${process.env.PATH}`,
       LOKA_DEV_CARTRIDGE: out,
-      LOKA_AUTHOR_PORT: String(port),
+      LOKA_AUTHOR_PORT: '0', // a free port: random ones collided
       STUB_WHICH: which,
     },
   });
@@ -88,10 +105,18 @@ test('watch: a text edit is pushed in place, a structural edit is written', asyn
     for (let i = 0; i < 100 && !ready(); i++) await settle(50);
     assert.ok(ready(), 'timed out');
   };
-  const messages: { text: Record<string, string>; said: string[]; compiled: boolean }[] = [];
-  const stream = await (async function connect(): Promise<Response> {
-    return fetch(`http://127.0.0.1:${port}/events`).catch(() => settle(50).then(connect));
-  })();
+  type Timings = { kind: string; compile: number; publish: number; sha256?: string };
+  const messages: {
+    text: Record<string, string>;
+    said: string[];
+    compiled: boolean;
+    timings?: Timings;
+  }[] = [];
+  let said = '';
+  watcher.stdout.on('data', (chunk) => (said += chunk));
+  await until(() => /port \d+\n/.test(said)); // the whole line, not a cut-off port
+  const port = /port (\d+)/.exec(said)![1];
+  const stream = await fetch(`http://127.0.0.1:${port}/events`);
   await until(() => existsSync(out) && JSON.parse(readFileSync(out, 'utf8')).sha256 === kat.sha256);
   const first = readFileSync(out, 'utf8');
   const reader = stream.body!.getReader();
@@ -116,6 +141,10 @@ test('watch: a text edit is pushed in place, a structural edit is written', asyn
   );
   await settle(400); // the compile that follows the quick push
   assert.equal(readFileSync(out, 'utf8'), first);
+  // Break: the editor's console has no timing for a prose edit, or files it as structural.
+  const prose = messages.at(-1)!.timings!;
+  assert.equal(prose.kind, 'prose');
+  assert.ok(prose.compile >= 0 && prose.publish >= 0);
   assert.deepEqual(messages.at(-1)!.text, { 'room.boathouse.description': 'line one' });
 
   const rest = read('protocol/fixtures/cartridge_rest_hash.json');
@@ -132,6 +161,11 @@ test('watch: a text edit is pushed in place, a structural edit is written', asyn
   });
   await until(() => messages.at(-1)!.text['room.boathouse.description'] === undefined);
   assert.equal(messages.at(-1)!.compiled, true);
+  // Break: a structural timing lacks the sha256 the Book's `ready` is matched against.
+  assert.deepEqual(
+    [messages.at(-1)!.timings!.kind, messages.at(-1)!.timings!.sha256],
+    ['structural', rest.sha256],
+  );
 
   await until(
     () => (messages.at(-1) as { lint?: string[] }).lint?.[0] === 'items/x.json: lint of rest.json',
@@ -143,6 +177,7 @@ test('watch: a text edit is pushed in place, a structural edit is written', asyn
   writeFileSync(join(src, 'rooms.json'), '{ }');
   await until(() => messages.at(-1)!.compiled === false);
   assert.match(messages.at(-1)!.said.join(), /kernel refuses/);
+  assert.equal(messages.at(-1)!.timings!.kind, 'refusal');
   // Break: the lint of the last good compile still shows, as if it read the refused source.
   assert.equal((messages.at(-1) as { lint?: string[] }).lint, undefined);
 
@@ -215,12 +250,11 @@ test('watch: the watcher answers during a compile, and saves compile one at a ti
     `{"cartridge":${rest.canonical},"content_hash":"${rest.sha256}"}`,
   );
   const artifact = join(dir, 'queued.json');
-  const port = 20000 + Math.floor(Math.random() * 20000);
   const watcher = spawn(process.execPath, [`${ROOT}kernel/ts/play/author.ts`, src, '--watch'], {
     env: {
       PATH: `${dir}:${process.env.PATH}`,
       LOKA_DEV_CARTRIDGE: artifact,
-      LOKA_AUTHOR_PORT: String(port),
+      LOKA_AUTHOR_PORT: '0', // a free port: random ones collided
       STUB_WHICH: which,
     },
   });
@@ -233,7 +267,14 @@ test('watch: the watcher answers during a compile, and saves compile one at a ti
   };
   let said = '';
   watcher.stdout.on('data', (chunk) => (said += chunk));
-  await until(() => said.includes('Watching'));
+  await until(() => /port \d+\n/.test(said)); // the whole line, not a cut-off port
+  const port = /port (\d+)/.exec(said)![1];
+  let events = '';
+  const reader = (await fetch(`http://127.0.0.1:${port}/events`)).body!.getReader();
+  (async () => {
+    for (let chunk = await reader.read(); !chunk.done; chunk = await reader.read())
+      events += new TextDecoder().decode(chunk.value);
+  })().catch(() => {}); // the stream ends with the watcher
   await settle(200); // the fs watch is live
   writeFileSync(`${which}.block`, '');
   writeFileSync(join(src, 'rooms.json'), '{ }');
@@ -253,22 +294,106 @@ test('watch: the watcher answers during a compile, and saves compile one at a ti
     log(),
     'start good.json\nend good.json\nstart good.json\nend good.json\nstart rest.json\nend rest.json\n',
   );
-  // Break: a compile that ends inside a later save's debounce is written, so its older words
-  // replace the page's newer ones until the next compile. Writes every 30 ms hold the debounce open.
+  // Break: the watcher boots a compiler per save instead of keeping one resident.
+  assert.equal(readFileSync(`${which}.serve`, 'utf8').split('\n').length, 2);
+  // Break: a compile that ends after a later save is written, so its older words replace the
+  // page's newer ones until the next compile. No wall time: the watcher's push of the save is the
+  // proof it saw it, and every compile after the blocked one is refused, so only it could write kat.
   writeFileSync(which, good);
   writeFileSync(`${which}.block`, '');
   writeFileSync(join(src, 'rooms.json'), '{}');
   await until(() => log().endsWith('start good.json\n'));
-  let n = 0;
-  const saving = setInterval(
-    () => writeFileSync(join(src, 'rooms.json'), `{${' '.repeat(++n)}}`),
-    30,
-  );
-  await settle(150);
+  const refused = join(dir, 'queued-refused.json');
+  writeFileSync(refused, '{"cartridge":{},"content_hash":"00"}');
+  writeFileSync(which, refused);
+  writeFileSync(join(src, 'rooms.json'), '{      }');
+  const later = createHash('sha256').update('{      }').digest('hex'); // not the first save's push
+  await until(() => events.includes(later));
   rmSync(`${which}.block`);
-  await until(() => log().endsWith('end good.json\n'));
-  await settle(300);
-  clearInterval(saving);
+  await until(() => log().endsWith('end queued-refused.json\n'));
   assert.equal(JSON.parse(readFileSync(artifact, 'utf8')).sha256, rest.sha256);
+  // Break: the compile after a discarded one is discarded too, so the newest good save never shows.
+  writeFileSync(which, good);
+  writeFileSync(join(src, 'rooms.json'), '{ }');
   await until(() => JSON.parse(readFileSync(artifact, 'utf8')).sha256 === kat.sha256);
+  reader.cancel();
+});
+
+// Breaks: a dead resident compiler fails the save or hangs the queue instead of compiling it
+// one-shot; it is never restarted; or it outlives a world switch (a BEAM left per switch), or the old
+// world compiles after the switch.
+test('watch: a killed resident compiler falls back to a one-shot compile and restarts', async (t) => {
+  const src = join(dir, 'resident');
+  mkdirSync(src);
+  const which = join(dir, 'resident-which');
+  writeFileSync(which, good);
+  const artifact = join(dir, 'resident.json');
+  const watcher = spawn(process.execPath, [`${ROOT}kernel/ts/play/author.ts`, src, '--watch'], {
+    env: {
+      PATH: `${dir}:${process.env.PATH}`,
+      LOKA_DEV_CARTRIDGE: artifact,
+      LOKA_AUTHOR_PORT: '0',
+      STUB_WHICH: which,
+    },
+  });
+  t.after(() => watcher.kill());
+  let said = '';
+  watcher.stdout.on('data', (c) => (said += c));
+  const exited = new Promise((r) => watcher.on('exit', r));
+  const settle = (ms: number) => new Promise((r) => setTimeout(r, ms));
+  const until = async (ready: () => boolean) => {
+    for (let i = 0; i < 100 && !ready(); i++) await settle(50);
+    assert.ok(ready(), 'timed out');
+  };
+  const pids = () =>
+    existsSync(`${which}.serve`)
+      ? readFileSync(`${which}.serve`, 'utf8').split('\n').filter(Boolean)
+      : [];
+  const alive = (pid: string) => {
+    try {
+      return process.kill(Number(pid), 0);
+    } catch {
+      return false;
+    }
+  };
+  await until(
+    () => existsSync(artifact) && JSON.parse(readFileSync(artifact, 'utf8')).sha256 === kat.sha256,
+  );
+  const [first] = pids();
+  const rest = read('protocol/fixtures/cartridge_rest_hash.json');
+  writeFileSync(
+    join(dir, 'rest.json'),
+    `{"cartridge":${rest.canonical},"content_hash":"${rest.sha256}"}`,
+  );
+  writeFileSync(which, join(dir, 'rest.json'));
+  const log = () => readFileSync(`${which}.log`, 'utf8').trim().split('\n');
+  let starts = log().length;
+  writeFileSync(`${which}.block`, '');
+  writeFileSync(join(src, 'rooms.json'), '{}');
+  await until(() => log().length > starts); // the resident dies mid-request, not idle
+  process.kill(Number(first), 'SIGKILL');
+  rmSync(`${which}.block`);
+  await until(() => JSON.parse(readFileSync(artifact, 'utf8')).sha256 === rest.sha256);
+  await until(() => pids().length === 2);
+  const second = pids()[1];
+  assert.ok(alive(second));
+  // a world switch while a save of this world is mid-compile on the resident
+  mkdirSync(join(dir, 'other'));
+  writeFileSync(join(dir, 'other', 'cartridge.json'), '{}');
+  starts = log().length;
+  writeFileSync(`${which}.block`, '');
+  writeFileSync(join(src, 'rooms.json'), '{ }');
+  await until(() => log().length > starts);
+  await until(() => / port \d+/.test(said));
+  const port = said.match(/ port (\d+)/)![1];
+  const posted = await fetch(`http://127.0.0.1:${port}/world`, {
+    method: 'POST',
+    body: JSON.stringify({ name: 'other' }),
+  });
+  assert.equal(posted.status, 200);
+  rmSync(`${which}.block`);
+  assert.equal(await exited, 75);
+  await until(() => !alive(second));
+  await settle(300);
+  assert.deepEqual(log().slice(starts), ['start rest.json', 'end rest.json']);
 });

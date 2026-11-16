@@ -1,4 +1,4 @@
-// size: allow 350, food, water, practical skills, local Knock, G7 get locks and row 33 theft and the row FD7 ask share the composed view list; the viewer is threaded (loka-kgd.150.5)
+// size: allow 355, food, water, practical skills, local Knock, G7 get locks and row 33 theft and the row FD7 ask share the composed view list; the viewer is threaded (loka-kgd.150.5); the hotbar's cooldown pair (loka-x6t.135)
 import { aimedRefused, craftRefused, policyRefusal } from '../mechanics/scripted_action/shared.ts';
 import { running as modalScene } from '../mechanics/scene/shared.ts';
 import { foodActions } from './food.ts';
@@ -20,7 +20,14 @@ import type {
   Key,
   TargetSpec,
 } from '../contracts.gen.ts';
-import { admission, detailAt, refusal, resolved, type Offered } from '../commands/actions.ts';
+import {
+  admission,
+  cooling,
+  detailAt,
+  refusal,
+  resolved,
+  type Offered,
+} from '../commands/actions.ts';
 import { bodyOf, type Steps, type World, type NpcEntity } from '../runtime/decision.ts';
 import { oneTalk } from '../mechanics/dialogue/fall_through.ts';
 import { MODAL, speaks, talkRefused } from '../mechanics/dialogue/shared.ts';
@@ -239,7 +246,8 @@ function advertise(
   // The unpaid cost names itself (pass-1 R1); an authored refusal wins.
   const short = unpaid(world, bodyOf(world, actor)!, admitted, a.scripted?.costs ?? []);
   const reason = code && (refused ?? (typeof code === 'object' ? code : { code, ...short }));
-  return reason ? { available: false, ...shown, reason } : { available: true, ...shown };
+  const cooled = reason?.code === 'cooldown' && a.scripted && cooling(world, a.scripted, actor);
+  return reason ? { available: false, ...shown, reason, ...cooled } : { available: true, ...shown };
 }
 
 function harvestOffered(

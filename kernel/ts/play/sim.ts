@@ -12,14 +12,7 @@ import { gameView } from '../src/runtime/world.ts';
 import { artifactBytes, compiled } from './compiled.ts';
 import { fights } from './fight.ts';
 import { flows, median, type Observe, type Policy } from './flows.ts';
-import {
-  FIGHT_LIMITS,
-  hours,
-  NO_ROOMS,
-  verdict,
-  type LevelRows,
-  type PoolsReport,
-} from './numbers.ts';
+import { FIGHT_LIMITS, hours, verdict, type LevelRows, type PoolsReport } from './numbers.ts';
 
 type Seen = {
   maximum: number;
@@ -182,10 +175,6 @@ if (import.meta.main) {
     process.exit(1);
   }
   const c = loaded.cartridge as Cartridge;
-  if (!c.rooms) {
-    console.error(NO_ROOMS);
-    process.exit(1);
-  }
   const p = pools(c, { seeds, days });
   const l = levels(c);
   if (artifact) console.log(encode({ pools: p, levels: l } as unknown as Json));

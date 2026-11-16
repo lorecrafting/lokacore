@@ -272,7 +272,7 @@ defmodule Loka.Content.SceneFiles do
 
     if key == "" or is_map_key(d["choices"], key),
       do: refuse(at, d, :refused, bad),
-      else: {put_in(d, ["choices", key], %{"label" => prose(label)}), key, bad}
+      else: {put_in(d, ["choices", key], %{"label" => prose(SceneLines.label(label))}), key, bad}
   end
 
   defp line({"needs: " <> what, _} = at, {%{"npc" => _}, cur, _} = st) when cur != nil,

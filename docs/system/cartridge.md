@@ -19,6 +19,7 @@ its NPC and item definitions with the rest of the world's definitions and text:
 | `behaviours/<name>.json`; `npcs/` and `items/` `behaviours` | source only: `{"reactions": {"<rule>": ReactionRule without key}}`, and the NPC's or item's `["<name>", ...]` (or `{"behaviour": "<name>", "with": {...}}` entries); the compiler expands each to copies and strips both ([Source shortcuts](#source-shortcuts)) |
 | `areas/<name>.json` | an area bundle: several definitions of any of those directories in one file, `{"<dir>": {"<key>": definition without key}}` ([Source shortcuts](#source-shortcuts)) |
 | `areas/<area>/<dir>/<key>.json` (`.scene`, `.cut` as at the root) | an area folder: the file `<dir>/<key>.json` would be, owned by the area `<area>` ([Area folders](#area-folders)) |
+| `conditions/<key>.json` | source only: one Policy, read wherever source writes `{"op": "named", "key": "<key>"}` and substituted at compile ([Named conditions](#source-shortcuts)) |
 | `outline.json` | author notes, not content: the Story map's beats, `{"parts": [{title?, minutes?, beats: [{n, title?, nodes?, seeds?, pays?}]}]}` ([schema](../../schemas/source/outline.schema.json)); the compiler skips it, and `bin/loka story <cartridge>` (`GET /story` in the author preview) reports each beat built, `~` or missing and each seed without a later payoff and payoff without an earlier seed ([design](../rnd/story-map-design-2026-11-05.md)) |
 
 `requires.kernel_api` is a range `{at_least, below}` with `at_least < below` (`KERNEL_API_RANGE_INVALID` at `cartridge.requires.kernel_api`, compiler); the loader refuses an installed API outside it (`KERNEL_API_UNSUPPORTED`). `at_least` rises only when the content uses a newer kernel feature; a contract bump alone changes `INSTALLED.kernel_api` and never a cartridge (the save pin carries the kernel_api, [save.md](save.md#opening-a-story); loka-daha). Floors raised by contract bumps before loka-daha (the dialogue cartridges at 1.124, the showcase at 1.126; 2026-10-30) stand; they are not lowered. No field carries its own floor; a cartridge released later states the API it was compiled against here.
@@ -29,8 +30,7 @@ file outside these recognized root files and definition directories is `UNKNOWN_
 definition may sit in an area bundle, may name a parent of its own kind with `"extends"` and may
 be marked `"abstract": true`; the compiler opens bundles and flattens the rest away first
 ([Source shortcuts](#source-shortcuts)). A
-source with rooms, text or an entry compiles to
-`loka-cartridge-v2`; v1 (manifest, facts, actions) is the R4 form.
+source compiles to `loka-cartridge-v2`, the one format; it needs rooms, an entry and text.
 
 ## Current bundled chapter
 
@@ -167,6 +167,7 @@ What the compiler checks (`lib/loka/content/*.ex` moduledocs; codes in
   (`SCHEMA_VIOLATION` at `location.item`). NPC and body custody is unchanged.
 - items and NPCs start somewhere real with no containment cycle and within capacity
   (`CONTAINMENT_CYCLE`, `CAPACITY_EXCEEDED`); details are reachable (`UNREACHABLE_DETAIL`);
+  named conditions hold no cycle (`CONDITION_CYCLE`, [Named conditions](#source-shortcuts));
 - barriers: each exit's barrier and its reciprocal face name the same one (`BARRIER_MISMATCH`);
   an item's `barrier` (a container's lid, c1-locks) names a barrier (`UNRESOLVED_REFERENCE`)
   that no exit and no other item names (`BARRIER_MISMATCH` at the item's `barrier`); no locked
@@ -282,9 +283,9 @@ The compiler rewrites the source before any other stage reads it (`Loka.Content.
 so `mix loka.compile` and `mix loka.lint` see the same flattened definitions. The order is: open
 area bundles, refuse repeated definitions, flatten `extends`, lower inline prose, expand
 behaviours, expand zone rules, refuse repeated definitions again, split waits, refuse repeated
-definitions again. The artifact
-never carries a bundle, `extends`, `abstract`, a prose marker, a behaviour, a zone or a wait;
-the loader is unchanged.
+definitions again, substitute named conditions. The artifact
+never carries a bundle, `extends`, `abstract`, a prose marker, a behaviour, a zone, a wait or a
+named condition; the loader is unchanged.
 
 **Actions with outcomes.** Every player action is `actions/<key>.json`. A file with `command`
 names a built-in command and is checked as an ActionDefinition; a file without it carries
@@ -304,6 +305,23 @@ author still writes the key alone. The refusals:
 A built-in action and a scripted action cannot share a key: two files cannot, and a bundled
 definition beside a file is `DUPLICATE_DEFINITION` at both sites (`actions/<key>`,
 `areas/<name>.actions.<key>`).
+
+**Named conditions.** `conditions/<key>.json` holds one Policy, and
+`{"op": "named", "key": "<key>"}` is accepted wherever a Policy is written in source. The
+compiler substitutes the named Policy, with its own `named` leaves substituted too, so a
+condition may read another. Substitution happens in this stage, before any check, so the site is
+checked as the author had written the condition out there: references, fact types, declared
+capabilities and nesting all report at the use site, and the artifact and the loader never see a
+`named` leaf. Four refusals:
+
+| Case | Code | Path | data |
+|---|---|---|---|
+| a condition that is not a Policy | the Policy's own codes | `conditions/<key>.<field>` | as any Policy |
+| a condition reaches itself through `named`, directly or not | `CONDITION_CYCLE` | each condition's file (`conditions/<key>`) | `{}` |
+| a `named` leaf names no condition | `UNRESOLVED_REFERENCE` | the leaf's `key` member (`rooms/hut.variants[0].when.key`) | `{"target": "<key>"}` |
+
+A condition on a cycle, or one that is not a Policy, stays known, so a site reading it adds no
+second cause (`Loka.Content.Conditions`).
 
 **Area bundles.** `areas/<name>.json` (a `.json` directly in `areas/<area>/` is `UNKNOWN_FIELD`) holds
 `{"<dir>": {"<key>": <definition without key>}}`, where each `<dir>` is a definition directory
@@ -452,6 +470,29 @@ inline; its artifact equals the hand-keyed one byte for byte.
 - **Timed actions.** An action's events carry its start, and FD1 lands a job due inside the advance 1 s after it, in job id order (minted per command). So a list on `action_completed` naming a scripted action with a `duration` adds that duration to every stretch that has an `after`: waits count from the action's end and keep their order and spacing. The same list on `action_completed` with no `action`, while any timed scripted action exists, or on a custom event a timed action's outcome emits, is refused (`wait_inside_action`) when it has two or more delayed stretches: the duration is not known there. One delayed stretch cannot reorder, so it compiles. `action_completed` does not fire on a failed check (`scripted_action/rule.ts`), so a failure path uses `check_failed`, an event of the kind below, or one wait on the failure's own event.
 - **Known limits.** `when` is read for each stretch, so a list whose earlier step makes its own `when` false drops the later stretches; the compiler does not look for this, and a writer may use it to cancel. A list on any other event inside a long command (a check or fact change inside a timed action, a chain of events from one, a `wait` command) is not known at compile: stretches due inside the advance all land 1 s after it, and their order can differ per command. A fact step on a per-subject fact with no `npc` or `item` after a wait writes nothing, since the job has no event subject. A fault another stage finds in a later stretch (an unknown text key) names the sibling's renumbered step, under the authored file (`ponytail:` in `lib/loka/content/waits.ex`).
 
+**`once` and `cooldown`.** A rule that fires once, or rests, without writing the fact, the `not`,
+the assign and `silent`.
+- Source only, and lowered in the compile pipeline for every reaction (`lib/loka/content/reaction_once.ex`),
+  as a choice's `once` is (`dialogue_once.ex`): `"once": true` becomes the engine bool fact
+  `<rule>_done` (default false), a trailing `fact.assign ... true`, and a `not fact_compare` under
+  `all` beside the authored `when`; `"cooldown": N` (logical seconds, at least 1) becomes the engine
+  int fact `<rule>_at` (default 0, minimum 0, no maximum, as a stamp needs), a trailing `fact.stamp`
+  and a `time_since {at_least: N}` leaf.
+- The `cooldown` stamp comes before `once`'s assign, and both come after the rule's own steps, so an
+  `after` rule records the time it fired, not the time it was queued.
+- The guard sits in `when`, not only in the steps: an `after` rule's `when` is read again when its
+  job runs (`protocol/reaction.schema.json` ReactionRule), so a rule delivered twice before its job
+  runs still fires once.
+- Both fields leave the rule, so nothing in the protocol, the kernels or the reviewer changes; the
+  artifact holds facts and policy as if hand-written.
+- Refused `RESERVED_FACT` at the field that lowered it: a declared fact of either name, and an
+  authored step writing either name into play (`Position.check` reads the authored source, since the
+  lowering drops the field and the steps are otherwise indistinguishable).
+- The added assign or stamp is bookkeeping, so it does not trip the narrate-or-silent lint.
+- Samplers: `bone_taken` (`once`) and `bone_rested` (`cooldown`) in `cartridges/reactions_sampler`. The
+  lowering appends its steps after the authored ones, so a rule that writes one of its own lowered
+  facts in an authored step is refused.
+
 **Zones.** One reaction for many rooms.
 - A room's source may carry `"zones": ["<Key>", ...]`; the compiler strips it from every room.
 - A reaction with `"zone": "<Key>"` and no `on.room` is replaced by one copy per room listing
@@ -548,7 +589,7 @@ being objects (they hold parameter markers).
 
 `loadCartridge(bytes, installed)` (`kernel/ts/src/content/cartridge.ts:23`) returns the decoded
 cartridge and its hash, or the first diagnostic of the first failing stage (`:15`): size
-(`ARTIFACT_TOO_LARGE`), JSON (`INVALID_JSON`), format (`UNKNOWN_FORMAT`: v1 or v2), the
+(`ARTIFACT_TOO_LARGE`), JSON (`INVALID_JSON`), format (`UNKNOWN_FORMAT`: not `loka-cartridge-v2`), the
 `CartridgeArtifact` schema (`SCHEMA_VIOLATION`, `UNKNOWN_FIELD`), `CONTENT_HASH_MISMATCH`,
 map keys against manifest and definition (`ARTIFACT_DEFINITION_KEY_MISMATCH`, `:109`), the
 lock (`:134`: `LOCK_MANIFEST_MISMATCH`), and the installed kernel
@@ -590,12 +631,12 @@ the loader diagnostic and exits 1 on refusal, otherwise prints one canonical JSO
   UNREACHABLE_DETAIL.
 - **Orphans.** `orphan_items`: template items with no inbound edge. `orphan_facts`: `unused` (no
   inbound edge), `write_only` (every inbound edge a write), `read_only` (inbound edges, none a
-  write). A write is an edge with op `fact.assign` or `fact.adjust`, or at an engine write site
+  write). A write is an edge with op `fact.assign`, `fact.adjust` or `fact.stamp`, or at an engine write site
   with no op: `world.death_credit[n].fact`; a topic's `fact` (also a read: the codex lists known
   topics); a scene's `on_end.assign[n].fact` and `on.rest.credit`; a quest's
   `expedition.survived_fact`, `expedition.faction`, `exchange.contribution`, `exchange.faction`,
   `deadline.fact` and `deadline.trust_fact`; an ancestry's `faction.fact`; an item's
-  `weapon.durability.fact` (a hit wears it); a service's `benefit.fact` (a repair restores it). Facts the engine owns
+  `weapon.durability.fact` (a hit wears it); a service's `benefit.fact` (a repair restores it) and `benefit.account` (a deposit or withdraw writes it). Facts the engine owns
   are left out: the [Compiler](#compiler)'s reserved facts (position, `scene_<key>`,
   `story_point_<key>`, `skill_<key>`, `uses_<key>`, `seen_tip_<key>`), a quest patrol's
   `trust_fact` and an entitlement service's fact, as RESERVED_FACT keeps them.
@@ -895,21 +936,45 @@ loopback-only author API (`LOKA_AUTHOR_PORT`, default 19008) that the preview pr
 with it set fails to build, and the app throws when the dev cartridge flag reaches a non-`__DEV__`
 build. The author tools below are reachable only in that bundle (a production export keeps a few dead strings) and change no protocol, save or kernel_api.
 
-- **Numbers.** The panel's Numbers tab and `bin/loka sim <cartridge dir>` ([`sim.ts`](../../kernel/ts/play/sim.ts)) report, read-only: each pool over game hours under the [measured-flows](#measured-flows-balance-tool-2) worker, XP per level with the kills that pay for it, and the [fight matrix](#fight-matrix-and-encounter-rating-balance-tool-7) (`GET /__author/numbers`). Each report runs in a child process killed at a limit; one that does not finish says so. Nothing is written to the source tree.
+- **Numbers.** The panel's Numbers tab and `bin/loka sim <cartridge dir>` ([`sim.ts`](../../kernel/ts/play/sim.ts)) report, read-only: each pool over game hours under the [measured-flows](#measured-flows-balance-tool-2) worker, XP per level with the kills that pay for it, and the [fight matrix](#fight-matrix-and-encounter-rating-balance-tool-7) (`GET /__author/numbers`; an NPC card's Run fights asks `GET /__author/fights`, the fight rows alone, without the minutes the pacing sim takes). Each report runs in a child process killed at a limit; one that does not finish says so. Nothing is written to the source tree.
+- **Roam.** `bin/loka roam <cartridge dir> [--runs N] [--steps M] [--seed S]`
+  ([`roam.ts`](../../kernel/ts/play/roam.ts)) plays the shipped cartridge at random through the real
+  authority and reports what no path reached — reactions, choices, quests, scenes and story points —
+  then a hit count per node, as one canonical JSON document. It reads the Book's own buttons
+  (`view()` plus the choices and notices it offers), so a button the Book does not show is never pressed.
+  A `fault` reply or a crashing step writes `checkpoints/roam-<seed>.json` holding that run's steps,
+  shrunk by greedy deletion, which `bin/loka check` then replays; a checkpoint of that seed already in
+  the cartridge is the author's and is kept. Nothing else is written to the source tree. It defaults to
+  10 runs of 150 presses because `view()` dominates the cost: 50 x 300 took 273 s on the M1.
+- **Lines sheet.** `bin/loka lines <cartridge dir> [--speaker <key>] [--csv]`
+  ([`lines.ts`](../../kernel/ts/play/lines.ts)) lists every text key of the compiled cartridge as
+  one row — its words, its speaker (a dialogue's or scene's `npc`) or else the node that owns it, the
+  source `file:line` it is written on, its gate in the panel's own sentence form
+  ([`why_words.ts`](../../kernel/ts/play/why_words.ts)), the `~` flag, and its byte length — as CSV
+  or JSON, for proofreading an area in order. Nothing is written to the source tree.
 - **Keep my place.** The preview records each input the Book sends that the session saved (the
   intent, its targets as definition refs `cartridge@version:kind/key`, and each dev-clock advance
-  in milliseconds) under the artifact's hash. After a reload into a different hash it replays the
-  path through the normal command path, one step at a time; the first step the session does not
+  in milliseconds) under the artifact's hash. The preview keeps one save file per kernel_api and
+  clock, never `loka-showcase.db`: the browser's save pool holds six files, so a file per edit filled
+  it within four edits (loka-wfrgk.58). On a save pinned to another edit it starts over without
+  asking (the file and its trace stay); the release build keeps the refusal above. After a reload
+  into a different hash it replays the path through the normal command path, one step at a time; the first step the session does not
   save and accept stops the replay and is named by its ordinal and reply. Nothing writes state directly.
   The dev cartridge plays one fixed seed; at `?dev=1`, on a frozen clock that moves only with the dev clock, as
-  `bin/loka check` does, so a recording replays alike in both; a release is untouched.
+  `bin/loka check` does, so a recording replays alike in both, but for one budget; a release is untouched.
+  The browser refuses one advance over 3000 game minutes, on record and on replay, because delivery
+  is synchronous and its cost follows game time (loka-wfrgk.55); `bin/loka check` replays off the
+  browser with no budget, so a step it passes can be refused in the panel.
 - **Fast loop.** A `text.json` save is pushed to the open page as a text overlay before its
   compile and shows at once: no compile, reload or replay. The compile still runs after it and
   reports its diagnostics to the page; an edit whose compiled cartridge differs from the page's
   only in text values (inline prose too) is pushed the same way once compiled, and the artifact
   is written on the next structural edit. Any other edit compiles, and the page reloads and
   replays. The overlay lives in the watcher's memory and the page; no file carries it. A failed compile keeps the last good
-  artifact and names the fault. The release compile (`mix loka.compile`) and every CI check are
+  artifact and names the fault. Each compile after the first goes to one resident compiler
+  (`mix loka.compile --serve`), one at a time in save order, and answers exactly as the one-shot
+  would; when it dies, wedges or finds changed engine code, that compile runs one-shot (on the new
+  code) and a new resident starts. The release compile (`mix loka.compile`) and every CI check are
   unchanged by the fast path; the overlay never becomes an artifact.
 - **Checkpoints.** A recorded path saved under a name is a plain file in the source tree,
   `checkpoints/<name>.json` (`{"steps": [...]}`, the same steps as keep my place, versioned with
@@ -917,8 +982,8 @@ build. The author tools below are reachable only in that bundle (a production ex
   (`GET /__author/checkpoints`, `GET|PUT /__author/checkpoints/<name>`); the compiler and the
   watcher's rebuild skip the directory. The panel lists them; jumping to one starts the game over
   and replays it, and a refused step offers dropping it and replaying the rest. `bin/loka check
-  <cartridge>` replays each one headless on a fresh session through the same replay and exits 1 on
-  any refusal; CI runs it for every cartridge with the directory.
+  <cartridge>` replays each one headless on a fresh session through the same replay, without the
+  browser's advance budget, and exits 1 on any refusal; CI runs it for every cartridge with the directory.
 - **Author panel** (`tools/author-panel`, its own web page framing the Book at `?dev=1`; nothing of it enters the app's dependencies or bundles): the last compile's diagnostics in plain words
   (`severity: file:line message`, which is what `mix loka.compile` prints: one sentence and one fix
   per diagnostic code, from `Loka.Content.Explain`, the path mapped to its line by the source JSON;
@@ -937,14 +1002,28 @@ build. The author tools below are reachable only in that bundle (a production ex
 - **Editor write path** ([`write.ts`](../../kernel/ts/play/write.ts), [GUI editor design §11](../rnd/gui-editor-design-2026-11-04.md)): the only way the editor changes the source tree.
   Every request whose `Host` is not `localhost` or `127.0.0.1` (any port) is answered 403, and so is
   any non-GET whose `Origin` is not one of those. `GET /source?file=` answers the file's bytes, its
-  sha256 and its kind, key and area; `GET /schema/<dir>` the source schema with its `$defs` inlined;
+  sha256 and its kind, key and area, and for a `.scene` its dialogue's words in the last compile's
+  artifact (`text`, `dialogue.<key>.` and `dialogue.<key>_` keys); `GET /schema/<dir>` the source schema with its `$defs` inlined;
   `GET /journal` the entries, newest first. `POST /change {file, was, ops}` sets or deletes JSON
   fields by path and writes the file in the house format (two-space JSON, a final newline);
   `/edit {file, line, was, words}` replaces the words of one line (a JSON string literal, or a
   scene's `* ` line; a key line, a choice label and words with a newline or tab are refused);
+  `/set {file, line, was, value}` ([`scene_card.ts`](../../kernel/ts/play/scene_card.ts)) replaces
+  the value of one `.scene` `npc:`, `with:` or `then:` line with a key from the last good compile's
+  artifact, the keys the card's picker offers: an NPC's for `npc:` and `with:`; for `then:` `end` or
+  a dialogue a then can enter (not a keyword, quest or riddle one, `dialogue_links.ex`), so only
+  `end` before any compile (any other line, value or file is refused 400; `was` is the line's text);
   `/delete {file, was}` (a room's `layout.json` row goes with it); `/move {file, was, area}`;
-  `/new {kind, name, from?, area?}` runs `mix loka.new` (`area` its `--area`; refused while any
-  symlink is in the tree) and journals the files it wrote, from a snapshot diff; `/undo {id}`.
+  `/new {kind, name, from?, area?, extends?}` runs `mix loka.new` (`area` its `--area`, `extends`
+  its `--extends`; refused while any symlink is in the tree) and journals the files it wrote, from
+  a snapshot diff; `/undo {id}`. `GET /templates` lists the abstract NPC and item sources
+  (`dir`, `key`), which the compile drops; templates inside an area bundle file are not listed.
+  `GET /world` lists the sibling cartridge folders (`name`, the `cartridge.json` title) and the
+  `current` one; `POST /world {name, new?, from?}` switches to a listed sibling, or with `new`
+  first runs `mix loka.new cartridge` (`from` its `--from`, a listed sibling) for a free folder
+  name `[a-z][a-z0-9_]{0,31}` (`mix loka.new`'s 32), refused while a write is in flight. The watcher then exits 75 and
+  `bin/loka dev` restarts it on that world, remembered in `.dev-cartridge/world` for the next
+  `bin/author.sh` with no folder; journal, Hold and the panel's selection start empty.
   `was` is the sha256 of the whole file (for `/edit`, the line's text): a file
   changed since answers 409 with its current bytes, and nothing is written. One path guard reads
   every path a body names: a normal relative path under the real source root (not the root as a
@@ -956,7 +1035,23 @@ build. The author tools below are reachable only in that bundle (a production ex
   /hold {on}`: while held, a structural compile waits (`pending` counts them, the newest kept) and
   the Hold's end writes it, so the Book does not reload mid-edit; text overlays still push until one waits. Each
   compile also pushes `diagnostics`, `mix loka.compile --json <file>`.
-- **Go to room, set fact** ([owner decision](../decisions/owner-decision-authoring-readiness-2026-10-31.md), dev@1): the panel sends them as ordinary invocations `dev_go_to_room` and `dev_set_fact` the session decides, saves as receipts and records as steps, so a reopen and `bin/loka check` re-decide them under the fixed seed and clock and a checkpoint may hold them. Only a host with `dev` set (the preview, `bin/loka check`) reaches `stepDev`; any other host answers `unsupported_capability`, `step` answers `permission_denied`, and no cartridge action can name them. Go to room moves the body alone and is refused `invalid_state` when that would leave a world invariant wrong: already there, engaged, not standing, in water, with an escort, mount or group that would come along, on a patrol or expedition, in a modal scene or at an open choice. It runs no entry sight or arrival line. Set fact is refused `invalid_state` for a per-subject fact, a value of the wrong type or range, the value it already has, the position and scene facts, and a fact another mechanic owns. The panel states each refusal in one plain sentence.
+- **World card** ([GUI editor design §6](../rnd/gui-editor-design-2026-11-04.md), E6e): the inspector's hand-built card
+  for `cartridge.json`, `resources.json`, `attributes.json` and each population, transport and barrier
+  file (their rows in `tools/author-panel/src/edit/registry.json`), opened from the Hierarchy's and the
+  Project tab's World button or by selecting one of those definitions. It writes only through the
+  routes above (`/change`, `/undo`, Hold). A known reference field is a picker of the keys its kind has
+  (rooms, items, NPCs and transports from the last good compile; resources, with the default pools hp,
+  ma and mv, and attributes from their root files) and refuses any other key at the field, before it is
+  written; with no keys known yet (no good compile) it takes any text. A new resource or attribute gets a
+  lowercase key of at most 64 characters that no entry has, with its required numbers at 0.
+- **Rules block** ([GUI editor design §4.5](../rnd/gui-editor-design-2026-11-04.md), E6c): an
+  action's policy and check and a reaction's trigger, condition and steps are edited by one block
+  (`tools/author-panel/src/edit/blocks/Rules.tsx`) inside the inspector's card. It draws the branch
+  the value's tag names (`op`, `event` or `kind`); picking another branch writes that tag and keeps
+  only the fields the new branch declares with the same shape (a check's `key` survives a switch of
+  kind); a branch that only states which fields are required draws nothing. Adding or removing a
+  check stays with the generic card, since a check needs its `failure` outcome.
+- **Go to room, set fact, set level** ([owner decision](../decisions/owner-decision-authoring-readiness-2026-10-31.md), dev@1): the panel sends them as ordinary invocations `dev_go_to_room`, `dev_set_fact` and `dev_set_level` the session decides, saves as receipts and records as steps, so a reopen and `bin/loka check` re-decide them under the fixed seed and clock and a checkpoint may hold them. Only a host with `dev` set (the preview, `bin/loka check`) reaches `stepDev`; any other host answers `unsupported_capability`, `step` answers `permission_denied`, and no cartridge action can name them. Go to room moves the body alone and is refused `invalid_state` when that would leave a world invariant wrong: already there, engaged, not standing, in water, with an escort, mount or group that would come along, on a patrol or expedition, in a modal scene or at an open choice. It runs no entry sight or arrival line. Set fact is refused `invalid_state` for a per-subject fact, a value of the wrong type or range, the value it already has, the position and scene facts, and a fact another mechanic owns. Set level writes the actor's levelling row (toolbox row 4): experience becomes the threshold of the given level (0 at level 1), and each listed attribute's allocated points become the given count. It sets the row and nothing more, like the other cheats that set state: no gained, level up or death penalty line, and no `level_reached`, so no level reaction springs. It is refused `not_found` for an attribute the cartridge does not declare, and `invalid_state` with no levelling, a level above the last threshold's, a count below the points already allocated, more points than the level grants, or the row it already holds. The panel states each refusal in one plain sentence.
 - **Still to write.** A text value with a line that trims to `~` is a placeholder, in JSON or in
   a scene file. The panel and
   `bin/loka todo <cartridge dir>` list placeholders grouped by the beat (file) that owns them with
@@ -1365,7 +1460,7 @@ A liquid kind declares [Consume](mechanics.md#consume-loka-kgd209)'s effect bloc
 
 ## Entity and pair fact declarations
 
-[Entity and pair facts](mechanics.md#entity-and-pair-facts-toolbox-row-w2) add one `FactSpec` field, `per_subject: true` (absent otherwise; `false` is a schema error), on a fact with `scopes: ["instance"]` (entity) or `["player"]` (pair); `fact_compare` gains `subject: "target"`, `npc` and `item`, and a reaction's `fact.assign` gains `npc` and `item`, each `npc` or `item` a short key the compiler expands (`Loka.Content.LeafRefs`, `Loka.Content.Resolve`). A reaction step's unresolved `npc` or `item` is UNRESOLVED_REFERENCE in the compiler. The loader alone (installed stage, as before) reports FACT_SCOPE_UNSUPPORTED at: any reference to a `per_subject` fact other than a `fact_compare`'s, `fact.assign`'s or `fact.adjust`'s `fact` or a reaction's `fact_changed` trigger; a `fact_compare` of one naming no subject; a subject field on any other fact, a second subject field, or an `npc` that is a spawn template; a `subject: "target"` in a reaction, quest, barrier or skill, which has no action target; and such a fact in the steps of an escort, receive or hand_over choice, a riddle answer with a `wrong_limit`, or any choice of a dialogue whose quest has a legacy deadline `fact`. Sampler: `cartridges/scoped_facts_sampler`.
+[Entity and pair facts](mechanics.md#entity-and-pair-facts-toolbox-row-w2) add one `FactSpec` field, `per_subject: true` (absent otherwise; `false` is a schema error), on a fact with `scopes: ["instance"]` (entity) or `["player"]` (pair); `fact_compare` gains `subject: "target"`, `npc` and `item`, and a reaction's `fact.assign` gains `npc` and `item`, each `npc` or `item` a short key the compiler expands (`Loka.Content.LeafRefs`, `Loka.Content.Resolve`). A reaction step's unresolved `npc` or `item` is UNRESOLVED_REFERENCE in the compiler. The loader alone (installed stage, as before) reports FACT_SCOPE_UNSUPPORTED at: any reference to a `per_subject` fact other than a `fact_compare`'s, `fact.assign`'s or `fact.adjust`'s `fact` or a reaction's `fact_changed` trigger; a `fact_compare` of one naming no subject (the compiler also reports this one, and a `fact_at_least` or `time_since` of one naming no subject, at the op's file line, in every policy it walks: `lib/loka/content/policies.ex`); a subject field on any other fact, a second subject field, or an `npc` that is a spawn template; a `subject: "target"` in a reaction, quest, barrier or skill, which has no action target; and such a fact in the steps of an escort, receive or hand_over choice, a riddle answer with a `wrong_limit`, or any choice of a dialogue whose quest has a legacy deadline `fact`. Sampler: `cartridges/scoped_facts_sampler`.
 
 ## Group declarations
 

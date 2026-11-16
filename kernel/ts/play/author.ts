@@ -5,7 +5,7 @@
 // inline, never export it) moves the artifact. With --watch, a change that only alters text
 // values (a `text.json` save at once, any other save after its compile) goes to the open page as
 // an overlay over the written artifact (play/live.ts): no reload, no replay.
-import { spawn } from 'node:child_process';
+import { spawn, type ChildProcess } from 'node:child_process';
 import {
   existsSync,
   mkdirSync,
@@ -17,9 +17,12 @@ import {
   writeFileSync,
 } from 'node:fs';
 import { tmpdir } from 'node:os';
+import { createInterface } from 'node:readline';
 import { dirname, join, resolve } from 'node:path';
 import { INSTALLED, loadCartridge } from '../src/index.ts';
-import { lintLines, serve, textOnly, type Canonical } from './live.ts';
+import { lintLines, serve, textOnly, type Canonical, type Timings } from './live.ts';
+import { compiler, type Run } from './compile_run.ts';
+import { recheck } from './recheck.ts';
 
 const root = resolve(import.meta.dirname, '../../..');
 const out = resolve(
@@ -27,21 +30,47 @@ const out = resolve(
   'mobile/app',
   process.env.LOKA_DEV_CARTRIDGE ?? '.dev-cartridge/current.json',
 );
-const [dir, flag, ...rest] = process.argv.slice(2);
-if (!dir || (flag !== undefined && flag !== '--watch') || rest.length) {
-  console.error('usage: bin/loka dev <cartridge dir> [--watch]');
+// The world the watcher last opened (POST /world switches by exiting 75 for bin/loka to restart).
+const remembered = join(dirname(out), 'world');
+const args = process.argv.slice(2);
+if (args.join() === '--watch' && existsSync(remembered))
+  args.unshift(readFileSync(remembered, 'utf8'));
+if (args.join() === '--watch' && !existsSync(remembered)) {
+  // A first run, or a cleaned checkout: nothing remembers a world (loka-wfrgk.98).
+  console.error(
+    'No world specified, and none remembered yet (the last one watched is remembered once you open one).\n' +
+      'Name one: bin/author.sh cartridges/<name>, then open another from the globe.',
+  );
+  process.exit(2);
+}
+const [dir, flag, ...rest] = args;
+if (!dir || dir === '--watch' || (flag !== undefined && flag !== '--watch') || rest.length) {
+  console.error(
+    'usage: bin/loka dev <cartridge dir> [--watch] | bin/loka dev --watch (the last one watched)',
+  );
   process.exit(2);
 }
 const source = resolve(dir);
 const port = Number(process.env.LOKA_AUTHOR_PORT || 19008); // mutate-skip: dev port default
 const live =
   flag === '--watch'
-    ? serve(port, source, out, () => {
-        if (!parked) return;
-        write(...parked);
-        if (failed) notCompiled(failed); // the source on disk is the failed save's, not the parked
+    ? serve(port, source, out, {
+        release() {
+          if (!parked) return;
+          write(...parked);
+          if (failed) notCompiled(failed); // the source on disk is the failed save's, not the parked
+        },
+        leave,
       })
     : undefined;
+// Another world: no late compile of this one may overwrite the artifact after the next one's.
+async function leave(world: string) {
+  if (watcher) watcher.close();
+  clearTimeout(timer);
+  await queue;
+  writeFileSync(remembered, world);
+  process.exit(75);
+}
 // While the editor holds (POST /hold), a structural compile waits here, and every compile after
 // it (the newest replaces it), so Metro does not reload the frame mid-edit.
 let parked: [canonicalText: string, sha256: string, said: string[]] | undefined;
@@ -67,7 +96,22 @@ function quick() {
   }
 }
 // A text-only change (against the artifact the page runs) is pushed in place; any other is written.
-function publish(canonicalText: string, sha256: string, said: string[], started: number) {
+const timed = (started: number, compiled: number, kind: Timings['kind'], sha256?: string) => ({
+  at: Date.now(),
+  compile: Math.round(compiled - started),
+  publish: Math.round(performance.now() - compiled),
+  kind,
+  ...(sha256 && { sha256 }),
+});
+let good: { canonical: string; sha256: string } | undefined; // the page's artifact, for R1
+function publish(
+  canonicalText: string,
+  sha256: string,
+  said: string[],
+  started: number,
+  compiled: number,
+) {
+  good = { canonical: canonicalText, sha256 };
   failed = undefined;
   const ms = () => `in ${Math.round(performance.now() - started)} ms`;
   const canonical: Canonical = JSON.parse(canonicalText);
@@ -79,61 +123,38 @@ function publish(canonicalText: string, sha256: string, said: string[], started:
     return true;
   }
   if (overlay) {
-    live!.push({ text: overlay, said, compiled: true });
+    live!.push({ text: overlay, said, compiled: true, timings: timed(started, compiled, 'prose') });
     const n = Object.keys(overlay).length;
     console.log(n ? `Text updated in place: ${n} keys ${ms()}` : `Preview unchanged ${ms()}`);
     return true;
   }
-  write(canonicalText, sha256, said);
+  write(canonicalText, sha256, said, timed(started, compiled, 'structural', sha256));
   console.log(`Preview updated: ${sha256.slice(0, 12)} ${ms()}`); // mutate-skip: console notice
   return true;
 }
-function write(canonicalText: string, sha256: string, said: string[]) {
+function write(canonicalText: string, sha256: string, said: string[], timings?: Timings) {
   mkdirSync(dirname(out), { recursive: true });
   writeFileSync(`${out}.tmp`, JSON.stringify({ canonical: canonicalText, sha256 }));
   renameSync(`${out}.tmp`, out); // Metro never reads half a file
   written = JSON.parse(canonicalText);
   parked = undefined;
   pending = 0;
-  live?.push({ text: {}, said, compiled: true, pending });
+  live?.push({ text: {}, said, compiled: true, pending, ...(timings && { timings }) });
 }
 // The preview allows `~` placeholders; a release compile refuses them (mix loka.compile). Not
 // spawnSync: the watcher answers /source, /events and writes while it runs.
-const compile = (artifact: string) =>
-  new Promise<{ status: number | null; stderr: string; error?: Error }>((done) => {
-    let stderr = '';
-    const run = spawn(
-      'mise',
-      [
-        'exec',
-        '--',
-        'mix',
-        'loka.compile',
-        source,
-        artifact,
-        '--allow-placeholders',
-        '--json',
-        diagnostics(artifact),
-        '--placeholders',
-        placeholders(artifact),
-      ],
-      { cwd: root, stdio: ['ignore', 'ignore', 'pipe'] }, // a launcher may have closed stdin (EBADF otherwise)
-    );
-    let error: Error | undefined;
-    run.stderr.on('data', (chunk) => (stderr += chunk));
-    run.on('error', (e) => (error = e)); // `close` follows
-    run.on('close', (status) => done({ status, stderr, error }));
-  });
-const diagnostics = (artifact: string) => join(dirname(artifact), 'diagnostics.json');
-const placeholders = (artifact: string) => join(dirname(artifact), 'placeholders.json');
+const MIX = ['exec', '--', 'mix', 'loka.compile'];
 const parsed = (file: string, none: unknown) =>
   existsSync(file) ? JSON.parse(readFileSync(file, 'utf8')) : none;
 // The last lint read older source, so it goes with the failed compile.
 let failed: string[] | undefined; // the last compile's lines, when it failed
-const notCompiled = (said: string[]) => {
+const notCompiled = (said: string[], timings?: Timings) => {
   failed = said;
-  live?.push({ said, compiled: false, lint: undefined });
+  live?.push({ said, compiled: false, lint: undefined, ...(timings && { timings }) });
 };
+
+// one compile runner for the watcher's lifetime; `compile` carries the resident child
+const compile = compiler(source, flag === '--watch');
 
 async function build(): Promise<boolean> {
   const started = performance.now();
@@ -142,12 +163,13 @@ async function build(): Promise<boolean> {
     const artifact = join(tmp, 'artifact.json');
     const read = saves;
     const run = await compile(artifact);
+    const compiled = performance.now();
     // a save since (even inside the debounce) compiles next: these older words would undo its push
     if (saves !== read) return false;
     // none written (mix crashed before it): the last build's cards must not stay up
     live?.push({
-      diagnostics: parsed(diagnostics(artifact), []),
-      placeholders: parsed(placeholders(artifact), {}),
+      diagnostics: parsed(join(dirname(artifact), 'diagnostics.json'), []),
+      placeholders: parsed(join(dirname(artifact), 'placeholders.json'), {}),
     });
     const said = run.stderr.split('\n').filter((l) => /^(error|warning|info): /.test(l));
     for (const line of said) console.error(line);
@@ -155,7 +177,7 @@ async function build(): Promise<boolean> {
       if (!said.length) said.push(run.error?.message ?? run.stderr);
       said.push(`Not compiled; ${keeps}`);
       console.error(said.at(-1));
-      notCompiled(said);
+      notCompiled(said, timed(started, compiled, 'refusal'));
       return false;
     }
     const bytes = readFileSync(artifact);
@@ -166,10 +188,10 @@ async function build(): Promise<boolean> {
       const why = loaded.ok ? 'not in canonical artifact form' : JSON.stringify(loaded);
       said.push(`The kernel refuses the compiled cartridge: ${why}`, keeps);
       console.error(said.slice(-2).join('\n'));
-      notCompiled(said);
+      notCompiled(said, timed(started, compiled, 'refusal'));
       return false;
     }
-    return publish(parts[1], parts[2], said, started);
+    return publish(parts[1], parts[2], said, started, compiled);
   } finally {
     rmSync(tmp, { recursive: true, force: true });
   }
@@ -205,12 +227,20 @@ function enqueue() {
       waiting = false;
       return build();
     })
-    .then((ok) => ok && lint())
+    .then((ok) => {
+      if (!ok || !good) return;
+      lint(); // both go after the page has the artifact, so neither delays the preview
+      const { canonical, sha256 } = good;
+      return recheck(source, canonical, sha256).then(({ checked, covered }) =>
+        live?.push({ checkpoints: checked, covered }),
+      );
+    })
     .catch((e) => console.error(`Not updated: ${(e as Error).message}`)); // a thrown build must not end the watch
 }
 let timer: ReturnType<typeof setTimeout> | undefined;
 // before the first compile: a save the moment its artifact lands is not lost while FSEvents starts
-if (flag === '--watch')
+const watcher =
+  flag === '--watch' &&
   watch(source, { recursive: true }, (_, file) => {
     if (file?.startsWith('checkpoints/')) return; // the page's own save, not content
     saves++;
@@ -228,4 +258,6 @@ queue = first.catch(() => {}); // a save during the first compile compiles after
 const ok = await first;
 if (flag !== '--watch') process.exit(ok ? 0 : 1);
 if (ok) lint();
-console.log(`Watching ${dir}`);
+mkdirSync(dirname(out), { recursive: true });
+writeFileSync(remembered, source);
+console.log(`Watching ${dir}, author API on port ${await live!.port}`);

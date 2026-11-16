@@ -3,7 +3,7 @@
 import { createHash } from 'node:crypto';
 import { lstatSync, readdirSync, readFileSync, realpathSync } from 'node:fs';
 import { dirname, join, posix, resolve, sep } from 'node:path';
-import { files } from './todo.ts';
+import { bundled, files } from './todo.ts';
 
 export type Bytes = string | null; // null: no file there
 export const REPO = resolve(import.meta.dirname, '../../..');
@@ -67,6 +67,9 @@ export function placed(rel: string) {
 }
 export const rootFile = (rel: string) =>
   ROOTS.some((r) => rel === `${r}.json`) || /^areas\/[a-z0-9_]+\.json$/.test(rel);
+/** A checkpoint is the author's own file beside the cartridge (`live.ts` NAME), never a definition:
+ * `files` skips it, so a write that follows one (`/restructure`'s rename) names it through here. */
+const checkpoint = (rel: string) => /^checkpoints\/[a-z0-9][a-z0-9_-]{0,63}\.json$/.test(rel);
 
 /** The one path guard: `rel` a normal relative path under the (real) root with no symlink on the
  * way; for `read` a listed regular file, for `create` a free place a source file may take. */
@@ -88,7 +91,26 @@ export function guarded(root: string, rel: unknown, mode: 'read' | 'create'): st
     if (at) refuse(409, `${rel} exists`);
     if (!placed(rel as string) && !rootFile(rel as string))
       refuse(400, `not a source file's place: ${rel}`);
-  } else if (!files(root).includes(rel as string)) refuse(404, `no source file ${rel}`);
+  } else if (!files(root).includes(rel as string) && !checkpoint(rel as string))
+    refuse(404, `no source file ${rel}`);
   else if (!at?.isFile()) refuse(400, `not a regular file: ${rel}`);
   return path;
+}
+
+/** Why `/new` may not run loka.new. mix writes past guarded() (the area, its companions, --from's
+ * folder): no link anywhere keeps every write inside the tree and in the snapshot the journal diffs
+ * (a link reads as no file). A `<dir>/<name>` any file or area bundle holds is taken, compiled or not
+ * (the starter would join that room, or write a second file in another area); a New area's name is
+ * also its folder's. */
+export function newRefused(root: string, kind: string, name: string) {
+  const all = files(root);
+  const link = all.find((rel) => there(join(root, rel))?.isSymbolicLink());
+  if (link) return `a symlink on the way to ${link}`;
+  const dir = ({ areas: 'rooms', cutscene: 'scenes' } as Record<string, string>)[kind] ?? kind; // Starters.dir_of
+  const area =
+    kind === 'areas' &&
+    all.find((rel) => rel.startsWith(`areas/${name}/`) || rel === `areas/${name}.json`);
+  const own = all.find((rel) => placed(rel)?.dir === dir && placed(rel)?.key === name);
+  const held = area || own || bundled(root)[`${dir}/${name}`];
+  return held && `${dir}/${name} exists in ${held}`;
 }

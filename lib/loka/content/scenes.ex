@@ -86,8 +86,8 @@ defmodule Loka.Content.Scenes do
   end
 
   @doc "Schema-valid scene definitions have ordered steps and one resolved, unique trigger."
-  @spec check(map() | nil, map(), {term(), map() | :unknown} | nil, [map()]) :: [map()]
-  def check(m, _, v2, _) when m == nil or v2 == nil, do: []
+  @spec check(map() | nil, map(), {term(), map() | :unknown}, [map()]) :: [map()]
+  def check(nil, _, _, _), do: []
 
   def check(m, defs, {_, text}, registry) do
     scenes = for {_, {rel, steps, s}} <- defs["scene"], do: {rel, steps, s}

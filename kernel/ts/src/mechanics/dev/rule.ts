@@ -1,11 +1,12 @@
-// dev@1 (capability_registry.json; cartridge.md Author preview): the author preview's go-to-room
-// and set-fact. Only stepDev reaches this rule, and only a host that says `dev` calls stepDev, so a
-// release refuses both; they are ordinary receipted Commands, so a reopen and `bin/loka check`
+// dev@1 (capability_registry.json; cartridge.md Author preview): the author preview's go-to-room,
+// set-fact and set-level. Only stepDev reaches this rule, and only a host that says `dev` calls
+// stepDev, so a release refuses them; they are ordinary receipted Commands, so a reopen and `bin/loka check`
 // re-decide them under the same seed and clock. Each refusal keeps a world invariant.
 import { KernelError } from '../../foundation/error.ts';
 import {
   accepted,
   bodyOf,
+  entries,
   event,
   refString,
   rejected,
@@ -18,7 +19,9 @@ import { engaged } from '../combat/shared.ts';
 import { travel } from '../escort/shared.ts';
 import { current } from '../expedition/shared.ts';
 import { assigned, subjective, typed, value } from '../fact.ts';
+import { levelling, write } from '../levelling/shared.ts';
 import { standing } from '../position/shared.ts';
+import { settleMaxima } from '../resource.ts';
 import { running } from '../scene/shared.ts';
 
 /** True while moving the body alone would leave a fight, a ride, a group or a walked route wrong. */
@@ -76,6 +79,33 @@ const setFact = (world: World, payload: SetFact): ReturnType<Rule<'dev'>> => {
   }
 };
 
+type SetLevel = Extract<Command['payload'], { type: 'dev_set_level' }>;
+
+// Toolbox row 4: experience at the level's threshold; a count never falls (compose_levelling).
+const setLevel = (
+  world: World,
+  { actor_id, level, allocated = [] }: SetLevel,
+): ReturnType<Rule<'dev'>> => {
+  const spec = world.cartridge.world?.levelling;
+  const row = levelling(world, actor_id)?.row ?? { experience: 0, allocated: {} };
+  if (allocated.some((a) => !world.cartridge.attributes?.[refString(a.attribute)]))
+    return rejected('not_found');
+  if (!spec || level > spec.thresholds.length + 1) return rejected('invalid_state');
+  if (allocated.some((a) => a.points < (row.allocated[refString(a.attribute)] ?? 0)))
+    return rejected('invalid_state');
+  const next = allocated.reduce<Record<string, number>>(
+    (o, a) => (a.points ? { ...o, [refString(a.attribute)]: a.points } : o),
+    row.allocated,
+  );
+  const experience = spec.thresholds[level - 2] ?? 0;
+  const spent = values(next).reduce((a, n) => a + n, 0);
+  const same =
+    experience === row.experience && entries(next).every(([a, n]) => row.allocated[a] === n);
+  if (same || spent > spec.points_per_level * (level - 1)) return rejected('invalid_state');
+  const ops = [...settleMaxima(world), write(world, actor_id, { experience, allocated: next }, 0)];
+  return accepted(world, 'dev_level_set', ops, []);
+};
+
 export const decide: Rule<'dev'> = (world, command, mint) => {
   const { payload } = command;
   const { actor_id } = payload;
@@ -104,5 +134,5 @@ export const decide: Rule<'dev'> = (world, command, mint) => {
     });
     return accepted(world, 'dev_moved', [op], [entered]);
   }
-  return setFact(world, payload);
+  return payload.type === 'dev_set_fact' ? setFact(world, payload) : setLevel(world, payload);
 };

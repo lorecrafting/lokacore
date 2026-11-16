@@ -1,0 +1,19 @@
+id: author-panel-zoom-constants
+language: tsx
+severity: error
+message: 'Zoom numbers live in map.ts `M` and flow.ts `F` (rulings S3 Tests): name the constant there.'
+files: [tools/author-panel/src/**]
+ignores: [tools/author-panel/src/map.ts, tools/author-panel/src/flow.ts]
+rule:
+  kind: number
+  not: { regex: '^1$' } # zoom 1 is the unit the constants are drawn at, not a tunable
+  inside:
+    any:
+      - kind: pair
+        has: { field: key, regex: '(?i)zoom' }
+      - kind: variable_declarator
+        has: { field: name, regex: '(?i)zoom' }
+      - kind: binary_expression
+        has: { any: [{ kind: identifier }, { kind: member_expression }], regex: '(?i)zoom$' }
+      - kind: arguments
+        inside: { kind: call_expression, has: { field: function, regex: '(?i)zoom$' } }

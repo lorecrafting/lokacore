@@ -699,6 +699,12 @@
     "journal": "quest.carry_letter.active"
    }
   ],
+  "spell_words": [
+   {
+    "word": "mend",
+    "available": true
+   }
+  ],
   "time": 25200,
   "calendar_status": {
    "day": 1,

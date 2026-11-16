@@ -40,9 +40,38 @@ bin/author.sh cartridges/<name>
 
 It starts the cartridge watcher (`bin/loka dev … --watch`), the Book preview (`mobile/app`,
 `npm run author`) and the author panel (`tools/author-panel`, installed on its first run). Open
-http://localhost:19009: the Book fills the page and the panel is the pane on the right (the cartridge's title,
-then Compile with its lint notes folded behind their count, then Play, Write, State, Why, Find and Numbers;
-the source line at the foot). It wears the Book's light palette and type. Ports: `LOKA_AUTHOR_PORT` (watcher, 19008), `LOKA_PREVIEW_PORT` (Book, 19006), `LOKA_PANEL_PORT` (panel, 19009).
+http://localhost:19009: the Book fills the page, with the panel's columns beside it ([the shell](#the-shell), below).
+The globe at the left of the Book's toolbar switches worlds or makes a new one (blank, or a copy); `bin/author.sh` with no folder reopens the last world named that way, and on a first run (nothing remembered yet) it says so instead of failing silently. Ports: `LOKA_AUTHOR_PORT` (watcher, 19008), `LOKA_PREVIEW_PORT` (Book, 19006), `LOKA_PANEL_PORT` (panel, 19009); if one is already taken, `bin/author.sh` names the process holding it. It wears the Book's light palette and type.
+
+A dev save made before the Book kept its save across edits may still show "The save could not be opened": clear the preview's site data once (the browser's storage for http://localhost:19009) and it does not come back.
+
+## The shell
+
+The panel is three columns around the Book, each foldable with a divider you drag (arrow keys nudge it
+16 px, Shift 64):
+
+- **Left**: the cartridge's rooms, NPCs, items and quests, with a search box. The pin marks the room the
+  Book is in; the play button beside a row starts the Book from there (**Play from here**), which is how
+  you test one scene without walking the whole chapter.
+- **Middle**: the map, in three views — **Map** (rooms and their exits), **Story** (what the scene
+  graph reaches) and **Flow** (how a rule fired). Click a node to select it; the map follows the
+  selection. Cmd-scroll zooms.
+- **Right**: the inspector for the selection — the card for that room, NPC, item, quest or scene, with
+  its purpose-built fields. A scene has no form: its card is the `.cut` page buttons and the `on` switch.
+- **The slot** under the left column holds the story list. `[` and `]` walk the Book's lines; `{` and `}`
+  walk the ones with no key.
+
+Double-click a line in the Book to edit it in place. **Cmd-E** opens the selection's source line in
+`$LOKA_EDITOR` (default `code --goto`); if the words changed outside the editor since the last compile,
+the answer is 404 and the line cannot open — wait for the compile, or Cmd-E again after it. **Cmd-K** is the
+palette of everything you can do from where you are. **Cmd-.** holds the Book: saves stop replaying
+and queue as *N waiting* until you hold it off again, which is how you type several lines before the
+page catches up. **Cmd-\\** folds the left column and **Cmd-/** the right. Cmd-Z puts back the last
+write. These work in the Book and in the panel.
+
+Saves compile on their own: the page replays what you had done. A refused write says why in the
+inspector and changes nothing; **Undo** in the header reverts it once.
+
 
 ## Write a scene
 
@@ -226,7 +255,7 @@ What you can rely on when dialogues link with `then` (JSON dialogues today):
 
 - Put `"entry": true` on the dialogue Talk should open, and it opens there, whatever else leads to
   it. A person takes one; their other dialogues stop opening, except keyword ones. Without a marker Talk infers, as below, and the
-  compiler warns (`ENTRY_GUESSED`) and names its choice whenever that is a guess.
+  compiler warns (`ENTRY_GUESSED`) and names its choice whenever that is a guess; when which one opens turns on a `when:`, it names each it can open, up to the first that always does, and on to what those lead to when none always does.
   A scene takes the marker in `dialogues/<key>.json` beside it. Several scenes for one person need
   no marker when each but the last by key has a `when:`.
 - A person's default Talk, when a dialogue's condition fails, passes on to what that dialogue leads
@@ -319,11 +348,11 @@ the judge; the schemas do not check references.
 
 Every kind's fields are in [source kinds](../reference/source-kinds.gen.md); step ops, policy leaves, events and choice fields are in [vocabulary](../reference/vocabulary.gen.md).
 
-`mise exec -- bin/loka new <kind> <name> [--from <room> <direction>] [--area <area>] ... [cartridge dir]` (from any directory; the cartridge dir defaults to the current one, or the cartridge a `cartridge <dir>` pair just made) writes a
+`mise exec -- bin/loka new <kind> <name> [--from <room> <direction>] [--area <area>] [--extends <key>] ... [cartridge dir]` (from any directory; the cartridge dir defaults to the current one, or the cartridge a `cartridge <dir>` pair just made) writes a
 compiling file for each pair on one Mix boot (name several pairs in one call; if any is refused, nothing is written), with every line a `~` placeholder, merged into the files it touches
 (it never replaces a value already there: it refuses, names the value and writes nothing; a shared `text.json` line you filled, such as `transport.unaffordable`, just stays),
 plus the capabilities it needs in `cartridge.json`; it prints what it changed, then what to fill (the list `bin/loka todo` prints) and the
-next command. `rooms <name> --from <room> <direction>` writes the exit both ways and, when `layout.json` exists, places the new room's row that way from its source; the new room goes into the source room's area folder. `--area <area>` writes the pair's own file into `areas/<area>/` (with `--from`, it wins: a border room), and a room it refers to is that area's first room. `areas <name>` starts an area folder with its first room, `areas/<name>/rooms/<name>.json`. `cartridge <dir>` stands alone: run it first, then the other pairs with the dir last. A rerun leaves the file it names as you left it, and refuses when that file's steps differ. A kind that refers
+next command. `rooms <name> --from <room> <direction>` writes the exit both ways and, when `layout.json` exists, places the new room's row that way from its source; the new room goes into the source room's area folder. `--area <area>` writes every new file of the pair (a population's or transport's companions too) into `areas/<area>/` (with `--from`, it wins: a border room), and a room it refers to is that area's first room. `--extends <key>` makes the pair's own file a child of the abstract definition `<key>` of its kind: it holds `"extends"`, its own keywords and placement (the room, a `--from` exit) and only the other fields the parent and its parents lack, and refuses an unknown key, a parent without `"abstract": true`, one with `params`, one of another kind, one in another area, a file already there without that `"extends"`, and a population or transport (their keys are derived per kind: write that child by hand). `areas <name>` starts an area folder with its first room, `areas/<name>/rooms/<name>.json`. `cartridge <dir>` stands alone: run it first, then the other pairs with the dir last. A rerun leaves the file it names as you left it, and refuses when that file's steps differ. A kind that refers
 to another takes the first one you have (for a room, the entry) and refuses with the command to run first. The shapes
 come from the samplers; the rules from the [Builders' Guide](../BUILDERS-GUIDE.md#authoring-paths-and-examples).
 
@@ -340,7 +369,7 @@ when you run `mix loka.compile` by hand.
 | `barriers` | [`position_sampler`](../../cartridges/position_sampler/) | nothing |
 | `behaviours` | [`fishing_sampler`](../../cartridges/fishing_sampler/) | nothing |
 | `bleeds` | [`bleed_sampler`](../../cartridges/bleed_sampler/) | a resource |
-| `cartridge` | [`cellar_sampler`](../../cartridges/cellar_sampler/) | nothing: `bin/loka new cartridge cartridges/<id>` makes the manifest and a `start` room |
+| `cartridge` | [`cellar_sampler`](../../cartridges/cellar_sampler/) | nothing: `bin/loka new cartridge cartridges/<id>` makes the manifest (with `knowledge`, which `layout.json` needs) and a `start` room placed at 0,0,0; `--from cartridges/<other>` copies that world under the new id |
 | `cutscene` | [`scene_sampler`](../../cartridges/scene_sampler/) | an item (it writes its own quest and `scenes/<name>.json`) |
 | `dialogues` | [`ask_sampler`](../../cartridges/ask_sampler/) | an NPC |
 | `emotes` | [`emote_sampler`](../../cartridges/emote_sampler/) | nothing |
@@ -355,7 +384,7 @@ when you run `mix loka.compile` by hand.
 | `replenish` | [`decay_sampler`](../../cartridges/decay_sampler/) | an item, a room and an NPC |
 | `resources` | [`affects_sampler`](../../cartridges/affects_sampler/) | nothing |
 | `rooms` | [`rooms_sampler`](../../cartridges/rooms_sampler/) | nothing |
-| `scene` | [`identity_sampler`](../../cartridges/identity_sampler/scenes/stranger_talk.scene) | an NPC, file or bundled: `bin/loka new scene <npc> <key>` writes `scenes/<key>.scene` (one line, one `- ~` choice and its reply) and refuses over an existing one |
+| `scene` | [`identity_sampler`](../../cartridges/identity_sampler/scenes/stranger_talk.scene) | an NPC, file or bundled: `bin/loka new scene <npc> <key>` writes `scenes/<key>.scene`, in the NPC's area folder when it has one (one line, one `- ~` choice and its reply) and refuses over an existing one |
 | `services` | [`durability_sampler`](../../cartridges/durability_sampler/) | an NPC and a resource (the currency); also writes the `use_service` action and the service text keys |
 | `skills` | [`damage_sampler`](../../cartridges/damage_sampler/) | nothing |
 | `statuses` | [`pen_sampler`](../../cartridges/pen_sampler/) | a resource |
@@ -421,7 +450,7 @@ Each goal names the samplers that already do it; copy their files or start with 
 |---|---|
 | A shop | [`prices_sampler`](../../cartridges/prices_sampler/) (buy and sell), [`escrow_sampler`](../../cartridges/escrow_sampler/) (pay now, get later) |
 | An item | [`items_sampler`](../../cartridges/items_sampler/); wear it: [`wear_sampler`](../../cartridges/wear_sampler/) |
-| An NPC that talks | [`hello_sampler`](../../cartridges/hello_sampler/), [`ask_sampler`](../../cartridges/ask_sampler/) (topics), [`voices_sampler`](../../cartridges/voices_sampler/) |
+| An NPC that talks | [`ask_sampler`](../../cartridges/ask_sampler/) (topics), [`voices_sampler`](../../cartridges/voices_sampler/) |
 | A room and an area | [`rooms_sampler`](../../cartridges/rooms_sampler/), [`details_sampler`](../../cartridges/details_sampler/) (things to look at), [`speech_sampler`](../../cartridges/speech_sampler/) (`areas/` bundle) |
 | A quest | [`quest_sampler`](../../cartridges/quest_sampler/), [`errand_sampler`](../../cartridges/errand_sampler/), [`chapters_sampler`](../../cartridges/chapters_sampler/) |
 | A cutscene | [`scene_sampler`](../../cartridges/scene_sampler/) |

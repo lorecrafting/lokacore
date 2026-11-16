@@ -18,7 +18,7 @@ import { factChanged, type Base } from '../mechanics/fact.ts';
 import { jobCommandId } from '../foundation/id_source.ts';
 import { begun, earned, stamp } from '../mechanics/quest/lifecycle.ts';
 import { sequence, triggered } from '../mechanics/reaction.ts';
-import { levelsReached, oneWrite } from '../mechanics/levelling/shared.ts';
+import { levelsReached, oneWrite, quiet } from '../mechanics/levelling/shared.ts';
 import { poolWriters } from '../mechanics/resource.ts';
 import { partings } from '../mechanics/escort/shared.ts';
 import { closing, say } from '../mechanics/death/lines.ts';
@@ -103,7 +103,7 @@ export function propose(
   failed ??= farewell(p, () => now(p)) ?? parting(p) ?? ambience(p, told);
   if (failed) return { decision: failed, ...(p.limit && { limit: p.limit }) };
   const ops = oneWrite(p.ops);
-  p.narration = [...closing(world, command.payload.actor_id, ops, p), ...told];
+  p.narration = [...closing(world, command.payload.actor_id, quiet(command, ops), p), ...told];
   return {
     decision: {
       ...root,
@@ -187,7 +187,7 @@ function join(
   const active = new Map(quests.map(([i, q]) => [i, q.state === 'active']));
   const assigns = own.filter((o) => o.op === 'fact.assign') as Assign[];
   const facts = factChanged(base, m, assigns, evs);
-  for (const e of [...facts, ...levelsReached(p.world, own, base, m)]) {
+  for (const e of [...facts, ...levelsReached(p.world, quiet(p.command, own), base, m)]) {
     const placed = { ...e, position: p.events.length + 1, correlation_id: base.correlation_id };
     const x = placed.payload;
     if (x.type === 'quest_activated' || x.type === 'quest_resolved')

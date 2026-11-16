@@ -115,10 +115,10 @@ defmodule Loka.ContentPlaceholdersTest do
   # Break: --json moves the printed line (the split loses a place, a column or the order), or
   # writes a file whose rel, line and path do not name the field the line names.
   test "mix loka.compile --json splits the line it prints", %{tmp_dir: tmp} do
-    dir = Loka.ContentSource.copy("cartridges/hello_sampler")
-    talk = Path.join(dir, "actions/talk.json")
-    # The committed file ends with `"accessibility": ...` on line 15, so the field lands on 16.
-    File.write!(talk, String.replace(File.read!(talk), ~r/\n}\n$/, ",\n  \"comand\": \"x\"\n}\n"))
+    dir = Loka.ContentSource.copy("cartridges/resource_sampler")
+    pray = Path.join(dir, "actions/pray.json")
+    # The committed file closes its last member on line 32, so the field lands on 33.
+    File.write!(pray, String.replace(File.read!(pray), ~r/\n}\n$/, ",\n  \"comand\": \"x\"\n}\n"))
     {out, json} = {Path.join(tmp, "a.json"), Path.join(tmp, "d.json")}
 
     run = fn args ->
@@ -129,16 +129,20 @@ defmodule Loka.ContentPlaceholdersTest do
 
     line = run.([])
     assert run.(["--allow-placeholders", "--json", json]) == line
-    assert line =~ ~r/^error: actions\/talk\.json:16 `comand` is not a field here\./
+    assert line =~ ~r/^error: actions\/pray\.json:33 `comand` is not a field here\./
 
     assert [
-             %{"severity" => "error", "code" => "UNKNOWN_FIELD", "path" => "actions/talk.comand"} =
+             %{
+               "severity" => "error",
+               "code" => "UNKNOWN_FIELD",
+               "path" => "actions/pray.comand"
+             } =
                d
            ] =
              JSON.decode!(File.read!(json))
 
-    assert {d["rel"], d["line"], d["column"]} == {"actions/talk.json", 16, nil}
-    assert line == "error: actions/talk.json:16 #{d["words"]}\n"
+    assert {d["rel"], d["line"], d["column"]} == {"actions/pray.json", 33, nil}
+    assert line == "error: actions/pray.json:33 #{d["words"]}\n"
     refute File.exists?(out)
     assert_raise Mix.Error, ~r/usage/, fn -> Mix.Tasks.Loka.Compile.run([dir, out, "--json"]) end
   end

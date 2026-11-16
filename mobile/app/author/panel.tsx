@@ -12,6 +12,7 @@ import {
   advanced,
   asRefs,
   dropStep,
+  isCheat,
   recording,
   replay,
   sendCheat,
@@ -22,6 +23,7 @@ import {
 } from './place.ts';
 import { factRows, shown, type Canon } from './shown.ts';
 import { worded } from '../book/words.ts';
+import { bind, clicked, lost, nextPage } from './prose_rules.ts';
 
 export { frozenClock } from './place.ts';
 
@@ -37,7 +39,7 @@ export const devClock =
 const inBook: typeof import('./inbook.ts') | undefined =
   process.env.EXPO_PUBLIC_LOKA_DEV_CARTRIDGE === '1' ? require('./inbook.ts') : undefined;
 if (devClock) {
-  worded.note = (words, key) => seen.set(words, key); // a line as shown, bound too
+  worded.note = (words, key) => bind(seen, words, key); // a line as shown, bound too
   worded.made = new Map(); // an open conversation re-words its lines from the overlay (loka-wfrgk.19)
 }
 const g = globalThis as { loka_dev_skew?: number }; // ms the dev clock has moved both host clocks
@@ -69,33 +71,43 @@ export const resetPlace = () => {
   placeNote = '';
   savePlace();
 };
-/** At page load: a path due a replay gets a fresh game, as a hash seen before keeps its old save (an edit undone). */
-export function bootPlace(session: {
-  game(): Opened | undefined;
-  startOver(): string | undefined;
-}) {
+/** At page load: a path due a replay gets a fresh game. `renewed`: the one dev save, pinned to another
+ * edit (an undo included), was just started over, so every path replays. */
+export function bootPlace(
+  session: {
+    game(): Opened | undefined;
+    startOver(): string | undefined;
+  },
+  renewed = false,
+) {
+  if (renewed) return restorePlace(session.game(), true);
   const due = place.hash !== chapter.sha256 && place.stopped?.hash !== chapter.sha256;
   const why = due && session.game() ? session.startOver() : undefined; // no game: a save that did not open stays as evidence
   if (why) placeNote = `Place: not replayed (${why}); this is the old save.`;
   else restorePlace(session.game());
 }
-export function restorePlace(game: Opened | undefined) {
+export function restorePlace(game: Opened | undefined, renewed = false) {
   if (!game) return;
-  if (place.hash === chapter.sha256) {
+  if (!renewed && place.hash === chapter.sha256) {
     // an edit undone: a stop recorded for that edit no longer describes the path
     delete place.stopped;
     return savePlace();
   }
-  if (place.stopped?.hash === chapter.sha256) {
+  if (!renewed && place.stopped?.hash === chapter.sha256) {
     // this save holds the path up to the stop: replaying would re-send those steps
     ({ at: refused, note: placeNote } = place.stopped);
     return;
   }
   let outcome: ReturnType<typeof replay>;
   try {
-    outcome = replay(place.steps, game, (ms) => {
-      g.loka_dev_skew = skew() + ms;
-    });
+    outcome = replay(
+      place.steps,
+      game,
+      (ms) => {
+        g.loka_dev_skew = skew() + ms;
+      },
+      canon().manifest.time_policy?.rate,
+    );
   } catch (e) {
     // a hand-edited checkpoint or stale place with a malformed step must not stop the boot
     outcome = { done: 0, failed: `malformed step (${(e as Error).message})` };
@@ -126,7 +138,7 @@ export function played(game: Opened | undefined) {
         if (held !== undefined) return held;
         const words = overlay[key] ?? game.text(key);
         const shown = inBook?.tagged(key, words) ?? words; // two `~` lines show apart
-        seen.set(shown, key);
+        bind(seen, shown, key);
         said.set(key, words);
         return shown;
       },
@@ -147,7 +159,7 @@ function advance(minutes: number, game: Opened) {
     placeNote = 'This cartridge has no clock (no time_policy); there is no time to advance.';
   if (!rate || !Number.isSafeInteger(minutes) || minutes <= 0) return;
   const ms = Math.ceil((minutes * 60_000) / rate);
-  const stopped = advanced(ms, (by) => (g.loka_dev_skew = skew() + by), game, keep);
+  const stopped = advanced(ms, (by) => (g.loka_dev_skew = skew() + by), game, keep, rate);
   if (stopped) placeNote = stopped;
 }
 
@@ -178,10 +190,26 @@ type Asked =
   | { op: 'drop' }
   | { op: 'trace'; id: number }
   | Cheat;
-const OPS = new Set(['hello', 'advance', 'jump', 'drop', 'trace', 'go_to_room', 'set_fact']); // any other local window is not the panel
+const OPS = new Set([
+  'hello',
+  'advance',
+  'jump',
+  'drop',
+  'trace',
+  'go_to_room',
+  'set_fact',
+  'set_level',
+]); // any other local window is not the panel
 let panel: { to: Window; origin: string } | undefined;
 const tell = (sent: object) => panel?.to.postMessage({ loka: 'author', ...sent }, panel.origin);
 const stateOf = (game: Opened) => ({
+  // The words a collision cost, and whether the page draws them now: `onPage` is what decides
+  // whether clearing `seen` per render would be enough (docs/rnd/line-key-binding-2026-11-15.md).
+  lost: [...lost].map(([words, keys]) => ({
+    words,
+    keys: [...keys],
+    onPage: [...document.querySelectorAll('[dir="auto"]')].some((el) => el.textContent === words),
+  })),
   hash: chapter.sha256,
   title: canon().manifest.title,
   placeNote,
@@ -190,14 +218,15 @@ const stateOf = (game: Opened) => ({
   facts: factRows(game.facts(), canon().facts),
   shown: shown(game.view().view, played(game)!.text, canon(), game.entityIds(), game.roomIds()),
 });
-// Alt-click (Option-click) on a Book line: the panel opens its source in the owner's editor.
+// A click on a Book line selects its definition in the panel; Alt-click (Option-click) also opens
+// its source in the owner's editor.
 const onClick = (e: MouseEvent) => {
+  const line = clicked(seen, said, (e.target as HTMLElement).textContent ?? '');
+  if (line.key) tell({ select: line.key });
   if (!e.altKey) return;
   e.preventDefault();
   e.stopPropagation();
-  const words = (e.target as HTMLElement).textContent ?? '';
-  const key = seen.get(words);
-  tell({ line: { key, words: (key && said.get(key)) || words } });
+  tell({ line });
 };
 // Through `played`, so an accepted cheat is a recorded step `bin/loka check` replays.
 function askCheat(game: Opened, cheat: Cheat) {
@@ -219,7 +248,7 @@ export function useAuthorPanel(tools: Tools, game: Opened | undefined) {
       if (e.data.op === 'hello') inBook?.recount(); // a new panel missed the `~` counts
       if (e.data.op === 'trace') return void tell({ trace: game.trace(), id: e.data.id });
       if (e.data.op === 'advance') advance(e.data.minutes, game);
-      if (e.data.op === 'go_to_room' || e.data.op === 'set_fact') askCheat(game, e.data);
+      if (isCheat(e.data)) askCheat(game, e.data);
       if (e.data.op === 'jump') {
         if (Array.isArray(e.data.steps)) return jumpTo(e.data.steps, latest.current); // the new game posts its state
         placeNote = 'Place: that checkpoint has no steps list; nothing changed.'; // checked before the start over wipes the save
@@ -230,13 +259,14 @@ export function useAuthorPanel(tools: Tools, game: Opened | undefined) {
     };
     window.addEventListener('message', onMessage);
     document.addEventListener('click', onClick, true);
-    const unsubscribe = game.subscribe(state);
+    // Bindings are per page: a wording drawn here must not cost a later page its field.
+    const unsubscribe = game.subscribe(() => (nextPage(seen), state()));
     // a text overlay redraws in place
     const unlisten = listen((message) => (inBook?.heard(message), latest.current.redraw({})));
     const stop = inBook?.start({ seen, said, tell, redraw: () => latest.current.redraw({}) });
     if (panel) state();
     else if (window.parent !== window)
-      window.parent.postMessage({ loka: 'author', ready: true }, '*');
+      window.parent.postMessage({ loka: 'author', ready: true, sha256: chapter.sha256 }, '*');
     return () => {
       window.removeEventListener('message', onMessage);
       document.removeEventListener('click', onClick, true);

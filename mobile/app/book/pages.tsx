@@ -116,6 +116,7 @@ type PageProps = {
   centred?: boolean; // centres the blocks vertically: the save error, the chapter card
   paperless?: boolean; // its owner paints the paper, with something on it under the ink
   foot?: ReactNode;
+  strip?: ReactNode; // fixed under the scroll, above the foot: the Combat hotbar
   children: ReactNode;
 };
 
@@ -131,6 +132,7 @@ type PageProps = {
  * - States: scrolling title; fixed title; no title; centred (no game behind it).
  * - Story: Page.stories.tsx
  */
+// size: allow 41, the scroll and what stays fixed around it (title, strip, foot) read as one layout
 export function Page(p: PageProps) {
   const c = usePalette();
   const scroll = useRef<ScrollView>(null);
@@ -167,6 +169,7 @@ export function Page(p: PageProps) {
         {!p.fixedTitle && title}
         {p.children}
       </ScrollView>
+      {p.strip}
       {p.foot && <PageFoot>{p.foot}</PageFoot>}
     </View>
   );

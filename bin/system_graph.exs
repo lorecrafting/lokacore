@@ -153,6 +153,9 @@ defmodule SystemGraph do
 
   @sec "[0-9A-Z](?:[0-9A-Za-z.]*[0-9A-Za-z])?"
 
+  @doc false
+  def cites(text, root), do: cited(text, spec_files(root))
+
   # `NN §a, §b` cites each section of NN.
   defp cited(text, specs) do
     for [run, nn] <- Regex.scan(~r/\b(\d\d[a-z]?) §(?:#{@sec})?(?:(?:, |-|–)§#{@sec})*/u, text),
@@ -188,9 +191,8 @@ defmodule SystemGraph do
 
   # Definition kind => contract, from CompiledCartridge's maps (key pattern `:kind/`).
   defp definition_kinds(defs) do
-    for b <- defs["CompiledCartridge"]["oneOf"],
-        {_, %{"propertyNames" => %{"pattern" => p}, "additionalProperties" => %{"$ref" => r}}} <-
-          b["properties"],
+    for {_, %{"propertyNames" => %{"pattern" => p}, "additionalProperties" => %{"$ref" => r}}} <-
+          defs["CompiledCartridge"]["properties"],
         [_, kind] <- [Regex.run(~r/\):([a-z_]+)\//, p)],
         into: %{},
         do: {kind, r}

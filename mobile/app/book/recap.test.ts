@@ -179,7 +179,7 @@ test('a room change drops the held lines and the recap entry; staying keeps them
   const logs = () =>
     ({
       log: [entry],
-      projection: { view: { place: { id: 'hall' } } },
+      projection: { view: { place: { id: 'hall', title: { key: 'hall' } } } },
       away: { from: 0, log: ['a'] },
     }) as unknown as Logs;
   const view = (id: string) => ({ place: { id } }) as GameView;
@@ -265,10 +265,12 @@ function deadly() {
 // Breaks (book-ui.md, World log; loka-x6t.26): a death in an elapsed settlement leaves the World
 // page in the dart room, keeps the old room's lines, drops the death's lines with the room change,
 // or holds them (or the rest of the settlement) into a recap.
-test('a poison death while away opens the hall page on the tick, fall and waking lines', () => {
+test('a poison death while away: the dead page, then the hall page on the tick, fall and waking lines', () => {
   const b = book(deadly() as never, undefined, ids());
   b.go('east');
-  const shown = wait(b, HOURS3).text();
+  assert.equal(wait(b, HOURS3).text()[0], 'Dart Corridor'); // the dead page first (book-ui.md, Dead page)
+  b.tap('Let go');
+  const shown = b.text();
   assert.equal(shown[0], 'Stone Hall', JSON.stringify(shown));
   assert.equal(count(shown, LABEL.awayRecap), 0);
   const at = shown.indexOf(TICK);

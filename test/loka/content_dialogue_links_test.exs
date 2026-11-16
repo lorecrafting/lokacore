@@ -1,4 +1,4 @@
-# size: allow 502, every whole-cartridge dialogue link check has its case here
+# size: allow 572, every whole-cartridge dialogue link check has its case here
 defmodule Loka.ContentDialogueLinksTest do
   use ExUnit.Case, async: true
   setup_all do: %{dir: Loka.ContentSource.copy("cartridges/persuade_sampler")}
@@ -363,7 +363,9 @@ defmodule Loka.ContentDialogueLinksTest do
     # Breaks: a policy-less keyword entry (a say's, never Talk's) counts as the entry Talk opens.
     z_k = d("z_k", "a", [], %{"keyword" => "w", "choices" => %{"bye" => %{}}})
     shut = d("g", "a", ["a_x", "z_y"], %{"policy" => %{}})
-    assert [{"warning", "ENTRY_GUESSED", _, "a_x"}] = entry_findings([shut, z_k | leaves])
+
+    assert entry_findings([shut, z_k | leaves]) ==
+             [{"warning", "ENTRY_GUESSED", "dialogues/g.npc", "a_x or z_y"}]
 
     # Breaks: a choice that can refuse or charge when taken counts as a way on.
     free = %{"then" => "z_y"}
@@ -390,12 +392,55 @@ defmodule Loka.ContentDialogueLinksTest do
     end
   end
 
+  defp source_gate(%{"gate" => "teach"} = c),
+    do:
+      c
+      |> Map.delete("gate")
+      |> Map.put("steps", [%{"op" => "skill.acquire", "skill" => "intimidate"}])
+
   defp source_gate(%{"gate" => gate} = c), do: c |> Map.delete("gate") |> Map.put(gate, %{})
   defp source_gate(c), do: c
 
   defp entry_findings(all) do
-    for x <- Loka.Content.DialogueLinks.entry_checks(all),
+    for x <- Loka.Content.DialogueLinks.entry_checks(all, &(&1 == "intimidate")),
         do: {x["severity"], x["code"], x["path"], x["data"]["target"]}
+  end
+
+  # Breaks: the compiler's hidden-skill test not reaching `opens?` (every taught skill counted as
+  # visible), or any taught skill counted as hidden. The answers are the shared row's (TS `offered`).
+  test "an entry whose only choice teaches a hidden skill leaves the shut entry's pick a guess",
+       %{
+         dir: dir
+       } do
+    gate = %{"op" => "fact_compare", "fact" => "gate_open", "equals" => true}
+    to = &%{"label" => @label, "narration" => @said, "then" => &1}
+
+    shut =
+      talk("guard", %{"policy" => gate, "choices" => %{"a" => to.("a_x"), "b" => to.("b_y")}})
+
+    teach = %{
+      "label" => @label,
+      "narration" => @said,
+      "steps" => [%{"op" => "skill.acquire", "skill" => "intimidate"}]
+    }
+
+    base = [
+      {@guard, shut},
+      {"dialogues/a_x.json", talk("guard")},
+      {"dialogues/b_y.json", talk("guard")},
+      {"dialogues/z_open.json", talk("guard", %{"choices" => %{"x" => teach}})}
+    ]
+
+    skill = Jason.decode!(File.read!("cartridges/persuade_sampler/skills/intimidate.json"))
+    hidden = Map.merge(skill, %{"hidden" => true, "prerequisite" => gate})
+    guessed = &for(d <- &1, d["code"] == "ENTRY_GUESSED", do: d["data"]["target"])
+    assert {:ok, _, warnings} = Loka.ContentSource.compile(dir, base)
+    assert guessed.(warnings) == []
+
+    assert {:ok, _, warnings} =
+             Loka.ContentSource.compile(dir, [{"skills/intimidate.json", hidden} | base])
+
+    assert guessed.(warnings) == ["a_x"]
   end
 
   defp guess(key), do: {"warning", "ENTRY_GUESSED", "dialogues/#{key}.npc", key}
@@ -417,6 +462,31 @@ defmodule Loka.ContentDialogueLinksTest do
     assert entry_findings([d("a_x", "a"), d("b", "a"), d("c", "a")]) == [guess("a_x")]
     assert entry_findings([d("a_x", "a", [], %{"name" => "n"}), d("b", "a")]) == [guess("a_x")]
     assert entry_findings([d("a_x", "a", ["a_x"])]) == []
+  end
+
+  # Breaks: an answer that shuts its own hub not warned, or warned when a `then`, `check` or
+  # `patrol` ends the talk, another dialogue links in, the hub is a quest or riddle or has one choice, or
+  # the answer leaves the policy true. The reopen itself: dialogue_branching.test.ts.
+  test "HUB_SHUT names the answer that fails its own hub's policy" do
+    shut = %{"op" => "fact.assign", "fact" => "flag", "value" => true}
+    p = %{"policy" => %{"op" => "fact_compare", "fact" => "flag", "equals" => false}}
+    hub = fn a, z -> d("hub", "a", [], Map.put(p, "choices", %{"a" => a, "z" => z})) end
+    shuts = %{"steps" => [shut]}
+
+    found = fn all ->
+      for {_, "HUB_SHUT", path, _} <- entry_findings(all), do: path
+    end
+
+    assert found.([hub.(shuts, %{})]) == ["dialogues/hub.choices.a"]
+    assert found.([hub.(Map.put(shuts, "then", "end"), %{})]) == []
+    assert found.([hub.(Map.put(shuts, "check", %{}), %{})]) == []
+    assert found.([hub.(Map.put(shuts, "patrol", %{}), %{})]) == []
+    assert found.([hub.(%{"steps" => [%{shut | "value" => false}]}, %{})]) == []
+    assert found.([hub.(shuts, %{}), d("in", "a", ["hub"])]) == []
+    {rel, quest} = hub.(shuts, %{})
+    assert found.([{rel, Map.put(quest, "quest", %{})}]) == []
+    assert found.([{rel, Map.put(quest, "riddle", %{})}]) == []
+    assert found.([d("hub", "a", [], Map.put(p, "choices", %{"a" => shuts}))]) == []
   end
 
   # Breaks: the marker still warned as a guess, a second marker or a keyword marker compiled, a

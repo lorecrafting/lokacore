@@ -1,4 +1,4 @@
-# size: allow 562, one case per starter kind and refusal; the area placement cases join them
+# size: allow 690, one case per starter kind and refusal; the area placement, companion, provider start and key order and shape cases join them
 defmodule Loka.ContentStartersTest do
   use ExUnit.Case, async: true
   @moduletag :tmp_dir
@@ -13,18 +13,24 @@ defmodule Loka.ContentStartersTest do
                 |> Enum.map(&if(&1 == "scenes", do: "cutscene", else: &1))
   @guide File.read!("docs/guides/writing-the-game.md")
 
-  # Breaks: a source kind the owner cannot start from the tools, or one the guide's coverage
-  # table leaves out (a new schema file lands without either).
-  test "every source schema kind has a starter and a coverage row" do
+  # Breaks: a source kind the owner cannot start from the tools, one the guide's coverage table
+  # leaves out (a new schema file lands without either), or one the editor's palette does not offer
+  # or names wrongly (`New room` once sent `room`, which no starter has: loka-wfrgk.60).
+  test "every source schema kind has a starter, a coverage row and a palette New" do
     assert @schema_kinds -- Starters.kinds() == []
+    offered = "tools/author-panel/src/edit/new.json" |> File.read!() |> Jason.decode!()
+    assert Enum.sort(offered) == Starters.kinds() -- ["cartridge"]
     for kind <- @schema_kinds, do: assert(@guide =~ "\n| `#{kind}` |", "no coverage row: #{kind}")
   end
 
   # Breaks: a starter missing a field or capability the compiler requires, or two starters
-  # sharing a key (the service's entitlement once took the action's fact, which made it reserved).
+  # sharing a key (the service's entitlement once took the action's fact, which made it reserved);
+  # a new world's entry room off the map (no cell to drop on), or its row refused (no knowledge).
   test "a new cartridge with one starter of every kind compiles", %{tmp_dir: tmp} do
     dir = Path.join(tmp, "mine")
     assert {:ok, _} = Starters.write(dir, "cartridge", dir)
+    assert read(dir, "layout.json") == [%{"room" => "start", "x" => 0, "y" => 0, "z" => 0}]
+    assert {:ok, _, _} = Loka.Content.compile(dir)
     first = ~w(items npcs resources facts quests)
     rest = (Starters.kinds() -- first) -- ~w(cartridge layout)
 
@@ -52,9 +58,68 @@ defmodule Loka.ContentStartersTest do
              Starters.write(dir, "shop", "x")
 
     assert {:error, _} = Starters.write(dir, "cartridge", dir)
-    assert Path.wildcard(Path.join(dir, "**/*.json")) |> length() == 2
+    assert Path.wildcard(Path.join(dir, "**/*.json")) |> length() == 3
     assert {:error, "no cartridge.json in " <> _} = Starters.write(tmp, "rooms", "r")
     assert {:ok, _} = Starters.write(dir, "text", "a.b")
+  end
+
+  # Breaks: a starter re-sorting the keys of a file it adds to; the editor writes insertion
+  # order, so every file a starter touched churned whole (loka-wfrgk.68).
+  test "a starter keeps a file's own key order and adds after it", %{tmp_dir: tmp} do
+    dir = cartridge(tmp)
+
+    fact =
+      ~s({"version": 1, "scopes": ["player"], "value_type": {"type": "bool", "default": false}})
+
+    File.write!(Path.join(dir, "facts.json"), ~s({"facts": {"zz": #{fact}}}))
+    {:ok, _} = Starters.write(dir, "facts", "aa")
+
+    assert File.read!(Path.join(dir, "facts.json")) =~ """
+           {
+             "facts": {
+               "zz": {
+                 "version": 1,
+                 "scopes": [
+                   "player"
+                 ],
+                 "value_type": {
+                   "type": "bool",
+                   "default": false
+                 }
+               },
+               "aa": {
+           """
+  end
+
+  # Break: a value whose shape differs from the file's (an object where the file has a list) is
+  # walked as the old list, which crashes or writes the object as a list.
+  test "a value of another shape than the file's is written as given", %{tmp_dir: tmp} do
+    path = Path.join(tmp, "f.json")
+    File.write!(path, ~s({"a": [1]}))
+    value = %{"a" => %{"b" => 1}}
+    assert JSON.decode!(Loka.Content.Starters.Parts.pretty_over(value, path)) == value
+  end
+
+  # Breaks: the service's provider seeded with a fixed 10 the resource's maximum refuses
+  # (RESOURCE_SPEC_INVALID, resources.ex:109-116) instead of the resource's own start.
+  test "a service's provider starts with the currency's own start", %{tmp_dir: tmp} do
+    dir = cartridge(tmp)
+    for k <- ~w(npcs resources), do: {:ok, _} = Starters.write(dir, k, "my_#{k}")
+
+    edit(
+      dir,
+      "resources.json",
+      &put_in(&1, ~w(resources my_resources), %{
+        "minimum" => 0,
+        "maximum" => 5,
+        "start" => 3,
+        "gain" => 0
+      })
+    )
+
+    {:ok, _} = Starters.write(dir, "services", "s")
+    assert read(dir, "npcs/my_npcs.json")["resource_starts"] == %{"my_resources" => 3}
+    assert {:ok, _, _} = Loka.Content.compile(dir)
   end
 
   # Breaks: a second service on the same npc replacing its first (list merge as replace); the
@@ -154,9 +219,11 @@ defmodule Loka.ContentStartersTest do
   end
 
   # Breaks: look refused for a missing capability, an exit written one way, an NPC in the
-  # alphabetically first room. Literal answers from the real headless client.
+  # alphabetically first room; a grow's layout row without the knowledge@1 it needs (compile
+  # refuses). Literal answers from the real headless client.
   test "a fresh cartridge, a joined room and an NPC play headless", %{tmp_dir: tmp} do
     dir = cartridge(tmp)
+    edit(dir, "cartridge.json", &elem(pop_in(&1, ~w(requires capabilities knowledge)), 1))
     {:ok, _} = Starters.write(dir, "rooms", "grove", {"start", "east"})
     {:ok, _} = Starters.write(dir, "npcs", "thera")
     assert read(dir, "npcs/thera.json")["room"] == "start"
@@ -230,6 +297,17 @@ defmodule Loka.ContentStartersTest do
     assert snapshot(dir) == before
   end
 
+  # Breaks: a New outline the Story list refuses (readOutline wants outline.schema.json: an
+  # object of parts, each with a beats list), or one that lands in a folder.
+  test "a new outline is one part with no beats at the root", %{tmp_dir: tmp} do
+    dir = cartridge(tmp)
+    assert {:ok, _} = Starters.write(dir, "outline", "story")
+
+    assert File.read!(Path.join(dir, "outline.json")) |> Jason.decode!() == %{
+             "parts" => [%{"beats" => []}]
+           }
+  end
+
   # Breaks: a starter reporting success on a cartridge the compile then refuses (a duplicate room,
   # a derived key or text path over its limit), or a stack trace from a bad layout.
   test "a room in another file, a long name and a bad layout are refused", %{tmp_dir: tmp} do
@@ -264,7 +342,7 @@ defmodule Loka.ContentStartersTest do
     dir = cartridge(tmp)
     bundle(dir, "marsh")
     edit(dir, "cartridge.json", &Map.put(&1, "entry", "marsh"))
-    File.rm!(Path.join(dir, "rooms/start.json"))
+    for f <- ~w(rooms/start.json layout.json), do: File.rm!(Path.join(dir, f))
     assert {:ok, _} = Starters.write(dir, "layout", "x")
     assert ["marsh"] == for(r <- read(dir, "layout.json"), do: r["room"])
   end
@@ -309,6 +387,7 @@ defmodule Loka.ContentStartersTest do
   # cartridge that chose none, a bundled room's row missed.
   test "any starter adds only the rows an existing layout lacks", %{tmp_dir: tmp} do
     dir = cartridge(tmp)
+    File.rm!(Path.join(dir, "layout.json"))
     {:ok, _} = Starters.write(dir, "rooms", "yard")
     refute File.exists?(Path.join(dir, "layout.json"))
     {:ok, _} = Starters.write(dir, "layout", "layout")
@@ -494,6 +573,54 @@ defmodule Loka.ContentStartersTest do
     assert snapshot(dir) == before
     assert File.read!(Path.join(tmp, "x.json")) == "{}"
     refute File.exists?(Path.join(tmp, "rooms"))
+  end
+
+  # Breaks: an --area starter's companion files (a population's NPC, items and camp room, a
+  # transport's routes, actions and far room) written at the root; or a file that exists (the root
+  # NPC a transport stocks) copied into the area, a duplicate definition; or a scene for an area NPC
+  # written at the root instead of its area's scenes/ (layout design section 7).
+  test "--area puts every new file in the area; a scene goes to its NPC's area", %{tmp_dir: tmp} do
+    run = fn args -> ExUnit.CaptureIO.capture_io(fn -> Mix.Tasks.Loka.New.run(args) end) end
+    run.(~w(--cwd #{tmp} cartridge mine npcs keeper resources coin areas marsh))
+    run.(~w(--cwd #{tmp} populations wolves --area marsh transports ferry --area marsh mine))
+    run.(~w(--cwd #{tmp} npcs brennan --area marsh scene brennan hi scene keeper yo mine))
+    dir = Path.join(tmp, "mine")
+
+    assert dir
+           |> Path.join("{rooms,npcs,items,populations,transports,actions}/*")
+           |> Path.wildcard() ==
+             Enum.map(~w(npcs/keeper.json rooms/start.json), &Path.join(dir, &1))
+
+    assert MapSet.subset?(
+             MapSet.new(~w(actions/ferry.json actions/ferry_back.json items/wolves_corpse.json
+               items/wolves_item.json items/wolves_player_corpse.json npcs/wolves_npc.json
+               populations/wolves.json rooms/ferry_far.json rooms/wolves_camp.json
+               transports/ferry.json transports/ferry_back.json scenes/hi.scene)),
+             dir
+             |> Path.join("areas/marsh")
+             |> Path.join("*/*")
+             |> Path.wildcard()
+             |> MapSet.new(&Path.relative_to(&1, Path.join(dir, "areas/marsh")))
+           )
+
+    assert read(dir, "npcs/keeper.json")["resource_starts"] == %{"coin" => 10}
+    assert File.exists?(Path.join(dir, "scenes/yo.scene"))
+    refute File.exists?(Path.join(dir, "scenes/hi.scene"))
+    assert {:ok, _, _} = Loka.Content.compile(dir)
+
+    # A bundled NPC's scene goes beside its bundle, in areas/<bundle>/scenes/ (no row: no layout).
+    File.rm!(Path.join(dir, "layout.json"))
+    bundle(dir, "fen")
+
+    edit(
+      dir,
+      "areas/fen.json",
+      &Map.put(&1, "npcs", %{"fenman" => read(dir, "npcs/keeper.json")})
+    )
+
+    run.(~w(--cwd #{tmp} scene fenman lo mine))
+    assert File.exists?(Path.join(dir, "areas/fen/scenes/lo.scene"))
+    assert {:ok, _, _} = Loka.Content.compile(dir)
   end
 
   # Break: a refusal after a pair merged into an author's file deletes it or leaves the merge.

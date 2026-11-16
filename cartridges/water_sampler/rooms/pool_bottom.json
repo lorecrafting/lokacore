@@ -1,0 +1,9 @@
+{
+  "name": "room.pool_bottom.title",
+  "description": "room.pool_bottom.description",
+  "exits": {
+    "up": {
+      "to": "pool"
+    }
+  }
+}

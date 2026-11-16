@@ -84,11 +84,11 @@ let w: World;
 
 // Breaks: the hub has no ladder up, the sign is not readable in the loft, or an unlearned spell
 // leaks into spell_words.
-test('magic 1: up the ladder; the sign reads and the Word bar is empty', () => {
+test('magic 1: up the ladder; the sign reads and the Word bar holds only mend', () => {
   w = go(newWorld(content, ctx(CTX), [1, 2, 3, 4]), 'up').world;
   const sign = play(w, { type: 'read', target_id: detail(w, 'sign_magic') });
   assert.deepEqual(sign.lines, ['readable.sign_magic']);
-  assert.equal(words(w), undefined);
+  assert.equal(String(words(w)?.map((s) => s.word)), 'mend');
 });
 
 // Breaks: the wizard opens the errand before teaching lux, the errand is not accepted, lux casts

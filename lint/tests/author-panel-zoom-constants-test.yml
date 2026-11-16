@@ -1,0 +1,12 @@
+id: author-panel-zoom-constants
+valid:
+  - "const a = g.zoom(1 / M.step);"
+  - "const d = zoom < F.overview;"
+  - "const x = h.y * v.zoom + v.x + 4;"
+  - "const w = M.disc / zoom;"
+  - "const z = v.view?.zoom ?? 1;"
+invalid:
+  - "const minZoom = 0.25;"
+  - "const v = { x: 0, zoom: 0.5 };"
+  - "const d = zoom < 0.5;"
+  - "const a = g.zoom(1.25);"

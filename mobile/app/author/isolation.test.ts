@@ -20,6 +20,7 @@ const SHARED = new Set([
   '@types/react',
   '@types/react-dom',
   'vite',
+  'playwright',
 ]);
 
 // Breaks: a panel package (radix-ui, tailwind, shadcn's helpers; vite is already Storybook's) is installed into mobile/app,

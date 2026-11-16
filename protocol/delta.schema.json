@@ -28,7 +28,7 @@
       ]
     },
     "FactValue": {
-      "description": "The value of a fact, in fact.assign, fact_compare and fact_changed: a Key, a safe integer or a boolean, the value types FactSpec declares (fact.schema.json; 03 §7). Which one a fact takes is its FactType, which the compiler checks.",
+      "description": "A fact's value: a word, a whole number, or true or false, matching the fact's type.",
       "anyOf": [
         {
           "$ref": "action.schema.json#/$defs/Key"

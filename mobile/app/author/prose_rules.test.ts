@@ -5,6 +5,12 @@ import { join } from 'node:path';
 import { test } from 'node:test';
 import { color } from '../book/tokens.ts';
 import {
+  bind,
+  clicked,
+  lost,
+  nextPage,
+  selects,
+  shortcut,
   noFieldNote,
   oneLine,
   paletteNear,
@@ -80,8 +86,8 @@ test("the panel hands the Book its walk keys and Enter, but not a field's or a c
 test('a line with no field says why', () => {
   assert.equal(noFieldNote('item.taken'), 'The engine writes this line.');
   assert.equal(
-    noFieldNote('room.a', 'a choice label: its key is its words'),
-    'A choice label is its key. Alt-click opens the scene.',
+    noFieldNote('room.a', 'a choice label: reword it in the scene card'),
+    "A choice's words are edited in the scene card. Alt-click opens the scene.",
   );
   assert.equal(noFieldNote(undefined), 'Not a line of words. Alt-click opens its source.');
 });
@@ -115,4 +121,88 @@ test('only the gated require reaches the in-Book editor', () => {
       "author/panel.tsx: process.env.EXPO_PUBLIC_LOKA_DEV_CARTRIDGE === '1' ? require('./inbook.ts') : undefined;",
     ],
   );
+});
+
+// Breaks: a Book Cmd-Z or walk key goes to the panel (two undos), a panel shortcut stays in the
+// Book; a selection marks another definition's lines, or one whose key only starts the same.
+test('the Book hands the panel its shortcuts, and marks only the selection`s lines', () => {
+  const key = (k: string, mod = {}) => ({
+    key: k,
+    metaKey: false,
+    ctrlKey: false,
+    altKey: false,
+    ...mod,
+  });
+  assert.deepEqual(
+    ['k', '.', 'e', '\\', '/'].map((k) => shortcut(key(k, { metaKey: true }))),
+    ['k', '.', 'e', '\\', '/'],
+  );
+  assert.equal(shortcut(key('k', { ctrlKey: true })), 'k');
+  for (const asked of [
+    key('z', { metaKey: true }),
+    key(']'),
+    key('k'),
+    key('k', { metaKey: true, altKey: true }),
+  ])
+    assert.equal(shortcut(asked), undefined);
+  assert.ok(selects('room.hut.title', 'room', 'hut'));
+  assert.ok(
+    !selects('room.hutch.title', 'room', 'hut') && !selects('item.hut.short', 'room', 'hut'),
+  );
+  assert.ok(!selects(undefined, 'room', 'hut'));
+});
+
+// Breaks: a click on a title cap() drew selects nothing (exact words only); Alt-click opens the
+// drawn capital, not the file's words; the exact or the lowered form wins when both name a key
+// (journal_sampler's oar: the quest title's field opens on the item's title); or words two keys
+// draw bind to the last key drawn.
+test("a clicked line's key: its words or the capital lowered, none when two keys claim it", () => {
+  const seen = new Map<string, string>(),
+    said = new Map([['item.lantern.name', 'brass lantern']]);
+  bind(seen, 'brass lantern', 'item.lantern.name');
+  assert.deepEqual(clicked(seen, said, 'Brass lantern'), {
+    key: 'item.lantern.name',
+    words: 'brass lantern',
+  });
+  assert.deepEqual(clicked(seen, said, 'Not drawn'), { key: undefined, words: 'Not drawn' });
+  bind(seen, 'the lost oar', 'item.oar.short');
+  bind(seen, 'The lost oar', 'quest.oar.title');
+  assert.equal(clicked(seen, said, 'The lost oar').key, undefined);
+  assert.equal(clicked(seen, said, 'the lost oar').key, 'item.oar.short');
+  bind(seen, 'the lost oar', 'item.oar.short');
+  assert.equal(clicked(seen, said, 'the lost oar').key, 'item.oar.short', 'one key drawn twice');
+  bind(seen, 'the lost oar', 'quest.oar.name');
+  assert.equal(clicked(seen, said, 'the lost oar').key, undefined, 'two keys, one words');
+  // Break: the probe misses the collision, so the measurement counts zero and the design note's
+  // first step decides on nothing (loka-wfrgk.100.8). Both keys, once.
+  assert.deepEqual([...(lost.get('the lost oar') ?? [])].sort(), [
+    'item.oar.short',
+    'quest.oar.name',
+  ]);
+  assert.equal(lost.has('brass lantern'), false, 'one key drawing words lost nothing');
+  // Break: the probe records the "no field" mark ('') as a claimant, so a line already refused
+  // reads as a fresh collision and every sample names '' instead of the keys that clashed.
+  assert.deepEqual([...(lost.get('the lost oar') ?? [])].sort(), [
+    'item.oar.short',
+    'quest.oar.name',
+  ]);
+  // ...and a third key does not rewrite the pair: the collision already recorded is the real one.
+  bind(seen, 'the lost oar', 'item.oar.other');
+  assert.deepEqual([...(lost.get('the lost oar') ?? [])].sort(), [
+    'item.oar.short',
+    'quest.oar.name',
+  ]);
+});
+
+// Break: the bindings outlive the page, so two keys that share a wording on one page cost that
+// wording's field on every later page too -- the 'rest of the session' a PM report described. The
+// showcase has 59 such families (`item.egg_01..04.bare` all draw 'egg'), none sharing a page.
+test('a page change drops the bindings, so a later page opens its own field', () => {
+  const seen = new Map<string, string>();
+  bind(seen, 'egg', 'item.egg_01.bare');
+  bind(seen, 'egg', 'item.egg_02.bare'); // both on this page: neither opens
+  assert.equal(clicked(seen, new Map(), 'egg').key, undefined);
+  nextPage(seen);
+  bind(seen, 'egg', 'item.egg_03.bare'); // the next page draws one of them
+  assert.equal(clicked(seen, new Map(), 'egg').key, 'item.egg_03.bare');
 });

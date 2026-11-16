@@ -160,6 +160,37 @@ test('wisp attempts compose to their literal answers', () => {
     ]);
   });
 
+  // Breaks (loka-x6t.135): a cooling action or spell word projecting an end without its length (or
+  // the reverse), a zero length, or an end on an available entry.
+  test('a cooldown end and length come together on unavailable actions and spell words only', () => {
+    const action = {
+      available: false,
+      action_key: 'pray',
+      label: 'actions.pray',
+      target: { kind: 'none' },
+      input: [],
+      reason: { code: 'cooldown' },
+    };
+    const word = { word: 'lux', available: false, reason: { code: 'cooldown' } };
+    for (const [contract, v] of [
+      ['AdvertisedAction', action],
+      ['SpellWord', word],
+    ] as const) {
+      assert.deepEqual(validate(contract, { ...v, ends_at: 30, duration: 30 }), [], contract);
+      assert.deepEqual(validate(contract, { ...v, ends_at: 30 }), [
+        { path: '/duration', code: 'missing_property' },
+      ]);
+      assert.deepEqual(validate(contract, { ...v, duration: 30 }), [
+        { path: '/ends_at', code: 'missing_property' },
+      ]);
+      assert.deepEqual(validate(contract, { ...v, ends_at: 30, duration: 0 }), [
+        { path: '/duration', code: 'below_minimum' },
+      ]);
+      const { reason: _, ...open } = { ...v, available: true };
+      assert.notDeepEqual(validate(contract, { ...open, ends_at: 30, duration: 30 }), [], contract);
+    }
+  });
+
   // Breaks: a compiled status definition missing one field, or with a zero duration or cadence,
   // loads (the compiler's own checks are not the contract).
   test('a status definition requires every field and positive times', () => {

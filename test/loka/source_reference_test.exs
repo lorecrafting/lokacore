@@ -195,4 +195,55 @@ defmodule Loka.SourceReferenceTest do
     assert {message, 1} = generate(["--check", ctx.schemas, ctx.out])
     assert message =~ "source-kinds.gen.md is out of date"
   end
+
+  # Breaks: a field's line not taken from the schema (own, else its type's), an example from a
+  # non-sampler cartridge, from a later sampler or from an area folder missed, two closed shapes
+  # merged into one table (offering fields one shape rejects), or a sampler edit the check misses.
+  test "the field guide lists each field's description and a sampler example", ctx do
+    tmp = Path.dirname(ctx.out)
+    carts = Path.join(tmp, "cartridges")
+
+    defs =
+      @defs
+      |> put_in(["$defs", "Ref", "description"], "A planted ref.")
+      |> put_in(["$defs", "source.notes", "else"], %{
+        "if" => %{"required" => ["script"]},
+        "then" => %{"$ref" => "#/$defs/source.Scripted"},
+        "else" => %{"$ref" => "#/$defs/source.Note"}
+      })
+      |> put_in(["$defs", "source.Scripted"], %{
+        "properties" => %{"script" => %{"type" => "string"}}
+      })
+
+    File.write!(Path.join(ctx.schemas, "defs.schema.json"), JSON.encode!(defs))
+
+    for {file, body} <- [
+          {"b_sampler/notes/n.json", %{"title" => "t"}},
+          {"c_sampler/notes/p.json", %{"title" => "u"}},
+          {"a_sampler/areas/v/notes/m.json", %{"a" => []}},
+          {"other/notes/o.json", %{"ref" => "x"}}
+        ] do
+      File.mkdir_p!(Path.dirname(Path.join(carts, file)))
+      File.write!(Path.join(carts, file), JSON.encode!(body))
+    end
+
+    assert {_, 0} = generate([ctx.schemas, ctx.out, carts])
+    guide = File.read!(Path.join(tmp, "FIELD-GUIDE.gen.md"))
+
+    assert guide =~
+             "| title | Its a\\|b name. | [Key](reference/source-kinds.gen.md#key) | [cartridges/b_sampler/notes/n.json](../cartridges/b_sampler/notes/n.json) |\n"
+
+    assert guide =~
+             "| a |  | list of string | [cartridges/a_sampler/areas/v/notes/m.json](../cartridges/a_sampler/areas/v/notes/m.json) |\n"
+
+    assert guide =~ "| ref | A planted ref. | [Ref](reference/source-kinds.gen.md#ref) |  |\n"
+
+    # Two closed shapes get a table each: `script` only beside its own shape's fields.
+    assert guide =~
+             "### Shape 1\n\n| Field | What it does | Allowed values | Example |\n|---|---|---|---|\n| script |  | string |  |\n\n### Shape 2\n"
+
+    File.write!(Path.join(carts, "b_sampler/notes/k.json"), JSON.encode!(%{"ref" => "y"}))
+    assert {message, 1} = generate(["--check", ctx.schemas, ctx.out, carts])
+    assert message =~ "FIELD-GUIDE.gen.md is out of date"
+  end
 end

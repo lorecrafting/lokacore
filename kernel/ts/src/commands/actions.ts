@@ -21,6 +21,7 @@ import { detailOf, questOffers } from './quest_offers.ts';
 import { modal, pending, talks } from '../mechanics/dialogue/shared.ts';
 import { permits } from '../mechanics/status/permits.ts';
 import { sub } from '../foundation/int.ts';
+import { SAFE } from '../foundation/canonical.ts';
 import { pay } from '../mechanics/resource.ts';
 import { accepts, aimedOffers, hiddenTarget, primaryTarget } from './action_input.ts';
 import * as scene from '../mechanics/scene/shared.ts';
@@ -262,6 +263,18 @@ export function refusalReason(
 const allScripted = (world: World) => Object.values(world.cartridge.scripted_actions ?? {});
 const keyed = (world: World) => allScripted(world).filter((r) => r.target.kind !== 'spell');
 const scriptedKeys = (world: World) => keyed(world).map((r) => r.key);
+
+/**
+ * The GameView's projection of a running cooldown, for a scripted action whose admission refused with
+ * cooldown (so the cooldown and the actor's last attempt exist; protocol GameView ends_at/duration): its
+ * end (the last admitted attempt plus the cooldown, the first time admission passes again) and length;
+ * undefined when that end passes 2^53 - 1.
+ */
+export function cooling(world: World, scripted: ScriptedAction, actor_id: CharacterId) {
+  const last = world.state.cooldowns![key({ kind: 'cooldown', actor_id, action: scripted.key })]!;
+  const duration = scripted.cooldown!;
+  return duration <= SAFE - last ? { ends_at: last + duration, duration } : undefined;
+}
 
 /**
  * A scripted action's admission for `actor_id` acting through `body`, after its policy and target, shared

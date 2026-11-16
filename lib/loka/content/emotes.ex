@@ -8,7 +8,6 @@ defmodule Loka.Content.Emotes do
   import Loka.Content.Refs, only: [owned: 3, owners: 2, reference: 6]
 
   def check(nil, _, _, _), do: []
-  def check(_, _, nil, _), do: []
 
   def check(m, defs, {_, text}, registry) do
     required = {m["requires"]["capabilities"], owners(registry, ["definitions"])}

@@ -1,9 +1,9 @@
 // The Story map's model (docs/system/cartridge.md#content-reports; docs/rnd/story-map-design-2026-11-05.md
-// section 11 S1): reach.ts's content graph and reach report over the compiled artifact, plus the
-// dialogue links it cannot see (a choice's `then` is a key, a reaction's `choice_resolved` names a
-// choice), the `~` placeholders and the compiler's diagnostics by node, and outline.json's beats
-// with their status and the seeds-and-payoffs check. live.ts serves it as `GET /story`;
-// `bin/loka story <cartridge dir>` prints it. Potential findings for authors, not a check.
+// section 11 S1): reach.ts's graph and report over the compiled artifact, the dialogue links it cannot
+// see (a choice's `then` is a key, a reaction's `choice_resolved` names a choice), the `~`
+// placeholders, the compiler's diagnostics by node, and outline.json's beats.
+// size: allow 312, K1's condition nodes: the compile substitutes a `named` leaf away, so a
+// condition is read from the source (conditions.ts), not the artifact.
 import { existsSync, readFileSync } from 'node:fs';
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import { createHash } from 'node:crypto';
@@ -12,9 +12,22 @@ import { INSTALLED, loadCartridge } from '../src/index.ts';
 import { isObj, step, type Obj } from '../src/content/cartridge_refs.ts';
 import { encode, type Json } from '../src/foundation/canonical.ts';
 import { artifactBytes, compiled } from './compiled.ts';
-import { contentGraph, reachReport } from './reach.ts';
+import { contentGraph, factUsage, reachReport } from './reach.ts';
+import { conditionGraph } from './conditions.ts';
 import { placed } from './guard.ts';
-import { todo, type Todo } from './todo.ts';
+import { bundled, files, todo, type Todo } from './todo.ts';
+import {
+  choiceCounts,
+  hiddenSkills,
+  keysIn,
+  resolve,
+  shorts,
+  unlinkable,
+  wordsByNode,
+  names,
+} from './story_counts.ts';
+import { refString } from '../src/runtime/decision.ts';
+import { triggers } from './scene_trigger.ts';
 
 type Dev = { canonical: string; sha256: string };
 type Diagnostic = { rel?: string };
@@ -41,11 +54,10 @@ const isOutline = (o: unknown): o is Outline =>
       ),
   );
 
-/** Each choice's `then`/`then_failed` (not `end`) as an edge to that dialogue, and each
- * `choice_resolved` reaction filtered on a choice key as an edge from every dialogue with that choice. */
-function links(c: Obj) {
+/** Each choice's `then`/`then_failed` edge, and a `choice_resolved` reaction, with its choice. */
+export function links(c: Obj) {
   const dialogues = Object.entries((c.dialogues ?? {}) as Obj) as [string, Obj][];
-  const edges: { from: string; to: string; path: string; op: string }[] = [];
+  const edges: { from: string; to: string; path: string; op: string; choice?: string }[] = [];
   for (const [from, d] of dialogues)
     for (const [choice, o] of Object.entries((d.choices ?? {}) as Record<string, Obj>))
       for (const field of ['then', 'then_failed'])
@@ -59,9 +71,10 @@ function links(c: Obj) {
   for (const [to, r] of Object.entries((c.reactions ?? {}) as Record<string, Obj>)) {
     const on = r.on as Obj;
     if (on?.event !== 'choice_resolved') continue; // the kernel's load checks choice is a string
+    const choice = on.choice as string;
     for (const [from, d] of dialogues)
-      if (isObj(d.choices) && (on.choice as string) in d.choices)
-        edges.push({ from, to, path: '.on.choice', op: 'choice_resolved' });
+      if (isObj(d.choices) && choice in d.choices)
+        edges.push({ from, to, path: '.on.choice', op: 'choice_resolved', choice });
   }
   return edges;
 }
@@ -85,14 +98,6 @@ function nodeOf(rel: string | undefined, refs: Map<string, string>) {
   return at && refs.get(`${at.ext === 'scene' ? 'dialogues' : at.dir}/${at.key}`);
 }
 
-// Every string in a definition: among them, the text keys it names.
-const keysIn = (v: unknown): string[] =>
-  typeof v === 'string'
-    ? [v]
-    : isObj(v) || Array.isArray(v)
-      ? Object.values(v).flatMap(keysIn)
-      : [];
-
 const add = <T>(into: Record<string, T[]>, ref: string | undefined, row: T) => {
   if (ref) (into[ref] ??= []).push(row);
 };
@@ -111,6 +116,28 @@ function todoByNode(source: string, refs: Map<string, string>, defs: Map<string,
   return out;
 }
 
+/** A bundle's members by ref: not `files` (no card of their own), but their area's (reachable). */
+const bundledRefs = (source: string, refs: Map<string, string>) =>
+  Object.fromEntries(
+    Object.entries(bundled(source)).flatMap(([k, rel]) =>
+      refs.has(k) ? [[refs.get(k)!, rel]] : [],
+    ),
+  );
+
+// each node's own source file, for the inspector's card: a `.json`, else its `.scene` (a `.cut` none)
+const ownFiles = (source: string, refs: Map<string, string>) => {
+  const json = (f: string) => Number(f.endsWith('.json'));
+  const pairs = files(source)
+    .filter((f) => /\.(json|scene)$/.test(f))
+    .sort((a, b) => json(a) - json(b))
+    .map((rel) => [nodeOf(rel, refs), rel]);
+  return Object.fromEntries(pairs.filter(([ref]) => ref)) as Record<string, string>;
+};
+
+/** A ref's prefix, `<id>@<version>`, as every node the artifact yields already reads. */
+const cartridgeOf = (c: Obj) =>
+  `${(c.manifest as Obj).id as string}@${(c.manifest as Obj).version as string}`;
+
 /** The model for `source` compiled to `dev`, with the compile's diagnostics. */
 export function story(source: string, dev: Dev, diagnostics: Diagnostic[]) {
   const loaded = loadCartridge(artifactBytes(dev), INSTALLED);
@@ -120,18 +147,62 @@ export function story(source: string, dev: Dev, diagnostics: Diagnostic[]) {
   graph.edges.push(...links(c));
   const report = reachReport(c);
   const { refs, defs } = shortRefs(c, graph.nodes);
+  // a condition is substituted away at compile, so its node and reader edges come from the source;
+  // a bundle's members have no file of their own, so `refs` gains their `${section}/${key}` keys
+  const { nodes, edges } = conditionGraph(source, cartridgeOf(c), refs, bundled(source));
+  graph.nodes.push(...nodes);
+  graph.edges.push(...edges);
   const todos = todoByNode(source, refs, defs);
   const byNode: Record<string, Diagnostic[]> = {};
   for (const d of diagnostics) add(byNode, nodeOf(d.rel, refs), d);
   const unreached = new Set(Object.values(report.unreachable).flat());
+  const sources = ownFiles(source, refs);
+  const inBundle = bundledRefs(source, refs);
   return {
     hash: dev.sha256,
     graph,
+    files: sources,
+    bundled: inBundle,
     report,
+    facts: factUsage(c), // F1's table (storyfacts.ts); `range` is the compiler's, added by the panel
     todo: todos,
     diagnostics: byNode,
     outline: beats(source, { refs, defs, todos, unreached }),
+    map: rooms(c, sources, inBundle),
+    words: wordsByNode(defs, (c.text ?? {}) as Record<string, unknown>),
+    names: names(defs, (c.text ?? {}) as Obj), // the Hierarchy's and palette's `key · name`
+    choices: choiceCounts(c),
+    hidden: hiddenSkills(c), // the cards' add menus and links (allowed.ts, link.ts)
+    unlinkable: unlinkable(c),
+    shorts: shorts(refs, defs), // what Bind may write
+    triggers: triggers(c, graph.edges), // what a modal scene may start on (Scene.tsx)
   };
+}
+
+/** The editor map's rooms (docs/design/editor-map-and-story-rulings.md E3a): each with its source
+ * file, its area (the folder, or an `areas/<name>.json` bundle; null at the root), its title's
+ * words, its exits and its layout.json cell (`at`, absent when unplaced). */
+function rooms(c: Obj, own: Record<string, string>, inBundle: Record<string, string>) {
+  const file = new Map<string, [string, string | null]>();
+  for (const [ref, rel] of Object.entries(own)) file.set(ref, [rel, placed(rel)!.area]);
+  for (const [ref, rel] of Object.entries(inBundle)) file.set(ref, [rel, rel.slice(6, -5)]); // areas/<a>.json
+  const at = new Map(
+    ((c.layout ?? []) as Obj[]).map(({ room, x, y, z }) => [refString(room as never), { x, y, z }]),
+  );
+  return Object.entries((c.rooms ?? {}) as Record<string, Obj>).map(([ref, r]) => ({
+    ref,
+    key: r.key as string,
+    file: file.get(ref)?.[0],
+    area: file.get(ref)?.[1] ?? null,
+    title: ((c.text ?? {}) as Obj)[r.name] ?? r.name,
+    exits: Object.entries(r.exits as Record<string, Obj>).map(([dir, e]) => ({
+      dir,
+      to: e.to.key as string,
+      ...(e.barrier && { barrier: e.barrier.key as string }),
+      ...(e.hidden_until && { hidden: true }),
+    })),
+    at: at.get(ref),
+  }));
 }
 
 type Bound = {
@@ -140,17 +211,6 @@ type Bound = {
   todos: Record<string, unknown>;
   unreached: Set<string>;
 };
-
-// A short ref's node: a dialogue choice `dialogues/<d>/<c>` is its dialogue's, when it has that choice.
-function resolve(short: string, { refs, defs }: Bound) {
-  const [dir, key, choice] = short.split('/');
-  const ref = refs.get(`${dir}/${key}`);
-  if (choice === undefined || !ref) return ref;
-  const d = defs.get(ref);
-  return dir === 'dialogues' && isObj(d) && isObj(d.choices) && choice in d.choices
-    ? ref
-    : undefined;
-}
 
 function readOutline(source: string): Outline | { refused: string } | null {
   const file = join(source, 'outline.json');
@@ -161,9 +221,14 @@ function readOutline(source: string): Outline | { refused: string } | null {
   } catch (e) {
     return { refused: `outline.json: ${(e as Error).message}` };
   }
-  return isOutline(outline)
+  if (!isOutline(outline))
+    return { refused: 'outline.json: not the shape of schemas/source/outline.schema.json' };
+  // a beat's n is its row id, its palette target and the beat Bind writes to: two of one n are refused
+  const ns = outline.parts.flatMap((p) => p.beats.map((b) => b.n));
+  const twice = ns.find((n, i) => ns.indexOf(n) !== i);
+  return twice === undefined
     ? outline
-    : { refused: 'outline.json: not the shape of schemas/source/outline.schema.json' };
+    : { refused: `outline.json: beat ${twice} is numbered twice` };
 }
 
 function beats(source: string, bound: Bound) {
@@ -171,7 +236,7 @@ function beats(source: string, bound: Bound) {
   if (!outline || 'refused' in outline) return outline;
   const all = outline.parts.flatMap((p, part) => p.beats.map((b) => ({ ...b, part })));
   const rows = all.map(({ part, n, title, nodes = [] }) => {
-    const refs = nodes.map((short) => resolve(short, bound));
+    const refs = nodes.map((short) => resolve(short, bound.refs, bound.defs));
     const missing = nodes.filter((_, i) => !refs[i]);
     const status =
       !nodes.length || missing.length
@@ -187,6 +252,7 @@ function beats(source: string, bound: Bound) {
       ...(title !== undefined && { title }),
       status,
       ...(missing.length && { missing }),
+      nodes: [...new Set(refs.filter((r) => r !== undefined))],
     };
   });
   // each seed needs a pays in a later beat, each pays a seed in an earlier one (outline order)
@@ -200,7 +266,7 @@ function beats(source: string, bound: Bound) {
       .filter((p) => !all.slice(0, i).some((e) => e.seeds?.includes(p)))
       .map((pays) => ({ pays, n: b.n })),
   );
-  return { beats: rows, unpaid, unseeded };
+  return { parts: outline.parts.map((p) => p.title ?? null), beats: rows, unpaid, unseeded };
 }
 
 /** live.ts's `GET /story`: the model built on the first ask after each compile (`stale()`), with

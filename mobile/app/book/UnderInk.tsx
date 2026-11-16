@@ -81,9 +81,9 @@ const riseFade = (still: boolean) => ({
   reduceMotion: ReduceMotion.Never,
 });
 
-function useLayers(view: GameView, c: Palette, treatment?: Treatment) {
+function useLayers(view: GameView, c: Palette, treatment?: Treatment, dead?: boolean) {
   const still = useReducedMotion();
-  const [fatal, setFatal] = useState(false);
+  const [fatal, setFatal] = useState(!!dead);
   useEffect(
     () =>
       onCue((cue) => {
@@ -122,9 +122,12 @@ function useLayers(view: GameView, c: Palette, treatment?: Treatment) {
   return { glowStyle, edgeStyle, washStyle };
 }
 
+// `dead`: the dead page, under the fatal hold from mount (book-ui.md, Dead page).
+type Props = { view: GameView; treatment?: Treatment; dead?: boolean };
+
 /**
  * The spirit layer, the lamp glow and the low-health vignette under a page's ink.
- * - Use: behind a `paperless` Page, on World and Combat.
+ * - Use: behind a `paperless` Page, on World, Combat and the dead page.
  * - Rules: paper, not a part: draws no block, holds no words, takes no touch. Only the highest of
  *   the fatal hold, the vignette and the glow shows; a lower one fades out over `motion.settle` and
  *   returns the same way. Storm's light cuts it for the strike; it returns over `motion.settle`.
@@ -135,12 +138,13 @@ function useLayers(view: GameView, c: Palette, treatment?: Treatment) {
  *   `motion.palette` (`motion.fade` under reduced motion, still a fade; Flashes off the same); a
  *   plain view, so it draws on the web too.
  * - States: none; glow (in `motion.palette`, by cut under reduced motion); vignette (breathes;
- *   steady at `opacity.faint` under reduced motion); under a fatal hold; spirit; reverie.
+ *   steady at `opacity.faint` under reduced motion); under a fatal hold (a fight's death, or `dead`
+ *   from mount); spirit; reverie.
  * - Story: UnderInk.stories.tsx
  */
-export function UnderInk({ view, treatment }: { view: GameView; treatment?: Treatment }) {
+export function UnderInk({ view, treatment, dead }: Props) {
   const c = usePalette();
-  const { glowStyle, edgeStyle, washStyle } = useLayers(view, c, treatment);
+  const { glowStyle, edgeStyle, washStyle } = useLayers(view, c, treatment, dead);
   // Once drawn a layer stays, at no opacity, so it can fade out over the settle.
   const drawn = useRef({ lit: false, low: false, wash: false }).current;
   drawn.lit ||= lampLit(view, c.bg);

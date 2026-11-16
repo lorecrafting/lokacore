@@ -3,7 +3,6 @@ defmodule Loka.Content.Food do
   import Loka.Content.Source, only: [diag: 3, at: 2]
 
   def check(nil, _, _), do: []
-  def check(_, _, nil), do: []
 
   def check(m, defs, {_, text}) do
     foods = for {_, {rel, [], %{"edible" => _} = item}} <- defs["item"], do: {rel, item}

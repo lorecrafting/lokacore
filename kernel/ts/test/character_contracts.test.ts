@@ -107,7 +107,6 @@ test('fresh ancestry choices keep their required projected shape', () => {
   assert.ok(loaded.ok, JSON.stringify(loaded));
   if (!loaded.ok) return;
   assert.equal(loaded.cartridge.format, 'loka-cartridge-v2');
-  if (loaded.cartridge.format !== 'loka-cartridge-v2') return;
   const view = gameView(
     newWorld(loaded.cartridge, ctx('0d4e8a5c-3f1b-4c2a-9e7d-6b5a4c3d2e1f'), [1, 2, 3, 4]),
   );

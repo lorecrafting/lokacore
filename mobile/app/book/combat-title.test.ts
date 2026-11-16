@@ -19,6 +19,7 @@ const text = (key: string) => words[key] ?? key;
 const goblin = { id: 'g', name: 'npc.goblin.short', words: { bare: 'npc.goblin', article: 'the' } };
 const fight = (encounter_id: string) => ({
   encounter_id,
+  interval: 150,
   opponent_id: 'g',
   name: 'npc.goblin.short',
   active_opponents: [goblin, { id: 'r', name: 'npc.rat' }],
@@ -50,7 +51,7 @@ test('the title names who opened each fight, and nothing when that is not known'
 // Breaks: the title blanks while the opener cannot be read (a save in flight, the opener fallen),
 // or a new fight with no known opener keeps the last fight's title.
 test('a fight keeps its title while its opener is unread; the next fight has its own', () => {
-  const rat = { encounter_id: 'fight', opponent_id: 'rat', name: 'npc.rat' };
+  const rat = { encounter_id: 'fight', opponent_id: 'rat', name: 'npc.rat', interval: 150 };
   const h = mounted(
     view({ combat: { ...rat, active_opponents: [{ id: 'rat', name: 'npc.rat' }] } }),
   );
