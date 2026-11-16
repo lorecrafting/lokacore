@@ -28,14 +28,14 @@ test('committed combat line indices come from pinned keys and structured receipt
               narration: {
                 player_hit: 'authored.strike',
                 npc_died: 'authored.fall',
-                // The same key the death's own narration names below: the spec's default, so one key
-                // can be told in a fight and off one (loka-kgd.222).
+                // The fall line's only key: the death's own is absent below, as in the showcase, so
+                // this is the spec's default that an off-fight death must use (loka-kgd.222).
                 player_died: 'authored.death',
               },
               tiers: [{ at_percent: 50, npc_hit: 'authored.maul' }],
               conditions: [{ at_percent: 75, text: 'authored.cuts' }],
             },
-            death: { narration: { woke: 'authored.woke', player_died: 'authored.death' } },
+            death: { narration: { woke: 'authored.woke' } },
           },
         },
       },

@@ -4,6 +4,7 @@ import { detailOf } from '../../../kernel/ts/src/commands/actions.ts';
 import { validate } from '../../../kernel/ts/src/foundation/validate.ts';
 import { bellCue } from '../../../kernel/ts/src/mechanics/bell/cue.ts';
 import { engaged } from '../../../kernel/ts/src/mechanics/combat/shared.ts';
+import { fallLine } from '../../../kernel/ts/src/mechanics/death/lines.ts';
 import { bodyOf, refString, type Accepted } from '../../../kernel/ts/src/runtime/decision.ts';
 import type { NarrationRecord } from '../../packages/game-view/session.ts';
 import { arrival, defenseEvidence } from './combat-receipt.ts';
@@ -85,13 +86,12 @@ const latest = (s: Story, command_id: string | undefined, before: number | null)
 
 const bleedKeys = (s: Story) =>
   Object.values(s.world.cartridge.bleeds ?? {}).flatMap((bleed) => Object.values(bleed.narration));
-
 // A player's death that closes no encounter is the dead page's, whose log is the room's (book-ui.md,
 // Dead page); its key is the room's even on a receipt that also ran rounds (loka-kgd.222).
 const offFightFall = (s: Story, d: Accepted) =>
   d.events.some((e) => e.payload.type === 'entity_died' && !e.payload.victim_definition) &&
   !d.delta.ops.some((o) => o.op === 'encounter.close')
-    ? s.world.cartridge.world?.death?.narration?.player_died
+    ? fallLine(s.world)[0]?.key
     : undefined;
 
 // Combat lines: a receipt opening an encounter (book-ui.md, Opening), attack, pack, skip, bleed.
