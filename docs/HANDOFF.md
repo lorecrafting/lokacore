@@ -171,7 +171,7 @@ guide documents the three-column shell, Cmd-K, Cmd-E and double-click-to-edit) �
 
 ## Retros awaiting the owner's yes/no
 
-**2026-11-16 (one new item):** loka-nrrk1 — **the PM's `ci_wait.sh` reports failure on green heads.** Evidence: on PR
+**2026-11-16 (one new item):** loka-wpw6x — **the PM's `ci_wait.sh` reports failure on green heads.** Evidence: on PR
 #740's head `18568fed55` it exited 1 while `gh run list --commit` showed `graph-diff`, `ci` and `book-e2e` all
 `success`, and `gh pr checks 740` showed every other job `pass` with `sim` and `walk` merely `skipping` (the normal
 state for a diff touching neither cartridge). Three tasks this session (`be4fd552d`, `b507857c0`, `baa27ef41`) wrote
