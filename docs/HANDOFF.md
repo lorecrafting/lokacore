@@ -4,7 +4,7 @@ The present only: open work, next steps, owner questions, and standing owner rul
 yet. Rewrite this page in place once per session, at its end; never add dated session sections. History lives in git, Beads and `docs/reviews/`; lessons
 go to [PM lessons](lessons/pm.md) ([harness patterns](decisions/owner-decision-harness-patterns-2026-10-28.md)).
 
-AS OF main after c7d851454 (PR #743); written 2026-11-16 22:20 UTC in the Pi harness by deploy/deepseek-ai/deepseek-v4.1-flash-1017, PM session.
+AS OF main after 90862bcf3 (PR #744); written 2026-11-16 22:50 UTC in the Pi harness by deploy/deepseek-ai/deepseek-v4.1-flash-1017, PM session.
 `kernel_api` is 1.159 (no contract slice since). **The owner is pausing the Anthropic subscription, so every reviewer
 and developer here now runs on `deploy/deepseek-ai/deepseek-v4.1-flash-1017`** (`~/.pi/agent/agents/loka-dev.md`,
 `loka-review.md` repinned 2026-11-13). **Nothing is mid-merge, nothing is in flight, no agent is running.**
@@ -100,9 +100,9 @@ since 11-07") closed because the number dropped.
 
 ## In flight at handoff
 
-**#744 (loka-x6t.6, stars only outdoors) is open with CI running.** Nothing else is in flight.
+Nothing. #744 (loka-x6t.6, stars only outdoors) merged after this page was written; the next slice starts from main.
 
-**This session (2026-11-16, third block) merged five PRs, all opened and closed by this PM:**
+**This session (2026-11-16, third block) merged six PRs, all opened and closed by this PM:**
 #739 **loka-kgd.223, the flows crash** (closed): `one_container_per_item` and `containment_acyclic` admitted only an
 edible item to the terminal consumed holder, but a death-created corpse decaying to it and a cured bandage were both
 lawful — so an accepted step made both world invariants false and `flows.ts:175` crashed on seed 4 step 130 after
