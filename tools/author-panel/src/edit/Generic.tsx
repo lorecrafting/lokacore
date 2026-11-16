@@ -202,14 +202,14 @@ function useSettled(commit: () => void) {
     stamp.current = undefined;
   }, []);
   useEffect(() => () => clearTimeout(stamp.current), []);
-  return { soon, stop, waiting: () => !!stamp.current };
+  return { soon, stop };
 }
 
 /** The card's form: rjsf draws the file under `ui`, each blur commits, refusals at their field. */
 export function CardForm({ rel, card, context, diag, ui, fields: picks = fields }: FormProps) {
   // rjsf keeps an added row's key in its own state: a renamed row redraws
   const [rows, remount] = useReducer((n: number) => n + 1, 0); // mutate-skip: a redraw key; any start or step redraws
-  const { soon, stop, waiting } = useSettled(card.commit);
+  const { soon, stop } = useSettled(card.commit);
   const change = (doc: unknown, row = capabilityRow(doc as never)) => {
     void (row !== doc && remount(), card.change(row));
   };
