@@ -26,6 +26,15 @@ const byPhase = new Map([
 ]);
 export const paletteOf = (solar?: string) => byPhase.get(solar!) ?? color.light;
 
+/**
+ * Whether the night sky draws over the page: the palette's darkest paper *and* a room open to the
+ * weather. `exposed` is the room's authored tag (room.tags: the same one the light and exposure
+ * mechanics read), so a lit cave or a house at night keeps its dark page without stars over it
+ * (loka-x6t.6). Default is outdoor: a room that names no tag keeps the sky it has always had.
+ */
+export const starsShow = (shown: Palette, exposed?: true) =>
+  shown.bg === color.dark.bg && exposed === true;
+
 // The palette to show for `target`: at once on mount, without a curve (reduced motion) and on a
 // polarity flip (ink and paper cross, so no fade keeps text readable: BOOK-UI-COMPONENTS.md
 // #design-tokens), else cross-faded along `curve` over motion.palette from whatever is shown (a

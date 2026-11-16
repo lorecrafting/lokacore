@@ -22,6 +22,7 @@ import { usePaletteCurve, useReducedMotion } from './fade.ts';
 import {
   PaletteContext,
   paletteOf,
+  starsShow,
   TypeContext,
   useBookPalette,
   usePalette,
@@ -234,7 +235,7 @@ export function BookView(p: ViewProps) {
             <Heard said={p.screen.said} />
             <HapticPulse />
           </View>
-          {p.palette.bg === color.dark.bg && <NightSky />}
+          {starsShow(p.palette, p.screen.view.place.exposed) && <NightSky />}
         </SafeAreaView>
       </TypeContext>
     </PaletteContext>
