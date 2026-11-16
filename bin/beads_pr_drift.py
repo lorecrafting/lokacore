@@ -26,7 +26,10 @@ def drift(issues, states):
             lines.append(f"drift: {issue['id']} is closed but PR #{number} is still OPEN")
     for number, state in states.items():
         if state == "OPEN" and number not in referenced:
-            lines.append(f"drift: open PR #{number} has no Beads issue")
+            lines.append(
+                f"drift: open PR #{number} has no linked issue (an unlinked issue is likely: "
+                f"br update <id> --external-ref https://github.com/<owner>/<repo>/pull/{number})"
+            )
     return sorted(lines)
 
 
