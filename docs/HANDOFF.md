@@ -154,15 +154,14 @@ class, three times). `close` runs it now, with a red control.
    at its head, and no per-node one is ever set. A per-node cite key must be added to the generated schemas first
    (`schemas/source/`, `protocol/`), so it is a schema slice of its own. Scale today: 11 `§` cites in
    `schemas/source/*.json`, 23 in `lib/loka/content/*.ex`.
-5. Housekeeping: **2 open, 4 deferred** under the label (was 74, then 10). The 55 closed this session were verified already-fixed, duplicates or
+5. Housekeeping: **2 open, 3 deferred** under the label (was 74, then 10; `7anzq` and `atj0g` closed as already
+   fixed after checking `bin/after_merge.sh:73-78` and `bin/pm_merge.sh:44-48`). The 55 closed this session were verified already-fixed, duplicates or
    procedural advice. This session closed **loka-wfrgk.117** (generators no longer read an
    untracked cartridge: both now filter per cartridge, since the red control plants a transcript *inside* a tracked
    cartridge) and **loka-fd8km** (`bin/lib/beads_sync.sh` no longer `git pull`s, which raced a concurrent fetch and
    rewrote `FETCH_HEAD`). Both in #741. **Open (2):** `wfrgk.54` (E6c2 self-review, four files, deferred behind Part 1) and `vduxr.64`
    (done in #632, awaiting that PR's merge). **Deferred (4):** `rvbmn` (a Walk-head check in push_slice),
-   `00p0u` (a combat narration routing check), `7anzq` and `atj0g` — but read the next line first.
-   `7anzq` and `atj0g` are **already fixed** (`bin/after_merge.sh:73-78` passes `--force` for a PR's own
-   follow-ups; `bin/pm_merge.sh:44-48` refuses a schema change with no review record) so they close on sight.
+   `00p0u` (a combat narration routing check), `e9ey` (the `@tmcp/transport-http` override).
    `7vnzm` was closed: the `.gitignore` and `worktree_setup.sh` halves shipped in #733.
 
 **Phase 0, 2 and 3 of the authoring-readiness plan are done** — do not re-plan them. Phase 0 was ff954162a
