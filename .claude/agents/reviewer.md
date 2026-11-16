@@ -1,7 +1,7 @@
 ---
 name: reviewer
 description: Fresh, independent reviewer for one Loka v3 PR; authored none of it. Proportionately adversarial. Writes the review record. Use per docs/WORKFLOW.md.
-tools: Bash, Read, Edit, Write, Skill, ReportFindings, ToolSearch
+tools: Bash, Read, Edit, Write, Skill, ReportFindings, ToolSearch, LSP
 model: opus
 autoCompactWindow: 200000
 ---

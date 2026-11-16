@@ -1,7 +1,7 @@
 ---
 name: Explore
 description: Read-only search and lookup for Loka v3 (files, citations, consumers); returns paths, line ranges and short quotes, never judgment.
-tools: Read, Grep, Glob
+tools: Read, Grep, Glob, LSP
 model: haiku
 ---
 
