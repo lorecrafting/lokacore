@@ -43,6 +43,9 @@ const PLACE: Record<string, string> = {
 const dirOf = (section: string) => (section === 'scripted_actions' ? 'actions' : section);
 /** A name as the index writes it: `<area>/<key>` for an area's, `<dir>/<key>` for the root's. */
 const where = (p: Place) => `${p.area ?? p.dir}/${p.key}`;
+/** A room named from elsewhere: `<area>/<key>`, or its bare key for the root, whose `(root)` label
+ * already says where it is (its own folder, `rooms/`, is not an area). */
+const target = (p: Place) => (p.area ? `${p.area}/${p.key}` : p.key);
 const byKey = (a: Place, b: Place) => (a.key < b.key ? -1 : 1);
 
 /** Each source definition's area by `<dir>/<key>`: its folder (`areas/<a>/`), its bundle's, or none. */
@@ -103,7 +106,7 @@ function roomLine(d: Def, cross: Cross[], spot?: number[], entry?: string) {
   const exits = Object.keys(isObj(d.body.exits) ? d.body.exits : {}).flatMap((dir) => {
     const to = cross.find((c) => c.from === d && c.at === `exits.${dir}.to`)?.to;
     if (!to) return [];
-    return [`${dir} ${to.area === d.area ? to.key : `-> ${where(to)}`}`];
+    return [`${dir} ${to.area === d.area ? to.key : `-> ${target(to)}`}`];
   });
   const spotText = spot ? ` (${spot.join(',')})` : '';
   return `${d.key}${spotText}${entry === d.key ? ' [entry]' : ''}  exits: ${exits.join(', ') || 'none'}`;
@@ -174,7 +177,7 @@ function worldBorders(cross: Cross[]) {
   const exits = cross.flatMap((c) => {
     const dir = /^exits\.([a-z_]+)\.to$/.exec(c.at)?.[1];
     return dir && crossing(c.from, c.to)
-      ? [`${side(c.from.area)} --${c.from.key} ${dir}--> ${where(c.to)}`]
+      ? [`${side(c.from.area)} --${c.from.key} ${dir}--> ${target(c.to)}`]
       : [];
   });
   const transports = [
@@ -183,7 +186,7 @@ function worldBorders(cross: Cross[]) {
     const room = cross.find((c) => c.from === t && c.at === 'room')?.to;
     const to = cross.find((c) => c.from === t && c.at === 'destination')?.to;
     return room && to && crossing(room, to)
-      ? [`${side(room.area)} --${t.key}--> ${where(to)}`]
+      ? [`${side(room.area)} --${t.key}--> ${target(to)}`]
       : [];
   });
   return [...exits, ...transports].sort();

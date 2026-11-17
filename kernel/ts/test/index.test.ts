@@ -200,10 +200,12 @@ test('a transport into an area is a border, and a flat cartridge has no index', 
   const borders = /^Borders \(exit or transport\): (.*)$/m.exec(
     indexes(flat, travel)!['areas/INDEX.md']!,
   );
+  // `(root)` already says where a root room is: its folder, `rooms/`, is not an area, so printing
+  // `rooms/lane` would name an area nobody can open. Break: the root side is spelled `rooms/<key>`.
   assert.equal(
     borders?.[1],
     '(root) --lane south--> south/south_post; (root) --north_road--> south/south_post; ' +
-      'south --south_post north--> rooms/lane; south --south_road--> rooms/north_post',
+      'south --south_post north--> lane; south --south_road--> north_post',
   );
   // Both of a transport's rooms in one area is no border: only the two room exits cross.
   const inside = join(tmp, 'fast_travel_inside');
@@ -217,7 +219,7 @@ test('a transport into an area is a border, and a flat cartridge has no index', 
   if (typeof inner === 'string') throw new Error(`fast_travel_sampler does not compile: ${inner}`);
   assert.match(
     indexes(inside, inner)!['areas/INDEX.md']!,
-    /^Borders \(exit or transport\): \(root\) --lane north--> south\/north_post; \(root\) --lane south--> south\/south_post; south --north_post south--> rooms\/lane; south --south_post north--> rooms\/lane$/m,
+    /^Borders \(exit or transport\): \(root\) --lane north--> south\/north_post; \(root\) --lane south--> south\/south_post; south --north_post south--> lane; south --south_post north--> lane$/m,
   );
   const flatDir = tree(join(tmp, 'flat'), {
     'cartridge.json': {
