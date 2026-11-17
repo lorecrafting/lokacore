@@ -55,7 +55,7 @@ defmodule Loka.Content do
       artifact = artifact(cartridge)
 
       if byte_size(artifact) <= max_bytes,
-        do: {:ok, artifact, warnings},
+        do: {:ok, artifact, sorted(warnings ++ stray_tildes(artifact, dir))},
         else: too_large(byte_size(artifact), max_bytes)
     end
   end
@@ -93,6 +93,40 @@ defmodule Loka.Content do
         ],
         into: %{},
         do: {key, "#{rel}:#{line}"}
+  end
+
+  @doc """
+  A tilde a writer left at the head of a written line (`~See the quarry`), as `[map()]`
+  warnings for `explained/2`. Only a line that trims to `~` alone is a placeholder, so these
+  words ship; naming them is a warning, never a refusal (docs/system/cartridge.md, Still to write).
+  """
+  @spec stray_tildes(binary(), Path.t()) :: [map()]
+  def stray_tildes(bytes, dir) do
+    keys =
+      for {key, text} <- Map.get(JSON.decode!(bytes)["cartridge"], "text", %{}),
+          text |> String.split("\n") |> Enum.any?(&head?/1),
+          do: key
+
+    # no stray tilde, no source index: it is most of a resident preview compile's time
+    index = if keys == [], do: %{}, else: Loka.Content.SourceLines.index(dir)
+
+    for key <- keys,
+        do:
+          Source.diag("PLACEHOLDER_TILDE", path(key, index), %{})
+          |> Map.put("severity", "warning")
+  end
+
+  # `~` and more on the line (`~See the quarry`, `~ See`): a bare `~` alone is the placeholder.
+  defp head?(line) do
+    t = String.trim(line)
+    String.starts_with?(t, "~") and String.trim(String.replace_prefix(t, "~", "")) != ""
+  end
+
+  # An inline word's key sits at its own `.prose` line; a text.json key at its own entry.
+  defp path(key, index) do
+    if Map.has_key?(index, key <> ".prose"),
+      do: key <> ".prose",
+      else: Source.at("text.json", [key])
   end
 
   defp held(bytes, dir) do
