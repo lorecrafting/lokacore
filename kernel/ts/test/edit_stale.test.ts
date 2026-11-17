@@ -7,6 +7,7 @@ import { join } from 'node:path';
 import { test } from 'node:test';
 import { Refused, sha256 } from '../play/guard.ts';
 import { edit } from '../play/prose.ts';
+import type { Answer } from '../play/write.ts';
 
 // Break: a 409 leaves the field with only "changed on disk", so Keep mine / Take theirs never
 // renders (it re-asks /line by the *old* words, which a reworded line no longer answers).
@@ -15,7 +16,7 @@ test('a 409 names the reworded line to take, and stays bare when it is not words
   const write = (name: string, text: string) => writeFileSync(join(root, name), text);
   const stale = (file: string, sent: Record<string, unknown>) => {
     try {
-      edit(root, { file, ...sent, words: 'mine' }, () => [200, {}] as never);
+      edit(root, { file, ...sent, words: 'mine' }, () => [200, {}] as Answer);
     } catch (e) {
       assert.ok(e instanceof Refused, String(e));
       return e.body as Record<string, unknown>;

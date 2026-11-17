@@ -269,8 +269,10 @@ test('a scene line reworded on disk also offers Take theirs', async () => {
   assert.equal((await fetch(`http://localhost:${author}/world`, world)).status, 200);
   const page = await open({ selection: { kind: 'dialogue', key: 'stranger_talk' } }, 'line 1 npc');
   try {
-    const field = page.getByLabel('scene card').locator('input[aria-label$=" words"]').first();
-    await shows(field, 'The stranger waits.');
+    const at = page.getByLabel('scene card').locator('input[aria-label$=" words"]').first();
+    await shows(at, 'The stranger waits.');
+    // a row's key is its words until it has a key, so a reword moves the row: find it by its key
+    const field = page.locator(`input[title="${await at.getAttribute('title')}"]`);
     await field.fill('my own words');
     writeFileSync(file, before.replace('* The stranger waits.', '* their words'));
     await field.blur();
