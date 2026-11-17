@@ -231,3 +231,55 @@ test("a scene card writes its words line in place", async () => {
     await page.close();
   }
 });
+
+// Breaks: a 409 whose line was reworded on disk, or whose words the server no longer has, tells the
+// field nothing to take, so Keep mine / Take theirs never renders and the draft is stranded.
+test('a line reworded on disk offers Take theirs, with the words it now holds', async () => {
+  const before = readFileSync(TEXT, 'utf8');
+  // the scene test above leaves the world on its own cartridge: this room is the showcase's
+  const world = { method: 'POST', body: JSON.stringify({ name: 'showcase' }) };
+  assert.equal((await fetch(`http://localhost:${author}/world`, world)).status, 200);
+  const page = await open(room);
+  try {
+    const field = page.getByTitle('room.fell_top.description');
+    await shows(field, FELL_TOP);
+    await field.fill('my own words');
+    const theirs = before.replace(
+      `"room.fell_top.description": "${FELL_TOP}"`,
+      `"room.fell_top.description": "${RAIN}"`,
+    );
+    writeFileSync(TEXT, theirs);
+    await field.blur();
+    await page.getByText(`Changed on disk since you opened it. ${RAIN}`).waitFor();
+    await page.getByRole('button', { name: 'Take theirs' }).click();
+    await shows(field, RAIN); // their words in the field, their file still on disk
+    assert.equal(readFileSync(TEXT, 'utf8'), theirs);
+  } finally {
+    writeFileSync(TEXT, before);
+    await page.close();
+  }
+});
+
+// Breaks: a 409 body without the line leaves the field saying only that it changed, and its draft
+// with nowhere to go: the scene card's line has no key, so nothing can re-ask for it.
+test('a scene line reworded on disk also offers Take theirs', async () => {
+  const file = join(dir, 'identity_sampler/scenes/stranger_talk.scene');
+  const before = readFileSync(file, 'utf8');
+  const world = { method: 'POST', body: JSON.stringify({ name: 'identity_sampler' }) };
+  assert.equal((await fetch(`http://localhost:${author}/world`, world)).status, 200);
+  const page = await open({ selection: { kind: 'dialogue', key: 'stranger_talk' } }, 'line 1 npc');
+  try {
+    const field = page.getByLabel('scene card').locator('input[aria-label$=" words"]').first();
+    await shows(field, 'The stranger waits.');
+    await field.fill('my own words');
+    writeFileSync(file, before.replace('* The stranger waits.', '* their words'));
+    await field.blur();
+    await page.getByText('Changed on disk since you opened it. their words').waitFor({ timeout: boot });
+    await page.getByRole('button', { name: 'Take theirs' }).click();
+    await shows(field, 'their words');
+    assert.equal(readFileSync(file, 'utf8'), before.replace('* The stranger waits.', '* their words'));
+  } finally {
+    writeFileSync(file, before);
+    await page.close();
+  }
+});
