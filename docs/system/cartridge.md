@@ -1077,7 +1077,10 @@ build. The author tools below are reachable only in that bundle (a production ex
   `bin/loka todo <cartridge dir>` list placeholders grouped by the beat (file) that owns them with
   word counts of what is written. A release compile refuses a cartridge with placeholders
   unless `--allow-placeholders` is given: one `placeholder_text` per key, at the source file and
-  line that wrote it (the scene or JSON file of an inline word, else `text.json`).
+  line that wrote it (the scene or JSON file of an inline word, else `text.json`). Only a line that
+  trims to `~` alone holds a place: a line that begins `~` and has words after it (`~See the
+  quarry`) is prose, ships as written, and draws one `placeholder_tilde` warning naming its file
+  and line, so a stray `~` is seen before release and a writer's words are never rewritten.
 - **Scene files.** `scenes/*.scene` (or `dialogues/*.scene`) is a plain-text form of one dialogue,
   and `scenes/*.cut` of one modal scene's steps (its `on` and `control` come from `scenes/<key>.json`,
   refused when missing, as is `steps` in that JSON, which would replace the words; a scene-format

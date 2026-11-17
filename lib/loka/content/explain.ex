@@ -1,4 +1,4 @@
-# size: allow 400, one row per refusal a writer can meet; the table reads together
+# size: allow 401, one row per refusal a writer can meet; the table reads together (PLACEHOLDER_TILDE, loka-vduxr.69)
 defmodule Loka.Content.Explain do
   @moduledoc """
   Diagnostics in plain words: one line each, `severity: file:line what to do`
@@ -86,6 +86,7 @@ defmodule Loka.Content.Explain do
          scene_when | `when:` needs a true/false fact, and `{fact}` is {type}. | Name a fact whose type is `bool` in facts.json, or write this test as `policy` in `dialogues/<key>.json`.
          scene_needs | `needs:` needs a true/false fact, and `{fact}` is {type}. | Name a fact whose type is `bool` in facts.json, or write this test as `policy` in `dialogues/<key>.json`.
          placeholder_text | Words here are still `~`, a place held for them. | Write the words, or compile with `--allow-placeholders` while the cartridge is unfinished.
+         PLACEHOLDER_TILDE | A line starts with `~` and has words after it, so they ship as written. | Remove the `~` if you meant prose, or leave the line as a bare `~` if it is still to write.
          no_prompt | {npc} says nothing before the first choice. | Write what {npc} says first, on a line `{npc}: words` above the first `- ` line.
          no_choices | This scene gives the player nothing to choose. | Add a `- ` choice line under what {npc} says.
          not_a_line | Line `{text}` is not scene format. | Use `npc:`, `when:`, `with:`, `<npc>: words`, `* words`, `- choice`, `gives:`, `sets:`, `quest:`, `needs:`, `once` or `then:` (docs/guides/writing-the-game.md).

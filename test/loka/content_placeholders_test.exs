@@ -199,6 +199,56 @@ defmodule Loka.ContentPlaceholdersTest do
                 scenes/still_to_write.scene:5 scenes/still_to_write.scene:7 text.json:2)
   end
 
+  # Break: a line that begins `~` and has words after it ships as prose with nobody told (a stray
+  # tilde reaching a release), a line that trims to `~` alone counted as prose instead of a
+  # placeholder, a `~` inside a line rather than at its head warned, or the warning refused the
+  # artifact. The words are the writer's: they ship, and one warning names their file and line.
+  test "mix loka.compile warns on a tilde at the head of a written line, without refusing",
+       %{tmp_dir: tmp} do
+    dir = Loka.ContentSource.copy("cartridges/speech_sampler")
+
+    edit = fn rel, change ->
+      path = Path.join(dir, rel)
+      File.write!(path, JSON.encode!(change.(JSON.decode!(File.read!(path)))))
+    end
+
+    edit.("text.json", &Map.put(&1, "dialogue.elder_ward.thank", "~See the quarry"))
+    edit.("text.json", &Map.put(&1, "dialogue.elder_ward.ask", "the ~ is mid-line, no warning"))
+    out = Path.join(tmp, "done.json")
+
+    said =
+      ExUnit.CaptureIO.capture_io(:stderr, fn ->
+        assert Mix.Tasks.Loka.Compile.run([dir, out]) == :ok
+      end)
+
+    # Named, and only the head tilde: the mid-line `~` is prose like any other.
+    assert said ==
+             "warning: text.json:1 A line starts with `~` and has words after it, so they " <>
+               "ship as written. Remove the `~` if you meant prose, or leave the line as a bare " <>
+               "`~` if it is still to write.\n"
+
+    assert JSON.decode!(File.read!(out))["cartridge"]["text"]["dialogue.elder_ward.thank"] ==
+             "~See the quarry"
+
+    # The warning is the compile's, not a refusal: the same build reports it with --json.
+    json = Path.join(tmp, "d.json")
+
+    ExUnit.CaptureIO.capture_io(:stderr, fn ->
+      Mix.Tasks.Loka.Compile.run([dir, out, "--json", json])
+    end)
+
+    assert [
+             %{
+               "severity" => "warning",
+               "code" => "PLACEHOLDER_TILDE",
+               "path" => path
+             }
+           ] = JSON.decode!(File.read!(json))
+
+    # `text[...]`, the form `Source.at/2` gives a key with dots in it (as placeholder_text does).
+    assert path == ~s(text["dialogue.elder_ward.thank"])
+  end
+
   # Break: --json writes a diagnostic twice that its printed line shows once, or a non-UTF-8 byte
   # in a path makes JSON.encode! raise, so the preview loses every diagnostic of that build.
   test "explained_entries are unique and encode with a non-UTF-8 path", %{tmp_dir: tmp} do
