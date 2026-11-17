@@ -4,7 +4,7 @@ The present only: open work, next steps, owner questions, and standing owner rul
 yet. Rewrite this page in place once per session, at its end; never add dated session sections. History lives in git, Beads and `docs/reviews/`; lessons
 go to [PM lessons](lessons/pm.md) ([harness patterns](decisions/owner-decision-harness-patterns-2026-10-28.md)).
 
-AS OF main after 533b0d1af (PR #745); written 2026-11-17 01:45 UTC in the Pi harness by deploy/deepseek-ai/deepseek-v4.1-flash-1017, PM session.
+AS OF main after 9d7523bd5 (PR #746); written 2026-11-17 05:05 UTC in the Pi harness by deploy/deepseek-ai/deepseek-v4.1-flash-1017, PM session.
 `kernel_api` is 1.159 (no contract slice since). **The owner is pausing the Anthropic subscription, so every reviewer
 and developer here now runs on `deploy/deepseek-ai/deepseek-v4.1-flash-1017`** (`~/.pi/agent/agents/loka-dev.md`,
 `loka-review.md` repinned 2026-11-13). **Nothing is mid-merge, nothing is in flight, no agent is running.**
@@ -103,6 +103,24 @@ since 11-07") closed because the number dropped.
 Nothing. Nothing is mid-merge and no agent is running. **#632 merged** (`loka-vduxr.64`, the TS LSP tool and the
 code-search guide: `docs/guides/code-search.md` is new and `AGENTS.md`'s "Searching code" section now points at
 `bin/loka ts` — read both before writing another repo-wide search). **#454** is still the owner's P3 hold.
+
+**#746 merged** (`loka-vduxr.39`, doc half only): `docs/system/save.md` no longer claims in "What reopen
+proves" that a `TypeError` is never a bad save. It said so for a universal it did not have: that holds at
+the row readers (the newest receipt, the deer and skills loaders) but not at the first screen, where
+`checked` reads the view before the Book draws and any throw is a refusal, because a row the view cannot
+show is a save it cannot show (`start_over.test.ts`, "a save with no body row"). The paragraph now scopes
+the claim and names the exception.
+
+**Read this before retrying `loka-vduxr.39`:** the code half is *withdrawn, not deferred*, and the reason is
+in `docs/reviews/2026-11-17-first-screen-guard-review.md`. Narrowing `checked`'s catch to `unreadable(e)`
+(which is what the bead asks for and what mirrors the narration guard two lines below) reddens
+`start_over.test.ts` 2/15: a deleted body row and a forged container id **both throw `TypeError` from the
+same catch**, so no throw-shape test can separate a damaged save from a bug of ours. Rows that must refuse
+(damaged save, Start over) and rows that must not (our bug, save kept) are the same observable there. The
+reviewer's M4 is the direction that keeps both: accept `KernelError` as a refusal **and** make `load` refuse
+an unknown container target. `loka-vduxr.39` stays open at P2 awaiting an owner decision (close won't-fix /
+take M4 / leave as doc-only, which is done). **Lesson: a catch that guards a screen, not a row, cannot
+classify by exception type.**
 
 **This session (2026-11-16 fourth block, 2026-11-17 UTC) merged two PRs:**
 #745 **loka-vduxr.58.4, S4 of the area layout** (closed): `bin/loka index <cartridge dir>` writes `areas/INDEX.md`
