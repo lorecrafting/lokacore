@@ -49,9 +49,15 @@ function TextKey(p: FieldProps) {
 export const inline = (value: unknown) => (value as { prose?: string } | undefined)?.prose ?? '';
 
 type At = { file: string; line: number; was: string; words: string };
+// 0 is "the server did not answer": a restart (`bin/loka dev --watch` rewrites and reboots it) or a
+// shut one rejects the fetch, and an unhandled rejection left the field shut with nothing said.
 async function api(path: string, sent?: object): Promise<[number, any]> {
-  const r = await fetch(`/__author${path}`, sent && { method: 'POST', body: JSON.stringify(sent) });
-  return [r.status, await r.json().catch(() => null)];
+  try {
+    const r = await fetch(`/__author${path}`, sent && { method: 'POST', body: JSON.stringify(sent) });
+    return [r.status, await r.json().catch(() => null)];
+  } catch {
+    return [0, 'The server did not answer. Is it running?'];
+  }
 }
 const lineOf = (key: string, words: string) =>
   api(`/line?key=${encodeURIComponent(key)}&words=${encodeURIComponent(words)}`);
@@ -76,7 +82,8 @@ function useLine(k: string, words: string) {
   const read = async (w: string, fresh = false) => {
     const [status, line] = await lineOf(k, w);
     if (kept.current && !fresh) return;
-    if (status !== 200) return setTold({ say: typeof line === 'string' ? line : `No line (${status}).` });
+    if (status !== 200)
+      return setTold({ say: typeof line === 'string' ? line : `No line (${status}).` });
     setAt(line);
     setDraft(line.words);
     setTold(undefined);
@@ -136,6 +143,12 @@ export function WordsField({ label, k, words }: { label: string; k: string; word
         />
       </div>
       {told ? <Refusal>{told.say}</Refusal> : null}
+      {/* a shut field is only reopenable by reopening the card: say why, and offer the read again */}
+      {!at && told ? (
+        <Button type="button" size="xs" variant="outline" onClick={() => void read(words, true)}>
+          Try again
+        </Button>
+      ) : null}
       {theirs ? <Theirs keep={() => void save(theirs)} take={() => void read(theirs.words, true)} /> : null}
     </div>
   );
