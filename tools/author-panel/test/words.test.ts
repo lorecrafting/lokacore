@@ -185,19 +185,26 @@ test('a choice label shows its key, no words field; its narration keeps one', as
 });
 
 // Breaks: a fetch that never answers taken as a line (an unhandled rejection, the field left shut with
-// nothing said), or the shut field with no way to read it again but reopening the card. The dev
-// server reboots on every write (`bin/loka dev --watch`), so this is the author's own case.
-test('a field whose read the server never answered says so and reads again', async () => {
-  let refused = 1;
+// nothing said), or a shut field whose only way back is reopening the card. The dev server reboots on
+// every write (`bin/loka dev --watch`), so this is the author's own case. The server stays down for the
+// whole test: a remount re-reads `/line`, so a server that came back would open the field itself and
+// the button would detach under the click.
+test('a field whose read the server never answered says so and offers the read again', async () => {
+  const asked: string[] = [];
   const page = await open({ right: 420, selection: { kind: 'item', key: 'lute' } }, 'Inspector', (p) =>
-    p.route('**/__author/line?**', (r) => (refused-- > 0 ? r.abort() : r.continue())),
+    p.route('**/__author/line?**', (r) => (asked.push(r.request().url()), r.abort())),
   );
   try {
     const field = page.getByLabel('name words');
-    await page.getByText('The server did not answer. Is it running?').waitFor({ timeout: boot });
+    // every words field on this card says it: the first is enough
+    const said = page.getByText('The server did not answer. Is it running?').first();
+    await said.waitFor({ timeout: boot });
     assert.equal(await field.isEditable(), false);
-    await page.getByRole('button', { name: 'Try again' }).click();
-    await shows(field, 'a lute');
+    const reads = asked.length;
+    await page.getByRole('button', { name: 'Try again' }).first().click();
+    await until(() => asked.length > reads); // the button reads the line again, it does not just sit there
+    assert.ok(asked.length > reads, 'Try again sends GET /line');
+    assert.equal(await field.isEditable(), false);
   } finally {
     await page.close();
   }
