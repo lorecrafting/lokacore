@@ -63,13 +63,18 @@ after(async () => {
   rmSync(dir, { recursive: true, force: true });
 });
 
-/** The panel with this layout kept, once the inspector's card has its form (the first compile and Vite's first optimise included). */
-export async function open(layout: object, ready = 'Inspector'): Promise<Page> {
+/** The panel with this layout kept, once the inspector's card has its form (the first compile and Vite's first optimise included). `before` runs on the page before it navigates: a route the first load must already obey. */
+export async function open(
+  layout: object,
+  ready = 'Inspector',
+  before?: (page: Page) => Promise<unknown>,
+): Promise<Page> {
   const page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
   await page.addInitScript(
     (l) => localStorage.setItem('loka.editor.layout', l),
     JSON.stringify(layout),
   );
+  await before?.(page);
   for (let i = 0; ; i++) {
     try {
       await page.goto(url);

@@ -8,7 +8,7 @@ import { readFileSync, statSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { test } from 'node:test';
 import type { Locator, Page } from 'playwright';
-import { author, dir, open } from './harness.ts';
+import { author, boot, dir, open } from './harness.ts';
 
 const TEXT = join(dir, 'showcase/text.json');
 const FELL_TOP = 'Open moor under a wide, quiet sky. A hut stands east, a brewhouse west; the shelter is south.';
@@ -179,6 +179,32 @@ test('a choice label shows its key, no words field; its narration keeps one', as
     await shows(bounty.getByLabel('narration words'), JSON.parse(readFileSync(TEXT, 'utf8'))['narration.aldous_talk.bounty']);
     assert.equal(await bounty.getByLabel('label words').count(), 0);
     assert.equal(await bounty.locator('code', { hasText: /^dialogue\.aldous_talk\.bounty$/ }).count(), 1);
+  } finally {
+    await page.close();
+  }
+});
+
+// Breaks: a fetch that never answers taken as a line (an unhandled rejection, the field left shut with
+// nothing said), or a shut field whose only way back is reopening the card. The dev server reboots on
+// every write (`bin/loka dev --watch`), so this is the author's own case. The server stays down for the
+// whole test: a remount re-reads `/line`, so a server that came back would open the field itself and
+// the button would detach under the click.
+test('a field whose read the server never answered says so and offers the read again', async () => {
+  const asked: string[] = [];
+  const page = await open({ right: 420, selection: { kind: 'item', key: 'lute' } }, 'Inspector', (p) =>
+    p.route('**/__author/line?**', (r) => (asked.push(r.request().url()), r.abort())),
+  );
+  try {
+    const field = page.getByLabel('name words');
+    // every words field on this card says it: the first is enough
+    const said = page.getByText('The server did not answer. Is it running?').first();
+    await said.waitFor({ timeout: boot });
+    assert.equal(await field.isEditable(), false);
+    const reads = asked.length;
+    await page.getByRole('button', { name: 'Try again' }).first().click();
+    await until(() => asked.length > reads); // the button reads the line again, it does not just sit there
+    assert.ok(asked.length > reads, 'Try again sends GET /line');
+    assert.equal(await field.isEditable(), false);
   } finally {
     await page.close();
   }
