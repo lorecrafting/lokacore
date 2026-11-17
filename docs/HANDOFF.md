@@ -4,7 +4,7 @@ The present only: open work, next steps, owner questions, and standing owner rul
 yet. Rewrite this page in place once per session, at its end; never add dated session sections. History lives in git, Beads and `docs/reviews/`; lessons
 go to [PM lessons](lessons/pm.md) ([harness patterns](decisions/owner-decision-harness-patterns-2026-10-28.md)).
 
-AS OF main after 90862bcf3 (PR #744); written 2026-11-16 22:50 UTC in the Pi harness by deploy/deepseek-ai/deepseek-v4.1-flash-1017, PM session.
+AS OF main after 533b0d1af (PR #745); written 2026-11-17 01:45 UTC in the Pi harness by deploy/deepseek-ai/deepseek-v4.1-flash-1017, PM session.
 `kernel_api` is 1.159 (no contract slice since). **The owner is pausing the Anthropic subscription, so every reviewer
 and developer here now runs on `deploy/deepseek-ai/deepseek-v4.1-flash-1017`** (`~/.pi/agent/agents/loka-dev.md`,
 `loka-review.md` repinned 2026-11-13). **Nothing is mid-merge, nothing is in flight, no agent is running.**
@@ -100,7 +100,25 @@ since 11-07") closed because the number dropped.
 
 ## In flight at handoff
 
-Nothing. #744 (loka-x6t.6, stars only outdoors) merged after this page was written; the next slice starts from main.
+Nothing. Nothing is mid-merge and no agent is running. **#632 merged** (`loka-vduxr.64`, the TS LSP tool and the
+code-search guide: `docs/guides/code-search.md` is new and `AGENTS.md`'s "Searching code" section now points at
+`bin/loka ts` — read both before writing another repo-wide search). **#454** is still the owner's P3 hold.
+
+**This session (2026-11-16 fourth block, 2026-11-17 UTC) merged two PRs:**
+#745 **loka-vduxr.58.4, S4 of the area layout** (closed): `bin/loka index <cartridge dir>` writes `areas/INDEX.md`
+and one `areas/<area>/INDEX.md`; `bin/regen.sh` rewrites a *changed, tracked* cartridge's and skips one with no
+`areas/` folder. Read `kernel/ts/play/index.ts` (324 lines) before changing the pages, and note `find.ts` now
+exports `refsIn` — the one ref walk, shared, so `find.ts`'s output and its `CAP=100` must stay as they are. The
+pages carry the owner's three fixed header lines and the Builders' Guide `#cartridge-layout` anchor. 12 pages are
+committed (showcase 9 + root, speech_sampler 2). Self-review found a real defect and fixed it: the reverse direction
+of a border spelled a root room `rooms/<key>`, reading as an area named `rooms`; root targets now print bare. Latent
+(no cartridge has a root room yet), so all 12 pages are byte-identical after the fix. Showcase `content_hash` is
+unchanged and still equals the fixture: the index is not part of the artifact.
+
+**Note for the next slice over these pages:** the showcase's root index ends with 85 lines of "Root definitions
+named by no area" (all `actions/*`, the `wheel_*_x_shows_*` family, `topics/*`, `scenes/letter_*`). The design
+demands that list and its own sample carries it, so it shipped; the owner has not seen it yet and it is the one
+thing here that may read as noise in the file an agent opens first.
 
 **This session (2026-11-16, third block) merged six PRs, all opened and closed by this PM:**
 #739 **loka-kgd.223, the flows crash** (closed): `one_container_per_item` and `containment_acyclic` admitted only an
@@ -123,7 +141,7 @@ runs `tsc -p .storybook` — so a bad `.stories.tsx` passed `close` and went red
 class, three times). `close` runs it now, with a red control.
 #738 (loka-2bp1n, loka-2zak, closed): slice size in the developer rules, and a narration brief names its fixtures.
 
-- **#632** (loka-vduxr.64) belongs to another session (lokacore-fb). **#454** is the owner's P3 hold.
+- **#632** (loka-vduxr.64) merged this session; **#454** is the owner's P3 hold.
 
 ## Resume, in order
 
