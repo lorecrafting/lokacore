@@ -63,10 +63,12 @@ const lineOf = (key: string, words: string) =>
   api(`/line?key=${encodeURIComponent(key)}&words=${encodeURIComponent(words)}`);
 
 type Told = { say: string; theirs?: At };
-async function conflict(k: string, mine: At): Promise<Told> {
+async function conflict(k: string, mine: At, at?: At): Promise<Told> {
   const [s, theirs] = await lineOf(k, mine.words);
   const say = 'Changed on disk since you opened it.';
-  return s === 200 ? { say: `${say} ${theirs.words}`, theirs } : { say };
+  if (s === 200) return { say: `${say} ${theirs.words}`, theirs };
+  // a scene's line has no key, so /line cannot find it again: the 409's own line is the only theirs
+  return at?.words ? { say: `${say} ${at.words}`, theirs: at } : { say };
 }
 
 function useLine(k: string, words: string) {
@@ -99,7 +101,7 @@ function useLine(k: string, words: string) {
     try {
       const [status, answer] = await api('/edit', { ...mine, words: draft, key: k });
       if (status === 200) await read(draft, true);
-      else if (status === 409) setTold(await conflict(k, mine));
+      else if (status === 409) setTold(await conflict(k, mine, answer));
       else setTold({ say: typeof answer === 'string' ? answer : `Not saved (${status}).` });
     } finally {
       busy.current = false;

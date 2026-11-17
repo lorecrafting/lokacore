@@ -50,8 +50,13 @@ const real = (path: string) => {
 };
 export const current = (path: string): Bytes =>
   there(path)?.isFile() ? readFileSync(path, 'utf8') : null;
-/** A 409's body: the file as it is now, for the panel to rebase on. */
-export const stale = (bytes: Bytes) => refuse(409, { bytes, sha256: sha256(bytes) });
+/** A 409's body: the file as it is now, for the panel to rebase on. `at` names the line the request
+ * asked for, when it is still a line of words: without it the field can only re-ask `GET /line` by
+ * the *old* words, which a line reworded on disk no longer answers, so Keep mine/Take theirs never
+ * renders (loka-wfrgk.100.4, scene and inline 409s). */
+export type At = { file: string; line: number; was: string; words: string };
+export const stale = (bytes: Bytes, at?: At) =>
+  refuse(409, { bytes, sha256: sha256(bytes), ...at });
 
 /** `<dir>/<key>.<ext>` or `areas/<area>/<dir>/<key>.<ext>` (`Source.classify`), else undefined. */
 export function placed(rel: string) {

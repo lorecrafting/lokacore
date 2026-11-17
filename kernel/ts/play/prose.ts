@@ -39,9 +39,28 @@ export function edit(
   const before = readFileSync(path, 'utf8');
   const lines = before.split('\n');
   if (!Number.isInteger(line) || line < 1 || line > lines.length) refuse(400, 'no such line');
-  if (lines[line - 1] !== was) stale(before);
+  // the line moved on: name it, so a field that never saw it can still offer Keep mine/Take theirs
+  if (lines[line - 1] !== was) stale(before, stillWords(file, line, lines[line - 1]));
   lines[line - 1] = worded(file, was, words);
   return done(`edit ${file}:${line}`, { file, before, after: lines.join('\n') });
+}
+
+/** The line's own words as written — a JSON string's value, a `.cut` line, a scene's `* ` line — or
+ * undefined when it is not a line of words (a key line, a choice label, `---`): a 409 carries it
+ * only when there is something to take theirs from. */
+function stillWords(file: string, line: number, was: string) {
+  try {
+    worded(file, was, '');
+  } catch {
+    return undefined;
+  }
+  const literal = file.endsWith('.json') && LITERAL.exec(was);
+  const own = literal
+    ? JSON.parse(literal[2])
+    : file.endsWith('.cut')
+      ? was
+      : was.replace(/^\s*\* /, '');
+  return { file, line, was, words: own as string };
 }
 
 /** Every `file:line` that may write `key`: its `"key":` lines, else lines holding `words`
