@@ -4,7 +4,7 @@ The present only: open work, next steps, owner questions, and standing owner rul
 yet. Rewrite this page in place once per session, at its end; never add dated session sections. History lives in git, Beads and `docs/reviews/`; lessons
 go to [PM lessons](lessons/pm.md) ([harness patterns](decisions/owner-decision-harness-patterns-2026-10-28.md)).
 
-AS OF main after 9d7523bd5 (PR #746); written 2026-11-17 05:05 UTC in the Pi harness by deploy/deepseek-ai/deepseek-v4.1-flash-1017, PM session.
+AS OF main after c44aa9fd4 (PR #749 and the backlog cull); written 2026-11-17 07:40 UTC in the Pi harness by deploy/deepseek-ai/deepseek-v4.1-flash-1017, PM session.
 `kernel_api` is 1.159 (no contract slice since). **The owner is pausing the Anthropic subscription, so every reviewer
 and developer here now runs on `deploy/deepseek-ai/deepseek-v4.1-flash-1017`** (`~/.pi/agent/agents/loka-dev.md`,
 `loka-review.md` repinned 2026-11-13). **Nothing is mid-merge, nothing is in flight, no agent is running.**
@@ -18,6 +18,27 @@ and developer here now runs on `deploy/deepseek-ai/deepseek-v4.1-flash-1017`** (
 - NPC routines (loka-ni2zd) wait for the owner's own design session.
 
 ## Merged since the 2026-11-07 handoff
+
+**This session (2026-11-17, after the 2026-11-16 blocks):** #748 (`loka-wfrgk.100.4`, the 409 half: a
+save's 409 checks find their row by key again, and no `as never` in the panel), #749 (`loka-vduxr.69`: a
+line that begins `~` and has words after it draws one `placeholder_tilde` warning naming its file and line,
+and the writer's words ship unchanged; only a line that trims to `~` alone is a placeholder — spec in
+`docs/system/cartridge.md`, **Still to write**). Read `stray_tildes/2` in `lib/loka/content.ex` before
+touching the placeholder counters again: it only binds the source index when there is a stray tilde to
+place, which is most of a preview compile's cost.
+
+**Three beads were closed as already-done or not-a-bug after verifying against the code, not the title:**
+`loka-g5hh.2` and `.2.6` (the whole level-up rush is on main from #573/#575 — `ExperienceRule.tsx`,
+`LevelWash.tsx`, `GiltLine`, `cueDiff.ts:176`, `cueSounds.ts:89`, `level_wash.test.ts`; the epic was left
+open by mistake), and `loka-wfrgk.120` (the `craft`/`use.tool` add-menu "writes nothing" is the intended
+convention: `card.ts:344` says allOf fields are the author's to pick and `Choices.tsx:29` implements it;
+nothing in `protocol/action.schema.json` is `allOf`, so the line 344 comment names carriers that do not exist).
+
+**Backlog cull (same session):** the 15 open `loka-ni2zd.*` NPC-behaviour slices were deferred to
+2027-01-01. The epic's own notes say NPC behaviours are not needed for the prologue and not before Pro, and
+no slice starts without an owner go; keeping them open at P2 made the ready queue look 16 items larger than
+the planned work. `.1` (plan runner) stays open as the reopen point. `loka-wfrgk.54` closed with its one
+real element spun out as `.120` (then closed above).
 
 #707 to #714 are in the previous handoff (scene structure S1/S2, the field guide, the pre-push gates, focus rules,
 `session_status.sh`). Newer: #715 S3, a choice's key pinned when its words change (loka-wfrgk.100.5.4, closed); #716 R1,
@@ -100,9 +121,18 @@ since 11-07") closed because the number dropped.
 
 ## In flight at handoff
 
-Nothing. Nothing is mid-merge and no agent is running. **#632 merged** (`loka-vduxr.64`, the TS LSP tool and the
-code-search guide: `docs/guides/code-search.md` is new and `AGENTS.md`'s "Searching code" section now points at
-`bin/loka ts` — read both before writing another repo-wide search). **#454** is still the owner's P3 hold.
+Nothing. Nothing is mid-merge and no agent is running. **#454** is still the owner's P3 hold.
+**#632 merged** (`loka-vduxr.64`, the TS LSP tool and the code-search guide: `docs/guides/code-search.md` is
+new and `AGENTS.md`'s "Searching code" section points at `bin/loka ts` — read both before a repo-wide search).
+
+The `loka-wfrgk.100.4` scene-field-focus item has a **recorded lead but no fix**. The card does remount on a
+save (stamping an input inside `[aria-label="scene card"]` and saving shows the stamp gone), so the defect is
+real — but reverting `tools/author-panel/src/edit/cards/Room.tsx:216`'s `key={proseKey(draft[f])}` to `key={f}`
+fails no test, so there is no break to name and nothing was changed. Suspect on its face: `kernel/ts/play/card.ts:312-315`
+returns the words themselves as `proseKey` when the value is a string, so a literal-text field gets a new React key
+on every save. Next step is to find which container actually remounts: when the prompt field remounted, the whole
+`[aria-label="scene card"]` went with it and did not come back, which points at `RoomForm key={resets}`
+(`tools/author-panel/src/edit/cards/Dialogue.tsx:79`) rather than the field's key.
 
 **#746 merged** (`loka-vduxr.39`, doc half only): `docs/system/save.md` no longer claims in "What reopen
 proves" that a `TypeError` is never a bad save. It said so for a universal it did not have: that holds at
@@ -163,6 +193,10 @@ class, three times). `close` runs it now, with a red control.
 
 ## Resume, in order
 
+0. **The board is honest again: 37 open, 16 ready, 246 deferred.** The ready list is the whole
+   planned queue now; anything absent from it is deferred on purpose, not forgotten. Before
+   proposing work, check whether a bead is already shipped — this session closed three that were
+   (see above) by reading the code, and the same habit would have caught each the first time.
 1. **The owner is writing Part 1 in the editor.** That is the point of the queue below, not a parallel task:
    `bin/author.sh`, restart it after each merge. File friction as it appears and fix the blockers at once.
    Three beads are open *because* they want the owner's input, not an agent's:
@@ -256,6 +290,13 @@ loka-4ks2l was approved and is merged (#709). Closed `loka-wfrgk.116` as a dupli
 2026-11-07 items are still open and unapproved; three of them closed with #710 (lvo9i, wfrgk.110, za8br).
 
 ## Learned this session (worth knowing next time)
+
+- **A bead's title is not evidence, and this session produced three.** `loka-g5hh.2`/`.2.6` looked like a
+  large unbuilt feature (gilt wash, progress bar, level moment) and its whole epic was already on main from
+  #573/#575. `loka-wfrgk.120` looked like a defect and was the codebase's own convention. `loka-vduxr.29`
+  looked like a live crash and the mechanism its title stated is neutralised by `runtime/proposal.ts:317`.
+  **Check the code and the schema, then check that the fault can happen** — the shape being wrong is not
+  the same as the bug existing.
 
 - **A test that passes with its bug present proves nothing, and this session produced two.** #740's test for the
   half-typed write asserted one write, but its first keystroke landed inside the 200 ms window, so it only ever
