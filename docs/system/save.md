@@ -43,8 +43,11 @@ Opening reads the head, the rows and the newest receipt; it replays no receipts 
 does not parse or validate, a newest receipt whose id, actor or revision does not bind to the head,
 a head clock behind the newest receipt, and a row the kernel would throw or hang on at the next
 command ([reopen principle](../lessons/storage.md)). A newest response that is no decision, or ops of
-the wrong shape where the deer or skills loader reads them, refuses too. A `TypeError` is never read as a bad save: a bug of ours must not offer to
-wipe one, so another malformed shape only edits reach is a plain fault with the save kept. Any other state row or older receipt that parses opens, whoever
+the wrong shape where the deer or skills loader reads them, refuses too. At a row a loader reads, a `TypeError` is never a bad save: a bug of ours must not offer to
+wipe one, so another malformed shape only edits reach is a plain fault with the save kept. The
+first screen is the exception, and deliberately: `checked` reads the view before the Book draws, so
+any throw there refuses, because a row the view cannot show is a save it cannot show and Start over
+is the way forward (`start_over.test.ts`, "a save with no body row"). Any other state row or older receipt that parses opens, whoever
 wrote it: a hand edit, wrong rows from a kernel or writer bug (they now persist and later saves build
 on them), and a stale page from a bad restore (the next action saves on the wrong state). Receipts
 stay written. `receiptHistory` (`receipt-history.ts`) still replays every accepted receipt, in tests
