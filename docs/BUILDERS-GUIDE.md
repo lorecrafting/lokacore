@@ -51,13 +51,23 @@ Read this before creating, moving or restructuring cartridge files. Rationale:
 [area layout design](rnd/cartridge-area-layout-design-2026-11-04.md); rules:
 [Area folders](system/cartridge.md#area-folders).
 
+**Read the index first.** Every cartridge with an `areas/` folder carries a generated
+`areas/INDEX.md`: each area's counts, the world's borders, the entry, and the root definitions two
+or more areas name. Open it before any file; then the area you will touch has its own
+`areas/<area>/INDEX.md` with its rooms, its definitions and what crosses its border. Both are
+generated: never edit them, run `bin/regen.sh` ([content reports](system/cartridge.md#content-reports)).
+Worked examples: [the showcase's](../cartridges/toolbox_showcase/areas/INDEX.md) and
+[a bundle-only area's](../cartridges/speech_sampler/areas/INDEX.md).
+
 ```
 cartridges/<id>/
   cartridge.json facts.json text.json layout.json   root files: one per world
   rooms/ npcs/ items/ reactions/ ...                root folders: shared by two or more areas
   areas/
+    INDEX.md                                        generated: read this first
     hollow.json                                     optional: area hollow as one bundle file
     hollow/                                         area hollow: lowercase snake_case
+      INDEX.md                                     generated: hollow's own contents
       rooms/ npcs/ items/ dialogues/ scenes/ ...    the same folders, owned by hollow
 ```
 
@@ -155,7 +165,7 @@ the toolbox showcase.
 | Definitions that share most fields | `"extends": "<key>"` and `"abstract": true` in any definition file; [shoo's deer and crow](../cartridges/shoo_sampler/npcs/); `bin/loka new <kind> <name> --extends <key>` starts a child | The compiler merges the parent in before anything else reads the source ([Source shortcuts](system/cartridge.md#source-shortcuts)): objects merge, everything else replaces, and the artifact is unchanged. |
 | A family of definitions that differ in a few values | `"params"` on the abstract parent with `{"param": "<name>"}` markers, `"with"` on each child; [the showcase wheel](../cartridges/toolbox_showcase/reactions/wheel_shows.json) and [one child](../cartridges/toolbox_showcase/reactions/wheel_1_x_shows_0.json) | Each marker is replaced whole by the child's value, then the child merges over the parent ([Source shortcuts](system/cartridge.md#source-shortcuts)). |
 | The same reactions on many NPCs or items | `behaviours/<name>.json` and `"behaviours": ["<name>"]` on each holder; [the fishing spoils](../cartridges/fishing_sampler/behaviours/spoils.json) on [a trout](../cartridges/fishing_sampler/items/trout_02.json) | The compiler copies the reactions per holder, with `holder` bound to it ([Source shortcuts](system/cartridge.md#source-shortcuts)). |
-| An area in one file | `areas/<name>.json`, `{"<dir>": {"<key>": definition}}`; [the speech village](../cartridges/speech_sampler/areas/village.json) | The compiler opens the bundle into ordinary definitions before anything else reads the source ([Source shortcuts](system/cartridge.md#source-shortcuts)); diagnostics name the bundle path, and the artifact is unchanged. |
+| An area | a folder `areas/<area>/` of the folders above, or one bundle file `areas/<area>.json` of the same definitions; [the showcase's areas](../cartridges/toolbox_showcase/areas/), [the speech village in one file](../cartridges/speech_sampler/areas/village.json) | `bin/loka new area <name>` starts the folder with a first room. A file in an area names its own things, the root and any area's rooms; a second area's NPC, item or quest is reached through the root ([the border rule](#cartridge-layout)). A bundle compiles to ordinary definitions before anything else reads the source ([Source shortcuts](system/cartridge.md#source-shortcuts)): diagnostics name the bundle path, and the artifact is unchanged. |
 | One rule for many rooms | `"zones"` on rooms and `"zone"` on a reaction; [codex wanderer](../cartridges/codex_sampler/reactions/wanderer.json) | The compiler copies a zone rule per member room ([zones](system/cartridge.md#source-shortcuts)). |
 | A consequence that plays out over time | `{"op": "wait", "seconds": <n>}` in a reaction's `steps` | The compiler splits the list into delayed rules ([waits](system/cartridge.md#source-shortcuts)) |
 | A consequence or story presentation | `reactions/<key>.json`, a dialogue choice's `story_point`, `scenes/<key>.json`; [bell scene](../cartridges/scene_sampler/scenes/bell_rung.json) | [Reactions](system/mechanics.md#reaction1-kerneltssrcmechanicsreactionts), [chapters](system/mechanics.md#chapters-kerneltssrcviewviewts) and [scenes](system/mechanics.md#scene1-mechanicsscenerulets) have bounded, typed triggers and steps. |

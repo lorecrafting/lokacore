@@ -8,6 +8,8 @@
 #   - a changed cartridge (or lib/, protocol/capability_registry.json): its compiled known-answer fixtures under protocol/fixtures/
 #     (bin/regen_hash_fixture.sh; frozen ones excepted, see FROZEN); a changed
 #     test/loka/cartridge_containers_hash.py or input of it: the containers_* fixtures it derives, first;
+#   - a changed cartridge with an areas/ folder: its generated areas/INDEX.md and areas/<area>/INDEX.md
+#     (bin/loka index; kernel/ts/play/index.ts);
 #   - mobile/, kernel/ts/src/, protocol/: the stories' views and saves (npm run stories:views);
 #   - cartridges/toolbox_showcase/, lib/: test/loka/lint_baseline.txt (mix loka.lint; fixed findings drop out, a new one fails).
 # Always: a transcript content_hash that is no known answer of its cartridge becomes the cartridge's
@@ -69,6 +71,14 @@ for t in glob.glob('cartridges/*/transcripts/*.jsonl'):
 PY
 
 m elixir bin/contracts.exs
+# A changed cartridge's area index (kernel/ts/play/index.ts; docs/system/cartridge.md#content-reports), for
+# the cartridges the repo tracks only: an owner's uncommitted world is not the repo's (loka-wfrgk.117).
+# A cartridge with no areas/ folder has none, so it is never compiled for nothing.
+for id in $(git ls-files cartridges | cut -d/ -f2 | sort -u); do
+  [ -d "cartridges/$id/areas" ] || continue
+  touched "^cartridges/$id/" || continue
+  m sh bin/loka index "cartridges/$id" >/dev/null
+done
 (cd kernel/ts && LOKA_WRITE_GEN=1 m node --test --test-reporter=dot test/state_sections.test.ts >/dev/null)
 m elixir bin/contracts.exs # the System graph reads docs/state-sections.gen.json
 m elixir bin/features.exs

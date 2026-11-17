@@ -11,16 +11,17 @@ type Ref = { key: string; kind: string; cartridge_id: string };
 export type Referrer = { kind: string; by: string; at?: string };
 
 const isRef = (v: object): v is Ref => 'cartridge_id' in v && 'key' in v && 'kind' in v;
-// The kinds under which `v` names `q`.
-function named(v: unknown, q: string, kinds = new Set<string>()) {
-  if (Array.isArray(v)) v.forEach((x) => named(x, q, kinds));
-  else if (v && typeof v === 'object') {
-    if (isRef(v)) {
-      if (v.key.toLowerCase() === q) kinds.add(v.kind);
-    } else Object.values(v).forEach((x) => named(x, q, kinds));
-  }
-  return kinds;
+/** Every definition `v` names, in artifact order, with the path that names it (`exits.north.to`, an
+ * array index as its own step). The one ref walk, shared with the area index (`index.ts`). */
+export function refsIn(v: unknown, at = ''): { at: string; kind: string; key: string }[] {
+  if (Array.isArray(v)) return v.flatMap((x, i) => refsIn(x, at ? `${at}.${i}` : `${i}`));
+  if (!v || typeof v !== 'object') return [];
+  if (isRef(v)) return [{ at, kind: v.kind, key: v.key }];
+  return Object.entries(v).flatMap(([k, x]) => refsIn(x, at ? `${at}.${k}` : k));
 }
+// The kinds under which `v` names `q`.
+const named = (v: unknown, q: string) =>
+  new Set(refsIn(v).flatMap((r) => (r.key.toLowerCase() === q ? [r.kind] : [])));
 
 // 0 when the file never spells the key (say, a copy from `extends`): nothing invented.
 const lineOf = (path: string, q: string) =>
