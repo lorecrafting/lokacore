@@ -112,3 +112,10 @@ shared client. Neither closes deferred native proof or the known UI blur carry.
 - A story test of an override must plant a value the default cannot produce (polish batch 6): the
   `words` Control's pre-fill is the text table's own words, so a play test expecting them passes with the
   override removed. `stories/RoomPage.stories.tsx` `Reworded` plants a sentence that is not in the table.
+
+**The author stack**
+- Start it with `bin/author.sh`, and never as an agent background task. Two Pi sessions each launched
+  a component directly under a `bg_run` timeout and both were killed mid-flight — a dev server never
+  "completes", so any timeout kills it — and one left an orphaned child holding 19008. `bin/author.sh`
+  is the whole fix: it names a port's holder before starting (`loka-wfrgk.99`) and its `trap` kills all
+  three on exit. If a server must run in the background, give it no timeout and kill it by PID.
