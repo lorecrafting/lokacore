@@ -285,3 +285,31 @@ test('a scene line reworded on disk also offers Take theirs', async () => {
     await page.close();
   }
 });
+
+// Breaks: a words write drops the id POST /edit returned, so the card's Undo stays disabled and the
+// author's only way back from a mistyped line is the external editor (loka-wfrgk.100.4's undo item).
+test("a card's Undo puts back the words write it just made", async () => {
+  const before = readFileSync(TEXT, 'utf8');
+  // the scene tests above leave the world on their own cartridge: this room is the showcase's
+  const world = { method: 'POST', body: JSON.stringify({ name: 'showcase' }) };
+  assert.equal((await fetch(`http://localhost:${author}/world`, world)).status, 200);
+  const page = await open(room);
+  const undo = page.getByRole('button', { name: 'Undo', exact: true });
+  try {
+    const field = page.getByTitle('room.fell_top.description');
+    await shows(field, FELL_TOP);
+    assert.equal(await undo.isDisabled(), true); // nothing written yet
+    await field.fill('~');
+    await field.blur();
+    await until(() => readFileSync(TEXT, 'utf8') !== before);
+    assert.notEqual(readFileSync(TEXT, 'utf8'), before);
+    for (let t = 0; (await undo.isDisabled()) && t < 50; t++) await page.waitForTimeout(100);
+    assert.equal(await undo.isDisabled(), false); // the words write armed it
+    await undo.click();
+    await until(() => readFileSync(TEXT, 'utf8') === before);
+    assert.equal(readFileSync(TEXT, 'utf8'), before);
+  } finally {
+    writeFileSync(TEXT, before);
+    await page.close();
+  }
+});

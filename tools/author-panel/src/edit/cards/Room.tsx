@@ -72,10 +72,10 @@ export function Room({ rel, context, diag, offer }: Props) {
     <div className="grid min-w-0 grid-cols-1 gap-2 px-3 text-xs" aria-label="Room card">
       <Header rel={rel} diag={diag} undo={undoOf(rel, card)} />
       {card.refused ? <Refusal boxed>{card.refused}</Refusal> : null}
-      <Words draft={draft} context={context} fields={['name', 'description']} />
+      <Words draft={draft} context={{ ...context, wrote: card.write }} fields={['name', 'description']} />
       <Exits room={context.key} exits={draft.exits ?? {}} />
       <Mechanics card={card} menu={menu} blocked={blocked} add={add} about={about} />
-      <RoomForm rel={rel} card={card} context={context} diag={diag} defs={defs} details />
+      <RoomForm rel={rel} card={card} context={{ ...context, wrote: card.write }} diag={diag} defs={defs} details />
     </div>
   );
 }
@@ -213,7 +213,7 @@ export function Words({
     <div className="grid gap-1" aria-label="words">
       {fields.map((f) => {
         const k = proseKey(draft[f], context.kind, context.key, [f]);
-        return <WordsField key={k} label={f} k={k} words={inline(draft[f])} />;
+        return <WordsField key={k} label={f} k={k} words={inline(draft[f])} wrote={context.wrote} />;
       })}
     </div>
   );

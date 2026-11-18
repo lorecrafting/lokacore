@@ -24,7 +24,7 @@ import { Pages } from './ScenePages.tsx';
 import { Trigger } from './Trigger.tsx';
 
 export function SceneText({ rel, context, diag }: SceneProps) {
-  const { file, post, back, refused } = useSource(rel, diag);
+  const { file, post, back, refused, write } = useSource(rel, diag);
   // one op is one journal entry: the row buttons and the keys both come here. Focus follows the op
   // (rulings §5) onto the moved, added or gap-closing row. `/restructure` renumbers lines, so landed()
   // answers from the bytes the op was sent against, before the reload replaces them. These hooks sit
@@ -49,7 +49,7 @@ export function SceneText({ rel, context, diag }: SceneProps) {
     <div className="grid min-w-0 grid-cols-1 gap-2 px-3 text-xs" aria-label="scene card">
       <Header rel={rel} diag={diag} undo={back} />
       {refused ? <Refusal boxed>{refused}</Refusal> : null}
-      <Lines lines={lines} context={context} set={set} op={op} bytes={file.bytes} focus={focus} />
+      <Lines lines={lines} context={{ ...context, wrote: write }} set={set} op={op} bytes={file.bytes} focus={focus} />
     </div>
   );
 }

@@ -26,6 +26,7 @@ export type Context = {
   files?: Record<string, string>; // each node's source file, by ref
   held?: number; // the items placed in the selection (kernel/ts/play/card.ts held)
   open?: (sel: { kind: string; key: string }) => void; // selects another definition's card
+  wrote?: (id: string) => void; // a words write landed: the card's Undo now puts it back
   stale?: boolean; // the last compile failed: pickers offer the last good compile's keys
 };
 const context = (p: FieldProps) => p.registry.formContext as Context;
@@ -43,7 +44,7 @@ function TextKey(p: FieldProps) {
         <code className="min-w-0 truncate">{k}</code>
       </div>
     );
-  return <WordsField key={k} label={p.name} k={k} words={inline(p.formData)} />;
+  return <WordsField key={k} label={p.name} k={k} words={inline(p.formData)} wrote={context(p).wrote} />;
 }
 /** An inline prose marker's words (docs/system/cartridge.md "Inline prose"): GET /line's hint. */
 export const inline = (value: unknown) => (value as { prose?: string } | undefined)?.prose ?? '';
@@ -71,7 +72,7 @@ async function conflict(k: string, mine: At, at?: At): Promise<Told> {
   return at?.words ? { say: `${say} ${at.words}`, theirs: at } : { say };
 }
 
-function useLine(k: string, words: string) {
+function useLine(k: string, words: string, wrote?: (id: string) => void) {
   const [at, setAt] = useState<At>();
   const [draft, setDraft] = useState('');
   const [told, setTold] = useState<Told>();
@@ -100,7 +101,7 @@ function useLine(k: string, words: string) {
     setOut(true);
     try {
       const [status, answer] = await api('/edit', { ...mine, words: draft, key: k });
-      if (status === 200) await read(draft, true);
+      if (status === 200) await (wrote?.(answer.id), read(draft, true)); // its id is the card's Undo
       else if (status === 409) setTold(await conflict(k, mine, answer));
       else setTold({ say: typeof answer === 'string' ? answer : `Not saved (${status}).` });
     } finally {
@@ -117,8 +118,8 @@ function useLine(k: string, words: string) {
  * `was` guard, Esc puts it back; a refusal or a conflict keeps the draft. `words` finds the line
  * (a scene's or an inline marker's words; a `"key":` line needs none).
  */
-export function WordsField({ label, k, words }: { label: string; k: string; words: string }) {
-  const { at, draft, setDraft, told, theirs, setTold, read, save, out } = useLine(k, words);
+export function WordsField({ label, k, words, wrote }: { label: string; k: string; words: string; wrote?: (id: string) => void }) {
+  const { at, draft, setDraft, told, theirs, setTold, read, save, out } = useLine(k, words, wrote);
   return (
     <div className="grid min-w-0 gap-1 text-xs">
       <div className="flex min-w-0 items-center gap-2">

@@ -144,7 +144,7 @@ export function useCard(rel: string, diag: Diag) {
     );
   const reveal = (f: string) => setRevealed([...revealed, f]);
   const unreveal = (f: string) => setRevealed(revealed.filter((r) => r !== f)); // back in the add menu
-  const card = { saved, draft, revealed, undo, change, commit: () => queued(send), back, reveal, unreveal };
+  const card = { saved, draft, revealed, undo, write: setUndo, change, commit: () => queued(send), back, reveal, unreveal };
   return { ...card, refused: held ?? refused };
 }
 
@@ -256,7 +256,7 @@ export function Generic({ rel, context, diag, only = (f) => f }: GenericProps) {
     <div className="grid min-w-0 grid-cols-1 gap-2 px-3 text-xs" aria-label="Card">
       <Header rel={rel} diag={diag} undo={card.undo ? card.back : undefined} />
       {card.refused ? <Refusal boxed>{card.refused}</Refusal> : null}
-      <CardForm rel={rel} card={card} context={context} diag={diag} ui={ui} />
+      <CardForm rel={rel} card={card} context={{ ...context, wrote: card.write }} diag={diag} ui={ui} />
       <AddMenu fields={menu} blocked={blocked} reveal={add} about={about} />
     </div>
   );
