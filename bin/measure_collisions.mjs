@@ -26,6 +26,17 @@ const book = await (async () => {
 })();
 await book.waitForSelector('[dir="auto"]', { timeout: 25000 });
 
+// The tutorial card covers the Book and eats the turn-the-page clicks, which kept the walk on page 1
+// (three sessions called the measurement blocked on it). Dismiss it the way a reader does, once.
+for (const label of ['Got it']) {
+  await book
+    .getByRole('button', { name: label, exact: true })
+    .first()
+    .click({ timeout: 5000 })
+    .catch(() => {});
+}
+await page.waitForTimeout(500);
+
 /** The words the Book draws now. */
 const drawn = () =>
   book.evaluate(() =>
@@ -44,21 +55,54 @@ await page.evaluate(() => {
 });
 
 const pages = [];
-for (let i = 0; i < STEPS; i++) {
-  const words = await drawn();
-  pages.push(words);
-  const before = words.join('|');
-  // Turn the page the way a reader does: the last drawn line, else the right arrow.
-  const line = book.locator('[dir="auto"]').last();
-  await line.click({ force: true }).catch(() => {});
-  await page.waitForTimeout(200);
-  if ((await drawn()).join('|') === before) {
-    await book
-      .locator('body')
-      .press('ArrowRight')
-      .catch(() => {});
+// The rooms to visit: the story graph knows them, and `go_to_room` is the cheat the panel already
+// accepts (mobile/app/author/place.ts:158), so the walk moves instead of hoping a drawn line is an exit.
+const AUTHOR = process.env.AUTHOR_URL ?? 'http://localhost:19008/';
+const ROOMS = await fetch(`${AUTHOR}story`)
+  .then((r) => (r.ok ? r.json() : null))
+  .then((j) =>
+    (j?.graph?.nodes ?? [])
+      .filter((n) => n.kind === 'room')
+      .map((n) => n.ref.split(':room/').pop())
+      .filter(Boolean),
+  )
+  .catch(() => []);
+
+/** Ask the Book to stand in a room, then wait for the state that proves it arrived. */
+const goTo = async (room) => {
+  const before = (await drawn()).join('|');
+  // The cheat handler is this frame's own window listener (mobile/app/author/panel.tsx:245), not its
+  // parent's: posting to the parent reaches the author panel page, which does not drive the game.
+  await book.evaluate((r) => window.postMessage({ op: 'go_to_room', room: r }, '*'), room);
+  for (let i = 0; i < 40; i++) {
+    await page.waitForTimeout(100);
+    if ((await drawn()).join('|') !== before) return true;
+  }
+  return false;
+};
+
+if (ROOMS.length) {
+  for (const room of ROOMS.slice(0, STEPS)) {
+    await goTo(room);
+    pages.push(await drawn());
+  }
+} else {
+  for (let i = 0; i < STEPS; i++) {
+    const words = await drawn();
+    pages.push(words);
+    const before = words.join('|');
+    // Turn the page the way a reader does: the last drawn line, else the right arrow.
+    const line = book.locator('[dir="auto"]').last();
+    await line.click({ force: true }).catch(() => {});
     await page.waitForTimeout(200);
-    if ((await drawn()).join('|') === before) break;
+    if ((await drawn()).join('|') === before) {
+      await book
+        .locator('body')
+        .press('ArrowRight')
+        .catch(() => {});
+      await page.waitForTimeout(200);
+      if ((await drawn()).join('|') === before) break;
+    }
   }
 }
 
@@ -66,19 +110,25 @@ const lost = latest?.lost ?? [];
 const seen = pages.map((w) => new Set(w));
 const onPage = lost.filter((g) => seen.some((s) => s.has(g.words)));
 const share = lost.length ? onPage.length / lost.length : null;
+const distinct = new Set(pages.map((p) => p.join('|'))).size;
 
 console.log(
   JSON.stringify(
     {
       pagesWalked: pages.length,
+      distinctPages: distinct,
+      rooms: ROOMS.length,
       groups: lost.length,
       onPage: onPage.length,
       share: share === null ? null : +share.toFixed(3),
-      verdict: !lost.length
-        ? 'no collisions recorded: either the walk saw none, or the probe is not live'
-        : share > 0.5
-          ? 'same-view collisions dominate: the data-loka-key attribute is the fix'
-          : 'mostly cross-view: clearing `seen` per render is enough and much smaller',
+      verdict:
+        distinct < 3
+          ? `the walk is not moving (${distinct} distinct pages over ${pages.length} steps): fix it before reading anything else`
+          : !lost.length
+            ? 'no collisions recorded: either the walk saw none, or the probe is not live'
+            : share > 0.5
+              ? 'same-view collisions dominate: the data-loka-key attribute is the fix'
+              : 'mostly cross-view: clearing `seen` per render is enough and much smaller',
       onPageSample: onPage.slice(0, 12),
       crossViewSample: lost.filter((g) => !onPage.includes(g)).slice(0, 8),
     },
