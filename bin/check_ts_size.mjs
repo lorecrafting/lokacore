@@ -45,6 +45,11 @@ const functions = (rel, src) => {
 };
 
 const report = [];
+// A named path that is not there is a pass nobody earned: a typo, a moved file or an absolute path
+// reported nothing and exited 0 (loka-735tg). Only an argument can carry that mistake — git ls-files
+// lists tracked files, all of which exist. The filter's other drops (generated, non-TS) are deliberate.
+for (const f of args)
+  if (!existsSync(root + f)) report.push(`${f}: not checked: no such file in the tree`);
 const check = (rel, text, { what, first, size, limit, ln }) => {
   const m = ln && text[ln - 1].match(/^\s*\/\/ size: allow (\d+),\s*(\S.*)/);
   const n = m && Number(m[1]);
