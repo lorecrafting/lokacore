@@ -99,16 +99,29 @@ and count how many are simultaneously visible. If they are not, fix the scope of
 
 ## When measuring first, note this
 
-The measurement this note asks for above (cross-view vs same-view) has since been run statically over
-the showcase's `text.json`: **156** wordings are drawn by two or more text keys, of which **59** are one
-sampler family (`item.egg_01..04`, never on one page) and **97** are cross-family. The 59 were fixed by
-clearing the bindings per page (`nextPage`, `prose_rules.ts:60`, shipped 323d3ac10, no attribute
-needed) — which is what this note predicted: measure before building. The 97 remain and are what the
-attribute is for.
+The measurement this note asks for above (cross-view vs same-view) was run statically over the showcase's
+`text.json`: **156** wordings are drawn by two or more text keys. Of those, **59** were one sampler family
+(`item.egg_01..04`, never on one page) and were fixed by clearing the bindings per page (`nextPage`,
+`prose_rules.ts:60`, shipped 323d3ac10, no attribute needed) — which is what this note predicted: measure
+before building.
 
-The live walk called for above (`bin/measure_collisions.mjs`) cannot be driven past the first page: the
-showcase opens on a tutorial overlay that needs real play to dismiss. The 97 are therefore still
-unmeasured for same-view overlap, and the attribute should be justified by a real edit that needs it.
+**Same-room, measured (2026-11-17): 14 wordings, every one an item variant family** — six eggs in the
+larder, five candles, four ores at the forge stall, three pelts in the glade, two trout in the pond, three
+turnips and three stews in the larder, and the loaf wordings. Each is one sampler family's own variety
+fixture, not an authoring ambiguity: a real room does not hold six indistinguishable eggs. So the
+`data-loka-key` attribute stays unbuilt, which is this note's own "do not build it speculatively" — now
+with a number behind it. What the 14 do justify is a **lint**, not an attribute: two items drawing the
+same words in one room is nearly always a copy-paste slip, and `mix loka.lint` can say so in one line.
+
+Two corrections to how the live walk was described here before. It could not pass the first page because
+the showcase opens a tutorial card with a "Got it" button; one click clears it. And it then walked
+nothing: `pagesWalked` counted loop iterations — forty steps covered two distinct page states. Fixed in
+`bin/measure_collisions.mjs`, which now reads rooms from the author API's `/story` graph, sends `go_to_room`
+to the Book frame itself (`mobile/app/author/panel.tsx:245`; posting to `window.parent` reached the portal,
+which drives nothing), and prints `distinctPages` with a "the walk is not moving" verdict so a standing
+walk can no longer produce a share. It reports 64 distinct pages over 64 rooms. A live walk still cannot
+answer the same-view question, because `nextPage(seen)` runs on every game change, so `lost` only records a
+collision inside one render — which is why the 14 above are counted statically.
 
 ## What I would refuse
 
