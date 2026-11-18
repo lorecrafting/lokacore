@@ -28,6 +28,21 @@ import { band, Control, home, type Home, Page, SectionTitle, useTitleFocus } fro
 import { LABEL } from './labels.ts';
 
 type Say = (key: string) => string;
+
+// Held items collapse by their plural words into one countable row (loka-x6t.132), as the room's
+// sentence does (people.tsx COUNT): the first member's id is the row's, and the count is what keeps
+// every member reachable, since one row opens one item page. An item with no plural never groups:
+// its kind is only its name, and two items can share a name and differ in state.
+// ponytail: a group is keyed by its plural text, so a cartridge that gives two item kinds one
+// plural groups them; split on `plural` if a cartridge ever needs to tell such kinds apart.
+export const holding = (items: readonly Thing[], text: Say) => {
+  const kinds = items.map((e) => e.words?.plural && text(e.words.plural));
+  return items.flatMap((e, i) => {
+    const same = kinds[i] ? items.filter((_, o) => kinds[o] === kinds[i]) : [e];
+    return same[0] === e ? [{ item: e, count: same.length }] : [];
+  });
+};
+
 type Carrying = Home & {
   items: readonly Thing[];
   equipment?: GameView['equipment'];
@@ -145,8 +160,13 @@ export function CarryingPage(p: Carrying) {
       {p.items.length === 0 && <Note>{LABEL.carryingNothing}</Note>}
       {p.items.length > 0 && (
         <View>
-          {p.items.map((e) => (
-            <EntityLine key={e.id} name={p.text(e.name)} onPress={() => p.open(e.id)} />
+          {holding(p.items, p.text).map(({ item: e, count }) => (
+            <EntityLine
+              key={e.id}
+              name={p.text(e.name)}
+              note={count > 1 && e.words?.plural ? `${count} ${p.text(e.words.plural)}` : undefined}
+              onPress={() => p.open(e.id)}
+            />
           ))}
         </View>
       )}
