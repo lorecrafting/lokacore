@@ -52,6 +52,19 @@ Lessons from PM sessions (merging, batches, spawns, hosted CI), moved out of the
 - `/clear` keeps the session's background agents and shells running: check `ListAgents` and the worktrees before redoing a previous session's work.
 - `bin/pm_merge.sh` stops on stacked additive conflicts (`mechanics.md`, the gen files): merge by hand keeping both sides, then `elixir bin/contracts.exs`, `bin/review_index.sh`, focused tests.
 
+## Evidence and bead state
+
+- **A bead's title is not evidence.** Four beads in one session were already done or mis-stated: `g5hh.2`/`.2.6` looked like an unbuilt feature and were on main (`#573`/`#575`); `wfrgk.120` looked like a defect and was the intended convention (`kernel/ts/play/card.ts:344`, `Choices.tsx:29`); `vduxr.29` looked like a live crash and its stated mechanism is neutralised by `kernel/ts/src/runtime/proposal.ts:317` (bumped to P1, reverted). **Check the code, then check that the fault can happen** — a wrong shape is not the same as a bug existing.
+- **A guard no mutant can break may still be load-bearing.** `is_binary(room)` in `Lint.same_words/1` survived its mutant because the comprehension's own `room = get_in(...)` already filters `nil`. Probe it, then document it, or the next reader deletes it.
+- **A limit that grows in one batch needs its reason beside it.** `@baseline_cap` moved 204 → 212 for `same_words/1`; the comment now carries the reason and says the cap still has to come down.
+- **A continuation prompt is stale by construction.** Its open questions are phrased as open; re-check each named bead with `br show <id>` before asking the owner (two settled beads were re-asked in one session).
+- **A check that filters its own arguments can fail open.** `bin/check_ts_size.mjs` drops any path it cannot find (`existsSync(root + f)`), so a typo or an absolute path reports nothing and exits 0.
+
+## Git
+
+- **`git reset --hard` on a branch whose commit you have not pushed costs the work.** Push, then rewrite.
+- **A careless grep turns a relative path into a wrong one.** `../system/...` from `docs/BUILDERS-GUIDE.md` is `system/...`; `bin/check_docs.exs` runs before every commit here and catches it.
+
 ## Cloud sessions
 
 - In a cloud container only: `gh` works over REST only (no `gh pr create`/`merge`; use the GitHub MCP tools); `gh auth status` misreports; branch deletion is blocked, so the owner deletes merged branches. Locally `gh pr merge` and `bin/merge_pr.sh` work.

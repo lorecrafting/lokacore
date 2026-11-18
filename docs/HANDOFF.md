@@ -4,7 +4,7 @@ The present only: open work, next steps, owner questions, and standing owner rul
 yet. Rewrite this page in place once per session, at its end; never add dated session sections. History lives in git, Beads and `docs/reviews/`; lessons
 go to [PM lessons](lessons/pm.md) ([harness patterns](decisions/owner-decision-harness-patterns-2026-10-28.md)).
 
-AS OF main after e9fa10b2e; written 2026-11-17 21:20 UTC in the Pi harness by deploy/deepseek-ai/deepseek-v4.1-flash-1017, PM session.
+AS OF main after b0d9f8ce4; written 2026-11-18 07:20 UTC in the Pi harness by deploy/deepseek-ai/deepseek-v4.1-flash-1017, PM session.
 `kernel_api` is 1.159 (no contract slice since). Every reviewer and developer here runs on `deploy/deepseek-ai/deepseek-v4.1-flash-1017`
 (the owner paused the Anthropic subscription; `~/.pi/agent/agents/loka-dev.md`, `loka-review.md` repinned
 2026-11-13). **Nothing is mid-merge, nothing is in flight, no agent is running. #454 is the owner's P3 hold.**
@@ -19,9 +19,10 @@ AS OF main after e9fa10b2e; written 2026-11-17 21:20 UTC in the Pi harness by de
 
 ## Board
 
-**32 open, 14 ready, 3 housekeeping deferred to 2027-01-01.** The ready list is the whole planned queue;
-anything absent from it is deferred on purpose, not forgotten. Before proposing work, check the bead is not
-already shipped — this session closed three that were (`g5hh.2`, `g5hh.2.6`, `wfrgk.120`) by reading the code.
+**37 open (31 open, 6 in-progress epics), 13 ready, 4 housekeeping deferred to 2027-01-01.** The ready list is
+the whole planned queue; anything absent from it is deferred on purpose, not forgotten. Before proposing work,
+check the bead is not already shipped — read the code, not the title. The six in-progress beads are all
+epics or long-running parents (`wfrgk.102`, `vduxr`, `x6t`, `wfrgk.100.4`, `kgd`, `y6yg`); none has an agent on it.
 
 Three ready beads want the owner's input, not an agent's:
 - **`.100.5`** (scene structure editable in the GUI) reverses ruling 11, so it needs a design pass first.
@@ -32,19 +33,20 @@ Three ready beads want the owner's input, not an agent's:
 awaiting a design call on where the phase name is read. **`bptw`** (page-side colon labels) needs the colon
 rule's one-line decision. **`czoln`, `325f8`** are prologue content, transcribing the owner's outline.
 
-## Story patterns (shipped this session, loka-vduxr.57)
+**`vduxr.39` is the one bead waiting on a bare yes/no from the owner:** the doc half is done (#746); the code
+half is withdrawn. Choose (a) close won't-fix, (b) take the reviewer's M4, (c) leave doc-only (already the
+state). `g96` is **closed** (2026-11-17) with its re-open trigger recorded — do not re-litigate it.
 
-`docs/BUILDERS-GUIDE.md` has a new **Story patterns** section: ten recipes from the
+## Story patterns (loka-vduxr.57, shipped 2026-11-17)
+
+`docs/BUILDERS-GUIDE.md` has a **Story patterns** section: ten recipes from the
 [2026-11-04 adoption shortlist](rnd/prologue-adoption-shortlist-2026-11-04.md), each verified against a running
-sampler file rather than the shortlist's unchecked claims. Read it before writing prologue beats; it is the
-fastest path from "the outline says X" to working JSON.
+sampler file. Read it before writing prologue beats.
 
-**Three shortlist claims did not survive and the page now carries the corrections:** row 3 is a fact read back
-by a reaction, not a delayed write (the `wait` op is real but a separate mechanism); `barrier.set` takes
-`{"barrier", "to": "open"}`, not `{"open": true}`; and row 2 already has **four** working actions on one barrier
-(`barrier_sampler`), not a sketch. **Row 1's `then_failed` is the one gap** — it exists in
-`protocol/dialogue.schema.json` and no cartridge or sampler uses it, so the page states it as blocked rather than
-showing a fake example. The supported form for a failing check is its own `failure` line.
+**Three shortlist claims did not survive and the page carries the corrections:** row 3 is a fact read back by a
+reaction, not a delayed write; `barrier.set` takes `{"barrier", "to": "open"}`; row 2 already has **four** working
+actions on one barrier (`barrier_sampler`). **Row 1's `then_failed` is the one gap** — it exists in
+`protocol/dialogue.schema.json` and no cartridge or sampler uses it, so the page states it as blocked.
 
 **Do not "verify" a mechanic by grepping one schema file.** `then_failed` was declared absent after a grep of
 `protocol/cartridge.schema.json` alone; it lives in `protocol/dialogue.schema.json`. Two written examples had to be
@@ -54,6 +56,7 @@ corrected the same way (`village_regard`, `mill_gate` did not exist). Grep the r
 
 1. **The owner is writing Part 1 in the editor.** That is the point of the queue, not a parallel task:
    `bin/author.sh`, restart it after each merge. File friction as it appears and fix blockers at once.
+   `bin/author.sh` is not a `bg_run` task: a server never completes, so a timeout kills it. Use its own trap.
 2. **`.100.4`'s scene-field-focus item: a lead, no fix.** The card does remount on a save (stamping an input
    inside `[aria-label="scene card"]` and saving shows the stamp gone), so the defect is real, but reverting
    `tools/author-panel/src/edit/cards/Room.tsx:216`'s `key={proseKey(draft[f])}` to `key={f}` fails no test, so there
@@ -82,25 +85,25 @@ corrected the same way (`village_regard`, `mill_gate` did not exist). Grep the r
 
 **Phases 0, 2 and 3 of the authoring-readiness plan are done** — do not re-plan them (ff954162a, 527fd4071, `.97`).
 
-## What shipped this session (2026-11-17)
+## Code worth reading before touching its area
 
-Six PRs and seven direct commits on `main`. The two worth reading before touching their area:
+History lives in git and `docs/reviews/`; these four are live constraints, not a changelog.
 
-- **#748** (`.100.4`, 409 half): a save's 409 checks find their row by key again, no `as never`.
-- **#749** (`vduxr.69`): a line beginning `~` with words after it draws one `placeholder_tilde` warning naming its
+- **`#749` (`vduxr.69`):** a line beginning `~` with words after it draws one `placeholder_tilde` warning naming its
   file and line; the words ship unchanged. Only a line that trims to `~` alone is a placeholder. **Read
   `stray_tildes/2` in `lib/loka/content.ex` before touching the placeholder counters** — it binds the source index
   only when there is a stray tilde to place, which is most of a preview compile's cost.
-- **#750** (`wfrgk.100.8`, measurement): 14 → corrected **12** same-room shared wordings, all item variant families.
+- **`#751` (`loka-8h2cq`):** `Lint.same_words/1` in `mix loka.lint` names two items drawing the same words in one
+  room. The showcase's 12 are the variety fixtures, pinned in `test/loka/lint_baseline.txt`; the cap moved 204 → 212
+  with the reason beside it and **still has to come down**.
+- **`#752` (`x6t.132`):** `CarryingPage` collapses held items by their authored `words.plural` into one row
+  (`holding()` in `mobile/app/book/sections.tsx`). The count is what keeps a grouped item reachable, and an item with
+  no `plural` never groups — its kind would be its name alone, and two items can share a name and differ in state.
+  A row-level consume control was declined; the item page's offered action is the same verb with the existing
+  confirmation/refusal/narration routing.
+- **`#750` (`wfrgk.100.8`):** measured **12** same-room shared wordings, all item variant families.
   `bin/measure_collisions.mjs` still cannot get past the showcase's tutorial overlay.
-- **#751** (`loka-8h2cq`): `Lint.same_words/1` in `mix loka.lint` names two items drawing the same words in one room,
-  naming both keys and the room. The showcase's 12 are the variety fixtures, so they are pinned in
-  `test/loka/lint_baseline.txt`; the cap moved 204 → 212 with the reason beside it and still has to come down.
-- **`vduxr.57`** (four commits, no PR — docs only): the Story patterns section above.
 
-**Three beads closed as already-done or not-a-bug after checking the code, not the title:** `g5hh.2`/`.2.6` (the
-level-up rush is on main from #573/#575) and `wfrgk.120` (the `craft`/`use.tool` add-menu "writes nothing" is the
-intended convention: `card.ts:344` says allOf fields are the author's to pick, `Choices.tsx:29` implements it).
 **15 `loka-ni2zd.*` slices deferred to 2027-01-01**; `.1` (plan runner) stays open as the reopen point.
 
 ## Owner's writing list (prologue; text keys, no prose from agents)
@@ -136,6 +139,11 @@ owner guide: [polish tour](design/polish-tour.md). Screenshots: Playwright needs
 
 ## Retros awaiting the owner's yes/no
 
+**2026-11-18 (two open, loka-735tg):** `bin/check_ts_size.mjs` fails open on a path it cannot find
+(`existsSync(root + f)` drops it, so a typo or an absolute path reports nothing and exits 0 — verified);
+and a continuation prompt's open questions are stale by construction, so re-check each named bead with
+`br show` before asking the owner. Approve either for the next housekeeping PR.
+
 **2026-11-16 (DONE):** loka-wpw6x — the PM's `ci_wait.sh` reported failure on green heads. The Pi-side copy is
 deleted and `~/.pi/agent/AGENTS.md` points at the repo's `bin/wait_ci.sh`. No owner action.
 
@@ -147,33 +155,13 @@ Its two cheap fixes are already in #733.
 
 **2026-11-11:** loka-x4ejm done in #714; loka-y043w shipped in #735; loka-r7vrx closed (the queue is 32).
 
-## Lessons this session (new; older ones are in [PM lessons](lessons/pm.md))
-
-- **A bead's title is not evidence, and this session produced four.** `g5hh.2`/`.2.6` looked like a large unbuilt
-  feature and were already on main. `wfrgk.120` looked like a defect and was the codebase's own convention.
-  `vduxr.29` looked like a live crash and its stated mechanism is neutralised by `runtime/proposal.ts:317` (I bumped
-  it to P1 and had to revert). `then_failed` was declared absent from one schema grep. **Check the code, then check
-  that the fault can happen** — the shape being wrong is not the same as the bug existing.
-- **A dev server is not a `bg_run` task.** Two author-stack servers were killed by the 900 s and 1200 s timeouts I
-  gave them; a server never "completes". The first orphaned a child still holding its port. Use `bin/author.sh`
-  (it names a held port and traps its three components) or a no-timeout run killed by PID. Recorded in
-  [mobile lessons](lessons/mobile.md).
-- **A limit that grows in one batch needs its reason beside it.** `@baseline_cap` moved 204 → 212 for
-  `same_words/1`, the one lint that adds a dozen findings at once; the comment now says so and says the cap still
-  has to come down.
-- **A guard that no mutant can break may still be load-bearing.** `is_binary(room)` in `Lint.same_words/1` survived
-  its mutant because the comprehension's own `room = get_in(...)` already filters `nil`. Probed rather than assumed,
-  then documented so the next reader does not delete it.
-- **`git reset --hard` on a branch whose commit you have not pushed costs the work.** I lost a commit that way and
-  recovered it only because the branch had been pushed. Push, then rewrite.
-- **A careless grep turns a relative path into a wrong one.** `../system/...` from `docs/BUILDERS-GUIDE.md` is
-  `system/...`; the docs gate caught it, which is why `bin/check_docs.exs` runs before every commit here.
-
 ## Session procedure
 
 - Start: `mise install`, `br` 0.7.6 ([BEADS.md](BEADS.md)), `gh auth status`; `git pull --ff-only origin main`, then `br sync --import-only`;
   read [WORKFLOW](WORKFLOW.md), [PM](PM.md) and this page; `bin/session_status.sh` prints the board (`--full` for everything).
   After a `/clear`, run `ListAgents` first: the previous conversation's agents and shells keep running.
+  A continuation prompt (a harness file, not this repo's) is stale by construction: `br show <id>` every bead it
+  names as awaiting the owner before asking, and drop the question if the status is terminal.
 - Beads writes from the `main` checkout after `br sync --import-only`; new issues through `bin/br_create.sh`; each checkpoint is
   `bin/beads_checkpoint.sh`. Never commit `beads.db`. A child slice of an open issue gets its own child id to merge with.
 - A kernel contract slice bumps only `INSTALLED.kernel_api` to main+1 at push; parallel claims rebump on the later merge.
