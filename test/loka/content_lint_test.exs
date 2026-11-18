@@ -419,9 +419,9 @@ defmodule Loka.ContentLintTest do
 
   # Story cartridges only (ruling b): toolbox_showcase, the one story cartridge (loka-4hik). Out:
   # every *_sampler (samplers break rules on purpose) and lantern_proof. Findings over the
-  # slice's timebox are pinned in lint_baseline.txt until loka-kgd.184 clears them: a new finding
-  # fails, and so does a baseline grown past its cap.
-  @baseline_cap 204
+  # timebox are pinned in lint_baseline.txt until loka-kgd.184 clears them: a new finding fails,
+  # and so does a baseline grown past its cap (204 -> 212 for Lint.same_words/1; still to come down).
+  @baseline_cap 212
   @baseline File.read!("test/loka/lint_baseline.txt")
             |> String.split("\n", trim: true)
             |> Enum.reject(&String.starts_with?(&1, "#"))

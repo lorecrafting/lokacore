@@ -1,4 +1,4 @@
-# Pinned findings loka-kgd.184 clears; the test caps this list at 204 lines: shrink it, never grow it.
+# Pinned findings loka-kgd.184 clears; the test caps this list at 212 lines: shrink it, never grow it.
 toolbox_showcase areas/homestead/actions/carve_spoon.json: policy refuses with no reason
 toolbox_showcase areas/homestead/actions/cook_feast.json: policy refuses with no reason
 toolbox_showcase areas/homestead/actions/cook_stew.json: policy refuses with no reason
@@ -194,4 +194,16 @@ toolbox_showcase areas/homestead/items/watering_can.json: nothing takes it out o
 toolbox_showcase areas/hub/items/waterskin.json: nothing takes it out of play
 toolbox_showcase areas/economy_law/items/yard_crate.json: nothing takes it out of play
 toolbox_showcase areas/magic/items/yard_torch.json: nothing takes it out of play
+toolbox_showcase areas/homestead/items/egg_01.json: draws "an egg" like egg_02, egg_03, egg_04, egg_05, egg_06 in room larder
+toolbox_showcase areas/fell_road/items/fold_loaf_1.json: draws "a loaf" like fold_loaf_2 in room the_fold
+toolbox_showcase areas/homestead/items/log_01.json: draws "a log" like log_02, log_03, log_04, log_05, log_06, log_07, log_08 in room woodpile
+toolbox_showcase areas/economy_law/items/ore_01.json: draws "a lump of ore" like ore_02, ore_03, ore_04 in room forge_stall
+toolbox_showcase areas/homestead/items/pelt_01.json: draws "a rabbit pelt" like pelt_02, pelt_03 in room glade
+toolbox_showcase areas/homestead/items/spoon_01.json: draws "a wooden spoon" like spoon_02 in room woodpile
+toolbox_showcase areas/homestead/items/stew_hearty_01.json: draws "a bowl of hearty stew" like stew_hearty_02, stew_hearty_03 in room larder
+toolbox_showcase areas/homestead/items/stick_01.json: draws "a stick" like stick_02 in room carpenter_shop
+toolbox_showcase areas/homestead/items/stick_03.json: draws "a stick" like stick_04 in room holding_croft
+toolbox_showcase areas/homestead/items/timber_01.json: draws "a timber" like timber_02 in room timber_yard
+toolbox_showcase areas/homestead/items/trout_01.json: draws "a trout" like trout_02 in room pond_deep
+toolbox_showcase areas/homestead/items/turnip_01.json: draws "a turnip" like turnip_02, turnip_03 in room larder
 toolbox_showcase areas/magic/items/lamp_oil.json: attic_lantern, lantern burn it; it starts empty and nothing fills it

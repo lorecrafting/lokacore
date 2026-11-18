@@ -49,6 +49,7 @@ defmodule Loka.Content.Lint do
     |> Kernel.++(talk(files, text))
     |> Kernel.++(LintLabels.run(files, text))
     |> Kernel.++(items(files))
+    |> Kernel.++(same_words(files))
     |> Kernel.++(fills(files))
     |> Kernel.++(Loka.Content.LintPages.run(files, text))
     |> Kernel.++(Loka.Content.LintStory.run(files))
@@ -144,6 +145,45 @@ defmodule Loka.Content.Lint do
         {kind, text} <- [source: "nothing puts it in play", sink: "nothing takes it out of play"],
         {kind, id} not in refs,
         do: "items/#{name}: #{text}"
+  end
+
+  # Two items in one room whose drawn words match cannot be told apart when the author clicks a
+  # line or opens a field: the Book binds words to a key, and two keys claiming them bind to none
+  # (`bind/3`; docs/rnd/line-key-binding-2026-11-15.md). Measured over the showcase: 12 such
+  # wordings, every one an item variant family, which is nearly always a copy-paste slip.
+  # A `room = get_in(...)` clause is itself a filter in a comprehension, so a held item (nil room)
+  # drops out before `is_binary(room)` is reached; that guard only catches a malformed room.
+  @spec same_words(%{String.t() => map()}) :: [String.t()]
+  def same_words(files) do
+    files
+    |> placed(files)
+    |> Enum.group_by(fn {_, room, words} -> {room, words} end)
+    |> Enum.flat_map(fn
+      {_, [_]} ->
+        []
+
+      {{room, words}, same} ->
+        names =
+          same |> Enum.map(fn {rel, _, _} -> Path.rootname(Path.basename(rel)) end) |> Enum.sort()
+
+        [
+          "items/#{hd(names)}.json: draws #{inspect(words)} like " <>
+            "#{Enum.join(tl(names), ", ")} in room #{room}"
+        ]
+    end)
+    |> Enum.sort()
+  end
+
+  # Each room-placed item with the words it draws: a held item draws no room line, so it cannot
+  # collide, and an item whose name is not a text key draws nothing.
+  defp placed(items, files) do
+    text = Map.get(files, "text.json", %{})
+
+    for {"items/" <> _ = rel, i} <- items,
+        room = get_in(i, ["location", "room"]),
+        words = text[i["name"]],
+        is_binary(room) and is_binary(words),
+        do: {rel, room, words}
   end
 
   defp refs(["items", name], i) do
