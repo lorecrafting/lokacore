@@ -577,7 +577,18 @@ A shop reason from the cartridge is a lowercase fragment with no period.
 
 ## Item details and Take/Drop
 
-Inventory separates Held from Worn slots, including empty slots. Held/worn item
+Inventory separates Held from Worn slots, including empty slots. Held items of one kind — the
+same authored `words.plural` text, as the room's sentence groups them (`two crows`, count words to
+nine, digits after) — draw as one row: the kind's first member's name, then the count and its plural
+as the row's [EntityLine](../BOOK-UI-COMPONENTS.md#component-catalogue) note, which draws below the
+name (`an egg`, note `3 eggs`); the count is a digit, as the room's sentence counts past nine. The row
+opens that first member's page, so the count is what keeps every grouped item reachable; a kind with
+one member draws its own row with no note. An item whose words declare no `plural` never groups,
+since its kind is only its name and two such items can share a name and differ in state. A grouped
+row offers no inline consume control: consuming one of a stack is reached through the item page's
+ordinary offered action, which is one engine verb per press and keeps the confirmation, refusal and
+narration routing the Book already has (PM, 2026-11-18, for the owner to overrule; loka-x6t.132).
+Held/worn item
 taps resolve the same detail; item pages follow [detail-page order](#detail-page-order), with current legal item/container/equipment actions, plus local **Leave** back to the page it was opened from ([grammar](../BOOK-UI-COMPONENTS.md#grammar)). An available loose item therefore offers Take
 and Leave; Leave sends no engine verb. Confirmed accepted `taken` returns to World with the engine's take line ([line placement](#line-placement)),
 the item named as the player saw it. Under the PM's explicitly adopted Drop symmetry, confirmed accepted `dropped` also

@@ -1,4 +1,5 @@
 // C row Pages, Sections (design-input-batch-4-2026-10-09.md 1); routes: stories/routes.ts.
+// size: allow 310, one story per Carrying and Character state the view can reach
 import type { Meta, StoryObj } from '@storybook/react-native-web-vite';
 import { expect, fn, userEvent, waitFor, type Mock } from 'storybook/test';
 import { ContentsPage } from '../book/Menu.tsx';
@@ -36,6 +37,23 @@ export default meta;
 export const Journal: StoryObj = { ...pageStory(JournalView), name: 'Journal' };
 export const CarryingEmpty: StoryObj = { ...pageStory(CarryingEmptyView), name: 'Carrying empty' };
 export const CarryingHeld: StoryObj = { ...pageStory(CarryingHeldView), name: 'Carrying held' };
+// Three loaves of one kind (loka-x6t.132): one counted row, still opening the first loaf's page.
+// Breaks: a stack draws its rows uncounted, or the count loses a member.
+const loaf = CarryingHeldView.view.inventory[0]!;
+const again = (id: string) => ({
+  ...loaf,
+  id,
+  actions: loaf.actions.map((a) =>
+    a.target_ids ? { ...a, target_ids: [id, ...a.target_ids.slice(1)] } : a,
+  ),
+});
+export const CarryingStacked: StoryObj = {
+  ...pageStory({
+    ...CarryingHeldView,
+    view: { ...CarryingHeldView.view, inventory: [loaf, again('e1'), again('e2')] },
+  }),
+  name: 'Carrying stacked',
+};
 export const CharacterUnknown: StoryObj = {
   ...pageStory(CharacterUnknownView),
   name: 'Character unknown',
