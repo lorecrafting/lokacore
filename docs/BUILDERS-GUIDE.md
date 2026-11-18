@@ -398,11 +398,65 @@ machinery as above, so there is no separate mechanic to learn.
   variant, a reaction's `when`, or a choice's `policy`.
 - **Check:** as with regard, replay the transcript through the moment and confirm the changed line.
 
+### Two ways past every gate
+
+One barrier, several ways through, each a separate action that shares the same "is this gate still
+shut" facts. A player who cannot pick can force, and neither blocks the other.
+
+- **Keys:** a barrier named in a detail on the room; one `actions/<key>.json` per route; each
+  route's `policy` reading the facts the others set, so a gate already opened stops offering.
+- **Example** ([`force_door.json`](../cartridges/barrier_sampler/actions/force_door.json)) — forcing
+  is offered only while the door is neither picked nor forced, and only if it is `fragile`:
+
+  ```json
+  "target": {"kind": "detail", "room": "storeroom", "detail": "wooden_door"},
+  "policy": {"op": "all", "items": [
+    {"op": "fact_compare", "fact": "door_picked", "equals": false},
+    {"op": "fact_compare", "fact": "door_forced", "equals": false},
+    {"op": "has_tag", "barrier": "wooden_door", "tag": "fragile"}
+  ]},
+  "check": {"key": "force_door", "kind": "opposed", "attribute": "str"},
+  "outcomes": {"success": {"steps": [{"op": "fact.assign", "fact": "door_forced", "value": true}],
+                           "narration": {"actor": "narration.force_door.success"}},
+               "failure": {"narration": {"actor": "narration.force_door.failure"}}}
+  ```
+
+  Its siblings are `pick_door.json`, `pick_lock.json` and `force_iron.json`, each setting its own
+  fact. `has_tag` is how a route is limited to the right material: forcing works on `fragile`,
+  not on an iron lock.
+- **The gate itself** opens with `barrier.set` (see *Quest rewards that are verbs*), so actions set
+  facts and one reaction or one step opens the barrier; two sets of words mean two actions, not
+  two barriers.
+- **Check:** one transcript per route. `coverage.ts` names an action no transcript ever completed.
+
+### Word gets around
+
+A deed the player is seen doing becomes something a different NPC already knows, so a visitor is
+greeted as though their reputation arrived first.
+
+- **Two separate mechanisms, both verified.**
+  1. **A witness filter** on a reaction, so only one NPC reacts to being present: `"witness":
+     "baker"` on an `item_acquired` for `apple` sets the *baker's* `gratitude`
+     ([`witnessed.json`](../cartridges/rivals_sampler/reactions/witnessed.json)). The fact is the
+     witness's, not the player's.
+  2. **Rumour by co-presence** (row W3), which is a fact travelling between NPCs rather than being
+     read by a witness directly. `knows_mill` is declared `per_subject: true`, so it is one value
+     per NPC: an entity entering `mill` sets that entity's own `knows_mill`
+     ([`sees_mill.json`](../cartridges/rumour_sampler/reactions/sees_mill.json); the event's
+     subject is the entrant), and then `ada` entering `inn` while her `knows_mill` holds copies it
+     to the *innkeeper's*
+     ([`tells_innkeeper.json`](../cartridges/rumour_sampler/reactions/tells_innkeeper.json)). The
+     sampler has ada walk that route herself: her `daily_schedule` is `16: mill`, `17: inn`.
+- **How the NPC then uses it.** A dialogue's `policy` reads the fact on the innkeeper (`subject:
+  "target"` names the NPC being talked to, not the player):
+  `{"op": "fact_compare", "fact": "knows_mill", "subject": "target", "equals": true}`
+  ([`innkeeper_mill.json`](../cartridges/rumour_sampler/dialogues/innkeeper_mill.json)), so the
+  conversation is on offer once the rumour has arrived.
+- **Check:** replay the visit to the mill, then the inn; `why.ts` at the dialogue's ordinal says
+  whether the policy's `fact_compare` held.
+
 ### Not written yet
 
-- **Two ways past every gate** (row 2) and **word gets around** (row 10) are the remaining
-  shortlist rows with engine work worth checking first: barriers and `barrier.set` exist (see
-  *Quest rewards that are verbs*), but pick/force and the witness ledger were not verified here.
-  Check them before writing a recipe rather than trusting the shortlist.
-- **Failure opens a *scene*** (row 1's stronger form) stays blocked: `then_failed` has no user
-  anywhere in the repo. The `failure` line above is what works today.
+- **Failure opens a *scene*** (row 1's stronger form) is the one shortlist mechanic still blocked:
+  `then_failed` has no user anywhere in the repo. The check's `failure` line (above) is what works
+  today. Every other row is now a recipe here.
