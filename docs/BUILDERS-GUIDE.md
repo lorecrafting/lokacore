@@ -191,3 +191,99 @@ declare, its sampler cartridge and its showcase district; read it before asking 
 with what each does, its allowed values and a sampler file that sets it.
 
 Before a district or area plan, read the [area authoring checklist](guides/area-authoring.md).
+
+## Story patterns
+
+Each pattern below is one short, checkable recipe: the pattern in a line, the keys it needs, a
+tiny example whose words are `~` placeholders (you write the words), and the check that proves
+your copy works. They come from the [2026-11-04 adoption shortlist](rnd/prologue-adoption-shortlist-2026-11-04.md),
+and each mechanic was verified against [mechanics](system/mechanics.md) and a sampler before it
+was written here. The shortlist's engine claims were unchecked; where one did not hold, this
+page says so instead of inventing a recipe.
+
+### Act now, hear it later
+
+A choice sets a fact; one or two later NPCs read it back in a line, and a return visit shows the
+change. No combination matrix.
+
+- **Keys:** a fact in `facts.json`; `fact.assign` on the choice that sets it; a `reaction` on
+  `fact_changed` whose `when` is a `fact_compare`.
+- **Example.** The choice sets `scene_letter_read` to 1. A standing counter reads it back:
+
+  ```json
+  {
+    "on": {"event": "fact_changed", "fact": "scene_letter_read"},
+    "when": {"op": "fact_compare", "fact": "scene_letter_read", "equals": 1},
+    "steps": [{"op": "fact.adjust", "fact": "wardle_standing", "amount": 1}]
+  }
+  ```
+
+  A later NPC's greeting reads `wardle_standing` with `fact_compare` and narrates one of two lines.
+- **One line, read back later:** a reaction's `steps` may hold `{"op": "wait", "seconds": <n>}`,
+  which the compiler splits into a delayed rule ([waits](system/cartridge.md#source-shortcuts)).
+- **Check:** replay a transcript that reads the letter, then talk to the NPC;
+  `node kernel/ts/play/why.ts <artifact> <transcript.jsonl> <ordinal>` says whether the
+  `fact_changed` rule fired at that step.
+- **Verified by:** [showcase `letter_read_after.json`](../cartridges/toolbox_showcase/reactions/letter_read_after.json)
+  and its `letter_late.json`.
+
+### Regard shown, never scored
+
+Hidden standing changes a greeting, a description or an emote at two or three moments; fame and
+infamy stay separate facts so no single score has to mean both.
+
+- **Keys:** one fact per kind of regard in `facts.json`; `fact_compare` in an NPC's
+  `description_variants`/`name_variants` `when`, or in a reaction's `when`.
+- **Example.** A greeting variant that appears only once the player is trusted:
+
+  ```json
+  "description_variants": [
+    {"when": {"op": "status_active", "subject": "target", "status": "afraid"},
+     "description": "npc.goblin.description_afraid"}
+  ]
+  ```
+
+  The first variant whose `when` holds replaces the NPC's description
+  ([W6](system/mechanics.md#entity-description-variants-toolbox-row-w6)). The room line has no
+  variants, so put regard on the description or a reaction line, never the room line.
+- **Check:** the variant sampler pairs each `when` with a value the default cannot produce, so a
+  test that passes with the variant deleted proves nothing; replay a transcript that reaches the
+  threshold and confirm the changed line at that ordinal.
+- **Verified by:** the [den goblin](../cartridges/toolbox_showcase/areas/traps/npcs/den_goblin.json)
+  and `description_variants` in the variants sampler.
+
+### Quest rewards that are verbs, not loot
+
+A resolved quest opens a path or teaches a recipe for good, rather than dropping an item.
+
+- **Keys:** `quests/<key>.json` with objectives that a dialogue resolves; a `reaction` on
+  `quest_resolved` whose steps are `barrier.set` (open a path) or a recipe grant.
+- **Example.** Resolving the errand lifts a barrier:
+
+  ```json
+  {
+    "on": {"event": "fact_changed", "fact": "warden_lets_pass"},
+    "when": {"op": "fact_compare", "fact": "warden_lets_pass", "equals": true},
+    "steps": [{"op": "barrier.set", "barrier": "toll_gate", "to": "open"}]
+  }
+  ```
+
+  The barrier's own name is the `barrier` field, and `to` takes `open` or `shut`; a quest that
+  resolves can set the fact the rule reads, or share the rule's `when`.
+- **Check:** replay the transcript that resolves the quest; `coverage.ts` lists a quest or
+  barrier no transcript exercised, and `why.ts` names the step where the rule did not run.
+- **Verified by:** [`gate_lifted.json`](../cartridges/toolbox_showcase/areas/low_wardle/reactions/gate_lifted.json)
+  (the form above) and [the wizard's errand](../cartridges/toolbox_showcase/areas/magic/quests/errand.json)
+  for the quest side.
+
+### Not written yet
+
+- **Failure opens a scene, never a dead end** (shortlist row 1). A dialogue choice does support
+  `then_failed` ([DialogueChoice](contracts.gen.md)), but **no sampler or cartridge uses it**, so
+  this page cannot show a working example and no check proves a copy works. Writing one is the
+  first step; until then treat it as documented but unexercised.
+- **Part 1 as an onboarding chapter** (row 4), **The shrine keeper moves on with each death**
+  (row 8) and the rest of the shortlist are researched but not yet written here. Row 8's mechanic
+  does exist: the showcase tallies player deaths with a reaction on `entity_died`
+  ([`keeper_tally.json`](../cartridges/toolbox_showcase/reactions/keeper_tally.json), skipping NPC
+  deaths with a `resource_compare` on hp), so it needs a recipe, not an engine change.
