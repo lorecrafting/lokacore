@@ -77,12 +77,17 @@ ci=$(sed -n 's/^ *- run: \(.*check_ts_size\.mjs.*\)$/\1/p' .github/workflows/ci.
 [ "$(printf '%s\n' "$ci" | grep -c .)" -eq 1 ] || { echo "FAIL ts size: expected one check_ts_size step in ci.yml, got: $ci"; exit 1; }
 scan_status=0
 scan=$(GIT_INDEX_FILE=$I sh -c "$ci") || scan_status=$?
+# A named path that is not there must say so and fail, not pass silently (loka-735tg).
+gone=$(node bin/check_ts_size.mjs "$M/gone.ts" 2>&1) && gone_status=0 || gone_status=$?
 if [ "$status" -ne 0 ] && [ "$got" = "$want" ] && [ "$scan_status" -ne 0 ] &&
   printf '%s\n' "$scan" | grep -qxF "$M/tracked.ts:1: file, 301 lines, limit 300" &&
-  ! printf '%s\n' "$scan" | grep -qF "$M/untracked.ts"; then
+  ! printf '%s\n' "$scan" | grep -qF "$M/untracked.ts" &&
+  [ "$gone_status" -ne 0 ] &&
+  printf '%s\n' "$gone" | grep -qxF "$M/gone.ts: not checked: no such file in the tree"; then
   echo "ok   ts size: limits and allow markers"
 else
   printf 'FAIL ts size: exit %s, expected\n%s\ngot\n%s\n' "$status" "$want" "$got"
   printf 'no-argument scan: exit %s\n%s\n' "$scan_status" "$scan"
+  printf 'missing named path: exit %s\n%s\n' "$gone_status" "$gone"
   exit 1
 fi
