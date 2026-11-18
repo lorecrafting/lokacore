@@ -35,7 +35,7 @@ export function useSource(rel: string, diag: SceneProps['diag']) {
     return ok;
   };
   const back = undo ? () => void post('undo', { id: undo }) : undefined;
-  return { rel, file, post, back, refused };
+  return { rel, file, post, back, refused, write: setUndo };
 }
 
 /** What useSource returns, for a card that takes it as a prop. */
