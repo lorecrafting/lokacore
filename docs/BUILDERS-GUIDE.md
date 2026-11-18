@@ -276,14 +276,133 @@ A resolved quest opens a path or teaches a recipe for good, rather than dropping
   (the form above) and [the wizard's errand](../cartridges/toolbox_showcase/areas/magic/quests/errand.json)
   for the quest side.
 
+### A check that fails into words, then a second way through
+
+Two things a check can do when it fails, both verified: name the failure, or leave the player a
+second route. Neither is a dead end.
+
+- **A check with its own failure line.** Every choice that carries a `check` names a `failure`
+  line, and its `steps` run only on success:
+
+  ```json
+  "persuade": {
+    "label": "dialogue.guard.persuade",
+    "narration": "narration.guard.persuade",
+    "steps": [{"op": "fact.assign", "fact": "gate_open", "value": true}],
+    "check": {"key": "persuade_guard", "kind": "opposed", "attribute": "cha",
+              "npc": "guard", "failure": "narration.guard.persuade_failed"}
+  }
+  ```
+
+  A sibling choice `intimidate` sets the same `gate_open` by a `skill` check with a `rating`, so
+  the gate opens either way, and the words differ ([`guard.json`](../cartridges/persuade_sampler/dialogues/guard.json)).
+- **A quest whose objective is a check.** A quest objective holds the same `skill_compare` a
+  choice's `policy` does, and a dialogue can `skill.acquire` on success
+  ([`old_carver_carpentry.json`](../cartridges/craft_sampler/dialogues/old_carver_carpentry.json)).
+- **Check:** replay one transcript per route; `coverage.ts` names a choice no transcript ever took.
+- **Not available:** `then_failed` — opening a *different scene* on failure — is in
+  [DialogueChoice](contracts.gen.md) but **no sampler or cartridge uses it**, so this page cannot
+  show a working example and no check proves a copy works. The `failure` line above is the
+  supported form today.
+
+### Every carried seed pays off
+
+Anything the player can pick up and carry for a long time needs a reaction that does something
+with it, so a seed is never dead weight in the pack.
+
+- **Keys:** a `reaction` whose `on.event` matches when the item's moment comes, and `item.move` in
+  its steps to put it down somewhere.
+- **Example.** When a `spoiling` status expires, the food leaves for the midden:
+
+  ```json
+  {
+    "on": {"event": "status_expired", "status": "spoiling"},
+    "steps": [{"op": "item.move", "room": "midden"}]
+  }
+  ```
+
+  ([`spoil.json`](../cartridges/decay_sampler/reactions/spoil.json).) A carried item's other payoff
+  is a `story_point` (see below), which needs no room to move it to.
+- **Check:** `coverage.ts` lists an item no transcript ever moved or used.
+
+### Rest that plays what is due
+
+A `rested` trigger fires on the room you name, so a night can carry a dream, a status or a line
+without the player having to remember to go anywhere.
+
+- **Keys:** `statuses/<key>.json` describing the effect, and a reaction on `rested`.
+- **Example.** A hut with a bed gives `well_rested`:
+
+  ```json
+  {"on": {"event": "rested", "room": "hut"},
+   "when": {"op": "item_present", "tag": "bed"},
+   "steps": [{"op": "status.apply", "status": "well_rested"}]}
+  ```
+
+  The status itself is data, not code: `duration` in seconds, an optional `tick_every`, the
+  `resource` it moves and `per_tick` ([`well_rested.json`](../cartridges/furnish_sampler/statuses/well_rested.json)).
+  A dream at rest is a scene the same trigger opens, as the sleep sampler's `hound_dream` does.
+- **Check:** replay a transcript that rests in the room and confirm the status at that ordinal.
+
+### One new line per death, once per visit
+
+The shrine keeper says a fresh line for each death the player has died, and stays quiet when they
+wake somewhere he is not. This one is worth copying whole rather than paraphrasing.
+
+- **Keys:** a player-scope death-count fact (`keeper_greeted`), a `resource_compare` on the
+  subject's `hp` that skips NPC deaths, an `npc_present` gate, and one `narrate` step per line.
+- **Why the hp comparison is there.** On a death event the subject is the victim, and the keeper's
+  tally must count the *player's* death, not a rat's. The showcase documents the composition
+  ([death lines](system/mechanics.md#death-lines-outside-a-combat-round-loka-3w3q)) as: a
+  player-scope fact tallies deaths, `resource_compare` on the subject's `hp` skips NPC deaths, and
+  `npc_present` keeps him silent when the body wakes elsewhere.
+- **Example** ([`keeper_line_1.json`](../cartridges/toolbox_showcase/areas/tidewater/reactions/keeper_line_1.json)):
+
+  ```json
+  {
+    "on": {"event": "entity_died"},
+    "when": {"op": "all", "items": [
+      {"op": "npc_present", "npc": "keeper"},
+      {"op": "resource_compare", "resource": "hp", "subject": "subject", "at_least": 1},
+      {"op": "fact_compare", "fact": "keeper_greeted", "equals": 0}
+    ]},
+    "steps": [{"op": "narrate", "text": "npc.keeper.revived_1"}]
+  }
+  ```
+
+  The tally itself is a silent reaction on the same event
+  ([`keeper_tally.json`](../cartridges/toolbox_showcase/reactions/keeper_tally.json)) with
+  `"silent": true`.
+- **Check:** the showcase transcript `walk_combat.jsonl` contains a real `entity_died` whose
+  `fact_changed` sets `keeper_greeted` to 1, so this path is exercised, not just declared.
+
+### Asides and room lines that change on a return visit
+
+A dry second-person line on failure, on an odd act or on a death; a "familiar" room line once the
+player has been there. Both are authored words selected by a condition, not new engine.
+
+- **Keys:** a `description_variants` (or `name_variants`) entry whose `when` holds, or a reaction
+  that narrates.
+- **Where it may go:** an NPC's description or name takes variants; **the room line does not**
+  ([W6](system/mechanics.md#entity-description-variants-toolbox-row-w6)). A room's returning
+  line is therefore a reaction on entry, not a variant.
+- **Check:** the variant must be paired with a value the default path cannot produce, or a test
+  that passes with the variant deleted proves nothing.
+
+### A mark kept from a hard moment
+
+A title, mood or scar that later lines can read. It is a fact plus the same variant and reaction
+machinery as above, so there is no separate mechanic to learn.
+
+- **Keys:** a fact set by the reaction on the hard moment, read later by `fact_compare` in a
+  variant, a reaction's `when`, or a choice's `policy`.
+- **Check:** as with regard, replay the transcript through the moment and confirm the changed line.
+
 ### Not written yet
 
-- **Failure opens a scene, never a dead end** (shortlist row 1). A dialogue choice does support
-  `then_failed` ([DialogueChoice](contracts.gen.md)), but **no sampler or cartridge uses it**, so
-  this page cannot show a working example and no check proves a copy works. Writing one is the
-  first step; until then treat it as documented but unexercised.
-- **Part 1 as an onboarding chapter** (row 4), **The shrine keeper moves on with each death**
-  (row 8) and the rest of the shortlist are researched but not yet written here. Row 8's mechanic
-  does exist: the showcase tallies player deaths with a reaction on `entity_died`
-  ([`keeper_tally.json`](../cartridges/toolbox_showcase/reactions/keeper_tally.json), skipping NPC
-  deaths with a `resource_compare` on hp), so it needs a recipe, not an engine change.
+- **Two ways past every gate** (row 2) and **word gets around** (row 10) are the remaining
+  shortlist rows with engine work worth checking first: barriers and `barrier.set` exist (see
+  *Quest rewards that are verbs*), but pick/force and the witness ledger were not verified here.
+  Check them before writing a recipe rather than trusting the shortlist.
+- **Failure opens a *scene*** (row 1's stronger form) stays blocked: `then_failed` has no user
+  anywhere in the repo. The `failure` line above is what works today.
