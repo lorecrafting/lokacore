@@ -104,7 +104,9 @@ export const LABEL = {
   empty: 'Empty',
   noWayOut: 'No way out is known.',
   nothingWritten: 'Nothing written yet.',
-  currentPlace: (place: string) => `Current place: ${place}`,
+  // The Map page names the room you are in, as the room page's own title does (owner 2026-11-19, loka-bptw:
+  // no colon labels on a page; `place` is a Title Case room title, so it stands alone rather than mid-sentence).
+  currentPlace: (place: string) => place,
   // A Map drawing's open dot: its caption and its accessible name.
   unexplored: 'Unexplored',
   unexploredExit: (direction: string, from: string) =>
@@ -118,10 +120,10 @@ export const LABEL = {
   patrolWalk: (direction: string) => `Walk ${direction} to join him.`,
   patrolRejoin: (leader: string) => `Return to ${leader} and choose Rejoin.`,
   patrolRestart: (leader: string) => `Return to ${leader} and choose Restart now.`,
-  patrolNext: (title: string) => `Next: ${title}.`,
+  patrolNext: (title: string) => `Then ${title}.`,
   expeditionProgress: (cursor: number, required: number) => `${cursor} of ${required} entries.`,
   shelterUsed: 'Shelter used.',
-  hint: (hint: string) => `Hint: ${hint}`,
+  hint: (hint: string) => hint,
   look: (title: string) => `${title}, look`,
   // A shop line (book-ui.md, shop lines): shown "A cob of bread, 4p.", its name adds "Buy for 4 pennies.".
   shopLine: (thing: string, price: number) => `${thing}, ${price}p.`,

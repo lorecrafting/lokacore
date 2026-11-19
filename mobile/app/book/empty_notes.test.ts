@@ -78,6 +78,7 @@ test('Journal draws a Hint line only for a quest that has one', () => {
         chronicle: () => [],
       } as any),
     );
-  assert.ok(page('Ask Bram').includes('Hint: Ask Bram'));
-  assert.equal(page().includes('Hint'), false);
+  assert.ok(page('Ask Bram').includes('Ask Bram'));
+  assert.ok(!page('Ask Bram').includes('Hint'));
+  assert.equal(page().includes('Ask Bram'), false);
 });

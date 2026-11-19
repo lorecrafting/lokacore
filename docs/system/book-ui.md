@@ -368,6 +368,14 @@ in place; every other line is log. The page's own redraw (purse, list, contents)
   (`You remember what you heard earlier.` before the cue); a failed Start over (`Start over
   fails.` then the reason). A new kind joins this list. The lint `mobile-book-log-prose` refuses a
   colon label in a log line builder.
+- A **page's own note and caption** takes the same rule as a log line, and its surface decides the words
+  (owner, 2026-11-19, Beads `loka-bptw`): never `Label: value`. A bare value stands where the surface
+  already says what it is (the Map's current place is the room's title alone, as the room page's title
+  is); otherwise it reads as a short sentence (`Time left: 3 days` becomes `3 days left`; `Fare: 4p`
+  becomes `It costs 4p to cross.`). A quest's hint is the authored hint text alone, set as a note under
+  its quest; a patrol's next waypoint reads `Then <room>.` A colon between two joined values is not a label (`Recover belongings
+  from Mill, the millstone`) and is unaffected. The lint `mobile-book-log-prose` covers the page
+  builders (`labels.ts`, `model.ts`, `notices.tsx`, `offers.ts`) too.
 - A vessel's liquid amount reads in words, never a count or unit label (owner, 2026-10-30, Beads
   `loka-ikat`), from quantity against capacity: `Empty.`; a third or less `Nearly empty, a little
   water left.`; between `Half full of water.`; two thirds or more `Nearly full of water.`; exact

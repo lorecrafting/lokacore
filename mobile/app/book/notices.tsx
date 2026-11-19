@@ -113,7 +113,7 @@ const fare = (c: Palette, t: Type, f: NonNullable<Notice['transport']>) => (
   <Text style={note(c, t)}>
     {f.waived
       ? 'Free passage to recover your belongings on the isle.'
-      : `Fare: ${f.charge === 0 ? 'free' : `${f.charge}p`}.`}
+      : `It costs ${f.charge === 0 ? 'nothing' : `${f.charge}p`} to cross.`}
   </Text>
 );
 

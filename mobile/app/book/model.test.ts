@@ -303,7 +303,7 @@ test('a duration reads in seconds, then minutes, then hours from two hours', () 
     [7200, '2h'],
     [86400, '24h'],
   ];
-  for (const [s, want] of cases) assert.equal(timeLeft(s), `Time left: ${want}`);
+  for (const [s, want] of cases) assert.equal(timeLeft(s), `${want} left`);
 });
 
 // Breaks: a shelf stays open, empty, after its keeper walks away.
