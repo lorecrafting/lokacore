@@ -4,7 +4,7 @@ The present only: open work, next steps, owner questions, and standing owner rul
 yet. Rewrite this page in place once per session, at its end; never add dated session sections. History lives in git, Beads and `docs/reviews/`; lessons
 go to [PM lessons](lessons/pm.md) ([harness patterns](decisions/owner-decision-harness-patterns-2026-10-28.md)).
 
-AS OF main after 7a63067e7; written 2026-11-19 16:40 UTC in the Pi harness by deploy/deepseek-ai/deepseek-v4.1-flash-1017, PM session.
+AS OF main after 7a63067e7 (PR #758 open on a branch); written 2026-11-19 17:55 UTC in the Pi harness by deploy/deepseek-ai/deepseek-v4.1-flash-1017, PM session.
 `kernel_api` is 1.159 (no contract slice since). Every reviewer and developer here runs on `deploy/deepseek-ai/deepseek-v4.1-flash-1017`
 (the owner paused the Anthropic subscription; `~/.pi/agent/agents/loka-dev.md`, `loka-review.md` repinned
 2026-11-13). **Nothing is mid-merge, nothing is in flight, no agent is running. #454 is the owner's P3 hold.**
@@ -19,7 +19,7 @@ AS OF main after 7a63067e7; written 2026-11-19 16:40 UTC in the Pi harness by de
 
 ## Board
 
-**33 open, 13 ready, 3 housekeeping deferred to 2027-01-01.** The ready list is
+**28 open, 10 ready, 3 housekeeping deferred to 2027-01-01.** The ready list is
 the whole planned queue; anything absent from it is deferred on purpose, not forgotten. Before proposing work,
 check the bead is not already shipped — read the code, not the title. The five in-progress beads are all
 epics or long-running parents (`wfrgk.102`, `vduxr`, `x6t`, `wfrgk.100.4`, `kgd`); none has an agent on it.
@@ -49,13 +49,17 @@ key is stable here (the field takes `words`, not the value), and the remount was
 survived. A bead that says "needs a repro" is often asking for a probe, not for the owner.
 
 Three ready beads want the owner's input, not an agent's:
-- **`.100.5`** (scene structure editable in the GUI) reverses ruling 11, so it needs a design pass first.
-- **`.100.7`** (wrapped/composed lines do not open their field) needs a multi-key decision no bead states; a composed line holds several keys, so `data-loka-key` cannot carry it.
-- **`.100.4`** (card words field follow-ups): undo, `/line` retry, re-read after outside write, Keep mine, **scene field focus**. The focus item has a **lead but no fix** — see below. (The undo item here is done, #754; `89`'s undo item was the separate one about the *held draft*, done in #756.)
+- **`.100.7`** (wrapped/composed lines do not open their field) is **correctly blocked, not work**: every one of
+  its six sites composes a key's words into a longer line, which the ADR
+  `docs/rnd/line-key-binding-2026-11-15.md` explicitly excludes from `data-loka-key`; its measured conclusion —
+  ship the lint, no attribute — is done (`same_words`, `lib/loka/content/lint.ex:157`).
+- **`.100.4`** (card words field follow-ups) is **entirely shipped**: undo (#754), the held draft (#756),
+  `/line` retry, re-read after an outside write, Keep mine, and **scene field focus (#757, `3gnyd`)**. Its
+  remaining item is the server-vs-card disagreement on dialogue choice labels — see Resume.
 
-**`vduxr.57` is done** (story patterns, below). **`mq9i8`** (weather phase names) is verified and re-scoped,
-awaiting a design call on where the phase name is read. **`bptw`** (page-side colon labels) needs the colon
-rule's one-line decision. **`czoln`, `325f8`** are prologue content, transcribing the owner's outline.
+**`vduxr.57` is done** (story patterns, below). **`mq9i8` and `bptw` are both closed by #758** (2026-11-19):
+weather beds are keyed by the cartridge's own phase names, and page notes read as sentences with the lint
+widened to the page builders. **`czoln`, `325f8`** are prologue content, transcribing the owner's outline.
 
 **`vduxr.39` is the one bead waiting on a bare yes/no from the owner:** the doc half is done (#746); the code
 half is withdrawn. Choose (a) close won't-fix, (b) take the reviewer's M4, (c) leave doc-only (already the
@@ -81,13 +85,18 @@ corrected the same way (`village_regard`, `mill_gate` did not exist). Grep the r
 1. **The owner is writing Part 1 in the editor.** That is the point of the queue, not a parallel task:
    `bin/author.sh`, restart it after each merge. File friction as it appears and fix blockers at once.
    `bin/author.sh` is not a `bg_run` task: a server never completes, so a timeout kills it. Use its own trap.
-2. **`.100.4`'s scene-field-focus item is DONE (#757, `loka-3gnyd`).** The card never remounted: `Field`
-   (`tools/author-panel/src/edit/cards/Scene.tsx:133`) chose its editor by the compile's text key, which lags the
-   write just made, so the words field was swapped for a `<span>` for one round and React replaced the input. A
-   `* ` line is now a words line whether or not the compile has caught up. **Lesson: the two leads in that bead
-   (`proseKey`, `RoomForm key={resets}`) were both wrong and cost a session each.** What worked was logging the
-   network (the only failure was `GET /line` 409) and comparing DOM node identity — the input was replaced while
-   all seven `<li>` survived.
+2. **Next small slices, all verified and unblocked** (no owner ruling needed, unlike the rest of the queue):
+   - **`.42.2`** — a per-weapon fight matrix on an item card. The mechanism is real: a wielded weapon *replaces*
+     the base attack (`kernel/ts/play/fight.ts`, `round_attack.ts:229-233`, `base = usable ? {...weapon.attack,
+     tags} : world.combat.player_attack`), so rows differ meaningfully per weapon. Needs a per-weapon build axis
+     first and `fightOf` extended past npc keys.
+   - **`.100.4`'s last item** — the card refuses a dialogue choice label that `POST /edit` would accept. The card's
+     comment at `tools/author-panel/src/edit/fields.tsx:39` claims `POST /edit` refuses it ("ruling 11"), but
+     `kernel/ts/play/prose.ts:14-25` shows `LITERAL` accepts any `"key": "words"` line, so only a `.scene` `-`
+     line gets the reword refusal. **Two-sided: needs the owner to say which side is right** before code.
+   - **`vduxr.29`** — a drowned creature's refill can fault (the recorded two-line fix looks right) but no test can
+     name the break without a kill landing on the exact drowning clock; 59 probes could not reach it. A test I
+     wrote now would be a change detector.
 3. **`.100.8` remainder: 97 of 156, do not build speculatively.** The sampler families (59) closed via per-page
    clearing (`nextPage`, `prose_rules.ts`, 323d3ac10). The rest needs `data-loka-key`, and that is bigger than the
    R&D note first claimed (corrected in 06ab70e75): `rendered` (`mobile/app/book/logs.ts:46`) holds `line.key` and
@@ -106,18 +115,16 @@ corrected the same way (`village_regard`, `mill_gate` did not exist). Grep the r
 6. Story tooling epic **loka-wfrgk.115** is complete except E1 (`.12`): P3, parked until a beat needs it; needs a
    protocol change, a `kernel_api` bump.
 7. **Housekeeping: 3 open, all deferred to 2027-01-01** (`rvbmn`, `00p0u`, `e9ey`). Nothing actionable.
-8. **`mq9i8` needs one ruling, then it is a small slice.** The gate is `mobile/app/book/sound.web.ts:226`,
-   `const audible = ['rain', 'wind', 'storm']`, so a cartridge naming its phases anything else (the showcase's
-   `gale`) plays no weather bed. AGENTS.md forbids the value; it is now row **W23** in `docs/world-parameters.md`
-   (added 2026-11-19 — the 2026-10-02 audit never swept `sound.web.ts`). The behaviour *is* pinned by
-   `sound_room.test.ts:71`. **Ruling needed: does the cartridge name its sounding phases, or the engine?** Not a
-   rename in the prologue — that swaps one hardcoded name for another. `cartridges/prologue/` is the owner's, so
-   the phase names there are theirs either way.
-9. **`100.7` is blocked correctly — do not start it.** All six sites compose a key's words into a longer line
-   (`heldBy(cap(p.text(p.holder)))`, `Menu.tsx:128`), which the ADR `docs/rnd/line-key-binding-2026-11-15.md`
-   explicitly excludes from `data-loka-key` ("a joined line legitimately has several"). The ADR's own measured
-   conclusion — build no attribute, ship the lint instead — is done: `same_words` in `lib/loka/content/lint.ex:157`
-   already reports exactly the 14 item families. Nothing here until a real composed-line edit exists.
+8. **`mq9i8` DONE (#758).** The weather bed is now a phase-name-to-file map keyed by the cartridge's own names,
+   exactly as `beds` is keyed by `room.sound`; the app holds no phase list. Row **W23** in
+   `docs/world-parameters.md` is closed and `docs/system/cartridge.md` states the carrier. **Open, one line from
+   the owner:** the phase's existing `wet` flag is read by no rule, so a cartridge marking `wet: true` does not by
+   itself make a phase sound — today what sounds is what has a recording. Make `wet` the switch, or drop the flag?
+   Not urgent; nothing is broken by leaving it declarative, and the spec now says so out loud.
+9. **`bptw` DONE (#758).** Page notes read as sentences (Map place title alone, `3 days left`, `Then X.`,
+   `It costs 4p to cross.`), the corpse label takes a comma, and `mobile-book-log-prose` now covers the page
+   builders (`labels.ts`, `model.ts`, `notices.tsx`, `offers.ts`). The remaining page-vs-server disagreement is
+   the dialogue choice label below.
 
 **Phases 0, 2 and 3 of the authoring-readiness plan are done** — do not re-plan them (ff954162a, 527fd4071, `.97`).
 
@@ -158,9 +165,9 @@ hunger (`toolbox_showcase/text.json:1461`, `docs/showcase/hub-and-first-district
 
 ## Holds
 
-- **Two rulings this session found, both one line from the owner** (details in Resume 8 and 9 below):
-  which layer names a cartridge's sounding weather phases (`mq9i8`), and whether `bptw`'s page-side
-  `Label: value` surfaces lose their colons or keep them (a designer call per surface).
+- **One ruling left open from this session, and it is not blocking** (Resume 8): a weather phase's existing
+  `wet` flag is read by no rule, so `wet: true` does not by itself make a phase sound — what sounds is what has a
+  recording. Make `wet` the switch, or drop the flag? The spec now says which it is today, so nothing is lying.
 - P3 hold (owner 2026-10-22): draft #454, kgd.188, 2lvx, 5i4c, x6t.98. loka-x6t.126 skill-gated room depth.
 - #632 (loka-vduxr.64) belongs to another session (lokacore-fb), not the PM.
 - `toolbox/settle-3` is 9 commits ahead of main from 2026-10-15 with no PR: decide PR or delete before the next batch.

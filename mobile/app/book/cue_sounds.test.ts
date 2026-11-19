@@ -252,7 +252,8 @@ test('the room and deed sounds play their manifest files', () => {
   assert.deepEqual(samples.miss, ['sfx-miss-01.m4a']);
   assert.deepEqual(samples.lever, ['sfx-lever-01.m4a']);
   assert.deepEqual(samples.latch, ['sfx-latch-01.m4a']);
-  assert.deepEqual(samples.weather, ['amb-rain-01.m4a']);
+  // The weather bed is keyed by the cartridge's own phase name, as bed tags are (loka-mq9i8).
+  assert.deepEqual(g.bookRooms.weather, { rain: 'amb-rain-01.m4a' });
   assert.deepEqual(samples.thunder, [
     'sfx-thunder-01.m4a',
     'sfx-thunder-02.m4a',

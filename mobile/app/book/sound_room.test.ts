@@ -67,18 +67,30 @@ test('a fight and Sound off stop beds; a fight ending and Sound on bring them ba
   assert.ok(urlsOf(b.els).includes('inn.m4a'));
 });
 
-// Breaks: a dry day plays rain, an exposed room muffles it, or an indoor one does not.
-test('the weather layer: rain, wind and storm only; muffled when not exposed', async () => {
+// Breaks: a dry day plays a bed, an exposed room is not muffled, an indoor one is not, or a cartridge
+// phase with no recording plays some other weather's file (loka-mq9i8).
+test('the weather layer: a recorded phase plays its file; any other phase is silent', async (t) => {
+  t.mock.timers.enable({ apis: ['setTimeout'] });
   const b = await browser();
   b.gesture();
   b.ambience('inn', 'clear', true);
-  assert.ok(!urlsOf(b.els).includes('rain.m4a'));
-  for (const phase of ['rain', 'wind', 'storm']) {
+  assert.ok(!urlsOf(b.els).includes('rain.m4a'), 'a dry phase plays no bed');
+  b.ambience('inn', 'rain', true);
+  assert.ok(urlsOf(b.els).includes('rain.m4a'));
+  // The break this pins: the phase names are the cartridge's, so a phase the app has no file for is
+  // silent, not rain. Two of the old hardcoded list's names (`wind`, `storm`) are not authored
+  // phases at all, and the showcase's own `gale` was never on it. Each phase starts from a settled
+  // room on rain, then fades that bed out over the cross-fade.
+  for (const phase of ['wind', 'storm', 'gale', 'frost']) {
+    b.ambience('inn', 'rain', true);
+    t.mock.timers.tick(1000);
+    assert.ok(urlsOf(b.els).includes('rain.m4a'), 'rain is back before the swap');
     b.ambience('inn', phase, true);
-    assert.ok(urlsOf(b.els).includes('rain.m4a'), phase);
+    t.mock.timers.tick(1000);
+    assert.ok(!urlsOf(b.els).includes('rain.m4a'), `${phase} is silent`);
   }
   assert.equal(b.filters.length, 0);
-  b.ambience('inn', 'storm', false);
+  b.ambience('inn', 'rain', false);
   assert.equal(b.filters[0]!.type, 'lowpass');
   assert.equal(b.filters[0]!.frequency.value, 800);
 });

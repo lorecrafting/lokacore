@@ -263,7 +263,7 @@ export const sound = {
   latch: { tier: 'note', variants: 1, haptic: 'light' }, // the player's own action opened an exit -- mutate-skip: uncalibrated design value
   thunder: { tier: 'beat', variants: 3 }, // Storm: its heavy haptic is Storm's, only on a room entry's first -- mutate-skip: uncalibrated design value
   bed: { tier: 'bed', variants: 1 }, // a room's bed, by tag (sources) -- mutate-skip: uncalibrated design value
-  weather: { tier: 'bed', variants: 1 }, // the weather layer -- mutate-skip: uncalibrated design value
+  weather: { tier: 'bed', variants: 1 }, // the weather layer, by phase (sources); busOf routes it -- mutate-skip: uncalibrated design value
   explore: { tier: 'chapter', variants: 1, gap: 600000 }, // an exploration piece, by tag; gap: ms since the last -- mutate-skip: uncalibrated design value
   impact: { tier: 'note', variants: 3 }, // a blow dealt, under the music -- mutate-skip: uncalibrated design value
   fightIn: { tier: 'chapter', variants: 1 }, // a fight's stinger, into the loop -- mutate-skip: uncalibrated design value

@@ -20,8 +20,8 @@ export const bleedingParts = (b: NonNullable<GameView['bleeding']>, time: number
   `${dur(Math.max(0, b.ends_at - time))} remaining`,
   `${b.hp_loss} HP each ${dur(b.tick_every)}`,
 ];
-// Toolbox row W24 Journal countdown (wording proposed; designer to approve).
-export const timeLeft = (remaining: number) => `Time left: ${dur(remaining)}`;
+// Toolbox row W24 Journal countdown (designer to approve); no colon label (owner 2026-11-19, loka-bptw).
+export const timeLeft = (remaining: number) => `${dur(remaining)} left`;
 type Condition = NonNullable<GameView['conditions']>[number];
 // A permanent status (row W8) has no end, so no time part.
 const left = (c: Condition, time: number) =>

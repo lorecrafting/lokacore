@@ -5,7 +5,11 @@ import type { sound } from './tokens.ts';
 export type SoundName = keyof typeof sound;
 export const sources = (
   _urls: Partial<Record<SoundName, string[]>>,
-  _rooms?: { beds?: Record<string, string>; pieces?: Record<string, string> },
+  _rooms?: {
+    beds?: Record<string, string>;
+    pieces?: Record<string, string>;
+    weather?: Record<string, string>;
+  },
 ) => {};
 export const ambience = (
   _tag?: string,

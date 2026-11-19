@@ -19,7 +19,16 @@ test('the Map at the start: the inn ringed, an open dot per exit, no actions', (
       (d) => `Unexplored, ${d} ${INN}`,
     ),
   ]);
-  assert.equal(h.text().includes(INN), false); // only the caption ever names a dot
+  // The current place line is the one text naming a room; the drawing's dots carry no page text (their
+  // names are accessibility captions), so no other room's name reaches the page (loka-bptw).
+  assert.deepEqual(
+    h.text().filter((s) => s.includes(INN)),
+    [INN],
+  );
+  assert.equal(
+    h.text().some((s) => s.includes('Tidewater Steps')),
+    false,
+  );
   h.sql.close();
 });
 
