@@ -8,7 +8,7 @@ import { readFileSync, statSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { test } from 'node:test';
 import type { Locator, Page } from 'playwright';
-import { author, boot, dir, open } from './harness.ts';
+import { boot, dir, open, world as openWorld } from './harness.ts';
 
 const TEXT = join(dir, 'showcase/text.json');
 const FELL_TOP = 'Open moor under a wide, quiet sky. A hut stands east, a brewhouse west; the shelter is south.';
@@ -215,8 +215,7 @@ test('a field whose read the server never answered says so and offers the read a
 test("a scene card writes its words line in place", async () => {
   const file = join(dir, 'identity_sampler/scenes/stranger_talk.scene');
   const before = readFileSync(file, 'utf8');
-  const world = { method: 'POST', body: JSON.stringify({ name: 'identity_sampler' }) };
-  assert.equal((await fetch(`http://localhost:${author}/world`, world)).status, 200);
+  await openWorld('identity_sampler');
   const page = await open({ selection: { kind: 'dialogue', key: 'stranger_talk' } }, 'line 1 npc');
   try {
     const field = page.getByLabel('scene card').locator('input[aria-label$=" words"]').first();
@@ -236,9 +235,7 @@ test("a scene card writes its words line in place", async () => {
 // field nothing to take, so Keep mine / Take theirs never renders and the draft is stranded.
 test('a line reworded on disk offers Take theirs, with the words it now holds', async () => {
   const before = readFileSync(TEXT, 'utf8');
-  // the scene test above leaves the world on its own cartridge: this room is the showcase's
-  const world = { method: 'POST', body: JSON.stringify({ name: 'showcase' }) };
-  assert.equal((await fetch(`http://localhost:${author}/world`, world)).status, 200);
+  await openWorld('showcase'); // the scene test above leaves the world on its own cartridge
   const page = await open(room);
   try {
     const field = page.getByTitle('room.fell_top.description');
@@ -265,8 +262,7 @@ test('a line reworded on disk offers Take theirs, with the words it now holds', 
 test('a scene line reworded on disk also offers Take theirs', async () => {
   const file = join(dir, 'identity_sampler/scenes/stranger_talk.scene');
   const before = readFileSync(file, 'utf8');
-  const world = { method: 'POST', body: JSON.stringify({ name: 'identity_sampler' }) };
-  assert.equal((await fetch(`http://localhost:${author}/world`, world)).status, 200);
+  await openWorld('identity_sampler');
   const page = await open({ selection: { kind: 'dialogue', key: 'stranger_talk' } }, 'line 1 npc');
   try {
     const at = page.getByLabel('scene card').locator('input[aria-label$=" words"]').first();
@@ -290,9 +286,7 @@ test('a scene line reworded on disk also offers Take theirs', async () => {
 // author's only way back from a mistyped line is the external editor (loka-wfrgk.100.4's undo item).
 test("a card's Undo puts back the words write it just made", async () => {
   const before = readFileSync(TEXT, 'utf8');
-  // the scene tests above leave the world on their own cartridge: this room is the showcase's
-  const world = { method: 'POST', body: JSON.stringify({ name: 'showcase' }) };
-  assert.equal((await fetch(`http://localhost:${author}/world`, world)).status, 200);
+  await openWorld('showcase'); // the undo test above leaves the world on its own cartridge
   const page = await open(room);
   const undo = page.getByRole('button', { name: 'Undo', exact: true });
   try {

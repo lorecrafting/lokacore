@@ -1,5 +1,6 @@
 // The panel E2E's one Vite + bin/loka dev server pair and Chrome, on a copy of the toolbox showcase
 // (panel.test.ts); its hooks attach to the importing test file, so the pair starts once per run.
+import assert from 'node:assert/strict';
 import { spawn, type ChildProcess, type SpawnOptions } from 'node:child_process';
 import { cpSync, mkdtempSync, rmSync } from 'node:fs';
 import { createServer } from 'node:net';
@@ -91,6 +92,25 @@ export async function open(
   return page;
 }
 export const QUEST = { right: 280, selection: { kind: 'quest', key: 'carry_letter' } };
+
+/** Switches the world and waits for the restarted watcher to serve it, as the panel's World button
+ * does (world.tsx opens): POST /world answers 200 and then `bin/loka dev --watch` restarts, unbinding
+ * the port, so a request in between is refused. Opening a page before it is back reported the restart
+ * as a card that never loaded ('a line reworded on disk...', panel smoke, flaky until #754). */
+export async function world(name: string) {
+  const at = `http://localhost:${author}/world`;
+  const sent = { method: 'POST', body: JSON.stringify({ name }) };
+  const r = await fetch(at, sent);
+  assert.equal(r.status, 200, `POST /world ${name}`);
+  for (let i = 0; i < 200; i++) {
+    await new Promise((res) => setTimeout(res, 300));
+    const now = await fetch(at)
+      .then((w) => w.json())
+      .catch(() => undefined); // the port is unbound while it restarts
+    if ((now as { current?: string } | undefined)?.current === name) return;
+  }
+  assert.fail(`the watcher did not come back on ${name}`);
+}
 
 /** Fill a controlled input and blur it, retrying until the value takes. React can remount between
  * `fill`'s select-all and its insert, so the insert lands on the restored draft and appends
