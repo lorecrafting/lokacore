@@ -74,13 +74,13 @@ corrected the same way (`village_regard`, `mill_gate` did not exist). Grep the r
 1. **The owner is writing Part 1 in the editor.** That is the point of the queue, not a parallel task:
    `bin/author.sh`, restart it after each merge. File friction as it appears and fix blockers at once.
    `bin/author.sh` is not a `bg_run` task: a server never completes, so a timeout kills it. Use its own trap.
-2. **`.100.4`'s scene-field-focus item: a lead, no fix.** The card does remount on a save (stamping an input
-   inside `[aria-label="scene card"]` and saving shows the stamp gone), so the defect is real, but reverting
-   `tools/author-panel/src/edit/cards/Room.tsx:216`'s `key={proseKey(draft[f])}` to `key={f}` fails no test, so there
-   is no break to name. Suspect on its face: `kernel/ts/play/card.ts:312-315` returns the words themselves as
-   `proseKey` when the value is a string. Next step: find which container actually remounts — when the prompt field
-   remounted, the whole `[aria-label="scene card"]` went with it and did not come back, pointing at
-   `RoomForm key={resets}` (`tools/author-panel/src/edit/cards/Dialogue.tsx:79`) rather than the field's key.
+2. **`.100.4`'s scene-field-focus item is DONE (#757, `loka-3gnyd`).** The card never remounted: `Field`
+   (`tools/author-panel/src/edit/cards/Scene.tsx:133`) chose its editor by the compile's text key, which lags the
+   write just made, so the words field was swapped for a `<span>` for one round and React replaced the input. A
+   `* ` line is now a words line whether or not the compile has caught up. **Lesson: the two leads in that bead
+   (`proseKey`, `RoomForm key={resets}`) were both wrong and cost a session each.** What worked was logging the
+   network (the only failure was `GET /line` 409) and comparing DOM node identity — the input was replaced while
+   all seven `<li>` survived.
 3. **`.100.8` remainder: 97 of 156, do not build speculatively.** The sampler families (59) closed via per-page
    clearing (`nextPage`, `prose_rules.ts`, 323d3ac10). The rest needs `data-loka-key`, and that is bigger than the
    R&D note first claimed (corrected in 06ab70e75): `rendered` (`mobile/app/book/logs.ts:46`) holds `line.key` and
