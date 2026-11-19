@@ -4,7 +4,7 @@ The present only: open work, next steps, owner questions, and standing owner rul
 yet. Rewrite this page in place once per session, at its end; never add dated session sections. History lives in git, Beads and `docs/reviews/`; lessons
 go to [PM lessons](lessons/pm.md) ([harness patterns](decisions/owner-decision-harness-patterns-2026-10-28.md)).
 
-AS OF main after 9f49402f3; written 2026-11-19 00:10 UTC in the Pi harness by deploy/deepseek-ai/deepseek-v4.1-flash-1017, PM session.
+AS OF main after 2e4b08652; written 2026-11-19 03:05 UTC in the Pi harness by deploy/deepseek-ai/deepseek-v4.1-flash-1017, PM session.
 `kernel_api` is 1.159 (no contract slice since). Every reviewer and developer here runs on `deploy/deepseek-ai/deepseek-v4.1-flash-1017`
 (the owner paused the Anthropic subscription; `~/.pi/agent/agents/loka-dev.md`, `loka-review.md` repinned
 2026-11-13). **Nothing is mid-merge, nothing is in flight, no agent is running. #454 is the owner's P3 hold.**
@@ -25,12 +25,14 @@ check the bead is not already shipped — read the code, not the title. The five
 epics or long-running parents (`wfrgk.102`, `vduxr`, `x6t`, `wfrgk.100.4`, `kgd`); none has an agent on it.
 `y6yg` (toolbox showcase) and `kgd.194` closed 2026-11-18 with every child done; `735tg` closed by #753;
 `wfrgk.100.4` closed by #754 (its undo item built; its scene-field-focus item became `3gnyd`, which needs an
-owner repro before a fix can name its break).
+owner repro before a fix can name its break). `wfrgk.89` item 1 closed by #756 and the bead **reopened**: its
+items 2 (Bind refuses short refs while the compile is refused, `storylist.tsx:104`) and 4 (bundles re-read per
+call) are untouched. `after_merge.sh` closes a whole bead on one PR — this has now cost three reopens.
 
 Three ready beads want the owner's input, not an agent's:
 - **`.100.5`** (scene structure editable in the GUI) reverses ruling 11, so it needs a design pass first.
 - **`.100.7`** (wrapped/composed lines do not open their field) needs a multi-key decision no bead states; a composed line holds several keys, so `data-loka-key` cannot carry it.
-- **`.100.4`** (card words field follow-ups): undo, `/line` retry, re-read after outside write, Keep mine, **scene field focus**. The focus item has a **lead but no fix** — see below.
+- **`.100.4`** (card words field follow-ups): undo, `/line` retry, re-read after outside write, Keep mine, **scene field focus**. The focus item has a **lead but no fix** — see below. (The undo item here is done, #754; `89`'s undo item was the separate one about the *held draft*, done in #756.)
 
 **`vduxr.57` is done** (story patterns, below). **`mq9i8`** (weather phase names) is verified and re-scoped,
 awaiting a design call on where the phase name is read. **`bptw`** (page-side colon labels) needs the colon
@@ -60,31 +62,34 @@ corrected the same way (`village_regard`, `mill_gate` did not exist). Grep the r
 1. **The owner is writing Part 1 in the editor.** That is the point of the queue, not a parallel task:
    `bin/author.sh`, restart it after each merge. File friction as it appears and fix blockers at once.
    `bin/author.sh` is not a `bg_run` task: a server never completes, so a timeout kills it. Use its own trap.
-2. **`.100.4`'s scene-field-focus item: a lead, no fix.** The card does remount on a save (stamping an input
+2. **`.wfrgk.89` items 2 and 4** are the cheapest remaining editor nits: item 2 is `storylist.tsx:104` refusing
+   short refs while the compile is refused; item 4 is bundles re-read per call. Neither has a named break yet, so
+   both need a repro before a fix.
+3. **`.100.4`'s scene-field-focus item: a lead, no fix.** The card does remount on a save (stamping an input
    inside `[aria-label="scene card"]` and saving shows the stamp gone), so the defect is real, but reverting
    `tools/author-panel/src/edit/cards/Room.tsx:216`'s `key={proseKey(draft[f])}` to `key={f}` fails no test, so there
    is no break to name. Suspect on its face: `kernel/ts/play/card.ts:312-315` returns the words themselves as
    `proseKey` when the value is a string. Next step: find which container actually remounts — when the prompt field
    remounted, the whole `[aria-label="scene card"]` went with it and did not come back, pointing at
    `RoomForm key={resets}` (`tools/author-panel/src/edit/cards/Dialogue.tsx:79`) rather than the field's key.
-3. **`.100.8` remainder: 97 of 156, do not build speculatively.** The sampler families (59) closed via per-page
+4. **`.100.8` remainder: 97 of 156, do not build speculatively.** The sampler families (59) closed via per-page
    clearing (`nextPage`, `prose_rules.ts`, 323d3ac10). The rest needs `data-loka-key`, and that is bigger than the
    R&D note first claimed (corrected in 06ab70e75): `rendered` (`mobile/app/book/logs.ts:46`) holds `line.key` and
    drops it, `DetailLine` (`:58-64`) has no key on any variant, `LogLine` (`mobile/app/book/lines.tsx:130`) never
    sees one. Build it when a real edit needs two same-screen duplicates told apart — measured: **12 same-room
    wordings, all item variant families**, which is why the attribute stays unbuilt and a lint shipped instead.
-4. **`.102.1` is blocked on a missing carrier, not a missing reader.** It says move each spec cite into the schema
+5. **`.102.1` is blocked on a missing carrier, not a missing reader.** It says move each spec cite into the schema
    node's `$comment`. That carrier does not exist: `lib/loka/content/source_schema.ex:62` writes one `$comment` per
    file, at its head. A per-node cite key must be added to the generated schemas first, so it is its own slice.
    Scale: 11 `§` cites in `schemas/source/*.json`, 23 in `lib/loka/content/*.ex`.
-5. **`.vduxr.39` waits on the owner:** close won't-fix / take the reviewer's M4 / leave doc-only (done). The code
+6. **`.vduxr.39` waits on the owner:** close won't-fix / take the reviewer's M4 / leave doc-only (done). The code
    half is *withdrawn, not deferred* — `docs/reviews/2026-11-17-first-screen-guard-review.md`. Narrowing
    `checked`'s catch to `unreadable(e)` reddens `start_over.test.ts` 2/15: a deleted body row and a forged container
    id both throw `TypeError` from the same catch. **Lesson: a catch that guards a screen, not a row, cannot classify
    by exception type.**
-6. Story tooling epic **loka-wfrgk.115** is complete except E1 (`.12`): P3, parked until a beat needs it; needs a
+7. Story tooling epic **loka-wfrgk.115** is complete except E1 (`.12`): P3, parked until a beat needs it; needs a
    protocol change, a `kernel_api` bump.
-7. **Housekeeping: 3 open, all deferred to 2027-01-01** (`rvbmn`, `00p0u`, `e9ey`). Nothing actionable.
+8. **Housekeeping: 3 open, all deferred to 2027-01-01** (`rvbmn`, `00p0u`, `e9ey`). Nothing actionable.
 
 **Phases 0, 2 and 3 of the authoring-readiness plan are done** — do not re-plan them (ff954162a, 527fd4071, `.97`).
 
@@ -104,6 +109,11 @@ History lives in git and `docs/reviews/`; these four are live constraints, not a
   no `plural` never groups — its kind would be its name alone, and two items can share a name and differ in state.
   A row-level consume control was declined; the item page's offered action is the same verb with the existing
   confirmation/refusal/narration routing.
+- **`#756` (`wfrgk.89` item 1):** `useCard`'s `back()` resets only the draft it was clicked on, and only once
+  the server says it wrote. `post()`'s `onOk` runs **before** `load()`, because the reload is what rebases the
+  draft onto the undone file — reset after it and an edit typed during the round trip is erased unsent.
+  `tools/author-panel/test/undo.test.ts` holds the two breaks; the panels share one cartridge copy, so a test
+  that writes `mass_grams` must read its current value first, not hard-code one.
 - **`#750` (`wfrgk.100.8`):** measured **12** same-room shared wordings, all item variant families.
   `bin/measure_collisions.mjs` still cannot get past the showcase's tutorial overlay.
 
