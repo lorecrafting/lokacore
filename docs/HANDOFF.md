@@ -4,7 +4,7 @@ The present only: open work, next steps, owner questions, and standing owner rul
 yet. Rewrite this page in place once per session, at its end; never add dated session sections. History lives in git, Beads and `docs/reviews/`; lessons
 go to [PM lessons](lessons/pm.md) ([harness patterns](decisions/owner-decision-harness-patterns-2026-10-28.md)).
 
-AS OF main after fab594e3e (PR #759 open on a branch); written 2026-11-19 19:40 UTC in the Pi harness by deploy/deepseek-ai/deepseek-v4.1-flash-1017, PM session.
+AS OF main after fab594e3e (PR #759 open on a branch); written 2026-11-19 21:45 UTC in the Pi harness by deploy/deepseek-ai/deepseek-v4.1-flash-1017, PM session.
 `kernel_api` is 1.159 (no contract slice since). Every reviewer and developer here runs on `deploy/deepseek-ai/deepseek-v4.1-flash-1017`
 (the owner paused the Anthropic subscription; `~/.pi/agent/agents/loka-dev.md`, `loka-review.md` repinned
 2026-11-13). **Nothing is mid-merge, nothing is in flight, no agent is running. #454 is the owner's P3 hold.**
@@ -85,11 +85,13 @@ corrected the same way (`village_regard`, `mill_gate` did not exist). Grep the r
 1. **The owner is writing Part 1 in the editor.** That is the point of the queue, not a parallel task:
    `bin/author.sh`, restart it after each merge. File friction as it appears and fix blockers at once.
    `bin/author.sh` is not a `bg_run` task: a server never completes, so a timeout kills it. Use its own trap.
-2. **Next small slices, all verified and unblocked** (no owner ruling needed, unlike the rest of the queue):
-   - **`.42.2`** — a per-weapon fight matrix on an item card. The mechanism is real: a wielded weapon *replaces*
-     the base attack (`kernel/ts/play/fight.ts`, `round_attack.ts:229-233`, `base = usable ? {...weapon.attack,
-     tags} : world.combat.player_attack`), so rows differ meaningfully per weapon. Needs a per-weapon build axis
-     first and `fightOf` extended past npc keys.
+2. **`42.2` is built and waiting on nothing but its merge** (PR #759, `docs/reviews/2026-11-19-weapon-wield-disposition.md`).
+   `fight.ts --wield <item>` puts a cartridge weapon in its slot and acquires its skill, so every level x build
+   cell is re-fought with it in hand; `GET /fights?wield=` passes it through and an item card draws every target's
+   rows. Two things the reviews settled that the bead did not predict: it is a **run option, not a matrix axis**
+   (a build per weapon multiplies 84 cells by every weapon), and the override must check `learnable`, because
+   combat re-reads `qualified` but never `prerequisite`, so a force-acquired skill behind an unmet prerequisite
+   won fights it should not have (rounds 3,3,3 -> 2,2,2).
    - **`.100.4`'s last item** — the card refuses a dialogue choice label that `POST /edit` would accept. The card's
      comment at `tools/author-panel/src/edit/fields.tsx:39` claims `POST /edit` refuses it ("ruling 11"), but
      `kernel/ts/play/prose.ts:14-25` shows `LITERAL` accepts any `"key": "words"` line, so only a `.scene` `-`
