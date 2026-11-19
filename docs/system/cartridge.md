@@ -778,7 +778,8 @@ committed or checked in CI.
 
 Balance tool 7 ([study](../rnd/balance-diagnostics-2026-10-11.md) §4 F1, F2, §13 order 3; Beads
 `loka-kgd.107.7`) answers whether a level L player beats NPC N, from the real round code and RNG.
-`node kernel/ts/play/fight.ts <artifact> [--seeds N] [--rounds R]` (defaults 32 and 100) loads
+`node kernel/ts/play/fight.ts <artifact> [--seeds N] [--rounds R] [--wield <item>]` (defaults 32
+and 100) loads
 and refuses as `flows.ts` above, otherwise prints one canonical JSON document and exits 0. Nothing
 reads it and nothing runs it in CI.
 
@@ -819,6 +820,14 @@ reads it and nothing runs it in CI.
   stands at genesis or birth; a plan is fought one member at a time (a pack's assistance is
   whatever the round code does). ponytail: no flee, consumables, spells, statuses or gear sweeps;
   the authored `rating` field (study L5) is not read.
+- **A weapon under test** (`--wield <item key>`, the panel's item card): every fight is fought
+  with that cartridge item in its own slot and its `weapon.skill` acquired, so the report answers
+  "what does this weapon do to my odds" (§4.2's Combat numbers block, beside the item). The key is
+  the item's bare name (`iron_sword`, not the full ref); it is not a matrix axis — levels and
+  builds stay as above, and a key naming no weapon, or no item, changes nothing, so the bare
+  report is the answer. A weapon needs its skill acquired to be usable (`skills.ts`: `usable =
+  acquired && qualified`), which is why the override writes the acquisition fact as well as the
+  item's container; the item's own room is overridden, so a sword left elsewhere is still in hand.
 
 ### Refusal and friction report (balance tool 8)
 

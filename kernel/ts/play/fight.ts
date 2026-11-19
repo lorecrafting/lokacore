@@ -15,6 +15,7 @@ import { refString } from '../src/runtime/decision.ts';
 import { stepElapsed } from '../src/runtime/world.ts';
 import { checked, gen, KERNEL, type Kernel } from '../test/sim.ts';
 import { median } from './flows.ts';
+import { wielded } from './wield.ts';
 
 type Outcome =
   | { end: 'win'; rounds: number; hp: number }
@@ -22,7 +23,13 @@ type Outcome =
   | { end: 'refused'; code: string };
 type Find = (w: World) => EntityId | undefined;
 type Row = { experience: number; allocated: Record<string, number> };
-type Matrix = { c: Cartridge; worlds: World[]; rounds: number; builds: string[] };
+type Matrix = {
+  c: Cartridge;
+  worlds: World[];
+  rounds: number;
+  builds: string[];
+  wield?: string; // the weapon the player carries into every fight (an item key)
+};
 type Cell = ReturnType<typeof cell>;
 
 const RUN = id('loka-fights', 'run', 0);
@@ -32,12 +39,18 @@ const byKey = ([a]: [string, unknown], [b]: [string, unknown]) => (a < b ? -1 : 
 /** The fight matrix and ratings (cartridge.md "Fight matrix and encounter rating"). */
 export function fights(
   c: Cartridge,
-  opts: { seeds?: number; rounds?: number } = {},
+  opts: { seeds?: number; rounds?: number; wield?: string } = {},
 ): FightsReport & { cartridge: string } {
-  const { seeds = 32, rounds = 100 } = opts;
+  const { seeds = 32, rounds = 100, wield } = opts;
   const alone = withoutAllies(c);
   const worlds = Array.from({ length: seeds }, (_, s) => genesis(alone, s + 1));
-  const m = { c, worlds, rounds, builds: ['none', ...Object.keys(c.attributes ?? {}).sort()] };
+  const m = {
+    c,
+    worlds,
+    rounds,
+    builds: ['none', ...Object.keys(c.attributes ?? {}).sort()],
+    wield,
+  };
   const w0 = worlds[0]!;
   const npcs = Object.entries(w0.entityIds)
     .filter(([, e]) => w0.entities[e]?.kind === 'npc' && !!w0.entities[e].attack && living(w0, e))
@@ -62,7 +75,7 @@ function target(m: Matrix, name: string, find: Find, plan?: PopulationPlan) {
     for (const build of m.builds) {
       const outs = [];
       for (let s = 0; s < m.worlds.length && outs.at(-1)?.end !== 'refused'; s++)
-        outs.push(fight(m.worlds[s]!, s + 1, find, row(m.c, l, build), m.rounds, plan));
+        outs.push(fight(m.worlds[s]!, s + 1, find, row(m.c, l, build), m.rounds, plan, m.wield));
       cells.push(cell(l, build, outs, !!plan));
     }
   return { target: name, rating: rating(m.c, cells, plan), cells };
@@ -144,7 +157,7 @@ function session(w: World, seed: number) {
 type Session = ReturnType<typeof session>;
 
 // One fight: an unborn target is elapsed to a birth, one wander interval at a time; then the
-// player's body joins it with the level's row and attacks.
+// player's body joins it with the level's row, and `wield` in hand, and attacks.
 function fight(
   start: World,
   seed: number,
@@ -152,6 +165,7 @@ function fight(
   row: Row | undefined,
   rounds: number,
   plan?: PopulationPlan,
+  wield?: string,
 ): Outcome {
   const p = session(start, seed);
   let foe = find(p.w);
@@ -163,7 +177,16 @@ function fight(
   const { w } = p;
   const containers = { ...w.state.containers, [w.body]: w.state.containers[foe]! };
   const levelling = row && { levelling: { ...w.state.levelling, [w.character]: row } };
-  p.w = { ...w, state: { ...w.state, containers, ...levelling } };
+  // The weapon goes into its slot's holder, as `holders` put it in at genesis (fresh.ts): the
+  // item's own location is replaced, so a sword left in another room is still the one in hand.
+  const held = wield && wielded(p.w, wield);
+  // The weapon's own move goes into `containers` the fight just built, not a map of its own: a map
+  // from the untouched state would put the foe's room back as it was.
+  const moved = held ? { ...containers, [held.move[0]]: held.move[1] } : containers;
+  p.w = {
+    ...w,
+    state: { ...w.state, containers: moved, ...levelling, ...(held && { facts: held.facts }) },
+  };
   const payload = { type: 'attack', actor_id: w.character, target_id: foe };
   const command = { id: id('loka-fights', String(seed), p.n + 1), world_context_id: w.context };
   const attack = p.play(KERNEL, { ...command, payload } as Command);
@@ -239,8 +262,11 @@ if (import.meta.main) {
     return i < 0 ? fallback : Number(rest[i + 1]);
   };
   const [seeds, rounds] = [flag('--seeds', 32), flag('--rounds', 100)];
+  const weapon = rest.includes('--wield') ? rest[rest.indexOf('--wield') + 1] : undefined;
   if (!file || ![seeds, rounds].every((x) => Number.isInteger(x) && x > 0)) {
-    console.error('usage: node kernel/ts/play/fight.ts <artifact> [--seeds N] [--rounds R]');
+    console.error(
+      'usage: node kernel/ts/play/fight.ts <artifact> [--seeds N] [--rounds R] [--wield item]',
+    );
     process.exit(2);
   }
   const loaded = loadCartridge(readFileSync(file), INSTALLED);
@@ -248,5 +274,9 @@ if (import.meta.main) {
     console.error(JSON.stringify(loaded.diagnostic));
     process.exit(1);
   }
-  console.log(encode(fights(loaded.cartridge as Cartridge, { seeds, rounds }) as unknown as Json));
+  console.log(
+    encode(
+      fights(loaded.cartridge as Cartridge, { seeds, rounds, wield: weapon }) as unknown as Json,
+    ),
+  );
 }

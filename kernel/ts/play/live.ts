@@ -21,6 +21,7 @@ import { join } from 'node:path';
 import { INSTALLED, loadCartridge, type Cartridge } from '../src/index.ts';
 import { artifactBytes } from './compiled.ts';
 import type { Fights, FightsReport, LevelRows, Numbers, PoolsReport, Section } from './numbers.ts';
+import { numbers } from './reports.ts';
 import { replayRecords } from './replay.ts';
 import { todo } from './todo.ts';
 import { find } from './find.ts';
@@ -205,28 +206,10 @@ export const limited = <T>(args: string[], seconds: number) =>
     });
   });
 
-/** The reports on the dev artifact; `fights` alone skips the pacing sim, which takes minutes (loka-wfrgk.79). */
-async function numbers(artifact: string, fights = false): Promise<Numbers | Fights> {
-  const dev = JSON.parse(readFileSync(artifact, 'utf8'));
-  const tmp = mkdtempSync(join(tmpdir(), 'loka-numbers-')); // the reports read a compiled artifact
-  try {
-    const file = join(tmp, 'artifact.json');
-    writeFileSync(file, artifactBytes(dev));
-    const play = (name: string) => join(import.meta.dirname, name);
-    const fought = limited<FightsReport>([play('fight.ts'), file, '--seeds', '8'], SECONDS);
-    if (fights) return { hash: dev.sha256, fights: await fought };
-    const pace = [play('sim.ts'), '--artifact', file, '--seeds', '4'];
-    const pacing = limited<{ pools: PoolsReport; levels: LevelRows }>(pace, SECONDS);
-    return { hash: dev.sha256, pacing: await pacing, fights: await fought };
-  } finally {
-    rmSync(tmp, { recursive: true, force: true });
-  }
-}
-
 const asked = (url: string) => new URL(url, 'http://x').searchParams.get('q') ?? '';
 
-const reply = (response: ServerResponse, artifact: string, fights?: boolean) =>
-  numbers(artifact, fights).then((n) => json(response, 200, n));
+const reply = (response: ServerResponse, artifact: string, fights?: boolean, wield?: string) =>
+  numbers(artifact, fights, wield).then((n) => json(response, 200, n));
 
 /** The column's routes, or false for a request that is not one. */
 function column(
@@ -239,7 +222,13 @@ function column(
   if (request.url?.startsWith('/checkpoints')) return checkpoints(request, response, source, busy);
   if (request.url === '/todo') return json(response, 200, todo(source));
   if (request.url === '/numbers') return reply(response, artifact);
-  if (request.url === '/fights') return reply(response, artifact, true);
+  if (request.url === '/fights')
+    return reply(
+      response,
+      artifact,
+      true,
+      new URL(request.url, 'http://x').searchParams.get('wield') ?? undefined,
+    );
   if (request.url?.startsWith('/find?'))
     return json(response, 200, find(source, artifact, asked(request.url)));
   if (request.method === 'POST' && (request.url === '/open' || request.url === '/why'))
