@@ -56,6 +56,12 @@ export function SceneText({ rel, context, diag }: SceneProps) {
 
 /** The file's lines, each with its row buttons (rulings §1, §5). */
 type Setter = (line: Line, value: string) => void;
+/** A row's React key: a `* ` line's is its line number, since its words are what the author is
+ * typing (and a `~` line names no text key at all); the compile's key lags its own write, and keying
+ * by it remounted the field — losing the caret and the draft mid-save (loka-3gnyd). A value line
+ * keeps its own key, so a picker remounts on a change made outside. */
+const rowKey = (l: Line) => (/^\s*\* /.test(l.text) ? `words ${l.n}` : (l.key ?? `${l.n}:${l.text}`));
+
 function Lines({
   lines,
   context,
@@ -68,9 +74,8 @@ function Lines({
   return (
     <ol className="grid gap-1 font-mono">
       {lines.map((l) => (
-        // a words line keeps its field (and a draft) when its text changes; a value line remounts
         <Row
-          key={l.key ?? `${l.n}:${l.text}`}
+          key={rowKey(l)}
           l={l}
           context={context}
           set={set}
@@ -116,15 +121,19 @@ function Row({
   );
 }
 
-/** A line's editor, by what the line is: a value line's picker, a `\* ` line's words, a `- ` line's
- * words that pin its key (rulings §2), or plain text the card does not edit. */
+/** A line's editor, by what the line is: a value line's picker, a `* ` line's words, a `- ` line's
+ * words that pin its key (rulings §2), or plain text the card does not edit. A `* ` line is a words
+ * line whether or not the compile has caught up with it: `sceneLines` finds its key from the last
+ * compile's text, which lags the write just made, and testing `l.key` swapped the words field for a
+ * span for one round — replacing the node, so the caret and the draft went (loka-3gnyd).
+ * `k` is the compile's text key, or for a `~` line its own words (GET /line's). */
 function Field({ l, context, set, op }: Pick<Rows, 'set' | 'op'> & { l: Line; context: Context }) {
   if (l.verb)
     return <Value line={l} keys={picks(l.verb, context.nodes, context.unlinkable)} set={(v) => set(l, v)} />;
-  if (l.key)
+  if (/^\s*\* /.test(l.text))
     return (
       <div className="min-w-0 flex-1">
-        <WordsField label="" k={l.key} words={l.text.replace(/^\s*\* /, '')} />
+        <WordsField label="" k={l.key ?? l.text.replace(/^\s*\* /, '')} words={l.text.replace(/^\s*\* /, '')} />
       </div>
     );
   if (l.choice === undefined) return <span className="min-w-0 flex-1 truncate whitespace-pre">{l.text}</span>;
