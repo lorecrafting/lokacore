@@ -296,6 +296,12 @@ test('GET /numbers: reports on the dev artifact', async (t) => {
   // Break: Run fights waits on the pacing sim, minutes on the showcase (loka-wfrgk.79, review 683 #2)
   const fought = await (await fetch(`http://127.0.0.1:${port}/fights`)).json();
   assert.deepEqual(fought, { hash: sha256, fights: told.fights });
+  // Break: the route matched `/fights` exactly, so the card's `?wield=<key>` request 404s and the
+  // item's numbers never appear (review 759 #1). This fixture has no items, so the report is the bare
+  // one; a 404 is not a report at all.
+  const armed = await fetch(`http://127.0.0.1:${port}/fights?wield=broadsword`);
+  assert.equal(armed.status, 200);
+  assert.deepEqual(await armed.json(), { hash: sha256, fights: told.fights });
 });
 
 test('limited: a report past its limit is killed and says so; a failing one gives its words', async () => {

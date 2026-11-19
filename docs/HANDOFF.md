@@ -4,7 +4,7 @@ The present only: open work, next steps, owner questions, and standing owner rul
 yet. Rewrite this page in place once per session, at its end; never add dated session sections. History lives in git, Beads and `docs/reviews/`; lessons
 go to [PM lessons](lessons/pm.md) ([harness patterns](decisions/owner-decision-harness-patterns-2026-10-28.md)).
 
-AS OF main after 7a63067e7 (PR #758 open on a branch); written 2026-11-19 17:55 UTC in the Pi harness by deploy/deepseek-ai/deepseek-v4.1-flash-1017, PM session.
+AS OF main after fab594e3e (PR #759 open on a branch); written 2026-11-19 21:45 UTC in the Pi harness by deploy/deepseek-ai/deepseek-v4.1-flash-1017, PM session.
 `kernel_api` is 1.159 (no contract slice since). Every reviewer and developer here runs on `deploy/deepseek-ai/deepseek-v4.1-flash-1017`
 (the owner paused the Anthropic subscription; `~/.pi/agent/agents/loka-dev.md`, `loka-review.md` repinned
 2026-11-13). **Nothing is mid-merge, nothing is in flight, no agent is running. #454 is the owner's P3 hold.**
@@ -19,7 +19,7 @@ AS OF main after 7a63067e7 (PR #758 open on a branch); written 2026-11-19 17:55 
 
 ## Board
 
-**28 open, 10 ready, 3 housekeeping deferred to 2027-01-01.** The ready list is
+**27 open, 9 ready, 3 housekeeping deferred to 2027-01-01.** The ready list is
 the whole planned queue; anything absent from it is deferred on purpose, not forgotten. Before proposing work,
 check the bead is not already shipped — read the code, not the title. The five in-progress beads are all
 epics or long-running parents (`wfrgk.102`, `vduxr`, `x6t`, `wfrgk.100.4`, `kgd`); none has an agent on it.
@@ -85,11 +85,13 @@ corrected the same way (`village_regard`, `mill_gate` did not exist). Grep the r
 1. **The owner is writing Part 1 in the editor.** That is the point of the queue, not a parallel task:
    `bin/author.sh`, restart it after each merge. File friction as it appears and fix blockers at once.
    `bin/author.sh` is not a `bg_run` task: a server never completes, so a timeout kills it. Use its own trap.
-2. **Next small slices, all verified and unblocked** (no owner ruling needed, unlike the rest of the queue):
-   - **`.42.2`** — a per-weapon fight matrix on an item card. The mechanism is real: a wielded weapon *replaces*
-     the base attack (`kernel/ts/play/fight.ts`, `round_attack.ts:229-233`, `base = usable ? {...weapon.attack,
-     tags} : world.combat.player_attack`), so rows differ meaningfully per weapon. Needs a per-weapon build axis
-     first and `fightOf` extended past npc keys.
+2. **`42.2` is built and waiting on nothing but its merge** (PR #759, `docs/reviews/2026-11-19-weapon-wield-disposition.md`).
+   `fight.ts --wield <item>` puts a cartridge weapon in its slot and acquires its skill, so every level x build
+   cell is re-fought with it in hand; `GET /fights?wield=` passes it through and an item card draws every target's
+   rows. Two things the reviews settled that the bead did not predict: it is a **run option, not a matrix axis**
+   (a build per weapon multiplies 84 cells by every weapon), and the override must check `learnable`, because
+   combat re-reads `qualified` but never `prerequisite`, so a force-acquired skill behind an unmet prerequisite
+   won fights it should not have (rounds 3,3,3 -> 2,2,2).
    - **`.100.4`'s last item** — the card refuses a dialogue choice label that `POST /edit` would accept. The card's
      comment at `tools/author-panel/src/edit/fields.tsx:39` claims `POST /edit` refuses it ("ruling 11"), but
      `kernel/ts/play/prose.ts:14-25` shows `LITERAL` accepts any `"key": "words"` line, so only a `.scene` `-`
@@ -115,13 +117,19 @@ corrected the same way (`village_regard`, `mill_gate` did not exist). Grep the r
 6. Story tooling epic **loka-wfrgk.115** is complete except E1 (`.12`): P3, parked until a beat needs it; needs a
    protocol change, a `kernel_api` bump.
 7. **Housekeeping: 3 open, all deferred to 2027-01-01** (`rvbmn`, `00p0u`, `e9ey`). Nothing actionable.
-8. **`mq9i8` DONE (#758).** The weather bed is now a phase-name-to-file map keyed by the cartridge's own names,
+8. **`wfrgk.42.2` DONE (PR #759).** `fight.ts --wield <item key>` re-fights every level × build cell
+   with that cartridge item in its slot and its `weapon.skill` acquired (`usable = acquired && qualified`,
+   `skills.ts:34` — wielding alone does nothing); `GET /fights?wield=` passes it, the item card draws every
+   target's rows. Built as a **run option, not a matrix axis** on purpose: a build per weapon would multiply
+   all 84 cells, seed 1 at ~6 ms a checked step. Its override is `kernel/ts/play/wield.ts`, the report
+   runner `kernel/ts/play/reports.ts` (both files were over the 300-line guard).
+9. **`mq9i8` DONE (#758).** The weather bed is now a phase-name-to-file map keyed by the cartridge's own names,
    exactly as `beds` is keyed by `room.sound`; the app holds no phase list. Row **W23** in
    `docs/world-parameters.md` is closed and `docs/system/cartridge.md` states the carrier. **Open, one line from
    the owner:** the phase's existing `wet` flag is read by no rule, so a cartridge marking `wet: true` does not by
    itself make a phase sound — today what sounds is what has a recording. Make `wet` the switch, or drop the flag?
    Not urgent; nothing is broken by leaving it declarative, and the spec now says so out loud.
-9. **`bptw` DONE (#758).** Page notes read as sentences (Map place title alone, `3 days left`, `Then X.`,
+10. **`bptw` DONE (#758).** Page notes read as sentences (Map place title alone, `3 days left`, `Then X.`,
    `It costs 4p to cross.`), the corpse label takes a comma, and `mobile-book-log-prose` now covers the page
    builders (`labels.ts`, `model.ts`, `notices.tsx`, `offers.ts`). The remaining page-vs-server disagreement is
    the dialogue choice label below.

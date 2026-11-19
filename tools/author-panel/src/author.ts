@@ -82,8 +82,15 @@ const report = <T>(route: string) =>
   });
 /** The balancing reports, each bounded by the watcher (kernel/ts/play/live.ts). */
 export const numbers = () => report<Numbers>('numbers');
-/** The fight rows alone, without the pacing sim's minutes (loka-wfrgk.79). */
-export const fights = () => report<Fights>('fights');
+/** The fight rows alone, without the pacing sim's minutes (loka-wfrgk.79). `wield` is an item key:
+ * every fight is fought with that weapon in hand (docs/rnd/gui-editor-design-2026-11-04.md §4.2). */
+export const fights = (wield?: string) =>
+  wield
+    ? fetch(`/__author/fights?wield=${encodeURIComponent(wield)}`).then(async (r) => {
+        if (!r.ok) throw new Error(await r.text());
+        return (await r.json()) as Fights;
+      })
+    : report<Fights>('fights');
 
 type Message = {
   text: Record<string, string>;

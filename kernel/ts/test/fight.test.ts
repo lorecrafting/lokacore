@@ -4,7 +4,7 @@
 // first in odd rounds, the foe in even rounds.
 import assert from 'node:assert/strict';
 import { execFileSync, spawnSync } from 'node:child_process';
-import { cpSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { cpSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -12,6 +12,7 @@ import { after, test } from 'node:test';
 import { fights, pct } from '../play/fight.ts';
 import { decode, encode, type Json } from '../src/foundation/canonical.ts';
 import { INSTALLED, loadCartridge, type Cartridge } from '../src/index.ts';
+import type { FightsReport } from '../play/numbers.ts';
 
 const ROOT = fileURLToPath(new URL('../../../', import.meta.url));
 const CLI = fileURLToPath(new URL('../play/fight.ts', import.meta.url));
@@ -31,8 +32,9 @@ const [sampler, encounters] = compile('cartridges/encounter_sampler', 'encounter
 // ally Al (hp 5, a sure 1).
 const source = join(scratch, 'clone');
 cpSync(join(ROOT, 'cartridges/encounter_sampler'), source, { recursive: true });
-const edit = (file: string, change: (j: Record<string, any>) => void) => {
-  const path = join(source, file);
+// Write `file` in `dir` with `change` applied, as the fixture edits below do.
+const edit = (file: string, change: (j: Record<string, any>) => void, dir = source) => {
+  const path = join(dir, file);
   const j = JSON.parse(readFileSync(path, 'utf8'));
   change(j);
   writeFileSync(path, JSON.stringify(j));
@@ -74,6 +76,85 @@ for (const [name, hp, damage] of [
   );
 }
 const [, clone] = compile(source, 'clone.json');
+
+// The clone with a sword: `slot: wield`, a sure 2 in `swords`, sitting in the clone's own `road`. A
+// weapon replaces the base attack outright (round_attack.ts), so wielding it turns the player's sure
+// 1 into a sure 2 and X (hp 2) falls in round 1 instead of round 2.
+const armed = join(scratch, 'armed');
+cpSync(source, armed, { recursive: true });
+// A skill needs `fact` and `policy` locked as well as `skill` (lib/loka/content/skills.ex, capability),
+// and a slot needs `equipment`; the text keys are real ones no other assertion reads.
+edit(
+  'cartridge.json',
+  (c) => {
+    Object.assign(c.requires.capabilities, { equipment: 1, skill: 1 });
+  },
+  armed,
+);
+edit(
+  'text.json',
+  (t) => {
+    Object.assign(t, {
+      'item.broadsword.short': 'a broadsword',
+      'item.broadsword.room': 'A [broadsword] lies here.',
+      'item.broadsword.description': 'Wide and heavy.',
+      'skill.swords.label': 'Swords',
+      'skill.swords.requirement': 'Anyone can swing a sword.',
+    });
+  },
+  armed,
+);
+writeFileSync(
+  join(armed, 'items/broadsword.json'),
+  JSON.stringify({
+    keywords: ['broadsword'],
+    name: 'item.broadsword.short',
+    room_line: 'item.broadsword.room',
+    description: 'item.broadsword.description',
+    location: { in: 'room', room: 'road' }, // the clone's own room
+    mass_grams: 900,
+    slot: 'wield',
+    weapon: {
+      skill: 'swords',
+      attack: { chance: 100, damage_min: 2, damage_max: 2, kind: 'physical' },
+    },
+  }),
+);
+mkdirSync(join(armed, 'skills'), { recursive: true });
+writeFileSync(
+  join(armed, 'skills/swords.json'),
+  JSON.stringify({ name: 'skill.swords.label', requirement: 'skill.swords.requirement' }),
+);
+const [armedArtifact, armedClone] = compile(armed, 'armed.json');
+
+// The same sword behind a prerequisite that never holds (HS-11). Combat reads `qualified` and never
+// `prerequisite`, so without `wielded`'s own check the sword would be handed over and win: rounds
+// 3,3,3 become 2,2,2 (review 759 recheck #1). `might` is never at least 10 for the clone.
+const unlearnable = join(scratch, 'unlearnable');
+cpSync(armed, unlearnable, { recursive: true });
+writeFileSync(
+  join(unlearnable, 'skills/swords.json'),
+  JSON.stringify({
+    name: 'skill.swords.label',
+    requirement: 'skill.swords.requirement',
+    prerequisite: { op: 'stat_compare', attribute: 'might', at_least: 10 },
+  }),
+);
+const [, unlearnableClone] = compile(unlearnable, 'unlearnable.json');
+
+test('a weapon whose skill the player has not learned the way to leaves the fight as it was', () => {
+  // Break: `wielded` writes the acquisition without `learnable`, so a skill behind an unmet
+  // prerequisite is granted by force and the weapon fights as if earned (review 759 recheck #1).
+  const bare = fights(unlearnableClone, { seeds: 2 });
+  assert.deepEqual(fights(unlearnableClone, { seeds: 2, wield: 'broadsword' }), bare);
+});
+
+test('a wield key that names no weapon leaves the fight as it was', () => {
+  const bare = fights(armedClone, { seeds: 2 });
+  for (const key of ['broadsword_missing', 'knife']) {
+    assert.deepEqual(fights(armedClone, { seeds: 2, wield: key }), bare, key);
+  }
+});
 
 type Report = ReturnType<typeof fights>;
 const of = (r: Report, key: string) =>
@@ -157,6 +238,46 @@ test('the clone: level, build, death and the removed ally, each hand-derived', (
   assert.deepEqual(of(r, 'npc/y').rating, rating(null, null, '100.00'));
 });
 
+// Breaks: `wield` ignored (the sword never reaches the slot holder), put in the wrong slot, or the
+// item's own ref not resolved to its entity so the weapon is not the one in hand. The clone's player
+// is a sure 1 (hp 3, resources.json below) and X is a sure 2-damage-1 foe with hp 2: bare, X falls in
+// round 2 after striking once (hp_left 2); with the sword's sure 2 it falls in round 1 before its own
+// blow lands (hp_left 3).
+test('a wielded weapon replaces the base attack', () => {
+  const cell = (wield?: string) =>
+    at(fights(armedClone, { seeds: 4, ...(wield && { wield }) }), 'npc/x', 1);
+  assert.deepEqual(cell(), {
+    level: 1,
+    build: 'none',
+    n: 4,
+    wins: 4,
+    deaths: 0,
+    timeouts: 0,
+    fleds: 0,
+    win_pct: '100.00',
+    death_pct: '0.00',
+    fled_pct: '0.00',
+    rounds: { min: 2, median: 2, max: 2 },
+    hp_left: { min: 1, median: 1, max: 1 },
+  });
+  assert.deepEqual(cell('broadsword'), {
+    level: 1,
+    build: 'none',
+    n: 4,
+    wins: 4,
+    deaths: 0,
+    timeouts: 0,
+    fleds: 0,
+    win_pct: '100.00',
+    death_pct: '0.00',
+    fled_pct: '0.00',
+    rounds: { min: 1, median: 1, max: 1 },
+    hp_left: { min: 3, median: 3, max: 3 },
+  });
+});
+
+// Breaks: an item key that is not a weapon, or not in the cartridge, taken as if it armed the
+// player (the report must equal the bare one it would otherwise forge).
 // The player's attack at `chance` in a copy of `c`.
 const hitting = (c: Cartridge, chance: number, more: object = {}) => {
   const combat = c.world!.combat!;
@@ -245,6 +366,17 @@ test('the CLI: usage, a refused artifact and one canonical report line', () => {
   const usage = spawnSync('node', [CLI], { encoding: 'utf8' });
   assert.equal(usage.status, 2);
   assert.match(usage.stderr, /^usage: node kernel\/ts\/play\/fight\.ts <artifact>/);
+  // Breaks: `--wield` with no value silently prints the bare report, so a mistyped flag looks like a
+  // weapon that changes nothing (review 759 recheck #2).
+  const noKey = spawnSync('node', [CLI, sampler, '--wield'], { encoding: 'utf8' });
+  assert.equal(noKey.status, 2);
+  assert.match(noKey.stderr, /needs an item key/);
+  // Break: `--wield` with no value falls through to the bare report, so a mistyped flag looks like
+  // "this weapon changes nothing" (review 759 recheck #2). `--seeds` refutes an empty value too.
+  for (const argv of [['--wield'], ['--wield', '']]) {
+    const bare = spawnSync('node', [CLI, sampler, '--seeds', '2', ...argv], { encoding: 'utf8' });
+    assert.equal(bare.status, 2, argv.join(' '));
+  }
   const forged = join(scratch, 'forged.json');
   const artifact = JSON.parse(readFileSync(sampler, 'utf8'));
   writeFileSync(forged, JSON.stringify({ ...artifact, content_hash: '0'.repeat(64) }));
@@ -256,4 +388,21 @@ test('the CLI: usage, a refused artifact and one canonical report line', () => {
   const [line, ...more] = ok.stdout.split('\n');
   assert.deepEqual(more, ['']);
   assert.equal(encode(decode(line!) as Json), line);
+  // Breaks: --wield parsed but ignored (the report equals the bare one) in the CLI's own path.
+  const withSword = spawnSync(
+    'node',
+    [CLI, armedArtifact, '--seeds', '2', '--wield', 'broadsword'],
+    {
+      encoding: 'utf8',
+    },
+  );
+  assert.equal(withSword.status, 0, withSword.stderr);
+  const bare = spawnSync('node', [CLI, armedArtifact, '--seeds', '2'], { encoding: 'utf8' });
+  const rounds = (out: string) => {
+    const cell = (JSON.parse(out) as FightsReport).targets.find((t) => t.target.endsWith(':npc/x'))!
+      .cells[0]!;
+    return 'rounds' in cell ? cell.rounds : undefined;
+  };
+  assert.deepEqual(rounds(bare.stdout), { min: 2, median: 2, max: 2 });
+  assert.deepEqual(rounds(withSword.stdout), { min: 1, median: 1, max: 1 });
 });

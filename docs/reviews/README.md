@@ -10,6 +10,7 @@ of closed work are deleted once their lesson is folded, and linked by permalink
 Reviews before R2 live in the [legacy repository](https://github.com/lorecrafting/lokacore-v2-legacy)
 (commit `997a7a8`, `docs/rewrite-v3/reviews/`).
 
+- [Disposition, review 759 fix round 2 (loka-wfrgk.42.2)](2026-11-19-weapon-wield-disposition.md)
 - [Review: the first screen's guard refuses only an unreadable save (loka-vduxr.39)](2026-11-17-first-screen-guard-review.md): **CHANGES REQUIRED**
 - [Review: K1b conditions as story nodes and the named leaf](2026-11-14-k1b-conditions-review.md): **APPROVE**
 - [Review: K1 named conditions](2026-11-14-k1-named-review.md): **APPROVE**

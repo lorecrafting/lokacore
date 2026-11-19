@@ -21,6 +21,9 @@ import { join } from 'node:path';
 import { INSTALLED, loadCartridge, type Cartridge } from '../src/index.ts';
 import { artifactBytes } from './compiled.ts';
 import type { Fights, FightsReport, LevelRows, Numbers, PoolsReport, Section } from './numbers.ts';
+import { limited, numbers } from './reports.ts';
+// Re-exported: the panel's own tests import `limited` from here, its long-standing home.
+export { limited };
 import { replayRecords } from './replay.ts';
 import { todo } from './todo.ts';
 import { find } from './find.ts';
@@ -184,49 +187,10 @@ async function post(
   }
 }
 
-const SECONDS = 90; // the panel waits this long per report: fight.ts --seeds 8 took 46 s on the showcase (M1, loka-wfrgk.79); mutate-skip: a measured limit
-const OPTS = { maxBuffer: 256 * 1024 * 1024, killSignal: 'SIGKILL' } as const;
-
-/** A report in a child, so a slow cartridge blocks no other route and is killed at the limit. */
-export const limited = <T>(args: string[], seconds: number) =>
-  new Promise<Section<T>>((done) => {
-    execFile(process.execPath, args, { ...OPTS, timeout: seconds * 1000 }, (e, out, err) => {
-      if (e)
-        return done({
-          why: e.killed
-            ? `timed out after ${seconds} s; bin/loka sim <cartridge dir> runs it with no limit`
-            : err.trim() || e.message,
-        });
-      try {
-        done({ report: JSON.parse(out) as T });
-      } catch (bad) {
-        done({ why: `not a report: ${(bad as Error).message}` }); // a throw here kills the watcher
-      }
-    });
-  });
-
-/** The reports on the dev artifact; `fights` alone skips the pacing sim, which takes minutes (loka-wfrgk.79). */
-async function numbers(artifact: string, fights = false): Promise<Numbers | Fights> {
-  const dev = JSON.parse(readFileSync(artifact, 'utf8'));
-  const tmp = mkdtempSync(join(tmpdir(), 'loka-numbers-')); // the reports read a compiled artifact
-  try {
-    const file = join(tmp, 'artifact.json');
-    writeFileSync(file, artifactBytes(dev));
-    const play = (name: string) => join(import.meta.dirname, name);
-    const fought = limited<FightsReport>([play('fight.ts'), file, '--seeds', '8'], SECONDS);
-    if (fights) return { hash: dev.sha256, fights: await fought };
-    const pace = [play('sim.ts'), '--artifact', file, '--seeds', '4'];
-    const pacing = limited<{ pools: PoolsReport; levels: LevelRows }>(pace, SECONDS);
-    return { hash: dev.sha256, pacing: await pacing, fights: await fought };
-  } finally {
-    rmSync(tmp, { recursive: true, force: true });
-  }
-}
-
 const asked = (url: string) => new URL(url, 'http://x').searchParams.get('q') ?? '';
 
-const reply = (response: ServerResponse, artifact: string, fights?: boolean) =>
-  numbers(artifact, fights).then((n) => json(response, 200, n));
+const reply = (response: ServerResponse, artifact: string, fights?: boolean, wield?: string) =>
+  numbers(artifact, fights, wield).then((n) => json(response, 200, n));
 
 /** The column's routes, or false for a request that is not one. */
 function column(
@@ -239,7 +203,14 @@ function column(
   if (request.url?.startsWith('/checkpoints')) return checkpoints(request, response, source, busy);
   if (request.url === '/todo') return json(response, 200, todo(source));
   if (request.url === '/numbers') return reply(response, artifact);
-  if (request.url === '/fights') return reply(response, artifact, true);
+  // `wield` is a query, so match the path: `?wield=` must not 404 the report the card asks for.
+  if (request.url?.split('?')[0] === '/fights')
+    return reply(
+      response,
+      artifact,
+      true,
+      new URL(request.url, 'http://x').searchParams.get('wield') ?? undefined,
+    );
   if (request.url?.startsWith('/find?'))
     return json(response, 200, find(source, artifact, asked(request.url)));
   if (request.method === 'POST' && (request.url === '/open' || request.url === '/why'))
