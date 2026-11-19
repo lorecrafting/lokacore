@@ -365,9 +365,11 @@ test('the CLI: usage, a refused artifact and one canonical report line', () => {
   );
   assert.equal(withSword.status, 0, withSword.stderr);
   const bare = spawnSync('node', [CLI, armedArtifact, '--seeds', '2'], { encoding: 'utf8' });
-  const rounds = (out: string) =>
-    (JSON.parse(out) as FightsReport).targets.find((t) => t.target.endsWith(':npc/x'))!.cells[0]!
-      .rounds;
+  const rounds = (out: string) => {
+    const cell = (JSON.parse(out) as FightsReport).targets.find((t) => t.target.endsWith(':npc/x'))!
+      .cells[0]!;
+    return 'rounds' in cell ? cell.rounds : undefined;
+  };
   assert.deepEqual(rounds(bare.stdout), { min: 2, median: 2, max: 2 });
   assert.deepEqual(rounds(withSword.stdout), { min: 1, median: 1, max: 1 });
 });

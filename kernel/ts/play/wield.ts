@@ -3,7 +3,8 @@
 // every fight is fought with it in hand (docs/rnd/gui-editor-design-2026-11-04.md §4.2).
 import { key } from '../src/foundation/compose.ts';
 import { acquisition } from '../src/mechanics/skill_level.ts';
-import { refString, type EntityId, type World } from '../src/runtime/decision.ts';
+import type { EntityId } from '../src/contracts.gen.ts';
+import { refString, type World } from '../src/runtime/decision.ts';
 
 /** Where to move an item and which facts to set, or undefined when `itemKey` is not a weapon this
  * cartridge can wield. A skill must be acquired to be usable (skills.ts, `usable = acquired &&
