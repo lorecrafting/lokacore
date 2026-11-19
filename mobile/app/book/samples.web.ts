@@ -72,7 +72,6 @@ sources(
     lever: [lever],
     latch: [latch],
     thunder: [thunder1, thunder2, thunder3],
-    weather: [rain],
     riddleRight: [noteLow],
     riffle: [riffle],
   },
@@ -89,6 +88,8 @@ sources(
       inn: bedInn,
       church: bedChurch,
     },
+    // The phase names are the cartridge's (calendar.weather[].phase), as bed tags are (room.sound).
+    weather: { rain },
     pieces: {
       wild: pieceWild,
       shore: pieceShore,

@@ -1423,6 +1423,12 @@ Recipe: give a skill its `learned` line and, with `growth`, a `ranks` entry per 
 
 [Derived sky](mechanics.md#derived-sky-weather-season-and-tide-toolbox-row-31): `calendar.season` and `calendar.tide` are `CalendarCycle`s checked like `calendar.lunar` (ordered cuts below the period, the first at 0, unique phases, origin + period a safe integer); `calendar.weather` lists 1 to 32 `{phase, weight 1..1000, wet?}` entries with unique phases. A `sky` leaf's `weather`, `season` or `tide` must name a phase its table authors (SCHEMA_VIOLATION at that field otherwise). Any of the three tables needs the calendar units (`units_per_hour`, `hours_per_day`, `subdivisions_per_hour`; SCHEMA_VIOLATION at `calendar` otherwise), since the status line that shows them needs them, as a `sky` leaf does. A room declares `exposed` in its `tags` (`tag@1`). The compiler (`lib/loka/content/calendar.ex`) refuses each case. Sampler: `cartridges/sky_sampler`.
 
+A phase sounds iff the app has a recording filed under that exact phase name: the Book's `sources` takes a
+`weather` map keyed by phase, exactly as a room's bed is keyed by its `sound` tag, and a phase the map
+does not name is silent (`loka-mq9i8`). The phase names are the cartridge's, so the presenter holds no
+list of them; which phases sound is a property of which recordings ship. No rule reads `wet` yet, so a
+cartridge that authors `wet: true` on a phase does not by itself make it sound.
+
 ## Pick and force declarations
 
 [Pick and force a barrier](mechanics.md#pick-and-force-a-barrier-toolbox-rows-13-and-g12) adds no field: a barrier source file declares `initial: "closed"` (a keyless `locked` barrier in reach is BARRIER_UNREACHABLE_KEY) and an `opens_when` reading an instance bool fact; the pick or force is an action on a room detail with a `rating` and an `opposed` check, as the [time gate](#time-gate-declarations), [skill growth and rating](#skill-growth-and-rating-declarations) and [tag](#tag-declarations) declarations already check. Sampler: `cartridges/barrier_sampler`.

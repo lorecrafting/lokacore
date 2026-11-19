@@ -4,7 +4,8 @@ import { mix, motion, sound } from './tokens.ts';
 import { busOf, type Bus } from './bus.ts';
 
 type SoundName = keyof typeof sound;
-type RoomFiles = { beds?: Record<string, string>; pieces?: Record<string, string> };
+// File a room's beds and pieces by its tag, its weather bed by the cartridge's phase name.
+type RoomFiles = Partial<Record<'beds' | 'pieces' | 'weather', Record<string, string>>>;
 
 let urls: Partial<Record<SoundName, string[]>> = {};
 let rooms: RoomFiles = {};
@@ -210,7 +211,8 @@ function settleRoom(ms: number) {
   }
   const beds = rooms.beds ?? {};
   bed = hold(bed, 'bed', beds[room.tag] ?? beds.wild, room.spirit, ms);
-  const rain = room.weather ? urls.weather?.[0] : undefined;
+  // Plays for a phase with a recording, named by the cartridge; the app holds no list (loka-mq9i8).
+  const rain = room.weather ? rooms.weather?.[room.weather] : undefined;
   layer = hold(layer, 'weather', rain, !room.exposed, ms);
 }
 
@@ -223,7 +225,6 @@ function explore(tag: string) {
   if (globalThis.document?.hidden) return;
   if (voice('explore', piece, {})) lastPiece = now;
 }
-const audible = ['rain', 'wind', 'storm'];
 /** The room the Book is on: bed tag, weather phase that sounds, exposed; `quiet`: this view plays no piece; 'woke' also spends the room's; 'silent' (a treated scene, book-ui.md Book treatments) also fades the bed, weather and music out and opens none; `spirit`: the bed through mix.muffle (book-ui.md, Spirit state). */
 export function ambience(
   tag?: string,
@@ -232,8 +233,7 @@ export function ambience(
   quiet?: boolean | 'woke' | 'silent',
   spirit = false,
 ) {
-  const weather = audible.includes(phase!) ? phase : undefined;
-  room = { tag: tag || 'wild', weather, exposed, spirit, silent: quiet === 'silent' };
+  room = { tag: tag || 'wild', weather: phase, exposed, spirit, silent: quiet === 'silent' };
   settleRoom(motion.bed.duration);
   if (quiet === 'woke') entered.add(room.tag);
   if (!inFight && !quiet) explore(room.tag);

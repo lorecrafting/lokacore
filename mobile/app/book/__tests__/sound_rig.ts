@@ -88,10 +88,11 @@ export async function browser(opts: { refuse?: boolean; noAudio?: boolean } = {}
       fightLoop: ['loop.m4a'],
       fightWon: ['won.m4a'],
       thunder: ['thunder.m4a'],
-      weather: ['rain.m4a'],
     },
     {
       beds: { inn: 'inn.m4a', wild: 'wild.m4a', cave: 'cave.m4a' },
+      // Only these phases have a recording; `gale` is a cartridge phase with none yet.
+      weather: { rain: 'rain.m4a' },
       pieces: { inn: 'p-inn.m4a', cave: 'p-cave.m4a' },
     },
   );
