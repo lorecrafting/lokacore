@@ -4,7 +4,7 @@ The present only: open work, next steps, owner questions, and standing owner rul
 yet. Rewrite this page in place once per session, at its end; never add dated session sections. History lives in git, Beads and `docs/reviews/`; lessons
 go to [PM lessons](lessons/pm.md) ([harness patterns](decisions/owner-decision-harness-patterns-2026-10-28.md)).
 
-AS OF main after 6b09d8602; written 2026-11-18 18:45 UTC in the Pi harness by deploy/deepseek-ai/deepseek-v4.1-flash-1017, PM session.
+AS OF main after 9f49402f3; written 2026-11-19 00:10 UTC in the Pi harness by deploy/deepseek-ai/deepseek-v4.1-flash-1017, PM session.
 `kernel_api` is 1.159 (no contract slice since). Every reviewer and developer here runs on `deploy/deepseek-ai/deepseek-v4.1-flash-1017`
 (the owner paused the Anthropic subscription; `~/.pi/agent/agents/loka-dev.md`, `loka-review.md` repinned
 2026-11-13). **Nothing is mid-merge, nothing is in flight, no agent is running. #454 is the owner's P3 hold.**
@@ -19,11 +19,13 @@ AS OF main after 6b09d8602; written 2026-11-18 18:45 UTC in the Pi harness by de
 
 ## Board
 
-**36 open (31 open, 5 in-progress), 13 ready, 3 housekeeping deferred to 2027-01-01.** The ready list is
+**37 open (32 open, 5 in-progress), 14 ready, 3 housekeeping deferred to 2027-01-01.** The ready list is
 the whole planned queue; anything absent from it is deferred on purpose, not forgotten. Before proposing work,
 check the bead is not already shipped — read the code, not the title. The five in-progress beads are all
 epics or long-running parents (`wfrgk.102`, `vduxr`, `x6t`, `wfrgk.100.4`, `kgd`); none has an agent on it.
-`y6yg` (toolbox showcase) and `kgd.194` closed 2026-11-18 with every child done; `735tg` closed by #753.
+`y6yg` (toolbox showcase) and `kgd.194` closed 2026-11-18 with every child done; `735tg` closed by #753;
+`wfrgk.100.4` closed by #754 (its undo item built; its scene-field-focus item became `3gnyd`, which needs an
+owner repro before a fix can name its break).
 
 Three ready beads want the owner's input, not an agent's:
 - **`.100.5`** (scene structure editable in the GUI) reverses ruling 11, so it needs a design pass first.
