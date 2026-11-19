@@ -4,7 +4,7 @@ The present only: open work, next steps, owner questions, and standing owner rul
 yet. Rewrite this page in place once per session, at its end; never add dated session sections. History lives in git, Beads and `docs/reviews/`; lessons
 go to [PM lessons](lessons/pm.md) ([harness patterns](decisions/owner-decision-harness-patterns-2026-10-28.md)).
 
-AS OF main after 2e4b08652; written 2026-11-19 03:40 UTC in the Pi harness by deploy/deepseek-ai/deepseek-v4.1-flash-1017, PM session.
+AS OF main after 70092863d; written 2026-11-19 05:05 UTC in the Pi harness by deploy/deepseek-ai/deepseek-v4.1-flash-1017, PM session.
 `kernel_api` is 1.159 (no contract slice since). Every reviewer and developer here runs on `deploy/deepseek-ai/deepseek-v4.1-flash-1017`
 (the owner paused the Anthropic subscription; `~/.pi/agent/agents/loka-dev.md`, `loka-review.md` repinned
 2026-11-13). **Nothing is mid-merge, nothing is in flight, no agent is running. #454 is the owner's P3 hold.**
@@ -19,13 +19,13 @@ AS OF main after 2e4b08652; written 2026-11-19 03:40 UTC in the Pi harness by de
 
 ## Board
 
-**37 open (32 open, 5 in-progress), 14 ready, 3 housekeeping deferred to 2027-01-01.** The ready list is
+**35 open, 15 ready, 3 housekeeping deferred to 2027-01-01.** The ready list is
 the whole planned queue; anything absent from it is deferred on purpose, not forgotten. Before proposing work,
 check the bead is not already shipped — read the code, not the title. The five in-progress beads are all
 epics or long-running parents (`wfrgk.102`, `vduxr`, `x6t`, `wfrgk.100.4`, `kgd`); none has an agent on it.
 `y6yg` (toolbox showcase) and `kgd.194` closed 2026-11-18 with every child done; `735tg` closed by #753;
-`wfrgk.100.4` closed by #754 (its undo item built; its scene-field-focus item became `3gnyd`, which needs an
-owner repro before a fix can name its break). `wfrgk.89` closed 2026-11-19 with all four items resolved, only #756 being code:
+`wfrgk.100.4` closed by #754 (its undo item built; its scene-field-focus item became `3gnyd`, closed by #757).
+`wfrgk.89` closed 2026-11-19 with all four items resolved, only #756 being code:
 items 1 and 3 by #755/#756; **item 2 (Bind refuses short refs while the compile is refused) was already fixed by
 `9f0863246`**, verified live — with a showcase file truncated the watcher says `compiled:false` and `GET /story`
 still answers 724 shorts, which is right (a broken unrelated file must not take away a good ref); **item 4
@@ -33,6 +33,13 @@ still answers 724 shorts, which is right (a broken unrelated file must not take 
 bundles, twice in a 193 ms `story()` build, and the showcase has no `areas/*.json` at all.
 `after_merge.sh` closes a whole bead on one PR: three reopens on that one bead. Re-read an item's **claim**
 against current code before filing a follow-up, not its line number — half of these needed no work.
+
+**loka-3gnyd (#757)** is the cautionary case for beads whose own lead is a guess. It was filed as "needs an
+owner repro" because two candidate causes were tried and neither failed. Both were wrong: `proseKey`'s per-save
+key is stable here (the field takes `words`, not the value), and the remount was `Field`'s branch on `l.key`, not
+`RoomForm key={resets}`. What found it was traffic, not reading: after a save the only failing request was
+`GET /line` 409 "the source moved since the compile", and the input node was replaced while all seven `<li>`
+survived. A bead that says "needs a repro" is often asking for a probe, not for the owner.
 
 Three ready beads want the owner's input, not an agent's:
 - **`.100.5`** (scene structure editable in the GUI) reverses ruling 11, so it needs a design pass first.
