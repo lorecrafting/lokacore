@@ -29,6 +29,8 @@ async function shows(field: Locator, words: string) {
   assert.equal(await field.inputValue(), words);
 }
 const room = { right: 420, selection: { kind: 'room', key: 'fell_top' } };
+// the focused element's title, as a string: the test tsconfig has no DOM lib
+const focused = `document.activeElement && document.activeElement.getAttribute('title')`;
 
 // Breaks: Esc still writes on the blur after it; the room's description written to another line, or
 // written only by opening it in the Book (POST /open, off the Book's page here).
@@ -304,6 +306,35 @@ test("a card's Undo puts back the words write it just made", async () => {
     assert.equal(readFileSync(TEXT, 'utf8'), before);
   } finally {
     writeFileSync(TEXT, before);
+    await page.close();
+  }
+});
+
+// Breaks: a scene's words row is picked by the compile's text key, which lags the write just made,
+// so the words field is swapped for a plain span for one round: the input node is replaced, the
+// caret leaves it and a draft typed across the save is lost (loka-3gnyd). Held focus is the check,
+// since React keeps the DOM node only when the key does.
+test("a scene card's words field keeps its node and its caret across its own save", async () => {
+  const file = join(dir, 'identity_sampler/scenes/stranger_talk.scene');
+  const before = readFileSync(file, 'utf8');
+  await openWorld('identity_sampler');
+  const page = await open({ selection: { kind: 'dialogue', key: 'stranger_talk' } }, 'line 1 npc');
+  try {
+    const field = page.locator('input[title="dialogue.stranger_talk.prompt"]');
+    await shows(field, 'The stranger waits.');
+    await field.click();
+    assert.equal(await page.evaluate(focused), 'dialogue.stranger_talk.prompt');
+    const mtime = statSync(file).mtimeMs;
+    await field.fill('The stranger waits, still.');
+    await field.press('Enter');
+    await until(() => statSync(file).mtimeMs !== mtime);
+    // the compile answers after the write: the field must be the same node, still focused, still mine
+    for (let t = 0; t < 40; t++) await page.waitForTimeout(100);
+    assert.equal(await page.evaluate(focused), 'dialogue.stranger_talk.prompt');
+    assert.equal(await field.inputValue(), 'The stranger waits, still.');
+    assert.equal(readFileSync(file, 'utf8'), before.replace('* The stranger waits.', '* The stranger waits, still.'));
+  } finally {
+    writeFileSync(file, before);
     await page.close();
   }
 });
