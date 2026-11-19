@@ -113,35 +113,35 @@ export function useCard(rel: string, diag: Diag) {
   const [undo, setUndo] = useUndo(rel);
   const [held, setHeld] = useState<string>(); // the schema's first new error: the draft not sent
   useEffect(() => void (setRevealed([]), setHeld(undefined)), [rel]); // a new file starts with nothing revealed
-  const post = async (path: string, sent: Sent, otherwise: string) => {
-    const base = file.current!.doc; // the file the write was made from
-    const { ok, told } = await ask(path, sent);
+  const post = async (path: string, sent: Sent, otherwise: string, onOk?: () => void) => {
+    const base = file.current!.doc, // the file the write was made from
+      { ok, told } = await ask(path, sent);
     setRefused(ok ? undefined : typeof told === 'string' ? told : otherwise);
     // a refused change wrote nothing, so the last write's Undo still stands
-    if (ok || path === 'undo')
-      setUndo(ok && path === 'change' ? (told as { id: string }).id : undefined);
+    if (ok || path === 'undo') setUndo(ok && path === 'change' ? (told as { id: string }).id : undefined);
+    if (ok) onOk?.(); // before the reload: it may reset the draft the reload rebases onto
     await load(base, sent.ops);
   };
   const send = async () => {
     const saved = file.current;
-    if (!saved) return;
+    if (!saved) return; // opening
     const errors = [...fresh(saved, latest.current), ...unready(latest.current as never)];
-    const [first] = errors;
-    setHeld(first && `${first.property} ${first.message}`);
+    setHeld(errors[0] && `${errors[0].property} ${errors[0].message}`);
     const ops = apart(diff(saved.doc, latest.current), errors);
     if (ops.length)
       await post('change', { file: rel, was: saved.sha256, ops }, 'Changed outside: reloaded.');
   };
   const change = (doc: unknown) => setDraft((latest.current = applied(saved!.doc, unlistedIn(saved!, doc))));
-  // Undo drops the held draft (rebased onto the undone file it is refused again); queued, it undoes the last write
-  const back = () =>
-    queued(
-      () => (
-        setHeld(undefined),
-        (latest.current = file.current!.doc),
-        post('undo', { id: undos.get(rel) }, 'Changed since: not undone.')
-      ),
+  // Undo drops the held draft it was clicked on, and that one only: an edit typed while the answer was
+  // in flight is not its to throw away, and a refusal wrote nothing (loka-wfrgk.89)
+  const back = () => {
+    const clicked = latest.current; // the draft Undo was clicked on, not whatever is here when it answers
+    return queued(() =>
+      post('undo', { id: undos.get(rel) }, 'Changed since: not undone.', () => {
+        if (clicked === latest.current) (setHeld(undefined), (latest.current = file.current!.doc));
+      }),
     );
+  };
   const reveal = (f: string) => setRevealed([...revealed, f]);
   const unreveal = (f: string) => setRevealed(revealed.filter((r) => r !== f)); // back in the add menu
   const card = { saved, draft, revealed, undo, write: setUndo, change, commit: () => queued(send), back, reveal, unreveal };
