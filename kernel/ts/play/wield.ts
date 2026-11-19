@@ -2,6 +2,7 @@
 // state override that puts one cartridge item in its slot's holder with its skill acquired, so
 // every fight is fought with it in hand (docs/rnd/gui-editor-design-2026-11-04.md §4.2).
 import { key } from '../src/foundation/compose.ts';
+import { learnable } from '../src/mechanics/skills.ts';
 import { acquisition } from '../src/mechanics/skill_level.ts';
 import type { EntityId } from '../src/contracts.gen.ts';
 import { refString, type World } from '../src/runtime/decision.ts';
@@ -24,7 +25,13 @@ export function wielded(
   // qualified` itself (round_attack.ts:220), so a weapon whose skill the player cannot qualify for
   // still falls back to the base attack. Do not add a qualification gate here — review 759 #2
   // removed one and every fight came out the same, so it would only be dead code.
+  //
+  // `prerequisite` is the exception: round_attack never reads it, so a skill the player has not
+  // *learned* the way to (HS-11) would be handed over outright and the weapon would win with it
+  // (review 759 recheck #1: rounds 3,3,3 -> 2,2,2 on a never-holding prerequisite). `learnable` is
+  // the same bar a teacher's acquisition step passes.
   if (!skill || !w.cartridge.skills?.[refString(skill)] || !holder || !id) return undefined;
+  if (!learnable(w, w.character, skill, { n: 0 })) return undefined;
   const at = key({
     kind: 'fact',
     fact: acquisition(skill),

@@ -127,6 +127,28 @@ writeFileSync(
 );
 const [armedArtifact, armedClone] = compile(armed, 'armed.json');
 
+// The same sword behind a prerequisite that never holds (HS-11). Combat reads `qualified` and never
+// `prerequisite`, so without `wielded`'s own check the sword would be handed over and win: rounds
+// 3,3,3 become 2,2,2 (review 759 recheck #1). `might` is never at least 10 for the clone.
+const unlearnable = join(scratch, 'unlearnable');
+cpSync(armed, unlearnable, { recursive: true });
+writeFileSync(
+  join(unlearnable, 'skills/swords.json'),
+  JSON.stringify({
+    name: 'skill.swords.label',
+    requirement: 'skill.swords.requirement',
+    prerequisite: { op: 'stat_compare', attribute: 'might', at_least: 10 },
+  }),
+);
+const [, unlearnableClone] = compile(unlearnable, 'unlearnable.json');
+
+test('a weapon whose skill the player has not learned the way to leaves the fight as it was', () => {
+  // Break: `wielded` writes the acquisition without `learnable`, so a skill behind an unmet
+  // prerequisite is granted by force and the weapon fights as if earned (review 759 recheck #1).
+  const bare = fights(unlearnableClone, { seeds: 2 });
+  assert.deepEqual(fights(unlearnableClone, { seeds: 2, wield: 'broadsword' }), bare);
+});
+
 test('a wield key that names no weapon leaves the fight as it was', () => {
   const bare = fights(armedClone, { seeds: 2 });
   for (const key of ['broadsword_missing', 'knife']) {
@@ -344,6 +366,12 @@ test('the CLI: usage, a refused artifact and one canonical report line', () => {
   const usage = spawnSync('node', [CLI], { encoding: 'utf8' });
   assert.equal(usage.status, 2);
   assert.match(usage.stderr, /^usage: node kernel\/ts\/play\/fight\.ts <artifact>/);
+  // Break: `--wield` with no value falls through to the bare report, so a mistyped flag looks like
+  // "this weapon changes nothing" (review 759 recheck #2). `--seeds` refutes an empty value too.
+  for (const argv of [['--wield'], ['--wield', '']]) {
+    const bare = spawnSync('node', [CLI, sampler, '--seeds', '2', ...argv], { encoding: 'utf8' });
+    assert.equal(bare.status, 2, argv.join(' '));
+  }
   const forged = join(scratch, 'forged.json');
   const artifact = JSON.parse(readFileSync(sampler, 'utf8'));
   writeFileSync(forged, JSON.stringify({ ...artifact, content_hash: '0'.repeat(64) }));
