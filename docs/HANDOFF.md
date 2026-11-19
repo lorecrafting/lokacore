@@ -4,7 +4,7 @@ The present only: open work, next steps, owner questions, and standing owner rul
 yet. Rewrite this page in place once per session, at its end; never add dated session sections. History lives in git, Beads and `docs/reviews/`; lessons
 go to [PM lessons](lessons/pm.md) ([harness patterns](decisions/owner-decision-harness-patterns-2026-10-28.md)).
 
-AS OF main after 70092863d; written 2026-11-19 05:05 UTC in the Pi harness by deploy/deepseek-ai/deepseek-v4.1-flash-1017, PM session.
+AS OF main after 7a63067e7; written 2026-11-19 16:40 UTC in the Pi harness by deploy/deepseek-ai/deepseek-v4.1-flash-1017, PM session.
 `kernel_api` is 1.159 (no contract slice since). Every reviewer and developer here runs on `deploy/deepseek-ai/deepseek-v4.1-flash-1017`
 (the owner paused the Anthropic subscription; `~/.pi/agent/agents/loka-dev.md`, `loka-review.md` repinned
 2026-11-13). **Nothing is mid-merge, nothing is in flight, no agent is running. #454 is the owner's P3 hold.**
@@ -19,7 +19,7 @@ AS OF main after 70092863d; written 2026-11-19 05:05 UTC in the Pi harness by de
 
 ## Board
 
-**35 open, 15 ready, 3 housekeeping deferred to 2027-01-01.** The ready list is
+**33 open, 13 ready, 3 housekeeping deferred to 2027-01-01.** The ready list is
 the whole planned queue; anything absent from it is deferred on purpose, not forgotten. Before proposing work,
 check the bead is not already shipped — read the code, not the title. The five in-progress beads are all
 epics or long-running parents (`wfrgk.102`, `vduxr`, `x6t`, `wfrgk.100.4`, `kgd`); none has an agent on it.
@@ -33,6 +33,13 @@ still answers 724 shorts, which is right (a broken unrelated file must not take 
 bundles, twice in a 193 ms `story()` build, and the showcase has no `areas/*.json` at all.
 `after_merge.sh` closes a whole bead on one PR: three reopens on that one bead. Re-read an item's **claim**
 against current code before filing a follow-up, not its line number — half of these needed no work.
+
+**`wfrgk.100.5` (scene structure) closed 2026-11-19 as stale, not as work**: all four children shipped
+(#701 design, #707 S1 cut pages, #711 S2 scene lines, #715 S3 choice keys), ruling 11 was already reversed at
+`docs/rnd/gui-editor-design-2026-11-04.md:234`, and its only dependent `cr7l7` closed "not reachable". A parent
+stays open until someone closes it; **sweep ready parents against their children before believing the count.**
+The same day: `wfrgk.102` (field guide) is *not* in that class — its children `.2`, `.3`, `.4` are closed but `.102.1`
+is open on a missing carrier (see below), so the parent is correctly open.
 
 **loka-3gnyd (#757)** is the cautionary case for beads whose own lead is a guess. It was filed as "needs an
 owner repro" because two candidate causes were tried and neither failed. Both were wrong: `proseKey`'s per-save
@@ -99,6 +106,18 @@ corrected the same way (`village_regard`, `mill_gate` did not exist). Grep the r
 6. Story tooling epic **loka-wfrgk.115** is complete except E1 (`.12`): P3, parked until a beat needs it; needs a
    protocol change, a `kernel_api` bump.
 7. **Housekeeping: 3 open, all deferred to 2027-01-01** (`rvbmn`, `00p0u`, `e9ey`). Nothing actionable.
+8. **`mq9i8` needs one ruling, then it is a small slice.** The gate is `mobile/app/book/sound.web.ts:226`,
+   `const audible = ['rain', 'wind', 'storm']`, so a cartridge naming its phases anything else (the showcase's
+   `gale`) plays no weather bed. AGENTS.md forbids the value; it is now row **W23** in `docs/world-parameters.md`
+   (added 2026-11-19 — the 2026-10-02 audit never swept `sound.web.ts`). The behaviour *is* pinned by
+   `sound_room.test.ts:71`. **Ruling needed: does the cartridge name its sounding phases, or the engine?** Not a
+   rename in the prologue — that swaps one hardcoded name for another. `cartridges/prologue/` is the owner's, so
+   the phase names there are theirs either way.
+9. **`100.7` is blocked correctly — do not start it.** All six sites compose a key's words into a longer line
+   (`heldBy(cap(p.text(p.holder)))`, `Menu.tsx:128`), which the ADR `docs/rnd/line-key-binding-2026-11-15.md`
+   explicitly excludes from `data-loka-key` ("a joined line legitimately has several"). The ADR's own measured
+   conclusion — build no attribute, ship the lint instead — is done: `same_words` in `lib/loka/content/lint.ex:157`
+   already reports exactly the 14 item families. Nothing here until a real composed-line edit exists.
 
 **Phases 0, 2 and 3 of the authoring-readiness plan are done** — do not re-plan them (ff954162a, 527fd4071, `.97`).
 
@@ -139,6 +158,9 @@ hunger (`toolbox_showcase/text.json:1461`, `docs/showcase/hub-and-first-district
 
 ## Holds
 
+- **Two rulings this session found, both one line from the owner** (details in Resume 8 and 9 below):
+  which layer names a cartridge's sounding weather phases (`mq9i8`), and whether `bptw`'s page-side
+  `Label: value` surfaces lose their colons or keep them (a designer call per surface).
 - P3 hold (owner 2026-10-22): draft #454, kgd.188, 2lvx, 5i4c, x6t.98. loka-x6t.126 skill-gated room depth.
 - #632 (loka-vduxr.64) belongs to another session (lokacore-fb), not the PM.
 - `toolbox/settle-3` is 9 commits ahead of main from 2026-10-15 with no PR: decide PR or delete before the next batch.
