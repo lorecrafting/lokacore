@@ -825,9 +825,13 @@ reads it and nothing runs it in CI.
   "what does this weapon do to my odds" (§4.2's Combat numbers block, beside the item). The key is
   the item's bare name (`iron_sword`, not the full ref); it is not a matrix axis — levels and
   builds stay as above, and a key naming no weapon, or no item, changes nothing, so the bare
-  report is the answer. A weapon needs its skill acquired to be usable (`skills.ts`: `usable =
-  acquired && qualified`), which is why the override writes the acquisition fact as well as the
-  item's container; the item's own room is overridden, so a sword left elsewhere is still in hand.
+  report is the answer. Because a weapon is in the player's hand in **every** fight rather than the
+  target of one, the card shows each target's rows rather than picking a single comparison. A
+  weapon needs its skill acquired to be usable (`skills.ts`: `usable = acquired && qualified`),
+  which is why the override writes the acquisition fact as well as the item's container; it grants
+  only the acquisition, and combat re-reads `qualified` itself, so a weapon whose skill the player
+  cannot qualify for still falls back to the base attack. The item's own room is overridden, so a
+  sword left elsewhere is still in hand.
 
 ### Refusal and friction report (balance tool 8)
 

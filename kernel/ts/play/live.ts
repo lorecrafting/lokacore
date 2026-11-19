@@ -21,7 +21,9 @@ import { join } from 'node:path';
 import { INSTALLED, loadCartridge, type Cartridge } from '../src/index.ts';
 import { artifactBytes } from './compiled.ts';
 import type { Fights, FightsReport, LevelRows, Numbers, PoolsReport, Section } from './numbers.ts';
-import { numbers } from './reports.ts';
+import { limited, numbers } from './reports.ts';
+// Re-exported: the panel's own tests import `limited` from here, its long-standing home.
+export { limited };
 import { replayRecords } from './replay.ts';
 import { todo } from './todo.ts';
 import { find } from './find.ts';
@@ -185,27 +187,6 @@ async function post(
   }
 }
 
-const SECONDS = 90; // the panel waits this long per report: fight.ts --seeds 8 took 46 s on the showcase (M1, loka-wfrgk.79); mutate-skip: a measured limit
-const OPTS = { maxBuffer: 256 * 1024 * 1024, killSignal: 'SIGKILL' } as const;
-
-/** A report in a child, so a slow cartridge blocks no other route and is killed at the limit. */
-export const limited = <T>(args: string[], seconds: number) =>
-  new Promise<Section<T>>((done) => {
-    execFile(process.execPath, args, { ...OPTS, timeout: seconds * 1000 }, (e, out, err) => {
-      if (e)
-        return done({
-          why: e.killed
-            ? `timed out after ${seconds} s; bin/loka sim <cartridge dir> runs it with no limit`
-            : err.trim() || e.message,
-        });
-      try {
-        done({ report: JSON.parse(out) as T });
-      } catch (bad) {
-        done({ why: `not a report: ${(bad as Error).message}` }); // a throw here kills the watcher
-      }
-    });
-  });
-
 const asked = (url: string) => new URL(url, 'http://x').searchParams.get('q') ?? '';
 
 const reply = (response: ServerResponse, artifact: string, fights?: boolean, wield?: string) =>
@@ -222,7 +203,8 @@ function column(
   if (request.url?.startsWith('/checkpoints')) return checkpoints(request, response, source, busy);
   if (request.url === '/todo') return json(response, 200, todo(source));
   if (request.url === '/numbers') return reply(response, artifact);
-  if (request.url === '/fights')
+  // `wield` is a query, so match the path: `?wield=` must not 404 the report the card asks for.
+  if (request.url?.split('?')[0] === '/fights')
     return reply(
       response,
       artifact,

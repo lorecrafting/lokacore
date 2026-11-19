@@ -2,15 +2,35 @@
 // (kernel/ts/play/live.ts serves them). `fights` alone skips the pacing sim, which takes minutes
 // (loka-wfrgk.79); `wield` is an item key, so every fight is fought with that weapon in hand
 // (docs/rnd/gui-editor-design-2026-11-04.md §4.2).
+import { execFile } from 'node:child_process';
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { limited } from './live.ts';
 import { artifactBytes } from './compiled.ts';
-import type { Fights, FightsReport, LevelRows, Numbers, PoolsReport } from './numbers.ts';
+import type { Fights, FightsReport, LevelRows, Numbers, PoolsReport, Section } from './numbers.ts';
 
 // The panel waits this long per report: fight.ts --seeds 8 took 46 s on the showcase (M1, loka-wfrgk.79).
-const SECONDS = 90; // matches live.ts's, the limit the panel waits
+const OPTS = { maxBuffer: 256 * 1024 * 1024, killSignal: 'SIGKILL' } as const;
+
+/** A report in a child, so a slow cartridge blocks no other route and is killed at the limit. */
+export const limited = <T>(args: string[], seconds: number) =>
+  new Promise<Section<T>>((done) => {
+    execFile(process.execPath, args, { ...OPTS, timeout: seconds * 1000 }, (e, out, err) => {
+      if (e)
+        return done({
+          why: e.killed
+            ? `timed out after ${seconds} s; bin/loka sim <cartridge dir> runs it with no limit`
+            : err.trim() || e.message,
+        });
+      try {
+        done({ report: JSON.parse(out) as T });
+      } catch (bad) {
+        done({ why: `not a report: ${(bad as Error).message}` }); // a throw here kills the watcher
+      }
+    });
+  });
+
+const SECONDS = 90; // the panel waits this long per report: fight.ts --seeds 8 took 46 s on the showcase (M1, loka-wfrgk.79); mutate-skip: a measured limit
 
 export async function numbers(
   artifact: string,

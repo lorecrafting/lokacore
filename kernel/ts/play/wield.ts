@@ -20,6 +20,10 @@ export function wielded(
   const skill = item?.weapon?.skill;
   const holder = item?.slot && w.slots[item.slot];
   const id = ref && w.entityIds[ref];
+  // Only the acquisition is granted, never `qualified`: combat re-reads `usable = acquired &&
+  // qualified` itself (round_attack.ts:220), so a weapon whose skill the player cannot qualify for
+  // still falls back to the base attack. Do not add a qualification gate here — review 759 #2
+  // removed one and every fight came out the same, so it would only be dead code.
   if (!skill || !w.cartridge.skills?.[refString(skill)] || !holder || !id) return undefined;
   const at = key({
     kind: 'fact',

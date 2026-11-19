@@ -263,6 +263,15 @@ if (import.meta.main) {
   };
   const [seeds, rounds] = [flag('--seeds', 32), flag('--rounds', 100)];
   const weapon = rest.includes('--wield') ? rest[rest.indexOf('--wield') + 1] : undefined;
+  // `--wield` with no value is a mistyped flag, not "this weapon changes nothing": both would print
+  // the bare report, so the author could not tell them apart (review 759 #3). `--seeds` refutes an
+  // empty value the same way.
+  if (rest.includes('--wield') && !weapon?.trim()) {
+    console.error(
+      'usage: node kernel/ts/play/fight.ts <artifact> [--wield item] needs an item key',
+    );
+    process.exit(2);
+  }
   if (!file || ![seeds, rounds].every((x) => Number.isInteger(x) && x > 0)) {
     console.error(
       'usage: node kernel/ts/play/fight.ts <artifact> [--seeds N] [--rounds R] [--wield item]',
