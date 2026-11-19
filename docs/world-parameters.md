@@ -46,8 +46,9 @@ Priority: **C1** before chapter one; **TM** with the time-model slice; **L** lat
 | W20 | B1 | `time_window` hour endpoints | dusk/dawn conditions | CT in current chapter | bounds use the authored day | — |
 | W21 | engine verb, talk and quest-offer priority `0` | kernel/ts/src/commands/actions.ts:111, :142; mechanics/dialogue/shared.ts:135, :156 | presentation order of engine verbs | HC | `world.verbs.<verb>.priority` (same block as W4) | L |
 | W22 | lock/unlock need `key_item` | kernel/ts/src/mechanics/barrier/rule.ts:81-84 | key rule | CT (key_item per barrier); the rule itself is mechanism | none | — |
+| W23 | `audible = ['rain', 'wind', 'storm']` | mobile/app/book/sound.web.ts:226-235 | which weather phases play a bed; a phase off the list is silent however the cartridge names it | HC (three phase names in the presenter) | the cartridge names its own sounding phases (`cartridge.json calendar.weather[].sound`, or `world.weather.audible`); until then a cartridge must spell a phase exactly one of these three to be heard | L |
 
-Audit counts (2026-10-02): 22 rows. HC 12 (W3-W6, W8, W11, W14, W16, W17, W19-W21; W14 acceptable as mechanism, so 11 to move), DEF 6 (W1, W2, W9, W10, W13, W18), CT 3 (W7, W15, W22), missing 1 (W12). Priority: C1 3 (W1, W2, W13; all DONE in #131), TM 9 (W3-W6, W8, W12, W16, W19, W20), L 5 (W7, W11, W14, W17, W21).
+Audit counts (2026-10-02): 22 rows. W23 was added 2026-11-19 from `loka-mq9i8` (the weather beds' hardcoded phase names; not in the 2026-10-02 audit, which did not sweep `sound.web.ts`). HC 12 (W3-W6, W8, W11, W14, W16, W17, W19-W21; W14 acceptable as mechanism, so 11 to move), DEF 6 (W1, W2, W9, W10, W13, W18), CT 3 (W7, W15, W22), missing 1 (W12). Priority: C1 3 (W1, W2, W13; all DONE in #131), TM 9 (W3-W6, W8, W12, W16, W19, W20), L 5 (W7, W11, W14, W17, W21) plus W23.
 At that audit, the only `time.advance` producers: mechanics/scripted_action/rule.ts:75-77 (scripted action duration) and mechanics/schedule/rule.ts:47 (wait); every other verb is instantaneous.
 
 ### Spec-pinned rows (need a spec/schema amendment before code)
