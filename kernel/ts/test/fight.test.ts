@@ -366,6 +366,11 @@ test('the CLI: usage, a refused artifact and one canonical report line', () => {
   const usage = spawnSync('node', [CLI], { encoding: 'utf8' });
   assert.equal(usage.status, 2);
   assert.match(usage.stderr, /^usage: node kernel\/ts\/play\/fight\.ts <artifact>/);
+  // Breaks: `--wield` with no value silently prints the bare report, so a mistyped flag looks like a
+  // weapon that changes nothing (review 759 recheck #2).
+  const noKey = spawnSync('node', [CLI, sampler, '--wield'], { encoding: 'utf8' });
+  assert.equal(noKey.status, 2);
+  assert.match(noKey.stderr, /needs an item key/);
   // Break: `--wield` with no value falls through to the bare report, so a mistyped flag looks like
   // "this weapon changes nothing" (review 759 recheck #2). `--seeds` refutes an empty value too.
   for (const argv of [['--wield'], ['--wield', '']]) {
