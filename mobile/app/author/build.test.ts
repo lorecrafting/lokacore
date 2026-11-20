@@ -17,9 +17,10 @@ const store = (entries: Record<string, string> = {}) => {
 };
 
 // Breaks: the Build switch reaching the game or its neighbours' keys (the place a reload replays),
-// keeping a sheet open after Build is left, or the strip not saying how many compiles wait.
+// keeping a sheet open after Build is left, the strip not saying how many compiles wait, or a saved
+// sheet with no body drawn as an empty cover over the Book.
 test('the Build switch changes no game state; the strip says what the Hold parks', async () => {
-  const { Strip, hear } = await import('./build/Build.tsx');
+  const { Strip, hear, install, sheets } = await import('./build/Build.tsx');
   const host = elapsedHost();
   const s = store({ 'loka-place': '{"hash":"h","steps":[]}' });
   Object.defineProperty(globalThis, 'localStorage', { value: s, configurable: true });
@@ -48,6 +49,14 @@ test('the Build switch changes no game state; the strip says what the Hold parks
     assert.equal(status(), 'Held · 0 waiting');
     hear({ held: true, pending: 3 } as never);
     assert.equal(status(), 'Held · 3 waiting');
+
+    keep(s, { on: true, sheet: 'gone' }); // saved on a branch that had a sheet this one lacks
+    Object.assign(globalThis, { addEventListener: () => {} });
+    install(); // the reload
+    const sheet = () => drawn().some((n) => n.type === 'ScrollView');
+    assert.equal(sheet(), false, 'an unknown sheet covers the Book');
+    sheets.gone = () => 'gone';
+    assert.equal(sheet(), true);
   } finally {
     host.sql.close();
   }
