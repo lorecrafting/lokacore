@@ -43,15 +43,24 @@ export async function created(kind: string) {
 /** The last map edit's id if it read or wrote `file` (mapedit.ts `newest`). */
 export const mapNewest = (file: string) => ed.newest(file);
 
-let queue = Promise.resolve();
-/** Runs one map gesture after the ones before it (so undo stays in order); a refusal is told, not thrown. */
+let queue: Promise<boolean> = Promise.resolve(true);
+/** Runs one map gesture after the ones before it (so undo stays in order); a refusal is told, not
+ * thrown. Resolves whether it landed. */
 export const edit = (gesture: (ed: Editor) => Promise<unknown>) =>
-  void (queue = queue
+  (queue = queue
     .then(() => gesture(ed))
     .then(
-      () => shown.tell(''),
-      (e: Error) => shown.tell(e.message),
+      () => (shown.tell(''), true),
+      (e: Error) => (shown.tell(e.message), false),
     ));
+
+/** The Room card's Add exit: `key`'s exit `dir` to the room `to`, both ways (the map's Shift-drag
+ * link, but any level and no layout needed). */
+export function linkTo(key: string, dir: string, to: string) {
+  const [a, b] = [key, to].map((k) => shown.rooms.find((o) => o.key === k));
+  if (!a || !b) return Promise.resolve((shown.tell(`No room ${a ? to : key}`), false));
+  return edit((e) => e.link(a, dir, b));
+}
 
 /** A map command (shell.ts COMMANDS `map-*`) on the selected room, its arguments by `prompt` (the plainest; see the PR's list) unless given. */
 export function mapCommand(id: string, key: string | undefined, given?: string) {

@@ -37,9 +37,9 @@ defmodule Loka.ContentStartersTest do
     for kind <- first ++ rest ++ ["layout"],
         do: assert({:ok, _} = Starters.write(dir, kind, "my_#{kind}"), kind)
 
-    assert {:ok, _, warnings} = Loka.Content.compile(dir)
-    # placeholder prose names no keyword; the writer's words will
-    assert Enum.map(warnings, & &1["code"]) |> Enum.uniq() == ["TOUCH_LINK_MISSING"]
+    # and with no warning: a bare `~` room line asks for no touch link yet, so a new item or NPC
+    # is not flagged before a word is written (loka-wfrgk.122)
+    assert {:ok, _, []} = Loka.Content.compile(dir)
   end
 
   # Breaks: a dependent starter writing a dangling reference, a bad key or an unknown kind

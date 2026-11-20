@@ -5,7 +5,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 // A non-literal path: this node-typed project would otherwise type-check the browser modules.
 const wire: string = '../src/mapwire.ts';
-const { created, mapCommand, shown } = await import(wire);
+const { created, linkTo, mapCommand, shown } = await import(wire);
 
 let posts: object[] = [];
 const picks: object[] = [];
@@ -81,3 +81,16 @@ test(
     ]);
   },
 );
+
+// Breaks: the Room card's Add exit writes one face only, the wrong way back, or needs a layout
+// neighbour (up and down to a room on another level was unreachable: loka-wfrgk.123).
+test('Add exit writes the exit and its way back, up to down, with no layout', { timeout: 5000 }, async () => {
+  shown.rooms = ['r', 's'].map((key) => ({ ref: key, key, file: `rooms/${key}.json`, area: null, title: key, exits: [] }));
+  posts = [];
+  assert.equal(await new Promise((told) => ((shown.tell = told), linkTo('r', 'up', 's'))), '');
+  assert.deepEqual(posts, [
+    { file: 'rooms/r.json', was: '', ops: [{ path: ['exits'], value: { up: { to: 's' } } }] },
+    { file: 'rooms/s.json', was: '', ops: [{ path: ['exits'], value: { down: { to: 'r' } } }] },
+  ]);
+  assert.equal(await new Promise((told) => ((shown.tell = told), linkTo('r', 'up', 'nowhere'))), 'No room nowhere');
+});

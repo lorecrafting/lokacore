@@ -216,8 +216,8 @@ What the compiler checks (`lib/loka/content/*.ex` moduledocs; codes in
   code, without changing dialogue or quest rules;
 - touch links in catalog strings: `[words]` links the thing whose text it is, and `[words]` followed by
   `(key)` a detail, item or NPC; an unresolved target is an error; a room description or room line without
-  a link to its visible details or entity is a `TOUCH_LINK_MISSING` warning
-  (`lib/loka/content/links.ex:2`).
+  a link to its visible details or entity is a `TOUCH_LINK_MISSING` warning, except a bare `~` line,
+  which is unwritten (`lib/loka/content/links.ex:2`).
 
 Each development cartridge compiles to its independent known answer
 (`protocol/fixtures/cartridge_<name>_hash.json`, derived by `test/loka/cartridge_lantern_hash.py`

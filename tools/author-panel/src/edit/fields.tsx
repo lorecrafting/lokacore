@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import type { FieldProps } from '@rjsf/utils';
 import { choices, pickKind, proseKey, refusePick } from '../../../../kernel/ts/play/card.ts';
 import type { Triggers } from '../../../../kernel/ts/play/scene_trigger.ts';
-import { oneLine, saving } from '../../../../mobile/app/author/prose_rules.ts';
+import { oneLine, saving, unwritten } from '../../../../mobile/app/author/prose_rules.ts';
 import { Button } from '../components/ui/button.tsx';
 import { Input } from '../components/ui/input.tsx';
 import { Combat } from './blocks/Combat.tsx';
@@ -132,6 +132,8 @@ export function WordsField({ label, k, words, wrote }: { label: string; k: strin
           readOnly={out}
           value={draft}
           onChange={(e) => setDraft(oneLine(e.target.value))}
+          onFocus={(e) => unwritten(draft) && e.currentTarget.select()} // as the Book's field: typing replaces a bare `~`
+          onMouseUp={(e) => unwritten(draft) && e.preventDefault()} // Safari's click mouseup drops that selection
           onBlur={() => theirs || void save()} // a shown conflict waits for Keep mine
           onKeyDown={(e) => {
             if (e.key === 'Enter') {

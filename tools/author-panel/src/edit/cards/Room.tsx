@@ -1,7 +1,7 @@
 // The Room card (docs/rnd/gui-editor-design-2026-11-04.md §6, E6a): the room's words open in the
 // Book, its exits take the map's edits, its mechanics are added (here or from the Book) and removed;
 // every write is the generic card's (useCard: POST /change, Undo, Hold, refusals at the field).
-import { type ReactNode, useEffect } from 'react';
+import { type ReactNode, useEffect, useId, useState } from 'react';
 import type { FieldProps, UiSchema } from '@rjsf/utils';
 import {
   addable,
@@ -17,7 +17,9 @@ import { uiSchema } from '../../../../../kernel/ts/play/ui_schema.ts';
 import type { useDiagnostics } from '../../author.ts';
 import { addHere } from '../../book.ts';
 import { Button } from '../../components/ui/button.tsx';
-import { mapCommand, mapNewest } from '../../mapwire.ts';
+import { Input } from '../../components/ui/input.tsx';
+import { BACK } from '../../mapedit.ts';
+import { linkTo, mapCommand, mapNewest, shown } from '../../mapwire.ts';
 import { fields, inline, WordsField, type Context } from '../fields.tsx';
 import { AddMenu, CardForm, Header, adding, useCard, useCartridge } from '../Generic.tsx';
 import { Folded, Refusal } from '../templates.tsx';
@@ -113,7 +115,33 @@ function Exits({ room, exits }: { room: string; exits: NonNullable<Doc['exits']>
           ))}
         </div>
       ))}
+      <AddExit room={room} free={Object.keys(BACK).filter((d) => !exits[d])} />
     </section>
+  );
+}
+
+/** A new exit both ways to a room the author names, on any level (loka-wfrgk.123): the map's only
+ * gesture for it was Shift-drag onto a neighbour on the same level, behind the drag lock. */
+function AddExit({ room, free }: { room: string; free: string[] }) {
+  const [dir, setDir] = useState('');
+  const [to, setTo] = useState('');
+  const list = useId();
+  const way = free.includes(dir) ? dir : (free[0] ?? '');
+  if (!way) return null;
+  const add = () => void linkTo(room, way, to).then((ok) => ok && setTo('')); // a refusal keeps the key to fix
+  return (
+    <div className="flex items-center gap-1">
+      <select aria-label="New exit direction" className="h-7 rounded border bg-transparent px-1" value={way} onChange={(e) => setDir(e.target.value)}>
+        {free.map((d) => <option key={d}>{d}</option>)}
+      </select>
+      <Input aria-label="New exit to room" list={list} className="h-7 flex-1 text-xs" placeholder="room" value={to} onChange={(e) => setTo(e.target.value)} />
+      <datalist id={list}>
+        {shown.rooms.filter((r) => r.key !== room).map((r) => <option key={r.key} value={r.key} />)}
+      </datalist>
+      <Button type="button" size="xs" variant="outline" disabled={!to} onClick={add}>
+        Add exit
+      </Button>
+    </div>
   );
 }
 
