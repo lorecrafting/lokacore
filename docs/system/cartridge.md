@@ -1439,8 +1439,9 @@ Recipe: give a skill its `learned` line and, with `growth`, a `ranks` entry per 
 A phase sounds iff the app has a recording filed under that exact phase name: the Book's `sources` takes a
 `weather` map keyed by phase, exactly as a room's bed is keyed by its `sound` tag, and a phase the map
 does not name is silent (`loka-mq9i8`). The phase names are the cartridge's, so the presenter holds no
-list of them; which phases sound is a property of which recordings ship. No rule reads `wet` yet, so a
-cartridge that authors `wet: true` on a phase does not by itself make it sound.
+list of them; which phases sound is a property of which recordings ship. No sound rule reads `wet`, so a
+cartridge that authors `wet: true` on a phase does not by itself make it sound; the light mechanic does
+read it: no flame lights in an exposed room while the weather is wet (`kernel/ts/src/mechanics/light/shared.ts:28-31`).
 
 ## Pick and force declarations
 

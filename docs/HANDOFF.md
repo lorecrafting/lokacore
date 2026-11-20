@@ -65,10 +65,11 @@ corrected the same way (`village_regard`, `mill_gate` did not exist). Grep the r
 3. **`loka-wfrgk.100.4.1`** (small, ready): drop the card's stale ruling-11 refusal of a dialogue
    choice label (`tools/author-panel/src/edit/fields.tsx:39`); owner ruled yes 2026-11-19.
 4. **The owner writing Part 1**: friction from `bin/author.sh` goes to Beads; blockers at once.
-5. **Owner answers still open** (proposed 2026-11-19, unanswered; defaults in brackets): `vduxr.39`
-   [close; doc-only done]; the weather `wet` flag [drop it]; `dbtxr` [close: (a) fixed, (c) matches
-   `book-ui.md:792`, (b) only if seen]; branches `toolbox/settle-3` (9 commits, 2026-10-15) and
-   `design/playtest-combat` (1 commit) [delete both]; retros `8v4lx` [yes] and `7vnzm` [no].
+5. **Owner answers given 2026-11-19:** `vduxr.39` and `dbtxr` closed; `toolbox/settle-3` and
+   `design/playtest-combat` deleted (local, remote, worktrees). The weather `wet` flag is **kept**: the
+   light mechanic reads it (`light/shared.ts:28-31`), only sound does not; the "drop it" default rested
+   on HANDOFF's wrong claim, corrected in `cartridge.md`. Retros `8v4lx` and `7vnzm` were already closed
+   2026-11-16.
 6. Parked on purpose: `.100.7`, `.100.8` (the builder's sheets supersede the line-key question),
    `vduxr.29` (unreproducible), `.102.1` (needs a per-node cite carrier first), `ni2zd.*`, #454.
 
@@ -109,20 +110,13 @@ hunger (`toolbox_showcase/text.json:1461`, `docs/showcase/hub-and-first-district
 
 ## Holds
 
-- **One ruling left open from this session, and it is not blocking** (Resume 8): a weather phase's existing
-  `wet` flag is read by no rule, so `wet: true` does not by itself make a phase sound — what sounds is what has a
-  recording. Make `wet` the switch, or drop the flag? The spec now says which it is today, so nothing is lying.
 - P3 hold (owner 2026-10-22): draft #454, kgd.188, 2lvx, 5i4c, x6t.98. loka-x6t.126 skill-gated room depth.
 - #632 (loka-vduxr.64) belongs to another session (lokacore-fb), not the PM.
-- `toolbox/settle-3` is 9 commits ahead of main from 2026-10-15 with no PR: decide PR or delete before the next batch.
 - **Both stashes are dropped** (2026-11-16): each was a stale `.beads/issues.jsonl` snapshot from a `br`-era
   workflow; Beads is the live store, so neither could be applied meaningfully. `git stash list` is now empty.
 - `/tmp/continuation-prompt.md` is a harness file, not this repo's. The session it described is finished;
   do not treat its contents as current work.
-- Worktrees: seven merged ones were removed this session (`k2rev-base`, `loka-kgd.202-old`, `.203-mut`,
-  `.205-design-review`, `review-k2`, `toolbox-authoring-batch-a-walks`, `s3-choice-key-review`), freeing about 15 GB.
-  What is left: `loka-preview` and `lokacore-session` (the polish/Storybook pair), `design-playtest`
-  (`design/playtest-combat`, 4ae8f6878 — commits not in main and no PR: decide PR or delete), `settle-3` (above),
+- Worktrees: what is left is `loka-preview` and `lokacore-session` (the polish/Storybook pair),
   `loka-vduxr.10-second` (three untracked probe tests: `kernel/ts/test/zz_dead.test.ts`,
   `mobile/authority/local-story/zz_esc.test.ts`, `zz_probe.test.ts`), `playtest-sweep` (untracked logs, a report and
   shots), and the two open-PR worktrees (`tools-ts-lsp` is #632, `toolbox-batch-engine-bugs-e2` is #454). Read the
@@ -132,23 +126,10 @@ Storybook http://localhost:6006 serves main from the preview checkout (`bin/prev
 Storybook run from its own worktree. The owner sends polish prompts in the conversation; loop: [PM, Live polish session](PM.md#live-polish-session),
 owner guide: [polish tour](design/polish-tour.md). Screenshots: Playwright needs `chromium.launch({ channel: 'chrome' })`.
 
-## Retros awaiting the owner's yes/no
+## Retros
 
-**2026-11-18 (DONE):** loka-735tg — `bin/check_ts_size.mjs` failed open on a path it cannot find
-(`existsSync(root + f)` dropped it, so a typo or an absolute path exited 0). Fixed in #753 with a red
-control in `bin/ts_size_red_controls.sh`. The second item, re-checking a continuation prompt's beads with
-`br show` before asking, is the Session procedure line above. No owner action.
-
-**2026-11-16 (DONE):** loka-wpw6x — the PM's `ci_wait.sh` reported failure on green heads. The Pi-side copy is
-deleted and `~/.pi/agent/AGENTS.md` points at the repo's `bin/wait_ci.sh`. No owner action.
-
-**2026-11-13 (one open):** loka-8v4lx — name the reviewer fallback model in WORKFLOW and the `loka-review` agent
-instead of justifying a substitution per slice. Still awaiting the owner. (loka-qozwj approved and shipped in #731.)
-
-**2026-11-15 (one open):** loka-7vnzm — should a pre-push check refuse a tracked symlink or absolute path at all?
-Its two cheap fixes are already in #733.
-
-**2026-11-11:** loka-x4ejm done in #714; loka-y043w shipped in #735; loka-r7vrx closed (the queue is 32).
+None awaiting the owner (2026-11-19). Before asking about one, `br show` it: `8v4lx` and `7vnzm` were
+listed here as open after both had closed on 2026-11-16.
 
 ## Session procedure
 
