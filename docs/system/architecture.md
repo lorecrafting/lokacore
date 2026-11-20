@@ -178,6 +178,10 @@ E1 certification retired with the first chapter and is rebuilt with the real cha
 
 `lint/rules/mobile-*.yml`: only `mobile/authority/local-story` imports the kernel; shared
 packages never import an authority or a feature; Story and Realm code never import each other.
+One exception: the dev-only builder (`mobile/app/author/build/`) imports `kernel/ts/play/`, and only
+that (lint `mobile-builder-kernel-play`), to share the author server's card and map logic rather than
+fork it ([builder design](../rnd/in-game-builder-mode-2026-11-19.md#1-decisions-at-a-glance), "Where the code lives", §6.3). A
+release never holds it: `panel.tsx`'s gated require and the `mobile/app/author/seam.test.ts` sentinel keep it out.
 The app shell imports the local authority's session controller
 (`localSession`, `mobile/app/App.tsx:16`); it implements `GameSession`
 ([owner rule](owner-rules.md#architecture-and-engine)).

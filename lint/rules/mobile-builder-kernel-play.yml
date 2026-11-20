@@ -1,0 +1,11 @@
+id: mobile-builder-kernel-play
+language: tsx
+severity: error
+message: 'The dev-only builder imports the kernel only from kernel/ts/play/, the author server''s shared logic (docs/system/architecture.md, Mobile import rules).'
+files: [mobile/app/author/build/**]
+rule:
+  kind: string_fragment
+  regex: '(^|/)kernel(/|$)'
+  inside: { matches: module-specifier }
+  # Plain segments after play/: a `..` cannot climb back out to kernel/ts/src.
+  not: { regex: '(^|/)kernel/ts/play/([\w-]+/)*[\w-]+(\.\w+)*$' }

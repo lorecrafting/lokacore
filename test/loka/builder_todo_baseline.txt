@@ -589,9 +589,7 @@ rooms.description.book.delete
 rooms.details.book.create
 rooms.details.book.edit
 rooms.details.book.delete
-rooms.exits.book.create
 rooms.exits.book.edit
-rooms.exits.book.delete
 rooms.locks.book.create
 rooms.locks.book.edit
 rooms.locks.book.delete

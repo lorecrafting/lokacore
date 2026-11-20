@@ -1,26 +1,22 @@
-// The Room sheet and the room title's pencil that opens it (design §7, slice 2.1). Editing exits,
-// Move and Delete are slice 2.1's second half: they wait on the map editor's move into
-// kernel/ts/play (slice 4.1).
-import { Text } from 'react-native';
+// The Room sheet and the room title's pencil that opens it (design §7, slice 2.1); its edits are
+// roomedit.tsx's.
+import { Text, View } from 'react-native';
+import type { MapRoom } from '../../../../kernel/ts/play/map.ts';
 import { size, space, type } from '../../book/tokens.ts';
 import { unwritten } from '../prose_rules.ts';
 import { ink } from './build.ts';
 import type { Hooks } from './field.tsx';
 import { sheets } from './sheet.tsx';
+import { exitActs, foot, grows, moveTo, refusal, wire, type Node } from './roomedit.tsx';
 
 const WORDS = {
   edit: (title: string) => `Edit ${title}`,
   exits: (n: number) => (n === 1 ? '1 exit' : `${n} exits`),
   root: 'No area',
 };
-/** A room on the editor map (/story's `map`, kernel/ts/play/story.ts `rooms`). */
-type Room = {
-  key: string;
-  area: string | null;
-  title: string;
-  exits: { dir: string; to: string }[];
-};
+type Room = MapRoom; // /story's `map` (kernel/ts/play/story.ts `rooms`)
 let rooms: Room[] = [];
+let nodes: Node[] = []; // /story's graph nodes: the keys a new room must not take
 // The latest /story request: a slower, older answer is dropped.
 let asked = 0; // mutate-skip: any start value counts the same
 const find = (key: string | undefined) => rooms.find((x) => x.key === key);
@@ -29,12 +25,14 @@ const named = (r: Room) => (unwritten(r.title) ? r.key : r.title);
 
 /** Reads the map again; `redraw` once it has come. */
 export function story(api: Hooks['api'] | undefined, redraw: () => void) {
+  wire(api, () => story(api, redraw));
   const n = ++asked;
   void api?.('/story').then(
     ([status, json]) => {
       if (status !== 200 || n !== asked) return;
-      const map = (json as { map?: Room[] } | null)?.map;
-      rooms = Array.isArray(map) ? map : [];
+      const told = json as { map?: Room[]; graph?: { nodes?: Node[] } } | null;
+      rooms = Array.isArray(told?.map) ? told.map : [];
+      nodes = told?.graph?.nodes ?? [];
       redraw();
     },
     () => {}, // the server down: the pencil waits for the next message
@@ -73,7 +71,7 @@ const PENCIL = {
   verticalAlign: 'middle',
 } as const;
 
-/** The Room sheet: its summary, then its exits. */
+/** The Room sheet: a refusal, its summary, its exits with their actions, `＋`, Move and Delete. */
 sheets.room = {
   title: (key) => {
     const r = find(key);
@@ -84,17 +82,27 @@ sheets.room = {
     if (!r) return null;
     const text = { ...type.small, color: ink('fg'), paddingHorizontal: space.md };
     return [
+      refusal(),
       <Text key="summary" style={{ ...text, color: ink('dim') }}>
         {`${r.area ?? WORDS.root} · ${WORDS.exits(r.exits.length)}`}
       </Text>,
       ...r.exits.map((e) => {
         const to = find(e.to);
         return (
-          <Text key={e.dir} style={{ ...text, minHeight: size.touch }}>
-            {`${e.dir} → ${to ? named(to) : e.to}`}
-          </Text>
+          <View
+            key={e.dir}
+            style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center' }}
+          >
+            <Text style={{ ...text, minHeight: size.touch }}>
+              {`${e.dir} → ${to ? named(to) : e.to}`}
+            </Text>
+            {exitActs(r, e.dir, rooms)}
+          </View>
         );
       }),
+      grows(r, nodes),
+      moveTo(r),
+      foot(r),
     ];
   },
 };

@@ -6,7 +6,7 @@ cd "$(dirname "$0")/.."
 case "${1-}" in '') core_only=0 ;; --core-only) core_only=1 ;; *) echo "unknown option: $1" >&2; exit 2 ;; esac
 # Mobile plants are .tsx and the kernel plant is .ts, so both file types are proven covered.
 planted="lib/loka/core/red_control.ex kernel/ts/src/red_control.ts kernel/ts/src/foundation/red_control.ts kernel/ts/test/red_control.test.ts"
-[ "$core_only" -eq 1 ] || planted="$planted mobile/app/.storybook/picker/red_control.tsx mobile/packages/ui/red_control.tsx mobile/features/story/red_control.tsx mobile/features/realm/red_control.tsx mobile/authority/local-story/red_control.ts mobile/app/book/red_control.tsx tools/author-panel/src/flow_red_control.tsx"
+[ "$core_only" -eq 1 ] || planted="$planted mobile/app/.storybook/picker/red_control.tsx mobile/packages/ui/red_control.tsx mobile/features/story/red_control.tsx mobile/features/realm/red_control.tsx mobile/authority/local-story/red_control.ts mobile/app/book/red_control.tsx mobile/app/author/build/red_control.tsx tools/author-panel/src/flow_red_control.tsx"
 mkdir -p lib/loka/core
 cp kernel/ts/src/runtime/world.ts kernel/ts/src/runtime/world.ts.red
 cp kernel/ts/src/mechanics/movement/rule.ts kernel/ts/src/mechanics/movement/rule.ts.red
@@ -63,6 +63,10 @@ echo "import { Text as T } from 'react-native';" >> mobile/app/book/red_control.
 echo "export const bleed = { marginVertical: -space.md };" >> mobile/app/book/red_control.tsx
 # The builder reached from a Book file other than Text.tsx (mobile-book-author-seam).
 echo "import { install } from '../author/build/seam.ts';" >> mobile/app/book/red_control.tsx
+# The builder's kernel reach: kernel/ts/play passes in author/build (line 1), kernel/ts/src there
+# does not (line 2), and kernel/ts/play anywhere else in the app does not (the Book plant's last line).
+printf "import { editor } from '../../../../kernel/ts/play/mapedit.ts';\nimport { decide } from '../../../../kernel/ts/src/index.ts';\n" > mobile/app/author/build/red_control.tsx
+echo "import { editor } from '../../../kernel/ts/play/mapedit.ts';" >> mobile/app/book/red_control.tsx
 # The seam installed outside author code, in a release path (mobile-author-seam-owner).
 echo "import { authorSeam } from './book/Text.tsx'; authorSeam.line = (p) => ({ ...p, accessibilityHint: 'x' });" >> mobile/app/App.tsx
 echo "import type { World } from '../../../kernel/ts/src/index.ts';" >> mobile/packages/game-view/session.ts
@@ -90,5 +94,11 @@ for rule in $(ls lint/rules lint/tests | sed -nE 's/(-test)?\.yml$//p' | sort -u
   [ "$core_only" -eq 0 ] || { case "$rule" in mobile-* | author-panel-*) continue ;; esac; }
   if printf '%s' "$out" | grep -q "error\[$rule\]"; then echo "ok   $rule"; else echo "FAIL $rule not reported"; status=1; fi
 done
+if [ "$core_only" -eq 0 ]; then
+  kernel=$(ast-grep scan --format github --filter '^mobile-(builder-kernel-play|kernel-via-local-story)$' mobile/app/author/build/red_control.tsx mobile/app/book/red_control.tsx 2>/dev/null | sed -nE 's/.*file=mobile\/app\/([^,]*),line=([0-9]+).*title=([a-z-]+).*/\1:\2 \3/p' | sort | tr '\n' ' ')
+  book=$(grep -c '' mobile/app/book/red_control.tsx)
+  want="author/build/red_control.tsx:2 mobile-builder-kernel-play book/red_control.tsx:$book mobile-kernel-via-local-story "
+  if [ "$kernel" = "$want" ]; then echo "ok   builder kernel/ts/play only"; else echo "FAIL builder kernel reach: got '$kernel', want '$want'"; status=1; fi
+fi
 if sh bin/check_as_never.sh >/dev/null; then echo "FAIL check_as_never passed the planted cast"; status=1; else echo "ok   check_as_never"; fi
 exit $status

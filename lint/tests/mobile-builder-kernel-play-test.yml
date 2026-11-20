@@ -1,0 +1,10 @@
+id: mobile-builder-kernel-play
+valid:
+  - "import { editor } from '../../../../kernel/ts/play/mapedit.ts';"
+  - "import registry from '../../../../kernel/ts/play/registry.json' with { type: 'json' };"
+  - "import { seam } from './seam.ts';"
+invalid:
+  - "import { decide } from '../../../../kernel/ts/src/index.ts';"
+  - "import { x } from '../../../../kernel/ts/play/../src/index.ts';"
+  - "const k = require('../../../../kernel/ts/play');"
+  - "export * from '../../../../kernel/ts/play/sub/../../src/a.ts';"
