@@ -173,8 +173,10 @@ test('keys, refusals and Esc on the field', async () => {
       preventDefault: () => pressed.push(key),
     });
   keyPress('Enter', true);
+  keyPress('A', true);
+  assert.ok(field(page('A low loft.')), 'Shift+Enter closed the field');
   keyPress('Escape');
-  assert.deepEqual(pressed, ['Enter'], 'Shift+Enter broke the line, or Esc was swallowed');
+  assert.deepEqual(pressed, ['Enter'], 'Shift+Enter broke the line, or another key was swallowed');
   input.props.onBlur();
   await tick();
   assert.equal(edits().length, 1, 'a blur after Esc saved');
