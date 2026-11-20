@@ -124,7 +124,7 @@ sheets.checks = () => {
         }}
         style={{ minHeight: size.touch, justifyContent: 'center', paddingHorizontal: space.md }}
       >
-        <Text style={{ ...type.small, color: ink('fg') }}>{c.label}</Text>
+        <Text style={{ ...type.small, color: ink('action') }}>{c.label}</Text>
       </Pressable>
     ) : (
       <Text key={i} style={{ ...type.small, color: ink('fg'), padding: space.md }}>
@@ -163,8 +163,14 @@ const STRIP = {
   borderBottomWidth: size.rule,
 } as const;
 const CONTROL = { minWidth: size.touch, minHeight: size.touch, justifyContent: 'center' } as const;
-const act = (label: string, run: () => void) => (
-  <Pressable key={label} accessibilityRole="button" onPress={run} style={CONTROL}>
+const act = (label: string, run: () => void, expanded?: boolean) => (
+  <Pressable
+    key={label}
+    accessibilityRole="button"
+    accessibilityState={expanded === undefined ? undefined : { expanded }}
+    onPress={run}
+    style={CONTROL}
+  >
     <Text style={{ ...type.control, color: ink('action') }}>{label}</Text>
   </Pressable>
 );
@@ -212,8 +218,11 @@ export function Strip({ children }: { children: ReactNode }) {
         {notBack ? warn(WORDS.notUndone(notBack.file)) : null}
         {notBack ? act(WORDS.source, openBack) : null}
         {builder.on
-          ? act(badge(heard), () =>
-              change({ ...builder, sheet: builder.sheet === 'checks' ? undefined : 'checks' }),
+          ? act(
+              badge(heard),
+              () =>
+                change({ ...builder, sheet: builder.sheet === 'checks' ? undefined : 'checks' }),
+              builder.sheet === 'checks',
             )
           : null}
       </View>
