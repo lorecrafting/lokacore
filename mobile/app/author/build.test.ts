@@ -4,7 +4,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { elapsedHost } from '../../authority/local-story/__tests__/elapsed-host.test.ts';
-import '../book/__tests__/combat-book.test.ts'; // the React Native stand-ins Build.tsx draws with
+import { nodes } from '../book/__tests__/combat-book.test.ts'; // the React Native stand-ins Build.tsx draws with
 import { autoHold, BUILD, keep, restored, toggled } from './build/build.ts';
 
 const store = (entries: Record<string, string> = {}) => {
@@ -16,12 +16,15 @@ const store = (entries: Record<string, string> = {}) => {
   };
 };
 
-// Breaks: Build reaching the game or its neighbours' keys (the place a reload replays, the save).
-test('toggling Build on, opening a sheet and toggling off changes no game state', () => {
+// Breaks: the Build switch reaching the game or its neighbours' keys (the place a reload replays),
+// keeping a sheet open after Build is left, or the strip not saying how many compiles wait.
+test('the Build switch changes no game state; the strip says what the Hold parks', async () => {
+  const { Strip, hear } = await import('./build/Build.tsx');
   const host = elapsedHost();
+  const s = store({ 'loka-place': '{"hash":"h","steps":[]}' });
+  Object.defineProperty(globalThis, 'localStorage', { value: s, configurable: true });
   try {
     host.game.invoke({ action_key: 'look' as never, target_ids: [], input: {} });
-    const s = store({ 'loka-place': '{"hash":"h","steps":[]}' });
     const tables = () =>
       (
         host.sql.prepare("SELECT name FROM sqlite_master WHERE type='table'").all() as {
@@ -29,12 +32,22 @@ test('toggling Build on, opening a sheet and toggling off changes no game state'
         }[]
       ).map(({ name }) => host.sql.prepare(`SELECT * FROM "${name}"`).all());
     const before = [host.game.view(), tables(), s.others()];
-    let b = restored(s);
-    keep(s, (b = toggled(b)));
-    keep(s, (b = { ...b, sheet: 'stand-in', scroll: 40 }));
-    keep(s, (b = toggled(b)));
+    const drawn = () => nodes(Strip({ children: 'book' }));
+    const toggle = () =>
+      drawn()
+        .find((n) => n.type === 'Pressable')
+        .props.onPress();
+    toggle();
+    assert.deepEqual(restored(s), { on: true });
+    keep(s, { on: true, sheet: 'stand-in', scroll: 40 });
+    toggle();
     assert.deepEqual([host.game.view(), tables(), s.others()], before);
     assert.deepEqual(restored(s), { on: false }, 'leaving Build closes every sheet');
+    const status = () => drawn().find((n) => n.props?.accessibilityLiveRegion).props.children;
+    hear({ held: true } as never);
+    assert.equal(status(), 'Held · 0 waiting');
+    hear({ held: true, pending: 3 } as never);
+    assert.equal(status(), 'Held · 3 waiting');
   } finally {
     host.sql.close();
   }
@@ -46,6 +59,7 @@ const recorded = () => {
   const hold = autoHold(
     (on) => posts.push(on),
     () => beacons++,
+    (f) => f(),
   );
   return { hold, posts, beacons: () => beacons };
 };
@@ -60,6 +74,34 @@ test('a focused builder field holds compiles until it commits', () => {
   hold.focus(); // a second field while held asks nothing
   hold.commit();
   assert.deepEqual(posts, [true, false]);
+});
+
+// Breaks: tabbing to the next field dropping the Hold for a moment (its blur releases, the server
+// writes the parked compile, the Book reloads under the new field), or a field left unheld when the
+// panel lets go of its own Hold.
+test('the next field keeps the Hold; a field re-takes it when the panel lets go', () => {
+  const queued: (() => void)[] = [];
+  const posts: boolean[] = [];
+  const hold = autoHold(
+    (on) => posts.push(on),
+    () => {},
+    (f) => queued.push(f),
+  );
+  hold.focus();
+  hold.heard(true);
+  hold.commit(); // blur of the first field
+  hold.focus(); // focus of the next, in the same task
+  queued.splice(0).forEach((f) => f());
+  assert.deepEqual(posts, [true], 'tabbing between fields');
+  hold.commit();
+  queued.splice(0).forEach((f) => f());
+  hold.heard(false);
+  assert.deepEqual(posts, [true, false]);
+
+  hold.heard(true); // the panel's Hold
+  hold.focus();
+  hold.heard(false); // the panel lets go
+  assert.deepEqual(posts, [true, false, true], 'the field takes the Hold over');
 });
 
 // Breaks: holding with no field focused, so a compile no longer reloads as today.
@@ -81,18 +123,17 @@ test('a field never releases a Hold it did not take', () => {
   assert.deepEqual([posts, beacons()], [[], 0]);
 });
 
-// Breaks: a page closed mid-edit leaving the server held, or a release the panel already made
-// leaving the field thinking the Hold is still its own.
+// Breaks: a page closed mid-edit leaving the server held, or a beacon after the field let go.
 test('leaving the page releases a Hold the field took, by beacon', () => {
   const { hold, posts, beacons } = recorded();
   hold.focus();
   hold.heard(true);
   hold.leave();
   assert.equal(beacons(), 1);
-  hold.heard(false); // released elsewhere
   hold.commit();
+  hold.heard(false);
   hold.leave();
-  assert.deepEqual([posts, beacons()], [[true], 1]);
+  assert.deepEqual([posts, beacons()], [[true, false], 1]);
 });
 
 // Breaks: a reload losing the open sheet or its scroll, or reopening a sheet outside Build.
@@ -109,6 +150,9 @@ test('a reload brings back the open sheet, scrolled where it was', async () => {
   drawn.props.ref.current = { scrollTo: (at: unknown) => (to = at) };
   drawn.props.onContentSizeChange();
   assert.deepEqual(to, { y: 120, animated: false });
+  to = undefined;
+  drawn.props.onContentSizeChange(); // the sheet grows after the author scrolled
+  assert.equal(to, undefined, 'a later size change scrolls back to the saved place');
   let saved: unknown;
   Sheet({ open, saved: (b) => (saved = b) }).props.onScroll({
     nativeEvent: { contentOffset: { y: 300 } },

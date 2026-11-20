@@ -24,24 +24,34 @@ export const keep = (store: Store, builder: Builder) =>
 export const toggled = (builder: Builder): Builder => ({ on: !builder.on });
 
 /** Ruling 7: a builder field holds compiles from focus to commit, through the server's Hold
- * (POST /__author/hold). It releases only a Hold it took: the panel's own stays the panel's. */
-export function autoHold(post: (on: boolean) => void, beacon: () => void) {
+ * (POST /__author/hold). It releases only a Hold it took: the panel's own stays the panel's. A
+ * commit releases on `later`, so tabbing to the next field (blur, then focus) keeps the Hold. */
+export function autoHold(
+  post: (on: boolean) => void,
+  beacon: () => void,
+  later: (f: () => void) => void,
+) {
   let held = false; // as the stream last said
   let mine = false;
+  let focused = false;
+  const take = () => ((mine = true), post(true));
   return {
     heard(now?: boolean) {
       if (held && !now) mine = false; // released, by anyone; a message before ours lands keeps `mine`
       held = !!now;
+      if (!held && focused && !mine) take(); // the panel let go while a field is still open
     },
     focus() {
-      if (held || mine) return;
-      mine = true;
-      post(true);
+      focused = true;
+      if (!held && !mine) take();
     },
     commit() {
-      if (!mine) return;
-      mine = false;
-      post(false);
+      focused = false;
+      later(() => {
+        if (focused || !mine) return;
+        mine = false;
+        post(false);
+      });
     },
     /** pagehide: a request in flight would be cut off, so the release goes as a beacon */
     leave() {

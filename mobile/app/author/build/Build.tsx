@@ -11,11 +11,21 @@ import { autoHold, keep, restored, toggled, type Builder } from './build.ts';
 const WORDS = { build: 'Build', held: (n: number) => `Held · ${n} waiting` };
 let builder: Builder = { on: false };
 let heard: Pick<Message, 'held' | 'pending'> = {};
-const ask = (on: boolean) =>
-  void fetch('/__author/hold', { method: 'POST', body: JSON.stringify({ on }) });
+let asked = Promise.resolve();
+/** One at a time: the server keeps the last flag it got, so an on overtaking its off would stick.
+ * A refused or failed request shows as no Held in the strip. */
+const ask = (on: boolean) => {
+  const send = () => fetch('/__author/hold', { method: 'POST', body: JSON.stringify({ on }) });
+  asked = asked.then(send).then(
+    () => {},
+    () => {},
+  );
+};
 /** A builder field calls `focus` and `commit` (Enter, blur, a picker closing); 1.3 brings fields. */
-export const hold = autoHold(ask, () =>
-  navigator.sendBeacon('/__author/hold', JSON.stringify({ on: false })),
+export const hold = autoHold(
+  ask,
+  () => navigator.sendBeacon('/__author/hold', JSON.stringify({ on: false })),
+  (release) => setTimeout(release),
 );
 /** Sheet bodies by id; later slices register theirs. */
 export const sheets: Record<string, () => ReactNode> = {};
@@ -37,11 +47,15 @@ const set = (next: Builder) => {
 /** The open sheet, scrolled back to where it was when it is drawn again after a reload. */
 export function Sheet({ open, saved }: { open: Builder; saved: (next: Builder) => void }) {
   const scroller: { current: ScrollView | null } = { current: null };
+  let restoring = true; // once per drawing: later size changes keep the author's place
   return (
     <ScrollView
       ref={scroller}
       style={StyleSheet.absoluteFill}
-      onContentSizeChange={() => scroller.current?.scrollTo({ y: open.scroll, animated: false })}
+      onContentSizeChange={() => {
+        if (restoring) scroller.current?.scrollTo({ y: open.scroll, animated: false });
+        restoring = false;
+      }}
       onScroll={(e) => saved({ ...open, scroll: e.nativeEvent.contentOffset.y })}
     >
       {sheets[open.sheet!]?.()}
@@ -60,10 +74,10 @@ const STRIP = {
 /** The strip at `size.touch` above the Book: the Build switch and the Hold status. */
 export function Strip({ children }: { children: ReactNode }) {
   const [, redraw] = useState({});
-  const c = chrome[useColorScheme() === 'dark' ? 'dark' : 'light'];
+  const c = chrome[useColorScheme() === 'dark' ? 'dark' : 'light']; // mutate-skip: look only
   const change = (next: Builder) => (set(next), redraw({}));
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1 }} /* mutate-skip: layout */>
       <View style={{ ...STRIP, backgroundColor: c.bg, borderColor: c.line }}>
         <Pressable
           accessibilityRole="switch"
@@ -83,9 +97,9 @@ export function Strip({ children }: { children: ReactNode }) {
           {heard.held ? WORDS.held(heard.pending ?? 0) : ''}
         </Text>
       </View>
-      <View style={{ flex: 1 }}>
+      <View style={{ flex: 1 }} /* mutate-skip: layout */>
         {children}
-        {builder.sheet ? <Sheet open={builder} saved={set} /> : null}
+        {builder.sheet && sheets[builder.sheet] ? <Sheet open={builder} saved={set} /> : null}
       </View>
     </View>
   );
