@@ -4,66 +4,38 @@ The present only: open work, next steps, owner questions, and standing owner rul
 yet. Rewrite this page in place once per session, at its end; never add dated session sections. History lives in git, Beads and `docs/reviews/`; lessons
 go to [PM lessons](lessons/pm.md) ([harness patterns](decisions/owner-decision-harness-patterns-2026-10-28.md)).
 
-AS OF main after 993cc3d28 (PR #759 merged); written 2026-11-19 22:05 UTC in the Pi harness by deploy/deepseek-ai/deepseek-v4.1-flash-1017, PM session.
-`kernel_api` is 1.159 (no contract slice since). Every reviewer and developer here runs on `deploy/deepseek-ai/deepseek-v4.1-flash-1017`
-(the owner paused the Anthropic subscription; `~/.pi/agent/agents/loka-dev.md`, `loka-review.md` repinned
-2026-11-13). **Nothing is mid-merge, nothing is in flight, no agent is running. #454 is the owner's P3 hold.**
+AS OF main after 250eac16d; written 2026-11-19 in Claude Code (Opus 5.5), PM session. The Anthropic
+subscription is back on the $20 Pro plan (owner 2026-11-19): low-token workflow, **subagents on Opus,
+never Fable** (no usage credits). `kernel_api` is 1.159. **Nothing is in flight, no agent is running.**
+#454 is the owner's P3 hold.
 
-## Direction (owner 2026-10-30 to 2026-11-07)
+## Direction
 
-- **Pro low-token workflow** (owner 2026-11-07): one session does small slices itself; at most one developer at a time; a separate reviewer only for engine, save, contract or compiler-facing slices; no mutation runs on editor polish.
-- **The prologue is v1** (epic loka-g5hh, now closed). The owner builds **Part 1** in the editor, in `cartridges/prologue/` (**uncommitted on purpose**). Start: `bin/author.sh`; restart it after each merge.
-- **The owner writes every player-facing word**; agents use `~`. Polish feedback goes to Beads under loka-wfrgk; fixes batch on the owner's go; blockers are fixed at once.
-- **Card bar:** a card never offers or writes what the compiler refuses; gates go two ways with the compiler `file:line`.
+- **The in-game builder is the authoring track** (owner-approved 2026-11-19, epic **`loka-hcnlh`**,
+  design `docs/rnd/in-game-builder-mode-2026-11-19.md`): every panel function moves into the game
+  screen (Build mode), responsive phone to desktop, **100% parity**, then `tools/author-panel` is
+  deleted. Until parity the panel takes fixes only. Unwritten lines never show `~` to the owner (ruling 9).
+  No builder for players unless hosted.
+- **Pro low-token workflow** (owner 2026-11-07): one session does small slices itself; at most one
+  developer at a time; a separate reviewer only for engine, save, contract, compiler-facing or security.
+- **The prologue is v1.** The owner builds Part 1 in `cartridges/prologue/` (**uncommitted on purpose**;
+  three rooms and a test item so far). Start: `bin/author.sh cartridges/prologue`; restart after each merge.
+- **The owner writes every player-facing word**; agents use `~`. Polish feedback goes to Beads under
+  loka-wfrgk; fixes batch on the owner's go; blockers are fixed at once.
 - NPC routines (loka-ni2zd) wait for the owner's own design session.
 
 ## Board
 
-**27 open, 9 ready, 3 housekeeping deferred to 2027-01-01.** The ready list is
-the whole planned queue; anything absent from it is deferred on purpose, not forgotten. Before proposing work,
-check the bead is not already shipped — read the code, not the title. The five in-progress beads are all
-epics or long-running parents (`wfrgk.102`, `vduxr`, `x6t`, `wfrgk.100.4`, `kgd`); none has an agent on it.
-`y6yg` (toolbox showcase) and `kgd.194` closed 2026-11-18 with every child done; `735tg` closed by #753;
-`wfrgk.100.4` closed by #754 (its undo item built; its scene-field-focus item became `3gnyd`, closed by #757).
-`wfrgk.89` closed 2026-11-19 with all four items resolved, only #756 being code:
-items 1 and 3 by #755/#756; **item 2 (Bind refuses short refs while the compile is refused) was already fixed by
-`9f0863246`**, verified live — with a showcase file truncated the watcher says `compiled:false` and `GET /story`
-still answers 724 shorts, which is right (a broken unrelated file must not take away a good ref); **item 4
-(bundles re-read per call) measured not worth it** — `bundled()` is 2.97 ms on the showcase, 0.13 ms with real
-bundles, twice in a 193 ms `story()` build, and the showcase has no `areas/*.json` at all.
-`after_merge.sh` closes a whole bead on one PR: three reopens on that one bead. Re-read an item's **claim**
-against current code before filing a follow-up, not its line number — half of these needed no work.
+**35 open, 11 ready, 3 housekeeping deferred to 2027-01-01.** Before proposing work, check the bead is
+not already shipped: read the code, not the title, and sweep ready parents against their children.
 
-**`wfrgk.100.5` (scene structure) closed 2026-11-19 as stale, not as work**: all four children shipped
-(#701 design, #707 S1 cut pages, #711 S2 scene lines, #715 S3 choice keys), ruling 11 was already reversed at
-`docs/rnd/gui-editor-design-2026-11-04.md:234`, and its only dependent `cr7l7` closed "not reachable". A parent
-stays open until someone closes it; **sweep ready parents against their children before believing the count.**
-The same day: `wfrgk.102` (field guide) is *not* in that class — its children `.2`, `.3`, `.4` are closed but `.102.1`
-is open on a missing carrier (see below), so the parent is correctly open.
-
-**loka-3gnyd (#757)** is the cautionary case for beads whose own lead is a guess. It was filed as "needs an
-owner repro" because two candidate causes were tried and neither failed. Both were wrong: `proseKey`'s per-save
-key is stable here (the field takes `words`, not the value), and the remount was `Field`'s branch on `l.key`, not
-`RoomForm key={resets}`. What found it was traffic, not reading: after a save the only failing request was
-`GET /line` 409 "the source moved since the compile", and the input node was replaced while all seven `<li>`
-survived. A bead that says "needs a repro" is often asking for a probe, not for the owner.
-
-Three ready beads want the owner's input, not an agent's:
-- **`.100.7`** (wrapped/composed lines do not open their field) is **correctly blocked, not work**: every one of
-  its six sites composes a key's words into a longer line, which the ADR
-  `docs/rnd/line-key-binding-2026-11-15.md` explicitly excludes from `data-loka-key`; its measured conclusion —
-  ship the lint, no attribute — is done (`same_words`, `lib/loka/content/lint.ex:157`).
-- **`.100.4`** (card words field follow-ups) is **entirely shipped**: undo (#754), the held draft (#756),
-  `/line` retry, re-read after an outside write, Keep mine, and **scene field focus (#757, `3gnyd`)**. Its
-  remaining item is the server-vs-card disagreement on dialogue choice labels — see Resume.
-
-**`vduxr.57` is done** (story patterns, below). **`mq9i8` and `bptw` are both closed by #758** (2026-11-19):
-weather beds are keyed by the cartridge's own phase names, and page notes read as sentences with the lint
-widened to the page builders. **`czoln`, `325f8`** are prologue content, transcribing the owner's outline.
-
-**`vduxr.39` is the one bead waiting on a bare yes/no from the owner:** the doc half is done (#746); the code
-half is withdrawn. Choose (a) close won't-fix, (b) take the reviewer's M4, (c) leave doc-only (already the
-state). `g96` is **closed** (2026-11-17) with its re-open trigger recorded — do not re-litigate it.
+Shipped 2026-11-19 (this session): **#760** (`wfrgk.125`) a diagnostic with `rel: null` (a `~words`
+line) no longer blanks the panel's map, hierarchy and inspector (`story.ts` `nodeOf`); **#761**
+(`wfrgk.121/.122/.123`) a card field types over a bare `~`, `TOUCH_LINK_MISSING` skips a bare `~` line
+(a starter world compiles with no warning), and the Room card has **Add exit** (both ways, any level).
+`wfrgk.124` closed as a misread. Builder probes **0.1** (the card logic bundles for web and Hermes;
+release unchanged; Metro must watch `kernel/ts/play` and `protocol/`) and **0.2** (warm structural
+edits 0.55-0.97 s; the 18 s was cold start) are recorded in the design's section 8.
 
 ## Story patterns (loka-vduxr.57, shipped 2026-11-17)
 
@@ -82,59 +54,23 @@ corrected the same way (`village_regard`, `mill_gate` did not exist). Grep the r
 
 ## Resume, in order
 
-1. **The owner is writing Part 1 in the editor.** That is the point of the queue, not a parallel task:
-   `bin/author.sh`, restart it after each merge. File friction as it appears and fix blockers at once.
-   `bin/author.sh` is not a `bg_run` task: a server never completes, so a timeout kills it. Use its own trap.
-2. **`42.2` DONE (PR #759, merged `07ed0ea1a`, bead closed).** `fight.ts --wield <item>` puts a cartridge
-   weapon in its slot and acquires its skill, so every level x build cell is re-fought with it in hand;
-   `GET /fights?wield=` passes it through and an item card draws every target's rows. Two things the reviews
-   settled that the bead did not predict: it is a **run option, not a matrix axis** (a build per weapon
-   multiplies 84 cells by every weapon), and the override must check `learnable`, because combat re-reads
-   `qualified` but never `prerequisite`, so a force-acquired skill behind an unmet prerequisite won fights it
-   should not have (rounds 3,3,3 -> 2,2,2). The panel suites are green and CI passed on `056143cdc`.
-   - **`.100.4`'s last item** — the card refuses a dialogue choice label that `POST /edit` would accept. The card's
-     comment at `tools/author-panel/src/edit/fields.tsx:39` claims `POST /edit` refuses it ("ruling 11"), but
-     `kernel/ts/play/prose.ts:14-25` shows `LITERAL` accepts any `"key": "words"` line, so only a `.scene` `-`
-     line gets the reword refusal. **Two-sided: needs the owner to say which side is right** before code.
-   - **`vduxr.29`** — a drowned creature's refill can fault (the recorded two-line fix looks right) but no test can
-     name the break without a kill landing on the exact drowning clock; 59 probes could not reach it. A test I
-     wrote now would be a change detector.
-3. **`.100.8` remainder: 97 of 156, do not build speculatively.** The sampler families (59) closed via per-page
-   clearing (`nextPage`, `prose_rules.ts`, 323d3ac10). The rest needs `data-loka-key`, and that is bigger than the
-   R&D note first claimed (corrected in 06ab70e75): `rendered` (`mobile/app/book/logs.ts:46`) holds `line.key` and
-   drops it, `DetailLine` (`:58-64`) has no key on any variant, `LogLine` (`mobile/app/book/lines.tsx:130`) never
-   sees one. Build it when a real edit needs two same-screen duplicates told apart — measured: **12 same-room
-   wordings, all item variant families**, which is why the attribute stays unbuilt and a lint shipped instead.
-4. **`.102.1` is blocked on a missing carrier, not a missing reader.** It says move each spec cite into the schema
-   node's `$comment`. That carrier does not exist: `lib/loka/content/source_schema.ex:62` writes one `$comment` per
-   file, at its head. A per-node cite key must be added to the generated schemas first, so it is its own slice.
-   Scale: 11 `§` cites in `schemas/source/*.json`, 23 in `lib/loka/content/*.ex`.
-5. **`.vduxr.39` waits on the owner:** close won't-fix / take the reviewer's M4 / leave doc-only (done). The code
-   half is *withdrawn, not deferred* — `docs/reviews/2026-11-17-first-screen-guard-review.md`. Narrowing
-   `checked`'s catch to `unreadable(e)` reddens `start_over.test.ts` 2/15: a deleted body row and a forged container
-   id both throw `TypeError` from the same catch. **Lesson: a catch that guards a screen, not a row, cannot classify
-   by exception type.**
-6. Story tooling epic **loka-wfrgk.115** is complete except E1 (`.12`): P3, parked until a beat needs it; needs a
-   protocol change, a `kernel_api` bump.
-7. **Housekeeping: 3 open, all deferred to 2027-01-01** (`rvbmn`, `00p0u`, `e9ey`). Nothing actionable.
-8. **`wfrgk.42.2` DONE (PR #759).** `fight.ts --wield <item key>` re-fights every level × build cell
-   with that cartridge item in its slot and its `weapon.skill` acquired (`usable = acquired && qualified`,
-   `skills.ts:34` — wielding alone does nothing); `GET /fights?wield=` passes it, the item card draws every
-   target's rows. Built as a **run option, not a matrix axis** on purpose: a build per weapon would multiply
-   all 84 cells, seed 1 at ~6 ms a checked step. Its override is `kernel/ts/play/wield.ts`, the report
-   runner `kernel/ts/play/reports.ts` (both files were over the 300-line guard).
-9. **`mq9i8` DONE (#758).** The weather bed is now a phase-name-to-file map keyed by the cartridge's own names,
-   exactly as `beds` is keyed by `room.sound`; the app holds no phase list. Row **W23** in
-   `docs/world-parameters.md` is closed and `docs/system/cartridge.md` states the carrier. **Open, one line from
-   the owner:** the phase's existing `wet` flag is read by no rule, so a cartridge marking `wet: true` does not by
-   itself make a phase sound — today what sounds is what has a recording. Make `wet` the switch, or drop the flag?
-   Not urgent; nothing is broken by leaving it declarative, and the spec now says so out loud.
-10. **`bptw` DONE (#758).** Page notes read as sentences (Map place title alone, `3 days left`, `Then X.`,
-   `It costs 4p to cross.`), the corpse label takes a comma, and `mobile-book-log-prose` now covers the page
-   builders (`labels.ts`, `model.ts`, `notices.tsx`, `offers.ts`). The remaining page-vs-server disagreement is
-   the dialogue choice label below.
-
-**Phases 0, 2 and 3 of the authoring-readiness plan are done** — do not re-plan them (ff954162a, 527fd4071, `.97`).
+1. **Builder slice 0.4, `loka-hcnlh.3`** (ready): move `registry.json` and `new.json` from
+   `tools/author-panel/src/edit/` to `kernel/ts/play/`, re-point panel, gate (`bin/toolbox_page.exs`)
+   and tests, and add `kernel/ts/play` and `protocol/` (was `protocol/fixtures`) to
+   `mobile/app/metro.config.js` watchFolders. Not compiler-facing: no separate reviewer.
+2. Then **0.3, `loka-hcnlh.4`** (parity gate: `book` surface per row + `parity.json`, shrink-only
+   `todo`, red controls), then **1.1 `.5`** (the `Text.tsx` seam, separate reviewer and designer),
+   then 1.2-1.4 (`.6`-`.8`). Split phases 2-6 into beads when phase 1 lands. Design section 7 has
+   every slice's acceptance.
+3. **`loka-wfrgk.100.4.1`** (small, ready): drop the card's stale ruling-11 refusal of a dialogue
+   choice label (`tools/author-panel/src/edit/fields.tsx:39`); owner ruled yes 2026-11-19.
+4. **The owner writing Part 1**: friction from `bin/author.sh` goes to Beads; blockers at once.
+5. **Owner answers still open** (proposed 2026-11-19, unanswered; defaults in brackets): `vduxr.39`
+   [close; doc-only done]; the weather `wet` flag [drop it]; `dbtxr` [close: (a) fixed, (c) matches
+   `book-ui.md:792`, (b) only if seen]; branches `toolbox/settle-3` (9 commits, 2026-10-15) and
+   `design/playtest-combat` (1 commit) [delete both]; retros `8v4lx` [yes] and `7vnzm` [no].
+6. Parked on purpose: `.100.7`, `.100.8` (the builder's sheets supersede the line-key question),
+   `vduxr.29` (unreproducible), `.102.1` (needs a per-node cite carrier first), `ni2zd.*`, #454.
 
 ## Code worth reading before touching its area
 

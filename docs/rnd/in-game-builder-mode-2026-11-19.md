@@ -694,6 +694,11 @@ auto-hold while a field has focus (decision 7) covers the warm reload. Not measu
 7. **The builder is responsive**, phone to desktop window: on a wide screen the sheet docks beside the
    Book, the notebook can stay open as a column, the Flow walk widens toward a canvas, and the panel's
    keyboard paths (Cmd-K palette, undo, walk keys) carry over. "Open source" in the external editor stays.
+8. **The desktop panel (the sidebars) retires** at parity, because the builder is the form factor the
+   game is played in. The gate: the parity check's `todo` is zero, the panel's browser tests are ported
+   to the builder, and the owner completes one authoring walk in the builder alone. Then
+   `tools/author-panel` is deleted, not left to rot, in the same phase that retires the E5 DOM field
+   (slice 6.4). Until then ruling 3 holds: the panel takes fixes only.
 9. **Unwritten lines never show `~`** (owner 2026-11-19). The files keep `~` (the compiler, lint,
    release refusal and the `.scene`/`.cut` formats rely on it); every surface the owner sees replaces
    it. In Build: a blank ruled line in the Book's own type, a fill-in-the-blank, with a small faded
@@ -702,11 +707,6 @@ auto-hold while a field has focus (decision 7) covers the warm reload. Not measu
    "Unwritten: <field>", and leaving it empty keeps `~`. In counts and Checks: "12 unwritten", never
    "~ 12". The designer specs the look in `docs/design/` with slice 1.3. A release still refuses
    unwritten lines.
-8. **The desktop panel (the sidebars) retires** at parity, because the builder is the form factor the
-   game is played in. The gate: the parity check's `todo` is zero, the panel's browser tests are ported
-   to the builder, and the owner completes one authoring walk in the builder alone. Then
-   `tools/author-panel` is deleted, not left to rot, in the same phase that retires the E5 DOM field
-   (slice 6.4). Until then ruling 3 holds: the panel takes fixes only.
 
 Standing: the owner writes every player-facing word, agents build structure only, and new things are
 born with `~` (`docs/decisions/owner-decision-handwritten-prose-2026-10-31.md`). The owner is the
