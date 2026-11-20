@@ -207,7 +207,7 @@ test('a reload brings back the open sheet, scrolled where it was', async () => {
 });
 
 // Breaks: a fifth sheet growing the stack or dropping its bottom, Back closing more than the top,
-// the breadcrumb out of order, the sheet modal beside the Book (or not modal over it on a phone),
+// the breadcrumb out of order or the dialog named by another sheet, the sheet modal beside the Book (or not modal over it on a phone),
 // docking below 1152 px or floating at it, sliding from the wrong side or under reduced motion,
 // or the focus left behind when the last sheet closes.
 test('sheets stack to four, Back closes the top, and the sheet is modal only over the Book', async () => {
@@ -231,6 +231,7 @@ test('sheets stack to four, Back closes the top, and the sheet is modal only ove
     };
     for (const k of 'abcde') open(k);
     assert.deepEqual(crumbs(), ['E', 'A › B › C']);
+    assert.equal(dialog().props['aria-label'], 'E', 'the dialog is named by its top sheet');
     Object.assign(globalThis, { document: { activeElement: null } }); // focus moved into the sheet
     nodes(dialog())
       .find((n) => n.props?.children?.props?.children === 'Back')
