@@ -89,7 +89,7 @@ export function line(p: Props): Props {
         p.children
       ),
       field?.key === key && field.note ? (
-        <Text key="note" style={NOTE}>{` ${field.note}`}</Text>
+        <Text key="note" style={CAPTION}>{`\n${field.note}`}</Text>
       ) : null,
     ],
   };
@@ -101,10 +101,11 @@ const keyed = (press: () => void) => (e: KeyboardEvent) =>
   (e.preventDefault(), press());
 const MARKED = {
   textDecorationLine: 'underline',
-  textDecorationStyle: 'dashed',
+  textDecorationStyle: 'wavy' as 'dashed', // web draws wavy; RN's types stop at dashed
   textDecorationColor: ink('warning'),
 } as const;
-const NOTE = { ...type.small, color: ink('warning') };
+const NOTE = { ...type.label, color: ink('warning') };
+const CAPTION = { ...type.label, color: ink('dim') };
 const CHOICE = {
   ...type.control,
   color: ink('action'),
@@ -142,7 +143,7 @@ async function save(h: Hooks, f: Field) {
   // ruling 9: an unwritten line left empty stays `~`
   const choice = unwritten(at.words) && !draft.trim() ? 'unchanged' : saving(draft, at.words);
   if (choice === 'unchanged') return close(h);
-  if (choice === 'empty') return say(h, f, 'Empty. Write ~ to leave it unwritten.');
+  if (choice === 'empty') return say(h, f, 'Empty. Esc keeps the words.');
   busy = true;
   const { file, line, was } = at;
   const [status, answer] = await h
@@ -160,7 +161,9 @@ async function save(h: Hooks, f: Field) {
     return say(h, f, typeof answer === 'string' ? answer : `Not saved (${status}).`);
   const [got, theirs] = await h.api(`/line?key=${enc(f.key)}&words=${enc(at.words)}`);
   if (got !== 200)
-    return say(h, f, 'Changed on disk since you opened it.', [['Close', () => close(h)]]);
+    return say(h, f, 'Changed on disk since you opened it.', [
+      ['Open source', () => (void h.api('/open', { key: f.key, words: at.words }), close(h))],
+    ]);
   say(h, f, `Changed on disk since you opened it. ${theirs.words}`, [
     ['Keep mine', () => ((f.at = theirs), (f.choices = undefined), void save(h, f))],
     ['Take theirs', () => close(h)],
@@ -189,7 +192,7 @@ function open(h: Hooks, f: Field, at: At, name: string, p: Props) {
       }}
       style={[p.style, { width: '100%', borderBottomWidth: size.rule, borderColor: ink('action') }]}
     />,
-    <Text key="note" style={f.choices ? NOTE : { ...type.small, color: ink('dim') }}>
+    <Text key="note" style={f.choices ? NOTE : CAPTION}>
       {`${f.note ?? `${at.file}:${at.line}  Enter saves · Esc cancels`}`}
     </Text>,
     ...(f.choices ?? []).map(([label, run]) => (
