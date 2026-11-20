@@ -92,7 +92,7 @@ hand-written prose, the compiler as validator, and "a card never offers what the
   (Contents `Menu.tsx:37`, Character, Skills, Carrying, Map `sections.tsx:202`, Journal, Settings) and
   Credits. Combat appears in the model (`model.ts:63`) but its draw site was not traced.
 - **Gate today**: `kernel/ts/play/registry.json` (in `tools/author-panel/src/edit/` until loka-hcnlh.3) has 277 rows keyed by **schema path**
-  (`kind.field`). Each row is `{create, edit, delete}`, either `generic` or a component path, and a `book: {create, edit, delete}` key (a file under `mobile/app/author/build/`, `generic` or `todo`).
+  (`kind.field`). Each row is `{create, edit, delete}`, either `generic` or a component path, and a `book: {create, edit, delete}` key (a file under `mobile/app/author/build/` or `todo`; `generic` is refused until the generic renderer, 6.4, lifts it).
   `bin/editor_gate.exs` (run by `bin/toolbox_page.exs`) checks that every schema path has all three verbs and that each path exists. It also holds the
   generic set equal to `test/loka/editor_generic_baseline.txt` (282 lines), shrink-only.
   `kernel/ts/test/editor_crud.test.ts:27-60` drives create, edit and delete for every kind through the routes.
@@ -486,7 +486,9 @@ require `build/` unconditionally and watch the test fail, then install the seam 
 ### 6.7 The parity gate extension
 
 - **Registry, `book` per row.** Each of the 277 schema-path rows gains `book: {create, edit, delete}`.
-  Each value is a path under `mobile/app/author/build/`, `generic` (the RN renderer) or `todo`.
+  Each value is a path under `mobile/app/author/build/` or `todo`. `generic` (the RN renderer) is
+  refused until the 6.4 renderer slice lifts it with its own shrink-only baseline: before that, a
+  todo turned generic would look like parity with no working home.
   `bin/editor_gate.exs` checks each path exists and holds the `todo` set equal to
   `test/loka/builder_todo_baseline.txt`, which only shrinks (the same mechanism as
   `editor_generic_baseline.txt`). Red controls go into
