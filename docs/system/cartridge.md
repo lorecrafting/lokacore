@@ -1070,7 +1070,7 @@ build. The author tools below are reachable only in that bundle (a production ex
   compile also pushes `diagnostics`, `mix loka.compile --json <file>`.
 - **World card** ([GUI editor design §6](../rnd/gui-editor-design-2026-11-04.md), E6e): the inspector's hand-built card
   for `cartridge.json`, `resources.json`, `attributes.json` and each population, transport and barrier
-  file (their rows in `tools/author-panel/src/edit/registry.json`), opened from the Hierarchy's and the
+  file (their rows in `kernel/ts/play/registry.json`), opened from the Hierarchy's and the
   Project tab's World button or by selecting one of those definitions. It writes only through the
   routes above (`/change`, `/undo`, Hold). A known reference field is a picker of the keys its kind has
   (rooms, items, NPCs and transports from the last good compile; resources, with the default pools hp,

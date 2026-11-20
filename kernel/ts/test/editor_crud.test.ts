@@ -1,5 +1,5 @@
 // The editor's create, edit and delete for every kind of the card registry
-// (tools/author-panel/src/edit/registry.json), each through the route the panel sends it on
+// (kernel/ts/play/registry.json), each through the route the panel sends it on
 // (write.ts /new as App.tsx's palette, /change as a card's add menu, /delete as author.ts drop()),
 // on a scaffolded cartridge that must compile after each step (docs/rnd/gui-editor-design-2026-11-04.md).
 import assert from 'node:assert/strict';
@@ -24,10 +24,9 @@ import { compiled } from '../play/compiled.ts';
 import { placed, REPO, SCHEMAS } from '../play/guard.ts';
 import { writer } from '../play/write.ts';
 
-const panel = (f: string) =>
-  JSON.parse(readFileSync(join(REPO, 'tools/author-panel/src/edit', f), 'utf8'));
-const registry: Record<string, unknown> = panel('registry.json');
-const offered: string[] = panel('new.json'); // the palette's New kinds (shell.ts)
+const play = (f: string) => JSON.parse(readFileSync(join(REPO, 'kernel/ts/play', f), 'utf8'));
+const registry: Record<string, unknown> = play('registry.json');
+const offered: string[] = play('new.json'); // the palette's New kinds (shell.ts)
 const kinds = [...new Set(Object.keys(registry).map((k) => k.split('.')[0]))];
 const ROWS = ['facts', 'resources', 'attributes']; // write.ts: root files of keyed rows
 // Kinds the editor rightly has no verb for, each with why.

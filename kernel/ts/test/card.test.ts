@@ -626,7 +626,7 @@ test("an action's and a reaction's add menus offer only fields the compiler acce
 // Break: a scripted action's Add menu offers a command action's field (command, input,
 // accessibility), or a command action's a scripted one's (check), which the compiler refuses as UNKNOWN_FIELD.
 test("a scripted action's add menu offers only ScriptedAction fields", () => {
-  const registry = read('../../tools/author-panel/src/edit/registry.json');
+  const registry = read('../../kernel/ts/play/registry.json');
   const fields = Object.keys(defs['source.ScriptedAction'].properties);
   const menu = menuOf(addable('actions', registry, {}, []), defs);
   assert.deepEqual(

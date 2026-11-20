@@ -7,7 +7,7 @@ import type { useDiagnostics } from '../../author.ts';
 import type { Context } from '../fields.tsx';
 import { adding, Header, useCard, useCartridge } from '../Generic.tsx';
 import { Refusal } from '../templates.tsx';
-import registry from '../registry.json';
+import registry from '../../../../../kernel/ts/play/registry.json';
 import { Mechanics, RoomForm } from './Room.tsx';
 
 type Props = { rel: string; context: Context; diag: ReturnType<typeof useDiagnostics> };

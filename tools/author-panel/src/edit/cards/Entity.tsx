@@ -16,7 +16,7 @@ import { Input } from '../../components/ui/input.tsx';
 import type { Context } from '../fields.tsx';
 import { adding, Header, useCard, useCartridge } from '../Generic.tsx';
 import { Refusal } from '../templates.tsx';
-import registry from '../registry.json';
+import registry from '../../../../../kernel/ts/play/registry.json';
 import { Mechanics, RoomForm, Words } from './Room.tsx';
 
 const WORDS = ['name', 'room_line', 'description'];
