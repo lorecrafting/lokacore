@@ -560,7 +560,7 @@ agent work, M is a day or two.
 **Phase 2: sheets and things.** The owner can build a room's contents on the phone screen.
 | Slice | Size | Acceptance |
 |---|---|---|
-| 2.1 Sheet and stack, title pencil, Room sheet: summary header, exits, delete, move to area (**D**) | M | From the room page: add an exit to a new room, make it one-way, delete it, all from the sheet |
+| 2.1 Sheet and stack, title pencil, Room sheet: summary header, exits, delete, move to area (**D**) | M | From the room page: add an exit to a new room, make it one-way, delete it, all from the sheet. The sheet has both layouts from the start (ruling 7): it slides up at phone width and docks beside a still-playable Book past the breakpoint |
 | 2.2 `+ Add here`, Person and Item sheets with placement; New in a minimal notebook Contents | M | Add a person here, then open their sheet and move them. The person appears on the page as `~` |
 | 2.3 Generic RN renderer (probe first) and Add mechanic… with greyed rows that turn a setting on | M | Every kind in `editor_generic_baseline.txt` opens a sheet that writes one field and removes it. Spot-check five kinds by hand |
 | 2.4 Combat and Schedule blocks (the panel's bespoke two) | M | An NPC's attack and schedule edit and the fight rows update (`/fights`) |
