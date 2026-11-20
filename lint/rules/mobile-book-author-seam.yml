@@ -7,9 +7,13 @@ ignores: ['**/*.test.ts', '**/*.test.tsx', mobile/app/book/Text.tsx]
 rule:
   any:
     - kind: string_fragment
-      regex: '(^|/)author/'
+      regex: '(^|/)author(/|$)'
       inside: { matches: module-specifier }
-    - kind: identifier
-      regex: '^authorSeam$'
-    - kind: property_identifier
+    - kind: export_statement
+      regex: '^export \* from .*/Text(\.tsx)?.;?$'
+    - any:
+        - kind: identifier
+        - kind: property_identifier
+        - kind: shorthand_property_identifier_pattern
+        - kind: string_fragment
       regex: '^authorSeam$'

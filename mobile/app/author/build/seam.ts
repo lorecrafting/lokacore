@@ -1,6 +1,7 @@
 // The Book seam's first implementation (slice 1.1, docs/rnd/in-game-builder-mode-2026-11-19.md §6.2):
 // it only counts the lines the Book draws, on the global, where a release bundle must not hold its
-// name (author/seam.test.ts). The builder's fields and pencils replace it.
+// name (author/seam.test.ts). The builder's fields and pencils replace it and keep a runtime string
+// that test looks for, or the release check passes on nothing.
 import { authorSeam } from '../../book/Text.tsx';
 
 const g = globalThis as { loka_author_seam_lines?: number };

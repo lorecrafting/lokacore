@@ -57,7 +57,7 @@ test('a release web export holds no builder seam', () => {
       {
         cwd: join(import.meta.dirname, '..'),
         env,
-        stdio: 'ignore',
+        stdio: ['ignore', 'ignore', 'pipe'], // a failed export throws with Metro's stderr
       },
     );
     const dir = join(out, '_expo/static/js/web');
