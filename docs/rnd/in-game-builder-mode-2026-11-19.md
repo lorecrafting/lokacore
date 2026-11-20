@@ -618,7 +618,30 @@ renderer's real size (2.3's probe).
 
 ## 8. Measurements
 
-To be filled by slice 0.2. Until then the only latency figure is the owner session's 0.8 to 18 s
+### 8.1 Bundle probe (slice 0.1, loka-hcnlh.1, 2026-11-19): passes, with two config changes
+
+Probe: `mobile/app/author/build/probe.ts` imported `card.ts`, `edit_model.ts`, `ui_schema.ts` and the
+registry, required from `panel.tsx` under the same `EXPO_PUBLIC_LOKA_DEV_CARTRIDGE === '1'` gate as
+`inbook.ts`, and logged `cardMenu('rooms', …)`. Probe code was not merged (worktree only).
+
+- **Metro reaches neither `tools/` nor `kernel/ts/play/` today.** `metro.config.js:11-15` watches only
+  `mobile/`, `kernel/ts/src` and `protocol/fixtures`. Two changes made it bundle: watch
+  `kernel/ts/play`, and widen `protocol/fixtures` to `protocol/` (`allowed.ts` reads
+  `protocol/capability_registry.json`). `tools/author-panel` stays unreachable by design, which confirms
+  slice 0.4's move of `registry.json` (and `new.json`) to `kernel/ts/play/`. The watch change lands with
+  0.4.
+- **Dev web: bundles and runs.** The JSON import attributes (`with { type: 'json' }`) bundle. In the
+  browser, `cardMenu` for a room with a three-capability cart returned the same twelve fields as the
+  same call in Node (`abstract … zones`).
+- **Hermes: compiles.** A release iOS export with the probe forced on produced Hermes bytecode v98
+  with the card logic and registry strings inside, no errors. Not run on a device or simulator.
+- **Release web: unchanged.** 4,177,491 bytes with the gated probe, 4,177,485 without; the 6 bytes are
+  the `-dirty` commit suffix (`metro.config.js:20-22`) of the uncommitted probe tree. No probe string in
+  the bundle.
+
+### 8.2 Structural edit latency (slice 0.2)
+
+To be filled by slice 0.2. Until then the only figure is the owner session's 0.8 to 18 s
 (unattributed).
 
 ## 9. Owner decisions (ruled 2026-11-19: every recommendation taken, 9 and 11 as amended below)
