@@ -26,6 +26,7 @@ const WORDS = {
   held: (n: number) => `Held · ${n} waiting`,
   undo: 'Undo',
   notUndone: (file: string) => `${file} changed since; not put back.`,
+  source: 'Open source',
   drop: 'Drop it and go on',
   back: 'Back to checkpoint',
   room: 'Start in this room',
@@ -36,7 +37,7 @@ let heard: Message = { text: {}, said: [] };
 let api: Hooks['api'] | undefined;
 let undo: Wrote | undefined; // the last write, while its chip shows
 let undoTimer: ReturnType<typeof setTimeout> | undefined;
-let note = ''; // a refused put-back
+let notBack: Wrote | undefined; // a refused put-back
 let redrawStrip = () => {};
 /** What the keep-my-place notice reads and does; panel.tsx hands it in per game. */
 export type Place = {
@@ -88,7 +89,7 @@ function wrote(w: Wrote) {
   const room = placed?.here();
   set({ ...builder, ...(room && { room }) });
   undo = w;
-  note = '';
+  notBack = undefined;
   clearTimeout(undoTimer);
   undoTimer = setTimeout(() => ((undo = undefined), redrawStrip()), UNDO_MS);
   redrawStrip();
@@ -99,9 +100,10 @@ async function putBack(w: Wrote) {
   redrawStrip();
   const undone = api!('/undo', { id: w.id, key: w.key, words: w.words });
   const [status] = await undone.catch(() => [0]); // the server down: not put back, said so
-  note = status === 200 ? '' : WORDS.notUndone(w.file);
+  notBack = status === 200 ? undefined : w;
   redrawStrip();
 }
+const openBack = () => void api!('/open', { key: notBack!.key, words: notBack!.words });
 /** Checks: each row goes to its line; one on this page closes the sheet to show its field. */
 sheets.checks = () =>
   checks(heard).map((c, i) =>
@@ -200,7 +202,8 @@ export function Strip({ children }: { children: ReactNode }) {
         </Pressable>
         {warn(heard.held ? WORDS.held(heard.pending ?? 0) : '')}
         {undo ? act(WORDS.undo, () => void putBack(undo!)) : null}
-        {warn(note)}
+        {notBack ? warn(WORDS.notUndone(notBack.file)) : null}
+        {notBack ? act(WORDS.source, openBack) : null}
         {builder.on
           ? act(badge(heard), () =>
               change({ ...builder, sheet: builder.sheet === 'checks' ? undefined : 'checks' }),

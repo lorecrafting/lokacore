@@ -283,6 +283,10 @@ test('a write offers Undo for five seconds; Undo puts the old words back or says
   assert.deepEqual(undos, [{ id: 8, key: KEY, words: LINKED }]);
   assert.equal(button('Undo'), undefined, 'the chip stays after it was pressed');
   assert.ok(shows('world/loft.md changed since; not put back.'));
+  answers = [[200, null]];
+  button('Open source').props.onPress();
+  await tick();
+  assert.deepEqual(sent.at(-1), ['/__author/open', { key: KEY, words: LINKED }]);
   await write(9);
   answers = [[200, null]];
   button('Undo').props.onPress();
