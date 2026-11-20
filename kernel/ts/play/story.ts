@@ -30,7 +30,7 @@ import { refString } from '../src/runtime/decision.ts';
 import { triggers } from './scene_trigger.ts';
 
 type Dev = { canonical: string; sha256: string };
-type Diagnostic = { rel?: string };
+type Diagnostic = { rel?: string | null }; // null: the compiler's row with no file (a text key's)
 type Beat = { n: number; title?: string; nodes?: string[]; seeds?: string[]; pays?: string[] };
 type Outline = { parts: { title?: string; minutes?: number; beats: Beat[] }[] };
 
@@ -93,8 +93,8 @@ function shortRefs(c: Obj, nodes: { ref: string }[]) {
 }
 
 // A source file's node by guard.ts's placed() (area folders too); a `.scene` is a dialogue (Source.placed).
-function nodeOf(rel: string | undefined, refs: Map<string, string>) {
-  const at = rel === undefined ? undefined : placed(rel);
+function nodeOf(rel: string | null | undefined, refs: Map<string, string>) {
+  const at = rel == null ? undefined : placed(rel);
   return at && refs.get(`${at.ext === 'scene' ? 'dialogues' : at.dir}/${at.key}`);
 }
 

@@ -122,7 +122,7 @@ export function apart(ops: Op[], errors: { property?: string }[]): Op[] {
   return ops.filter((o) => !held.includes(String(o.path[0])));
 }
 
-type Diagnostic = { rel?: string; path?: string; words?: string };
+type Diagnostic = { rel?: string | null; path?: string; words?: string }; // null: a row with no file
 export type Errors = { __errors?: string[]; [field: string]: Errors | string[] | undefined };
 
 // Source.at: a plain stem (`npcs/ada`) or the quoted file name, then `.name`, `[0]` or `["lit"]`.
