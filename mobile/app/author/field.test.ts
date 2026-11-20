@@ -263,7 +263,7 @@ async function write(id: number, before = async () => {}) {
 }
 
 // Breaks: no Undo after a write, the chip gone early or never, Undo putting back the new words or
-// another write's (its journal id), or a refused put-back (the file changed since) passing silently.
+// another write's (its journal id), or a refused or unsent put-back passing silently.
 test('a write offers Undo for five seconds; Undo puts the old words back or says why not', async () => {
   try {
     await write(7, async () => mock.timers.enable({ apis: ['setTimeout'] }));
@@ -288,12 +288,19 @@ test('a write offers Undo for five seconds; Undo puts the old words back or says
   button('Undo').props.onPress();
   await tick();
   assert.ok(!shows('world/loft.md changed since; not put back.'), 'a put-back said it failed');
+  await write(10);
+  const { fetch } = globalThis;
+  globalThis.fetch = async () => Promise.reject(new TypeError('the server is down'));
+  button('Undo').props.onPress();
+  await tick();
+  globalThis.fetch = fetch;
+  assert.ok(shows('world/loft.md changed since; not put back.'), 'a put-back the server never got');
   sent.length = 0;
 });
 
 // Breaks: the badge or its sheet shown outside Build, a row going nowhere or to the wrong line (a key on
-// this page not opening its field, one elsewhere not opening its source, a refusal not opening its file),
-// or the sheet left covering the field it opened.
+// this page not opening its field, one elsewhere or with no field not opening its source, a refusal not
+// opening its file), a file-less refusal posing as a link, or the sheet left covering the field it opened.
 test('Checks: the badge opens the list, each row goes to its line', async () => {
   build.hear({
     text: {},
@@ -313,21 +320,40 @@ test('Checks: the badge opens the list, each row goes to its line', async () => 
   assert.equal(field(page(LINKED))?.props.defaultValue, LINKED, 'the row did not open its field');
   assert.equal(rows().length, 0, 'the sheet covers the field');
   shut();
+  build.hear({
+    text: {},
+    said: [],
+    diagnostics: [{ rel: 'world/loft.md', words: 'bad' }, { words: 'no start room' }],
+    unconfirmed: [{ key: 'room.loft.name', at: 'world/loft.md:2' }],
+    placeholders: { 'room.cellar.description': 'world/cellar.md:4' },
+  });
+  seen.set('Loft', 'room.loft.name'); // on this page, but no field draws it
   sent.length = 0;
-  button(BADGE).props.onPress();
+  button('Checks · 2 refused · 1 not confirmed · 1 unwritten').props.onPress();
   answers = [
+    [200, null],
     [200, null],
     [200, null],
   ];
   row('room.cellar.description: unwritten').props.onPress();
   row('world/loft.md: bad').props.onPress();
+  row('room.loft.name: not confirmed').props.onPress();
   await tick();
   assert.deepEqual(
     sent.filter(([path]) => path === '/__author/open').map(([, b]) => b),
-    [{ key: 'room.cellar.description', words: '' }, { file: 'world/loft.md' }],
+    [
+      { key: 'room.cellar.description', words: '' },
+      { file: 'world/loft.md' },
+      { key: 'room.loft.name', words: '' },
+    ],
   );
-  assert.equal(rows().length, 3, 'a row elsewhere closed the sheet');
-  button(BADGE).props.onPress();
+  assert.equal(
+    rows().length,
+    3,
+    'a row elsewhere closed the sheet, or a row with nowhere to go is a link',
+  );
+  seen.delete('Loft');
+  button('Checks · 2 refused · 1 not confirmed · 1 unwritten').props.onPress();
   button('✎ Build').props.onPress(); // Build off
   assert.equal(button(BADGE), undefined, 'the badge shows outside Build');
   button('Build').props.onPress();
@@ -336,8 +362,8 @@ test('Checks: the badge opens the list, each row goes to its line', async () => 
 });
 
 // Breaks: the notice shown with no refusal or missing on one; Back offered with no checkpoint to go to;
-// Start in this room offered with no room, or sent another room, or the room lost by the reload a write
-// causes; an action wired to another's handler.
+// Start in this room offered with no room, or sent another room, or the room lost by the reload a later
+// structural compile causes; an action wired to another's handler.
 test('the keep-my-place notice offers its three ways back', async () => {
   const kept = new Map([[BUILD, '{"on":true}']]);
   const stored = globalThis.localStorage;
@@ -368,7 +394,7 @@ test('the keep-my-place notice offers its three ways back', async () => {
       [true, false, false],
     );
     await write(10); // the write records the room it was made in
-    build.install({ seen, said, redraw() {}, api }); // the reload the write's compile causes
+    build.install({ seen, said, redraw() {}, api }); // the reload a structural compile causes
     state = { steps: [go], refused: 0, checkpoint: [] };
     ['Drop it and go on', 'Back to checkpoint', 'Start in this room'].forEach((l) =>
       button(l).props.onPress(),

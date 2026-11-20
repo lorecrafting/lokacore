@@ -132,7 +132,8 @@ async function edit(h: Hooks, key: string) {
  * editor, as E5 does (inbook.ts `edit`). False: not on this page. */
 export function go(key: string) {
   if (!hooks) return false;
-  if ([...hooks.seen.values()].includes(key)) return (void edit(hooks, key), true);
+  const here = key.endsWith('.description') && [...hooks.seen.values()].includes(key); // as keyOf draws
+  if (here) return (void edit(hooks, key), true);
   void hooks.api('/open', { key, words: hooks.said.get(key) ?? '' });
   return false;
 }

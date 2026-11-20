@@ -176,13 +176,14 @@ type Tools = {
   startOver: () => unknown;
 };
 // Jumping to a checkpoint starts the game over and replays the file's steps (the panel fetched them).
-function jumpTo(steps: Step[], { session, startOver }: Tools) {
+function jumpTo(steps: Step[], { session, startOver }: Tools, checkpoint = place.checkpoint) {
   const before = session.game();
   startOver();
   const game = session.game();
   if (!game || game === before) return; // a refused start over keeps this game and its place
   place.hash = ''; // not this artifact's path yet: restorePlace replays it
   place.steps = [...steps]; // its own list: a recorded step must not grow the checkpoint it came from
+  place.checkpoint = checkpoint; // Back to checkpoint (the Build strip) replays it
   restorePlace(game);
 }
 
@@ -244,7 +245,6 @@ function askCheat(game: Opened, cheat: Cheat) {
 }
 const heard = (message: Message) => (inBook?.heard(message), build?.hear(message));
 const NO_STEPS = 'Place: that checkpoint has no steps list; nothing changed.';
-/** The Build strip's keep-my-place notice: what it reads and its three ways back to a live page. */
 const placeHooks = (game: Opened, latest: { current: Tools }) => ({
   place: () => ({ steps: place.steps, refused, checkpoint: place.checkpoint }),
   here: () => roomKey(game.roomIds(), game.view().view.place.id),
@@ -272,7 +272,7 @@ export function useAuthorPanel(tools: Tools, game: Opened | undefined) {
       if (e.data.op === 'advance') advance(e.data.minutes, game);
       if (isCheat(e.data)) askCheat(game, e.data);
       if (e.data.op === 'jump' && Array.isArray(e.data.steps))
-        return jumpTo((place.checkpoint = e.data.steps), latest.current); // the strip's Back replays it; the new game posts its state
+        return jumpTo(e.data.steps, latest.current, e.data.steps); // the new game posts its state
       if (e.data.op === 'jump') placeNote = NO_STEPS; // checked before the start over wipes the save
       if (e.data.op === 'drop' && refused !== undefined)
         return jumpTo(dropStep(place.steps, refused), latest.current);

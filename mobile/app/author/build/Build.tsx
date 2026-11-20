@@ -97,26 +97,33 @@ async function putBack(w: Wrote) {
   undo = undefined;
   clearTimeout(undoTimer);
   redrawStrip();
-  const [status] = await api!('/undo', { id: w.id, key: w.key, words: w.words });
+  const undone = api!('/undo', { id: w.id, key: w.key, words: w.words });
+  const [status] = await undone.catch(() => [0]); // the server down: not put back, said so
   note = status === 200 ? '' : WORDS.notUndone(w.file);
   redrawStrip();
 }
 /** Checks: each row goes to its line; one on this page closes the sheet to show its field. */
 sheets.checks = () =>
-  checks(heard).map((c) => (
-    <Pressable
-      key={c.label}
-      accessibilityRole="link"
-      onPress={() => {
-        if (c.key ? go(c.key) : void api!('/open', { file: c.file }))
-          set({ ...builder, sheet: undefined });
-        redrawStrip();
-      }}
-      style={{ minHeight: size.touch, justifyContent: 'center', paddingHorizontal: space.md }}
-    >
-      <Text style={{ ...type.small, color: ink('fg') }}>{c.label}</Text>
-    </Pressable>
-  ));
+  checks(heard).map((c, i) =>
+    c.key || c.file ? (
+      <Pressable
+        key={i}
+        accessibilityRole="link"
+        onPress={() => {
+          if (c.key ? go(c.key) : void api!('/open', { file: c.file }))
+            set({ ...builder, sheet: undefined });
+          redrawStrip();
+        }}
+        style={{ minHeight: size.touch, justifyContent: 'center', paddingHorizontal: space.md }}
+      >
+        <Text style={{ ...type.small, color: ink('fg') }}>{c.label}</Text>
+      </Pressable>
+    ) : (
+      <Text key={i} style={{ ...type.small, color: ink('fg'), padding: space.md }}>
+        {c.label}
+      </Text>
+    ),
+  );
 
 /** The open sheet, scrolled back to where it was when it is drawn again after a reload. */
 export function Sheet({ open, saved }: { open: Builder; saved: (next: Builder) => void }) {
