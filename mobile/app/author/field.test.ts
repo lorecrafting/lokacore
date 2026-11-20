@@ -470,7 +470,8 @@ test("the room title's pencil opens its Room sheet: summary and exits", async ()
   const words = nodes(dialog())
     .map((n) => n.props?.children)
     .filter((c) => typeof c === 'string');
-  assert.deepEqual(words.slice(-3), ['Loft', 'mill · 1 exit', 'down → cellar']);
+  const at = words.indexOf('mill · 1 exit') - 1; // the summary, above the sheet's edits
+  assert.deepEqual(words.slice(at, at + 3), ['Loft', 'mill · 1 exit', 'down → cellar']);
   here = 'cellar';
   const drawn = page('A low loft.', '~');
   assert.equal(pencil(drawn).props.accessibilityLabel, 'Edit cellar');

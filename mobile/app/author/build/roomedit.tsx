@@ -20,11 +20,13 @@ const WORDS = {
   also: (files: string[]) => `Also deletes ${files.join(', ')}`,
   yes: 'Delete all',
   no: 'Keep',
+  noFile: (key: string) => `${key}: no source file`,
 };
 export type Node = { kind: string; ref: string };
 
 let api: Hooks['api'] | undefined;
 let after = () => {}; // reads the map again and redraws (room.tsx `story`)
+let close = () => {}; // closes the top sheet (Build.tsx `back`)
 let busy = false; // one gesture at a time: a press while one runs does nothing
 let said = ''; // the last refusal, shown at the sheet's top until the next press
 let asking: { key: string; files: string[]; answer: (yes: boolean) => void } | undefined;
@@ -44,13 +46,19 @@ export const io: Io = {
 // ponytail: one editor per page; its Undo history and freeKey's handed-out keys end with a reload
 const ed = editor(io);
 
-export function wire(a: Hooks['api'] | undefined, then: () => void) {
+export function wire(a: Hooks['api'] | undefined, then: () => void, shut: () => void) {
   api = a;
   after = then;
+  close = shut;
 }
 
 /** Runs one gesture; a refusal (a thrown or returned reason) shows in the sheet. */
 export async function run(go: () => Promise<unknown>) {
+  if (asking) {
+    const { answer } = asking; // another press answers a pending Delete question Keep
+    asking = undefined;
+    answer(false);
+  }
   if (busy || !api) return;
   busy = true;
   said = '';
@@ -104,7 +112,7 @@ export const moveTo = (r: MapRoom) => (
       placeholder={WORDS.area}
       accessibilityLabel={WORDS.area}
       onChangeText={(d) => void drafts.set(r.key, d)}
-      style={{ ...text, flex: 1 }}
+      style={{ ...text, flex: 1 }} // mutate-skip: layout; the field takes the row's free width
     />
     {act(
       WORDS.move,
@@ -130,7 +138,17 @@ export function foot(r: MapRoom) {
     new Promise<boolean>((answer) => ((asking = { key: r.key, files, answer }), after()));
   return (
     <View key="foot" style={row}>
-      {act(WORDS.drop(r.key), () => void run(() => drop(io, r.key, r.file ?? '', ask)))}
+      {act(
+        WORDS.drop(r.key),
+        () =>
+          void run(async () => {
+            if (!r.file) return WORDS.noFile(r.key);
+            let yes = true;
+            const why = await drop(io, r.key, r.file, (files) => ask(files).then((y) => (yes = y)));
+            if (why === '' && yes) close(); // the room is gone: its sheet goes too
+            return why;
+          }),
+      )}
     </View>
   );
 }

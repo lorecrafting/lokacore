@@ -102,14 +102,14 @@ export function install(book: Pick<Hooks, 'seen' | 'said' | 'redraw' | 'api'>) {
   });
   builder = restored(localStorage);
   mapped = () => (redrawStrip(), book.redraw());
-  story(api, mapped);
+  story(api, mapped, back);
   addEventListener('pagehide', hold.leave);
 }
 export function hear(message: Message) {
   heard = message;
   hold.heard(message.held);
   told(message.unconfirmed?.map((u) => u.key));
-  story(api, mapped); // a compile may have added, moved or renamed rooms
+  story(api, mapped, back); // a compile may have added, moved or renamed rooms
 }
 const set = (next: Builder) => {
   builder = next;

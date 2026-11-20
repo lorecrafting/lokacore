@@ -7,6 +7,7 @@ import { nodes, words } from '../book/__tests__/combat-book.test.ts'; // also re
 
 const { story } = await import('./build/room.tsx');
 const { sheets } = await import('./build/sheet.tsx');
+const { foot, io, wire } = await import('./build/roomedit.tsx');
 
 const room = (key: string, exits: { dir: string; to: string }[], area: string | null = 'yard') => ({
   ref: key,
@@ -37,7 +38,12 @@ async function opened(answer: (path: string) => [number, unknown] = () => [200, 
     const file = decodeURIComponent(path.split('file=')[1]) as keyof typeof doc;
     return doc[file] ? [200, { bytes: JSON.stringify(doc[file]), sha256: 'S' }] : [404, null];
   };
-  story(api, () => {});
+  let closed = 0;
+  story(
+    api,
+    () => {},
+    () => closed++,
+  );
   await settle();
   const shown = () => nodes(sheets.room.body('hall'));
   const press = async (label: string) => {
@@ -46,7 +52,7 @@ async function opened(answer: (path: string) => [number, unknown] = () => [200, 
       .props.onPress();
     await settle();
   };
-  return { posts, shown, press };
+  return { posts, shown, press, closed: () => closed };
 }
 
 // Breaks: a `＋` on a side that has an exit, a new room taking a key the graph holds or outside this
@@ -93,6 +99,7 @@ test('Delete room asks in the sheet about the files it also takes; refusals show
   const alert = () => s.shown().find((n) => n.props?.accessibilityRole === 'alert');
   await s.press('Delete hall');
   assert.ok(words(s.shown()).includes('Also deletes rooms/loft.json'));
+  assert.ok(!words(nodes(sheets.room.body('loft'))).includes('Also deletes')); // hall's question
   await s.press('Keep');
   assert.equal(s.posts.length, 1);
   await s.press('Delete hall');
@@ -102,4 +109,47 @@ test('Delete room asks in the sheet about the files it also takes; refusals show
   delete (doc as Record<string, unknown>)['rooms/hall.json'];
   await s.press('Delete hall');
   assert.equal(words(alert()), 'rooms/hall.json: not found');
+  const bare = nodes(foot({ ...hall, file: undefined })).find(
+    (n) => n.props?.accessibilityRole === 'button' && words(n) === 'Delete hall',
+  );
+  bare!.props.onPress();
+  await settle();
+  assert.equal(words(alert()), 'hall: no source file');
+});
+
+// Breaks: a Delete question left unanswered locking every later press (the code-review lock), a
+// deleted room's sheet left open, or a Keep closing it.
+test('a confirmed delete closes its sheet; another press answers a pending question Keep', async () => {
+  let deletes = 0;
+  const set = { set: [{ file: 'rooms/loft.json', sha256: 'L' }] };
+  const s = await opened((path) =>
+    path !== '/delete' ? [200, { id: 1 }] : ++deletes === 3 ? [200, { id: 2 }] : [409, set],
+  );
+  (doc as Record<string, unknown>)['rooms/hall.json'] = { exits: { north: { to: 'loft' } } };
+  await s.press('Delete hall');
+  await s.press('One-way'); // answers Keep; the press itself is spent
+  assert.ok(!words(s.shown()).includes('Also deletes rooms/loft.json'));
+  assert.equal(s.posts.length, 1);
+  await s.press('One-way');
+  assert.equal(s.posts.length, 2);
+  assert.equal(s.closed(), 0);
+  await s.press('Delete hall');
+  await s.press('Delete all');
+  assert.equal(s.closed(), 1);
+});
+
+// Breaks: a 3xx answer (not a write) taken as a saved write.
+test('io: only a 2xx answer is ok', async () => {
+  const at = (status: number) => (
+    wire(
+      async () => [status, null],
+      () => {},
+      () => {},
+    ),
+    io.post('move', {})
+  );
+  assert.deepEqual(
+    [(await at(299)).ok, (await at(300)).ok, (await at(200)).ok, (await at(199)).ok],
+    [true, false, true, false],
+  );
 });

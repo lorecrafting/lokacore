@@ -337,17 +337,33 @@ test('the newest map wins; a refused answer keeps it, a malformed one empties it
   let drawn = 0;
   const loft = (title: string) => ({ map: [{ key: 'loft', area: null, title, exits: [] }] });
   const has = (title: string) => pencil(title, 'loft', () => {}) !== undefined;
-  story(slow, () => drawn++);
-  story(slow, () => drawn++);
+  story(
+    slow,
+    () => drawn++,
+    () => {},
+  );
+  story(
+    slow,
+    () => drawn++,
+    () => {},
+  );
   replies[1]([200, loft('Attic')]);
   replies[0]([200, loft('Loft')]);
   await new Promise((r) => setTimeout(r));
   assert.deepEqual([has('Attic'), has('Loft'), drawn], [true, false, 1]);
-  story(slow, () => drawn++);
+  story(
+    slow,
+    () => drawn++,
+    () => {},
+  );
   replies[2]([500, loft('Loft')]);
   await new Promise((r) => setTimeout(r));
   assert.equal(has('Attic'), true, 'a refused answer keeps the map');
-  story(slow, () => drawn++);
+  story(
+    slow,
+    () => drawn++,
+    () => {},
+  );
   replies[3]([200, {}]);
   await new Promise((r) => setTimeout(r));
   assert.equal(has('Attic'), false);
