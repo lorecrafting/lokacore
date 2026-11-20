@@ -27,6 +27,7 @@ const WORDS = {
   undo: 'Undo',
   notUndone: (file: string) => `${file} changed since; not put back.`,
   source: 'Open source',
+  nothing: 'Nothing to check.',
   drop: 'Drop it and go on',
   back: 'Back to checkpoint',
   room: 'Start in this room',
@@ -105,8 +106,13 @@ async function putBack(w: Wrote) {
 }
 const openBack = () => void api!('/open', { key: notBack!.key, words: notBack!.words });
 /** Checks: each row goes to its line; one on this page closes the sheet to show its field. */
-sheets.checks = () =>
-  checks(heard).map((c, i) =>
+sheets.checks = () => {
+  const rows = checks(heard);
+  if (!rows.length)
+    return (
+      <Text style={{ ...type.small, color: ink('fg'), padding: space.md }}>{WORDS.nothing}</Text>
+    );
+  return rows.map((c, i) =>
     c.key || c.file ? (
       <Pressable
         key={i}
@@ -126,6 +132,7 @@ sheets.checks = () =>
       </Text>
     ),
   );
+};
 
 /** The open sheet, scrolled back to where it was when it is drawn again after a reload. */
 export function Sheet({ open, saved }: { open: Builder; saved: (next: Builder) => void }) {
@@ -134,7 +141,7 @@ export function Sheet({ open, saved }: { open: Builder; saved: (next: Builder) =
   return (
     <ScrollView
       ref={scroller}
-      style={StyleSheet.absoluteFill}
+      style={[StyleSheet.absoluteFill, { backgroundColor: ink('card') }]} // a sheet is card paper (§5)
       onContentSizeChange={() => {
         if (restoring) scroller.current?.scrollTo({ y: open.scroll, animated: false });
         restoring = false;

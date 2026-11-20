@@ -304,7 +304,8 @@ test('a write offers Undo for five seconds; Undo puts the old words back or says
 
 // Breaks: the badge or its sheet shown outside Build, a row going nowhere or to the wrong line (a key on
 // this page not opening its field, one elsewhere or with no field not opening its source, a refusal not
-// opening its file), a file-less refusal posing as a link, or the sheet left covering the field it opened.
+// opening its file), a file-less refusal posing as a link, the sheet left covering the field it opened,
+// or an empty sheet drawn blank and transparent over the Book (it eats every tap).
 test('Checks: the badge opens the list, each row goes to its line', async () => {
   build.hear({
     text: {},
@@ -362,6 +363,14 @@ test('Checks: the badge opens the list, each row goes to its line', async () => 
   assert.equal(button(BADGE), undefined, 'the badge shows outside Build');
   button('Build').props.onPress();
   build.hear({ text: {}, said: [] });
+  button('Checks').props.onPress();
+  const sheet = strip().find((n) => n.props?.onScroll);
+  assert.ok(shows('Nothing to check.'), 'an empty sheet says nothing');
+  assert.ok(
+    sheet.props.style.some((s: object) => 'backgroundColor' in s),
+    'an invisible sheet eats taps',
+  );
+  button('Checks').props.onPress();
   sent.length = 0;
 });
 
