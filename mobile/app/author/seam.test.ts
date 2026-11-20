@@ -27,7 +27,7 @@ test('a counting seam sees each line of a room page', async () => {
   } as any;
   install();
   const g = globalThis as { loka_author_seam_lines?: number };
-  g.loka_author_seam_lines = 0;
+  delete g.loka_author_seam_lines; // the seam starts its own count
   const drawn = nodes(
     RoomPage({
       view,
