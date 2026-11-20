@@ -932,8 +932,17 @@ reasons and limits: [prose in the Book rulings](../design/prose-in-the-book-ruli
   opened it.`, their words, and Keep mine (writes the draft over their line, found again) or Take
   theirs; only Open source when their line is not found exactly once. It opens unasked when a
   pushed change alters the field's line.
-- **Hold** shows in the panel header (a toggle and `Held · N waiting`), never in the Book;
-  leaving the page releases a Hold it set.
+- **Hold** shows in the panel header (a toggle and `Held · N waiting`) and on the Build strip,
+  never in the Book; leaving the page releases a Hold it set.
+- **Build** (the in-game builder, [builder mode §4.1, §5](../rnd/in-game-builder-mode-2026-11-19.md)).
+  A strip a touch target tall sits above the Book, outside its page and chrome row, in the Book's
+  current palette. It carries the Build switch (a switch named `Build`, its on state shown by more
+  than colour) and a polite live status: `Held · N waiting` while the server holds compiles, else
+  nothing. Turning Build on or off changes no game state; leaving Build closes every sheet. A
+  builder field holds compiles from its focus to its commit (Enter, blur, a picker closing) and
+  releases only a Hold it took; tabbing to the next field keeps it. With no field focused, a
+  compile reloads the Book as usual: Build, the open sheet and its scroll are kept beside the place
+  and come back after the reload. The plain dev preview and a release draw no strip.
 - **No field.** A double-click on a line that is not words opens nothing; a note under it, in a
   row of its own (the lines below move down by its height while it shows and back when it goes,
   with no motion; a note never covers a line, loka-wfrgk.39), until the next click or key, read politely: `A choice label is its key. Alt-click opens the scene.`,
