@@ -7,8 +7,9 @@
 # Prints one `<seconds>s [FAIL|SLOW] <path>` line per file, then
 # RELATED_TESTS_none|skip_no_node_modules|ok|fail. Exit 1 only on red. A worktree without
 # kernel/ts/node_modules skips the run: setup costs more than the CI it saves. A diff that touches
-# tools/author-panel is typechecked there before any of this (loka-vvreo: #711 pushed two panel type
-# errors past this gate because it only ever ran kernel/ts tests).
+# tools/author-panel, or the registry and starter list it imports from kernel/ts/play, is typechecked
+# there before any of this (loka-vvreo: #711 pushed two panel type errors past this gate because it
+# only ever ran kernel/ts tests).
 # A file gets RELATED_TESTS_CAP (default 60) seconds: over it, the file prints SLOW and does not dock the
 # push, because `editor_crud.test.ts` compiles the whole registry (164 s) and a gate people work around
 # catches nothing. CI's `npm run test:nosim` runs every file whatever this says.
@@ -20,7 +21,7 @@ base=$(git merge-base origin/main "$rev" 2>/dev/null) || { echo RELATED_TESTS_no
 diff=$(git diff --no-renames --name-only "$base" "$rev")
 # The panel's types, before its tests: `npm run build` is `tsc -b && vite build`, and a type error is
 # what reached CI on #711 (an unused import and a missing prop, neither of which a test names).
-if printf '%s\n' "$diff" | grep -q '^tools/author-panel/'; then
+if printf '%s\n' "$diff" | grep -qE '^(tools/author-panel/|kernel/ts/play/(registry|new)\.json$)'; then
   if [ -d tools/author-panel/node_modules ]; then
     if ( cd tools/author-panel && node_modules/.bin/tsc -b ) >/dev/null 2>&1; then
       echo AUTHOR_PANEL_TSC_OK
@@ -50,7 +51,7 @@ for f in $files; do
   [ -f "kernel/ts/test/$name.test.ts" ] && printf '%s\n' "kernel/ts/test/$name.test.ts" >>"$list"
   # Tests that name the file. With the extension, so an import path or a read path counts and a bare
   # word in prose does not; `write.ts` is named by nine files, which is the honest cost of the gate.
-  grep -lF "$name.ts" kernel/ts/test/*.test.ts 2>/dev/null >>"$list" || true
+  grep -lF "${f##*/}" kernel/ts/test/*.test.ts 2>/dev/null >>"$list" || true
 done
 [ -s "$list" ] || { rm -f "$list"; echo RELATED_TESTS_none; exit 0; }
 tests=$(sort -u "$list" | tr '\n' ' ')

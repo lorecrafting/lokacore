@@ -19,7 +19,9 @@ printf 'x\n' > kernel/ts/play/write.ts
 printf 'x\n' > kernel/ts/test/write.test.ts
 # Names the source by path, as editor_routes.test.ts names write.ts: caught without an import.
 printf "readFileSync('kernel/ts/play/write.ts')\n" > kernel/ts/test/editor_routes.test.ts
-printf 'x\n' > kernel/ts/test/card.test.ts
+# Names the panel registry by path, as card.test.ts does (break 7).
+printf '{}\n' > kernel/ts/play/registry.json
+printf "read('../../kernel/ts/play/registry.json')\n" > kernel/ts/test/card.test.ts
 git add -A . && git -c user.name=t -c user.email=t@t commit -qm base
 # The script diffs from origin/main, as a branch of the real repo does.
 git update-ref refs/remotes/origin/main HEAD
@@ -74,5 +76,13 @@ printf 'q\n' > kernel/ts/play/write.ts
 git -c user.name=t -c user.email=t@t commit -qam "kernel only"
 out=$(PATH="$tmp/stub:$PATH" sh "$bin/related_tests.sh" . 2>&1) || bad "kernel-only exit: $out"
 printf '%s\n' "$out" | grep -q AUTHOR_PANEL_TSC && { bad 'a kernel-only diff ran the panel typecheck'; printf '%s\n' "$out"; }
+# Break 7: a registry-only diff runs neither the panel typecheck nor the tests that read it
+# (loka-hcnlh.3 moved registry.json and new.json into kernel/ts/play; the panel imports both).
+git checkout -q -B registry-only refs/remotes/origin/main
+printf '{"a":1}\n' > kernel/ts/play/registry.json
+git -c user.name=t -c user.email=t@t commit -qam "registry only"
+out=$(PATH="$tmp/stub:$PATH" sh "$bin/related_tests.sh" . 2>&1) || bad "registry-only exit: $out"
+printf '%s\n' "$out" | grep -q AUTHOR_PANEL_TSC || { bad 'a registry-only diff skipped the panel typecheck'; printf '%s\n' "$out"; }
+printf '%s\n' "$out" | grep -q 'test/card.test.ts' || { bad 'the test reading the registry is not selected'; printf '%s\n' "$out"; }
 [ "$fail" = 0 ] && echo "related_tests red controls: all pass"
 exit "$fail"
