@@ -38,7 +38,11 @@ export const devClock =
 // the in-Book editor (E5) is required only in the author preview, so a player build drops it
 const inBook: typeof import('./inbook.ts') | undefined =
   process.env.EXPO_PUBLIC_LOKA_DEV_CARTRIDGE === '1' ? require('./inbook.ts') : undefined;
+// the builder's Book seam (book/Text.tsx), required behind the same gate
+const build: typeof import('./build/seam.ts') | undefined =
+  process.env.EXPO_PUBLIC_LOKA_DEV_CARTRIDGE === '1' ? require('./build/seam.ts') : undefined;
 if (devClock) {
+  build?.install();
   worded.note = (words, key) => bind(seen, words, key); // a line as shown, bound too
   worded.made = new Map(); // an open conversation re-words its lines from the overlay (loka-wfrgk.19)
 }

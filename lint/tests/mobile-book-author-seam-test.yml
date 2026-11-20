@@ -1,0 +1,8 @@
+id: mobile-book-author-seam
+valid:
+  - "import { Text } from './Text.tsx';"
+  - "import { worded } from './words.ts';"
+invalid:
+  - "import { install } from '../author/build/seam.ts';"
+  - "const m = require('../author/panel.tsx');"
+  - "import x from '../author';"

@@ -13,6 +13,7 @@ cp kernel/ts/src/mechanics/movement/rule.ts kernel/ts/src/mechanics/movement/rul
 [ "$core_only" -eq 1 ] || cp mobile/packages/game-view/session.ts mobile/packages/game-view/session.ts.red
 [ "$core_only" -eq 1 ] || cp mobile/app/.storybook/picker/overlay.ts mobile/app/.storybook/picker/overlay.ts.red
 [ "$core_only" -eq 1 ] || cp mobile/app/book/words.ts mobile/app/book/words.ts.red
+[ "$core_only" -eq 1 ] || cp mobile/app/App.tsx mobile/app/App.tsx.red
 [ "$core_only" -eq 1 ] || cp mobile/app/book/DiscoveredMap.tsx mobile/app/book/DiscoveredMap.tsx.red
 [ "$core_only" -eq 1 ] || cp mobile/app/book/sections.tsx mobile/app/book/sections.tsx.red
 cleanup() {
@@ -23,6 +24,7 @@ cleanup() {
   [ "$core_only" -eq 1 ] || mv mobile/packages/game-view/session.ts.red mobile/packages/game-view/session.ts
   [ "$core_only" -eq 1 ] || mv mobile/app/.storybook/picker/overlay.ts.red mobile/app/.storybook/picker/overlay.ts
   [ "$core_only" -eq 1 ] || mv mobile/app/book/words.ts.red mobile/app/book/words.ts
+  [ "$core_only" -eq 1 ] || mv mobile/app/App.tsx.red mobile/app/App.tsx
   [ "$core_only" -eq 1 ] || mv mobile/app/book/DiscoveredMap.tsx.red mobile/app/book/DiscoveredMap.tsx
   [ "$core_only" -eq 1 ] || mv mobile/app/book/sections.tsx.red mobile/app/book/sections.tsx
 }
@@ -59,6 +61,10 @@ echo "export const raw = { color: '#7b2d20', fontSize: 17 };" >> mobile/app/book
 echo "import { Text as T } from 'react-native';" >> mobile/app/book/red_control.tsx
 # A negative marginVertical outside Tap (mobile-book-bleed-only-tap).
 echo "export const bleed = { marginVertical: -space.md };" >> mobile/app/book/red_control.tsx
+# The builder reached from a Book file other than Text.tsx (mobile-book-author-seam).
+echo "import { install } from '../author/build/seam.ts';" >> mobile/app/book/red_control.tsx
+# The seam installed outside author code, in a release path (mobile-author-seam-owner).
+echo "import { authorSeam } from './book/Text.tsx'; authorSeam.line = (p) => ({ ...p, accessibilityHint: 'x' });" >> mobile/app/App.tsx
 echo "import type { World } from '../../../kernel/ts/src/index.ts';" >> mobile/packages/game-view/session.ts
 # The picker: a book/ import and a raw colour on the manager side; a third colour in the overlay.
 printf "import { color } from '../../book/tokens.ts';\nexport const raw = { border: '1px solid #7b2d20', c: color };\n" > mobile/app/.storybook/picker/red_control.tsx
