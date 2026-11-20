@@ -9,7 +9,7 @@ import { burst, F, key, layout, stateOf, type Flow } from './flow.ts';
 import type { ChipAct } from './flowcard.tsx';
 import { Graph, Header } from './flowframe.tsx';
 import { entry, focusInk, followed, footer, inked, search } from './flowread.ts';
-import { fit, keep, zoomAt } from './map.ts';
+import { fit, keep, zoomAt } from '../../../kernel/ts/play/map.ts';
 import type { SetLayout } from './columns.tsx';
 import { BUDGET, fromRef, type Layout, type Selection } from './shell.ts';
 import { LIST, toggle, type Story } from './storylist.ts';

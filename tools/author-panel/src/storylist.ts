@@ -7,7 +7,7 @@ import { reads } from '../../../kernel/ts/play/reads.ts';
 import type { Edge } from '../../../kernel/ts/play/consequences.ts';
 import type { FactUsage } from '../../../kernel/ts/play/fact_usage.ts';
 import type { Triggers } from '../../../kernel/ts/play/scene_trigger.ts';
-import type { MapRoom } from './map.ts';
+import type { MapRoom } from '../../../kernel/ts/play/map.ts';
 import type { Covered } from '../../../kernel/ts/play/covered_type.ts';
 import { fromRef, type Item } from './shell.ts';
 

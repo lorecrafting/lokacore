@@ -1,7 +1,7 @@
 // The map's edits (editor-map-and-story-rulings.md, Left to E3b; gui-editor-design §3): each gesture
 // as write-route calls (§5.1) in order, undone together. No React or fetch here: the panel passes its
 // routes in; tested from kernel/ts/test/author_mapedit.test.ts.
-import { M, type At, type MapRoom } from './map.ts';
+import type { At, MapRoom } from './map.ts';
 
 type Told = { ok: boolean; told: unknown };
 export type Io = {
@@ -46,23 +46,6 @@ const faceOf = async (s: Run, a: MapRoom, dir: string) =>
   (await s.read<Doc>(fileOf(a))).doc.exits?.[dir] ?? no(`${a.key} has no exit ${dir}`);
 const roomOf = (rooms: MapRoom[], key: string) =>
   rooms.find((r) => r.key === key) ?? no(`${key} is not on the map`);
-
-/** The layout cell under a point of the map's SVG (the inverse of mapdraw.tsx `at`). */
-export const cellAt = (v: { zoom: number; x: number; y: number }, p: { x: number; y: number }) => ({
-  x: Math.floor((p.x - v.x) / (v.zoom * M.cell)),
-  y: Math.floor((p.y - v.y) / (v.zoom * M.cell)),
-});
-const DRAG = 4; // mutate-skip: px a press moves before it is a drag, uncalibrated design value
-/** A press released this far from where it began is a drag; nearer, it is a click (it selects). */
-export const dragged = (a: { x: number; y: number }, b: { x: number; y: number }) =>
-  Math.hypot(b.x - a.x, b.y - a.y) >= DRAG;
-/** The compass direction from one cell toward another on the same level: the larger axis wins. */
-export function toward(a: At, b: At) {
-  const [dx, dy] = [b.x - a.x, b.y - a.y];
-  if (a.z !== b.z || (!dx && !dy)) return undefined;
-  if (Math.abs(dx) >= Math.abs(dy)) return dx > 0 ? 'east' : 'west';
-  return dy > 0 ? 'south' : 'north';
-}
 
 /** Drag: writes `r`'s layout row (appending one for an unplaced room); a taken cell refuses. */
 const place = (s: Run, r: MapRoom, at: At) =>
@@ -167,8 +150,16 @@ async function made(s: Run, r: MapRoom, kind: 'npcs' | 'items', key: string, up?
 const minted = new Set<string>(); // `kind/key` handed out here: a second New before the recompile skips the first
 /** A new definition's key, no name asked: the first `<base>_<n>` from 1 that no `kind` node in the graph,
  * no template and no key handed out before holds (a template's child: `<template>_<n>`). */
-export function freeKey(base: string, kind: string, nodes: { kind: string; ref: string }[], templates: string[]) {
-  const taken = new Set([...templates, ...nodes.filter((o) => o.kind === kind).map((o) => o.ref.split('/')[1])]);
+export function freeKey(
+  base: string,
+  kind: string,
+  nodes: { kind: string; ref: string }[],
+  templates: string[],
+) {
+  const taken = new Set([
+    ...templates,
+    ...nodes.filter((o) => o.kind === kind).map((o) => o.ref.split('/')[1]),
+  ]);
   let n = 1;
   while (taken.has(`${base}_${n}`) || minted.has(`${kind}/${base}_${n}`)) n++;
   minted.add(`${kind}/${base}_${n}`);
@@ -176,8 +167,12 @@ export function freeKey(base: string, kind: string, nodes: { kind: string; ref: 
 }
 
 /** A dropped template's child key, `<template>_<n>`, free among the nodes of the template's kind. */
-export const childKey = (dir: 'npcs' | 'items', template: string, nodes: { kind: string; ref: string }[], templates: string[]) =>
-  freeKey(template, dir === 'npcs' ? 'npc' : 'item', nodes, templates);
+export const childKey = (
+  dir: 'npcs' | 'items',
+  template: string,
+  nodes: { kind: string; ref: string }[],
+  templates: string[],
+) => freeKey(template, dir === 'npcs' ? 'npc' : 'item', nodes, templates);
 
 /** Move to area: the file moves to `areas/<area>/rooms/`, or to the root for null. */
 const move = async (s: Run, r: MapRoom, area: string | null) =>
@@ -197,7 +192,8 @@ const bind = (s: Run, part: number, n: number, short: string, known: string[]) =
   });
 
 // Beat edits (design 5c) on part `part` of outline.json.
-const partOf = (doc: Outline, part: number) => doc.parts[part]?.beats ?? no(`outline.json has no part ${part + 1}`);
+const partOf = (doc: Outline, part: number) =>
+  doc.parts[part]?.beats ?? no(`outline.json has no part ${part + 1}`);
 const beatOf = (doc: Outline, part: number, n: number) => {
   const j = partOf(doc, part).findIndex((b) => b.n === n);
   return j < 0 ? no(`part ${part + 1} has no beat ${n}`) : ['parts', part, 'beats', j];
@@ -206,11 +202,14 @@ const beatOf = (doc: Outline, part: number, n: number) => {
 const addBeat = (s: Run, part: number, n: number) =>
   s.change<Outline>('outline.json', (doc) => {
     if (!Number.isInteger(n) || n < 1) no(`a beat's number is a whole number from 1, not ${n}`);
-    if (doc.parts.some((p) => p.beats.some((b) => b.n === n))) no(`outline.json already has beat ${n}`);
+    if (doc.parts.some((p) => p.beats.some((b) => b.n === n)))
+      no(`outline.json already has beat ${n}`);
     const beats = partOf(doc, part);
     const j = beats.findIndex((b) => b.n > n); // in number order, as play reads them
     const at = j < 0 ? beats.length : j;
-    return [{ path: ['parts', part, 'beats'], value: [...beats.slice(0, at), { n }, ...beats.slice(at)] }];
+    return [
+      { path: ['parts', part, 'beats'], value: [...beats.slice(0, at), { n }, ...beats.slice(at)] },
+    ];
   });
 const titleBeat = (s: Run, part: number, n: number, title: string) =>
   s.change<Outline>('outline.json', (doc) => {
