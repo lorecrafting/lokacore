@@ -89,12 +89,14 @@ test('a placed room offers no ＋ toward a held cell', async () => {
   assert.deepEqual(plus.map(words), ['＋ south', '＋ west', '＋ up', '＋ down']);
 });
 
-// Breaks: Move sending the root when the field is left as shown, or the typed area ignored.
+// Breaks: Move sending the root when the field is left as shown, the typed area ignored, or a
+// redrawn field showing the room's area while Move sends the old draft.
 test('Move to area sends the area as shown, or the typed one; an empty field is the root', async () => {
   const s = await opened();
   await s.press('Move to area');
   const field = () => s.shown().find((n) => n.props?.accessibilityLabel === 'Area');
   field().props.onChangeText(' cellar ');
+  assert.equal(field().props.defaultValue, ' cellar '); // the sheet drawn again shows what Move sends
   await s.press('Move to area');
   field().props.onChangeText('');
   await s.press('Move to area');
@@ -152,6 +154,19 @@ test('a confirmed delete closes its own sheet; another press answers a pending q
   await s.press('Delete hall');
   await s.press('Delete all');
   assert.deepEqual(s.closed, ['room:hall']);
+});
+
+// Breaks: a /story that does not answer 200 (a compile error) leaving a refusal or a Delete
+// question undrawn.
+test('the sheet redraws when /story fails', async () => {
+  let drew = 0;
+  story(
+    async () => [500, null],
+    () => drew++,
+    () => {},
+  );
+  await settle();
+  assert.equal(drew, 1);
 });
 
 // Breaks: a 3xx answer (not a write) taken as a saved write.

@@ -123,7 +123,7 @@ export const grows = (r: MapRoom, nodes: Node[], rooms: MapRoom[]) => (
 export const moveTo = (r: MapRoom) => (
   <View key={`move:${r.key}`} style={row}>
     <TextInput
-      defaultValue={r.area ?? ''}
+      defaultValue={drafts.get(r.key) ?? r.area ?? ''} // drawn again, it shows what Move sends
       placeholder={WORDS.area}
       accessibilityLabel={WORDS.area}
       onChangeText={(d) => void drafts.set(r.key, d)}

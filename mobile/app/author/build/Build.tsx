@@ -75,7 +75,6 @@ export const hold = autoHold(
   () => navigator.sendBeacon('/__author/hold', JSON.stringify({ on: false })),
   (release) => setTimeout(release),
 );
-/** Sheets by kind: an open sheet's id is `<kind>` or `<kind>:<arg>`; later slices register theirs. */
 /** Opens a sheet on the stack (or brings it to the top); the first remembers the focus to return. */
 export function open(id: string) {
   if (!builder.sheets) opener = globalThis.document?.activeElement as typeof opener;

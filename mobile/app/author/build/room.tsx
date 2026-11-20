@@ -43,11 +43,13 @@ export function story(
   const n = ++asked;
   void api?.('/story').then(
     ([status, json]) => {
-      if (status !== 200 || n !== asked) return;
-      const told = json as { map?: Room[]; graph?: { nodes?: Node[] } } | null;
-      rooms = Array.isArray(told?.map) ? told.map : [];
-      nodes = told?.graph?.nodes ?? [];
-      redraw();
+      if (n !== asked) return;
+      if (status === 200) {
+        const told = json as { map?: Room[]; graph?: { nodes?: Node[] } } | null;
+        rooms = Array.isArray(told?.map) ? told.map : [];
+        nodes = told?.graph?.nodes ?? [];
+      }
+      redraw(); // a refusal or question still shows when the map does not come (a compile error)
     },
     () => {}, // the server down: the pencil waits for the next message
   );
