@@ -131,11 +131,10 @@ async function edit(h: Hooks, key: string) {
 /** A Checks row's line: its field when this page draws the key, else the source in the owner's
  * editor, as E5 does (inbook.ts `edit`). False: not on this page. */
 export function go(key: string) {
-  if (!hooks) return false;
-  const here = key.endsWith('.description') && [...hooks.seen.values()].includes(key); // as keyOf draws
-  if (here) return (void edit(hooks, key), true);
-  void hooks.api('/open', { key, words: hooks.said.get(key) ?? '' });
-  return false;
+  const h = hooks!; // install attaches it before Build can open the Checks sheet
+  const here = key.endsWith('.description') && [...h.seen.values()].includes(key); // as keyOf draws
+  void (here ? edit(h, key) : h.api('/open', { key, words: h.said.get(key) ?? '' }));
+  return here;
 }
 /** Build turned on or off: no field stays open, and the Book redraws its lines. */
 export const shut = () => hooks && close(hooks);

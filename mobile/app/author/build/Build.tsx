@@ -99,7 +99,7 @@ async function putBack(w: Wrote) {
   clearTimeout(undoTimer);
   redrawStrip();
   const undone = api!('/undo', { id: w.id, key: w.key, words: w.words });
-  const [status] = await undone.catch(() => [0]); // the server down: not put back, said so
+  const [status] = await undone.catch(() => []); // the server down: not put back, said so
   notBack = status === 200 ? undefined : w;
   redrawStrip();
 }
