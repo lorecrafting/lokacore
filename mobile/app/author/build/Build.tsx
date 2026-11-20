@@ -6,7 +6,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { size, space, type } from '../../book/tokens.ts';
 import type { Message } from '../live.ts';
 import { install as seam } from './seam.ts';
-import { heard as told, type Hooks } from './field.tsx';
+import { heard as told, shut, type Hooks } from './field.tsx';
 import { autoHold, ink, keep, restored, toggled, type Builder } from './build.ts';
 
 const WORDS = { build: 'Build', on: '✎ Build', held: (n: number) => `Held · ${n} waiting` };
@@ -77,7 +77,7 @@ const STRIP = {
 /** The strip at `size.touch` above the Book: the Build switch and the Hold status. */
 export function Strip({ children }: { children: ReactNode }) {
   const [, redraw] = useState({});
-  const change = (next: Builder) => (set(next), redraw({}));
+  const change = (next: Builder) => (set(next), redraw({}), shut());
   return (
     <View style={{ flex: 1 }} /* mutate-skip: layout */>
       <View style={{ ...STRIP, backgroundColor: ink('bg'), borderColor: ink('line') }}>

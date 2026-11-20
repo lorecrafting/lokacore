@@ -248,8 +248,8 @@ function onKey(e: KeyboardEvent, inField = typing(e.target), relayed = false) {
   reapply();
 }
 const onDouble = (e: MouseEvent) => {
-  if (field?.el.contains(e.target as Node)) return; // a word picked in the field
-  let el = e.target as HTMLElement | null;
+  let el = e.target as HTMLElement | null; // a word picked in the field, or Build's line (field.tsx), is not ours
+  if (field?.el.contains(el) || el?.closest('[aria-label$=", edit"]')) return;
   while (el && el !== document.body && drawn(el) === undefined) el = el.parentElement;
   void openField(el && el !== document.body ? el : (e.target as HTMLElement));
 };

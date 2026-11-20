@@ -6,7 +6,6 @@
 import type { ComponentProps, ReactNode } from 'react';
 import { Text, TextInput } from 'react-native';
 import { plain } from '../../book/model.ts';
-import { onKey } from '../../book/lines.tsx';
 import { size, space, type } from '../../book/tokens.ts';
 import { api } from '../inbook.ts';
 import { drawnWords, noFieldNote, oneLine, saving, unwritten } from '../prose_rules.ts';
@@ -74,7 +73,7 @@ export function line(p: Props): Props {
     accessibilityRole: 'button',
     accessibilityLabel: `${blank ? `Unwritten ${name}` : shown}${marked ? ', unconfirmed' : ''}, edit`,
     onPress: press,
-    ...onKey((k) => (k === 'Enter' || k === ' ') && (press(), true)), // web Text has no key press
+    ...({ onKeyDown: keyed(press) } as object), // web Text has no key press
     style: [
       p.style,
       blank && { borderBottomWidth: size.rule, borderColor: ink('line') },
@@ -94,6 +93,11 @@ export function line(p: Props): Props {
     ],
   };
 }
+/** Enter or Space on the line itself: a link's own key bubbles up from inside and is not ours. */
+const keyed = (press: () => void) => (e: KeyboardEvent) =>
+  e.target === e.currentTarget &&
+  (e.key === 'Enter' || e.key === ' ') &&
+  (e.preventDefault(), press());
 const MARKED = {
   textDecorationLine: 'underline',
   textDecorationStyle: 'dashed',
@@ -108,7 +112,7 @@ const CHOICE = {
 };
 
 async function edit(h: Hooks, key: string) {
-  if (busy || field?.at) return; // one field at a time
+  if (busy) return; // a tap elsewhere replaces a field left open (a notice, another page)
   busy = true;
   const [status, at] = await api(
     `/line?key=${enc(key)}&words=${enc(h.said.get(key) ?? '')}`,
@@ -119,6 +123,8 @@ async function edit(h: Hooks, key: string) {
       : { key, draft: '', note: noFieldNote(key, typeof at === 'string' ? at : undefined) };
   h.redraw();
 }
+/** Build turned on or off: no field stays open, and the Book redraws its lines. */
+export const shut = () => hooks && close(hooks);
 function close(h: Hooks) {
   field = undefined;
   h.commit();
@@ -173,7 +179,7 @@ function open(h: Hooks, f: Field, at: At, name: string, p: Props) {
       onFocus={h.focus}
       onChangeText={(d) => void (f.draft = d)}
       onSubmitEditing={() => void save(h, f)}
-      onBlur={() => void save(h, f)}
+      onBlur={() => (h.commit(), void save(h, f))} // the Hold lasts while it has focus
       onKeyPress={(e) => {
         const k = e.nativeEvent as { key: string; shiftKey?: boolean };
         if (k.key === 'Escape') close(h);

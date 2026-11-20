@@ -28,6 +28,7 @@ Object.assign(globalThis, {
 });
 const build = await import('./build/Build.tsx');
 const { RoomPage } = await import('../book/Body.tsx');
+const { shut } = await import('./build/field.tsx');
 build.install({ seen, said, redraw() {} });
 
 /** The room page as the author preview draws it: panel.tsx's played().text binds each line. */
@@ -85,6 +86,14 @@ test('a tap opens the source words in place, Enter sends them, links still play'
     'a link that is its whole line edits instead of playing',
   );
   assert.equal(line(drawn).props.accessibilityLabel, 'A low loft. A hearth smokes., edit');
+  const key = (target: object) => ({
+    key: 'Enter',
+    target,
+    currentTarget: {},
+    preventDefault() {},
+  });
+  line(drawn).props.onKeyDown(key({})); // Enter on the link inside bubbles to its line
+  assert.equal(sent.length, 0, "a link's Enter opens the field too");
   const input = await opened(LINKED, at(LINKED));
   assert.equal(input.props.defaultValue, LINKED);
   input.props.onFocus();
@@ -98,6 +107,31 @@ test('a tap opens the source words in place, Enter sends them, links still play'
   assert.equal(field(page(LINKED)), undefined, 'the field stays open after a save');
   await tick(); // the release waits a turn (Build.tsx `hold`)
   assert.deepEqual(holds(), [true, false], 'the field took no Hold, or kept it');
+  sent.length = 0;
+});
+
+// Breaks: a field left open (a notice, then a page change) refusing every later tap, or keeping
+// the Hold after it lost focus; Build turned off leaving the field open.
+test('a field left open blocks nothing and holds only while focused', async () => {
+  const press = line(page(LINKED)).props.onPress;
+  const input = await opened(LINKED, at(LINKED));
+  input.props.onFocus();
+  input.props.onChangeText('');
+  input.props.onSubmitEditing(); // the "Empty." notice keeps it open
+  input.props.onBlur();
+  await tick();
+  assert.deepEqual(holds(), [true, false], 'the Hold outlived the focus');
+  sent.length = 0;
+  answers = [[200, at('A cold loft.')]];
+  press(); // the same line drawn again, as on a page that no longer shows the field
+  await tick();
+  assert.equal(
+    field(page(LINKED)).props.defaultValue,
+    'A cold loft.',
+    'the stale field refused the tap',
+  );
+  shut();
+  assert.equal(field(page(LINKED)), undefined, 'Build off left the field open');
   sent.length = 0;
 });
 
