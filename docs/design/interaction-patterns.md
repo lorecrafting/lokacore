@@ -122,6 +122,18 @@ order is a bug, not a variation ([owner, 2026-10-23](../decisions/owner-decision
 - Enforcement: `mobile/app/catalogue.test.ts` (every component listed); `mobile/app/book/polish.test.ts`
   (the fixed Contents list).
 
+### Author chrome over the Book (dev only)
+
+- What: the in-game builder's Build strip, a bar above the Book, outside its page and chrome row,
+  drawn from `mobile/app/author/`, never from `book/`. It carries the Build switch and one polite
+  status line, in Book tokens and the Book's current palette, and shows in the author preview with
+  Build on or off.
+- Never appears: in a release build or the plain dev preview; game actions; player-facing words.
+- Source: [owner decision](../decisions/owner-decision-build-strip-2026-11-20.md),
+  [Author mode](../system/book-ui.md#author-mode-dev-only).
+- Enforcement: `mobile/app/author/seam.test.ts` (absent from a release bundle),
+  `mobile/app/author/build.test.ts`.
+
 ## 2. Where actions live
 
 ### Every action sits on a fixture, person or item page
