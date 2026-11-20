@@ -4,10 +4,10 @@ The present only: open work, next steps, owner questions, and standing owner rul
 yet. Rewrite this page in place once per session, at its end; never add dated session sections. History lives in git, Beads and `docs/reviews/`; lessons
 go to [PM lessons](lessons/pm.md) ([harness patterns](decisions/owner-decision-harness-patterns-2026-10-28.md)).
 
-AS OF main after 250eac16d; written 2026-11-19 in Claude Code (Opus 5.5), PM session. The Anthropic
-subscription is back on the $20 Pro plan (owner 2026-11-19): low-token workflow, **subagents on Opus,
-never Fable** (no usage credits). `kernel_api` is 1.159. **Nothing is in flight, no agent is running.**
-#454 is the owner's P3 hold.
+AS OF main after 4d226f866; written 2026-11-20 in Claude Code (Opus 5.5), PM session. The Anthropic
+subscription is on the $20 Pro plan: low-token workflow, **subagents on Opus, never Fable** (no usage
+credits; a developer hit the 5-hour limit once this session and was finished by the PM). `kernel_api`
+is 1.159. **Nothing is in flight, no agent is running.** #454 is the owner's P3 hold.
 
 ## Direction
 
@@ -20,22 +20,33 @@ never Fable** (no usage credits). `kernel_api` is 1.159. **Nothing is in flight,
   developer at a time; a separate reviewer only for engine, save, contract, compiler-facing or security.
 - **The prologue is v1.** The owner builds Part 1 in `cartridges/prologue/` (**uncommitted on purpose**;
   three rooms and a test item so far). Start: `bin/author.sh cartridges/prologue`; restart after each merge.
+  **Give the owner http://localhost:19009 (panel) or http://localhost:19006/?dev=1 (the Book with Build).**
+  Never 19007: that is Metro's raw port, with no isolation headers, so the save fails there (#769).
 - **The owner writes every player-facing word**; agents use `~`. Polish feedback goes to Beads under
   loka-wfrgk; fixes batch on the owner's go; blockers are fixed at once.
 - NPC routines (loka-ni2zd) wait for the owner's own design session.
 
 ## Board
 
-**35 open, 11 ready, 3 housekeeping deferred to 2027-01-01.** Before proposing work, check the bead is
-not already shipped: read the code, not the title, and sweep ready parents against their children.
+**55 open, 14 ready.** Before proposing work, check the bead is not already shipped: read the code, not
+the title, and sweep ready parents against their children.
 
-Shipped 2026-11-19 (this session): **#760** (`wfrgk.125`) a diagnostic with `rel: null` (a `~words`
-line) no longer blanks the panel's map, hierarchy and inspector (`story.ts` `nodeOf`); **#761**
-(`wfrgk.121/.122/.123`) a card field types over a bare `~`, `TOUCH_LINK_MISSING` skips a bare `~` line
-(a starter world compiles with no warning), and the Room card has **Add exit** (both ways, any level).
-`wfrgk.124` closed as a misread. Builder probes **0.1** (the card logic bundles for web and Hermes;
-release unchanged; Metro must watch `kernel/ts/play` and `protocol/`) and **0.2** (warm structural
-edits 0.55-0.97 s; the 18 s was cold start) are recorded in the design's section 8.
+Shipped 2026-11-20 (this session), the builder's phases 0 and 1:
+- **#762** `hcnlh.3` (0.4): `registry.json` and `new.json` now live in `kernel/ts/play/`. Metro watches
+  `kernel/ts/play` and `protocol/`.
+- **#764** `hcnlh.4` (0.3): the parity gate (`bin/editor_gate.exs`, `kernel/ts/play/parity.json`, and the
+  shrink-only `test/loka/builder_todo_baseline.txt`). It proves each builder home exists, not that it works.
+- **#767** `hcnlh.10`: the gate **refuses `book: generic`** until the generic form editor exists. Slice 2.3
+  lifts it, with its own shrink-only list.
+- **#763** `wfrgk.100.4.1`: a dialogue choice label has its words field on the card.
+- **#765** `hcnlh.5` (1.1): the dev-only `authorSeam` in `book/Text.tsx`, lint, and a release sentinel.
+- **#766** `hcnlh.6` (1.2): the Build strip; owner decision `owner-decision-build-strip-2026-11-20.md`.
+- **#768** `hcnlh.7` (1.3): the in-place field (`mobile/app/author/build/field.tsx`). `/set` is deferred to 5.1.
+- **#770** `hcnlh.8` (1.4): Undo chip (5 s, owner OK until the Recent tab), the Checks badge and sheet, and
+  the keep-my-place notice. All three actions were browser-checked by the PM.
+- **#769** `hcnlh.12`: the author terminal names the preview port, not Metro's.
+
+Book UI spec for 1.3 and 1.4: `book-ui.md` Author mode, and looks in `BOOK-UI-COMPONENTS.md`.
 
 ## Story patterns (loka-vduxr.57, shipped 2026-11-17)
 
@@ -54,24 +65,25 @@ corrected the same way (`village_regard`, `mill_gate` did not exist). Grep the r
 
 ## Resume, in order
 
-1. **Builder slice 0.4, `loka-hcnlh.3`** (ready): move `registry.json` and `new.json` from
-   `tools/author-panel/src/edit/` to `kernel/ts/play/`, re-point panel, gate (`bin/toolbox_page.exs`)
-   and tests, and add `kernel/ts/play` and `protocol/` (was `protocol/fixtures`) to
-   `mobile/app/metro.config.js` watchFolders. Not compiler-facing: no separate reviewer.
-2. Then **0.3, `loka-hcnlh.4`** (parity gate: `book` surface per row + `parity.json`, shrink-only
-   `todo`, red controls), then **1.1 `.5`** (the `Text.tsx` seam, separate reviewer and designer),
-   then 1.2-1.4 (`.6`-`.8`). Split phases 2-6 into beads when phase 1 lands. Design section 7 has
-   every slice's acceptance.
-3. **`loka-wfrgk.100.4.1`** (small, ready): drop the card's stale ruling-11 refusal of a dialogue
-   choice label (`tools/author-panel/src/edit/fields.tsx:39`); owner ruled yes 2026-11-19.
-4. **The owner writing Part 1**: friction from `bin/author.sh` goes to Beads; blockers at once.
-5. **Owner answers given 2026-11-19:** `vduxr.39` and `dbtxr` closed; `toolbox/settle-3` and
-   `design/playtest-combat` deleted (local, remote, worktrees). The weather `wet` flag is **kept**: the
-   light mechanic reads it (`light/shared.ts:28-31`), only sound does not; the "drop it" default rested
-   on HANDOFF's wrong claim, corrected in `cartridge.md`. Retros `8v4lx` and `7vnzm` were already closed
-   2026-11-16.
-6. Parked on purpose: `.100.7`, `.100.8` (the builder's sheets supersede the line-key question),
-   `vduxr.29` (unreproducible), `.102.1` (needs a per-node cite carrier first), `ni2zd.*`, #454.
+1. **Builder phase 2, starting with 2.1 `loka-hcnlh.13`** (Sheet and stack, title pencil, Room sheet; designer).
+   - Slices 2.1-6.8 are beads `loka-hcnlh.13`-`.35`, chained in the design's §7 order, each with its acceptance.
+   - Reviewer and designer flags are the **R** and **D** marks in the design's table: 3.1 needs a reviewer
+     (it is security work).
+   - Brief the developer to browser-check every acceptance line at 390 px before handback (retro `loka-p971b`
+     item 4).
+2. **The two panel smoke flakes** cost a rerun on most PRs: `loka-61se9` (map test, half-written JSON) and
+   `loka-wfrgk.127` (palette Undo). Fix them early in phase 2.
+3. Builder follow-ups (small, dev-only):
+   - `loka-hcnlh.9`: a failed hold request is silent.
+   - `loka-hcnlh.11`: the field's E5 overlap and silent failures, the 1.4 nits, and Esc focus.
+   - `loka-wfrgk.126`: a choice-label note mismatch between book-ui and prose_rules.
+4. **The owner writing Part 1**: friction from `bin/author.sh` goes to Beads; blockers are fixed at once.
+5. **Retro `loka-p971b`** waits for the owner's approval of its four items.
+6. Parked on purpose:
+   - `.100.7` and `.100.8` (the builder's sheets supersede the line-key question).
+   - `vduxr.29` (unreproducible).
+   - `.102.1` (needs a per-node cite carrier first).
+   - `ni2zd.*` and #454.
 
 ## Code worth reading before touching its area
 
@@ -128,8 +140,7 @@ owner guide: [polish tour](design/polish-tour.md). Screenshots: Playwright needs
 
 ## Retros
 
-None awaiting the owner (2026-11-19). Before asking about one, `br show` it: `8v4lx` and `7vnzm` were
-listed here as open after both had closed on 2026-11-16.
+`loka-p971b` (2026-11-20) awaits the owner. Before asking about a retro, `br show` it first.
 
 ## Session procedure
 
@@ -150,6 +161,7 @@ listed here as open after both had closed on 2026-11-16.
 - Mutation runs in a throwaway worktree need node_modules (root, `kernel/ts`, `tools/author-panel`) and `deps` linked and
   `_build` copied, else every row is BASELINE-RED; panel rows often stay BASELINE-RED there, so hand mutants in the slice
   worktree cover them.
-- Subagents work only in their own worktrees under `~/dev/worktrees.noindex`; a fresh worktree runs `bin/worktree_setup.sh`.
+- Subagents work only in their own worktrees under `~/dev/worktrees.noindex`. A fresh worktree runs **its own**
+  `bin/worktree_setup.sh`, from inside it: main's copy sets up main.
   The load gate refuses spawns at load 8 or more: wait with a background until-loop, never bypass. Kill orphaned
   author servers and Playwright Chromes when load climbs (`ps` for `worktrees.noindex` and `--disable-field-trial-config`).
