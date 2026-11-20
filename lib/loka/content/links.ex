@@ -5,7 +5,8 @@ defmodule Loka.Content.Links do
   detail of the room or item or NPC of the cartridge. A target that names none of them is
   UNRESOLVED_REFERENCE; a room description (or variant) without a link to one of the room's
   details, or a room line (or variant) without one to its item or NPC, is a TOUCH_LINK_MISSING
-  warning. Checked for each use of a text key, since its owner decides what a link may name.
+  warning, except a line that is a bare `~` (unwritten: its link comes with its words). Checked
+  for each use of a text key, since its owner decides what a link may name.
   """
   import Loka.Content.Source, only: [diag: 3, at: 2]
   alias Loka.Content.{Entities, RoomParts}
@@ -77,8 +78,12 @@ defmodule Loka.Content.Links do
 
   defp links({rel, steps, key, self, targets, must}, text) do
     path = at(rel, steps)
-    named = for [_, w | t] <- Regex.scan(@link, Map.get(text, key, "")), do: target(w, t, self)
-    unresolved(named, self, targets, path) ++ missing(named, must, path)
+    words = Map.get(text, key, "")
+    named = for [_, w | t] <- Regex.scan(@link, words), do: target(w, t, self)
+
+    # a bare `~` is unwritten (the placeholder rule): its link comes with the words (loka-wfrgk.122)
+    unresolved(named, self, targets, path) ++
+      if(String.trim(words) == "~", do: [], else: missing(named, must, path))
   end
 
   defp unresolved(named, self, targets, path) do

@@ -61,6 +61,28 @@ test('a room card writes its description line in place, off the Book page; Esc w
   }
 });
 
+// Break: a click into a bare `~` field puts the caret after it, so typing writes `~Cold`, which
+// ships as written with a placeholder_tilde warning (loka-wfrgk.121); the Book's field selects it.
+test('a click into an unwritten field and typing replaces the `~`', async () => {
+  const before = readFileSync(TEXT, 'utf8');
+  const unwritten = before.replace(`"room.fell_top.description": "${FELL_TOP}"`, '"room.fell_top.description": "~"');
+  assert.notEqual(unwritten, before);
+  writeFileSync(TEXT, unwritten);
+  const page = await open(room);
+  try {
+    const field = page.getByTitle('room.fell_top.description');
+    await shows(field, '~');
+    await field.click();
+    await field.pressSequentially('Cold');
+    await field.blur();
+    await until(() => readFileSync(TEXT, 'utf8') !== unwritten);
+    assert.match(readFileSync(TEXT, 'utf8'), /"room\.fell_top\.description": "Cold"/);
+  } finally {
+    writeFileSync(TEXT, before);
+    await page.close();
+  }
+});
+
 // Breaks: a keystroke commits (one /edit per key), or Enter's save and the blur after it send two.
 test("the generic card's words commit once, on Enter, never per keystroke", async () => {
   const before = readFileSync(TEXT, 'utf8');
