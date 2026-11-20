@@ -11,7 +11,8 @@ config.transformer.babelTransformerPath = require.resolve('./sksl-transformer.cj
 config.watchFolders = [
   path.resolve(__dirname, '..'),
   path.resolve(__dirname, '../../kernel/ts/src'),
-  path.resolve(__dirname, '../../protocol/fixtures'),
+  path.resolve(__dirname, '../../kernel/ts/play'), // the in-game builder's card logic and registry
+  path.resolve(__dirname, '../../protocol'),
 ];
 // The kernel version's commit (ADR-075 §3), inlined into the bundle as EXPO_PUBLIC_KERNEL_COMMIT:
 // HEAD, with -dirty when the tree has changes (never the bare HEAD then); unset when git fails.

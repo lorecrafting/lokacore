@@ -204,7 +204,7 @@ schema_paths =
       do: p
 
 schema_paths = Enum.sort(schema_paths ++ for(t <- enum, do: "treatment:#{t}"))
-editor_path = Enum.at(System.argv(), 4, "tools/author-panel/src/edit/registry.json")
+editor_path = Enum.at(System.argv(), 4, "kernel/ts/play/registry.json")
 editor = json.(editor_path)
 baseline_path = Enum.at(System.argv(), 5, "test/loka/editor_generic_baseline.txt")
 lines = &MapSet.new(String.split(&1, "\n", trim: true))

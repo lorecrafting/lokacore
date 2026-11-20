@@ -199,7 +199,7 @@ controls = [
 
 # Editor gate controls (toolbox_page.exs): a planted registry, baseline or main's baseline, each
 # at tmp/red-editor-<name>.*; the files not planted are the committed ones.
-editor_registry = "tools/author-panel/src/edit/registry.json"
+editor_registry = "kernel/ts/play/registry.json"
 editor_baseline = "test/loka/editor_generic_baseline.txt"
 editor = JSON.decode!(File.read!(Path.join(root, editor_registry)))
 base = File.read!(Path.join(root, editor_baseline))

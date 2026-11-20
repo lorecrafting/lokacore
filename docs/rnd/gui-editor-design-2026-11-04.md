@@ -30,7 +30,7 @@ the single truth; the compiler is the validator.
 | Compiler refusals in place | `mix loka.compile --json` emits each Diagnostic (`code`, `path`, `rel`, `line`, `words`) beside today's lines; the card shows a refusal at its field by `path`. No protocol change: Diagnostic already carries `path`. |
 | Rename a key | Out of scope for v1 (every referrer and checkpoint changes). The card shows referrers and refuses. |
 | Prose | Only through the prose block (loka-vduxr.53's route). New things are born with `~`; the editor never writes words. |
-| Coverage gate | `tools/author-panel/src/edit/registry.json`, one source read by the panel and by the gate: each implemented capability's declarations name a create, edit and delete surface, or `engine-only: <reason>`. CI fails on a missing row, a missing component, or a generic row not in the baseline. |
+| Coverage gate | `kernel/ts/play/registry.json` (in `tools/author-panel/src/edit/` until loka-hcnlh.3), one source read by the panel and by the gate: each implemented capability's declarations name a create, edit and delete surface, or `engine-only: <reason>`. CI fails on a missing row, a missing component, or a generic row not in the baseline. |
 
 ## 2. What is there today (read-only findings)
 
@@ -210,7 +210,7 @@ Tests: the write routes get `node:test` cases in `kernel/ts/test/live.test.ts` o
 
 loka-vduxr.59's generator fails CI when an implemented capability lacks a summary, its declarations (or `engine-only`), a compiling sampler, and a showcase location. This design adds one input and three checks to the same generator (one gate, one `bin/regen.sh` entry, one `REGEN_DIRTY`):
 
-- Input: `tools/author-panel/src/edit/registry.json`. Per implemented capability: `create`, `edit`, `delete`, each a component path under `tools/author-panel/src/edit/` or the word `generic`, and `declares` listing the declaration sites the row covers (`room.exits`, `npc.shop`, `reactions/`, `facts.json`), copied from the toolbox data's "declares" column so the two cannot drift: the generator fails when a toolbox declaration has no registry row naming it, or a registry row names a declaration the toolbox does not list.
+- Input: `kernel/ts/play/registry.json` (in `tools/author-panel/src/edit/` until loka-hcnlh.3). Per implemented capability: `create`, `edit`, `delete`, each a component path under `tools/author-panel/src/edit/` or the word `generic`, and `declares` listing the declaration sites the row covers (`room.exits`, `npc.shop`, `reactions/`, `facts.json`), copied from the toolbox data's "declares" column so the two cannot drift: the generator fails when a toolbox declaration has no registry row naming it, or a registry row names a declaration the toolbox does not list.
 - Check 1, **CRUD complete**: every implemented capability with declarations has all three of `create`, `edit`, `delete`; one with none is `engine-only: <reason>` (the same reason the toolbox row carries). Missing: halt, naming the capability and the missing verb.
 - Check 2, **the component exists**: each named path is a file; a `generic` entry is in `test/loka/editor_generic_baseline.txt` (one line per `<capability>.<verb>`), which only shrinks (the lint baseline rule, `bin/regen.sh:12`). A `generic` entry not in the baseline, or a baseline line no longer generic: halt.
 - Check 3, **the toolbox page shows it**: the generated page gains an "Editor" column per row (`bespoke`, `generic`, `engine-only`), so a builder sees what is hand-built.

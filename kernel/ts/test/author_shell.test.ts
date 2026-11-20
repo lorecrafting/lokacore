@@ -187,12 +187,10 @@ test('.dark and color-scheme follow a forced OS scheme and its changes', () => {
   assert.equal(heard.size, 0);
 });
 
-// Breaks: a starter added to edit/new.json never reaches the Hierarchy's + list, or a kind header's
+// Breaks: a starter added to play/new.json never reaches the Hierarchy's + list, or a kind header's
 // + makes the wrong starter (`room` making an area; `scene` or `status` making nothing).
 test('the Hierarchy + lists every starter once, and a kind header`s + makes its own starter', () => {
-  const starters = JSON.parse(
-    readFileSync(new URL('../../../tools/author-panel/src/edit/new.json', import.meta.url), 'utf8'),
-  );
+  const starters = JSON.parse(readFileSync(new URL('../play/new.json', import.meta.url), 'utf8'));
   assert.deepEqual(shell.GROUPS.flatMap(([, kinds]) => kinds).sort(), [...starters].sort());
   assert.deepEqual(
     [

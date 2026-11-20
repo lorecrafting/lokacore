@@ -91,7 +91,7 @@ hand-written prose, the compiler as validator, and "a card never offers what the
   ScenePage (`ScenePage.tsx:42`), Chapter (`sections.tsx:276`), Dead, Ancestry, the six sections
   (Contents `Menu.tsx:37`, Character, Skills, Carrying, Map `sections.tsx:202`, Journal, Settings) and
   Credits. Combat appears in the model (`model.ts:63`) but its draw site was not traced.
-- **Gate today**: `tools/author-panel/src/edit/registry.json` has 277 rows keyed by **schema path**
+- **Gate today**: `kernel/ts/play/registry.json` (in `tools/author-panel/src/edit/` until loka-hcnlh.3) has 277 rows keyed by **schema path**
   (`kind.field`). Each row is `{create, edit, delete}`, either `generic` or a component path.
   `bin/toolbox_page.exs:192-281` checks that every schema path has all three verbs and that each path exists. It also holds the
   generic set equal to `test/loka/editor_generic_baseline.txt` (282 lines), shrink-only.

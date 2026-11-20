@@ -18,7 +18,7 @@ defmodule Loka.ContentStartersTest do
   # or names wrongly (`New room` once sent `room`, which no starter has: loka-wfrgk.60).
   test "every source schema kind has a starter, a coverage row and a palette New" do
     assert @schema_kinds -- Starters.kinds() == []
-    offered = "tools/author-panel/src/edit/new.json" |> File.read!() |> Jason.decode!()
+    offered = "kernel/ts/play/new.json" |> File.read!() |> Jason.decode!()
     assert Enum.sort(offered) == Starters.kinds() -- ["cartridge"]
     for kind <- @schema_kinds, do: assert(@guide =~ "\n| `#{kind}` |", "no coverage row: #{kind}")
   end

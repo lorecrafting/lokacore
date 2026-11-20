@@ -10,7 +10,7 @@ defmodule Loka.RedControlsTest do
     for rel <-
           ~w(bin/red_controls.exs protocol/capability_registry.json docs/features.json
                   docs/MECHANICS-TOOLBOX.md cartridges/toolbox_showcase/transcripts/walk_combat.jsonl
-                  tools/author-panel/src/edit/registry.json test/loka/editor_generic_baseline.txt) do
+                  kernel/ts/play/registry.json test/loka/editor_generic_baseline.txt) do
       File.mkdir_p!(Path.dirname(Path.join(root, rel)))
       File.cp!(rel, Path.join(root, rel))
     end

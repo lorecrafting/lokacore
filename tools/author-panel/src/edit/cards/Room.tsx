@@ -23,7 +23,7 @@ import { linkTo, mapCommand, mapNewest, shown } from '../../mapwire.ts';
 import { fields, inline, WordsField, type Context } from '../fields.tsx';
 import { AddMenu, CardForm, Header, adding, useCard, useCartridge } from '../Generic.tsx';
 import { Folded, Refusal } from '../templates.tsx';
-import registry from '../registry.json';
+import registry from '../../../../../kernel/ts/play/registry.json';
 
 const OWN = ['name', 'description', 'exits']; // drawn above the form
 export const HIDE = { 'ui:field': 'Hidden', 'ui:widget': 'hidden' };

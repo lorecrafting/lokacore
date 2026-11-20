@@ -29,7 +29,7 @@ import { ask, type useDiagnostics } from '../author.ts';
 import { Button } from '../components/ui/button.tsx';
 import { fields, type Context } from './fields.tsx';
 import { Refusal, templates } from './templates.tsx';
-import registry from './registry.json';
+import registry from '../../../../kernel/ts/play/registry.json';
 export { AddMenu } from './AddMenu.tsx';
 
 import { AddMenu } from './AddMenu.tsx';

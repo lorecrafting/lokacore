@@ -27,7 +27,7 @@ import { Input } from '../../components/ui/input.tsx';
 import { FieldName, fields, type Context } from '../fields.tsx';
 import { AddMenu, CardForm, Header, useCard } from '../Generic.tsx';
 import { Refusal } from '../templates.tsx';
-import registry from '../registry.json';
+import registry from '../../../../../kernel/ts/play/registry.json';
 
 type Diag = ReturnType<typeof useDiagnostics>;
 type Named = Record<string, string[]>; // resource and attribute keys, from the root files

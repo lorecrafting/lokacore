@@ -4,7 +4,7 @@
 // kernel/ts/test/author_shell.test.ts.
 
 import type { ListState } from './storylist.ts';
-import NEW from './edit/new.json' with { type: 'json' };
+import NEW from '../../../kernel/ts/play/new.json' with { type: 'json' };
 
 export type Selection = { file?: string; kind: string; key: string };
 /** The World card's selection: cartridge.json, which no graph node names (its card opens the root files). */
@@ -134,7 +134,7 @@ export const nodeOf = (kind: string) => NODE[kind] ?? kind.replace(/(us)es$|s$/,
 /** The starter a Hierarchy kind header's + makes: `room` → rooms (the later of areas and rooms wins). */
 // The actions starter writes a scripted action, not the command `action` nodes listed under that header, so it gets no +.
 export const STARTER: Record<string, string> = Object.fromEntries(NEW.filter((k) => k !== 'actions').map((k) => [nodeOf(k), k]));
-/** The Hierarchy's New list: every starter of edit/new.json, by what an author is making. */
+/** The Hierarchy's New list: every starter of kernel/ts/play/new.json, by what an author is making. */
 export const GROUPS: [string, string[]][] = [
   ['Places', ['rooms', 'areas', 'barriers', 'transports', 'structures']],
   ['People and things', ['npcs', 'items', 'populations', 'services', 'liquids']],
