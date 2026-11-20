@@ -349,12 +349,13 @@ test("the map's rooms: file, area by folder or bundle, exits and layout cell", (
 });
 
 // Break: rows keyed by the wrong node (an area folder's, a `.scene` as other than its dialogue),
-// or a row of a file with no node (text.json) given one.
+// or a row of a file with no node (text.json) given one, or a row with no file (`rel: null`, a
+// `placeholder_tilde` on a text key) throwing, which blanked the map, hierarchy and inspector.
 test("the compile's diagnostics by node", () => {
   const [near, far, scene] = ['rooms/village_green.json', hub, 'scenes/greet.scene'].map((rel) => ({
     rel,
   }));
-  const model = story(src, dev, [near!, far!, scene!, { rel: 'text.json' }]);
+  const model = story(src, dev, [near!, far!, scene!, { rel: 'text.json' }, { rel: null }]);
   assert.deepEqual(model.diagnostics, {
     [green]: [near],
     [ref('dialogue', 'hub')]: [far],
