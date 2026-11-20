@@ -2,13 +2,13 @@
 // above the Book, the sheet host, and auto-hold. panel.tsx requires this only in the author preview,
 // so a release never holds it (author/seam.test.ts looks for `BUILD`).
 import { useState, type ReactNode } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View, useColorScheme } from 'react-native';
-import { chrome, size, space } from '../../book/tokens.ts';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { color, size, space, type } from '../../book/tokens.ts';
 import type { Message } from '../live.ts';
 import { install as seam } from './seam.ts';
 import { autoHold, keep, restored, toggled, type Builder } from './build.ts';
 
-const WORDS = { build: 'Build', held: (n: number) => `Held · ${n} waiting` };
+const WORDS = { build: 'Build', on: '✎ Build', held: (n: number) => `Held · ${n} waiting` };
 let builder: Builder = { on: false };
 let heard: Pick<Message, 'held' | 'pending'> = {};
 let asked = Promise.resolve();
@@ -71,14 +71,16 @@ const STRIP = {
   paddingHorizontal: space.md,
   borderBottomWidth: size.rule,
 } as const;
+/** The Book's current palette, night included: inbook.ts sets `--loka-<role>` from
+ * `paletteNear(paper(...))` after every Book render; light until it first has. */
+const ink = (role: keyof typeof color.light) => `var(--loka-${role}, ${color.light[role]})`;
 /** The strip at `size.touch` above the Book: the Build switch and the Hold status. */
 export function Strip({ children }: { children: ReactNode }) {
   const [, redraw] = useState({});
-  const c = chrome[useColorScheme() === 'dark' ? 'dark' : 'light']; // mutate-skip: look only
   const change = (next: Builder) => (set(next), redraw({}));
   return (
     <View style={{ flex: 1 }} /* mutate-skip: layout */>
-      <View style={{ ...STRIP, backgroundColor: c.bg, borderColor: c.line }}>
+      <View style={{ ...STRIP, backgroundColor: ink('bg'), borderColor: ink('line') }}>
         <Pressable
           accessibilityRole="switch"
           accessibilityState={{ checked: builder.on }}
@@ -86,14 +88,11 @@ export function Strip({ children }: { children: ReactNode }) {
           onPress={() => change(toggled(builder))}
           style={{ minWidth: size.touch, minHeight: size.touch, justifyContent: 'center' }}
         >
-          <Text style={{ fontFamily: chrome.sans, color: builder.on ? c.accent : c.fg }}>
-            {WORDS.build}
+          <Text style={{ ...type.control, color: ink(builder.on ? 'action' : 'fg') }}>
+            {builder.on ? WORDS.on : WORDS.build}
           </Text>
         </Pressable>
-        <Text
-          accessibilityLiveRegion="polite"
-          style={{ fontFamily: chrome.sans, color: c.warning }}
-        >
+        <Text aria-live="polite" style={{ ...type.small, color: ink('warning') }}>
           {heard.held ? WORDS.held(heard.pending ?? 0) : ''}
         </Text>
       </View>

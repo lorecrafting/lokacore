@@ -38,13 +38,16 @@ test('the Build switch changes no game state; the strip says what the Hold parks
       drawn()
         .find((n) => n.type === 'Pressable')
         .props.onPress();
+    const label = () => drawn().find((n) => n.type === 'Pressable').props.children.props.children;
+    assert.equal(label(), 'Build');
     toggle();
     assert.deepEqual(restored(s), { on: true });
+    assert.equal(label(), '✎ Build', 'Build on shown by colour alone (WCAG 1.4.1)');
     keep(s, { on: true, sheet: 'stand-in', scroll: 40 });
     toggle();
     assert.deepEqual([host.game.view(), tables(), s.others()], before);
     assert.deepEqual(restored(s), { on: false }, 'leaving Build closes every sheet');
-    const status = () => drawn().find((n) => n.props?.accessibilityLiveRegion).props.children;
+    const status = () => drawn().find((n) => n.props?.['aria-live']).props.children;
     hear({ held: true } as never);
     assert.equal(status(), 'Held · 0 waiting');
     hear({ held: true, pending: 3 } as never);
