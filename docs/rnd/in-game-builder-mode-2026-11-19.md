@@ -554,7 +554,7 @@ agent work, M is a day or two.
 |---|---|---|
 | 1.1 Seam in `Text.tsx`, `mobile-book-author-seam` lint, release-bundle sentinel test (**R**, **D**) | M | Release: seam absent (sentinel test) and lint red control fails. Dev: a seam that only counts lines reports the room page's lines |
 | 1.2 Build toggle and strip, auto-hold while a field has focus, builder state across reload (**D**) | S | Toggling changes no game state. A structural compile that lands while a field has focus waits until the field commits. One that lands with a sheet open reloads the Book and the same sheet comes back, scrolled where it was |
-| 1.3 The in-place field on a plain-word tap, `/edit`, `/set`, 409 notice, unconfirmed mark | M | At 390 px: tap the description, change a word, Enter. The Book shows it at once. A 409 shows Keep mine and Take theirs. A link tap still plays |
+| 1.3 The in-place field on a plain-word tap, `/edit`, `/set`, 409 notice, unconfirmed mark; the unwritten look (ruling 9) | M | At 390 px: tap the description, change a word, Enter. The Book shows it at once. A 409 shows Keep mine and Take theirs. A link tap still plays |
 | 1.4 Undo chip, Checks tab (refusals, `~`, unconfirmed), keep-my-place failure notice with its three actions | S | Undo restores the last write. A removed exit on the recorded path shows the notice. Each of its three actions leaves you on a live page |
 
 **Phase 2: sheets and things.** The owner can build a room's contents on the phone screen.
@@ -694,6 +694,14 @@ auto-hold while a field has focus (decision 7) covers the warm reload. Not measu
 7. **The builder is responsive**, phone to desktop window: on a wide screen the sheet docks beside the
    Book, the notebook can stay open as a column, the Flow walk widens toward a canvas, and the panel's
    keyboard paths (Cmd-K palette, undo, walk keys) carry over. "Open source" in the external editor stays.
+9. **Unwritten lines never show `~`** (owner 2026-11-19). The files keep `~` (the compiler, lint,
+   release refusal and the `.scene`/`.cut` formats rely on it); every surface the owner sees replaces
+   it. In Build: a blank ruled line in the Book's own type, a fill-in-the-blank, with a small faded
+   caption naming the field ("description"); a tap opens the field. In the dev preview's Play: the
+   faded field name in angle quotes ("A rock and ⟨name⟩ are here."). In a field: empty, with the hint
+   "Unwritten: <field>", and leaving it empty keeps `~`. In counts and Checks: "12 unwritten", never
+   "~ 12". The designer specs the look in `docs/design/` with slice 1.3. A release still refuses
+   unwritten lines.
 8. **The desktop panel (the sidebars) retires** at parity, because the builder is the form factor the
    game is played in. The gate: the parity check's `todo` is zero, the panel's browser tests are ported
    to the builder, and the owner completes one authoring walk in the builder alone. Then
