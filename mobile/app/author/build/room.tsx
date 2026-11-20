@@ -33,8 +33,12 @@ const find = (key: string | undefined) => rooms.find((x) => x.key === key);
 // An unwritten title shows the key, never `~` (ruling 9).
 const named = (r: Room) => (unwritten(r.title) ? r.key : r.title);
 
-/** Reads the map again; `redraw` once it has come. `close` shuts the top sheet (a deleted room's). */
-export function story(api: Hooks['api'] | undefined, redraw: () => void, close: () => void) {
+/** Reads the map again; `redraw` once it has come. `close` shuts a sheet by id (a deleted room's). */
+export function story(
+  api: Hooks['api'] | undefined,
+  redraw: () => void,
+  close: (id: string) => void,
+) {
   wire(api, () => story(api, redraw, close), close);
   const n = ++asked;
   void api?.('/story').then(
@@ -107,7 +111,7 @@ sheets.room = {
           </View>
         );
       }),
-      grows(r, nodes),
+      grows(r, nodes, rooms),
       moveTo(r),
       foot(r),
     ];

@@ -2,7 +2,7 @@
 // free side (born `~`), Move to area and Delete room. The gestures are the panel's own
 // (kernel/ts/play/mapedit.ts, drop.ts) over the same write routes; no words are written here.
 import { Text, TextInput, View } from 'react-native';
-import type { MapRoom } from '../../../../kernel/ts/play/map.ts';
+import { grows as sides, type MapRoom } from '../../../../kernel/ts/play/map.ts';
 import { BACK, editor, freeKey, type Io } from '../../../../kernel/ts/play/mapedit.ts';
 import { drop } from '../../../../kernel/ts/play/drop.ts';
 import { space, type } from '../../book/tokens.ts';
@@ -26,8 +26,9 @@ export type Node = { kind: string; ref: string };
 
 let api: Hooks['api'] | undefined;
 let after = () => {}; // reads the map again and redraws (room.tsx `story`)
-let close = () => {}; // closes the top sheet (Build.tsx `back`)
+let close = (_id: string) => {}; // closes a sheet by id (Build.tsx `back`)
 let busy = false; // one gesture at a time: a press while one runs does nothing
+let ran: Promise<void> = Promise.resolve(); // the gesture running now
 let said = ''; // the last refusal, shown at the sheet's top until the next press
 let asking: { key: string; files: string[]; answer: (yes: boolean) => void } | undefined;
 const drafts = new Map<string, string>(); // each room's Move field, as typed
@@ -46,7 +47,7 @@ export const io: Io = {
 // ponytail: one editor per page; its Undo history and freeKey's handed-out keys end with a reload
 const ed = editor(io);
 
-export function wire(a: Hooks['api'] | undefined, then: () => void, shut: () => void) {
+export function wire(a: Hooks['api'] | undefined, then: () => void, shut: (id: string) => void) {
   api = a;
   after = then;
   close = shut;
@@ -55,22 +56,26 @@ export function wire(a: Hooks['api'] | undefined, then: () => void, shut: () => 
 /** Runs one gesture; a refusal (a thrown or returned reason) shows in the sheet. */
 export async function run(go: () => Promise<unknown>) {
   if (asking) {
-    const { answer } = asking; // another press answers a pending Delete question Keep
+    const { answer } = asking; // another press answers a pending Delete question Keep, then goes on
     asking = undefined;
     answer(false);
+    await ran;
   }
   if (busy || !api) return;
   busy = true;
   said = '';
-  try {
-    const why = await go();
-    if (typeof why === 'string') said = why;
-  } catch (e) {
-    said = (e as Error).message;
-  } finally {
-    busy = false;
-    after();
-  }
+  ran = (async () => {
+    try {
+      const why = await go();
+      if (typeof why === 'string') said = why;
+    } catch (e) {
+      said = (e as Error).message;
+    } finally {
+      busy = false;
+      after();
+    }
+  })();
+  return ran;
 }
 
 const text = { ...type.small, color: ink('fg'), paddingHorizontal: space.md };
@@ -98,17 +103,19 @@ export const exitActs = (r: MapRoom, dir: string, rooms: MapRoom[]) => [
   act(WORDS.unlink, () => void run(() => ed.unlink(r, dir, rooms))),
 ];
 
-/** `＋` on each side with no exit: a new room that way, its words `~`, in this room's area. */
-export const grows = (r: MapRoom, nodes: Node[]) => (
+/** `＋` on each side with no exit and, when placed, no room on the cell: a new room that way,
+ * its words `~`, in this room's area. */
+export const grows = (r: MapRoom, nodes: Node[], rooms: MapRoom[]) => (
   <View key="grow" style={row}>
-    {Object.keys(BACK)
-      .filter((dir) => !r.exits.some((e) => e.dir === dir))
-      .map((dir) =>
-        act(
-          WORDS.grow(dir),
-          () => void run(() => ed.grow(r, dir, freeKey('room', 'room', nodes, []))),
-        ),
-      )}
+    {(r.at
+      ? sides(r, rooms)
+      : Object.keys(BACK).filter((dir) => !r.exits.some((e) => e.dir === dir))
+    ).map((dir) =>
+      act(
+        WORDS.grow(dir),
+        () => void run(() => ed.grow(r, dir, freeKey('room', 'room', nodes, []))),
+      ),
+    )}
   </View>
 );
 
@@ -153,7 +160,7 @@ export function foot(r: MapRoom) {
             if (!r.file) return WORDS.noFile(r.key);
             let yes = true;
             const why = await drop(io, r.key, r.file, (files) => ask(files).then((y) => (yes = y)));
-            if (why === '' && yes) close(); // the room is gone: its sheet goes too
+            if (why === '' && yes) close(`room:${r.key}`); // the room is gone: its sheet goes too, wherever it sits
             return why;
           }),
       )}

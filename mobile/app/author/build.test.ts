@@ -266,12 +266,14 @@ test('sheets stack to four, Back closes the top, and the sheet is modal only ove
 });
 
 // Breaks: opening a sheet already lower in the stack adding a second copy, reopening the top sheet
-// throwing away its scroll, or Back showing the sheet under at the closed one's scroll.
+// throwing away its scroll, Back showing the sheet under at the closed one's scroll, or closing
+// a named sheet (a deleted room's) taking the top one instead.
 test('a lower sheet opened again rises to the top; the top reopened keeps its place', () => {
   const b = { on: true, sheets: ['checks', 'room:loft'], scroll: 300 };
   assert.deepEqual(opened(b, 'checks'), { on: true, sheets: ['room:loft', 'checks'], scroll: 0 });
   assert.equal(opened(b, 'room:loft'), b);
   assert.deepEqual(closed(b), { on: true, sheets: ['checks'], scroll: 0 });
+  assert.deepEqual(closed(b, 'checks'), { on: true, sheets: ['room:loft'], scroll: 0 });
 });
 
 // Breaks: a drag on the phone sheet's grip setting the wrong height (up is full, down is half), a

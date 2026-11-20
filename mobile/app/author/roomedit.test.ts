@@ -38,11 +38,11 @@ async function opened(answer: (path: string) => [number, unknown] = () => [200, 
     const file = decodeURIComponent(path.split('file=')[1]) as keyof typeof doc;
     return doc[file] ? [200, { bytes: JSON.stringify(doc[file]), sha256: 'S' }] : [404, null];
   };
-  let closed = 0;
+  const closed: string[] = [];
   story(
     api,
     () => {},
-    () => closed++,
+    (id) => closed.push(id),
   );
   await settle();
   const shown = () => nodes(sheets.room.body('hall'));
@@ -52,7 +52,7 @@ async function opened(answer: (path: string) => [number, unknown] = () => [200, 
       .props.onPress();
     await settle();
   };
-  return { posts, shown, press, closed: () => closed };
+  return { posts, shown, press, closed };
 }
 
 // Breaks: a `＋` on a side that has an exit, a new room taking a key the graph holds or outside this
@@ -73,6 +73,20 @@ test('＋ grows a new room on a free side only; One-way and Delete reach their o
   assert.deepEqual(changed(), ['/change rooms/loft.json']);
   await s.press('Delete');
   assert.deepEqual(changed(), ['/change rooms/hall.json', '/change rooms/loft.json']);
+});
+
+// Breaks: a placed room offering `＋` toward a cell another placed room holds (the server would set
+// the new room elsewhere on the level, not that way).
+test('a placed room offers no ＋ toward a held cell', async () => {
+  Object.assign(hall, { at: { x: 0, y: 0, z: 0 } });
+  Object.assign(loft, { at: { x: 1, y: 0, z: 0 } }); // east of hall
+  const s = await opened();
+  const plus = s
+    .shown()
+    .filter((n) => n.props?.accessibilityRole === 'button' && words(n).startsWith('＋'));
+  delete (hall as { at?: unknown }).at;
+  delete (loft as { at?: unknown }).at;
+  assert.deepEqual(plus.map(words), ['＋ south', '＋ west', '＋ up', '＋ down']);
 });
 
 // Breaks: Move sending the root when the field is left as shown, or the typed area ignored.
@@ -117,9 +131,10 @@ test('Delete room asks in the sheet about the files it also takes; refusals show
   assert.equal(words(alert()), 'hall: no source file');
 });
 
-// Breaks: a Delete question left unanswered locking every later press (the code-review lock), a
-// deleted room's sheet left open, or a Keep closing it.
-test('a confirmed delete closes its sheet; another press answers a pending question Keep', async () => {
+// Breaks: a Delete question left unanswered locking every later press (the code-review lock), the
+// press that answers it Keep being spent, a deleted room's sheet left open (or another closed),
+// or a Keep closing it.
+test('a confirmed delete closes its own sheet; another press answers a pending question Keep and goes on', async () => {
   let deletes = 0;
   const set = { set: [{ file: 'rooms/loft.json', sha256: 'L' }] };
   const s = await opened((path) =>
@@ -127,15 +142,16 @@ test('a confirmed delete closes its sheet; another press answers a pending quest
   );
   (doc as Record<string, unknown>)['rooms/hall.json'] = { exits: { north: { to: 'loft' } } };
   await s.press('Delete hall');
-  await s.press('One-way'); // answers Keep; the press itself is spent
+  await s.press('One-way'); // answers Keep, then goes on
   assert.ok(!words(s.shown()).includes('Also deletes rooms/loft.json'));
-  assert.equal(s.posts.length, 1);
-  await s.press('One-way');
-  assert.equal(s.posts.length, 2);
-  assert.equal(s.closed(), 0);
+  assert.deepEqual(
+    s.posts.map(([path]) => path),
+    ['/delete', '/change'],
+  );
+  assert.deepEqual(s.closed, []);
   await s.press('Delete hall');
   await s.press('Delete all');
-  assert.equal(s.closed(), 1);
+  assert.deepEqual(s.closed, ['room:hall']);
 });
 
 // Breaks: a 3xx answer (not a write) taken as a saved write.

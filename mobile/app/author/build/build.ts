@@ -47,9 +47,9 @@ export function opened(b: Builder, id: string): Builder {
   const s = (b.sheets ?? []).filter((x) => x !== id);
   return { ...b, sheets: [...(s.length < STACK ? s : s.slice(0, -1)), id], scroll: 0 };
 }
-/** Back: the top sheet closes, the one under it shows again. */
-export function closed({ sheets, scroll: _, ...b }: Builder): Builder {
-  const rest = sheets?.slice(0, -1) ?? [];
+/** Back: the top sheet (or sheet `id`) closes, the one under it shows again. */
+export function closed({ sheets, scroll: _, ...b }: Builder, id?: string): Builder {
+  const rest = (id ? sheets?.filter((x) => x !== id) : sheets?.slice(0, -1)) ?? [];
   return rest.length ? { ...b, sheets: rest, scroll: 0 } : b;
 }
 

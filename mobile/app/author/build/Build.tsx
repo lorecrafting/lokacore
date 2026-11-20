@@ -83,9 +83,9 @@ export function open(id: string) {
   redrawStrip();
   shut();
 }
-/** Back: closes the top sheet only; the last one returns the focus to what opened it. */
-function back() {
-  set(closed(builder));
+/** Back: closes the top sheet (or sheet `id`); the last one returns the focus to what opened it. */
+function back(id?: string) {
+  set(closed(builder, id));
   redrawStrip();
   if (!builder.sheets) opener?.focus?.();
 }
@@ -228,7 +228,7 @@ export function Strip({ children }: { children: ReactNode }) {
         >
           {children}
         </View>
-        {top && parts(top)[0] ? <Frame open={builder} saved={set} back={back} /> : null}
+        {top && parts(top)[0] ? <Frame open={builder} saved={set} back={() => back()} /> : null}
       </View>
     </View>
   );
