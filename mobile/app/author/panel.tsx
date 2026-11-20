@@ -43,8 +43,9 @@ const build: typeof import('./build/Build.tsx') | undefined =
   process.env.EXPO_PUBLIC_LOKA_DEV_CARTRIDGE === '1' ? require('./build/Build.tsx') : undefined;
 /** The Build strip App draws above the Book in the author preview; undefined elsewhere. */
 export const Building = devClock ? build?.Strip : undefined;
+let redrawBook = () => {}; // the mounted App's, once useAuthorPanel runs
 if (devClock) {
-  build?.install();
+  build?.install({ seen, said, redraw: () => redrawBook() });
   worded.note = (words, key) => bind(seen, words, key); // a line as shown, bound too
   worded.made = new Map(); // an open conversation re-words its lines from the overlay (loka-wfrgk.19)
 }
@@ -268,9 +269,9 @@ export function useAuthorPanel(tools: Tools, game: Opened | undefined) {
     document.addEventListener('click', onClick, true);
     // Bindings are per page: a wording drawn here must not cost a later page its field.
     const unsubscribe = game.subscribe(() => (nextPage(seen), state()));
-    // a text overlay redraws in place
-    const unlisten = listen((message) => (heard(message), latest.current.redraw({})));
-    const stop = inBook?.start({ seen, said, tell, redraw: () => latest.current.redraw({}) });
+    redrawBook = () => latest.current.redraw({});
+    const unlisten = listen((message) => (heard(message), redrawBook())); // a text overlay redraws in place
+    const stop = inBook?.start({ seen, said, tell, redraw: redrawBook });
     if (panel) state();
     else if (window.parent !== window)
       window.parent.postMessage({ loka: 'author', ready: true, sha256: chapter.sha256 }, '*');

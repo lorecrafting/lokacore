@@ -69,6 +69,7 @@ test('a release web export holds no builder seam or Build strip', () => {
     assert.ok(js.includes('loka-kernel'), 'the export holds the app'); // a broken export proves nothing
     assert.ok(!js.includes('loka_author_seam_lines'), 'the builder seam is in a release bundle');
     assert.ok(!js.includes(BUILD), 'the Build strip is in a release bundle');
+    assert.ok(!js.includes('Unwritten: '), 'the in-place field is in a release bundle');
   } finally {
     rmSync(out, { recursive: true, force: true });
   }

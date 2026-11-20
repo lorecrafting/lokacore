@@ -17,7 +17,7 @@ type At = { file: string; line: number; was: string; words: string };
 type Field = { el: HTMLElement; kept: Node[]; shown: string; key: string; at: At; busy?: boolean };
 const LOCAL = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/;
 const enc = encodeURIComponent;
-async function api(path: string, sent?: object): Promise<[number, any]> {
+export async function api(path: string, sent?: object): Promise<[number, any]> {
   const init = sent && { method: 'POST', body: JSON.stringify(sent) };
   const r = await fetch(`/__author${path}`, init);
   return [r.status, await r.json().catch(() => null)];
@@ -307,8 +307,8 @@ export function heard(message: Message) {
     });
   reapply();
 }
-const on: [EventTarget, string, EventListener][] = [
-  [document, 'dblclick', onDouble as EventListener],
+const on = (): [EventTarget, string, EventListener][] => [
+  [document, 'dblclick', onDouble as EventListener], // read at start(): a node import has no document
   [document, 'keydown', onKey as EventListener],
   [document, 'click', onClick],
   [document, 'keyup', hush],
@@ -323,11 +323,11 @@ export function start(given: Hooks) {
   note = document.body.appendChild(document.createElement('div'));
   note.className = 'loka-note';
   note.setAttribute('role', 'status'); // polite
-  for (const [target, name, run] of on) target.addEventListener(name, run, true);
+  for (const [target, name, run] of on()) target.addEventListener(name, run, true);
   watch();
   reapply();
   return () => {
-    for (const [target, name, run] of on) target.removeEventListener(name, run, true);
+    for (const [target, name, run] of on()) target.removeEventListener(name, run, true);
     observer?.disconnect();
     style.remove();
     note.remove();

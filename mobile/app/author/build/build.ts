@@ -1,6 +1,11 @@
 // Build mode's state and auto-hold (docs/system/book-ui.md#author-mode; ruling 7 of
 // docs/design/prose-in-the-book-rulings.md). Pure: the storage and the hold requests are passed in.
 
+import { color } from '../../book/tokens.ts';
+
+/** The Book's current palette, night included: inbook.ts sets `--loka-<role>` from
+ * `paletteNear(paper(...))` after every Book render; light until it first has. */
+export const ink = (role: keyof typeof color.light) => `var(--loka-${role}, ${color.light[role]})`;
 /** Where the builder state is kept, beside the place (`loka-place`), so a reload restores it. */
 export const BUILD = 'loka-build';
 /** Build on or off, and the open sheet with its scroll offset; a sheet is open only in Build. */
