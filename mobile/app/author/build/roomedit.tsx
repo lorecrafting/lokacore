@@ -74,6 +74,7 @@ export async function run(go: () => Promise<unknown>) {
 }
 
 const text = { ...type.small, color: ink('fg'), paddingHorizontal: space.md };
+export const inRow = { ...text, paddingHorizontal: 0 }; // mutate-skip: layout; a row already pads its edges
 // mutate-skip: layout; the acts in a row stand apart and line up with the sheet's text
 export const row = {
   flexDirection: 'row',
@@ -135,7 +136,7 @@ export function foot(r: MapRoom) {
     const say = (yes: boolean) => () => ((asking = undefined), answer(yes));
     return (
       <View key="foot" style={row}>
-        <Text style={{ ...text, paddingHorizontal: 0 }}>{WORDS.also(files)}</Text>
+        <Text style={inRow}>{WORDS.also(files)}</Text>
         {act(WORDS.yes, say(true))}
         {act(WORDS.no, say(false))}
       </View>
