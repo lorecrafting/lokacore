@@ -3,10 +3,11 @@
 // so a release never holds it (author/seam.test.ts looks for `BUILD`).
 import { useState, type ReactNode } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { color, size, space, type } from '../../book/tokens.ts';
+import { size, space, type } from '../../book/tokens.ts';
 import type { Message } from '../live.ts';
 import { install as seam } from './seam.ts';
-import { autoHold, keep, restored, toggled, type Builder } from './build.ts';
+import { heard as told, shut, type Hooks } from './field.tsx';
+import { autoHold, ink, keep, restored, toggled, type Builder } from './build.ts';
 
 const WORDS = { build: 'Build', on: '✎ Build', held: (n: number) => `Held · ${n} waiting` };
 let builder: Builder = { on: false };
@@ -21,7 +22,7 @@ const ask = (on: boolean) => {
     () => {},
   );
 };
-/** A builder field calls `focus` and `commit` (Enter, blur, a picker closing); 1.3 brings fields. */
+/** A builder field calls `focus` and `commit` (Enter, blur, a picker closing). */
 export const hold = autoHold(
   ask,
   () => navigator.sendBeacon('/__author/hold', JSON.stringify({ on: false })),
@@ -30,14 +31,16 @@ export const hold = autoHold(
 /** Sheet bodies by id; later slices register theirs. */
 export const sheets: Record<string, () => ReactNode> = {};
 
-export function install() {
-  seam();
+/** `book`: the Book's word bindings, redraw and E5's api (panel.tsx), for the field. */
+export function install(book: Pick<Hooks, 'seen' | 'said' | 'redraw' | 'api'>) {
+  seam({ ...book, on: () => builder.on, focus: hold.focus, commit: hold.commit });
   builder = restored(localStorage);
   addEventListener('pagehide', hold.leave);
 }
 export function hear(message: Message) {
   heard = message;
   hold.heard(message.held);
+  told(message.unconfirmed?.map((u) => u.key));
 }
 const set = (next: Builder) => {
   builder = next;
@@ -71,13 +74,10 @@ const STRIP = {
   paddingHorizontal: space.md,
   borderBottomWidth: size.rule,
 } as const;
-/** The Book's current palette, night included: inbook.ts sets `--loka-<role>` from
- * `paletteNear(paper(...))` after every Book render; light until it first has. */
-const ink = (role: keyof typeof color.light) => `var(--loka-${role}, ${color.light[role]})`;
 /** The strip at `size.touch` above the Book: the Build switch and the Hold status. */
 export function Strip({ children }: { children: ReactNode }) {
   const [, redraw] = useState({});
-  const change = (next: Builder) => (set(next), redraw({}));
+  const change = (next: Builder) => (set(next), redraw({}), shut());
   return (
     <View style={{ flex: 1 }} /* mutate-skip: layout */>
       <View style={{ ...STRIP, backgroundColor: ink('bg'), borderColor: ink('line') }}>

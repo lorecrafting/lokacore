@@ -284,7 +284,10 @@ any no-field note `type.label` in `dim` on `card`, the note's buttons (Add here'
 border. Unconfirmed words: a static wavy underline in `warning`
 (never dotted: that is the fixture link). A `~` line: a `size.speechBar` bar in `warning` in the
 left page margin over the line's full height, `action` on the landed line. The changed-on-disk
-notice: `type.label` in `warning`. Worst pair: `warning` on `card`, 4.75 (light).
+notice: `type.label` in `warning`, its buttons `type.control` in `action`, each a touch target tall.
+Build's tap field (builder 1.3): the line's own type role and width on page paper, a `size.rule`
+rule in `action` beneath it; an unwritten line in Build: a blank line of the line's own height
+ruled `size.rule` in `line`, its field name in `type.small` `dim`. Worst pair: `warning` on `card`, 4.75 (light).
 
 Not adopted from the mock (no live consumer): the text drawer and its command chips, topic
 chips and scene pick cards. The mock's shop price rows are not adopted either: a stock, sale or service row is an

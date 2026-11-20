@@ -943,6 +943,17 @@ reasons and limits: [prose in the Book rulings](../design/prose-in-the-book-ruli
   releases only a Hold it took; tabbing to the next field keeps it. With no field focused, a
   compile reloads the Book as usual: Build, the open sheet and its scroll are kept beside the place
   and come back after the reload. The plain dev preview and a release draw no strip.
+- **Build: in-place field** (slice 1.3, [builder mode §4](../rnd/in-game-builder-mode-2026-11-19.md);
+  the unwritten look is owner ruling 9 in its §10). In Build a line that draws one description
+  whole is a button named `<words>, edit` (`Unwritten <field>, edit` when unwritten; either adds
+  `, unconfirmed`); a link in it keeps its own press, and Enter or Space on the focused line opens
+  it. A **tap** (not a double-click) opens the field on that line, nothing reflowing, with Edit in
+  place's caption under it. What it holds, save, Esc, Empty and the 409 notice with its two
+  buttons are Edit in place's and Changed on disk's above. Unwritten lines never show `~`
+  (ruling 9): an unwritten line is a blank ruled line of its own height with its field name
+  (`description`) on it; its field opens empty with the hint `Unwritten: <field>`, and leaving it
+  empty keeps `~`. A line the last compile refused carries Confirming's unconfirmed mark. Looks:
+  [author-mode marks](../BOOK-UI-COMPONENTS.md#component-catalogue).
 - **No field.** A double-click on a line that is not words opens nothing; a note under it, in a
   row of its own (the lines below move down by its height while it shows and back when it goes,
   with no motion; a note never covers a line, loka-wfrgk.39), until the next click or key, read politely: `A choice label is its key. Alt-click opens the scene.`,
