@@ -1,5 +1,8 @@
 # GUI editor: every mechanic with create, edit and delete (design, loka-wfrgk.1)
 
+**Direction 2026-11-19:** the [in-game builder](in-game-builder-mode-2026-11-19.md) brings every function
+here into the game screen, and this panel retires at full parity (owner). Until then the panel takes fixes only.
+
 **Amended 2026-11-04** by the [authoring editor plan](../decisions/owner-decision-authoring-editor-plan-2026-11-04.md)
 (the owner's planning session and a Fable audit). Where they differ, the record wins: the layout is
 three columns, the order and slices are new (section 9), and section 11 lists the technical changes.
