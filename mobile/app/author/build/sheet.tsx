@@ -65,8 +65,17 @@ export function Sheet({ open, saved }: Stack) {
 
 let grabbed = NaN; // where a drag on the grip began
 let dragged = false;
-/** The phone sheet's grip: a drag sets the height by its direction, a tap or key toggles it. */
-export function Grip({ full, grow }: { full: boolean; grow: (full: boolean) => void }) {
+/** The phone sheet's grip: a drag up fills it, down halves it or from half closes it (as Back,
+ * §5); a tap or key toggles the height. */
+export function Grip({
+  full,
+  grow,
+  back,
+}: {
+  full: boolean;
+  grow: (full: boolean) => void;
+  back: () => void;
+}) {
   return (
     <Pressable
       accessibilityRole="button"
@@ -75,12 +84,16 @@ export function Grip({ full, grow }: { full: boolean; grow: (full: boolean) => v
       onPressIn={(e) => ((grabbed = e.nativeEvent.pageY), (dragged = false))}
       onPressOut={(e) => {
         const dy = e.nativeEvent.pageY - grabbed; // NaN from a key: not a drag
-        if (Math.abs(dy) >= size.touch / 4) (grow(dy < 0), (dragged = true));
+        if (Math.abs(dy) >= size.touch / 4)
+          (dy < 0 || full ? grow(dy < 0) : back(), (dragged = true));
       }}
       onPress={() => dragged || grow(!full)}
-      style={{ ...CONTROL, alignSelf: 'center' }}
+      // RN-web's touchAction (untyped in RN): the browser must not take the drag as a scroll.
+      style={{ ...CONTROL, alignSelf: 'center', ...({ touchAction: 'none' } as object) }}
     >
-      <View style={{ width: size.touch, height: size.rule * 4, backgroundColor: ink('line') }} />
+      <View
+        style={{ width: size.touch, height: size.rule * 4, backgroundColor: ink('line') }} // mutate-skip: drawing
+      />
     </Pressable>
   );
 }
@@ -106,17 +119,17 @@ export function Frame({ open, saved, back }: Stack & { back: () => void }) {
         slide(docked),
       ]}
     >
-      {docked ? null : <Grip full={full} grow={grow} />}
+      {docked ? null : <Grip full={full} grow={grow} back={back} />}
       <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: space.md }}>
         {act(WORDS.close, back)}
-        <Text style={{ ...type.small, color: ink('dim'), flexShrink: 1 }}>
+        <Text style={{ ...type.small, color: ink('dim'), flexShrink: 1 }} /* mutate-skip: layout */>
           {titles.slice(0, -1).join(' › ')}
         </Text>
       </View>
       <Text
         key={ids.at(-1)} // a new top sheet mounts a new title, which takes the focus
         ref={focusTitle}
-        {...({ tabIndex: -1 } as object)}
+        {...({ tabIndex: -1 } as object)} // mutate-skip: any negative tabIndex is the same
         accessibilityRole="header"
         style={{ ...type.control, color: ink('fg'), paddingHorizontal: space.md }}
       >
@@ -139,4 +152,4 @@ const SLIDE = StyleSheet.create({ side: from('translateX(100%)'), up: from('tran
 const slide = (docked: boolean) =>
   !globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches &&
   SLIDE[docked ? 'side' : 'up'];
-const FLOAT = { position: 'absolute', left: 0, right: 0, bottom: 0 } as const;
+const FLOAT = { position: 'absolute', left: 0, right: 0, bottom: 0 } as const; // mutate-skip: layout

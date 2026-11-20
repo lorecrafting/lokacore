@@ -209,7 +209,8 @@ test('a reload brings back the open sheet, scrolled where it was', async () => {
 // Breaks: a fifth sheet growing the stack or dropping its bottom, Back closing more than the top,
 // the breadcrumb out of order or the dialog named by another sheet, the sheet modal beside the Book (or not modal over it on a phone),
 // docking below 1152 px or floating at it, sliding from the wrong side or under reduced motion,
-// or the focus left behind when the last sheet closes.
+// the title and body not keyed by the top sheet (a new one must remount: focus to the title, scroll
+// to the top), or the focus left behind when the last sheet closes.
 test('sheets stack to four, Back closes the top, and the sheet is modal only over the Book', async () => {
   const { Strip, install, open, sheets } = await import('./build/Build.tsx');
   for (const k of 'abcde') sheets[k] = { title: () => k.toUpperCase(), body: () => k };
@@ -232,6 +233,9 @@ test('sheets stack to four, Back closes the top, and the sheet is modal only ove
     for (const k of 'abcde') open(k);
     assert.deepEqual(crumbs(), ['E', 'A › B › C']);
     assert.equal(dialog().props['aria-label'], 'E', 'the dialog is named by its top sheet');
+    const title = nodes(dialog()).find((n) => n.props?.accessibilityRole === 'header');
+    const body = dialog().props.children.at(-1).props.children; // the unexpanded <Sheet>
+    assert.deepEqual([title.key, body.key], ['e', 'e'], 'title and body keyed by the top sheet');
     Object.assign(globalThis, { document: { activeElement: null } }); // focus moved into the sheet
     nodes(dialog())
       .find((n) => n.props?.children?.props?.children === 'Back')
@@ -271,21 +275,22 @@ test('a lower sheet opened again rises to the top; the top reopened keeps its pl
 });
 
 // Breaks: a drag on the phone sheet's grip setting the wrong height (up is full, down is half), a
-// short drag (a quarter of the touch size) read as a tap, or a drag also toggling as a tap.
-test('the grip: a drag sets the height by its direction, a tap toggles', async () => {
+// drag down from half not closing the sheet as Back does (§5), a short drag (a quarter of the touch size) read as a tap, or a drag also toggling as a tap.
+test('the grip: a drag sets the height by its direction or closes from half, a tap toggles', async () => {
   const { Grip } = await import('./build/sheet.tsx');
-  const grown: boolean[] = [];
+  const grown: (boolean | 'back')[] = [];
   const press = (full: boolean, from: number, to: number) => {
-    const p = Grip({ full, grow: (f) => grown.push(f) }).props;
+    const p = Grip({ full, grow: (f) => grown.push(f), back: () => grown.push('back') }).props;
     p.onPressIn({ nativeEvent: { pageY: from } });
     p.onPressOut({ nativeEvent: { pageY: to } });
     p.onPress();
   };
   press(true, 100, 89); // up by 11 = 44 / 4: full (a tap would halve it)
-  press(false, 100, 111); // down: half (a tap would fill it)
+  press(true, 100, 111); // down from full: half
+  press(false, 100, 111); // down from half: Back (a tap would fill it)
   press(false, 100, 100); // a tap
   press(true, 100, 90); // 10 is short of a drag: a tap
-  assert.deepEqual(grown, [true, false, true, false]);
+  assert.deepEqual(grown, [true, false, 'back', true, false]);
 });
 
 // Breaks: a Checks row dropped or sent to the wrong line (a refusal with no file, a key's row not

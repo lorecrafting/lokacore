@@ -21,7 +21,8 @@ type Room = {
   exits: { dir: string; to: string }[];
 };
 let rooms: Room[] = [];
-let asked = 0; // the latest /story request: a slower, older answer is dropped
+// The latest /story request: a slower, older answer is dropped.
+let asked = 0; // mutate-skip: any start value counts the same
 const find = (key: string | undefined) => rooms.find((x) => x.key === key);
 // An unwritten title shows the key, never `~` (ruling 9).
 const named = (r: Room) => (unwritten(r.title) ? r.key : r.title);
