@@ -290,9 +290,12 @@ test('a + on a free side of the selected room makes and links a room there and s
     JSON.parse(readFileSync(join(dir, `showcase/areas/homestead/rooms/${k}.json`), 'utf8')).exits;
   const row = async (k: string) => {
     for (let t = 0; t < 100; t++) {
-      const r = JSON.parse(readFileSync(join(dir, 'showcase/layout.json'), 'utf8')).find(
-        (o: { room: string }) => o.room === k,
-      );
+      let r;
+      try {
+        r = JSON.parse(readFileSync(join(dir, 'showcase/layout.json'), 'utf8')).find(
+          (o: { room: string }) => o.room === k,
+        );
+      } catch {} // read while the server rewrites it (loka-61se9): poll again
       if (r) return r;
       await new Promise((r) => setTimeout(r, 100));
     }
