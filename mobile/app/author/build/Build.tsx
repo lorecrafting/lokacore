@@ -47,6 +47,7 @@ let undo: Wrote | undefined; // the last write, while its chip shows
 let undoTimer: ReturnType<typeof setTimeout> | undefined;
 let notBack: Wrote | undefined; // a refused put-back
 let redrawStrip = () => {};
+let mapped = () => {}; // the map has come: the strip and the Book's pencil draw again
 let opener: { focus?: () => void } | null | undefined; // what had focus before the first sheet opened
 /** What the keep-my-place notice reads and does; panel.tsx hands it in per game. */
 export type Place = {
@@ -100,14 +101,15 @@ export function install(book: Pick<Hooks, 'seen' | 'said' | 'redraw' | 'api'>) {
     pencil: (shown) => pencil(shown, placed?.here(), open),
   });
   builder = restored(localStorage);
-  story(api, redrawStrip);
+  mapped = () => (redrawStrip(), book.redraw());
+  story(api, mapped);
   addEventListener('pagehide', hold.leave);
 }
 export function hear(message: Message) {
   heard = message;
   hold.heard(message.held);
   told(message.unconfirmed?.map((u) => u.key));
-  story(api, redrawStrip); // a compile may have added, moved or renamed rooms
+  story(api, mapped); // a compile may have added, moved or renamed rooms
 }
 const set = (next: Builder) => {
   builder = next;

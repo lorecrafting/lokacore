@@ -50,7 +50,8 @@ export function Sheet({ open, saved }: Stack) {
   return (
     <ScrollView
       ref={scroller}
-      style={[StyleSheet.absoluteFill, { backgroundColor: ink('card') }]} // a sheet is card paper (§5)
+      // A sheet is card paper (§5).
+      style={[StyleSheet.absoluteFill, { backgroundColor: ink('card') }]}
       onContentSizeChange={() => {
         if (restoring) scroller.current?.scrollTo({ y: open.scroll, animated: false });
         restoring = false;
@@ -65,7 +66,7 @@ export function Sheet({ open, saved }: Stack) {
 let grabbed = NaN; // where a drag on the grip began
 let dragged = false;
 /** The phone sheet's grip: a drag sets the height by its direction, a tap or key toggles it. */
-function Grip({ full, grow }: { full: boolean; grow: (full: boolean) => void }) {
+export function Grip({ full, grow }: { full: boolean; grow: (full: boolean) => void }) {
   return (
     <Pressable
       accessibilityRole="button"
@@ -122,7 +123,7 @@ export function Frame({ open, saved, back }: Stack & { back: () => void }) {
         {titles.at(-1)}
       </Text>
       <View style={{ flex: 1 }} /* mutate-skip: layout */>
-        <Sheet open={open} saved={saved} />
+        <Sheet key={ids.at(-1)} open={open} saved={saved} /* a new top sheet starts at its top */ />
       </View>
     </View>
   );

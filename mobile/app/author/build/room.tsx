@@ -21,19 +21,24 @@ type Room = {
   exits: { dir: string; to: string }[];
 };
 let rooms: Room[] = [];
+let asked = 0; // the latest /story request: a slower, older answer is dropped
 const find = (key: string | undefined) => rooms.find((x) => x.key === key);
-const named = (r: Room) => (unwritten(r.title) ? r.key : r.title); // never `~` (ruling 9)
+// An unwritten title shows the key, never `~` (ruling 9).
+const named = (r: Room) => (unwritten(r.title) ? r.key : r.title);
 
 /** Reads the map again; `redraw` once it has come. */
-export const story = (api: Hooks['api'] | undefined, redraw: () => void) =>
+export function story(api: Hooks['api'] | undefined, redraw: () => void) {
+  const n = ++asked;
   void api?.('/story').then(
     ([status, json]) => {
-      if (status !== 200) return;
-      rooms = (json as { map: Room[] }).map;
+      if (status !== 200 || n !== asked) return;
+      const map = (json as { map?: Room[] } | null)?.map;
+      rooms = Array.isArray(map) ? map : [];
       redraw();
     },
     () => {}, // the server down: the pencil waits for the next message
   );
+}
 
 /** The pencil after the room page's own title (`here`'s), which opens its Room sheet. */
 export function pencil(shown: string, here: string | undefined, open: (id: string) => void) {

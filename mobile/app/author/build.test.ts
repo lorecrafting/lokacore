@@ -5,7 +5,18 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { elapsedHost } from '../../authority/local-story/__tests__/elapsed-host.test.ts';
 import { nodes } from '../book/__tests__/combat-book.test.ts'; // the React Native stand-ins Build.tsx draws with
-import { autoHold, badge, BUILD, checks, keep, refusal, restored, toggled } from './build/build.ts';
+import {
+  autoHold,
+  badge,
+  BUILD,
+  checks,
+  closed,
+  keep,
+  opened,
+  refusal,
+  restored,
+  toggled,
+} from './build/build.ts';
 import type { Step } from './place.ts';
 
 const store = (entries: Record<string, string> = {}) => {
@@ -197,6 +208,7 @@ test('a reload brings back the open sheet, scrolled where it was', async () => {
 
 // Breaks: a fifth sheet growing the stack or dropping its bottom, Back closing more than the top,
 // the breadcrumb out of order, the sheet modal beside the Book (or not modal over it on a phone),
+// docking below 1152 px or floating at it, sliding from the wrong side or under reduced motion,
 // or the focus left behind when the last sheet closes.
 test('sheets stack to four, Back closes the top, and the sheet is modal only over the Book', async () => {
   const { Strip, install, open, sheets } = await import('./build/Build.tsx');
@@ -224,10 +236,15 @@ test('sheets stack to four, Back closes the top, and the sheet is modal only ove
       .find((n) => n.props?.children?.props?.children === 'Back')
       .props.onPress();
     assert.deepEqual(crumbs(), ['C', 'A › B']);
-    Object.assign(globalThis, { innerWidth: 390 });
+    const slid = () => dialog().props.style.at(-1);
+    Object.assign(globalThis, { innerWidth: 1151, matchMedia: () => ({ matches: false }) });
     assert.equal(dialog().props['aria-modal'], true, 'a phone sheet over the Book is modal');
-    Object.assign(globalThis, { innerWidth: 1400 });
+    assert.equal(slid().animationKeyframes[0].from.transform, 'translateY(100%)');
+    Object.assign(globalThis, { innerWidth: 1152 });
     assert.equal(dialog().props['aria-modal'], false, 'a docked sheet leaves the Book playable');
+    assert.equal(slid().animationKeyframes[0].from.transform, 'translateX(100%)');
+    Object.assign(globalThis, { matchMedia: () => ({ matches: true }) });
+    assert.equal(slid(), false, 'reduced motion cuts the sheet in');
     for (let i = 0; i < 3; i++)
       nodes(dialog())
         .find((n) => n.props?.children?.props?.children === 'Back')
@@ -235,8 +252,39 @@ test('sheets stack to four, Back closes the top, and the sheet is modal only ove
     assert.equal(dialog(), undefined);
     assert.equal(focused, 1, 'the last Back returns the focus to what opened the first sheet');
   } finally {
-    Object.assign(globalThis, { document: undefined, innerWidth: undefined });
+    Object.assign(globalThis, {
+      document: undefined,
+      innerWidth: undefined,
+      matchMedia: undefined,
+    });
   }
+});
+
+// Breaks: opening a sheet already lower in the stack adding a second copy, reopening the top sheet
+// throwing away its scroll, or Back showing the sheet under at the closed one's scroll.
+test('a lower sheet opened again rises to the top; the top reopened keeps its place', () => {
+  const b = { on: true, sheets: ['checks', 'room:loft'], scroll: 300 };
+  assert.deepEqual(opened(b, 'checks'), { on: true, sheets: ['room:loft', 'checks'], scroll: 0 });
+  assert.equal(opened(b, 'room:loft'), b);
+  assert.deepEqual(closed(b), { on: true, sheets: ['checks'], scroll: 0 });
+});
+
+// Breaks: a drag on the phone sheet's grip setting the wrong height (up is full, down is half), a
+// short drag (a quarter of the touch size) read as a tap, or a drag also toggling as a tap.
+test('the grip: a drag sets the height by its direction, a tap toggles', async () => {
+  const { Grip } = await import('./build/sheet.tsx');
+  const grown: boolean[] = [];
+  const press = (full: boolean, from: number, to: number) => {
+    const p = Grip({ full, grow: (f) => grown.push(f) }).props;
+    p.onPressIn({ nativeEvent: { pageY: from } });
+    p.onPressOut({ nativeEvent: { pageY: to } });
+    p.onPress();
+  };
+  press(true, 100, 89); // up by 11 = 44 / 4: full (a tap would halve it)
+  press(false, 100, 111); // down: half (a tap would fill it)
+  press(false, 100, 100); // a tap
+  press(true, 100, 90); // 10 is short of a drag: a tap
+  assert.deepEqual(grown, [true, false, true, false]);
 });
 
 // Breaks: a Checks row dropped or sent to the wrong line (a refusal with no file, a key's row not
@@ -271,4 +319,31 @@ test('the keep-my-place notice names the refused step', () => {
   const steps: Step[] = [{ advance: 60000 }, go, { advance: 1 }];
   assert.equal(refusal(steps, 1), "Couldn't keep your place: step 2, go north, was refused.");
   assert.equal(refusal([{} as Step], 0), "Couldn't keep your place: step 1 was refused.");
+});
+
+// Breaks: a slow, older /story answer overwriting the newer map (the pencil and Room sheet showing
+// the room's old title), or a refused or malformed answer leaving a header or Room sheet that throws.
+test('the newest map wins; a refused answer keeps it, a malformed one empties it', async () => {
+  const { story, pencil } = await import('./build/room.tsx');
+  const { sheets } = await import('./build/sheet.tsx');
+  const replies: ((a: [number, any]) => void)[] = [];
+  const slow = () => new Promise<[number, any]>((r) => replies.push(r));
+  let drawn = 0;
+  const loft = (title: string) => ({ map: [{ key: 'loft', area: null, title, exits: [] }] });
+  const has = (title: string) => pencil(title, 'loft', () => {}) !== undefined;
+  story(slow, () => drawn++);
+  story(slow, () => drawn++);
+  replies[1]([200, loft('Attic')]);
+  replies[0]([200, loft('Loft')]);
+  await new Promise((r) => setTimeout(r));
+  assert.deepEqual([has('Attic'), has('Loft'), drawn], [true, false, 1]);
+  story(slow, () => drawn++);
+  replies[2]([500, loft('Loft')]);
+  await new Promise((r) => setTimeout(r));
+  assert.equal(has('Attic'), true, 'a refused answer keeps the map');
+  story(slow, () => drawn++);
+  replies[3]([200, {}]);
+  await new Promise((r) => setTimeout(r));
+  assert.equal(has('Attic'), false);
+  assert.equal(sheets.room.body('loft'), null, 'no room, no sheet body');
 });

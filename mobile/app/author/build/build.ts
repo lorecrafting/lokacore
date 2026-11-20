@@ -40,10 +40,11 @@ export const keep = (store: Store, builder: Builder) =>
   store.setItem(BUILD, JSON.stringify(builder));
 /** Leaving Build closes every sheet. */
 export const toggled = ({ on, room }: Builder): Builder => ({ on: !on, ...(room && { room }) });
-/** `id` on top of the stack, scrolled to its start; already on top, nothing changes. */
+/** `id` on top of the stack (moved there if it is lower), scrolled to its start; already on top,
+ * nothing changes. */
 export function opened(b: Builder, id: string): Builder {
-  const s = b.sheets ?? [];
-  if (s.at(-1) === id) return b;
+  if (b.sheets?.at(-1) === id) return b;
+  const s = (b.sheets ?? []).filter((x) => x !== id);
   return { ...b, sheets: [...(s.length < STACK ? s : s.slice(0, -1)), id], scroll: 0 };
 }
 /** Back: the top sheet closes, the one under it shows again. */
