@@ -7,7 +7,7 @@ import { useEffect, useRef } from 'react';
 import { Platform } from 'react-native';
 import type { localSession } from '../../authority/local-story/session';
 import chapter from '../../../protocol/fixtures/toolbox_showcase_hash.json';
-import { listen, overlay } from './live.ts';
+import { listen, overlay, type Message } from './live.ts';
 import {
   advanced,
   asRefs,
@@ -38,9 +38,11 @@ export const devClock =
 // the in-Book editor (E5) is required only in the author preview, so a player build drops it
 const inBook: typeof import('./inbook.ts') | undefined =
   process.env.EXPO_PUBLIC_LOKA_DEV_CARTRIDGE === '1' ? require('./inbook.ts') : undefined;
-// the builder's Book seam (book/Text.tsx), required behind the same gate
-const build: typeof import('./build/seam.ts') | undefined =
-  process.env.EXPO_PUBLIC_LOKA_DEV_CARTRIDGE === '1' ? require('./build/seam.ts') : undefined;
+// the builder (its Book seam in book/Text.tsx, the Build strip), required behind the same gate
+const build: typeof import('./build/Build.tsx') | undefined =
+  process.env.EXPO_PUBLIC_LOKA_DEV_CARTRIDGE === '1' ? require('./build/Build.tsx') : undefined;
+/** The Build strip App draws above the Book in the author preview; undefined elsewhere. */
+export const Building = devClock ? build?.Strip : undefined;
 if (devClock) {
   build?.install();
   worded.note = (words, key) => bind(seen, words, key); // a line as shown, bound too
@@ -239,6 +241,7 @@ function askCheat(game: Opened, cheat: Cheat) {
   };
   placeNote = sendCheat(played(game)!, cheat, manifest, place.stopped?.note);
 }
+const heard = (message: Message) => (inBook?.heard(message), build?.hear(message));
 /** Serves the author panel page for `game` while mounted; App calls it only in the author preview. */
 export function useAuthorPanel(tools: Tools, game: Opened | undefined) {
   const latest = useRef(tools); // App's closures change per render; the bridge lives per game
@@ -266,7 +269,7 @@ export function useAuthorPanel(tools: Tools, game: Opened | undefined) {
     // Bindings are per page: a wording drawn here must not cost a later page its field.
     const unsubscribe = game.subscribe(() => (nextPage(seen), state()));
     // a text overlay redraws in place
-    const unlisten = listen((message) => (inBook?.heard(message), latest.current.redraw({})));
+    const unlisten = listen((message) => (heard(message), latest.current.redraw({})));
     const stop = inBook?.start({ seen, said, tell, redraw: () => latest.current.redraw({}) });
     if (panel) state();
     else if (window.parent !== window)

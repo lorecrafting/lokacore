@@ -7,6 +7,8 @@ export type Message = {
   said: string[];
   unconfirmed?: { key: string }[];
   changed?: { file: string }[];
+  held?: boolean; // the server's Hold (POST /__author/hold) is on
+  pending?: number; // compiles parked while it holds
 };
 
 /** Follows the stream until the returned function is called; `onMessage` gets each message. */

@@ -21,6 +21,7 @@ import Book, { type Shell } from './book/Book.tsx';
 import { hint } from './book/model.ts';
 import {
   bootPlace,
+  Building,
   devClock,
   frozenClock,
   played,
@@ -285,5 +286,6 @@ export default function App() {
         haptics={shell.effects?.haptics?.get()}
       />
     );
-  return <Book key={starts} game={played(game)!} shell={bookShell} startOver={startOver} />;
+  const book = <Book key={starts} game={played(game)!} shell={bookShell} startOver={startOver} />;
+  return Building ? <Building>{book}</Building> : book;
 }

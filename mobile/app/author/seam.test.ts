@@ -6,6 +6,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { test } from 'node:test';
 import { nodes } from '../book/__tests__/polish-book.test.ts';
+import { BUILD } from './build/build.ts';
 
 // Breaks: a Book line skips the seam (Text.tsx drawing without asking it), so the builder cannot see
 // or decorate that line. A line is each Book Text, an inline link inside a sentence included.
@@ -43,9 +44,10 @@ test('a counting seam sees each line of a room page', async () => {
   assert.equal(g.loka_author_seam_lines, 3);
 });
 
-// Breaks: the builder reaches a player build (build/seam.ts required outside the author gate in
-// panel.tsx), so a release carries author code. A real release web export (about 11 s on an M1).
-test('a release web export holds no builder seam', () => {
+// Breaks: the builder reaches a player build (build/Build.tsx, its seam and strip, required outside
+// the author gate in panel.tsx), so a release carries author code. A real release web export
+// (about 11 s on an M1).
+test('a release web export holds no builder seam or Build strip', () => {
   const out = mkdtempSync(join(tmpdir(), 'loka-release-'));
   const env = { ...process.env, CI: '1', EXPO_NO_TELEMETRY: '1' };
   delete env.EXPO_PUBLIC_LOKA_DEV_CARTRIDGE;
@@ -66,6 +68,7 @@ test('a release web export holds no builder seam', () => {
       .join('');
     assert.ok(js.includes('loka-kernel'), 'the export holds the app'); // a broken export proves nothing
     assert.ok(!js.includes('loka_author_seam_lines'), 'the builder seam is in a release bundle');
+    assert.ok(!js.includes(BUILD), 'the Build strip is in a release bundle');
   } finally {
     rmSync(out, { recursive: true, force: true });
   }
