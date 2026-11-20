@@ -193,16 +193,17 @@ test('a line the server cannot find leaves the field shut and says why', async (
   }
 });
 
-// Breaks: a dialogue choice's label offered as a words field, though POST /edit refuses a choice
-// label (its key is its words; gui-editor-design ruling 11); or its narration loses its field.
-test('a choice label shows its key, no words field; its narration keeps one', async () => {
+// Breaks: a JSON dialogue choice's label shown as its bare key with no words field (the stale
+// ruling-11 refusal: a choice's key is fixed, its words free, owner 2026-11-06), or its narration
+// loses its field.
+test('a choice label and its narration each have a words field', async () => {
   const page = await open({ right: 420, selection: { kind: 'dialogue', key: 'aldous_talk' } });
   try {
     const bounty = page.locator('[aria-label="choice bounty"]');
     await bounty.locator('summary').click();
-    await shows(bounty.getByLabel('narration words'), JSON.parse(readFileSync(TEXT, 'utf8'))['narration.aldous_talk.bounty']);
-    assert.equal(await bounty.getByLabel('label words').count(), 0);
-    assert.equal(await bounty.locator('code', { hasText: /^dialogue\.aldous_talk\.bounty$/ }).count(), 1);
+    const text = JSON.parse(readFileSync(TEXT, 'utf8'));
+    await shows(bounty.getByLabel('narration words'), text['narration.aldous_talk.bounty']);
+    await shows(bounty.getByLabel('label words'), text['dialogue.aldous_talk.bounty']);
   } finally {
     await page.close();
   }
