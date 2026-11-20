@@ -639,10 +639,30 @@ registry, required from `panel.tsx` under the same `EXPO_PUBLIC_LOKA_DEV_CARTRID
   the `-dirty` commit suffix (`metro.config.js:20-22`) of the uncommitted probe tree. No probe string in
   the bundle.
 
-### 8.2 Structural edit latency (slice 0.2)
+### 8.2 Structural edit latency (slice 0.2, loka-hcnlh.2, 2026-11-19): warm edits land under a second
 
-To be filled by slice 0.2. Until then the only figure is the owner session's 0.8 to 18 s
-(unattributed).
+Method: forty edits through the author routes on the scratch world (about ten rooms, an NPC, a
+dialogue), each read from the panel strip `compile + publish + Book reload = total ms`
+(`tools/author-panel/src/centre.tsx:11-24`; the Book's reload includes keep-my-place's replay, a few
+steps here). Desktop, warm resident compiler (`mix loka.compile --serve`), Metro already bundled.
+
+| Edit (10 each) | compile ms | publish ms | Book reload ms | total ms |
+|---|---|---|---|---|
+| Field change (`/change`, room `sanctuary` toggled) | 39-52 | 1-2 | 511-575 | 553-615 |
+| New room (`/new rooms`) | 49-131 | 2-4 | 681-880 | 732-934 |
+| New NPC (`/new npcs`) | 58-108 | 2-7 | 667-808 | 740-923 |
+| Delete an NPC (`/delete`) | 61-142 | 2-6 | 688-907 | 755-973 |
+
+**Where the 18 s went: cold starts, not edits.** The session's slow figures were `6109 + 5 + 11886`
+and, on a fresh stack today, `659 + 7 + 24488`: the resident compiler's first compile after a
+(re)start (0.7 to 6 s) and Metro bundling the Book on its first load (12 to 24 s). A warm edit's cost is
+the Book reload, about 0.5 to 0.9 s, of which compile is under 0.15 s.
+
+Consequences for the design: no partial-compile R&D is needed (section 7 risk 2 closes). The builder
+must handle the cold cases instead: after a server restart or a `POST /world` switch, show "updating…"
+until the first compile lands rather than an error, and never time a field out under ~30 s. The
+auto-hold while a field has focus (decision 7) covers the warm reload. Not measured: a large cartridge
+(the showcase), a long keep-my-place replay, a real phone over the LAN (phase 3 re-measures).
 
 ## 9. Owner decisions (ruled 2026-11-19: every recommendation taken, 9 and 11 as amended below)
 
