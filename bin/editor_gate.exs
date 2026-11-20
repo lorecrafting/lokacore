@@ -7,8 +7,9 @@
 # The Book builder's parity (in-game-builder-mode §6.7): each row also has `book` create, edit
 # and delete, and each kernel/ts/play/parity.json row (a panel feature outside the schema) names
 # its panel file and a `book`; a book value is a file under mobile/app/author/build/ or `todo`
-# (`generic` is refused until the generic form editor exists). The todos are exactly the shared todo baseline, which only shrinks
-# against main's copy (absent there: this gate's first change). Arguments 4 to 9 after --check:
+# (`generic` is refused until the generic form editor exists). The todos are exactly the shared
+# todo baseline, which only shrinks against main's copy (absent there: this gate's first change).
+# Arguments 4 to 9 after --check:
 #   registry.json baseline.txt main_baseline.txt parity.json todo.txt main_todo.txt
 schema_paths =
   for f <- File.ls!(Path.join(root, "schemas/source")),
