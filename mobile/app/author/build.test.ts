@@ -5,7 +5,8 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { elapsedHost } from '../../authority/local-story/__tests__/elapsed-host.test.ts';
 import { nodes } from '../book/__tests__/combat-book.test.ts'; // the React Native stand-ins Build.tsx draws with
-import { autoHold, BUILD, keep, restored, toggled } from './build/build.ts';
+import { autoHold, badge, BUILD, checks, keep, refusal, restored, toggled } from './build/build.ts';
+import type { Step } from './place.ts';
 
 const store = (entries: Record<string, string> = {}) => {
   const m = new Map(Object.entries(entries));
@@ -179,4 +180,47 @@ test('a reload brings back the open sheet, scrolled where it was', async () => {
     scroll: 0,
   });
   assert.deepEqual(restored(store({ [BUILD]: '{garbled' })), { on: false });
+  // Breaks: a reload or leaving Build forgetting the room Start in this room goes back to.
+  assert.deepEqual(restored(store({ [BUILD]: '{"on":false,"room":"loft"}' })), {
+    on: false,
+    room: 'loft',
+  });
+  assert.deepEqual(toggled({ on: true, sheet: 'checks', room: 'loft' }), {
+    on: false,
+    room: 'loft',
+  });
+});
+
+// Breaks: a Checks row dropped or sent to the wrong line (a refusal with no file, a key's row not
+// naming its key), the badge counting one kind as another or showing a kind it has none of, or an
+// unwritten line counted as `~` (ruling 9).
+test('Checks lists refusals, unconfirmed and unwritten lines; the badge counts each', () => {
+  const m = {
+    diagnostics: [
+      { rel: 'world/loft.md', path: 'exits.north', words: 'no such room' },
+      { words: 'no start room' },
+    ],
+    unconfirmed: [{ key: 'room.loft.title', at: 'world/loft.md:2' }],
+    placeholders: { 'room.cellar.description': 'world/cellar.md:4' },
+  };
+  assert.deepEqual(checks(m), [
+    { label: 'world/loft.md: exits.north: no such room', file: 'world/loft.md' },
+    { label: 'cartridge: no start room' },
+    { label: 'room.loft.title: not confirmed', key: 'room.loft.title' },
+    { label: 'room.cellar.description: unwritten', key: 'room.cellar.description' },
+  ]);
+  assert.equal(badge(m), 'Checks · 2 refused · 1 not confirmed · 1 unwritten');
+  assert.equal(badge({ placeholders: m.placeholders }), 'Checks · 1 unwritten');
+  assert.equal(badge({}), 'Checks');
+});
+
+// Breaks: the notice naming the step before or after the refused one (an off-by-one between the
+// replay's index and the count the author reads).
+test('the keep-my-place notice names the refused step', () => {
+  const go = {
+    intent: { action_key: 'go', target_ids: [], input: { direction: 'north' } },
+  } as unknown as Step;
+  const steps: Step[] = [{ advance: 60000 }, go, { advance: 1 }];
+  assert.equal(refusal(steps, 1), "Couldn't keep your place: step 2, go north, was refused.");
+  assert.equal(refusal([{} as Step], 0), "Couldn't keep your place: step 1 was refused.");
 });

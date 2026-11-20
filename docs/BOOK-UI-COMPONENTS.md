@@ -287,7 +287,13 @@ left page margin over the line's full height, `action` on the landed line. The c
 notice: `type.label` in `warning`, its buttons `type.control` in `action`, each a touch target tall.
 Build's tap field (builder 1.3): the line's own type role and width on page paper, a `size.rule`
 rule in `action` beneath it; an unwritten line in Build: a blank line of the line's own height
-ruled `size.rule` in `line`, its field name in `type.small` `dim`. Worst pair: `warning` on `card`, 4.75 (light).
+ruled `size.rule` in `line`, its field name in `type.small` `dim`. The Build strip (and the
+keep-my-place notice, a second row of the same look): `bg`, a `size.rule` rule in `line` beneath,
+`space.md` padding and gaps; its buttons (Build, Undo, Open source, the Checks badge, the notice's
+three) `type.control` in `action`, each a touch target in both axes, no border or fill; its status
+and notices (Held, not put back, couldn't keep your place) `type.small` in `warning`. The Checks
+sheet: `card` paper, rows `type.small` with `space.md` sides; a row that goes somewhere is a touch
+target tall in `action`, a plain row and `Nothing to check.` `fg` with `space.md` padding. Worst pair: `warning` on `card`, 4.75 (light).
 
 Not adopted from the mock (no live consumer): the text drawer and its command chips, topic
 chips and scene pick cards. The mock's shop price rows are not adopted either: a stock, sale or service row is an

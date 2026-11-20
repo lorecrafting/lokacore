@@ -954,6 +954,27 @@ reasons and limits: [prose in the Book rulings](../design/prose-in-the-book-ruli
   (`description`) on it; its field opens empty with the hint `Unwritten: <field>`, and leaving it
   empty keeps `~`. A line the last compile refused carries Confirming's unconfirmed mark. Looks:
   [author-mode marks](../BOOK-UI-COMPONENTS.md#component-catalogue).
+- **Build: Undo, Checks, keep my place** (slice 1.4, [builder mode §4.1, §5](../rnd/in-game-builder-mode-2026-11-19.md)).
+  The strip wraps to more rows when its items do not fit; looks:
+  [author-mode marks](../BOOK-UI-COMPONENTS.md#component-catalogue).
+  - **Undo.** After each saved Build write a button `Undo` shows on the strip for 5 s; a later write
+    restarts it for that write. A press hides it at once and puts back exactly that write; success
+    says nothing (the line's old words return). A refused or unsent put-back shows, politely,
+    `<file> changed since; not put back.` and an `Open source` button, until the next write. No redo.
+  - **Checks.** While Build is on the strip carries a button `Checks`, then ` · N refused`,
+    ` · N not confirmed`, ` · N unwritten` for each nonzero count, in that order (never `~`, ruling 9;
+    this replaces §4.1's `~ 4 here · 41`). It opens the Checks sheet, or closes it when open. Rows, in
+    that order: `<file>: <path>: <words>` per refusal (`cartridge` when it has no file), `<key>: not
+    confirmed`, `<key>: unwritten`. A row whose key this page draws as a field closes the sheet and
+    opens that field; any other key opens its source, a refusal its file, both leaving the sheet
+    open; a refusal with no file is plain text, not a control. No rows: one line, `Nothing to
+    check.` (placeholder words, the owner's to replace).
+  - **Keep-my-place notice.** While the replay of the recorded path stands refused, a second strip
+    row reads, politely, `Couldn't keep your place: step N, <step>, was refused.` (`step N was
+    refused.` when the step has no name), with Build on or off, and offers `Drop it and go on`;
+    `Back to checkpoint`, only once a checkpoint was jumped to from the panel, replays the last
+    one; `Start in this room`, only after a Build write, starts over in the room of the last
+    write. It goes when the game starts over or a later replay is not refused.
 - **No field.** A double-click on a line that is not words opens nothing; a note under it, in a
   row of its own (the lines below move down by its height while it shows and back when it goes,
   with no motion; a note never covers a line, loka-wfrgk.39), until the next click or key, read politely: `A choice label is its key. Alt-click opens the scene.`,

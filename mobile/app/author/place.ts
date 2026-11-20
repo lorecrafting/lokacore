@@ -10,6 +10,7 @@ export type Place = {
   hash: string;
   steps: Step[];
   stopped?: { hash: string; at?: number; note: string };
+  checkpoint?: Step[]; // the last checkpoint the panel jumped to (its pin, on a fresh Book)
 };
 type Ids = Readonly<Record<string, string>>; // definition ref -> entity id
 type Pulsed = {
@@ -206,12 +207,19 @@ export function sendCheat(
 /** The path without the step at `index`. */
 export const dropStep = (steps: Step[], index: number) => steps.filter((_, i) => i !== index);
 
+/** A step as its replay names it: `go north`, `advance 600`; undefined when it is not a step. */
+export function named(step: Step | undefined) {
+  if (step && 'advance' in step) return `advance ${step.advance}`;
+  const intent = step?.intent;
+  if (!intent?.input || !Array.isArray(intent.target_ids)) return undefined;
+  const { direction } = intent.input;
+  return [intent.action_key, ...intent.target_ids, ...(direction ? [direction] : [])].join(' ');
+}
+
 /** Sends one recorded input; `done` is filled by the caller. */
 function send(i: number, intent: Intent, game: Replayable): Omit<Outcome, 'done'> | undefined {
   const ids = game.entityIds();
-  const { direction } = intent.input;
-  const said = [intent.action_key, ...intent.target_ids, ...(direction ? [direction] : [])];
-  const name = `step ${i + 1} (${said.join(' ')})`;
+  const name = `step ${i + 1} (${named({ intent })})`;
   const missing = intent.target_ids.find((t) => isRef(t) && !(t in ids));
   if (missing) return { failed: `${name}: no ${missing} in this cartridge`, refused: true };
   const { view, token } = game.view();
@@ -268,7 +276,7 @@ export function replay(
         refused: true,
       };
     if ('advance' in step) {
-      const name = `step ${i + 1} (advance ${step.advance})`;
+      const name = `step ${i + 1} (${named(step)})`;
       if (!Number.isSafeInteger(step.advance) || step.advance < 0)
         return { done: i, failed: `${name}: not whole milliseconds`, refused: true };
       if (rate !== undefined && step.advance > limit(rate))
