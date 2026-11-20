@@ -74,7 +74,14 @@ export async function run(go: () => Promise<unknown>) {
 }
 
 const text = { ...type.small, color: ink('fg'), paddingHorizontal: space.md };
-const row = { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center' } as const;
+// mutate-skip: layout; the acts in a row stand apart and line up with the sheet's text
+export const row = {
+  flexDirection: 'row',
+  flexWrap: 'wrap',
+  alignItems: 'center',
+  columnGap: space.md,
+  paddingHorizontal: space.md,
+} as const;
 
 /** The refusal line, when the last gesture was refused. */
 export const refusal = () =>
@@ -112,7 +119,7 @@ export const moveTo = (r: MapRoom) => (
       placeholder={WORDS.area}
       accessibilityLabel={WORDS.area}
       onChangeText={(d) => void drafts.set(r.key, d)}
-      style={{ ...text, flex: 1 }} // mutate-skip: layout; the field takes the row's free width
+      style={{ ...text, paddingHorizontal: 0, flex: 1 }} // mutate-skip: layout; the field takes the row's free width
     />
     {act(
       WORDS.move,
@@ -128,7 +135,7 @@ export function foot(r: MapRoom) {
     const say = (yes: boolean) => () => ((asking = undefined), answer(yes));
     return (
       <View key="foot" style={row}>
-        <Text style={text}>{WORDS.also(files)}</Text>
+        <Text style={{ ...text, paddingHorizontal: 0 }}>{WORDS.also(files)}</Text>
         {act(WORDS.yes, say(true))}
         {act(WORDS.no, say(false))}
       </View>

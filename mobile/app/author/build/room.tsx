@@ -7,7 +7,7 @@ import { unwritten } from '../prose_rules.ts';
 import { ink } from './build.ts';
 import type { Hooks } from './field.tsx';
 import { sheets } from './sheet.tsx';
-import { exitActs, foot, grows, moveTo, refusal, wire, type Node } from './roomedit.tsx';
+import { exitActs, foot, grows, moveTo, refusal, row, wire, type Node } from './roomedit.tsx';
 
 const WORDS = {
   edit: (title: string) => `Edit ${title}`,
@@ -89,11 +89,8 @@ sheets.room = {
       ...r.exits.map((e) => {
         const to = find(e.to);
         return (
-          <View
-            key={e.dir}
-            style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center' }}
-          >
-            <Text style={{ ...text, minHeight: size.touch }}>
+          <View key={e.dir} style={row}>
+            <Text style={{ ...text, paddingHorizontal: 0, minHeight: size.touch }}>
               {`${e.dir} → ${to ? named(to) : e.to}`}
             </Text>
             {exitActs(r, e.dir, rooms)}
