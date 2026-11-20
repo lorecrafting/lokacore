@@ -127,11 +127,15 @@ export function Frame({ open, saved, back }: Stack & { back: () => void }) {
     </View>
   );
 }
-/** The slide in from the docked side; a cut under reduced motion. */
+/** The slide in from the docked side; a cut under reduced motion. RN-web compiles keyframes only
+ * in StyleSheet.create, not inline. */
+const from = (transform: string) =>
+  ({
+    animationKeyframes: [{ from: { transform } }],
+    animationDuration: `${motion.quick.duration}ms`,
+  }) as object;
+const SLIDE = StyleSheet.create({ side: from('translateX(100%)'), up: from('translateY(100%)') });
 const slide = (docked: boolean) =>
   !globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches &&
-  ({
-    animationKeyframes: [{ from: { transform: docked ? 'translateX(100%)' : 'translateY(100%)' } }],
-    animationDuration: `${motion.quick.duration}ms`,
-  } as object);
+  SLIDE[docked ? 'side' : 'up'];
 const FLOAT = { position: 'absolute', left: 0, right: 0, bottom: 0 } as const;
