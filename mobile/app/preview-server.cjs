@@ -33,7 +33,9 @@ const expo = spawn(
 );
 for (const [from, to] of [[expo.stdout, process.stdout], [expo.stderr, process.stderr]]) {
   const keep = quiet();
-  readline.createInterface({ input: from }).on('line', (line) => keep(line) && to.write(`${line}\n`));
+  // Expo names its own port, which has no isolation headers (the save fails there): name the proxy's.
+  const own = (line) => line.replaceAll(`localhost:${metroPort}`, `localhost:${previewPort}`);
+  readline.createInterface({ input: from }).on('line', (line) => keep(line) && to.write(`${own(line)}\n`));
 }
 
 // `/__author/*` goes to `bin/loka dev --watch`'s live stream (kernel/ts/play/live.ts).
