@@ -12,6 +12,7 @@ const seen = new Map<string, string>();
 const said = new Map<string, string>();
 const sent: [string, any][] = []; // every request the page makes, hold included
 let answers: [number, unknown][] = []; // the next /line and /edit answers, in order
+let map: object[] = []; // /story's rooms
 const hearth = () => {};
 const tick = () => new Promise((r) => setTimeout(r));
 const edits = () => sent.filter(([path]) => path === '/__author/edit').map(([, b]) => b);
@@ -21,6 +22,7 @@ Object.assign(globalThis, {
   localStorage: { getItem: (k: string) => (k === BUILD ? '{"on":true}' : null), setItem() {} },
   addEventListener() {},
   fetch: async (path: string, init?: { body: string }) => {
+    if (path === '/__author/story') return { status: 200, json: async () => ({ map }) };
     sent.push([path.split('?')[0], init && JSON.parse(init.body)]);
     const [status, body] = path.startsWith('/__author/hold') ? [200, null] : answers.shift()!;
     return { status, json: async () => body };
@@ -36,9 +38,9 @@ const api = async (path: string, body?: object): Promise<[number, any]> => {
 build.install({ seen, said, redraw() {}, api });
 
 /** The room page as the author preview draws it: panel.tsx's played().text binds each line. */
-function page(description: string) {
+function page(description: string, title = 'Loft') {
   const text = (key: string) => {
-    const words = key === KEY ? description : 'Loft';
+    const words = key === KEY ? description : title;
     const shown = tagged(key, words);
     bind(seen, shown, key);
     said.set(key, words);
@@ -419,4 +421,45 @@ test('the keep-my-place notice offers its three ways back', async () => {
     build.install({ seen, said, redraw() {}, api });
     sent.length = 0;
   }
+});
+
+// Breaks: the pencil missing from the room's own title, shown on another room's title or on a
+// line that is not a title, a press opening no Room sheet, its press also the title's look, or an
+// unwritten title or exit showing `~` (ruling 9).
+test("the room title's pencil opens its Room sheet: summary and exits", async () => {
+  map = [
+    { key: 'loft', area: 'mill', title: 'Loft', exits: [{ dir: 'down', to: 'cellar' }] },
+    { key: 'cellar', area: null, title: '~', exits: [] },
+  ];
+  let here = 'loft';
+  build.place({
+    place: () => ({ steps: [] }),
+    here: () => here,
+    drop() {},
+    back() {},
+    startIn() {},
+  });
+  build.install({ seen, said, redraw() {}, api });
+  await tick();
+  const pencils = (drawn: any[]) =>
+    drawn.filter((n) => n.props?.accessibilityLabel?.startsWith('Edit '));
+  const pencil = (drawn: any[]) => pencils(drawn)[0];
+  const pen = pencil(page('A low loft.'));
+  assert.equal(pen.props.accessibilityLabel, 'Edit Loft');
+  assert.equal(pencils(page('Loft')).length, 1, 'a description in the title words has a pencil');
+  let looked = true;
+  pen.props.onPress({ stopPropagation: () => (looked = false) });
+  assert.equal(looked, false, "the pencil's press also looks");
+  const sheet = nodes(build.Strip({ children: 'book' })).find((n) => n.props?.role === 'dialog');
+  const words = nodes(sheet)
+    .map((n) => n.props?.children)
+    .filter((c) => typeof c === 'string');
+  assert.deepEqual(words.slice(-3), ['Loft', 'mill · 1 exit', 'down → cellar']);
+  here = 'cellar';
+  const drawn = page('A low loft.', '~');
+  assert.equal(pencil(drawn).props.accessibilityLabel, 'Edit cellar');
+  const title = drawn.find((n) => n.props?.accessibilityRole === 'header');
+  assert.equal(title.props.children[0].props.children, 'title', 'a `~` title drawn');
+  assert.equal(pencil(page('A low loft.', 'Loft')), undefined, "another room's title");
+  build.install({ seen, said, redraw() {}, api }); // the stored state: no sheet open
 });

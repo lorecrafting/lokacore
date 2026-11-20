@@ -44,7 +44,7 @@ test('the Build switch changes no game state; the strip says what the Hold parks
     toggle();
     assert.deepEqual(restored(s), { on: true });
     assert.equal(label(), '✎ Build', 'Build on shown by colour alone (WCAG 1.4.1)');
-    keep(s, { on: true, sheet: 'stand-in', scroll: 40 });
+    keep(s, { on: true, sheets: ['stand-in'], scroll: 40 });
     toggle();
     assert.deepEqual([host.game.view(), tables(), s.others()], before);
     assert.deepEqual(restored(s), { on: false }, 'leaving Build closes every sheet');
@@ -54,12 +54,12 @@ test('the Build switch changes no game state; the strip says what the Hold parks
     hear({ held: true, pending: 3 } as never);
     assert.equal(status(), 'Held · 3 waiting');
 
-    keep(s, { on: true, sheet: 'gone' }); // saved on a branch that had a sheet this one lacks
+    keep(s, { on: true, sheets: ['gone'] }); // saved on a branch that had a sheet this one lacks
     Object.assign(globalThis, { addEventListener: () => {} });
-    install({ seen: new Map(), said: new Map(), redraw() {}, api: async () => [200, null] }); // the reload
+    install({ seen: new Map(), said: new Map(), redraw() {}, api: async () => [200, { map: [] }] }); // the reload
     const sheet = () => drawn().some((n) => n.type === 'ScrollView');
     assert.equal(sheet(), false, 'an unknown sheet covers the Book');
-    sheets.gone = () => 'gone';
+    sheets.gone = { title: () => 'Gone', body: () => 'gone' };
     assert.equal(sheet(), true);
   } finally {
     host.sql.close();
@@ -152,11 +152,11 @@ test('leaving the page releases a Hold the field took, by beacon', () => {
 // Breaks: a reload losing the open sheet or its scroll, or reopening a sheet outside Build.
 test('a reload brings back the open sheet, scrolled where it was', async () => {
   const { Sheet, sheets } = await import('./build/Build.tsx');
-  sheets['stand-in'] = () => 'stand-in sheet';
+  sheets['stand-in'] = { title: () => 'Stand-in', body: () => 'stand-in sheet' };
   const s = store();
-  keep(s, { on: true, sheet: 'stand-in', scroll: 120 });
+  keep(s, { on: true, sheets: ['stand-in'], scroll: 120 });
   const open = restored(store({ [BUILD]: s.getItem(BUILD)! })); // a fresh page over the same storage
-  assert.deepEqual(open, { on: true, sheet: 'stand-in', scroll: 120 });
+  assert.deepEqual(open, { on: true, sheets: ['stand-in'], scroll: 120 });
   const drawn = Sheet({ open, saved: () => {} }) as any;
   assert.equal(drawn.props.children, 'stand-in sheet');
   let to: unknown;
@@ -170,25 +170,73 @@ test('a reload brings back the open sheet, scrolled where it was', async () => {
   Sheet({ open, saved: (b) => (saved = b) }).props.onScroll({
     nativeEvent: { contentOffset: { y: 300 } },
   });
-  assert.deepEqual(saved, { on: true, sheet: 'stand-in', scroll: 300 });
+  assert.deepEqual(saved, { on: true, sheets: ['stand-in'], scroll: 300 });
 
-  assert.deepEqual(restored(store({ [BUILD]: '{"on":false,"sheet":"stand-in"}' })), { on: false });
+  assert.deepEqual(restored(store({ [BUILD]: '{"on":false,"sheets":["stand-in"]}' })), {
+    on: false,
+  });
   assert.deepEqual(restored(store({ [BUILD]: '{"on":true}' })), { on: true });
-  assert.deepEqual(restored(store({ [BUILD]: '{"on":true,"sheet":"x"}' })), {
+  // Breaks: a hand-edited stack drawing a non-id, or more than four sheets after a reload.
+  assert.deepEqual(restored(store({ [BUILD]: '{"on":true,"sheets":[1,"a","b","c","d","e"]}' })), {
     on: true,
-    sheet: 'x',
+    sheets: ['b', 'c', 'd', 'e'],
     scroll: 0,
   });
+  assert.deepEqual(restored(store({ [BUILD]: '{"on":true,"sheets":"x"}' })), { on: true });
   assert.deepEqual(restored(store({ [BUILD]: '{garbled' })), { on: false });
   // Breaks: a reload or leaving Build forgetting the room Start in this room goes back to.
   assert.deepEqual(restored(store({ [BUILD]: '{"on":false,"room":"loft"}' })), {
     on: false,
     room: 'loft',
   });
-  assert.deepEqual(toggled({ on: true, sheet: 'checks', room: 'loft' }), {
+  assert.deepEqual(toggled({ on: true, sheets: ['checks'], room: 'loft' }), {
     on: false,
     room: 'loft',
   });
+});
+
+// Breaks: a fifth sheet growing the stack or dropping its bottom, Back closing more than the top,
+// the breadcrumb out of order, the sheet modal beside the Book (or not modal over it on a phone),
+// or the focus left behind when the last sheet closes.
+test('sheets stack to four, Back closes the top, and the sheet is modal only over the Book', async () => {
+  const { Strip, install, open, sheets } = await import('./build/Build.tsx');
+  for (const k of 'abcde') sheets[k] = { title: () => k.toUpperCase(), body: () => k };
+  let focused = 0;
+  const opener = { focus: () => focused++ };
+  Object.defineProperty(globalThis, 'localStorage', { value: store(), configurable: true });
+  Object.assign(globalThis, { document: { activeElement: opener }, addEventListener() {} });
+  install({ seen: new Map(), said: new Map(), redraw() {}, api: async () => [200, { map: [] }] });
+  try {
+    const drawn = () => nodes(Strip({ children: 'book' }));
+    const dialog = () => drawn().find((n) => n.props?.role === 'dialog');
+    const crumbs = () => {
+      const d = nodes(dialog());
+      return [
+        d.find((n) => n.props?.accessibilityRole === 'header').props.children,
+        d.find((n) => typeof n.props?.children === 'string' && n.props.children.includes(' › '))
+          ?.props.children,
+      ];
+    };
+    for (const k of 'abcde') open(k);
+    assert.deepEqual(crumbs(), ['E', 'A › B › C']);
+    Object.assign(globalThis, { document: { activeElement: null } }); // focus moved into the sheet
+    nodes(dialog())
+      .find((n) => n.props?.children?.props?.children === 'Back')
+      .props.onPress();
+    assert.deepEqual(crumbs(), ['C', 'A › B']);
+    Object.assign(globalThis, { innerWidth: 390 });
+    assert.equal(dialog().props['aria-modal'], true, 'a phone sheet over the Book is modal');
+    Object.assign(globalThis, { innerWidth: 1400 });
+    assert.equal(dialog().props['aria-modal'], false, 'a docked sheet leaves the Book playable');
+    for (let i = 0; i < 3; i++)
+      nodes(dialog())
+        .find((n) => n.props?.children?.props?.children === 'Back')
+        .props.onPress();
+    assert.equal(dialog(), undefined);
+    assert.equal(focused, 1, 'the last Back returns the focus to what opened the first sheet');
+  } finally {
+    Object.assign(globalThis, { document: undefined, innerWidth: undefined });
+  }
 });
 
 // Breaks: a Checks row dropped or sent to the wrong line (a refusal with no file, a key's row not

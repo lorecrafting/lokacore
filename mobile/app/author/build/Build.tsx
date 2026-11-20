@@ -2,7 +2,7 @@
 // above the Book, the sheet host, and auto-hold. panel.tsx requires this only in the author preview,
 // so a release never holds it (author/seam.test.ts looks for `BUILD`).
 import { useState, type ReactNode } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 import { size, space, type } from '../../book/tokens.ts';
 import type { Message } from '../live.ts';
 import type { Step } from '../place.ts';
@@ -12,13 +12,19 @@ import {
   autoHold,
   badge,
   checks,
+  closed,
   ink,
   keep,
+  opened,
   refusal,
   restored,
   toggled,
   type Builder,
 } from './build.ts';
+import { pencil, story } from './room.tsx';
+import { act, CONTROL, Frame, parts, sheets } from './sheet.tsx';
+
+export { Sheet, sheets } from './sheet.tsx';
 
 const WORDS = {
   build: 'Build',
@@ -31,6 +37,7 @@ const WORDS = {
   drop: 'Drop it and go on',
   back: 'Back to checkpoint',
   room: 'Start in this room',
+  checks: 'Checks',
 };
 const UNDO_MS = 5000; // the chip's life after a write (docs/rnd/in-game-builder-mode-2026-11-19.md)
 let builder: Builder = { on: false };
@@ -40,6 +47,7 @@ let undo: Wrote | undefined; // the last write, while its chip shows
 let undoTimer: ReturnType<typeof setTimeout> | undefined;
 let notBack: Wrote | undefined; // a refused put-back
 let redrawStrip = () => {};
+let opener: { focus?: () => void } | null | undefined; // what had focus before the first sheet opened
 /** What the keep-my-place notice reads and does; panel.tsx hands it in per game. */
 export type Place = {
   place: () => { steps: Step[]; refused?: number; checkpoint?: Step[] };
@@ -66,20 +74,40 @@ export const hold = autoHold(
   () => navigator.sendBeacon('/__author/hold', JSON.stringify({ on: false })),
   (release) => setTimeout(release),
 );
-/** Sheet bodies by id; later slices register theirs. */
-export const sheets: Record<string, () => ReactNode> = {};
-
+/** Sheets by kind: an open sheet's id is `<kind>` or `<kind>:<arg>`; later slices register theirs. */
+/** Opens a sheet on the stack (or brings it to the top); the first remembers the focus to return. */
+export function open(id: string) {
+  if (!builder.sheets) opener = globalThis.document?.activeElement as typeof opener;
+  set(opened(builder, id));
+  redrawStrip();
+  shut();
+}
+/** Back: closes the top sheet only; the last one returns the focus to what opened it. */
+function back() {
+  set(closed(builder));
+  redrawStrip();
+  if (!builder.sheets) opener?.focus?.();
+}
 /** `book`: the Book's word bindings, redraw and E5's api (panel.tsx), for the field. */
 export function install(book: Pick<Hooks, 'seen' | 'said' | 'redraw' | 'api'>) {
   api = book.api;
-  seam({ ...book, on: () => builder.on, focus: hold.focus, commit: hold.commit, wrote });
+  seam({
+    ...book,
+    on: () => builder.on,
+    focus: hold.focus,
+    commit: hold.commit,
+    wrote,
+    pencil: (shown) => pencil(shown, placed?.here(), open),
+  });
   builder = restored(localStorage);
+  story(api, redrawStrip);
   addEventListener('pagehide', hold.leave);
 }
 export function hear(message: Message) {
   heard = message;
   hold.heard(message.held);
   told(message.unconfirmed?.map((u) => u.key));
+  story(api, redrawStrip); // a compile may have added, moved or renamed rooms
 }
 const set = (next: Builder) => {
   builder = next;
@@ -106,7 +134,8 @@ async function putBack(w: Wrote) {
 }
 const openBack = () => void api!('/open', { key: notBack!.key, words: notBack!.words });
 /** Checks: each row goes to its line; one on this page closes the sheet to show its field. */
-sheets.checks = () => {
+sheets.checks = { title: () => WORDS.checks, body: checked };
+function checked() {
   const rows = checks(heard);
   if (!rows.length)
     return (
@@ -119,7 +148,7 @@ sheets.checks = () => {
         accessibilityRole="link"
         onPress={() => {
           if (c.key ? go(c.key) : void api!('/open', { file: c.file }))
-            set({ ...builder, sheet: undefined });
+            set({ ...builder, sheets: undefined });
           redrawStrip();
         }}
         style={{ minHeight: size.touch, justifyContent: 'center', paddingHorizontal: space.md }}
@@ -132,27 +161,7 @@ sheets.checks = () => {
       </Text>
     ),
   );
-};
-
-/** The open sheet, scrolled back to where it was when it is drawn again after a reload. */
-export function Sheet({ open, saved }: { open: Builder; saved: (next: Builder) => void }) {
-  const scroller: { current: ScrollView | null } = { current: null };
-  let restoring = true; // once per drawing: later size changes keep the author's place
-  return (
-    <ScrollView
-      ref={scroller}
-      style={[StyleSheet.absoluteFill, { backgroundColor: ink('card') }]} // a sheet is card paper (§5)
-      onContentSizeChange={() => {
-        if (restoring) scroller.current?.scrollTo({ y: open.scroll, animated: false });
-        restoring = false;
-      }}
-      onScroll={(e) => saved({ ...open, scroll: e.nativeEvent.contentOffset.y })}
-    >
-      {sheets[open.sheet!]?.()}
-    </ScrollView>
-  );
 }
-
 const STRIP = {
   minHeight: size.touch,
   flexDirection: 'row',
@@ -162,18 +171,6 @@ const STRIP = {
   paddingHorizontal: space.md,
   borderBottomWidth: size.rule,
 } as const;
-const CONTROL = { minWidth: size.touch, minHeight: size.touch, justifyContent: 'center' } as const;
-const act = (label: string, run: () => void, expanded?: boolean) => (
-  <Pressable
-    key={label}
-    accessibilityRole="button"
-    accessibilityState={expanded === undefined ? undefined : { expanded }}
-    onPress={run}
-    style={CONTROL}
-  >
-    <Text style={{ ...type.control, color: ink('action') }}>{label}</Text>
-  </Pressable>
-);
 const warn = (text: ReactNode) => (
   <Text aria-live="polite" style={{ ...type.small, color: ink('warning') }}>
     {text}
@@ -199,6 +196,7 @@ export function Strip({ children }: { children: ReactNode }) {
   const [, redraw] = useState({});
   redrawStrip = () => redraw({});
   const change = (next: Builder) => (set(next), redraw({}), shut());
+  const top = builder.sheets?.at(-1);
   return (
     <View style={{ flex: 1 }} /* mutate-skip: layout */>
       <View style={{ ...STRIP, backgroundColor: ink('bg'), borderColor: ink('line') }}>
@@ -218,18 +216,17 @@ export function Strip({ children }: { children: ReactNode }) {
         {notBack ? warn(WORDS.notUndone(notBack.file)) : null}
         {notBack ? act(WORDS.source, openBack) : null}
         {builder.on
-          ? act(
-              badge(heard),
-              () =>
-                change({ ...builder, sheet: builder.sheet === 'checks' ? undefined : 'checks' }),
-              builder.sheet === 'checks',
-            )
+          ? act(badge(heard), () => (top === 'checks' ? back() : open('checks')), top === 'checks')
           : null}
       </View>
       <Notice />
-      <View style={{ flex: 1 }} /* mutate-skip: layout */>
-        {children}
-        {builder.sheet && sheets[builder.sheet] ? <Sheet open={builder} saved={set} /> : null}
+      <View style={{ flex: 1, flexDirection: 'row' }} /* mutate-skip: layout */>
+        <View
+          style={{ flex: 1 }} /* mutate-skip: layout; the Book keeps its place as sheets open */
+        >
+          {children}
+        </View>
+        {top && parts(top)[0] ? <Frame open={builder} saved={set} back={back} /> : null}
       </View>
     </View>
   );

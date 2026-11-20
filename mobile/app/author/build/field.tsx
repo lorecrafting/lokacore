@@ -29,6 +29,7 @@ export type Hooks = {
   commit: () => void;
   api: typeof api; // E5's, handed in by panel.tsx behind its require gate
   wrote: (w: Wrote) => void; // a saved write, for the strip's Undo chip
+  pencil?: (shown: string) => ReactNode; // the title pencil, on the room page's own title only
 };
 /** A saved write as /undo puts it back: its journal id, and the key and old words the Book shows at once. */
 export type Wrote = { id: number; key: string; words: string; file: string };
@@ -65,6 +66,8 @@ export function line(p: Props): Props {
   const h = hooks;
   if (!h?.on() || p.onPress) return p;
   const shown = flat(p.children);
+  const pen = p.accessibilityRole === 'header' ? h.pencil?.(shown) : undefined;
+  if (pen) return { ...p, children: [unwritten(shown) ? hint('title') : p.children, pen] };
   const key = keyOf(h, shown);
   if (!key) return p;
   const name = key.slice(key.lastIndexOf('.') + 1);
@@ -84,19 +87,19 @@ export function line(p: Props): Props {
       marked && MARKED,
     ],
     children: [
-      blank ? (
-        <Text key="blank" style={{ ...type.small, color: ink('dim') }}>
-          {name}
-        </Text>
-      ) : (
-        p.children
-      ),
+      blank ? hint(name) : p.children,
       field?.key === key && field.note ? (
         <Text key="note" style={CAPTION}>{`\n${field.note}`}</Text>
       ) : null,
     ],
   };
 }
+/** An unwritten line's name in place of its `~` (ruling 9). */
+const hint = (name: string) => (
+  <Text key="blank" style={{ ...type.small, color: ink('dim') }}>
+    {name}
+  </Text>
+);
 /** Enter or Space on the line itself: a link's own key bubbles up from inside and is not ours. */
 const keyed = (press: () => void) => (e: KeyboardEvent) =>
   e.target === e.currentTarget &&
