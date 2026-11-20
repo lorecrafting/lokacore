@@ -1,0 +1,11 @@
+id: mobile-author-seam-owner
+valid:
+  - "import { Text } from './book/Text.tsx';"
+  - "const authorship = 'authorSeams';"
+  - "export * from './tokens.ts';"
+invalid:
+  - "import { authorSeam } from './book/Text.tsx'; authorSeam.line = (p) => ({ ...p, accessibilityHint: 'x' });"
+  - "import * as T from './Text.tsx'; T.authorSeam.line = undefined;"
+  - "import * as T from './Text.tsx'; const { authorSeam } = T;"
+  - "import * as T from './Text.tsx'; T['authorSeam'].line = undefined;"
+  - "export * from './Text.tsx';"

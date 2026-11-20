@@ -2,14 +2,7 @@ id: mobile-book-author-seam
 valid:
   - "import { Text } from './Text.tsx';"
   - "import { worded } from './words.ts';"
-  - "const authorship = 'authorSeams';"
-  - "export * from './tokens.ts';"
 invalid:
-  - "import { authorSeam } from './Text.tsx';"
-  - "import * as T from './Text.tsx'; T.authorSeam.line = undefined;"
   - "import { install } from '../author/build/seam.ts';"
   - "const m = require('../author/panel.tsx');"
-  - "import * as T from './Text.tsx'; const { authorSeam } = T;"
-  - "import * as T from './Text.tsx'; T['authorSeam'].line = undefined;"
-  - "export * from './Text.tsx';"
   - "import x from '../author';"

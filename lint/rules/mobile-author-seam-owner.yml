@@ -1,0 +1,16 @@
+id: mobile-author-seam-owner
+language: tsx
+severity: error
+message: 'Only author code sets the Book seam, authorSeam in book/Text.tsx (docs/rnd/in-game-builder-mode-2026-11-19.md §6.2, §6.6): no other app file names it, so a release cannot install it.'
+files: [mobile/app/**]
+ignores: ['**/*.test.ts', '**/*.test.tsx', mobile/app/book/Text.tsx, mobile/app/author/**]
+rule:
+  any:
+    - kind: export_statement
+      regex: '^export \* from .*/Text(\.tsx)?.;?$'
+    - any:
+        - kind: identifier
+        - kind: property_identifier
+        - kind: shorthand_property_identifier_pattern
+        - kind: string_fragment
+      regex: '^authorSeam$'
