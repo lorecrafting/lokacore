@@ -92,7 +92,7 @@ hand-written prose, the compiler as validator, and "a card never offers what the
   (Contents `Menu.tsx:37`, Character, Skills, Carrying, Map `sections.tsx:202`, Journal, Settings) and
   Credits. Combat appears in the model (`model.ts:63`) but its draw site was not traced.
 - **Gate today**: `kernel/ts/play/registry.json` (in `tools/author-panel/src/edit/` until loka-hcnlh.3) has 277 rows keyed by **schema path**
-  (`kind.field`). Each row is `{create, edit, delete}`, either `generic` or a component path.
+  (`kind.field`). Each row is `{create, edit, delete}`, either `generic` or a component path, and a `book: {create, edit, delete}` key (a file under `mobile/app/author/build/`, `generic` or `todo`).
   `bin/editor_gate.exs` (run by `bin/toolbox_page.exs`) checks that every schema path has all three verbs and that each path exists. It also holds the
   generic set equal to `test/loka/editor_generic_baseline.txt` (282 lines), shrink-only.
   `kernel/ts/test/editor_crud.test.ts:27-60` drives create, edit and delete for every kind through the routes.
@@ -492,7 +492,7 @@ require `build/` unconditionally and watch the test fail, then install the seam 
   `editor_generic_baseline.txt`). Red controls go into
   `bin/editor_red_controls.exs`: drop a `book` key, name a missing file, add an unlisted `todo`.
 - **`parity.json`, everything that is not a schema path.** Appendix A's rows, each holding `id`, the panel
-  home (a file) and the book home (a file or `panel-only: <reason>` or `todo`). The same exs checks that
+  home (a file) and the book home (a file or `todo`; `panel-only` is refused, ruling 6). The same exs checks that
   files exist and that `todo` only shrinks. "Parity reached" (ruling 3) means both `todo` sets are
   empty.
 - The gate proves a named surface exists, not that it works. `editor_crud.test.ts` already proves
