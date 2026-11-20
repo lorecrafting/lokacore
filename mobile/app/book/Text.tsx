@@ -7,7 +7,8 @@ type Props = ComponentProps<typeof Text>;
  * props to its own Text, never a wrapper. A release never sets it: one property read per line. Lint
  * mobile-book-author-seam keeps every other Book file off it.
  */
-export const authorSeam: { line?: (p: Props) => Props } = {};
+const authorSeam: { line?: (p: Props) => Props } = {};
+export { authorSeam };
 const Line = (p: Props) => (
   <Text allowFontScaling={false} {...(authorSeam.line ? authorSeam.line(p) : p)} />
 );
