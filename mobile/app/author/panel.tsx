@@ -45,7 +45,7 @@ const build: typeof import('./build/Build.tsx') | undefined =
 export const Building = devClock ? build?.Strip : undefined;
 let redrawBook = () => {}; // the mounted App's, once useAuthorPanel runs
 if (devClock) {
-  build?.install({ seen, said, redraw: () => redrawBook() });
+  build?.install({ seen, said, redraw: () => redrawBook(), api: inBook!.api });
   worded.note = (words, key) => bind(seen, words, key); // a line as shown, bound too
   worded.made = new Map(); // an open conversation re-words its lines from the overlay (loka-wfrgk.19)
 }

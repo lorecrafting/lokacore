@@ -31,8 +31,8 @@ export const hold = autoHold(
 /** Sheet bodies by id; later slices register theirs. */
 export const sheets: Record<string, () => ReactNode> = {};
 
-/** `book`: the Book's word bindings and redraw (panel.tsx), for the field. */
-export function install(book: Pick<Hooks, 'seen' | 'said' | 'redraw'>) {
+/** `book`: the Book's word bindings, redraw and E5's api (panel.tsx), for the field. */
+export function install(book: Pick<Hooks, 'seen' | 'said' | 'redraw' | 'api'>) {
   seam({ ...book, on: () => builder.on, focus: hold.focus, commit: hold.commit });
   builder = restored(localStorage);
   addEventListener('pagehide', hold.leave);

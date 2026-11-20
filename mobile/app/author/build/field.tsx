@@ -7,7 +7,7 @@ import type { ComponentProps, ReactNode } from 'react';
 import { Text, TextInput } from 'react-native';
 import { plain } from '../../book/model.ts';
 import { size, space, type } from '../../book/tokens.ts';
-import { api } from '../inbook.ts';
+import type { api } from '../inbook.ts';
 import { drawnWords, noFieldNote, oneLine, saving, unwritten } from '../prose_rules.ts';
 import { ink } from './build.ts';
 
@@ -27,6 +27,7 @@ export type Hooks = {
   redraw: () => void; // the Book's
   focus: () => void; // auto-hold (Build.tsx `hold`)
   commit: () => void;
+  api: typeof api; // E5's, handed in by panel.tsx behind its require gate
 };
 let hooks: Hooks | undefined;
 let field: Field | undefined;
@@ -114,9 +115,9 @@ const CHOICE = {
 async function edit(h: Hooks, key: string) {
   if (busy) return; // a tap elsewhere replaces a field left open (a notice, another page)
   busy = true;
-  const [status, at] = await api(
-    `/line?key=${enc(key)}&words=${enc(h.said.get(key) ?? '')}`,
-  ).finally(() => (busy = false));
+  const [status, at] = await h
+    .api(`/line?key=${enc(key)}&words=${enc(h.said.get(key) ?? '')}`)
+    .finally(() => (busy = false));
   field =
     status === 200
       ? { key, at, draft: unwritten(at.words) ? '' : at.words }
@@ -144,19 +145,20 @@ async function save(h: Hooks, f: Field) {
   if (choice === 'empty') return say(h, f, 'Empty. Write ~ to leave it unwritten.');
   busy = true;
   const { file, line, was } = at;
-  const [status, answer] = await api('/edit', {
-    file,
-    line,
-    was,
-    words: draft,
-    key: f.key,
-  }).finally(() => (busy = false));
+  const [status, answer] = await h
+    .api('/edit', {
+      file,
+      line,
+      was,
+      words: draft,
+      key: f.key,
+    })
+    .finally(() => (busy = false));
   if (field !== f) return; // closed (Esc) while it saved
   if (status === 200) return close(h); // the server sends the new words at once (kernel/ts/play/told.ts)
   if (status !== 409)
     return say(h, f, typeof answer === 'string' ? answer : `Not saved (${status}).`);
-  const [got, theirs] = await api(`/line?key=${enc(f.key)}&words=${enc(at.words)}`);
-  if (field !== f) return;
+  const [got, theirs] = await h.api(`/line?key=${enc(f.key)}&words=${enc(at.words)}`);
   if (got !== 200)
     return say(h, f, 'Changed on disk since you opened it.', [['Close', () => close(h)]]);
   say(h, f, `Changed on disk since you opened it. ${theirs.words}`, [

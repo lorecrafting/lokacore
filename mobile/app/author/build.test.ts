@@ -55,7 +55,7 @@ test('the Build switch changes no game state; the strip says what the Hold parks
 
     keep(s, { on: true, sheet: 'gone' }); // saved on a branch that had a sheet this one lacks
     Object.assign(globalThis, { addEventListener: () => {} });
-    install({ seen: new Map(), said: new Map(), redraw() {} }); // the reload
+    install({ seen: new Map(), said: new Map(), redraw() {}, api: async () => [200, null] }); // the reload
     const sheet = () => drawn().some((n) => n.type === 'ScrollView');
     assert.equal(sheet(), false, 'an unknown sheet covers the Book');
     sheets.gone = () => 'gone';

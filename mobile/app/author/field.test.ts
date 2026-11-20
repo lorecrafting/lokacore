@@ -28,8 +28,12 @@ Object.assign(globalThis, {
 });
 const build = await import('./build/Build.tsx');
 const { RoomPage } = await import('../book/Body.tsx');
-const { shut } = await import('./build/field.tsx');
-build.install({ seen, said, redraw() {} });
+const { line: seamLine, shut } = await import('./build/field.tsx');
+const api = async (path: string, body?: object): Promise<[number, any]> => {
+  const r = await fetch(`/__author${path}`, body && { method: 'POST', body: JSON.stringify(body) });
+  return [r.status, await r.json()];
+}; // inbook.ts's, which panel.tsx hands in
+build.install({ seen, said, redraw() {}, api });
 
 /** The room page as the author preview draws it: panel.tsx's played().text binds each line. */
 function page(description: string) {
@@ -132,6 +136,58 @@ test('a field left open blocks nothing and holds only while focused', async () =
   );
   shut();
   assert.equal(field(page(LINKED)), undefined, 'Build off left the field open');
+  sent.length = 0;
+});
+
+// Breaks: Enter or Space on the line itself, or a line with an empty child, opening nothing; a
+// refusal's own words or an unwritten line's first words lost; Esc leaving a field that a blur saves.
+test('keys, refusals and Esc on the field', async () => {
+  const drawn = page('A low loft.');
+  assert.ok(!JSON.stringify(line(drawn).props.style).includes('border'), 'a written line is ruled');
+  const self = {};
+  for (const key of ['Enter', ' ']) {
+    answers = [[200, at('A low loft.')]];
+    line(drawn).props.onKeyDown({ key, target: self, currentTarget: self, preventDefault() {} });
+    await tick();
+    assert.ok(field(page('A low loft.')), `${JSON.stringify(key)} on the line opened nothing`);
+    shut();
+  }
+  assert.ok(
+    seamLine({ children: [null, 'A low loft.'] } as any).onPress,
+    'an empty child broke the line',
+  );
+  answers = [[404, 'a choice label has no line']];
+  line(drawn).props.onPress();
+  await tick();
+  assert.match(JSON.stringify(page('A low loft.')), /scene card/, "the refusal's reason was lost");
+  const input = await opened('A low loft.', at('A low loft.'));
+  input.props.onChangeText('A bare loft.');
+  answers = [[500, 'no such file']];
+  input.props.onSubmitEditing();
+  await tick();
+  assert.match(JSON.stringify(page('A low loft.')), /no such file/, "the server's words were lost");
+  const pressed: string[] = [];
+  const keyPress = (key: string, shiftKey = false) =>
+    input.props.onKeyPress({
+      nativeEvent: { key, shiftKey },
+      preventDefault: () => pressed.push(key),
+    });
+  keyPress('Enter', true);
+  keyPress('Escape');
+  assert.deepEqual(pressed, ['Enter'], 'Shift+Enter broke the line, or Esc was swallowed');
+  input.props.onBlur();
+  await tick();
+  assert.equal(edits().length, 1, 'a blur after Esc saved');
+  const blank = await opened('~', at('~'));
+  blank.props.onChangeText('Rain falls.');
+  answers = [[200, { id: 3 }]];
+  blank.props.onSubmitEditing();
+  await tick();
+  assert.equal(
+    edits().at(-1).words,
+    'Rain falls.',
+    "an unwritten line's first words were not sent",
+  );
   sent.length = 0;
 });
 
