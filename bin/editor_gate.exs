@@ -6,8 +6,8 @@
 # exactly the baseline, which only shrinks against main's copy, so a new path ships hand-built.
 # The Book builder's parity (in-game-builder-mode §6.7): each row also has `book` create, edit
 # and delete, and each kernel/ts/play/parity.json row (a panel feature outside the schema) names
-# its panel file and a `book`; a book value is a file under mobile/app/author/build/, `todo` or
-# (rows only) `generic`. The todos are exactly the shared todo baseline, which only shrinks
+# its panel file and a `book`; a book value is a file under mobile/app/author/build/ or `todo`
+# (`generic` is refused until the generic form editor exists). The todos are exactly the shared todo baseline, which only shrinks
 # against main's copy (absent there: this gate's first change). Arguments 4 to 9 after --check:
 #   registry.json baseline.txt main_baseline.txt parity.json todo.txt main_todo.txt
 schema_paths =
@@ -96,23 +96,26 @@ surface? = fn
   _ -> false
 end
 
+# `generic` is refused until the builder's generic form editor exists (in-game-builder-mode §6.4):
+# before it, a todo turned generic would shrink the todo baseline with no working home. The slice
+# that builds that editor lifts this and holds generic book values to a shrink-only baseline.
 book = fn
-  nil, _ ->
-    "missing (todo, generic or a file under mobile/app/author/build/)"
+  nil ->
+    "missing (todo or a file under mobile/app/author/build/)"
 
-  "todo", _ ->
+  "todo" ->
     nil
 
-  "generic", generic_ok when generic_ok ->
-    nil
+  "generic" ->
+    "generic: refused until the builder's generic form editor exists"
 
-  s, _ when is_binary(s) ->
+  s when is_binary(s) ->
     if(!file?.("mobile/app/author/build", s),
       do: "#{s}: no such file under mobile/app/author/build/"
     )
 
-  s, _ ->
-    "#{inspect(s)} is not a file, todo or generic"
+  s ->
+    "#{inspect(s)} is not a file or todo"
 end
 
 problems =
@@ -132,7 +135,7 @@ problems =
     for(
       p <- schema_paths,
       v <- verbs,
-      m = book.(editor[p]["book"][v], true),
+      m = book.(editor[p]["book"][v]),
       do: "#{editor_path}: #{p}: book #{v} #{m}"
     ) ++
     for(
@@ -141,7 +144,7 @@ problems =
         if(!(is_binary(r["panel"]) and file?.("", r["panel"])),
           do: "no panel file #{inspect(r["panel"])}"
         ),
-        if(m = book.(r["book"], false), do: "book #{m}")
+        if(m = book.(r["book"]), do: "book #{m}")
       ],
       m,
       do: "#{parity_path}: #{inspect(r["id"])}: #{m}"

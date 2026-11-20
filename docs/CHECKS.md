@@ -89,8 +89,8 @@ their rules and red controls remain available for resumption.
   the generic ones equal `test/loka/editor_generic_baseline.txt`, which only shrinks against main's copy.
   The Book builder's parity (`bin/editor_gate.exs`): every registry row also has `book` create, edit
   and delete, and every `kernel/ts/play/parity.json` row (a panel feature outside the schema) names an
-  existing panel file; a book value is a file under `mobile/app/author/build/`, `todo` or (registry
-  only) `generic`; the todos equal `test/loka/builder_todo_baseline.txt`, which only shrinks against
+  existing panel file; a book value is a file under `mobile/app/author/build/` or `todo`
+  (`generic` is refused until the generic form editor exists); the todos equal `test/loka/builder_todo_baseline.txt`, which only shrinks against
   main's copy (absent there: the first change). Red controls: `bin/editor_red_controls.exs`.
 - `elixir bin/red_controls.exs`: refuses occupied plant paths and creates files exclusively;
   `test/loka/red_controls_test.exs` checks preserved local bytes. It plants a boundary violation, a cycle, a compile edge, an
