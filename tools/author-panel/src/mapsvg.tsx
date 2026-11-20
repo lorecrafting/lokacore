@@ -2,11 +2,11 @@
 // buttons, wheel and drag pans, Cmd/Ctrl-wheel zooms, and the keyboard row.
 import { useEffect, useRef, useState } from 'react';
 import type { Level, MapProps, Reach } from './areamap.tsx';
-import type { MapRoom } from './map.ts';
-import * as map from './map.ts';
-import { M } from './map.ts';
+import type { MapRoom } from '../../../kernel/ts/play/map.ts';
+import * as map from '../../../kernel/ts/play/map.ts';
+import { M } from '../../../kernel/ts/play/map.ts';
 import { at, Box, half, Edges, Hulls, Pills, RING, Stubs, type Marks } from './mapdraw.tsx';
-import { cellAt, dragged, toward } from './mapedit.ts';
+import { cellAt, dragged, toward } from '../../../kernel/ts/play/map.ts';
 import { edit, mapCommand, shown } from './mapwire.ts';
 
 /** `locked`: the map's drag lock (areamap.tsx); rooms do not move while it is on. */

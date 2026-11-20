@@ -96,12 +96,12 @@
   },
   {
     "id": "map-exit-edits",
-    "panel": "tools/author-panel/src/mapedit.ts",
+    "panel": "kernel/ts/play/mapedit.ts",
     "book": "todo"
   },
   {
     "id": "map-undo",
-    "panel": "tools/author-panel/src/mapedit.ts",
+    "panel": "kernel/ts/play/mapedit.ts",
     "book": "todo"
   },
   {

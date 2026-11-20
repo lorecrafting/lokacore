@@ -1,9 +1,9 @@
-// The editor map's rules (tools/author-panel/src/map.ts): expected values worked by hand from the
+// The editor map's rules (kernel/ts/play/map.ts): expected values worked by hand from the
 // E3a table (docs/design/editor-map-and-story-rulings.md), not from the code.
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import type { MapRoom } from '../../../tools/author-panel/src/map.ts';
-import * as map from '../../../tools/author-panel/src/map.ts';
+import type { MapRoom } from '../play/map.ts';
+import * as map from '../play/map.ts';
 import { places } from '../../../tools/author-panel/src/shell.ts';
 
 const room = (key: string, area: string | null, at?: MapRoom['at'], exits: MapRoom['exits'] = []) =>

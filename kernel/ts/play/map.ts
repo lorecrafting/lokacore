@@ -104,7 +104,8 @@ export function label(key: string, zoom: number) {
   return { text: key.length <= fits ? key : `${key.slice(0, Math.max(fits - 1, 0))}…` };
 }
 /** A marked room's pill: where its box shows no whole key; the current room's box draws the pin, not its key. */
-export const pill = (key: string, zoom: number, here: boolean) => here || label(key, zoom)?.text !== key;
+export const pill = (key: string, zoom: number, here: boolean) =>
+  here || label(key, zoom)?.text !== key;
 
 /** A failed /story that keeps the last map (map ruling: only a refusal replaces it): no answer, or
  * vite's 502 with the watcher down. The watcher's own refusal is its 500 with the sentence. */
@@ -242,6 +243,26 @@ export function grows(r: MapRoom, rooms: MapRoom[]) {
   if (!at) return [];
   const held = new Set(rooms.flatMap((o) => (o.at ? [`${o.at.x},${o.at.y},${o.at.z}`] : [])));
   return Object.entries(STEP)
-    .filter(([dir, [x, y, z]]) => !r.exits.some((e) => e.dir === dir) && !held.has(`${at.x + x},${at.y + y},${at.z + z}`))
+    .filter(
+      ([dir, [x, y, z]]) =>
+        !r.exits.some((e) => e.dir === dir) && !held.has(`${at.x + x},${at.y + y},${at.z + z}`),
+    )
     .map(([dir]) => dir);
+}
+
+/** The layout cell under a point of the map's SVG (the inverse of mapdraw.tsx `at`). */
+export const cellAt = (v: { zoom: number; x: number; y: number }, p: { x: number; y: number }) => ({
+  x: Math.floor((p.x - v.x) / (v.zoom * M.cell)),
+  y: Math.floor((p.y - v.y) / (v.zoom * M.cell)),
+});
+const DRAG = 4; // mutate-skip: px a press moves before it is a drag, uncalibrated design value
+/** A press released this far from where it began is a drag; nearer, it is a click (it selects). */
+export const dragged = (a: { x: number; y: number }, b: { x: number; y: number }) =>
+  Math.hypot(b.x - a.x, b.y - a.y) >= DRAG;
+/** The compass direction from one cell toward another on the same level: the larger axis wins. */
+export function toward(a: At, b: At) {
+  const [dx, dy] = [b.x - a.x, b.y - a.y];
+  if (a.z !== b.z || (!dx && !dy)) return undefined;
+  if (Math.abs(dx) >= Math.abs(dy)) return dx > 0 ? 'east' : 'west';
+  return dy > 0 ? 'south' : 'north';
 }

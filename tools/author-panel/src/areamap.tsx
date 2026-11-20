@@ -14,12 +14,12 @@ import {
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { motion } from '../../../mobile/app/book/tokens.ts';
 import type { Story } from './author.ts';
-import type { MapRoom } from './map.ts';
+import type { MapRoom } from '../../../kernel/ts/play/map.ts';
 import { Button } from './components/ui/button.tsx';
-import * as map from './map.ts';
-import { M, type Box as Size, type View } from './map.ts';
+import * as map from '../../../kernel/ts/play/map.ts';
+import { M, type Box as Size, type View } from '../../../kernel/ts/play/map.ts';
 import { Drawing } from './mapsvg.tsx';
-import { cellAt } from './mapedit.ts';
+import { cellAt } from '../../../kernel/ts/play/map.ts';
 import { DRAGGED, dropped, Templates } from './maptemplates.tsx';
 import { alone, edit, shown } from './mapwire.ts';
 import type { Selection } from './shell.ts';

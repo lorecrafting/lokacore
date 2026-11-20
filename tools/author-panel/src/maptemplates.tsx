@@ -2,8 +2,8 @@
 // items, each dragged onto a room to make its child there (`bin/loka new --extends`).
 import { useEffect, useState } from 'react';
 import { templates, type Story, type Template } from './author.ts';
-import type { MapRoom } from './map.ts';
-import { childKey } from './mapedit.ts';
+import type { MapRoom } from '../../../kernel/ts/play/map.ts';
+import { childKey } from '../../../kernel/ts/play/mapedit.ts';
 import { edit, shown } from './mapwire.ts';
 
 export const DRAGGED = 'text/x-loka-template';

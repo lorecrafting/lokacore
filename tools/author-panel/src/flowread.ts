@@ -2,7 +2,7 @@
 // the hover card, the keys and the palette rows. No React; tested from kernel/ts/test/author_flow.test.ts.
 import { reads } from '../../../kernel/ts/play/reads.ts';
 import { cmp, F, inColumn, key, laneOf, plural, solid, type Chip, type Flow, type Part, type Stub } from './flow.ts';
-import { nearest, type MapRoom } from './map.ts';
+import { nearest, type MapRoom } from '../../../kernel/ts/play/map.ts';
 import { fromRef, type Item, type Layout } from './shell.ts';
 import { go, isOpen, LIST, outlineOf, toggle, type Edge, type Story } from './storylist.ts';
 
