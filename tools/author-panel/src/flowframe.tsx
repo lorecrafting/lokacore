@@ -8,7 +8,7 @@ import { FILTERS, inColumn, key } from './flow.ts';
 import type { Graph, Props as P } from './flow.tsx';
 import { Card, ChipButton, Lines, StubButton, type CardAct } from './flowcard.tsx';
 import { step } from './flowread.ts';
-import { M } from './map.ts';
+import { M } from '../../../kernel/ts/play/map.ts';
 import { fromRef } from './shell.ts';
 import type { Story } from './storylist.ts';
 

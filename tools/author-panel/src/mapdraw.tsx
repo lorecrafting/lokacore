@@ -1,8 +1,8 @@
 // The editor map's SVG marks (editor-map-and-story-rulings.md E3a): hulls, exits, stubs, rooms and
 // label pills, drawn in screen px from a View so strokes and labels keep their size at any zoom.
 import { Lock, MapPin } from 'lucide-react';
-import type { MapRoom } from './map.ts';
-import { centre, edges, label, M, type View } from './map.ts';
+import type { MapRoom } from '../../../kernel/ts/play/map.ts';
+import { centre, edges, label, M, type View } from '../../../kernel/ts/play/map.ts';
 
 // Literal classes so Tailwind emits them: area n's hue as fill (0.12 light, 0.18 dark) and stroke.
 const HUE = [

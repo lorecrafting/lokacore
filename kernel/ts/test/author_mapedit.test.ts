@@ -1,5 +1,5 @@
 // size: allow 540, one scaffolded cartridge the tests edit in turn and the last undoes; a split needs a second scaffold
-// The editor map's edits (tools/author-panel/src/mapedit.ts) through the real write routes
+// The editor map's edits (kernel/ts/play/mapedit.ts) through the real write routes
 // (play/write.ts) and the real `mix loka.new`, on one scaffolded cartridge the tests edit in turn;
 // the last one undoes every gesture. Expected files are written by hand.
 import assert from 'node:assert/strict';
@@ -13,17 +13,8 @@ import { after, before, test } from 'node:test';
 import { added } from '../play/card.ts';
 import { paired } from '../play/action.ts';
 import { serve } from '../play/live.ts';
-import type { MapRoom } from '../../../tools/author-panel/src/map.ts';
-import {
-  cellAt,
-  editor,
-  childKey,
-  freeKey,
-  toward,
-  dragged,
-  type Editor,
-  type Io,
-} from '../../../tools/author-panel/src/mapedit.ts';
+import { cellAt, dragged, toward, type MapRoom } from '../play/map.ts';
+import { editor, childKey, freeKey, type Editor, type Io } from '../play/mapedit.ts';
 
 const REPO = join(import.meta.dirname, '../../..');
 const dir = realpathSync(mkdtempSync(join(tmpdir(), 'loka-mapedit-')));

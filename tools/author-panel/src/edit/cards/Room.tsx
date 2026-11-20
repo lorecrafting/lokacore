@@ -18,7 +18,7 @@ import type { useDiagnostics } from '../../author.ts';
 import { addHere } from '../../book.ts';
 import { Button } from '../../components/ui/button.tsx';
 import { Input } from '../../components/ui/input.tsx';
-import { BACK } from '../../mapedit.ts';
+import { BACK } from '../../../../../kernel/ts/play/mapedit.ts';
 import { linkTo, mapCommand, mapNewest, shown } from '../../mapwire.ts';
 import { fields, inline, WordsField, type Context } from '../fields.tsx';
 import { AddMenu, CardForm, Header, adding, useCard, useCartridge } from '../Generic.tsx';

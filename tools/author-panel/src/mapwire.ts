@@ -1,9 +1,9 @@
 // The panel's one map editor (mapedit.ts over /__author) and the palette's map commands; a refusal
 // shows on the map's footer line (areamap.tsx registers it), else in an alert.
 import { ask, templates, type Story } from './author.ts';
-import type { MapRoom } from './map.ts';
-export { kept } from './map.ts'; // App's /story failure rule
-import { editor, freeKey, type Editor } from './mapedit.ts';
+import type { MapRoom } from '../../../kernel/ts/play/map.ts';
+export { kept } from '../../../kernel/ts/play/map.ts'; // App's /story failure rule
+import { editor, freeKey, type Editor } from '../../../kernel/ts/play/mapedit.ts';
 import { nodeOf } from './shell.ts';
 
 const ed = editor({
