@@ -1,4 +1,4 @@
-// size: allow 685, one editor's keys, saves, conflicts, add-here, a refused /open and capitalised titles and Build's lines walked over one stubbed page
+// size: allow 695, one editor's keys, saves, conflicts, add-here, a refused /open and capitalised titles and Build's lines walked over one stubbed page
 // E5's in-Book editor (docs/design/prose-in-the-book-rulings.md) in headless Google Chrome, over a
 // page of plain lines and a stubbed /__author route; the Book itself is the walk's (web-preview.md).
 import assert from 'node:assert/strict';
@@ -126,6 +126,15 @@ test("a double-click on Build's line is Build's, not E5's", async () => {
     .first()
     .evaluate((el) => el.setAttribute('aria-label', 'Rain falls., edit'));
   await page.locator('p').first().dblclick();
+  await page.waitForTimeout(200);
+  await page.evaluate(() => {
+    const open = document.createElement('textarea'); // Build's open field, holding the drawn words
+    const p = document.querySelector('p')!;
+    p.removeAttribute('aria-label'); // line() drops the line's label while its field is open
+    p.replaceChildren(open);
+    open.textContent = 'Rain falls.';
+  });
+  await page.locator('textarea').dblclick();
   await page.waitForTimeout(200);
   assert.deepEqual(asked, []);
   assert.equal(await page.locator('[data-loka-field]').count(), 0);
