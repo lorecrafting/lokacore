@@ -1,0 +1,15 @@
+id: mobile-book-author-seam
+language: tsx
+severity: error
+message: 'The Book has one author seam, authorSeam in book/Text.tsx (docs/rnd/in-game-builder-mode-2026-11-19.md §6.2): no other Book file names it or imports author code.'
+files: [mobile/app/book/**]
+ignores: ['**/*.test.ts', '**/*.test.tsx', mobile/app/book/Text.tsx]
+rule:
+  any:
+    - kind: string_fragment
+      regex: '(^|/)author/'
+      inside: { matches: module-specifier }
+    - kind: identifier
+      regex: '^authorSeam$'
+    - kind: property_identifier
+      regex: '^authorSeam$'
