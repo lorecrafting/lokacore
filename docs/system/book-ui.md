@@ -900,7 +900,12 @@ deadline. A merged cue fires once.
 
 The `?dev=1` dev-cartridge page only ([author preview](cartridge.md#author-preview)); no player
 rule above changes, and nothing here is drawn by a component in `mobile/app/book/`: it is laid
-over the Book from `mobile/app/author/`, with its words there too. Looks: [author-mode marks](../BOOK-UI-COMPONENTS.md#component-catalogue);
+over the Book from `mobile/app/author/`, with its words there too. The one exception is the
+author seam (owner ruling 2, [builder mode §9](../rnd/in-game-builder-mode-2026-11-19.md)): `book/Text.tsx` exports
+`authorSeam`, whose hook the author preview alone sets, to see each Book line and add to that
+line's own text element (never a wrapper). Unset, every line renders exactly as without it; a
+release build holds none of the code that sets it, and the plain dev preview never sets it. No
+other Book file names the seam or imports author code (lint `mobile-book-author-seam`). Looks: [author-mode marks](../BOOK-UI-COMPONENTS.md#component-catalogue);
 reasons and limits: [prose in the Book rulings](../design/prose-in-the-book-rulings.md).
 
 - **Edit in place.** A click plays. A double-click on a line's words (not on a link or card in it)
