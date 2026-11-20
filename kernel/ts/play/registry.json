@@ -1,999 +1,2772 @@
 {
-  "actions.abstract": { "create": "generic", "edit": "generic", "delete": "generic" },
-  "actions.accessibility": { "create": "generic", "edit": "generic", "delete": "generic" },
+  "actions.abstract": {
+    "create": "generic",
+    "edit": "generic",
+    "delete": "generic",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
+  },
+  "actions.accessibility": {
+    "create": "generic",
+    "edit": "generic",
+    "delete": "generic",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
+  },
   "actions.aliases": {
     "create": "cards/Action.tsx",
     "edit": "cards/Action.tsx",
-    "delete": "cards/Action.tsx"
+    "delete": "cards/Action.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "actions.check": {
     "create": "cards/Action.tsx",
     "edit": "blocks/Rules.tsx",
-    "delete": "cards/Action.tsx"
+    "delete": "cards/Action.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
-  "actions.command": { "create": "generic", "edit": "generic", "delete": "generic" },
+  "actions.command": {
+    "create": "generic",
+    "edit": "generic",
+    "delete": "generic",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
+  },
   "actions.cooldown": {
     "create": "cards/Action.tsx",
     "edit": "cards/Action.tsx",
-    "delete": "cards/Action.tsx"
+    "delete": "cards/Action.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "actions.costs": {
     "create": "cards/Action.tsx",
     "edit": "cards/Action.tsx",
-    "delete": "cards/Action.tsx"
+    "delete": "cards/Action.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "actions.craft": {
     "create": "cards/Action.tsx",
     "edit": "cards/Action.tsx",
-    "delete": "cards/Action.tsx"
+    "delete": "cards/Action.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "actions.duration": {
     "create": "cards/Action.tsx",
     "edit": "cards/Action.tsx",
-    "delete": "cards/Action.tsx"
+    "delete": "cards/Action.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
-  "actions.input": { "create": "generic", "edit": "generic", "delete": "generic" },
-  "actions.name": { "create": "generic", "edit": "generic", "delete": "generic" },
+  "actions.input": {
+    "create": "generic",
+    "edit": "generic",
+    "delete": "generic",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
+  },
+  "actions.name": {
+    "create": "generic",
+    "edit": "generic",
+    "delete": "generic",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
+  },
   "actions.outcomes": {
     "create": "cards/Action.tsx",
     "edit": "cards/Action.tsx",
-    "delete": "cards/Action.tsx"
+    "delete": "cards/Action.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
-  "actions.policy": { "create": "generic", "edit": "blocks/Rules.tsx", "delete": "generic" },
-  "actions.priority": { "create": "generic", "edit": "generic", "delete": "generic" },
+  "actions.policy": {
+    "create": "generic",
+    "edit": "blocks/Rules.tsx",
+    "delete": "generic",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
+  },
+  "actions.priority": {
+    "create": "generic",
+    "edit": "generic",
+    "delete": "generic",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
+  },
   "actions.reason": {
     "create": "cards/Action.tsx",
     "edit": "cards/Action.tsx",
-    "delete": "cards/Action.tsx"
+    "delete": "cards/Action.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
-  "actions.target": { "create": "generic", "edit": "blocks/Rules.tsx", "delete": "generic" },
+  "actions.target": {
+    "create": "generic",
+    "edit": "blocks/Rules.tsx",
+    "delete": "generic",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
+  },
   "actions.tip": {
     "create": "cards/Action.tsx",
     "edit": "cards/Action.tsx",
-    "delete": "cards/Action.tsx"
+    "delete": "cards/Action.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "attributes.attributes": {
     "create": "cards/World.tsx",
     "edit": "cards/World.tsx",
-    "delete": "cards/World.tsx"
+    "delete": "cards/World.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "barriers.abstract": {
     "create": "cards/World.tsx",
     "edit": "cards/World.tsx",
-    "delete": "cards/World.tsx"
+    "delete": "cards/World.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "barriers.initial": {
     "create": "cards/World.tsx",
     "edit": "cards/World.tsx",
-    "delete": "cards/World.tsx"
+    "delete": "cards/World.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "barriers.key_item": {
     "create": "cards/World.tsx",
     "edit": "cards/World.tsx",
-    "delete": "cards/World.tsx"
+    "delete": "cards/World.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "barriers.keywords": {
     "create": "cards/World.tsx",
     "edit": "cards/World.tsx",
-    "delete": "cards/World.tsx"
+    "delete": "cards/World.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "barriers.name": {
     "create": "cards/World.tsx",
     "edit": "cards/World.tsx",
-    "delete": "cards/World.tsx"
+    "delete": "cards/World.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "barriers.opens_when": {
     "create": "cards/World.tsx",
     "edit": "cards/World.tsx",
-    "delete": "cards/World.tsx"
+    "delete": "cards/World.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "barriers.tags": {
     "create": "cards/World.tsx",
     "edit": "cards/World.tsx",
-    "delete": "cards/World.tsx"
+    "delete": "cards/World.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
-  "behaviours.params": { "create": "generic", "edit": "generic", "delete": "generic" },
-  "behaviours.reactions": { "create": "generic", "edit": "generic", "delete": "generic" },
-  "bleeds.abstract": { "create": "generic", "edit": "generic", "delete": "generic" },
-  "bleeds.duration": { "create": "generic", "edit": "generic", "delete": "generic" },
-  "bleeds.hp_loss": { "create": "generic", "edit": "generic", "delete": "generic" },
-  "bleeds.narration": { "create": "generic", "edit": "generic", "delete": "generic" },
-  "bleeds.tick_every": { "create": "generic", "edit": "generic", "delete": "generic" },
+  "behaviours.params": {
+    "create": "generic",
+    "edit": "generic",
+    "delete": "generic",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
+  },
+  "behaviours.reactions": {
+    "create": "generic",
+    "edit": "generic",
+    "delete": "generic",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
+  },
+  "bleeds.abstract": {
+    "create": "generic",
+    "edit": "generic",
+    "delete": "generic",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
+  },
+  "bleeds.duration": {
+    "create": "generic",
+    "edit": "generic",
+    "delete": "generic",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
+  },
+  "bleeds.hp_loss": {
+    "create": "generic",
+    "edit": "generic",
+    "delete": "generic",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
+  },
+  "bleeds.narration": {
+    "create": "generic",
+    "edit": "generic",
+    "delete": "generic",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
+  },
+  "bleeds.tick_every": {
+    "create": "generic",
+    "edit": "generic",
+    "delete": "generic",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
+  },
   "cartridge.alternates": {
     "create": "cards/World.tsx",
     "edit": "cards/World.tsx",
-    "delete": "cards/World.tsx"
+    "delete": "cards/World.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "cartridge.ancestries": {
     "create": "cards/World.tsx",
     "edit": "cards/World.tsx",
-    "delete": "cards/World.tsx"
+    "delete": "cards/World.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "cartridge.api_version": {
     "create": "cards/World.tsx",
     "edit": "cards/World.tsx",
-    "delete": "cards/World.tsx"
+    "delete": "cards/World.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "cartridge.calendar": {
     "create": "cards/World.tsx",
     "edit": "cards/World.tsx",
-    "delete": "cards/World.tsx"
+    "delete": "cards/World.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "cartridge.chapters": {
     "create": "cards/World.tsx",
     "edit": "cards/World.tsx",
-    "delete": "cards/World.tsx"
+    "delete": "cards/World.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "cartridge.entry": {
     "create": "cards/World.tsx",
     "edit": "cards/World.tsx",
-    "delete": "cards/World.tsx"
+    "delete": "cards/World.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "cartridge.id": {
     "create": "cards/World.tsx",
     "edit": "cards/World.tsx",
-    "delete": "cards/World.tsx"
+    "delete": "cards/World.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "cartridge.requires": {
     "create": "cards/World.tsx",
     "edit": "cards/World.tsx",
-    "delete": "cards/World.tsx"
+    "delete": "cards/World.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "cartridge.speech": {
     "create": "cards/World.tsx",
     "edit": "cards/World.tsx",
-    "delete": "cards/World.tsx"
+    "delete": "cards/World.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "cartridge.supported_profiles": {
     "create": "cards/World.tsx",
     "edit": "cards/World.tsx",
-    "delete": "cards/World.tsx"
+    "delete": "cards/World.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "cartridge.time_policy": {
     "create": "cards/World.tsx",
     "edit": "cards/World.tsx",
-    "delete": "cards/World.tsx"
+    "delete": "cards/World.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "cartridge.title": {
     "create": "cards/World.tsx",
     "edit": "cards/World.tsx",
-    "delete": "cards/World.tsx"
+    "delete": "cards/World.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "cartridge.version": {
     "create": "cards/World.tsx",
     "edit": "cards/World.tsx",
-    "delete": "cards/World.tsx"
+    "delete": "cards/World.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "cartridge.world": {
     "create": "cards/World.tsx",
     "edit": "cards/World.tsx",
-    "delete": "cards/World.tsx"
+    "delete": "cards/World.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "dialogues.abstract": {
     "create": "cards/Dialogue.tsx",
     "edit": "cards/Dialogue.tsx",
-    "delete": "cards/Dialogue.tsx"
+    "delete": "cards/Dialogue.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "dialogues.choices": {
     "create": "cards/Dialogue.tsx",
     "edit": "cards/Dialogue.tsx",
-    "delete": "cards/Dialogue.tsx"
+    "delete": "cards/Dialogue.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "dialogues.entry": {
     "create": "cards/Dialogue.tsx",
     "edit": "cards/Dialogue.tsx",
-    "delete": "cards/Dialogue.tsx"
+    "delete": "cards/Dialogue.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "dialogues.keyword": {
     "create": "cards/Dialogue.tsx",
     "edit": "cards/Dialogue.tsx",
-    "delete": "cards/Dialogue.tsx"
+    "delete": "cards/Dialogue.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "dialogues.name": {
     "create": "cards/Dialogue.tsx",
     "edit": "cards/Dialogue.tsx",
-    "delete": "cards/Dialogue.tsx"
+    "delete": "cards/Dialogue.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "dialogues.npc": {
     "create": "cards/Dialogue.tsx",
     "edit": "cards/Dialogue.tsx",
-    "delete": "cards/Dialogue.tsx"
+    "delete": "cards/Dialogue.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "dialogues.policy": {
     "create": "cards/Dialogue.tsx",
     "edit": "blocks/Rules.tsx",
-    "delete": "cards/Dialogue.tsx"
+    "delete": "cards/Dialogue.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "dialogues.prompt": {
     "create": "cards/Dialogue.tsx",
     "edit": "cards/Dialogue.tsx",
-    "delete": "cards/Dialogue.tsx"
+    "delete": "cards/Dialogue.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "dialogues.quest": {
     "create": "cards/Dialogue.tsx",
     "edit": "cards/Dialogue.tsx",
-    "delete": "cards/Dialogue.tsx"
+    "delete": "cards/Dialogue.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "dialogues.riddle": {
     "create": "cards/Dialogue.tsx",
     "edit": "cards/Dialogue.tsx",
-    "delete": "cards/Dialogue.tsx"
+    "delete": "cards/Dialogue.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "dialogues.roles": {
     "create": "cards/Dialogue.tsx",
     "edit": "cards/Dialogue.tsx",
-    "delete": "cards/Dialogue.tsx"
+    "delete": "cards/Dialogue.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
-  "emotes.abstract": { "create": "generic", "edit": "generic", "delete": "generic" },
-  "emotes.others": { "create": "generic", "edit": "generic", "delete": "generic" },
-  "emotes.to": { "create": "generic", "edit": "generic", "delete": "generic" },
-  "facts.facts": { "create": "generic", "edit": "generic", "delete": "generic" },
+  "emotes.abstract": {
+    "create": "generic",
+    "edit": "generic",
+    "delete": "generic",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
+  },
+  "emotes.others": {
+    "create": "generic",
+    "edit": "generic",
+    "delete": "generic",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
+  },
+  "emotes.to": {
+    "create": "generic",
+    "edit": "generic",
+    "delete": "generic",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
+  },
+  "facts.facts": {
+    "create": "generic",
+    "edit": "generic",
+    "delete": "generic",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
+  },
   "items.abstract": {
     "create": "cards/Entity.tsx",
     "edit": "cards/Entity.tsx",
-    "delete": "cards/Entity.tsx"
+    "delete": "cards/Entity.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "items.affects": {
     "create": "cards/Entity.tsx",
     "edit": "cards/Entity.tsx",
-    "delete": "cards/Entity.tsx"
+    "delete": "cards/Entity.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "items.ambient": {
     "create": "cards/Entity.tsx",
     "edit": "cards/Entity.tsx",
-    "delete": "cards/Entity.tsx"
+    "delete": "cards/Entity.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "items.bandage": {
     "create": "cards/Entity.tsx",
     "edit": "cards/Entity.tsx",
-    "delete": "cards/Entity.tsx"
+    "delete": "cards/Entity.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "items.barrier": {
     "create": "cards/Entity.tsx",
     "edit": "cards/Entity.tsx",
-    "delete": "cards/Entity.tsx"
+    "delete": "cards/Entity.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "items.behaviours": {
     "create": "cards/Entity.tsx",
     "edit": "cards/Entity.tsx",
-    "delete": "cards/Entity.tsx"
+    "delete": "cards/Entity.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "items.block_chance": {
     "create": "cards/Entity.tsx",
     "edit": "cards/Entity.tsx",
-    "delete": "cards/Entity.tsx"
+    "delete": "cards/Entity.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "items.capacity": {
     "create": "cards/Entity.tsx",
     "edit": "cards/Entity.tsx",
-    "delete": "cards/Entity.tsx"
+    "delete": "cards/Entity.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "items.container": {
     "create": "cards/Entity.tsx",
     "edit": "cards/Entity.tsx",
-    "delete": "cards/Entity.tsx"
+    "delete": "cards/Entity.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "items.cues": {
     "create": "cards/Entity.tsx",
     "edit": "cards/Entity.tsx",
-    "delete": "cards/Entity.tsx"
+    "delete": "cards/Entity.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "items.description": {
     "create": "cards/Entity.tsx",
     "edit": "cards/Entity.tsx",
-    "delete": "cards/Entity.tsx"
+    "delete": "cards/Entity.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "items.description_variants": {
     "create": "cards/Entity.tsx",
     "edit": "cards/Entity.tsx",
-    "delete": "cards/Entity.tsx"
+    "delete": "cards/Entity.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "items.edible": {
     "create": "cards/Entity.tsx",
     "edit": "cards/Entity.tsx",
-    "delete": "cards/Entity.tsx"
+    "delete": "cards/Entity.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "items.equip": {
     "create": "cards/Entity.tsx",
     "edit": "cards/Entity.tsx",
-    "delete": "cards/Entity.tsx"
+    "delete": "cards/Entity.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "items.fuel": {
     "create": "cards/Entity.tsx",
     "edit": "cards/Entity.tsx",
-    "delete": "cards/Entity.tsx"
+    "delete": "cards/Entity.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "items.give_allowed": {
     "create": "cards/Entity.tsx",
     "edit": "cards/Entity.tsx",
-    "delete": "cards/Entity.tsx"
+    "delete": "cards/Entity.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "items.identified": {
     "create": "cards/Entity.tsx",
     "edit": "cards/Entity.tsx",
-    "delete": "cards/Entity.tsx"
+    "delete": "cards/Entity.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "items.immune": {
     "create": "cards/Entity.tsx",
     "edit": "cards/Entity.tsx",
-    "delete": "cards/Entity.tsx"
+    "delete": "cards/Entity.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "items.intended_level": {
     "create": "cards/Entity.tsx",
     "edit": "cards/Entity.tsx",
-    "delete": "cards/Entity.tsx"
+    "delete": "cards/Entity.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "items.keywords": {
     "create": "cards/Entity.tsx",
     "edit": "cards/Entity.tsx",
-    "delete": "cards/Entity.tsx"
+    "delete": "cards/Entity.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "items.location": {
     "create": "cards/Entity.tsx",
     "edit": "cards/Entity.tsx",
-    "delete": "cards/Entity.tsx"
+    "delete": "cards/Entity.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "items.locks": {
     "create": "cards/Entity.tsx",
     "edit": "cards/Entity.tsx",
-    "delete": "cards/Entity.tsx"
+    "delete": "cards/Entity.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "items.mass_grams": {
     "create": "cards/Entity.tsx",
     "edit": "cards/Entity.tsx",
-    "delete": "cards/Entity.tsx"
+    "delete": "cards/Entity.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "items.name": {
     "create": "cards/Entity.tsx",
     "edit": "cards/Entity.tsx",
-    "delete": "cards/Entity.tsx"
+    "delete": "cards/Entity.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "items.name_variants": {
     "create": "cards/Entity.tsx",
     "edit": "cards/Entity.tsx",
-    "delete": "cards/Entity.tsx"
+    "delete": "cards/Entity.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "items.readable": {
     "create": "cards/Entity.tsx",
     "edit": "cards/Entity.tsx",
-    "delete": "cards/Entity.tsx"
+    "delete": "cards/Entity.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "items.room_line": {
     "create": "cards/Entity.tsx",
     "edit": "cards/Entity.tsx",
-    "delete": "cards/Entity.tsx"
+    "delete": "cards/Entity.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "items.room_line_variants": {
     "create": "cards/Entity.tsx",
     "edit": "cards/Entity.tsx",
-    "delete": "cards/Entity.tsx"
+    "delete": "cards/Entity.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "items.slot": {
     "create": "cards/Entity.tsx",
     "edit": "cards/Entity.tsx",
-    "delete": "cards/Entity.tsx"
+    "delete": "cards/Entity.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "items.tags": {
     "create": "cards/Entity.tsx",
     "edit": "cards/Entity.tsx",
-    "delete": "cards/Entity.tsx"
+    "delete": "cards/Entity.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "items.vessel": {
     "create": "cards/Entity.tsx",
     "edit": "cards/Entity.tsx",
-    "delete": "cards/Entity.tsx"
+    "delete": "cards/Entity.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "items.weapon": {
     "create": "cards/Entity.tsx",
     "edit": "blocks/Combat.tsx",
-    "delete": "cards/Entity.tsx"
+    "delete": "cards/Entity.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "items.words": {
     "create": "cards/Entity.tsx",
     "edit": "cards/Entity.tsx",
-    "delete": "cards/Entity.tsx"
+    "delete": "cards/Entity.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
-  "layout.room": { "create": "generic", "edit": "generic", "delete": "generic" },
-  "layout.x": { "create": "generic", "edit": "generic", "delete": "generic" },
-  "layout.y": { "create": "generic", "edit": "generic", "delete": "generic" },
-  "layout.z": { "create": "generic", "edit": "generic", "delete": "generic" },
-  "liquids.abstract": { "create": "generic", "edit": "generic", "delete": "generic" },
-  "liquids.amount": { "create": "generic", "edit": "generic", "delete": "generic" },
-  "liquids.applies": { "create": "generic", "edit": "blocks/Rules.tsx", "delete": "generic" },
-  "liquids.cures": { "create": "generic", "edit": "generic", "delete": "generic" },
-  "liquids.drink_amount": { "create": "generic", "edit": "generic", "delete": "generic" },
-  "liquids.grams_per_unit": { "create": "generic", "edit": "generic", "delete": "generic" },
-  "liquids.name": { "create": "generic", "edit": "generic", "delete": "generic" },
-  "liquids.resource": { "create": "generic", "edit": "generic", "delete": "generic" },
-  "liquids.unit_label": { "create": "generic", "edit": "generic", "delete": "generic" },
+  "layout.room": {
+    "create": "generic",
+    "edit": "generic",
+    "delete": "generic",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
+  },
+  "layout.x": {
+    "create": "generic",
+    "edit": "generic",
+    "delete": "generic",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
+  },
+  "layout.y": {
+    "create": "generic",
+    "edit": "generic",
+    "delete": "generic",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
+  },
+  "layout.z": {
+    "create": "generic",
+    "edit": "generic",
+    "delete": "generic",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
+  },
+  "liquids.abstract": {
+    "create": "generic",
+    "edit": "generic",
+    "delete": "generic",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
+  },
+  "liquids.amount": {
+    "create": "generic",
+    "edit": "generic",
+    "delete": "generic",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
+  },
+  "liquids.applies": {
+    "create": "generic",
+    "edit": "blocks/Rules.tsx",
+    "delete": "generic",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
+  },
+  "liquids.cures": {
+    "create": "generic",
+    "edit": "generic",
+    "delete": "generic",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
+  },
+  "liquids.drink_amount": {
+    "create": "generic",
+    "edit": "generic",
+    "delete": "generic",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
+  },
+  "liquids.grams_per_unit": {
+    "create": "generic",
+    "edit": "generic",
+    "delete": "generic",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
+  },
+  "liquids.name": {
+    "create": "generic",
+    "edit": "generic",
+    "delete": "generic",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
+  },
+  "liquids.resource": {
+    "create": "generic",
+    "edit": "generic",
+    "delete": "generic",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
+  },
+  "liquids.unit_label": {
+    "create": "generic",
+    "edit": "generic",
+    "delete": "generic",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
+  },
   "npcs.abstract": {
     "create": "cards/Entity.tsx",
     "edit": "cards/Entity.tsx",
-    "delete": "cards/Entity.tsx"
+    "delete": "cards/Entity.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "npcs.ambient": {
     "create": "cards/Entity.tsx",
     "edit": "cards/Entity.tsx",
-    "delete": "cards/Entity.tsx"
+    "delete": "cards/Entity.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "npcs.ask": {
     "create": "cards/Entity.tsx",
     "edit": "cards/Entity.tsx",
-    "delete": "cards/Entity.tsx"
+    "delete": "cards/Entity.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "npcs.attack": {
     "create": "cards/Entity.tsx",
     "edit": "blocks/Combat.tsx",
-    "delete": "cards/Entity.tsx"
+    "delete": "cards/Entity.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "npcs.attributes": {
     "create": "cards/Entity.tsx",
     "edit": "cards/Entity.tsx",
-    "delete": "cards/Entity.tsx"
+    "delete": "cards/Entity.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "npcs.behaviours": {
     "create": "cards/Entity.tsx",
     "edit": "cards/Entity.tsx",
-    "delete": "cards/Entity.tsx"
+    "delete": "cards/Entity.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "npcs.capacity": {
     "create": "cards/Entity.tsx",
     "edit": "cards/Entity.tsx",
-    "delete": "cards/Entity.tsx"
+    "delete": "cards/Entity.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "npcs.cues": {
     "create": "cards/Entity.tsx",
     "edit": "cards/Entity.tsx",
-    "delete": "cards/Entity.tsx"
+    "delete": "cards/Entity.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "npcs.daily_schedule": {
     "create": "cards/Entity.tsx",
     "edit": "blocks/Schedule.tsx",
-    "delete": "cards/Entity.tsx"
+    "delete": "cards/Entity.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "npcs.description": {
     "create": "cards/Entity.tsx",
     "edit": "cards/Entity.tsx",
-    "delete": "cards/Entity.tsx"
+    "delete": "cards/Entity.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "npcs.description_variants": {
     "create": "cards/Entity.tsx",
     "edit": "cards/Entity.tsx",
-    "delete": "cards/Entity.tsx"
+    "delete": "cards/Entity.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "npcs.disposition": {
     "create": "cards/Entity.tsx",
     "edit": "cards/Entity.tsx",
-    "delete": "cards/Entity.tsx"
+    "delete": "cards/Entity.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "npcs.drops": {
     "create": "cards/Entity.tsx",
     "edit": "cards/Entity.tsx",
-    "delete": "cards/Entity.tsx"
+    "delete": "cards/Entity.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "npcs.hp": {
     "create": "cards/Entity.tsx",
     "edit": "blocks/Combat.tsx",
-    "delete": "cards/Entity.tsx"
+    "delete": "cards/Entity.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "npcs.immune": {
     "create": "cards/Entity.tsx",
     "edit": "cards/Entity.tsx",
-    "delete": "cards/Entity.tsx"
+    "delete": "cards/Entity.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "npcs.keywords": {
     "create": "cards/Entity.tsx",
     "edit": "cards/Entity.tsx",
-    "delete": "cards/Entity.tsx"
+    "delete": "cards/Entity.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "npcs.locks": {
     "create": "cards/Entity.tsx",
     "edit": "cards/Entity.tsx",
-    "delete": "cards/Entity.tsx"
+    "delete": "cards/Entity.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "npcs.mount": {
     "create": "cards/Entity.tsx",
     "edit": "cards/Entity.tsx",
-    "delete": "cards/Entity.tsx"
+    "delete": "cards/Entity.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "npcs.name": {
     "create": "cards/Entity.tsx",
     "edit": "cards/Entity.tsx",
-    "delete": "cards/Entity.tsx"
+    "delete": "cards/Entity.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "npcs.name_variants": {
     "create": "cards/Entity.tsx",
     "edit": "cards/Entity.tsx",
-    "delete": "cards/Entity.tsx"
+    "delete": "cards/Entity.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "npcs.perception": {
     "create": "cards/Entity.tsx",
     "edit": "cards/Entity.tsx",
-    "delete": "cards/Entity.tsx"
+    "delete": "cards/Entity.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "npcs.resistances": {
     "create": "cards/Entity.tsx",
     "edit": "cards/Entity.tsx",
-    "delete": "cards/Entity.tsx"
+    "delete": "cards/Entity.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "npcs.resource_starts": {
     "create": "cards/Entity.tsx",
     "edit": "cards/Entity.tsx",
-    "delete": "cards/Entity.tsx"
+    "delete": "cards/Entity.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "npcs.room": {
     "create": "cards/Entity.tsx",
     "edit": "cards/Entity.tsx",
-    "delete": "cards/Entity.tsx"
+    "delete": "cards/Entity.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "npcs.room_line": {
     "create": "cards/Entity.tsx",
     "edit": "cards/Entity.tsx",
-    "delete": "cards/Entity.tsx"
+    "delete": "cards/Entity.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "npcs.services": {
     "create": "cards/Entity.tsx",
     "edit": "cards/Entity.tsx",
-    "delete": "cards/Entity.tsx"
+    "delete": "cards/Entity.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "npcs.shop": {
     "create": "cards/Entity.tsx",
     "edit": "cards/Entity.tsx",
-    "delete": "cards/Entity.tsx"
+    "delete": "cards/Entity.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "npcs.spawn_template": {
     "create": "cards/Entity.tsx",
     "edit": "cards/Entity.tsx",
-    "delete": "cards/Entity.tsx"
+    "delete": "cards/Entity.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "npcs.unattackable": {
     "create": "cards/Entity.tsx",
     "edit": "cards/Entity.tsx",
-    "delete": "cards/Entity.tsx"
+    "delete": "cards/Entity.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "npcs.words": {
     "create": "cards/Entity.tsx",
     "edit": "cards/Entity.tsx",
-    "delete": "cards/Entity.tsx"
+    "delete": "cards/Entity.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
-  "outline.parts": { "create": "generic", "edit": "generic", "delete": "generic" },
+  "outline.parts": {
+    "create": "generic",
+    "edit": "generic",
+    "delete": "generic",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
+  },
   "populations.abstract": {
     "create": "cards/World.tsx",
     "edit": "cards/World.tsx",
-    "delete": "cards/World.tsx"
+    "delete": "cards/World.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "populations.area": {
     "create": "cards/World.tsx",
     "edit": "cards/World.tsx",
-    "delete": "cards/World.tsx"
+    "delete": "cards/World.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "populations.birth_when": {
     "create": "cards/World.tsx",
     "edit": "cards/World.tsx",
-    "delete": "cards/World.tsx"
+    "delete": "cards/World.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "populations.cap": {
     "create": "cards/World.tsx",
     "edit": "cards/World.tsx",
-    "delete": "cards/World.tsx"
+    "delete": "cards/World.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "populations.chance": {
     "create": "cards/World.tsx",
     "edit": "cards/World.tsx",
-    "delete": "cards/World.tsx"
+    "delete": "cards/World.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "populations.corpse": {
     "create": "cards/World.tsx",
     "edit": "cards/World.tsx",
-    "delete": "cards/World.tsx"
+    "delete": "cards/World.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "populations.day_target": {
     "create": "cards/World.tsx",
     "edit": "cards/World.tsx",
-    "delete": "cards/World.tsx"
+    "delete": "cards/World.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "populations.floor": {
     "create": "cards/World.tsx",
     "edit": "cards/World.tsx",
-    "delete": "cards/World.tsx"
+    "delete": "cards/World.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "populations.home": {
     "create": "cards/World.tsx",
     "edit": "cards/World.tsx",
-    "delete": "cards/World.tsx"
+    "delete": "cards/World.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "populations.hunts": {
     "create": "cards/World.tsx",
     "edit": "cards/World.tsx",
-    "delete": "cards/World.tsx"
+    "delete": "cards/World.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "populations.item": {
     "create": "cards/World.tsx",
     "edit": "cards/World.tsx",
-    "delete": "cards/World.tsx"
+    "delete": "cards/World.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "populations.member_role": {
     "create": "cards/World.tsx",
     "edit": "cards/World.tsx",
-    "delete": "cards/World.tsx"
+    "delete": "cards/World.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "populations.night_end": {
     "create": "cards/World.tsx",
     "edit": "cards/World.tsx",
-    "delete": "cards/World.tsx"
+    "delete": "cards/World.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "populations.night_start": {
     "create": "cards/World.tsx",
     "edit": "cards/World.tsx",
-    "delete": "cards/World.tsx"
+    "delete": "cards/World.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "populations.night_target": {
     "create": "cards/World.tsx",
     "edit": "cards/World.tsx",
-    "delete": "cards/World.tsx"
+    "delete": "cards/World.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "populations.npc": {
     "create": "cards/World.tsx",
     "edit": "cards/World.tsx",
-    "delete": "cards/World.tsx"
+    "delete": "cards/World.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "populations.pack": {
     "create": "cards/World.tsx",
     "edit": "cards/World.tsx",
-    "delete": "cards/World.tsx"
+    "delete": "cards/World.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "populations.replacement_delay": {
     "create": "cards/World.tsx",
     "edit": "cards/World.tsx",
-    "delete": "cards/World.tsx"
+    "delete": "cards/World.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "populations.scavenge": {
     "create": "cards/World.tsx",
     "edit": "cards/World.tsx",
-    "delete": "cards/World.tsx"
+    "delete": "cards/World.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "populations.sight": {
     "create": "cards/World.tsx",
     "edit": "cards/World.tsx",
-    "delete": "cards/World.tsx"
+    "delete": "cards/World.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "populations.trail": {
     "create": "cards/World.tsx",
     "edit": "cards/World.tsx",
-    "delete": "cards/World.tsx"
+    "delete": "cards/World.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "populations.walks": {
     "create": "cards/World.tsx",
     "edit": "cards/World.tsx",
-    "delete": "cards/World.tsx"
+    "delete": "cards/World.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "populations.wander_interval": {
     "create": "cards/World.tsx",
     "edit": "cards/World.tsx",
-    "delete": "cards/World.tsx"
+    "delete": "cards/World.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "populations.wander_when": {
     "create": "cards/World.tsx",
     "edit": "cards/World.tsx",
-    "delete": "cards/World.tsx"
+    "delete": "cards/World.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "quests.abstract": {
     "create": "cards/Quest.tsx",
     "edit": "cards/Quest.tsx",
-    "delete": "cards/Quest.tsx"
+    "delete": "cards/Quest.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "quests.deadline": {
     "create": "cards/Quest.tsx",
     "edit": "cards/Quest.tsx",
-    "delete": "cards/Quest.tsx"
+    "delete": "cards/Quest.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "quests.exchange": {
     "create": "cards/Quest.tsx",
     "edit": "cards/Quest.tsx",
-    "delete": "cards/Quest.tsx"
+    "delete": "cards/Quest.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "quests.expedition": {
     "create": "cards/Quest.tsx",
     "edit": "cards/Quest.tsx",
-    "delete": "cards/Quest.tsx"
+    "delete": "cards/Quest.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "quests.journal": {
     "create": "cards/Quest.tsx",
     "edit": "cards/Quest.tsx",
-    "delete": "cards/Quest.tsx"
+    "delete": "cards/Quest.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "quests.name": {
     "create": "cards/Quest.tsx",
     "edit": "cards/Quest.tsx",
-    "delete": "cards/Quest.tsx"
+    "delete": "cards/Quest.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "quests.objective": {
     "create": "cards/Quest.tsx",
     "edit": "blocks/Rules.tsx",
-    "delete": "cards/Quest.tsx"
+    "delete": "cards/Quest.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "quests.offer": {
     "create": "cards/Quest.tsx",
     "edit": "cards/Quest.tsx",
-    "delete": "cards/Quest.tsx"
+    "delete": "cards/Quest.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "quests.patrol": {
     "create": "cards/Quest.tsx",
     "edit": "cards/Quest.tsx",
-    "delete": "cards/Quest.tsx"
+    "delete": "cards/Quest.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "quests.repeatable": {
     "create": "cards/Quest.tsx",
     "edit": "cards/Quest.tsx",
-    "delete": "cards/Quest.tsx"
+    "delete": "cards/Quest.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "reactions.abstract": {
     "create": "cards/Reaction.tsx",
     "edit": "cards/Reaction.tsx",
-    "delete": "cards/Reaction.tsx"
+    "delete": "cards/Reaction.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "reactions.after": {
     "create": "cards/Reaction.tsx",
     "edit": "cards/Reaction.tsx",
-    "delete": "cards/Reaction.tsx"
+    "delete": "cards/Reaction.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "reactions.on": {
     "create": "cards/Reaction.tsx",
     "edit": "blocks/Rules.tsx",
-    "delete": "cards/Reaction.tsx"
+    "delete": "cards/Reaction.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "reactions.cooldown": {
     "create": "cards/Reaction.tsx",
     "edit": "cards/Reaction.tsx",
-    "delete": "cards/Reaction.tsx"
+    "delete": "cards/Reaction.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "reactions.once": {
     "create": "cards/Reaction.tsx",
     "edit": "cards/Reaction.tsx",
-    "delete": "cards/Reaction.tsx"
+    "delete": "cards/Reaction.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "reactions.silent": {
     "create": "cards/Reaction.tsx",
     "edit": "cards/Reaction.tsx",
-    "delete": "cards/Reaction.tsx"
+    "delete": "cards/Reaction.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "reactions.steps": {
     "create": "cards/Reaction.tsx",
     "edit": "blocks/Rules.tsx",
-    "delete": "cards/Reaction.tsx"
+    "delete": "cards/Reaction.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "reactions.when": {
     "create": "cards/Reaction.tsx",
     "edit": "blocks/Rules.tsx",
-    "delete": "cards/Reaction.tsx"
+    "delete": "cards/Reaction.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "reactions.zone": {
     "create": "cards/Reaction.tsx",
     "edit": "cards/Reaction.tsx",
-    "delete": "cards/Reaction.tsx"
+    "delete": "cards/Reaction.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
-  "replenish.abstract": { "create": "generic", "edit": "generic", "delete": "generic" },
-  "replenish.cap": { "create": "generic", "edit": "generic", "delete": "generic" },
-  "replenish.count": { "create": "generic", "edit": "generic", "delete": "generic" },
-  "replenish.every": { "create": "generic", "edit": "generic", "delete": "generic" },
-  "replenish.from": { "create": "generic", "edit": "blocks/Rules.tsx", "delete": "generic" },
-  "replenish.items": { "create": "generic", "edit": "generic", "delete": "generic" },
-  "replenish.to": { "create": "generic", "edit": "blocks/Rules.tsx", "delete": "generic" },
+  "replenish.abstract": {
+    "create": "generic",
+    "edit": "generic",
+    "delete": "generic",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
+  },
+  "replenish.cap": {
+    "create": "generic",
+    "edit": "generic",
+    "delete": "generic",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
+  },
+  "replenish.count": {
+    "create": "generic",
+    "edit": "generic",
+    "delete": "generic",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
+  },
+  "replenish.every": {
+    "create": "generic",
+    "edit": "generic",
+    "delete": "generic",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
+  },
+  "replenish.from": {
+    "create": "generic",
+    "edit": "blocks/Rules.tsx",
+    "delete": "generic",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
+  },
+  "replenish.items": {
+    "create": "generic",
+    "edit": "generic",
+    "delete": "generic",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
+  },
+  "replenish.to": {
+    "create": "generic",
+    "edit": "blocks/Rules.tsx",
+    "delete": "generic",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
+  },
   "resources.resources": {
     "create": "cards/World.tsx",
     "edit": "cards/World.tsx",
-    "delete": "cards/World.tsx"
+    "delete": "cards/World.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "rooms.abstract": {
     "create": "cards/Room.tsx",
     "edit": "cards/Room.tsx",
-    "delete": "cards/Room.tsx"
+    "delete": "cards/Room.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "rooms.actions": {
     "create": "cards/Room.tsx",
     "edit": "cards/Room.tsx",
-    "delete": "cards/Room.tsx"
+    "delete": "cards/Room.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "rooms.ambient": {
     "create": "cards/Room.tsx",
     "edit": "cards/Room.tsx",
-    "delete": "cards/Room.tsx"
+    "delete": "cards/Room.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "rooms.cues": {
     "create": "cards/Room.tsx",
     "edit": "cards/Room.tsx",
-    "delete": "cards/Room.tsx"
+    "delete": "cards/Room.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "rooms.dark": {
     "create": "cards/Room.tsx",
     "edit": "cards/Room.tsx",
-    "delete": "cards/Room.tsx"
+    "delete": "cards/Room.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "rooms.dark_description": {
     "create": "cards/Room.tsx",
     "edit": "cards/Room.tsx",
-    "delete": "cards/Room.tsx"
+    "delete": "cards/Room.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "rooms.description": {
     "create": "cards/Room.tsx",
     "edit": "cards/Room.tsx",
-    "delete": "cards/Room.tsx"
+    "delete": "cards/Room.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "rooms.details": {
     "create": "cards/Room.tsx",
     "edit": "cards/Room.tsx",
-    "delete": "cards/Room.tsx"
+    "delete": "cards/Room.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "rooms.exits": {
     "create": "cards/Room.tsx",
     "edit": "cards/Room.tsx",
-    "delete": "cards/Room.tsx"
+    "delete": "cards/Room.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "rooms.locks": {
     "create": "cards/Room.tsx",
     "edit": "cards/Room.tsx",
-    "delete": "cards/Room.tsx"
+    "delete": "cards/Room.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "rooms.name": {
     "create": "cards/Room.tsx",
     "edit": "cards/Room.tsx",
-    "delete": "cards/Room.tsx"
+    "delete": "cards/Room.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "rooms.sanctuary": {
     "create": "cards/Room.tsx",
     "edit": "cards/Room.tsx",
-    "delete": "cards/Room.tsx"
+    "delete": "cards/Room.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "rooms.site": {
     "create": "cards/Room.tsx",
     "edit": "cards/Room.tsx",
-    "delete": "cards/Room.tsx"
+    "delete": "cards/Room.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "rooms.sound": {
     "create": "cards/Room.tsx",
     "edit": "cards/Room.tsx",
-    "delete": "cards/Room.tsx"
+    "delete": "cards/Room.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "rooms.tags": {
     "create": "cards/Room.tsx",
     "edit": "cards/Room.tsx",
-    "delete": "cards/Room.tsx"
+    "delete": "cards/Room.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "rooms.variants": {
     "create": "cards/Room.tsx",
     "edit": "cards/Room.tsx",
-    "delete": "cards/Room.tsx"
+    "delete": "cards/Room.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "rooms.zones": {
     "create": "cards/Room.tsx",
     "edit": "cards/Room.tsx",
-    "delete": "cards/Room.tsx"
+    "delete": "cards/Room.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
-  "scenes.abstract": { "create": "generic", "edit": "generic", "delete": "generic" },
-  "scenes.control": { "create": "generic", "edit": "generic", "delete": "generic" },
-  "scenes.description": { "create": "generic", "edit": "generic", "delete": "generic" },
-  "scenes.name": { "create": "generic", "edit": "generic", "delete": "generic" },
-  "scenes.on": { "create": "generic", "edit": "generic", "delete": "generic" },
-  "scenes.on_end": { "create": "generic", "edit": "generic", "delete": "generic" },
-  "scenes.steps": { "create": "generic", "edit": "generic", "delete": "generic" },
+  "scenes.abstract": {
+    "create": "generic",
+    "edit": "generic",
+    "delete": "generic",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
+  },
+  "scenes.control": {
+    "create": "generic",
+    "edit": "generic",
+    "delete": "generic",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
+  },
+  "scenes.description": {
+    "create": "generic",
+    "edit": "generic",
+    "delete": "generic",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
+  },
+  "scenes.name": {
+    "create": "generic",
+    "edit": "generic",
+    "delete": "generic",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
+  },
+  "scenes.on": {
+    "create": "generic",
+    "edit": "generic",
+    "delete": "generic",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
+  },
+  "scenes.on_end": {
+    "create": "generic",
+    "edit": "generic",
+    "delete": "generic",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
+  },
+  "scenes.steps": {
+    "create": "generic",
+    "edit": "generic",
+    "delete": "generic",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
+  },
   "scenes.treatment": {
     "create": "cards/Scene.tsx",
     "edit": "cards/Scene.tsx",
-    "delete": "cards/Scene.tsx"
+    "delete": "cards/Scene.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
-  "services.abstract": { "create": "generic", "edit": "generic", "delete": "generic" },
-  "services.action": { "create": "generic", "edit": "generic", "delete": "generic" },
-  "services.benefit": { "create": "generic", "edit": "blocks/Rules.tsx", "delete": "generic" },
-  "services.currency": { "create": "generic", "edit": "generic", "delete": "generic" },
-  "services.name": { "create": "generic", "edit": "generic", "delete": "generic" },
-  "services.narration": { "create": "generic", "edit": "generic", "delete": "generic" },
-  "services.price": { "create": "generic", "edit": "generic", "delete": "generic" },
-  "services.provider": { "create": "generic", "edit": "generic", "delete": "generic" },
-  "skills.abstract": { "create": "generic", "edit": "generic", "delete": "generic" },
-  "skills.growth": { "create": "generic", "edit": "generic", "delete": "generic" },
-  "skills.hidden": { "create": "generic", "edit": "generic", "delete": "generic" },
-  "skills.learned": { "create": "generic", "edit": "generic", "delete": "generic" },
-  "skills.name": { "create": "generic", "edit": "generic", "delete": "generic" },
-  "skills.prerequisite": { "create": "generic", "edit": "blocks/Rules.tsx", "delete": "generic" },
-  "skills.profession": { "create": "generic", "edit": "generic", "delete": "generic" },
-  "skills.qualification": { "create": "generic", "edit": "blocks/Rules.tsx", "delete": "generic" },
-  "skills.ranks": { "create": "generic", "edit": "generic", "delete": "generic" },
-  "skills.requirement": { "create": "generic", "edit": "generic", "delete": "generic" },
-  "statuses.abstract": { "create": "generic", "edit": "generic", "delete": "generic" },
-  "statuses.allows": { "create": "generic", "edit": "generic", "delete": "generic" },
-  "statuses.blocks": { "create": "generic", "edit": "generic", "delete": "generic" },
-  "statuses.concealment": { "create": "generic", "edit": "generic", "delete": "generic" },
-  "statuses.cues": { "create": "generic", "edit": "generic", "delete": "generic" },
-  "statuses.duration": { "create": "generic", "edit": "blocks/Rules.tsx", "delete": "generic" },
-  "statuses.fear": { "create": "generic", "edit": "generic", "delete": "generic" },
-  "statuses.kind": { "create": "generic", "edit": "generic", "delete": "generic" },
-  "statuses.modifies": { "create": "generic", "edit": "generic", "delete": "generic" },
-  "statuses.movement": { "create": "generic", "edit": "generic", "delete": "generic" },
-  "statuses.name": { "create": "generic", "edit": "generic", "delete": "generic" },
-  "statuses.narration": { "create": "generic", "edit": "generic", "delete": "generic" },
-  "statuses.per_tick": { "create": "generic", "edit": "generic", "delete": "generic" },
-  "statuses.perception": { "create": "generic", "edit": "generic", "delete": "generic" },
-  "statuses.pierced_by": { "create": "generic", "edit": "generic", "delete": "generic" },
-  "statuses.resistances": { "create": "generic", "edit": "generic", "delete": "generic" },
-  "statuses.resource": { "create": "generic", "edit": "generic", "delete": "generic" },
-  "statuses.tick_every": { "create": "generic", "edit": "generic", "delete": "generic" },
-  "statuses.ticks": { "create": "generic", "edit": "generic", "delete": "generic" },
-  "structures.abstract": { "create": "generic", "edit": "generic", "delete": "generic" },
-  "structures.description": { "create": "generic", "edit": "generic", "delete": "generic" },
-  "structures.locks": { "create": "generic", "edit": "generic", "delete": "generic" },
-  "structures.max_per_owner": { "create": "generic", "edit": "generic", "delete": "generic" },
-  "structures.name": { "create": "generic", "edit": "generic", "delete": "generic" },
-  "structures.ruin": { "create": "generic", "edit": "generic", "delete": "generic" },
-  "structures.tags": { "create": "generic", "edit": "generic", "delete": "generic" },
-  "structures.variants": { "create": "generic", "edit": "generic", "delete": "generic" },
-  "structures.weathering": { "create": "generic", "edit": "generic", "delete": "generic" },
-  "text": { "create": "generic", "edit": "generic", "delete": "generic" },
-  "topics.abstract": { "create": "generic", "edit": "generic", "delete": "generic" },
-  "topics.fact": { "create": "generic", "edit": "generic", "delete": "generic" },
-  "topics.name": { "create": "generic", "edit": "generic", "delete": "generic" },
+  "services.abstract": {
+    "create": "generic",
+    "edit": "generic",
+    "delete": "generic",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
+  },
+  "services.action": {
+    "create": "generic",
+    "edit": "generic",
+    "delete": "generic",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
+  },
+  "services.benefit": {
+    "create": "generic",
+    "edit": "blocks/Rules.tsx",
+    "delete": "generic",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
+  },
+  "services.currency": {
+    "create": "generic",
+    "edit": "generic",
+    "delete": "generic",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
+  },
+  "services.name": {
+    "create": "generic",
+    "edit": "generic",
+    "delete": "generic",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
+  },
+  "services.narration": {
+    "create": "generic",
+    "edit": "generic",
+    "delete": "generic",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
+  },
+  "services.price": {
+    "create": "generic",
+    "edit": "generic",
+    "delete": "generic",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
+  },
+  "services.provider": {
+    "create": "generic",
+    "edit": "generic",
+    "delete": "generic",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
+  },
+  "skills.abstract": {
+    "create": "generic",
+    "edit": "generic",
+    "delete": "generic",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
+  },
+  "skills.growth": {
+    "create": "generic",
+    "edit": "generic",
+    "delete": "generic",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
+  },
+  "skills.hidden": {
+    "create": "generic",
+    "edit": "generic",
+    "delete": "generic",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
+  },
+  "skills.learned": {
+    "create": "generic",
+    "edit": "generic",
+    "delete": "generic",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
+  },
+  "skills.name": {
+    "create": "generic",
+    "edit": "generic",
+    "delete": "generic",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
+  },
+  "skills.prerequisite": {
+    "create": "generic",
+    "edit": "blocks/Rules.tsx",
+    "delete": "generic",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
+  },
+  "skills.profession": {
+    "create": "generic",
+    "edit": "generic",
+    "delete": "generic",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
+  },
+  "skills.qualification": {
+    "create": "generic",
+    "edit": "blocks/Rules.tsx",
+    "delete": "generic",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
+  },
+  "skills.ranks": {
+    "create": "generic",
+    "edit": "generic",
+    "delete": "generic",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
+  },
+  "skills.requirement": {
+    "create": "generic",
+    "edit": "generic",
+    "delete": "generic",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
+  },
+  "statuses.abstract": {
+    "create": "generic",
+    "edit": "generic",
+    "delete": "generic",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
+  },
+  "statuses.allows": {
+    "create": "generic",
+    "edit": "generic",
+    "delete": "generic",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
+  },
+  "statuses.blocks": {
+    "create": "generic",
+    "edit": "generic",
+    "delete": "generic",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
+  },
+  "statuses.concealment": {
+    "create": "generic",
+    "edit": "generic",
+    "delete": "generic",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
+  },
+  "statuses.cues": {
+    "create": "generic",
+    "edit": "generic",
+    "delete": "generic",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
+  },
+  "statuses.duration": {
+    "create": "generic",
+    "edit": "blocks/Rules.tsx",
+    "delete": "generic",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
+  },
+  "statuses.fear": {
+    "create": "generic",
+    "edit": "generic",
+    "delete": "generic",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
+  },
+  "statuses.kind": {
+    "create": "generic",
+    "edit": "generic",
+    "delete": "generic",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
+  },
+  "statuses.modifies": {
+    "create": "generic",
+    "edit": "generic",
+    "delete": "generic",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
+  },
+  "statuses.movement": {
+    "create": "generic",
+    "edit": "generic",
+    "delete": "generic",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
+  },
+  "statuses.name": {
+    "create": "generic",
+    "edit": "generic",
+    "delete": "generic",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
+  },
+  "statuses.narration": {
+    "create": "generic",
+    "edit": "generic",
+    "delete": "generic",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
+  },
+  "statuses.per_tick": {
+    "create": "generic",
+    "edit": "generic",
+    "delete": "generic",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
+  },
+  "statuses.perception": {
+    "create": "generic",
+    "edit": "generic",
+    "delete": "generic",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
+  },
+  "statuses.pierced_by": {
+    "create": "generic",
+    "edit": "generic",
+    "delete": "generic",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
+  },
+  "statuses.resistances": {
+    "create": "generic",
+    "edit": "generic",
+    "delete": "generic",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
+  },
+  "statuses.resource": {
+    "create": "generic",
+    "edit": "generic",
+    "delete": "generic",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
+  },
+  "statuses.tick_every": {
+    "create": "generic",
+    "edit": "generic",
+    "delete": "generic",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
+  },
+  "statuses.ticks": {
+    "create": "generic",
+    "edit": "generic",
+    "delete": "generic",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
+  },
+  "structures.abstract": {
+    "create": "generic",
+    "edit": "generic",
+    "delete": "generic",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
+  },
+  "structures.description": {
+    "create": "generic",
+    "edit": "generic",
+    "delete": "generic",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
+  },
+  "structures.locks": {
+    "create": "generic",
+    "edit": "generic",
+    "delete": "generic",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
+  },
+  "structures.max_per_owner": {
+    "create": "generic",
+    "edit": "generic",
+    "delete": "generic",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
+  },
+  "structures.name": {
+    "create": "generic",
+    "edit": "generic",
+    "delete": "generic",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
+  },
+  "structures.ruin": {
+    "create": "generic",
+    "edit": "generic",
+    "delete": "generic",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
+  },
+  "structures.tags": {
+    "create": "generic",
+    "edit": "generic",
+    "delete": "generic",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
+  },
+  "structures.variants": {
+    "create": "generic",
+    "edit": "generic",
+    "delete": "generic",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
+  },
+  "structures.weathering": {
+    "create": "generic",
+    "edit": "generic",
+    "delete": "generic",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
+  },
+  "text": {
+    "create": "generic",
+    "edit": "generic",
+    "delete": "generic",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
+  },
+  "topics.abstract": {
+    "create": "generic",
+    "edit": "generic",
+    "delete": "generic",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
+  },
+  "topics.fact": {
+    "create": "generic",
+    "edit": "generic",
+    "delete": "generic",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
+  },
+  "topics.name": {
+    "create": "generic",
+    "edit": "generic",
+    "delete": "generic",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
+  },
   "transports.abstract": {
     "create": "cards/World.tsx",
     "edit": "cards/World.tsx",
-    "delete": "cards/World.tsx"
+    "delete": "cards/World.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "transports.action": {
     "create": "cards/World.tsx",
     "edit": "cards/World.tsx",
-    "delete": "cards/World.tsx"
+    "delete": "cards/World.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "transports.currency": {
     "create": "cards/World.tsx",
     "edit": "cards/World.tsx",
-    "delete": "cards/World.tsx"
+    "delete": "cards/World.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "transports.destination": {
     "create": "cards/World.tsx",
     "edit": "cards/World.tsx",
-    "delete": "cards/World.tsx"
+    "delete": "cards/World.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "transports.detail": {
     "create": "cards/World.tsx",
     "edit": "cards/World.tsx",
-    "delete": "cards/World.tsx"
+    "delete": "cards/World.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "transports.fare": {
     "create": "cards/World.tsx",
     "edit": "cards/World.tsx",
-    "delete": "cards/World.tsx"
+    "delete": "cards/World.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "transports.name": {
     "create": "cards/World.tsx",
     "edit": "cards/World.tsx",
-    "delete": "cards/World.tsx"
+    "delete": "cards/World.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "transports.narration": {
     "create": "cards/World.tsx",
     "edit": "cards/World.tsx",
-    "delete": "cards/World.tsx"
+    "delete": "cards/World.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "transports.recipient": {
     "create": "cards/World.tsx",
     "edit": "cards/World.tsx",
-    "delete": "cards/World.tsx"
+    "delete": "cards/World.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "transports.recovery_rooms": {
     "create": "cards/World.tsx",
     "edit": "cards/World.tsx",
-    "delete": "cards/World.tsx"
+    "delete": "cards/World.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "transports.reverse": {
     "create": "cards/World.tsx",
     "edit": "cards/World.tsx",
-    "delete": "cards/World.tsx"
+    "delete": "cards/World.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "transports.room": {
     "create": "cards/World.tsx",
     "edit": "cards/World.tsx",
-    "delete": "cards/World.tsx"
+    "delete": "cards/World.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   },
   "treatment:reverie": {
     "create": "cards/Scene.tsx",
     "edit": "cards/Scene.tsx",
-    "delete": "cards/Scene.tsx"
+    "delete": "cards/Scene.tsx",
+    "book": {
+      "create": "todo",
+      "edit": "todo",
+      "delete": "todo"
+    }
   }
 }

@@ -1,0 +1,302 @@
+[
+  {
+    "id": "hierarchy",
+    "panel": "tools/author-panel/src/App.tsx",
+    "book": "todo"
+  },
+  {
+    "id": "play-from-here",
+    "panel": "tools/author-panel/src/left.tsx",
+    "book": "todo"
+  },
+  {
+    "id": "new-menu",
+    "panel": "tools/author-panel/src/left.tsx",
+    "book": "todo"
+  },
+  {
+    "id": "world-button",
+    "panel": "tools/author-panel/src/left.tsx",
+    "book": "todo"
+  },
+  {
+    "id": "project-tabs",
+    "panel": "tools/author-panel/src/project.tsx",
+    "book": "todo"
+  },
+  {
+    "id": "world-picker",
+    "panel": "tools/author-panel/src/world.tsx",
+    "book": "todo"
+  },
+  {
+    "id": "map-story-flow-segment",
+    "panel": "tools/author-panel/src/left.tsx",
+    "book": "todo"
+  },
+  {
+    "id": "device-size",
+    "panel": "tools/author-panel/src/centre.tsx",
+    "book": "todo"
+  },
+  {
+    "id": "last-edit-timing",
+    "panel": "tools/author-panel/src/centre.tsx",
+    "book": "todo"
+  },
+  {
+    "id": "hold",
+    "panel": "tools/author-panel/src/centre.tsx",
+    "book": "todo"
+  },
+  {
+    "id": "map-header",
+    "panel": "tools/author-panel/src/areamap.tsx",
+    "book": "todo"
+  },
+  {
+    "id": "unplaced-strip",
+    "panel": "tools/author-panel/src/areamap.tsx",
+    "book": "todo"
+  },
+  {
+    "id": "map-select-go-source",
+    "panel": "tools/author-panel/src/mapsvg.tsx",
+    "book": "todo"
+  },
+  {
+    "id": "map-drag-room",
+    "panel": "tools/author-panel/src/mapsvg.tsx",
+    "book": "todo"
+  },
+  {
+    "id": "map-join",
+    "panel": "tools/author-panel/src/mapsvg.tsx",
+    "book": "todo"
+  },
+  {
+    "id": "map-pan-zoom-keys",
+    "panel": "tools/author-panel/src/mapsvg.tsx",
+    "book": "todo"
+  },
+  {
+    "id": "map-grow-handles",
+    "panel": "tools/author-panel/src/mapsvg.tsx",
+    "book": "todo"
+  },
+  {
+    "id": "map-templates",
+    "panel": "tools/author-panel/src/maptemplates.tsx",
+    "book": "todo"
+  },
+  {
+    "id": "map-wire",
+    "panel": "tools/author-panel/src/mapwire.ts",
+    "book": "todo"
+  },
+  {
+    "id": "map-exit-edits",
+    "panel": "tools/author-panel/src/mapedit.ts",
+    "book": "todo"
+  },
+  {
+    "id": "map-undo",
+    "panel": "tools/author-panel/src/mapedit.ts",
+    "book": "todo"
+  },
+  {
+    "id": "story-list",
+    "panel": "tools/author-panel/src/storylist.tsx",
+    "book": "todo"
+  },
+  {
+    "id": "story-row-sheets",
+    "panel": "tools/author-panel/src/storylist.tsx",
+    "book": "todo"
+  },
+  {
+    "id": "story-beats",
+    "panel": "tools/author-panel/src/storylist.tsx",
+    "book": "todo"
+  },
+  {
+    "id": "flow-graph",
+    "panel": "tools/author-panel/src/flow.tsx",
+    "book": "todo"
+  },
+  {
+    "id": "inspector-header",
+    "panel": "tools/author-panel/src/right.tsx",
+    "book": "todo"
+  },
+  {
+    "id": "card-picker",
+    "panel": "tools/author-panel/src/right.tsx",
+    "book": "todo"
+  },
+  {
+    "id": "compile-status",
+    "panel": "tools/author-panel/src/sections.tsx",
+    "book": "todo"
+  },
+  {
+    "id": "drop-step",
+    "panel": "tools/author-panel/src/sections.tsx",
+    "book": "todo"
+  },
+  {
+    "id": "failed-checkpoints",
+    "panel": "tools/author-panel/src/sections.tsx",
+    "book": "todo"
+  },
+  {
+    "id": "unconfirmed-words",
+    "panel": "tools/author-panel/src/prose.tsx",
+    "book": "todo"
+  },
+  {
+    "id": "change-feed",
+    "panel": "tools/author-panel/src/right.tsx",
+    "book": "todo"
+  },
+  {
+    "id": "source-footer",
+    "panel": "tools/author-panel/src/sections.tsx",
+    "book": "todo"
+  },
+  {
+    "id": "advance-time",
+    "panel": "tools/author-panel/src/sections.tsx",
+    "book": "todo"
+  },
+  {
+    "id": "checkpoints",
+    "panel": "tools/author-panel/src/sections.tsx",
+    "book": "todo"
+  },
+  {
+    "id": "cheats",
+    "panel": "tools/author-panel/src/cheats.tsx",
+    "book": "todo"
+  },
+  {
+    "id": "write-tab",
+    "panel": "tools/author-panel/src/sections.tsx",
+    "book": "todo"
+  },
+  {
+    "id": "state-tab",
+    "panel": "tools/author-panel/src/reading.tsx",
+    "book": "todo"
+  },
+  {
+    "id": "why-tab",
+    "panel": "tools/author-panel/src/reading.tsx",
+    "book": "todo"
+  },
+  {
+    "id": "step-tab",
+    "panel": "tools/author-panel/src/steptab.tsx",
+    "book": "todo"
+  },
+  {
+    "id": "numbers",
+    "panel": "tools/author-panel/src/numbers.tsx",
+    "book": "todo"
+  },
+  {
+    "id": "find-referrers",
+    "panel": "tools/author-panel/src/reading.tsx",
+    "book": "todo"
+  },
+  {
+    "id": "generic-card",
+    "panel": "tools/author-panel/src/edit/Generic.tsx",
+    "book": "todo"
+  },
+  {
+    "id": "words-field",
+    "panel": "tools/author-panel/src/edit/fields.tsx",
+    "book": "todo"
+  },
+  {
+    "id": "room-card",
+    "panel": "tools/author-panel/src/edit/cards/Room.tsx",
+    "book": "todo"
+  },
+  {
+    "id": "entity-card",
+    "panel": "tools/author-panel/src/edit/cards/Entity.tsx",
+    "book": "todo"
+  },
+  {
+    "id": "action-quest-reaction-cards",
+    "panel": "tools/author-panel/src/edit/cards/Action.tsx",
+    "book": "todo"
+  },
+  {
+    "id": "dialogue-card",
+    "panel": "tools/author-panel/src/edit/cards/Dialogue.tsx",
+    "book": "todo"
+  },
+  {
+    "id": "scene-text",
+    "panel": "tools/author-panel/src/edit/cards/Scene.tsx",
+    "book": "todo"
+  },
+  {
+    "id": "modal-scene",
+    "panel": "tools/author-panel/src/edit/cards/ScenePages.tsx",
+    "book": "todo"
+  },
+  {
+    "id": "world-card",
+    "panel": "tools/author-panel/src/edit/cards/World.tsx",
+    "book": "todo"
+  },
+  {
+    "id": "combat-block",
+    "panel": "tools/author-panel/src/edit/blocks/Combat.tsx",
+    "book": "todo"
+  },
+  {
+    "id": "schedule-block",
+    "panel": "tools/author-panel/src/edit/blocks/Schedule.tsx",
+    "book": "todo"
+  },
+  {
+    "id": "palette",
+    "panel": "tools/author-panel/src/palette.tsx",
+    "book": "todo"
+  },
+  {
+    "id": "delete-definition",
+    "panel": "tools/author-panel/src/shell.ts",
+    "book": "todo"
+  },
+  {
+    "id": "undo",
+    "panel": "tools/author-panel/src/author.ts",
+    "book": "todo"
+  },
+  {
+    "id": "new-kind",
+    "panel": "kernel/ts/play/new.json",
+    "book": "todo"
+  },
+  {
+    "id": "open-source-key",
+    "panel": "tools/author-panel/src/App.tsx",
+    "book": "todo"
+  },
+  {
+    "id": "column-folds",
+    "panel": "tools/author-panel/src/shell.ts",
+    "book": "todo"
+  },
+  {
+    "id": "prose-walk-keys",
+    "panel": "mobile/app/author/prose_rules.ts",
+    "book": "todo"
+  }
+]
