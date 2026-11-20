@@ -21,7 +21,7 @@ import {
   type Place,
   type Step,
 } from './place.ts';
-import { factRows, shown, type Canon } from './shown.ts';
+import { factRows, roomKey, shown, type Canon } from './shown.ts';
 import { worded } from '../book/words.ts';
 import { bind, clicked, lost, nextPage } from './prose_rules.ts';
 
@@ -182,7 +182,7 @@ function jumpTo(steps: Step[], { session, startOver }: Tools) {
   const game = session.game();
   if (!game || game === before) return; // a refused start over keeps this game and its place
   place.hash = ''; // not this artifact's path yet: restorePlace replays it
-  place.steps = steps;
+  place.steps = [...steps]; // its own list: a recorded step must not grow the checkpoint it came from
   restorePlace(game);
 }
 
@@ -243,6 +243,20 @@ function askCheat(game: Opened, cheat: Cheat) {
   placeNote = sendCheat(played(game)!, cheat, manifest, place.stopped?.note);
 }
 const heard = (message: Message) => (inBook?.heard(message), build?.hear(message));
+const NO_STEPS = 'Place: that checkpoint has no steps list; nothing changed.';
+/** The Build strip's keep-my-place notice: what it reads and its three ways back to a live page. */
+const placeHooks = (game: Opened, latest: { current: Tools }) => ({
+  place: () => ({ steps: place.steps, refused, checkpoint: place.checkpoint }),
+  here: () => roomKey(game.roomIds(), game.view().view.place.id),
+  drop: () => refused !== undefined && jumpTo(dropStep(place.steps, refused), latest.current),
+  back: () => jumpTo(place.checkpoint ?? [], latest.current),
+  startIn: (room: string) => {
+    const before = latest.current.session.game();
+    jumpTo([], latest.current);
+    const fresh = latest.current.session.game();
+    if (fresh && fresh !== before) askCheat(fresh, { op: 'go_to_room', room }); // a refused start over stays put
+  },
+});
 /** Serves the author panel page for `game` while mounted; App calls it only in the author preview. */
 export function useAuthorPanel(tools: Tools, game: Opened | undefined) {
   const latest = useRef(tools); // App's closures change per render; the bridge lives per game
@@ -257,10 +271,9 @@ export function useAuthorPanel(tools: Tools, game: Opened | undefined) {
       if (e.data.op === 'trace') return void tell({ trace: game.trace(), id: e.data.id });
       if (e.data.op === 'advance') advance(e.data.minutes, game);
       if (isCheat(e.data)) askCheat(game, e.data);
-      if (e.data.op === 'jump') {
-        if (Array.isArray(e.data.steps)) return jumpTo(e.data.steps, latest.current); // the new game posts its state
-        placeNote = 'Place: that checkpoint has no steps list; nothing changed.'; // checked before the start over wipes the save
-      }
+      if (e.data.op === 'jump' && Array.isArray(e.data.steps))
+        return jumpTo((place.checkpoint = e.data.steps), latest.current); // the strip's Back replays it; the new game posts its state
+      if (e.data.op === 'jump') placeNote = NO_STEPS; // checked before the start over wipes the save
       if (e.data.op === 'drop' && refused !== undefined)
         return jumpTo(dropStep(place.steps, refused), latest.current);
       state();
@@ -272,6 +285,7 @@ export function useAuthorPanel(tools: Tools, game: Opened | undefined) {
     redrawBook = () => latest.current.redraw({});
     const unlisten = listen((message) => (heard(message), redrawBook())); // a text overlay redraws in place
     const stop = inBook?.start({ seen, said, tell, redraw: redrawBook });
+    build?.place(placeHooks(game, latest));
     if (panel) state();
     else if (window.parent !== window)
       window.parent.postMessage({ loka: 'author', ready: true, sha256: chapter.sha256 }, '*');

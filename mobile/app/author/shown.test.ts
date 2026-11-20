@@ -2,7 +2,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import type { GameView } from '../../packages/game-view/session.ts';
-import { clockWords, factRows, shown, type Canon } from './shown.ts';
+import { clockWords, factRows, roomKey, shown, type Canon } from './shown.ts';
 
 const ref = (kind: string, key: string) => ({
   cartridge_id: 'c',
@@ -129,4 +129,11 @@ test('facts: every declared one by short key, unset at its default, each held ro
       ['c@1:fact/gone', 'gone', 'x', true],
     ],
   );
+});
+
+// Breaks: Start in this room (the Build strip) sending the whole ref, or another room's key, as the
+// go_to_room cheat's room, which the cheat refuses as no such room.
+test('the room key a go_to_room cheat names', () => {
+  assert.equal(roomKey(rooms, 'r2'), 'other');
+  assert.equal(roomKey(rooms, 'gone'), undefined);
 });

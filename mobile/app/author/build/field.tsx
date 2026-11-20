@@ -28,7 +28,10 @@ export type Hooks = {
   focus: () => void; // auto-hold (Build.tsx `hold`)
   commit: () => void;
   api: typeof api; // E5's, handed in by panel.tsx behind its require gate
+  wrote: (w: Wrote) => void; // a saved write, for the strip's Undo chip
 };
+/** A saved write as /undo puts it back: its journal id, and the key and old words the Book shows at once. */
+export type Wrote = { id: number; key: string; words: string; file: string };
 let hooks: Hooks | undefined;
 let field: Field | undefined;
 let busy = false; // a /line or /edit in flight
@@ -125,6 +128,14 @@ async function edit(h: Hooks, key: string) {
       : { key, draft: '', note: noFieldNote(key, typeof at === 'string' ? at : undefined) };
   h.redraw();
 }
+/** A Checks row's line: its field when this page draws the key, else the source in the owner's
+ * editor, as E5 does (inbook.ts `edit`). False: not on this page. */
+export function go(key: string) {
+  if (!hooks) return false;
+  if ([...hooks.seen.values()].includes(key)) return (void edit(hooks, key), true);
+  void hooks.api('/open', { key, words: hooks.said.get(key) ?? '' });
+  return false;
+}
 /** Build turned on or off: no field stays open, and the Book redraws its lines. */
 export const shut = () => hooks && close(hooks);
 function close(h: Hooks) {
@@ -155,6 +166,7 @@ async function save(h: Hooks, f: Field) {
       key: f.key,
     })
     .finally(() => (busy = false));
+  if (status === 200) h.wrote({ id: answer.id, key: f.key, words: at.words, file });
   if (field !== f) return; // closed (Esc) while it saved
   if (status === 200) return close(h); // the server sends the new words at once (kernel/ts/play/told.ts)
   if (status !== 409)

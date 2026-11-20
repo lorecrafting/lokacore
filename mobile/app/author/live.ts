@@ -6,6 +6,8 @@ export type Message = {
   text: Record<string, string>;
   said: string[];
   unconfirmed?: { key: string }[];
+  diagnostics?: unknown[]; // the last compile's refusals (kernel/ts/play/card.ts)
+  placeholders?: Record<string, string>; // each unwritten (`~`) key's file:line
   changed?: { file: string }[];
   held?: boolean; // the server's Hold (POST /__author/hold) is on
   pending?: number; // compiles parked while it holds

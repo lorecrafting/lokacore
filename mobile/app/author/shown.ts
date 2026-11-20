@@ -10,6 +10,11 @@ export type Canon = {
   facts?: Record<string, { key: string; value_type: { default?: unknown } }>;
 };
 const refString = (r: Ref) => `${r.cartridge_id}@${r.cartridge_version}:${r.kind}/${r.key}`;
+type Ids = Readonly<Record<string, string>>;
+const hereRef = (roomIds: Ids, id: string) =>
+  Object.keys(roomIds).find((ref) => roomIds[ref] === id);
+/** The key of the room whose entity id is `id`, as a go_to_room cheat names it (`c@1:room/r`: `r`). */
+export const roomKey = (roomIds: Ids, id: string) => hereRef(roomIds, id)?.split(':room/')[1];
 
 export function shown(
   view: GameView,
@@ -21,7 +26,7 @@ export function shown(
   const say = (key: string) => text(key) ?? key;
   return {
     room: say(view.place.title.key),
-    here: Object.keys(roomIds).find((ref) => roomIds[ref] === view.place.id), // the editor's highlight
+    here: hereRef(roomIds, view.place.id), // the editor's highlight
     visited: visited(view, roomIds),
     people: view.entities.filter((e) => e.kind === 'npc').map((e) => say(e.name)),
     held: view.inventory.map((e) => say(e.name)),
