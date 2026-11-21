@@ -8,7 +8,7 @@ import { known } from './room.tsx';
 import { io, refusal } from './roomedit.tsx';
 import { sheets } from './sheet.tsx';
 
-type Got = { doc: unknown; kind: string; defs: Defs; root: Record<string, unknown> };
+type Got = { doc: unknown; was: string; kind: string; defs: Defs; root: Record<string, unknown> };
 const got = new Map<string, Got>(); // each file with its schema, as last read
 const fresh = new Set<string>(); // the files read under the latest /story
 let of = known.files; // that /story: a new one reads each file again, showing the old until then
@@ -23,6 +23,7 @@ function load(file: string) {
       const [status, schema] = await known.api!(`/schema/${s.kind}`);
       got.set(file, {
         doc: JSON.parse(s.bytes),
+        was: s.sha256,
         kind: s.kind!,
         defs: schema.$defs,
         root: { $ref: schema.$ref },
@@ -40,7 +41,7 @@ function body(file: string) {
   const def = definitionOf(g.defs, g.kind, g.doc);
   const doc = g.doc as Record<string, unknown>;
   const seed = (f: string) => (Array.isArray(doc) ? undefined : added(doc, f, g.defs, def)?.[f]);
-  return field({ file, defs: g.defs, seen: [], seed }, [], g.root, g.doc);
+  return field({ file, was: g.was, defs: g.defs, seen: [], seed }, [], g.root, g.doc);
 }
 
 sheets.def = { title: (file) => file, body };

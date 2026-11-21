@@ -22,7 +22,7 @@ const files = new Map<string, unknown>();
 const posts: { file: string; ops: { path: unknown[]; value?: unknown; delete?: true }[] }[] = [];
 /** The builder api: each file's source and its kind's `/schema/<dir>` as write.ts answers it. */
 async function api(path: string, sent?: any): Promise<[number, any]> {
-  if (sent) return (posts.push(sent), [200, { id: 1 }]);
+  if (sent) return sent.was === 'S' ? (posts.push(sent), [200, { id: 1 }]) : [409, {}]; // the hash read below
   if (path === '/story') return [200, { map: [], graph: { nodes: [] }, files: {} }];
   if (path === '/templates') return [200, []];
   const dir = /^\/schema\/(\w+)$/.exec(path)?.[1];
@@ -205,7 +205,12 @@ test('each gesture writes the exact value at the exact path', async () => {
   const list = () => within(s, ['allows']);
   assert.ok(!list().some((x) => x.key === 'up 1')); // folded
   await edit(s, ['allows'], () => {}); // unfolded
-  assert.ok(!list().some((x) => x.key === 'up 0'));
+  assert.deepEqual(
+    list()
+      .map((x) => String(x.key))
+      .filter((k) => k.startsWith('up ')),
+    ['up 1', 'up 2'],
+  ); // every item but the first moves up
   for (const k of ['up 2', 'copy 0']) {
     list()
       .find((x) => x.key === k)

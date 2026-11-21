@@ -21,8 +21,14 @@ import { act } from './sheet.tsx';
 
 type Obj = Record<string, unknown>;
 type Step = string | number;
-/** The file drawn, its schema's `$defs`, the definitions entered so far and a root field's least value. */
-export type At = { file: string; defs: Defs; seen: string[]; seed?: (f: string) => unknown };
+/** The file drawn and the hash it was read at, its schema's `$defs`, the definitions entered so far and a root field's least value. */
+export type At = {
+  file: string;
+  was: string;
+  defs: Defs;
+  seen: string[];
+  seed?: (f: string) => unknown;
+};
 
 export const WORDS = {
   add: 'Add…',
@@ -49,7 +55,7 @@ const set = (at: At, path: Step[], value: unknown) =>
   value === undefined
     ? (revealed.add(id(at, path)), known.redraw())
     : void run(() =>
-        ed.change(at.file, ops(path, value)).then(() => void revealed.delete(id(at, path))),
+        ed.change(at.file, at.was, ops(path, value)).then(() => void revealed.delete(id(at, path))),
       );
 /** A write at `path`; at the root (a picked branch, a whole list) one op per top-level field. */
 const ops = (path: Step[], value: unknown) =>
@@ -58,7 +64,8 @@ const ops = (path: Step[], value: unknown) =>
     : Array.isArray(value)
       ? value.map((v, i) => ({ path: [i], value: v }))
       : Object.entries(value as Obj).map(([k, v]) => ({ path: [k], value: v }));
-const drop = (at: At, path: Step[]) => void run(() => ed.change(at.file, [{ path, delete: true }]));
+const drop = (at: At, path: Step[]) =>
+  void run(() => ed.change(at.file, at.was, [{ path, delete: true }]));
 
 /** `value` at `path` drawn as `node` says. */
 export function field(at: At, path: Step[], node: Obj | undefined, value: unknown): ReactNode {

@@ -19,8 +19,8 @@ type Row = { room: string } & At;
 type Run = {
   call: (route: string, sent: object) => Promise<{ id: number; files?: string[] }>;
   read: <T>(file: string) => Promise<{ doc: T; was: string }>;
-  /** One `/change` of `file` with the ops `edit` builds from its current source; none skips it. */
-  change: <T>(file: string, edit: (doc: T) => Op[]) => Promise<void>;
+  /** One `/change` of `file` with the ops `edit` builds; none skips it. `was`: the hash they were built on. */
+  change: <T>(file: string, edit: (doc: T) => Op[], was?: string) => Promise<void>;
 };
 
 /** The direction back through an exit (Loka.Content.Barriers.opposite). */
@@ -248,10 +248,10 @@ async function gesture(io: Io, done: Done[], steps: (s: Run) => Promise<unknown>
     files.add(file);
     return { doc: JSON.parse(got.bytes), was: got.sha256 };
   };
-  const change: Run['change'] = async (file, edit) => {
-    const { doc, was } = await read<never>(file);
-    const ops = edit(doc);
-    if (ops.length) await call('change', { file, was, ops });
+  const change: Run['change'] = async (file, edit, was) => {
+    const got = await read<never>(file);
+    const ops = edit(got.doc);
+    if (ops.length) await call('change', { file, was: was ?? got.was, ops }); // a stale `was` is refused
   };
   try {
     await steps({ call, read, change });
@@ -289,7 +289,7 @@ export function editor(io: Io) {
     put: (file: string, dir: 'npcs' | 'items', kind: string, key: string) =>
       run((s) => s.change(file, () => [spot(dir, kind, key)])),
     move: (r: MapRoom, area: string | null) => run((s) => move(s, r, area)),
-    change: (file: string, ops: Op[]) => run((s) => s.change(file, () => ops)), // the generic sheet's (builder 2.3)
+    change: (file: string, was: string, ops: Op[]) => run((s) => s.change(file, () => ops, was)),
     bind: (part: number, n: number, short: string, known: string[]) =>
       run((s) => bind(s, part, n, short, known)),
     addBeat: (part: number, n: number) => run((s) => addBeat(s, part, n)),

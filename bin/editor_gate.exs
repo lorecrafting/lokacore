@@ -150,7 +150,11 @@ problems =
     for(
       p <- schema_paths,
       v <- verbs,
-      m = book.(editor[p]["book"][v]),
+      m =
+        if(editor[p]["book"][v] == "generic" and editor[p][v] != "generic",
+          do: "generic: refused, the panel's own #{v} is #{inspect(editor[p][v])}",
+          else: book.(editor[p]["book"][v])
+        ),
       do: "#{editor_path}: #{p}: book #{v} #{m}"
     ) ++
     for(
