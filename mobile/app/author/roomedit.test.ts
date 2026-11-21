@@ -47,7 +47,11 @@ async function opened(answer: (path: string) => [number, unknown] = () => [200, 
               { kind: 'npc', ref: 's:npc/hen' },
             ],
           },
-          files: { 's:npc/hen': 'npcs/hen.json' },
+          files: {
+            's:npc/hen': 'npcs/hen.json',
+            's:npc/goat': 'areas/yard/npcs/goat.json',
+            's:dialogue/hen': 'dialogues/hen.scene',
+          },
         },
       ];
     if (path === '/templates')
@@ -238,6 +242,24 @@ test("Contents' New makes a person under a free key and opens it; a named kind n
     ['intro', 'item_3'], // item_2 is Add here's
   );
   assert.deepEqual(s.opens, [`npc:${sent.name}`, 'item:item_3']);
+});
+
+// Breaks: Contents listing no file, a file under the wrong kind (an area's by `areas`), a `.scene`
+// (no schema sheet), or a file row not opening its `def:<file>` sheet.
+test("Contents lists each kind's JSON files after its New; a file opens its sheet", async () => {
+  const s = await opened();
+  s.on(() => sheets.contents.body(''));
+  const labels = s
+    .shown()
+    .filter((n) => n.props?.accessibilityRole === 'button')
+    .map(words);
+  const after = (w: string) => labels[labels.indexOf(w) + 1];
+  assert.deepEqual(
+    [after('New npcs'), after('areas/yard/npcs/goat.json'), after('New dialogues')],
+    ['areas/yard/npcs/goat.json', 'npcs/hen.json', 'New emotes'],
+  );
+  await s.press('npcs/hen.json');
+  assert.deepEqual(s.opens.at(-1), 'def:npcs/hen.json');
 });
 
 // Breaks: the other files a delete takes sent without asking, a Keep still deleting, or a refusal

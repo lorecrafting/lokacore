@@ -41,7 +41,7 @@ function body(file: string) {
   const def = definitionOf(g.defs, g.kind, g.doc);
   const doc = g.doc as Record<string, unknown>;
   const seed = (f: string) => (Array.isArray(doc) ? undefined : added(doc, f, g.defs, def)?.[f]);
-  return field({ file, was: g.was, defs: g.defs, seen: [], seed }, [], g.root, g.doc);
+  return [refusal(), field({ file, was: g.was, defs: g.defs, seen: [], seed }, [], g.root, g.doc)];
 }
 
 sheets.def = { title: (file) => file, body };

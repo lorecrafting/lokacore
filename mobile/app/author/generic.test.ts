@@ -19,10 +19,14 @@ const ROOTS = ['cartridge', 'facts', 'text', 'resources', 'attributes', 'layout'
 const settle = () => new Promise((r) => setTimeout(r));
 
 const files = new Map<string, unknown>();
+let hash = 'S'; // every file's sha256 now
 const posts: { file: string; ops: { path: unknown[]; value?: unknown; delete?: true }[] }[] = [];
 /** The builder api: each file's source and its kind's `/schema/<dir>` as write.ts answers it. */
 async function api(path: string, sent?: any): Promise<[number, any]> {
-  if (sent) return sent.was === 'S' ? (posts.push(sent), [200, { id: 1 }]) : [409, {}]; // the hash read below
+  if (sent)
+    return sent.was === hash
+      ? (posts.push(sent), [200, { id: 1 }])
+      : [409, { bytes: '{}', sha256: hash }]; // write.ts's stale answer: the file changed since read
   if (path === '/story') return [200, { map: [], graph: { nodes: [] }, files: {} }];
   if (path === '/templates') return [200, []];
   const dir = /^\/schema\/(\w+)$/.exec(path)?.[1];
@@ -34,7 +38,7 @@ async function api(path: string, sent?: any): Promise<[number, any]> {
   const file = decodeURIComponent(path.split('file=')[1]);
   const kind = file.split(/[/.]/)[0];
   return files.has(file)
-    ? [200, { bytes: JSON.stringify(files.get(file)), sha256: 'S', kind }]
+    ? [200, { bytes: JSON.stringify(files.get(file)), sha256: hash, kind }]
     : [404, null];
 }
 const load = () =>
@@ -244,4 +248,15 @@ test('each gesture writes the exact value at the exact path', async () => {
     sent().map((o) => o.path),
     [['facts', 'new']],
   );
+});
+
+// Breaks: a refused write (write.ts's 409 for a file changed behind the sheet) silent once the
+// sheet has read its file.
+test('a write refused after the file is read shows in the sheet', async () => {
+  const s = await opened('statuses', { tick_every: 5 });
+  hash = 'T'; // the file changed on disk since the sheet read it
+  assert.deepEqual(await typeIn(s, ['tick_every'], '6'), []);
+  const alert = s.shown().find((x) => x.props?.accessibilityRole === 'alert');
+  assert.equal(words(alert), 'a file changed since the map read it');
+  hash = 'S';
 });
