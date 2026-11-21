@@ -55,20 +55,23 @@ export function unsee() {
   redraw();
   return true;
 }
-/** A game update: a new room (a page change) ends See as; the clock's pulses, each a state, do not. */
+/** A game update: a new room (a page change) or new words in force end See as; the clock's pulses do not. */
 export const updated = (u: GameSubscription) =>
-  u.kind === 'state' && u.projection.view.place.id !== as?.at && unsee();
+  u.kind === 'state' &&
+  (u.projection.view.place.id !== as?.at || u.projection.view.place.description.key !== as?.base) &&
+  unsee();
 
 /** The Room sheet's variant rows for `room`, each with See as; only for the page's own room. */
 export function variantRows(room: string) {
   const shown = room === given?.here() ? here().filter((g) => g.kind === 'variant') : [];
   if (!shown.length) return [];
   const { place } = given!.game.view().view;
-  return shown.map((g) => (
-    <View key={`as:${g.words}`} style={ROW}>
-      {/* mutate-skip: style */}
-      <Text style={{ ...type.small, color: ink('dim'), flex: 1 }}>{g.reason}</Text>
-      {act(WORDS.see, () => see(place.description.key, g, place.id), undefined, `see:${g.words}`)}
+  return shown.map((g, i) => (
+    <View key={`as:${i}`} style={ROW}>
+      <Text style={{ ...type.small, color: ink('dim'), flex: 1 /* mutate-skip: style */ }}>
+        {g.reason}
+      </Text>
+      {act(WORDS.see, () => see(place.description.key, g, place.id), undefined, `see:${i}`)}
     </View>
   ));
 }
@@ -79,12 +82,12 @@ export const chip = () => (as ? act(WORDS.seeing(as.ghost.reason), unsee) : null
 
 /** The ghost lines under the room title; `sheet` is a ghost's sheet id, undefined when it has none. */
 export function ghostLines(open: (id: string) => void, sheet: (g: Ghost) => string | undefined) {
-  return here().map((g) => {
+  return here().map((g, i) => {
     const id = sheet(g);
     const words = said(g.words);
     return (
       <Text
-        key={`ghost:${g.kind}:${g.key}:${g.words}`}
+        key={`ghost:${i}`}
         accessibilityRole={id ? 'button' : undefined}
         accessibilityLabel={WORDS.ghost(words, g.reason)}
         onPress={id ? (e) => (e.stopPropagation(), open(id)) : undefined}

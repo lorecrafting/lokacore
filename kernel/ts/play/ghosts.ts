@@ -13,8 +13,15 @@ export type Cartridge = {
   items?: Record<string, Def & { location: { in: string; room?: Ref } }>;
   rooms?: Record<string, { key: string; variants?: { when: Policy; description: string }[] }>;
   scripted_actions?: Record<string, Def & { target?: { kind: string; room?: Ref } }>;
-  dialogues?: Record<string, Def & { npc: Ref; prompt?: string }>;
+  dialogues?: Record<string, Dialogue>;
 };
+type Dialogue = Def & {
+  npc: Ref;
+  prompt?: string;
+  entry?: boolean;
+  choices?: Record<string, Next>;
+};
+type Next = { then?: string; then_failed?: string };
 export type Ghost = {
   kind: 'npc' | 'item' | 'variant' | 'action' | 'dialogue';
   key: string; // the definition's key; a variant's is the room's
@@ -23,19 +30,20 @@ export type Ghost = {
   reason: string;
 };
 export const NOT_HERE = 'not here now';
-const when = (policy?: Policy) =>
+export const NOT_OFFERED = 'not offered now';
+const when = (policy?: Policy, otherwise = NOT_HERE) =>
   policy
     ? `only when: ${sentences({ policy })
         .map((r) => r.text)
         .join('; ')}`
-    : NOT_HERE;
+    : otherwise;
 
 type Seen = { seen: (ref: string) => boolean; offered: (key: string) => boolean };
 const list = <T>(r?: Record<string, T>) => Object.entries(r ?? {});
 
 /** The ghost lines of room `here` (its key): people and items placed here the view lacks, the room's
- * variants not in force, and the detail actions here and the dialogues of who is here the view does
- * not offer. `ids` is the game's entity id per ref string. */
+ * variants not in force, the detail actions here the view does not offer, and the ways into talk
+ * with someone drawn who offers none. `ids` is the game's entity id per ref string. */
 export function ghosts(
   view: GameView,
   cartridge: Cartridge,
@@ -112,14 +120,24 @@ function unoffered(c: Cartridge, here: string, { seen, offered }: Seen): Ghost[]
       words: a.name ?? a.key,
       reason: when(a.policy),
     }));
-  const talks = list(c.dialogues)
-    .filter(([, d]) => seen(refString(d.npc as DefinitionRef)) && !offered(d.key))
+  // A drawn speaker offers one talk, and only a way in (not `entry: false`, no answer leads to it).
+  const all = list(c.dialogues);
+  const named = new Set(
+    all.flatMap(([, d]) => Object.values(d.choices ?? {}).flatMap((x) => [x.then, x.then_failed])),
+  );
+  const speaker = (d: Dialogue) => refString(d.npc as DefinitionRef);
+  const talking = new Set(all.filter(([, d]) => offered(d.key)).map(([, d]) => speaker(d)));
+  const talks = all
+    .filter(
+      ([, d]) =>
+        seen(speaker(d)) && !talking.has(speaker(d)) && d.entry !== false && !named.has(d.key),
+    )
     .map(([ref, d]): Ghost => ({
       kind: 'dialogue',
       key: d.key,
       ref,
       words: d.name ?? d.prompt ?? d.key,
-      reason: when(d.policy),
+      reason: when(d.policy, NOT_OFFERED),
     }));
   return [...actions, ...talks];
 }

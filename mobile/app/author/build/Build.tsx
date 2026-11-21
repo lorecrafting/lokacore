@@ -104,7 +104,14 @@ export function install(book: Pick<Hooks, 'seen' | 'said' | 'redraw' | 'api'>) {
     unsee,
     pencil: (shown, key) => {
       const room = pencil(shown, placed?.here(), open); // the page's own title: its ghosts follow
-      return room ? [room, ...ghostLines(open, ghostSheet)] : thingPen(key, open);
+      return room ? (
+        <>
+          {room}
+          {ghostLines(open, ghostSheet)}
+        </>
+      ) : (
+        thingPen(key, open)
+      );
     },
   });
   builder = restored(localStorage);

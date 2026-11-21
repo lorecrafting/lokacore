@@ -180,8 +180,8 @@ test('See as at night redraws the words and leaves the save hash unchanged', asy
   assert.equal(hash(), before);
 });
 
-// Breaks: the clock's pulse (every 250 ms in the app) ending See as; a new room (a page change) or
-// a new game (a jump, a start over) not ending it.
+// Breaks: the clock's pulse (every 250 ms in the app) ending See as; a new room (a page change), new
+// words in force here (the clock crossing a variant's hour) or a new game (a jump, a start over) not ending it.
 test("See as lasts through the clock's pulses and ends on a new room or a new game", () => {
   const description = game.view().view.place.description.key;
   const seeAs = () => {
@@ -195,6 +195,13 @@ test("See as lasts through the clock's pulses and ends on a new room or a new ga
   const unsubscribe = game.subscribe(build.updated); // as panel.tsx subscribes
   game.pulse('active');
   assert.notEqual(build.drawn(description), description, 'a pulse ended See as');
+  const { place } = game.view().view; // the hour turns: the night's words come into force here
+  build.updated({
+    kind: 'state',
+    projection: { view: { place: { ...place, description: { key: 'room.night' } } } },
+  } as never);
+  assert.equal(build.drawn(description), description, 'new words in force kept See as');
+  seeAs();
   game.invoke({ action_key: 'move', target_ids: [], input: { direction: 'north' } } as never);
   game.pulse('active');
   unsubscribe();

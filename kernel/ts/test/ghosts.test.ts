@@ -1,7 +1,7 @@
 // Build mode's ghost lines (kernel/ts/play/ghosts.ts) on a hand-made cartridge and view.
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { ghosts, NOT_HERE, type Cartridge } from '../play/ghosts.ts';
+import { ghosts, NOT_HERE, NOT_OFFERED, type Cartridge } from '../play/ghosts.ts';
 import type { GameView } from '../src/contracts.gen.ts';
 
 const ref = (kind: string, key: string) => ({
@@ -68,6 +68,19 @@ const CART = {
       key: 'whisper',
       prompt: 'dialogue.whisper.prompt',
       npc: ref('npc', 'thief'),
+      choices: { pry: { then: 'pry' } },
+    },
+    'c@1:dialogue/pry': { key: 'pry', prompt: 'dialogue.pry.prompt', npc: ref('npc', 'thief') },
+    'c@1:dialogue/aside': {
+      key: 'aside',
+      prompt: 'dialogue.aside.prompt',
+      npc: ref('npc', 'thief'),
+      entry: false,
+    },
+    'c@1:dialogue/gossip': {
+      key: 'gossip',
+      prompt: 'dialogue.gossip.prompt',
+      npc: ref('npc', 'smith'),
     },
   },
 } as Cartridge;
@@ -103,13 +116,14 @@ test('ghosts: what is placed here and not drawn, each with its reason; nothing d
 });
 
 // Breaks caught: a detail action offered on a board's notice still ghosted; a dialogue of someone not drawn
-// ghosted (the `seen(npc)` filter dropped); an ungated absent
-// person or room item not ghosted; an action or dialogue with no policy given a policy reason.
+// ghosted (the `seen(npc)` filter dropped); a speaker's other dialogue ghosted while one talk is offered;
+// a follow-up (an answer's `then`) or an `entry: false` dialogue ghosted; an ungated absent person or
+// room item not ghosted; an action or dialogue with no policy given a policy reason.
 test('ghosts: the dialogue of who is drawn but not offered; absent people and items say not here', () => {
   assert.deepEqual(lines(view(['e1'], [], ['dig'], 'room.yard.night')), [
     `npc:smith npc.smith.short | ${NOT_HERE}`,
     `item:coin item.coin.short | ${NOT_HERE}`,
     'variant:yard room.yard.moon | only when: the moon is full',
-    `dialogue:whisper dialogue.whisper.prompt | ${NOT_HERE}`,
+    `dialogue:whisper dialogue.whisper.prompt | ${NOT_OFFERED}`,
   ]);
 });
