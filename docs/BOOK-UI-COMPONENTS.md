@@ -293,7 +293,20 @@ keep-my-place notice, a second row of the same look): `bg`, a `size.rule` rule i
 three) `type.control` in `action`, each a touch target in both axes, no border or fill; its status
 and notices (Held, not put back, couldn't keep your place) `type.small` in `warning`. The Checks
 sheet: `card` paper, rows `type.small` with `space.md` sides; a row that goes somewhere is a touch
-target tall in `action`, a plain row and `Nothing to check.` `fg` with `space.md` padding. Worst pair: `warning` on `card`, 4.75 (light).
+target tall in `action`, a plain row and `Nothing to check.` `fg` with `space.md` padding. Builder
+sheets (2.1): `card` paper; docked, half a `size.column` wide with a `size.rule` `line` rule on its
+Book side, from a window `size.column` and a half wide (so the Book keeps its full column and the
+sheet is about a phone's width); on a phone, absolute over the Book's lower half or all of it, a
+`size.rule` `line` rule on top, no scrim. The grip: a touch target in both axes holding a
+`size.touch`-wide bar four `size.rule` tall in `line`. The header row: Back `type.control` in
+`action`, the breadcrumb `type.small` in `dim`, `space.md` sides; the title `type.control` in `fg`.
+It slides in over `motion.quick`, none under reduced motion. The title pencil: `✎` in
+`type.control` `action`, after the title, inline, a touch target in both axes. Room sheet rows,
+`space.md` sides and gaps, wrapping: the summary `type.small` `dim`; an exit's words `type.small`
+`fg`, a touch target tall; every act (One-way, Delete, ＋, Move to area, Delete room, Delete all,
+Keep) `type.control` in `action`, a touch target in both axes, no border or fill; the Area field
+`type.small` `fg` taking the row's free width; the refusal `type.small` in `danger` (a barred
+edit); the also-deletes question `type.small` `fg`. Worst pair: `warning` on `card`, 4.75 (light).
 
 Not adopted from the mock (no live consumer): the text drawer and its command chips, topic
 chips and scene pick cards. The mock's shop price rows are not adopted either: a stock, sale or service row is an

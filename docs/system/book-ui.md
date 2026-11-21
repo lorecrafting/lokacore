@@ -965,8 +965,8 @@ reasons and limits: [prose in the Book rulings](../design/prose-in-the-book-ruli
     ` · N not confirmed`, ` · N unwritten` for each nonzero count, in that order (never `~`, ruling 9;
     this replaces §4.1's `~ 4 here · 41`). It opens the Checks sheet, or closes it when open. Rows, in
     that order: `<file>: <path>: <words>` per refusal (`cartridge` when it has no file), `<key>: not
-    confirmed`, `<key>: unwritten`. A row whose key this page draws as a field closes the sheet and
-    opens that field; any other key opens its source, a refusal its file, both leaving the sheet
+    confirmed`, `<key>: unwritten`. A row whose key this page draws as a field closes every open
+    sheet (on a phone one left open would cover the line) and opens that field; any other key opens its source, a refusal its file, both leaving the sheet
     open; a refusal with no file is plain text, not a control. No rows: one line, `Nothing to
     check.` (placeholder words, the owner's to replace).
   - **Keep-my-place notice.** While the replay of the recorded path stands refused, a second strip
@@ -975,6 +975,42 @@ reasons and limits: [prose in the Book rulings](../design/prose-in-the-book-ruli
     `Back to checkpoint`, only once a checkpoint was jumped to from the panel, replays the last
     one; `Start in this room`, only after a Build write, starts over in the room of the last
     write. It goes when the game starts over or a later replay is not refused.
+- **Build: sheets, the title pencil, the Room sheet** (slice 2.1, [builder mode §4.3, §4.9, §5,
+  ruling 7](../rnd/in-game-builder-mode-2026-11-19.md)). Looks:
+  [author-mode marks](../BOOK-UI-COMPONENTS.md#component-catalogue).
+  - **Sheets.** A sheet has a Back button, the breadcrumb of the sheets under it (their titles
+    joined ` › `), and its title, a header that takes focus whenever a new sheet comes on top; its
+    body scrolls, from its start when it comes on top. Sheets stack, at most four: opening a fifth
+    replaces the top one, opening one already lower moves it to the top, and Back closes only the
+    top one. Closing the last returns focus to what opened the first. The stack and the top
+    sheet's scroll survive a reload; leaving Build closes every sheet.
+  - **Two layouts** (ruling 7). Where the window holds the full page column with a docked sheet
+    beside it (the page column and half of it again), the sheet docks at the Book's right edge,
+    half a page column wide, not modal, and the Book beside it keeps its full column and stays
+    playable. In a narrower window it rises over the Book's lower half, modal, with a grip (a
+    button named `Full height`, expanded when full): a drag up makes it full height, a drag down
+    from full halves it, from half closes it as Back does, and a tap or Enter toggles the height.
+    A sheet slides in from the side it docks on (from below on a phone); under reduced motion it
+    cuts in. Closing never animates.
+  - **Title pencil.** In Build the room page's own title, and only it, is followed by a pencil
+    button named `Edit <title>`, which opens that room's sheet. An unwritten title shows its field
+    name `title`, as Build's in-place field draws an unwritten line.
+  - **Room sheet.** Titled by the room's title. At its top, a summary line: `<area> · N exits`
+    (`No area` at the root, `1 exit`). Then a row per exit, `<dir> → <room>`, with `One-way` (drops
+    the way back) and `Delete` (removes both ways). Then `＋ <dir>` for each side with no exit (for
+    a room on the map grid, also none toward a cell another room holds): it makes a new room
+    there, keyed `room_N`, in this room's area, linked both ways, every word unwritten. Then an
+    `Area` field, shown holding the room's area, and `Move to area`, which moves the room to the
+    typed area (empty: the root). Last, `Delete <key>`. A room with an unwritten title shows its
+    key wherever the sheet names it (title, breadcrumb, exit rows, `Edit <key>`; ruling 9), never
+    `~`.
+  - **Room sheet edits.** One runs at a time; a press while one runs does nothing. A refusal (the
+    server's words, or `<key>: no source file` for a room with none) shows, as an alert, at the
+    sheet's top until the next press. When Delete would take other files, the foot reads `Also
+    deletes <files>` with `Delete all` and `Keep`; any other press on a sheet answers Keep first,
+    then does its own edit. The server's refusal names a deleted room's referrers; no count is
+    shown before. A deleted room's sheet closes wherever it sits in the stack. Labels here are
+    placeholder words, the owner's to replace.
 - **No field.** A double-click on a line that is not words opens nothing; a note under it, in a
   row of its own (the lines below move down by its height while it shows and back when it goes,
   with no motion; a note never covers a line, loka-wfrgk.39), until the next click or key, read politely: `A choice label is its key. Alt-click opens the scene.`,
@@ -986,7 +1022,8 @@ reasons and limits: [prose in the Book rulings](../design/prose-in-the-book-ruli
   the next click or key. A pick is the panel's card writing that field's least valid value (a text key is `~`; a
   key or choice the author must make is only revealed, not written), undone by the card's Undo, and
   asks for no second note. Nothing is added from the Book without a pick.
-- Nothing here animates (the scroll to a landed line is instant under reduced motion).
+- Nothing here animates but a sheet coming in (above); the scroll to a landed line is instant under
+  reduced motion.
 
 ## Future boundaries
 
