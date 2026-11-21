@@ -29,6 +29,7 @@ export type Hooks = {
   commit: () => void;
   api: typeof api; // E5's, handed in by panel.tsx behind its require gate
   wrote: (w: Wrote) => void; // a saved write, for the strip's Undo chip
+  unsee?: () => boolean; // ends See as (seeas.tsx); true when it was on
   pencil?: (shown: string, key?: string) => ReactNode; // the title pencil: a room page's own title, a person's or item's name
 };
 /** A saved write as /undo puts it back: its journal id, and the key and old words the Book shows at once. */
@@ -138,6 +139,7 @@ const CHOICE = {
 };
 
 async function edit(h: Hooks, key: string) {
+  if (h.unsee?.()) return; // the words See as shows are not the key's: a tap first shows them again
   if (busy) return; // a tap elsewhere replaces a field left open (a notice, another page)
   busy = true;
   const [status, at] = await h

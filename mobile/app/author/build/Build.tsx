@@ -21,13 +21,15 @@ import {
   toggled,
   type Builder,
 } from './build.ts';
-import { pencil, story } from './room.tsx';
+import { ghostSheet, pencil, story } from './room.tsx';
+import { chip, ghostLines, seeWith, unsee, type Game } from './seeas.tsx';
 import { thingPen } from './thing.tsx';
 import { CONTENTS } from './contents.tsx';
 import './generic.tsx'; // registers the def:<file> sheet
 import { act, CONTROL, Frame, parts, sheets } from './sheet.tsx';
 
 export { Sheet, sheets } from './sheet.tsx';
+export { seeing, unsee } from './seeas.tsx';
 
 const WORDS = {
   build: 'Build',
@@ -53,15 +55,14 @@ let redrawStrip = () => {};
 let mapped = () => {}; // the map has come: the strip and the Book's pencil draw again
 let opener: { focus?: () => void } | null | undefined; // what had focus before the first sheet opened
 /** What the keep-my-place notice reads and does; panel.tsx hands it in per game. */
-export type Place = {
+export type Place = Game & {
   place: () => { steps: Step[]; refused?: number; checkpoint?: Step[] };
-  here: () => string | undefined; // the Book's room key
   drop: () => void;
   back: () => void;
   startIn: (room: string) => void;
 };
 let placed: Place | undefined;
-export const place = (given: Place) => void (placed = given);
+export const place = (given: Place) => void ((placed = given), seeWith(given, () => mapped()));
 let asked = Promise.resolve();
 /** One at a time: the server keeps the last flag it got, so an on overtaking its off would stick.
  * A refused or failed request shows as no Held in the strip. */
@@ -100,7 +101,11 @@ export function install(book: Pick<Hooks, 'seen' | 'said' | 'redraw' | 'api'>) {
     focus: hold.focus,
     commit: hold.commit,
     wrote,
-    pencil: (shown, key) => pencil(shown, placed?.here(), open) ?? thingPen(key, open),
+    unsee,
+    pencil: (shown, key) => {
+      const room = pencil(shown, placed?.here(), open); // the page's own title: its ghosts follow
+      return room ? [room, ...ghostLines(open, ghostSheet)] : thingPen(key, open);
+    },
   });
   builder = restored(localStorage);
   mapped = () => (redrawStrip(), book.redraw());
@@ -109,6 +114,7 @@ export function install(book: Pick<Hooks, 'seen' | 'said' | 'redraw' | 'api'>) {
 }
 export function hear(message: Message) {
   heard = message;
+  unsee(); // a compile may have changed what See as shows
   hold.heard(message.held);
   told(message.unconfirmed?.map((u) => u.key));
   story(api, mapped, back, open); // a compile may have added, moved or renamed rooms
@@ -119,6 +125,7 @@ const set = (next: Builder) => {
 };
 /** A field saved: its Undo chip for UNDO_MS, and the room Start in this room goes back to. */
 function wrote(w: Wrote) {
+  unsee();
   const room = placed?.here();
   set({ ...builder, ...(room && { room }) });
   undo = w;
@@ -216,13 +223,14 @@ const pad = (label: string, id: string, top?: string) =>
 export function Strip({ children }: { children: ReactNode }) {
   const [, redraw] = useState({});
   redrawStrip = () => redraw({});
-  const change = (next: Builder) => (set(next), redraw({}), shut());
+  const change = (next: Builder) => (set(next), unsee(), redraw({}), shut());
   const top = builder.sheets?.at(-1);
   return (
     <View style={{ flex: 1 }} /* mutate-skip: layout */>
       <View style={{ ...STRIP, backgroundColor: ink('bg'), borderColor: ink('line') }}>
         {buildSwitch(() => change(toggled(builder)))}
         {warn(heard.held ? WORDS.held(heard.pending ?? 0) : '')}
+        {chip()}
         {undo ? act(WORDS.undo, () => void putBack(undo!)) : null}
         {notBack ? warn(WORDS.notUndone(notBack.file)) : null}
         {notBack ? act(WORDS.source, openBack) : null}
