@@ -289,8 +289,9 @@ async function narrow(kind: string, doc: object) {
 
 // Breaks: a refused row pressable with no turn-on, or showing no reason; the turn-on missing the
 // capability write, writing it after the field, at the wrong path or version, or into the sheet's file;
-// a field with no least value revealed only in memory, so web's reload drops it (a second press).
-test('a greyed mechanic turns its capability on in cartridge.json, then adds the field', async () => {
+// a field with no least value revealed only in memory, so web's reload drops it (a second press);
+// Remove on such a field writing a delete of nothing and leaving it revealed.
+test('a greyed mechanic turns its capability on in cartridge.json, then adds the field', async (t) => {
   const s = await narrow('actions', {});
   const row = s.shown().find((x) => String(x.key).startsWith('mechanic policy '));
   assert.ok(words(row).includes(WORDS.needs(['policy'])));
@@ -312,6 +313,7 @@ test('a greyed mechanic turns its capability on in cartridge.json, then adds the
   Object.assign(globalThis, {
     sessionStorage: { getItem: (k: string) => kept.get(k) ?? null, setItem: kept.set.bind(kept) },
   });
+  t.after(() => delete (globalThis as { sessionStorage?: unknown }).sessionStorage);
   const i = await narrow('items', {});
   (await i.press('mechanic slot '), await settle());
   assert.deepEqual(
@@ -319,8 +321,11 @@ test('a greyed mechanic turns its capability on in cartridge.json, then adds the
     ['cartridge.json'],
   );
   assert.ok(i.shown().some((x) => String(x.key).includes('"slot"')));
-  assert.match([...kept.values()].join(), /slot/); // a reload wipes the module, not this
-  delete (globalThis as { sessionStorage?: unknown }).sessionStorage;
+  const slot = `${i.file}:${JSON.stringify(['slot'])}`;
+  assert.ok(JSON.parse(kept.get('loka-build-revealed')!).includes(slot)); // a reload keeps this
+  assert.ok(await i.press(`remove ${slot}`));
+  assert.deepEqual(posts.splice(0), []);
+  assert.ok(!i.shown().some((x) => String(x.key).includes('"slot"')));
 });
 
 // Breaks: Add… listing a mechanic field too; an empty Add mechanic… drawn; a stale or missing cartridge's menu.

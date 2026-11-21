@@ -16,6 +16,7 @@ import type { Blocked } from '../../../../kernel/ts/play/allowed.ts';
 import { titles } from '../../../../kernel/ts/play/ui_schema.ts';
 import { size, space, type } from '../../book/tokens.ts';
 import { ink } from './build.ts';
+import { reveal, reveals } from './reveal.ts';
 import { known } from './room.tsx';
 import { ed, inRow, row, run } from './roomedit.tsx';
 import { act, greyed } from './sheet.tsx';
@@ -49,14 +50,6 @@ export const WORDS = {
   first: 'needs another field first',
 };
 const opened = new Set<string>(); // the folded blocks and Add… menus open, by file and path
-// Fields added with no least value, drawn empty until written; web reloads on each write (App.tsx)
-const REVEALED = 'loka-build-revealed';
-let memory = '[]'; // native: no reload, no sessionStorage
-const reveals = (): string[] => JSON.parse(globalThis.sessionStorage?.getItem(REVEALED) ?? memory);
-const reveal = (k: string, on: boolean) => {
-  const v = JSON.stringify([...reveals().filter((x) => x !== k), ...(on ? [k] : [])]);
-  globalThis.sessionStorage ? globalThis.sessionStorage.setItem(REVEALED, v) : (memory = v);
-};
 const drafts = new Map<string, string>(); // each typed field, as typed
 const LABEL = { ...type.label, color: ink('dim') };
 const INPUT = {
@@ -85,8 +78,10 @@ const ops = (path: Step[], value: unknown) =>
     : Array.isArray(value)
       ? value.map((v, i) => ({ path: [i], value: v }))
       : Object.entries(value as Obj).map(([k, v]) => ({ path: [k], value: v }));
-const drop = (at: At, path: Step[]) =>
-  void run(() => ed.change([at.file, at.was, [{ path, delete: true }]]));
+const drop = (at: At, path: Step[], value: unknown) =>
+  value === undefined // only revealed: nothing on disk to delete
+    ? (reveal(id(at, path), false), known.redraw())
+    : void run(() => ed.change([at.file, at.was, [{ path, delete: true }]]));
 
 /** `value` at `path` drawn as `node` says. */
 export function field(at: At, path: Step[], node: Obj | undefined, value: unknown): ReactNode {
@@ -123,7 +118,7 @@ function block(at: At, path: Step[], node: Obj | undefined, value: unknown, remo
         {removable
           ? act(
               s.as === 'const' ? WORDS.off : WORDS.remove,
-              () => drop(at, path),
+              () => drop(at, path, value),
               undefined,
               `remove ${key}`,
               s.as === 'const' ? value !== s.value : undefined,
