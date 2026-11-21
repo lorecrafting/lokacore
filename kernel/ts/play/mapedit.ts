@@ -9,7 +9,7 @@ export { childKey, freeKey, NAMED, nodeOf } from './keys.ts';
 type Told = { ok: boolean; told: unknown };
 export type Io = {
   post: (route: string, sent: object) => Promise<Told>;
-  source: (file: string) => Promise<{ bytes: string; sha256: string }>;
+  source: (file: string) => Promise<{ bytes: string; sha256: string; kind?: string }>;
 };
 type Op = { path: (string | number)[]; value?: unknown; delete?: true };
 type Exit = { to: string; barrier?: string };
@@ -231,7 +231,6 @@ async function undo(io: Io, ids: number[]) {
 }
 
 type Done = { ids: number[]; files: Set<string> };
-
 /** Runs one gesture's calls in order; a refusal puts back the calls before it, then throws. */
 async function gesture(io: Io, done: Done[], steps: (s: Run) => Promise<unknown>) {
   const ids: number[] = [];
@@ -290,6 +289,7 @@ export function editor(io: Io) {
     put: (file: string, dir: 'npcs' | 'items', kind: string, key: string) =>
       run((s) => s.change(file, () => [spot(dir, kind, key)])),
     move: (r: MapRoom, area: string | null) => run((s) => move(s, r, area)),
+    change: (file: string, ops: Op[]) => run((s) => s.change(file, () => ops)), // the generic sheet's (builder 2.3)
     bind: (part: number, n: number, short: string, known: string[]) =>
       run((s) => bind(s, part, n, short, known)),
     addBeat: (part: number, n: number) => run((s) => addBeat(s, part, n)),
