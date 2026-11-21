@@ -1079,6 +1079,28 @@ reasons and limits: [prose in the Book rulings](../design/prose-in-the-book-ruli
     session) until it is written or removed. `Remove` on a mechanic takes only its field off; the
     capability stays on. `Remove` on a field shown empty and never written hides it, writing
     nothing.
+  - **Combat and Schedule blocks** (slice 2.4; root fields only, chosen by the field's registry
+    row). On a person's sheet `hp`, `attack` and `daily_schedule`, and on an item's sheet `weapon`,
+    are each drawn by a block; every other field is drawn as above.
+    - **Combat.** The field's block as above; `hp` has nothing more. Under a present `attack` or
+      `weapon`, folded or open, `Run fights` asks the fight report: for an attack the person's own
+      rows, for a weapon every target's (the weapon in the player's hand). While it runs,
+      `running the fights…` stands in for the button and the last answer is gone. The answer is,
+      per target, its name, its verdict, then its no-build table: a header row, then one row per
+      level, each row one line of its cells joined by ` · `. Or one line saying why there are
+      none: the report's own reason, `not a fight target…`, `no fight targets in this world`, or
+      the request's error. The answer stays until the next write anywhere; an answer that arrives
+      after a newer run or write is dropped. The table never scrolls sideways or clips: a row
+      wider than the sheet wraps, so its cells are read in the header's order.
+    - **Schedule.** The day's hours in hour order, each one row: its number on a short ruled line,
+      its room or cases as the form draws them, and `Remove`. The number moves the hour when it
+      loses focus, only when changed, to a whole number below the cartridge's hours per day (24
+      when it names none) that is not already an hour. A refused move shows its reason as any
+      refused write does (`an hour is a whole number`, `an hour is below N`, `already N`), writes
+      nothing and keeps the typed value, so leaving the field again refuses again. Last,
+      `Add hour` writes the first free hour, sending the person to the room in their own file;
+      with no room there, or every hour taken, it is a disabled greyed row with
+      `place the NPC in a room first, or the day is full`.
   - Labels here are placeholder words, the owner's to replace.
 - **No field.** A double-click on a line that is not words opens nothing; a note under it, in a
   row of its own (the lines below move down by its height while it shows and back when it goes,
