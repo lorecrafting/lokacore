@@ -1,7 +1,8 @@
 // Build mode's ghost lines (docs/rnd/in-game-builder-mode-2026-11-19.md §4.5): what the compiled
 // cartridge places in this room that the view does not draw, each with why. Pure; dev only. The
 // reasons are builder chrome, placeholder words the owner replaces.
-import type { GameView, Policy } from '../src/contracts.gen.ts';
+import type { DefinitionRef, GameView, Policy } from '../src/contracts.gen.ts';
+import { refString } from '../src/runtime/decision.ts';
 import { sentences } from './why_words.ts';
 
 type Ref = { cartridge_id: string; cartridge_version: string; kind: string; key: string };
@@ -31,7 +32,6 @@ const when = (policy?: Policy) =>
 
 type Seen = { seen: (ref: string) => boolean; offered: (key: string) => boolean };
 const list = <T>(r?: Record<string, T>) => Object.entries(r ?? {});
-const refString = (r: Ref) => `${r.cartridge_id}@${r.cartridge_version}:${r.kind}/${r.key}`;
 
 /** The ghost lines of room `here` (its key): people and items placed here the view lacks, the room's
  * variants not in force, and the detail actions here and the dialogues of who is here the view does
@@ -42,9 +42,19 @@ export function ghosts(
   here: string,
   ids: Readonly<Record<string, string>>,
 ): Ghost[] {
+  // A talk is offered on its person, a detail action on its notice, the rest on the place.
+  const notices = [
+    ...(view.notices ?? []),
+    ...(view.notice_boards ?? []).flatMap((b) => b.notices),
+  ];
+  const keys = new Set<string>(
+    [view.actions, ...[...view.entities, ...notices].map((o) => o.actions ?? [])]
+      .flat()
+      .map((a) => a.action_key),
+  );
   const at: Seen = {
     seen: (ref) => view.entities.some((e) => e.id === ids[ref]),
-    offered: (key) => view.actions.some((a) => a.action_key === key),
+    offered: (key) => keys.has(key),
   };
   const shown = view.place.description.key;
   return [
@@ -103,7 +113,7 @@ function unoffered(c: Cartridge, here: string, { seen, offered }: Seen): Ghost[]
       reason: when(a.policy),
     }));
   const talks = list(c.dialogues)
-    .filter(([, d]) => seen(refString(d.npc)) && !offered(d.key))
+    .filter(([, d]) => seen(refString(d.npc as DefinitionRef)) && !offered(d.key))
     .map(([ref, d]): Ghost => ({
       kind: 'dialogue',
       key: d.key,

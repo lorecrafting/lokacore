@@ -29,7 +29,7 @@ import './generic.tsx'; // registers the def:<file> sheet
 import { act, CONTROL, Frame, parts, sheets } from './sheet.tsx';
 
 export { Sheet, sheets } from './sheet.tsx';
-export { seeing, unsee } from './seeas.tsx';
+export { drawn, unsee, updated } from './seeas.tsx';
 
 const WORDS = {
   build: 'Build',
@@ -114,7 +114,7 @@ export function install(book: Pick<Hooks, 'seen' | 'said' | 'redraw' | 'api'>) {
 }
 export function hear(message: Message) {
   heard = message;
-  unsee(); // a compile may have changed what See as shows
+  unsee(); // any live message ends it (fail safe)
   hold.heard(message.held);
   told(message.unconfirmed?.map((u) => u.key));
   story(api, mapped, back, open); // a compile may have added, moved or renamed rooms

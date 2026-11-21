@@ -7,6 +7,7 @@ import { test } from 'node:test';
 import { elapsedHost } from '../../authority/local-story/__tests__/elapsed-host.test.ts';
 import { nodes } from '../book/__tests__/combat-book.test.ts'; // the React Native stand-ins
 import { BUILD } from './build/build.ts';
+import { overlay } from './live.ts';
 import { bind, tagged } from './prose_rules.ts';
 
 const kept = new Map([[BUILD, '{"on":true}']]);
@@ -14,6 +15,7 @@ const sent: string[] = []; // every path the page asks for but /story
 const seen = new Map<string, string>();
 const said = new Map<string, string>();
 const tick = () => new Promise((r) => setTimeout(r));
+const FILES = { 'ferry_sampler@0.0.1:action/dig': 'actions/dig.json' };
 const LANDING = { key: 'ferry_landing', area: null, title: 'Ferry Landing', exits: [] };
 Object.assign(globalThis, {
   localStorage: {
@@ -22,7 +24,8 @@ Object.assign(globalThis, {
   },
   addEventListener() {},
   fetch: async (path: string) => {
-    if (path === '/__author/story') return { status: 200, json: async () => ({ map: [LANDING] }) };
+    if (path === '/__author/story')
+      return { status: 200, json: async () => ({ map: [LANDING], files: FILES }) };
     sent.push(path.split('?')[0]);
     return { status: 200, json: async () => null };
   },
@@ -44,7 +47,8 @@ const ref = (kind: string, key: string) => ({
 });
 const LANDING_AT = ref('room', 'ferry_landing');
 const NIGHT = { op: 'time_window', from: 20, to: 6 } as const;
-// The compiled cartridge as the dev artifact gives it, with a hidden person and a night variant here.
+// The compiled cartridge as the dev artifact gives it, with a hidden person and a night variant here;
+// Bram's talk and the lantern's detail action are offered (on him, on the notice), so not ghosts; dig is not.
 const CANON = {
   npcs: {
     'ferry_sampler@0.0.1:npc/bram': { key: 'bram', name: 'npc.bram.short', room: LANDING_AT },
@@ -55,6 +59,14 @@ const CANON = {
       perception: { discovered: ref('fact', 'saw_shade') },
     },
   },
+  dialogues: { 'ferry_sampler@0.0.1:dialogue/bram': { key: 'bram', npc: ref('npc', 'bram') } },
+  scripted_actions: {
+    'ferry_sampler@0.0.1:action/lantern': {
+      key: 'lantern',
+      target: { kind: 'detail', room: LANDING_AT },
+    },
+    'ferry_sampler@0.0.1:action/dig': { key: 'dig', target: { kind: 'detail', room: LANDING_AT } },
+  },
   rooms: {
     'ferry_sampler@0.0.1:room/ferry_landing': {
       key: 'ferry_landing',
@@ -62,7 +74,7 @@ const CANON = {
     },
   },
 };
-build.place({
+const hooks = {
   place: () => ({ steps: [] }),
   here: () => 'ferry_landing',
   drop() {},
@@ -70,14 +82,16 @@ build.place({
   startIn() {},
   game,
   canon: () => CANON,
-});
+};
+build.place(hooks);
 build.install({ seen, said, redraw() {}, api });
 await tick(); // the map
 
 /** The room page as panel.tsx draws it: See as's words, else the game's, each line bound. */
 function page() {
-  const text = (key: string) => {
-    const words = build.seeing(key) ?? game.text(key) ?? key;
+  const text = (asked: string) => {
+    const key = build.drawn(asked);
+    const words = game.text(key) ?? key;
     const shown = tagged(key, words);
     bind(seen, shown, key);
     said.set(key, words);
@@ -93,7 +107,9 @@ const strip = () => nodes(build.Strip({ children: 'book' }));
 const button = (label: string) =>
   strip().find((n) => n.type === 'Pressable' && n.props.children?.props?.children === label);
 const ghosts = () =>
-  page().filter((n) => n.props?.accessibilityLabel?.match(/, (hidden|only when).*, edit$/));
+  page().filter((n) =>
+    n.props?.accessibilityLabel?.match(/, (hidden|only when|not here).*, edit$/),
+  );
 const top = () => JSON.parse(kept.get(BUILD)!).sheets?.at(-1);
 const tables = () =>
   (host.sql.prepare("SELECT name FROM sqlite_master WHERE type='table'").all() as any[]).map(
@@ -106,16 +122,22 @@ const hash = () =>
     .digest('hex');
 
 // Breaks: no ghost for a person the room holds but its perception gate hides, the gate's reason not
-// said, a ghost drawn twice (as its own title line too) or out of Build, a tap opening no sheet or
-// another's.
+// said, a ghost drawn twice (as its own title line too) or out of Build, a talk or detail action the
+// real view offers still ghosted, an action's ghost opening no file, a live edit of the words not shown, a tap opening no sheet or another's.
 test("the room's title has one ghost per hidden thing, with its reason; a tap opens its sheet", () => {
+  overlay['npc.shade.short'] = 'Shade, as edited';
   const lines = ghosts().map((n) => n.props.accessibilityLabel);
+  delete overlay['npc.shade.short'];
   assert.deepEqual(lines, [
-    'npc.shade.short, hidden: until fact saw_shade, edit',
+    'Shade, as edited, hidden: until fact saw_shade, edit',
     'An old elm shades a patch of trodden grass., only when: the time of day is from 20 to 6, edit',
+    'dig, not here now, edit',
   ]);
   ghosts()[0].props.onPress({ stopPropagation() {} });
   assert.equal(top(), 'npc:shade');
+  ghosts()[2].props.onPress({ stopPropagation() {} }); // an action's sheet is its file's
+  assert.equal(top(), 'def:actions/dig.json');
+  button('Back')?.props.onPress();
   button('Back')?.props.onPress();
   button('✎ Build').props.onPress(); // Build off
   assert.deepEqual(ghosts(), [], 'a ghost out of Build');
@@ -137,14 +159,14 @@ test('See as at night redraws the words and leaves the save hash unchanged', asy
     assert.equal(top(), 'room:ferry_landing');
     button('See as').props.onPress();
     assert.ok(
-      drawn(night) && !build.seeing('room.x'),
+      drawn(night) && build.drawn('room.x') === 'room.x',
       "the night's words not drawn, or not only there",
     );
   };
   seeAs();
   assert.ok(!drawn(day), "the day's words still drawn");
   button('Seeing: only when: the time of day is from 20 to 6 · Back').props.onPress();
-  assert.equal(build.seeing(description), undefined);
+  assert.equal(build.drawn(description), description);
   assert.equal(hash(), before, 'See as changed the save');
 
   seeAs();
@@ -152,8 +174,29 @@ test('See as at night redraws the words and leaves the save hash unchanged', asy
   line.props.onPress();
   await tick();
   assert.deepEqual(
-    [build.seeing(description), sent.includes('/__author/line')],
-    [undefined, false],
+    [build.drawn(description), sent.includes('/__author/line')],
+    [description, false],
   );
   assert.equal(hash(), before);
+});
+
+// Breaks: the clock's pulse (every 250 ms in the app) ending See as; a new room (a page change) or
+// a new game (a jump, a start over) not ending it.
+test("See as lasts through the clock's pulses and ends on a new room or a new game", () => {
+  const description = game.view().view.place.description.key;
+  const seeAs = () => {
+    ghosts()[1].props.onPress({ stopPropagation() {} });
+    button('See as').props.onPress();
+  };
+  seeAs();
+  build.place(hooks);
+  assert.equal(build.drawn(description), description, 'a new game kept See as');
+  seeAs();
+  const unsubscribe = game.subscribe(build.updated); // as panel.tsx subscribes
+  game.pulse('active');
+  assert.notEqual(build.drawn(description), description, 'a pulse ended See as');
+  game.invoke({ action_key: 'move', target_ids: [], input: { direction: 'north' } } as never);
+  game.pulse('active');
+  unsubscribe();
+  assert.equal(build.drawn(description), description, 'a new room kept See as');
 });

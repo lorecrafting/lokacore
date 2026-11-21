@@ -77,31 +77,36 @@ const IDS = {
   'c@1:npc/far': 'e3',
   'c@1:item/coin': 'e4',
 };
-// Only the fields ghosts reads: who is drawn, what is offered and which words the room drew.
-const view = (entities: string[], actions: string[], drawn = 'room.yard.moon') =>
+// Only the fields ghosts reads, where the kernel puts them: who is drawn with the talks they offer,
+// a detail action on its notice (on a board), the place's own actions and the words the room drew.
+const offer = (keys: string[]) => keys.map((action_key) => ({ action_key }));
+const view = (entities: string[], talks: string[], details: string[], drawn = 'room.yard.moon') =>
   ({
-    entities: entities.map((id) => ({ id })),
-    actions: actions.map((action_key) => ({ action_key })),
+    entities: entities.map((id, i) => ({ id, actions: offer(i ? [] : talks) })),
+    actions: offer(['look']),
+    notice_boards: [{ notices: [{ actions: offer(details) }] }],
     place: { description: { key: drawn } },
   }) as unknown as GameView;
 const lines = (v: GameView) =>
   ghosts(v, CART, 'yard', IDS).map((g) => `${g.kind}:${g.key} ${g.words} | ${g.reason}`);
 
-// Breaks caught: a drawn person, a drawn item or an offered action still ghosted (`!seen`/`!offered` dropped);
+// Breaks caught: a drawn person, a drawn item or an offered talk still ghosted (`!seen`/`!offered` dropped, or a
+// talk looked for only in the place's actions);
 // someone placed in another room ghosted here; an item a person holds ghosted; the variant in force ghosted;
 // a non-detail action ghosted in every room; a perception gate said as the generic reason.
 test('ghosts: what is placed here and not drawn, each with its reason; nothing drawn or elsewhere', () => {
-  assert.deepEqual(lines(view(['e2', 'e4'], ['haggle'])), [
+  assert.deepEqual(lines(view(['e2', 'e4'], ['haggle'], [])), [
     'npc:thief npc.thief.short | hidden: until fact saw_thief',
     'variant:yard room.yard.night | only when: the time of day is from 20 to 6',
     'action:dig actions.dig | only when: the time of day is from 20 to 6',
   ]);
 });
 
-// Breaks caught: a dialogue of someone not drawn ghosted (the `seen(npc)` filter dropped); an ungated absent
+// Breaks caught: a detail action offered on a board's notice still ghosted; a dialogue of someone not drawn
+// ghosted (the `seen(npc)` filter dropped); an ungated absent
 // person or room item not ghosted; an action or dialogue with no policy given a policy reason.
 test('ghosts: the dialogue of who is drawn but not offered; absent people and items say not here', () => {
-  assert.deepEqual(lines(view(['e1'], ['dig'], 'room.yard.night')), [
+  assert.deepEqual(lines(view(['e1'], [], ['dig'], 'room.yard.night')), [
     `npc:smith npc.smith.short | ${NOT_HERE}`,
     `item:coin item.coin.short | ${NOT_HERE}`,
     'variant:yard room.yard.moon | only when: the moon is full',

@@ -1,7 +1,6 @@
-// Author preview only (`?dev=1` on the web dev cartridge; never the pinned save): keep my place and the
-// bridge the author panel page (tools/author-panel) drives over postMessage: the dev clock, checkpoints,
-// facts, quests, the trace and each Book line's source (docs/system/cartridge.md#author-preview). All
-// drive the kernel's own paths: skewed host clocks, saved inputs replayed through `invoke`, the view, the trace.
+// Author preview only (`?dev=1` on the web dev cartridge; never the pinned save): my place and the bridge
+// tools/author-panel drives over postMessage (clock, checkpoints, facts, quests, trace, each line's source;
+// docs/system/cartridge.md#author-preview), all through the kernel's paths: skewed clocks, replayed `invoke`.
 import { useEffect, useRef } from 'react';
 import { Platform } from 'react-native';
 import type { localSession } from '../../authority/local-story/session';
@@ -139,10 +138,11 @@ export function played(game: Opened | undefined) {
   if (!recorded.has(game))
     recorded.set(game, {
       ...game,
-      text: (key) => {
+      text: (asked) => {
+        const key = build?.drawn(asked) ?? asked; // See as: a variant's words, bound as its own
         const held = inBook?.frozen(key); // an open field's words stay put under React
         if (held !== undefined) return held;
-        const words = build?.seeing(key) ?? overlay[key] ?? game.text(key); // See as: a variant's
+        const words = overlay[key] ?? game.text(key);
         const shown = inBook?.tagged(key, words) ?? words; // two `~` lines show apart
         bind(seen, shown, key);
         said.set(key, words);
@@ -281,7 +281,7 @@ export function useAuthorPanel(tools: Tools, game: Opened | undefined) {
     window.addEventListener('message', onMessage);
     document.addEventListener('click', onClick, true);
     // Bindings are per page: a wording drawn here must not cost a later page its field.
-    const unsubscribe = game.subscribe(() => (nextPage(seen), build?.unsee(), state()));
+    const unsubscribe = game.subscribe((u) => (nextPage(seen), build?.updated(u), state()));
     redrawBook = () => latest.current.redraw({});
     const unlisten = listen((message) => (heard(message), redrawBook())); // a text overlay redraws in place
     const stop = inBook?.start({ seen, said, tell, redraw: redrawBook });
