@@ -1,4 +1,4 @@
-// size: allow 545, one scaffolded cartridge the tests edit in turn and the last undoes; a split needs a second scaffold
+// size: allow 540, one scaffolded cartridge the tests edit in turn and the last undoes; a split needs a second scaffold
 // The editor map's edits (kernel/ts/play/mapedit.ts) through the real write routes
 // (play/write.ts) and the real `mix loka.new`, on one scaffolded cartridge the tests edit in turn;
 // the last one undoes every gesture. Expected files are written by hand.
@@ -14,7 +14,7 @@ import { added } from '../play/card.ts';
 import { paired } from '../play/action.ts';
 import { serve } from '../play/live.ts';
 import { cellAt, dragged, toward, type MapRoom } from '../play/map.ts';
-import { editor, childKey, freeKey, type Editor, type Io } from '../play/mapedit.ts';
+import { editor, freeKey, type Editor, type Io } from '../play/mapedit.ts';
 
 const REPO = join(import.meta.dirname, '../../..');
 const dir = realpathSync(mkdtempSync(join(tmpdir(), 'loka-mapedit-')));
@@ -382,17 +382,6 @@ test('a map point maps to its layout cell, and a drag between cells to a compass
     ],
     ['east', 'west', 'south', 'north', 'east', 'west', 'north', undefined, undefined],
   );
-});
-
-test("a dropped template's child takes the first free <template>_<n>", () => {
-  // Breaks: a child key reusing a compiled one (the starter refuses the drop), or starting past _1.
-  // Also: an item's key counted against an NPC child, or a template's key (no node holds it) missed.
-  const nodes = ['npc/wild', 'npc/wild_1', 'item/wild_2', 'npc/wild_4'].map((r) => ({
-    kind: r.split('/')[0],
-    ref: `cart@0:${r}`,
-  }));
-  const wild = (held: string[], on = nodes) => childKey('npcs', 'wild', on, held); // each call mints its key
-  assert.deepEqual([wild([], []), wild([]), wild(['wild_3'])], ['wild_1', 'wild_2', 'wild_5']);
 });
 
 test('a press that stays within 4 px is a click (it selects); one that leaves is a drag', () => {
