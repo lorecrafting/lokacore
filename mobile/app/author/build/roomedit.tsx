@@ -170,10 +170,10 @@ export const moveTo = (r: MapRoom) => (
         ...text,
         paddingHorizontal: 0,
         flex: 1,
-        minWidth: 0,
+        minWidth: 0, // mutate-skip: layout; the field may shrink below its own width in a narrow row
         borderBottomWidth: size.rule,
         borderColor: ink('action'),
-      }} // mutate-skip: layout; the field takes the row's free width, may shrink below its own, ruled as Build's tap field
+      }} // mutate-skip: layout; the field takes the row's free width, ruled as Build's tap field
     />
     {act(
       WORDS.move,

@@ -46,7 +46,9 @@ sheets.contents = {
         ) : null}
         {act(WORDS.new(kind), () => void made(kind))}
       </View>,
-      ...filesOf(kind).map((f) => act(f, () => known.open(`def:${f}`))),
+      <View key={`${kind}/`} style={row}>
+        {filesOf(kind).map((f) => act(f, () => known.open(`def:${f}`)))}
+      </View>,
     ]),
   ],
 };
