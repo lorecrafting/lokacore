@@ -992,8 +992,8 @@ reasons and limits: [prose in the Book rulings](../design/prose-in-the-book-ruli
     from full halves it, from half closes it as Back does, and a tap or Enter toggles the height.
     A sheet slides in from the side it docks on (from below on a phone); under reduced motion it
     cuts in. Closing never animates.
-  - **Title pencil.** In Build the room page's own title, and only it, is followed by a pencil
-    button named `Edit <title>`, which opens that room's sheet. An unwritten title shows its field
+  - **Title pencil.** In Build the room page's own title is followed by a pencil button named
+    `Edit <title>`, which opens that room's sheet (2.2 adds the name pencil). An unwritten title shows its field
     name `title`, as Build's in-place field draws an unwritten line.
   - **Room sheet.** Titled by the room's title. At its top, a summary line: `<area> · N exits`
     (`No area` at the root, `1 exit`). Then a row per exit, `<dir> → <room>`, with `One-way` (drops
@@ -1019,8 +1019,8 @@ reasons and limits: [prose in the Book rulings](../design/prose-in-the-book-ruli
     `Item` and one button per template (abstract person or item), named by its key. Each makes a
     new thing placed in this room, keyed `npc_N`, `item_N` or `<template>_N`, every word
     unwritten, and opens its sheet on top.
-  - **Name pencil.** In Build a page title that is exactly one person's or item's name (and no
-    room's) is followed by a pencil named `Edit <key>`, which opens its Person or Item sheet. Two
+  - **Name pencil.** In Build a page title that is exactly one person's or item's name (unless it
+    is this room's own title) is followed by a pencil named `Edit <key>`, which opens its Person or Item sheet. Two
     things drawn in the same words get none.
   - **Person and Item sheets.** Titled by the key. A summary line names where it starts: `Room ·
     <key>`, `Person · <key>` or `Item · <key>`. A person then has a `Room` field and `Move`; an item
