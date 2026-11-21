@@ -5,6 +5,7 @@ import { placed } from './card.ts';
 import type { At, MapRoom } from './map.ts';
 import { freeKey, NAMED, nodeOf } from './keys.ts';
 export { childKey, freeKey, NAMED, nodeOf } from './keys.ts';
+import { addBeat, bind, dropBeat, titleBeat } from './outlineedit.ts';
 
 type Told = { ok: boolean; told: unknown };
 export type Io = {
@@ -16,7 +17,7 @@ type Exit = { to: string; barrier?: string };
 type Doc = { exits?: Record<string, Exit> };
 type Row = { room: string } & At;
 /** One gesture's write calls: each journals an entry the gesture's undo puts back. */
-type Run = {
+export type Run = {
   call: (route: string, sent: object) => Promise<{ id: number; files?: string[] }>;
   read: <T>(file: string) => Promise<{ doc: T; was: string }>;
   /** One `/change` of `file` with the ops `edit` builds; none skips it. `was`: the hash they were built on. */
@@ -179,48 +180,6 @@ export async function create(
 const move = async (s: Run, r: MapRoom, area: string | null) =>
   s.call('move', { file: fileOf(r), was: (await s.read(fileOf(r))).was, area });
 
-type Outline = { parts: { beats: { n: number; nodes?: string[] }[] }[] };
-/** Bind (design 5c): `short`, one of `known` (Story.shorts), joins beat `n` of part `part` in outline.json. */
-const bind = (s: Run, part: number, n: number, short: string, known: string[]) =>
-  s.change<Outline>('outline.json', (doc) => {
-    if (!known.includes(short)) no(`${short} is no definition in the last compile`);
-    const beats = doc.parts[part]?.beats ?? no(`outline.json has no part ${part + 1}`);
-    const j = beats.findIndex((b) => b.n === n);
-    if (j < 0) no(`part ${part + 1} has no beat ${n}`);
-    const nodes = beats[j].nodes ?? [];
-    if (nodes.includes(short)) no(`beat ${n} already binds ${short}`);
-    return [{ path: ['parts', part, 'beats', j, 'nodes'], value: [...nodes, short] }];
-  });
-
-// Beat edits (design 5c) on part `part` of outline.json.
-const partOf = (doc: Outline, part: number) =>
-  doc.parts[part]?.beats ?? no(`outline.json has no part ${part + 1}`);
-const beatOf = (doc: Outline, part: number, n: number) => {
-  const j = partOf(doc, part).findIndex((b) => b.n === n);
-  return j < 0 ? no(`part ${part + 1} has no beat ${n}`) : ['parts', part, 'beats', j];
-};
-// a beat's n is unique across the outline: readOutline (kernel/ts/play/story.ts) refuses a repeat
-const addBeat = (s: Run, part: number, n: number) =>
-  s.change<Outline>('outline.json', (doc) => {
-    if (!Number.isInteger(n) || n < 1) no(`a beat's number is a whole number from 1, not ${n}`);
-    if (doc.parts.some((p) => p.beats.some((b) => b.n === n)))
-      no(`outline.json already has beat ${n}`);
-    const beats = partOf(doc, part);
-    const j = beats.findIndex((b) => b.n > n); // in number order, as play reads them
-    const at = j < 0 ? beats.length : j;
-    return [
-      { path: ['parts', part, 'beats'], value: [...beats.slice(0, at), { n }, ...beats.slice(at)] },
-    ];
-  });
-const titleBeat = (s: Run, part: number, n: number, title: string) =>
-  s.change<Outline>('outline.json', (doc) => {
-    const path = [...beatOf(doc, part, n), 'title'];
-    const had = partOf(doc, part).some((b) => b.n === n && 'title' in b);
-    return title ? [{ path, value: title }] : had ? [{ path, delete: true }] : []; // none: nothing to remove
-  });
-const dropBeat = (s: Run, part: number, n: number) =>
-  s.change<Outline>('outline.json', (doc) => [{ path: beatOf(doc, part, n), delete: true }]);
-
 /** Undoes `ids` newest first, dropping each as it goes, so a refusal leaves only what stands. */
 async function undo(io: Io, ids: number[]) {
   while (ids.length) {
@@ -289,7 +248,11 @@ export function editor(io: Io) {
     put: (file: string, dir: 'npcs' | 'items', kind: string, key: string) =>
       run((s) => s.change(file, () => [spot(dir, kind, key)])),
     move: (r: MapRoom, area: string | null) => run((s) => move(s, r, area)),
-    change: (file: string, was: string, ops: Op[]) => run((s) => s.change(file, () => ops, was)),
+    /** Each `[file, was, ops]` written in order, as one gesture (a refusal undoes the earlier ones). */
+    change: (...writes: [string, string, Op[]][]) =>
+      run(async (s) => {
+        for (const [file, was, ops] of writes) await s.change(file, () => ops, was);
+      }),
     bind: (part: number, n: number, short: string, known: string[]) =>
       run((s) => bind(s, part, n, short, known)),
     addBeat: (part: number, n: number) => run((s) => addBeat(s, part, n)),

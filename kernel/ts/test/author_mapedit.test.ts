@@ -347,7 +347,7 @@ test("placement moves an NPC's room and replaces an item's whole location; undo 
   const [hen, pail] = ['areas/yard/npcs/hen.json', 'areas/yard/items/pail.json'];
   const was = (await io.source(hen)).sha256; // the sheet's read
   await ed.put(hen, 'npcs', 'room', 'b');
-  await assert.rejects(ed.change(hen, was, [{ path: ['room'], value: 'c' }]));
+  await assert.rejects(ed.change([hen, was, [{ path: ['room'], value: 'c' }]]));
   await ed.put(pail, 'items', 'npc', 'hen');
   assert.deepEqual([json(hen).room, json(hen).location], ['b', undefined]);
   assert.deepEqual(json(pail).location, { in: 'npc', npc: 'hen' });

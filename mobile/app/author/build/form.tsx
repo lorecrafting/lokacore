@@ -12,15 +12,19 @@ import {
   type Defs,
   type Shape,
 } from '../../../../kernel/ts/play/generic.ts';
+import type { Blocked } from '../../../../kernel/ts/play/allowed.ts';
 import { titles } from '../../../../kernel/ts/play/ui_schema.ts';
 import { size, space, type } from '../../book/tokens.ts';
 import { ink } from './build.ts';
 import { known } from './room.tsx';
 import { ed, inRow, row, run } from './roomedit.tsx';
-import { act } from './sheet.tsx';
+import { act, greyed } from './sheet.tsx';
 
 type Obj = Record<string, unknown>;
 type Step = string | number;
+type Write = Parameters<typeof ed.change>[number];
+/** Add mechanic…'s fields the cartridge takes, and those it refuses with any turn-on write (`turnOn`). */
+export type Mechanics = { allowed: string[]; blocked: (Blocked & { on?: Write })[] };
 /** The file drawn and the hash it was read at, its schema's `$defs`, the definitions entered so far and a root field's least value. */
 export type At = {
   file: string;
@@ -28,6 +32,7 @@ export type At = {
   defs: Defs;
   seen: string[];
   seed?: (f: string) => unknown;
+  mech?: Mechanics;
 };
 
 export const WORDS = {
@@ -39,6 +44,9 @@ export const WORDS = {
   key: 'Key',
   on: 'On',
   off: 'Off',
+  mechanic: 'Add mechanic…',
+  needs: (caps: string[]) => `needs ${caps.join(' + ')} in cartridge.json`,
+  first: 'needs another field first',
 };
 const opened = new Set<string>(); // the folded blocks and Add… menus open, by file and path
 const revealed = new Set<string>(); // fields added with no least value: drawn empty until written
@@ -61,7 +69,9 @@ const set = (at: At, path: Step[], value: unknown) =>
   value === undefined
     ? (revealed.add(id(at, path)), known.redraw())
     : void run(() =>
-        ed.change(at.file, at.was, ops(path, value)).then(() => void revealed.delete(id(at, path))),
+        ed
+          .change([at.file, at.was, ops(path, value)])
+          .then(() => void revealed.delete(id(at, path))),
       );
 /** A write at `path`; at the root (a picked branch, a whole list) one op per top-level field. */
 const ops = (path: Step[], value: unknown) =>
@@ -71,12 +81,12 @@ const ops = (path: Step[], value: unknown) =>
       ? value.map((v, i) => ({ path: [i], value: v }))
       : Object.entries(value as Obj).map(([k, v]) => ({ path: [k], value: v }));
 const drop = (at: At, path: Step[]) =>
-  void run(() => ed.change(at.file, at.was, [{ path, delete: true }]));
+  void run(() => ed.change([at.file, at.was, [{ path, delete: true }]]));
 
 /** `value` at `path` drawn as `node` says. */
 export function field(at: At, path: Step[], node: Obj | undefined, value: unknown): ReactNode {
   const [s, seen] = shapeOf(node, value, at.defs, at.seen);
-  const inner = { ...at, seen, seed: path.length ? undefined : at.seed };
+  const inner = { ...at, seen, ...(path.length && { seed: undefined, mech: undefined }) };
   if (s.as === 'object') return object(inner, path, s, value);
   if (s.as === 'array') return array(inner, path, s.items, value);
   if (s.as === 'union') return union(inner, path, s.branches, value);
@@ -125,9 +135,12 @@ function object(at: At, path: Step[], s: Extract<Shape, { as: 'object' }>, value
   const v: Obj = plain(value) ? value : {};
   const shown = (k: string) => Object.hasOwn(v, k) || revealed.has(id(at, [...path, k]));
   const keys = [...new Set([...Object.keys(v), ...Object.keys(s.props)])].filter(shown);
-  const absent = Object.keys(s.props).filter((k) => !shown(k));
+  const m = at.mech; // the root only (field)
+  const theirs = new Set([...(m?.allowed ?? []), ...(m?.blocked ?? []).map((b) => b.field)]);
+  const absent = Object.keys(s.props).filter((k) => !shown(k) && !theirs.has(k));
   const menu = id(at, [...path, '+']);
-  const add = (k: string) => set(at, [...path, k], at.seed?.(k) ?? least(s.props[k], at.defs));
+  const start = (k: string) => at.seed?.(k) ?? least(s.props[k], at.defs);
+  const add = (k: string) => set(at, [...path, k], start(k));
   return [
     ...keys.map((k) =>
       block(at, [...path, k], s.props[k] ?? s.each, v[k], !s.required.includes(k)),
@@ -136,7 +149,41 @@ function object(at: At, path: Step[], s: Extract<Shape, { as: 'object' }>, value
     ...(opened.has(menu)
       ? absent.map((k) => act(k, () => add(k), undefined, `add ${k} ${menu}`))
       : []),
+    ...(m ? mechanics(at, m, (k) => shown(k) || !Object.hasOwn(s.props, k), start) : []), // this branch's fields
     s.each ? entry(at, path, s.each, v) : null,
+  ];
+}
+
+const why = (b: Blocked) => (b.caps.length ? WORDS.needs(b.caps) : WORDS.first);
+/** Add mechanic…: the fields the cartridge takes, then the refused ones greyed with why; a greyed one
+ * `on` can turn on writes cartridge.json and then the field, one gesture (a refusal undoes both). */
+function mechanics(
+  at: At,
+  m: Mechanics,
+  hidden: (k: string) => boolean,
+  start: (k: string) => unknown,
+) {
+  const menu = id(at, ['+mechanic']);
+  const yes = m.allowed.filter((k) => !hidden(k));
+  const no = m.blocked.filter((b) => !hidden(b.field));
+  if (!yes.length && !no.length) return [];
+  const turn = (k: string, on: Write) => () => {
+    const value = start(k); // none: the field is revealed empty once the capability is on
+    const field: Write[] = value === undefined ? [] : [[at.file, at.was, ops([k], value)]];
+    void run(() => ed.change(on, ...field).then(() => value === undefined && set(at, [k], value)));
+  };
+  return [
+    act(WORDS.mechanic, () => toggle(menu), opened.has(menu), `mechanic ${menu}`),
+    ...(opened.has(menu)
+      ? [
+          ...yes.map((k) =>
+            act(k, () => set(at, [k], start(k)), undefined, `mechanic ${k} ${menu}`),
+          ),
+          ...no.map((b) =>
+            greyed(b.field, why(b), `mechanic ${b.field} ${menu}`, b.on && turn(b.field, b.on)),
+          ),
+        ]
+      : []),
   ];
 }
 

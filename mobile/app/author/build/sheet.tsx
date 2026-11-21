@@ -55,6 +55,21 @@ export const act = (
   </Pressable>
 );
 
+/** A control that cannot act yet, dim with why; pressable only given `run` (Add mechanic… turns one on). */
+export const greyed = (label: string, why: string, key: string, run?: () => void) => (
+  <Pressable
+    key={key}
+    accessibilityRole="button"
+    accessibilityState={{ disabled: !run }}
+    disabled={!run}
+    onPress={run}
+    style={CONTROL}
+  >
+    <Text style={{ ...type.control, color: ink('dim') }}>{label}</Text>
+    <Text style={{ ...type.label, color: ink('dim') }}>{why}</Text>
+  </Pressable>
+);
+
 type Stack = { open: Builder; saved: (next: Builder) => void };
 /** The open sheet, scrolled back to where it was when it is drawn again after a reload. */
 export function Sheet({ open, saved }: Stack) {

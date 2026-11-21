@@ -19,12 +19,21 @@ const ROOTS = ['cartridge', 'facts', 'text', 'resources', 'attributes', 'layout'
 const settle = () => new Promise((r) => setTimeout(r));
 
 const files = new Map<string, unknown>();
+const every = Object.fromEntries(
+  (read('protocol/capability_registry.json') as { key: string; version: number }[]).map((c) => [
+    c.key,
+    c.version,
+  ]),
+);
+const CART = { requires: { capabilities: every }, world: { combat: {} } }; // every gate open: rows sit in Add mechanic…
+files.set('cartridge.json', CART);
 let hash = 'S'; // every file's sha256 now
+const stale = new Set<string>(); // files changed on disk since the sheet read them
 const posts: { file: string; ops: { path: unknown[]; value?: unknown; delete?: true }[] }[] = [];
 /** The builder api: each file's source and its kind's `/schema/<dir>` as write.ts answers it. */
 async function api(path: string, sent?: any): Promise<[number, any]> {
   if (sent)
-    return sent.was === hash
+    return sent.was === hash && !stale.has(sent.file)
       ? (posts.push(sent), [200, { id: 1 }])
       : [409, { bytes: '{}', sha256: hash }]; // write.ts's stale answer: the file changed since read
   if (path === '/story') return [200, { map: [], graph: { nodes: [] }, files: {} }];
@@ -74,6 +83,11 @@ async function opened(kind: string, doc: unknown) {
 }
 
 const VARIANTS = [{}, { command: 'x' }, { abstract: true }, { extends: 'x' }]; // definitionOf's branches
+// allowed.ts NEEDS: a field Add mechanic… greys until the field it depends on is there
+const FIRST: Record<string, object> = {
+  liquids: { resource: 'hp' },
+  skills: { prerequisite: 'x', growth: [1] },
+};
 const button = (s: { shown: () => any[] }, w: string) =>
   s.shown().find((x) => x.props?.accessibilityRole === 'button' && words(x) === w);
 const sent = () => posts.splice(0).flatMap((p) => p.ops);
@@ -105,6 +119,7 @@ async function gesture(kind: string, f: string, op: string, doc: Record<string, 
   if (op === 'create') {
     button(s, WORDS.add)?.props.onPress();
     await settle();
+    if (!button(s, f)) await s.press(`mechanic ${s.file}`); // a mechanic row: Add mechanic… opens it
     const b = button(s, f);
     if (!b) return [];
     b.props.onPress();
@@ -148,7 +163,7 @@ for (const [p, op] of rows) {
   const [kind, f] = p.split('.');
   test(`${p}.book.${op}`, async () => {
     let ops: any[] = [];
-    for (const v of ROOTS.includes(kind) ? [{}] : VARIANTS) {
+    for (const v of ROOTS.includes(kind) ? [{}] : [...VARIANTS, FIRST[kind] ?? {}]) {
       ops = await gesture(kind, f, 'create', { ...v });
       if (op !== 'create') ops = await gesture(kind, f, op, { ...v, [f]: ops[0]?.value ?? '7' });
       if (ops.length) break;
@@ -259,4 +274,46 @@ test('a write refused after the file is read shows in the sheet', async () => {
   const alert = s.shown().find((x) => x.props?.accessibilityRole === 'alert');
   assert.equal(words(alert), 'a file changed since the map read it');
   hash = 'S';
+});
+
+/** `doc` of `kind` opened under a cartridge whose capabilities are only speech, Add mechanic… open. */
+async function narrow(kind: string, doc: object) {
+  files.set('cartridge.json', { requires: { capabilities: { speech: 1 } }, world: {} });
+  (load(), await settle()); // a new /story reads cartridge.json again
+  const s = await opened(kind, doc);
+  await s.press(`mechanic ${s.file}`);
+  sent();
+  files.set('cartridge.json', CART);
+  return s;
+}
+
+// Breaks: a refused row pressable with no turn-on, or showing no reason; the turn-on missing the
+// capability write, writing it after the field, at the wrong path or version, or into the sheet's file.
+test('a greyed mechanic turns its capability on in cartridge.json, then adds the field', async () => {
+  const s = await narrow('actions', {});
+  const row = s.shown().find((x) => String(x.key).startsWith('mechanic policy '));
+  assert.ok(words(row).includes(WORDS.needs(['policy'])));
+  await s.press('mechanic policy ');
+  assert.deepEqual(
+    posts.splice(0).map((p) => [p.file, p.ops.map((o) => o.path)]),
+    [
+      ['cartridge.json', [['requires', 'capabilities', 'policy']]],
+      [s.file, [['policy']]],
+    ],
+  );
+  const l = await narrow('liquids', {}); // amount needs resource first: no write turns it on
+  const amount = l.shown().find((x) => String(x.key).startsWith('mechanic amount '));
+  assert.deepEqual([amount.props.disabled, amount.props.accessibilityState.disabled], [true, true]);
+  assert.equal(words(amount).includes(WORDS.first), true);
+});
+
+// Breaks: the field written when the cartridge.json write is refused (two gestures, not one), or the
+// refusal silent.
+test('a turn-on refused as stale writes nothing and shows the refusal', async () => {
+  const s = await narrow('actions', {});
+  stale.add('cartridge.json');
+  await s.press('mechanic policy ');
+  stale.clear();
+  assert.deepEqual(posts.splice(0), []);
+  assert.ok(s.shown().some((x) => x.props?.accessibilityRole === 'alert'));
 });
