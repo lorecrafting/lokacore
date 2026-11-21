@@ -1,8 +1,6 @@
-// Author preview only (`?dev=1` on the web dev cartridge; never the pinned save): keep my place and
-// the bridge the author panel page (tools/author-panel) drives over postMessage: the dev clock,
-// checkpoints, facts, quests, the trace and each Book line's source (docs/system/cartridge.md#author-preview).
-// All drive the kernel's own paths: the clock skews the host clocks, the place replays saved inputs
-// through `invoke`, the panel reads the view and the trace.
+// Author preview only (`?dev=1` on the web dev cartridge; never the pinned save): my place and the bridge
+// tools/author-panel drives over postMessage (clock, checkpoints, facts, quests, trace, each line's source;
+// docs/system/cartridge.md#author-preview), all through the kernel's paths: skewed clocks, replayed `invoke`.
 import { useEffect, useRef } from 'react';
 import { Platform } from 'react-native';
 import type { localSession } from '../../authority/local-story/session';
@@ -140,7 +138,8 @@ export function played(game: Opened | undefined) {
   if (!recorded.has(game))
     recorded.set(game, {
       ...game,
-      text: (key) => {
+      text: (asked) => {
+        const key = build?.drawn(asked) ?? asked; // See as: a variant's words, bound as its own
         const held = inBook?.frozen(key); // an open field's words stay put under React
         if (held !== undefined) return held;
         const words = overlay[key] ?? game.text(key);
@@ -246,6 +245,7 @@ function askCheat(game: Opened, cheat: Cheat) {
 const heard = (message: Message) => (inBook?.heard(message), build?.hear(message));
 const NO_STEPS = 'Place: that checkpoint has no steps list; nothing changed.';
 const placeHooks = (game: Opened, latest: { current: Tools }) => ({
+  ...{ game, canon }, // the ghost lines' and See as's reads (build/seeas.tsx)
   place: () => ({ steps: place.steps, refused, checkpoint: place.checkpoint }),
   here: () => roomKey(game.roomIds(), game.view().view.place.id),
   drop: () => refused !== undefined && jumpTo(dropStep(place.steps, refused), latest.current),
@@ -281,7 +281,7 @@ export function useAuthorPanel(tools: Tools, game: Opened | undefined) {
     window.addEventListener('message', onMessage);
     document.addEventListener('click', onClick, true);
     // Bindings are per page: a wording drawn here must not cost a later page its field.
-    const unsubscribe = game.subscribe(() => (nextPage(seen), state()));
+    const unsubscribe = game.subscribe((u) => (nextPage(seen), build?.updated(u), state()));
     redrawBook = () => latest.current.redraw({});
     const unlisten = listen((message) => (heard(message), redrawBook())); // a text overlay redraws in place
     const stop = inBook?.start({ seen, said, tell, redraw: redrawBook });
