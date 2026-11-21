@@ -243,8 +243,7 @@ test('an unwritten line is a blank ruled line whose field opens empty', async ()
 test('an unwritten link is a blank captioned line that still plays; out of Build it is as drawn', () => {
   const link = (drawn: any[]) => drawn.find((n) => n.props?.onPress === hearth);
   const on = link(page('A [~](hearth) smokes.'));
-  assert.ok(!JSON.stringify(on.props.children).includes('~'), 'the owner sees `~`');
-  assert.equal(on.props.children.props.children, 'name');
+  assert.equal(on.props.children.props.children, 'name', 'the caption, no `~`');
   assert.equal(on.props.accessibilityLabel, 'Unwritten name, open');
   assert.ok(on.props.style.flat().some((s: any) => s?.borderBottomWidth)); // ruled
   button('✎ Build').props.onPress(); // Build off
@@ -441,10 +440,10 @@ test('the keep-my-place notice offers its three ways back', async () => {
   }
 });
 
-// Breaks: the pencil missing from the room's own title, shown on another room's title or on a
-// line that is not a title, a press (or Enter, Space) opening no Room sheet, another key opening
-// one, its press also the title's look, the Book not redrawn when the map comes (no pencil until
-// some other redraw), or an unwritten title or exit showing `~` (ruling 9).
+// Breaks: the pencil missing from the room's own title, on another room's or a non-title line, a
+// press (or Enter, Space) opening no Room sheet, another key opening one, its press also looking,
+// no redraw when the map comes, an unwritten title or exit showing `~` (ruling 9), or a person's
+// name pencil keyed by the words drawn (two names in the same words: one gets the other's sheet).
 test("the room title's pencil opens its Room sheet: summary and exits", async () => {
   map = [
     { key: 'loft', area: 'mill', title: 'Loft', exits: [{ dir: 'down', to: 'cellar' }] },
@@ -494,5 +493,8 @@ test("the room title's pencil opens its Room sheet: summary and exits", async ()
   const title = drawn.find((n) => n.props?.accessibilityRole === 'header');
   assert.equal(title.props.children[0].props.children, 'title', 'a `~` title drawn');
   assert.equal(pencil(page('A low loft.', 'Loft')), undefined, "another room's title");
+  const hen = (k: string) => (said.set(k, 'Hen'), pencil(page('', 'Hen')));
+  assert.equal(hen('npc.hen.name').props.accessibilityLabel, 'Edit hen');
+  assert.equal(hen('item.hen.name'), undefined, 'two names in the same words: no pencil');
   build.install({ seen, said, redraw() {}, api }); // the stored state: no sheet open
 });

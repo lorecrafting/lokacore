@@ -61,6 +61,14 @@ function keyOf(h: Hooks, shown: string) {
   return keys.length === 1 && keys[0].endsWith('.description') ? keys[0] : undefined;
 }
 
+/** The one person's or item's name in these words: two in the same words (or two new `~`) get none. */
+function nameKey(h: Hooks, shown: string) {
+  const keys = [...h.said].filter(
+    ([k, s]) => /^(npc|item)\.\w+\.name$/.test(k) && s && plain(s).trim() === shown.trim(),
+  );
+  return keys.length === 1 ? keys[0][0] : undefined;
+}
+
 /** The seam's line: Build off or no key leaves it as drawn; a link keeps its own press, an unwritten
  * one drawn blank with its caption (ruling 9). */
 export function line(p: Props): Props {
@@ -78,7 +86,7 @@ export function line(p: Props): Props {
         }
       : p;
   if (p.accessibilityRole === 'header') {
-    const pen = h.pencil?.(shown, h.seen.get(drawnWords(h.seen, shown) ?? ''));
+    const pen = h.pencil?.(shown, nameKey(h, shown));
     if (pen || blank) return { ...p, children: [blank ? hint('title') : p.children, pen] };
   }
   const key = keyOf(h, shown);

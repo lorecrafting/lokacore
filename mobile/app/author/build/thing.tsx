@@ -22,7 +22,7 @@ type Doc = Record<string, unknown>;
 const docs = new Map<string, Doc>(); // each source file as last read
 const fresh = new Set<string>(); // the files read under the latest /story
 let of = known.files; // that /story: a new one reads each file again, showing the old until then
-const chosen = new Map<string, string>(); // an item's holder kind picked, until it moves
+const chosen = new Map<string, string>(); // an item's holder kind picked (by `dir:key`), until it moves
 const drafts = new Map<string, string>(); // each holder field, as typed
 
 /** The pencil after a person's or item's name (`npc.<key>.name`), which opens its sheet. */
@@ -36,10 +36,9 @@ function doc(file: string) {
   if (of !== known.files) (fresh.clear(), (of = known.files));
   if (!fresh.has(file)) {
     fresh.add(file);
-    io.source(file).then(
-      (got) => (docs.set(file, JSON.parse(got.bytes)), known.redraw()),
-      () => {}, // gone since the /story: the next one drops it
-    );
+    io.source(file)
+      .then((got) => (docs.set(file, JSON.parse(got.bytes)), known.redraw()))
+      .catch(() => {}); // gone or half-written since the /story: the next one reads it again
   }
   return docs.get(file);
 }
@@ -48,9 +47,9 @@ function doc(file: string) {
 function body(dir: Dir, key: string) {
   const kind = nodeOf(dir);
   const ref = known.nodes.find((n) => n.kind === kind && n.ref.endsWith(`/${key}`))?.ref;
-  const d = ref && known.files[ref] ? doc(known.files[ref]) : undefined;
-  if (!ref || !d) return refusal();
-  const file = known.files[ref];
+  const file = known.files[ref ?? ''];
+  const d = file && doc(file);
+  if (!file || !d) return refusal();
   const text = { ...type.small, color: ink('dim'), paddingHorizontal: space.md };
   if (d.spawn_template !== undefined)
     return [
@@ -72,21 +71,21 @@ function body(dir: Dir, key: string) {
 
 /** An item's holder kinds, then the holder field and Move (the panel's Placement, Entity.tsx). */
 function holderForm(dir: Dir, key: string, file: string, now: { kind: string; key?: unknown }) {
-  const holder = chosen.get(key) ?? now.kind;
-  const id = `${key}:${holder}`;
+  const holder = chosen.get(`${dir}:${key}`) ?? now.kind;
+  const id = `${dir}:${key}:${holder}`;
   const move = async () => {
     const v = (drafts.get(id) ?? '').trim();
     if (!v) return undefined;
     return (
       refusePick({ kind: holder, keys: choices(holder, known.nodes) }, v) ??
-      ed.put(file, dir, holder, v)
+      ed.put(file, dir, holder, v).then(() => void chosen.delete(`${dir}:${key}`))
     );
   };
   return [
     dir === 'items' ? (
       <View key="kinds" style={row}>
         {['room', 'npc', 'item'].map((k) =>
-          act(WORDS.holder[k], () => (chosen.set(key, k), known.redraw())),
+          act(WORDS.holder[k], () => (chosen.set(`${dir}:${key}`, k), known.redraw())),
         )}
       </View>
     ) : null,
