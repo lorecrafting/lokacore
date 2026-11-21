@@ -66,7 +66,7 @@ export const greyed = (label: string, why: string, key: string, run?: () => void
     style={CONTROL}
   >
     <Text style={{ ...type.control, color: ink('dim') }}>{label}</Text>
-    <Text style={{ ...type.label, color: ink('dim') }}>{why}</Text>
+    <Text style={{ ...type.label, color: ink(run ? 'action' : 'dim') }}>{why}</Text>
   </Pressable>
 );
 
