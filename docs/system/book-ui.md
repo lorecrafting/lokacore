@@ -1038,6 +1038,33 @@ reasons and limits: [prose in the Book rulings](../design/prose-in-the-book-ruli
     does (Build: in-place field): a blank ruled line with the caption `name`, never `~`, named
     `Unwritten name, open`. It keeps its own press. Out of Build every link draws as before.
   - Labels here are placeholder words, the owner's to replace.
+- **Build: the generic sheet** (slice 2.3, [builder mode §6.4](../rnd/in-game-builder-mode-2026-11-19.md)),
+  `def:<file>`: any source file's fields, drawn from its kind's schema. Every write runs and refuses
+  as Room sheet edits do; it is sent with the file as the
+  sheet read it, so a file changed since is refused, never overwritten. Looks:
+  [author-mode marks](../BOOK-UI-COMPONENTS.md#component-catalogue).
+  - **Sheet.** Titled by the file's path. Until the file is read the body is empty. Then its root
+    fields, each a block indented one step deeper than the field holding it.
+  - **A block** shows the field's name, then its value. A field that holds fields (an object or a
+    list) is folded: its name is a button that opens or closes it, closed at first. A field the
+    schema does not require, and every list item, has `Remove`, which deletes it. An optional
+    constant (a flag such as `hidden`) is a switch instead: `On` writes it, `Off` deletes it, and
+    the one that holds is picked; a required constant shows its value as plain text.
+  - **Objects.** The fields present, in the file's order, then `Add…` while the schema has fields
+    the file lacks; it opens or closes a list of their names. A pick writes that field's least
+    valid value (a definition's own starter value where it has one); a field with none shows
+    empty and is written when it is first entered. A map ends with a `Key` field and `Add`, which
+    adds an entry under that key; an empty key or one already present adds nothing.
+  - **Lists.** Each item, with `Remove`, then `Move up` (every item but the first) and `Copy`
+    (a duplicate after it); a file that is itself a list has neither. Last, `Add item` appends a
+    least valid item.
+  - **Picks.** An enum or a boolean is one button per option, a union one button per branch
+    (named as the panel names them), the present one picked; a press writes it, and a union then
+    shows the picked branch's own fields.
+  - **Typed fields** (a string, a number, a text's words, a definition's key) show the present
+    value on a ruled line and write when they lose focus, only when changed; a number field that
+    does not read as a number writes nothing. Each fits the sheet's width, however deep its block.
+  - Labels here are placeholder words, the owner's to replace.
 - **No field.** A double-click on a line that is not words opens nothing; a note under it, in a
   row of its own (the lines below move down by its height while it shows and back when it goes,
   with no motion; a note never covers a line, loka-wfrgk.39), until the next click or key, read politely: `A choice label is its key. Alt-click opens the scene.`,

@@ -44,7 +44,13 @@ const opened = new Set<string>(); // the folded blocks and Add… menus open, by
 const revealed = new Set<string>(); // fields added with no least value: drawn empty until written
 const drafts = new Map<string, string>(); // each typed field, as typed
 const LABEL = { ...type.label, color: ink('dim') };
-const INPUT = { ...inRow, flex: 1, borderBottomWidth: size.rule, borderColor: ink('action') }; // mutate-skip: layout; ruled as the Room sheet's Move field
+const INPUT = {
+  ...inRow,
+  flex: 1,
+  minWidth: 0, // mutate-skip: layout; a row may shrink the field below its own width, to the docked sheet's
+  borderBottomWidth: size.rule,
+  borderColor: ink('action'),
+}; // mutate-skip: layout; ruled as the Room sheet's Move field
 
 const id = (at: At, path: Step[]) => `${at.file}:${JSON.stringify(path)}`;
 const toggle = (key: string) => (
