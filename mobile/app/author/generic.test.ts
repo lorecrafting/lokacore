@@ -305,6 +305,30 @@ test('a greyed mechanic turns its capability on in cartridge.json, then adds the
   const amount = l.shown().find((x) => String(x.key).startsWith('mechanic amount '));
   assert.deepEqual([amount.props.disabled, amount.props.accessibilityState.disabled], [true, true]);
   assert.equal(words(amount).includes(WORDS.first), true);
+  const i = await narrow('items', {}); // slot has no least value: revealed empty once equipment is on
+  (await i.press('mechanic slot '), await settle());
+  assert.deepEqual(
+    posts.splice(0).map((p) => p.file),
+    ['cartridge.json'],
+  );
+  assert.ok(i.shown().some((x) => String(x.key).includes('"slot"')));
+});
+
+// Breaks: Add… listing a mechanic field too; an empty Add mechanic… drawn; a stale or missing cartridge's menu.
+test('Add… lists no mechanic field; no mechanic to add, or an unread cartridge.json, draws no Add mechanic…', async () => {
+  const s = await opened('actions', {});
+  await s.press(`add ${s.file}`);
+  const keys = s.shown().map((x) => String(x.key));
+  assert.ok(
+    keys.some((k) => k.startsWith('add ')) && !keys.some((k) => k.startsWith('add policy ')),
+  );
+  const x = await opened('text', {}); // text has no mechanic to add
+  assert.ok(!x.shown().some((n) => String(n.key).startsWith(`mechanic ${x.file}`)));
+  files.delete('cartridge.json');
+  (load(), await settle());
+  const t = await opened('actions', {});
+  assert.ok(!t.shown().some((x) => String(x.key).startsWith(`mechanic ${t.file}`)));
+  (files.set('cartridge.json', CART), load(), await settle());
 });
 
 // Breaks: the field written when the cartridge.json write is refused (two gestures, not one), or the

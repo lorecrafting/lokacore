@@ -175,4 +175,8 @@ test('turnOn writes each missing owning capability at its registry version, or n
   assert.deepEqual(turnOn('npcs', 'attack', { ...cart, world: { combat: {} } }, { hp: 5 }), [
     at('combat', 1),
   ]);
+  assert.equal(
+    turnOn('actions', 'policy', { requires: { capabilities: { policy: 1 } } }),
+    undefined,
+  ); // none missing
 });

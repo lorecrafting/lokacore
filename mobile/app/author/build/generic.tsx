@@ -41,7 +41,7 @@ function load(file: string) {
 function cartridge() {
   io.source('cartridge.json')
     .then((s) => ((cart = { doc: JSON.parse(s.bytes), was: s.sha256 }), known.redraw()))
-    .catch(() => {}); // half-written: the next /story reads it again
+    .catch(() => ((cart = undefined), known.redraw())); // gone or half-written: no menu until the next /story reads it
 }
 
 /** Add mechanic…'s menu for `doc`, once cartridge.json is read: each refused field's turn-on write. */
