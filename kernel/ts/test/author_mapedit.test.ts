@@ -413,6 +413,7 @@ test("a bind appends the short ref to that beat's nodes, and refuses a missing b
     [['rooms/c'], ['rooms/b', 'rooms/c']],
   );
   await assert.rejects(ed.bind(0, 3, 'rooms/c', known), /part 1 has no beat 3/);
+  await assert.rejects(ed.bind(1, 1, 'rooms/c', known), /outline.json has no part 2/);
   await assert.rejects(ed.bind(0, 2, 'rooms/b', known), /beat 2 already binds rooms\/b/);
 });
 
@@ -447,6 +448,7 @@ test('a beat is added in number order, retitled and removed; a repeated or a bel
     [5, undefined],
   ]);
   await assert.rejects(ed.dropBeat(0, 1), /part 1 has no beat 1/);
+  await assert.rejects(ed.dropBeat(1, 1), /outline.json has no part 2/);
   await ed.addBeat(0, 1); // 1 is the least number, and goes first
   assert.deepEqual(beats()[0], [1, undefined]);
 });

@@ -14,7 +14,7 @@ type Got = { doc: unknown; was: string; kind: string; defs: Defs; root: Record<s
 const got = new Map<string, Got>(); // each file with its schema, as last read
 const fresh = new Set<string>(); // the files read under the latest /story
 let of: unknown; // that /story: a new one reads each file again, showing the old until then
-type Cart = Parameters<typeof turnOn>[2];
+type Cart = Parameters<typeof turnOn>[2]; // mutate-skip: a type, erased at run time
 let cart: { doc: Cart; was: string } | undefined; // cartridge.json as last read: its capabilities gate Add mechanic…
 
 /** `file` and its kind's schema as last read; read again under a new /story, then the Book redraws. */
