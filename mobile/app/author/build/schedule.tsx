@@ -2,6 +2,7 @@
 // day's hours down, each hour's number (moved on leaving it), its room or cases as the form draws
 // them, and its Remove; then Add hour. The logic is kernel/ts/play/blocks.ts. Labels are placeholders.
 import { TextInput, View } from 'react-native';
+import { size } from '../../book/tokens.ts';
 import { addHour, NO_HOUR, rehour } from '../../../../kernel/ts/play/blocks.ts';
 import { plain } from '../../../../kernel/ts/play/card.ts';
 import { shapeOf } from '../../../../kernel/ts/play/generic.ts';
@@ -21,7 +22,7 @@ import { ed, row, run } from './roomedit.tsx';
 import { act, greyed } from './sheet.tsx';
 
 export const WORDS = { add: 'Add hour', hour: (h: string) => `hour ${h}` };
-const HOUR = { ...INPUT, flexGrow: 0, width: 48 }; // mutate-skip: a style, no logic
+const HOUR = { ...INPUT, flexGrow: 0, width: size.touch }; // mutate-skip: a style, no logic
 
 /** Hour `h`: its number, written as the schedule moved on leaving the field (a refusal is shown,
  * never written), its value, and its Remove. */
@@ -41,6 +42,7 @@ function hour(at: At, path: Step[], sched: Obj, h: string, each: Obj | undefined
       <TextInput
         accessibilityLabel={WORDS.hour(h)}
         defaultValue={h}
+        inputMode="numeric"
         style={HOUR}
         onChangeText={(t) => void drafts.set(key, t)}
         onBlur={move}
