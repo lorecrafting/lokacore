@@ -9,6 +9,7 @@ import { nodes, words } from '../book/__tests__/combat-book.test.ts'; // also re
 const { story } = await import('./build/room.tsx');
 const { sheets } = await import('./build/sheet.tsx');
 await import('./build/Build.tsx'); // the app's registration of the def: sheet
+const { WORDS } = await import('./build/form.tsx');
 
 const root = new URL('../../../', import.meta.url);
 const read = (rel: string) => JSON.parse(readFileSync(new URL(rel, root), 'utf8'));
@@ -98,7 +99,7 @@ async function gesture(kind: string, f: string, op: string, doc: Record<string, 
     return (await t.press(`remove ${t.file}:${JSON.stringify(entry.path)}`), sent());
   }
   if (op === 'create') {
-    button(s, 'Add…')?.props.onPress();
+    button(s, WORDS.add)?.props.onPress();
     await settle();
     const b = button(s, f);
     if (!b) return [];
@@ -126,9 +127,9 @@ async function edit(s: { file: string; shown: () => any[] }, path: unknown[], th
   if (named) named.props.onChangeText('k');
   if (named && (await press(hit((x) => String(x.key).startsWith('entry '))))) return;
   if (await press(hit((x) => x.props.accessibilityState?.selected === false))) return;
-  if (await press(hit((x) => words(x) === 'Add item'))) return;
-  if (!(await press(hit((x) => words(x) === 'Add…')))) return;
-  await press(hit((x) => String(x.key).startsWith('add ') && words(x) !== 'Add…'));
+  if (await press(hit((x) => words(x) === WORDS.item))) return;
+  if (!(await press(hit((x) => words(x) === WORDS.add)))) return;
+  await press(hit((x) => String(x.key).startsWith('add ') && words(x) !== WORDS.add));
   if (!posts.length) await press(hit((x) => x.props.accessibilityState?.selected === false)); // drawn empty: pick its value
 }
 

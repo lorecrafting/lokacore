@@ -33,6 +33,18 @@ test('a text or a definition key is claimed; a missing definition draws nothing'
   assert.deepEqual(shapeOf(ref('Gone'), undefined, defs)[0], { as: 'none' });
 });
 
+test('a constant, an enum and a union each draw as such', () => {
+  assert.deepEqual(shapeOf({ const: 'x', type: 'string' }, undefined, defs)[0], {
+    as: 'const',
+    value: 'x',
+  });
+  assert.deepEqual(shapeOf({ enum: ['a', 'b'], type: 'string' }, undefined, defs)[0], {
+    as: 'enum',
+    options: ['a', 'b'],
+  });
+  assert.deepEqual(shapeOf({ anyOf: [str] }, undefined, defs)[0], { as: 'union', branches: [str] });
+});
+
 test('properties alone, or a map alone, is an object; allOf folds its parts in', () => {
   assert.deepEqual(shapeOf({ properties: { s: str } }, undefined, defs)[0], {
     as: 'object',
@@ -102,6 +114,8 @@ test("a picked branch's required fields start at their least; present ones are k
     n: 2,
   });
   assert.equal(picked([{ type: 'boolean' }, { type: 'integer', minimum: 3 }], 1, true, defs), 3);
+  const untyped = { properties: { o }, required: ['o'] }; // an object by its properties alone
+  assert.deepEqual(picked([str, untyped], 1, undefined, defs), { o: {} });
 });
 
 test('a list element moves up, or is copied after itself', () => {

@@ -127,9 +127,9 @@ export function least(node: Obj, defs: Defs): unknown {
 
 /** A picked union branch's value: card.ts `start`, its required fields at their least. */
 export function picked(branches: Obj[], i: number, old: unknown, defs: Defs): unknown {
-  const v = start(branches, i, old, defs);
   const b = resolve(branches[i], defs, [])?.[0] ?? {};
-  if (!plain(v) || b.type !== 'object') return v ?? least(b, defs);
+  const v = start(branches, i, old, defs) ?? least(b, defs);
+  if (!plain(v)) return v;
   const props = (b.properties ?? {}) as Record<string, Obj>;
   const req = ((b.required ?? []) as string[]).filter((f) => !Object.hasOwn(v, f));
   return { ...v, ...Object.fromEntries(req.map((f) => [f, least(props[f], defs)])) };
