@@ -72,6 +72,17 @@ const VARIANTS = [{}, { command: 'x' }, { abstract: true }, { extends: 'x' }]; /
 const button = (s: { shown: () => any[] }, w: string) =>
   s.shown().find((x) => x.props?.accessibilityRole === 'button' && words(x) === w);
 const sent = () => posts.splice(0).flatMap((p) => p.ops);
+/** The nodes inside the block at `path`. */
+const within = (s: { file: string; shown: () => any[] }, path: unknown[]) =>
+  nodes(s.shown().find((x) => x.key === `${s.file}:${JSON.stringify(path)}`)?.props.children);
+/** `t` typed into the block at `path`'s input, then the input left: the ops it sends. */
+async function typeIn(s: { file: string; shown: () => any[] }, path: unknown[], t: string) {
+  const input = within(s, path).find((x) => x.props?.onBlur);
+  input.props.onChangeText(t);
+  input.props.onBlur();
+  await settle();
+  return sent();
+}
 
 /** The writes one gesture on field `f` of `doc` sends, the field found as `op` needs it. */
 async function gesture(kind: string, f: string, op: string, doc: Record<string, unknown>) {
@@ -102,7 +113,7 @@ async function gesture(kind: string, f: string, op: string, doc: Record<string, 
 /** One edit inside the block at `path`: typed into its input, else a pick, an Add item or an Add… field. */
 async function edit(s: { file: string; shown: () => any[] }, path: unknown[], then?: () => void) {
   const key = `${s.file}:${JSON.stringify(path)}`;
-  const inside = () => nodes(s.shown().find((x) => x.key === key)?.props.children);
+  const inside = () => within(s, path);
   const hit = (pred: (x: any) => boolean) =>
     inside().find((x) => x.props?.accessibilityRole === 'button' && pred(x));
   const press = async (x: any) => x && (x.props.onPress(), await settle(), true);
@@ -144,3 +155,61 @@ for (const [p, op] of rows) {
     if (op === 'delete') assert.equal(ops[0].delete, true);
   });
 }
+
+// Breaks: a number written as text, or rewritten unchanged; an optional constant's On or Off, a
+// list's Move up or Copy, or a text's words writing the wrong value or path; a union's picker
+// marking the wrong branch; a map's Add over an existing key.
+test('each gesture writes the exact value at the exact path', async () => {
+  const s = await opened('statuses', {
+    fear: true,
+    tick_every: 5,
+    allows: ['a', 'b'],
+    duration: 'permanent',
+    name: { prose: 'x' },
+  });
+  sent();
+  assert.deepEqual(await typeIn(s, ['tick_every'], '5'), []);
+  assert.deepEqual(await typeIn(s, ['tick_every'], 'six'), []);
+  assert.deepEqual(await typeIn(s, ['tick_every'], '6'), [{ path: ['tick_every'], value: 6 }]);
+  assert.deepEqual(await typeIn(s, ['name'], 'y'), [{ path: ['name'], value: { prose: 'y' } }]);
+  await s.press(`on ${s.file}:["fear"]`);
+  await s.press(`remove ${s.file}:["fear"]`);
+  assert.deepEqual(sent(), [
+    { path: ['fear'], value: true },
+    { path: ['fear'], delete: true },
+  ]);
+  const selected = within(s, ['duration']).filter((x) => x.props?.accessibilityState?.selected);
+  assert.deepEqual(
+    selected.map((x) => String(x.key)),
+    ['branch 1'],
+  );
+  await edit(s, ['allows'], () => {}); // unfolded
+  const list = () => within(s, ['allows']);
+  for (const k of ['up 1', 'copy 0']) {
+    list()
+      .find((x) => x.key === k)
+      .props.onPress();
+    await settle();
+    await settle();
+  }
+  assert.deepEqual(sent(), [
+    { path: ['allows'], value: ['b', 'a'] },
+    { path: ['allows'], value: ['a', 'a', 'b'] },
+  ]);
+  const f = await opened('facts', { facts: { lit: { type: 'boolean', initial: false } } });
+  await edit(f, ['facts'], () => {}); // unfolded
+  sent();
+  for (const k of ['lit', 'new']) {
+    within(f, ['facts'])
+      .find((x) => x.props?.accessibilityLabel === 'Key')
+      .props.onChangeText(k);
+    within(f, ['facts'])
+      .find((x) => String(x.key).startsWith('entry '))
+      .props.onPress();
+    await settle();
+  }
+  assert.deepEqual(
+    sent().map((o) => o.path),
+    [['facts', 'new']],
+  );
+});

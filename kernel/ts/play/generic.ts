@@ -122,9 +122,7 @@ export function least(node: Obj, defs: Defs): unknown {
   const v = minimal(node, defs);
   if (v !== undefined) return v;
   const [s] = shapeOf(node, undefined, defs);
-  if (s.as === 'object') return {};
-  if (s.as === 'array') return [];
-  return undefined;
+  return s.as === 'object' ? {} : s.as === 'array' ? [] : undefined;
 }
 
 /** A picked union branch's value: card.ts `start`, its required fields at their least. */

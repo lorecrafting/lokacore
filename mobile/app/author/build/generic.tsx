@@ -21,7 +21,6 @@ function load(file: string) {
     void (async () => {
       const s = await io.source(file);
       const [status, schema] = await known.api!(`/schema/${s.kind}`);
-      if (status !== 200) return;
       got.set(file, {
         doc: JSON.parse(s.bytes),
         kind: s.kind!,
@@ -29,7 +28,7 @@ function load(file: string) {
         root: { $ref: schema.$ref },
       });
       known.redraw();
-    })().catch(() => {}); // gone or half-written since the /story: the next one reads it again
+    })().catch(() => {}); // gone or half-written since the /story, or no /schema for its kind: the next /story reads it again
   }
   return got.get(file);
 }

@@ -127,16 +127,17 @@ function object(at: At, path: Step[], s: Extract<Shape, { as: 'object' }>, value
     ...(opened.has(menu)
       ? absent.map((k) => act(k, () => add(k), undefined, `add ${k} ${menu}`))
       : []),
-    s.each ? entry(at, path, s.each) : null,
+    s.each ? entry(at, path, s.each, v) : null,
   ];
 }
 
-/** A map's new entry: its key typed, then Add writes the entry's least value. */
-function entry(at: At, path: Step[], each: Obj) {
+/** A map's new entry: its key typed, then Add writes the entry's least value (an existing key: nothing). */
+function entry(at: At, path: Step[], each: Obj, map: Obj) {
   const key = id(at, [...path, '+key']);
   const add = () => {
     const k = (drafts.get(key) ?? '').trim();
-    if (k) set(at, [...path, k], least(each, at.defs) ?? '');
+    drafts.delete(key);
+    if (k && !Object.hasOwn(map, k)) set(at, [...path, k], least(each, at.defs) ?? '');
   };
   return (
     <View key={key} style={row}>
@@ -216,7 +217,8 @@ function typed(at: At, path: Step[], s: Shape, value: unknown) {
     const t = drafts.get(key);
     const v = t === undefined ? undefined : entered(t, number);
     drafts.delete(key);
-    if (v !== undefined && v !== shown) set(at, path, prose ? { prose: v } : v);
+    if (v !== undefined && !Number.isNaN(v) && String(v) !== shown)
+      set(at, path, prose ? { prose: v } : v);
   };
   return (
     <TextInput
