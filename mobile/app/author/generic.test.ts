@@ -10,6 +10,7 @@ const { story } = await import('./build/room.tsx');
 const { sheets } = await import('./build/sheet.tsx');
 await import('./build/Build.tsx'); // the app's registration of the def: sheet
 const { WORDS } = await import('./build/form.tsx');
+const HOURS = (await import('./build/schedule.tsx')).WORDS;
 
 const root = new URL('../../../', import.meta.url);
 const read = (rel: string) => JSON.parse(readFileSync(new URL(rel, root), 'utf8'));
@@ -25,10 +26,16 @@ const every = Object.fromEntries(
     c.version,
   ]),
 );
-const CART = { requires: { capabilities: every }, world: { combat: {} } }; // every gate open: rows sit in Add mechanic…
+const CART = {
+  requires: { capabilities: every },
+  world: { combat: {} },
+  calendar: { hours_per_day: 20 }, // schedule.tsx's hours stop below it, not at the default 24
+}; // every gate open: rows sit in Add mechanic…
 files.set('cartridge.json', CART);
 let hash = 'S'; // every file's sha256 now
 const stale = new Set<string>(); // files changed on disk since the sheet read them
+const asked: string[] = []; // each GET /fights
+let fights: object = { why: 'none yet' }; // what it answers
 const posts: { file: string; ops: { path: unknown[]; value?: unknown; delete?: true }[] }[] = [];
 /** The builder api: each file's source and its kind's `/schema/<dir>` as write.ts answers it. */
 async function api(path: string, sent?: any): Promise<[number, any]> {
@@ -36,6 +43,7 @@ async function api(path: string, sent?: any): Promise<[number, any]> {
     return sent.was === hash && !stale.has(sent.file)
       ? (posts.push(sent), [200, { id: 1 }])
       : [409, { bytes: '{}', sha256: hash }]; // write.ts's stale answer: the file changed since read
+  if (path.startsWith('/fights')) return (asked.push(path), [200, { hash, fights }]);
   if (path === '/story') return [200, { map: [], graph: { nodes: [] }, files: {} }];
   if (path === '/templates') return [200, []];
   const dir = /^\/schema\/(\w+)$/.exec(path)?.[1];
@@ -87,6 +95,8 @@ const VARIANTS = [{}, { command: 'x' }, { abstract: true }, { extends: 'x' }]; /
 const FIRST: Record<string, object> = {
   liquids: { resource: 'hp' },
   skills: { prerequisite: 'x', growth: [1] },
+  npcs: { hp: 10, room: 'r' }, // attack; Add hour sends the NPC to its room
+  items: { slot: 'wield' }, // weapon
 };
 const button = (s: { shown: () => any[] }, w: string) =>
   s.shown().find((x) => x.props?.accessibilityRole === 'button' && words(x) === w);
@@ -147,6 +157,7 @@ async function edit(s: { file: string; shown: () => any[] }, path: unknown[], th
   if (named && (await press(hit((x) => String(x.key).startsWith('entry '))))) return;
   if (await press(hit((x) => x.props.accessibilityState?.selected === false))) return;
   if (await press(hit((x) => words(x) === WORDS.item))) return;
+  if (await press(hit((x) => words(x) === HOURS.add))) return;
   if (!(await press(hit((x) => words(x) === WORDS.add)))) return;
   await press(hit((x) => String(x.key).startsWith('add ') && words(x) !== WORDS.add));
   if (!posts.length) await press(hit((x) => x.props.accessibilityState?.selected === false)); // drawn empty: pick its value
@@ -155,7 +166,7 @@ async function edit(s: { file: string; shown: () => any[] }, path: unknown[], th
 const rows = Object.entries(read('kernel/ts/play/registry.json') as Record<string, any>).flatMap(
   ([p, r]) =>
     Object.keys(r.book ?? {})
-      .filter((op) => r.book[op] === 'generic')
+      .filter((op) => ['generic', 'combat.tsx', 'schedule.tsx'].includes(r.book[op])) // the blocks claim a root field (generic.tsx)
       .map((op) => [p, op]),
 );
 assert.ok(rows.length > 0);
@@ -357,4 +368,80 @@ test('a turn-on refused as stale writes nothing and shows the refusal', async ()
   (await i.press('mechanic slot '), await settle());
   stale.clear();
   assert.ok(!i.shown().some((x) => String(x.key).includes('"slot"')));
+});
+
+// Breaks: an attack asking with ?wield or a weapon without it, or its key not the file's name; an
+// NPC shown another's rows or a weapon only one target's; hp with Run fights; rows kept after a
+// write's new /story (stale numbers beside the new values).
+test('Combat: Run fights asks GET /fights and shows the rows it answers, until the next /story', async () => {
+  const at = (key: string, wins: number) => ({
+    target: `c:npc/${key}`,
+    rating: { first_win_level: null, first_win_build: null },
+    cells: [{ level: 1, build: 'none', n: 4, wins, deaths: 4 - wins, fleds: 0, timeouts: 0 }],
+  });
+  const row = (pct: string, death: string) =>
+    `level 1 · ${pct} · ${death} · 0.00% · 0 · no win · no win`;
+  const texts = (s: { shown: () => any[] }) =>
+    s
+      .shown()
+      .filter((x) => typeof x.props?.children === 'string')
+      .map(words);
+  const npc = await opened('npcs', { hp: 5, attack: { hit_chance: 50, damage: [1, 2] } });
+  const key = npc.file.replace(/^npcs\/|\.json$/g, '');
+  fights = { report: { seeds: 4, rounds: 9, targets: [at('other', 2), at(key, 1)] } };
+  assert.equal(
+    (await opened('npcs', { hp: 5 })).shown().filter((x) => words(x) === 'Run fights').length,
+    0,
+  ); // hp alone
+  asked.length = 0;
+  assert.ok(await npc.press(`fights ${npc.file}`));
+  await settle();
+  assert.deepEqual(asked, ['/fights']);
+  assert.ok(texts(npc).includes(row('25.00%', '75.00%')));
+  assert.ok(!texts(npc).includes(row('50.00%', '50.00%')));
+  const sword = await opened('items', {
+    slot: 'wield',
+    weapon: { skill: 's', attack: { hit_chance: 1, damage: [1, 1] } },
+  });
+  assert.ok(await sword.press(`fights ${sword.file}`));
+  await settle();
+  assert.deepEqual(asked.slice(1), [
+    `/fights?wield=${sword.file.replace(/^items\/|\.json$/g, '')}`,
+  ]);
+  assert.ok(
+    texts(sword).includes(row('25.00%', '75.00%')) &&
+      texts(sword).includes(row('50.00%', '50.00%')),
+  );
+  (load(), await settle(), await settle());
+  assert.ok(!texts(npc).includes(row('25.00%', '75.00%')));
+  fights = { why: 'none yet' };
+});
+
+// Breaks: a refused hour written, or its refusal not shown; the cartridge's hours_per_day not
+// reaching the block (24 assumed); a moved hour losing its room; Add hour offered with no room,
+// or writing anything but the first free hour to the NPC's room.
+test('Schedule: an hour moves within the day, a refusal writes nothing, Add hour needs a room', async () => {
+  const s = await opened('npcs', { room: 'inn', daily_schedule: { 0: 'inn', 3: 'yard' } });
+  sent();
+  (await s.press(`fold ${s.file}:${JSON.stringify(['daily_schedule'])}`), await settle());
+  const hour = (h: string) => s.shown().find((x) => x.props?.accessibilityLabel === HOURS.hour(h));
+  const move = async (h: string, t: string) => (
+    hour(h).props.onChangeText(t),
+    hour(h).props.onBlur(),
+    await settle()
+  );
+  await move('3', '21');
+  assert.deepEqual(sent(), []);
+  assert.ok(s.shown().some((x) => words(x) === 'an hour is below 20'));
+  await move('3', '5');
+  assert.deepEqual(sent(), [{ path: ['daily_schedule'], value: { 0: 'inn', 5: 'yard' } }]);
+  assert.ok(button(s, HOURS.add)?.props.onPress);
+  button(s, HOURS.add).props.onPress();
+  await settle();
+  assert.deepEqual(sent(), [
+    { path: ['daily_schedule'], value: { 0: 'inn', 1: 'inn', 3: 'yard' } },
+  ]);
+  const lost = await opened('npcs', { daily_schedule: {} });
+  (await lost.press(`fold ${lost.file}:${JSON.stringify(['daily_schedule'])}`), await settle());
+  assert.ok(lost.shown().some((x) => words(x) === HOURS.add && !x.props?.onPress));
 });

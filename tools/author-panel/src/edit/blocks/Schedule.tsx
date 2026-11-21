@@ -3,7 +3,7 @@
 // kernel/ts/play/blocks.ts.
 import { useState } from 'react';
 import { toFieldPathId, type FieldProps } from '@rjsf/utils';
-import { addHour, rehour, roomPicks } from '../../../../../kernel/ts/play/blocks.ts';
+import { addHour, NO_HOUR, rehour, roomPicks } from '../../../../../kernel/ts/play/blocks.ts';
 import { removed } from '../../../../../kernel/ts/play/card.ts';
 import { Button } from '../../components/ui/button.tsx';
 import { Input } from '../../components/ui/input.tsx';
@@ -96,7 +96,7 @@ export function Schedule(p: FieldProps) {
         variant="outline"
         className="justify-self-start"
         disabled={!next}
-        title={next ? undefined : 'place the NPC in a room first, or the day is full'}
+        title={next ? undefined : NO_HOUR}
         onMouseDown={keep}
         onClick={() => next && write(next)}
       >

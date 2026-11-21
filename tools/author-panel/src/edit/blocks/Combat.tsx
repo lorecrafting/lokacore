@@ -4,17 +4,14 @@
 // since it is the player's hand in each fight rather than a target of one.
 import { useState } from 'react';
 import type { FieldProps } from '@rjsf/utils';
-import { fightOf } from '../../../../../kernel/ts/play/blocks.ts';
+import { fightsShown } from '../../../../../kernel/ts/play/blocks.ts';
 import { fights } from '../../author.ts';
 import { Fight } from '../../numbers.tsx';
-import type { Target } from '../../../../../kernel/ts/play/numbers.ts';
 import { Button } from '../../components/ui/button.tsx';
 import type { Context } from '../fields.tsx';
 
-type Rows = ReturnType<typeof fightOf>;
-type Shown = Rows | Target[] | Error;
+type Shown = ReturnType<typeof fightsShown> | Error;
 const RUNNING = 'running the fights…';
-const NOT_TARGET = 'not a fight target (an NPC with an attack, alive at start)';
 
 /** The fight rows, measured on asking: the report runs every fight, so this is seconds, not
  * keystrokes (loka-wfrgk.79). `wield` is a weapon's item key; without it the NPC's own rows. */
@@ -23,13 +20,9 @@ function Fights({ who, wield }: { who: string; wield?: string }) {
   const run = () => {
     show(RUNNING); // the last answer goes while the next runs
     fights(wield)
-      .then((r) =>
-        show(wield ? ('why' in r.fights ? r.fights.why : r.fights.report.targets) : fightOf(r.fights, who)),
-      )
+      .then((r) => show(fightsShown(r.fights, who, !!wield)))
       .catch((e: Error) => show(e));
   };
-  const line = (s: Rows) =>
-    s === undefined ? NOT_TARGET : typeof s === 'string' ? s : <Fight target={s} />;
   return (
     <div className="grid gap-1">
       <Button
@@ -47,13 +40,9 @@ function Fights({ who, wield }: { who: string; wield?: string }) {
       ) : typeof shown === 'string' ? (
         <p className="text-muted-foreground">{shown}</p>
       ) : Array.isArray(shown) ? (
-        shown.length ? (
-          shown.map((s) => <div key={s.target}>{line(s)}</div>)
-        ) : (
-          <p className="text-muted-foreground">no fight targets in this world</p>
-        )
+        shown.map((s) => <Fight key={s.target} target={s} />)
       ) : (
-        line(shown)
+        <Fight target={shown} />
       )}
     </div>
   );

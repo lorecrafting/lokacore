@@ -85,6 +85,12 @@ export function cellRow(c: Cell): string[] {
   ];
 }
 
+/** A target's no-build rows under their column names (the Combat blocks' and the Numbers tab's table). */
+export const fightTable = (t: Target) => [
+  ['no build', 'win', 'death', 'fled', 'no end (runs)', 'rounds', 'hp left'],
+  ...t.cells.filter((c) => c.build === 'none').map(cellRow),
+];
+
 /** One target's result, in level then build order; it says so when nothing was measured. */
 export function verdict({ cells }: Pick<Target, 'cells'>): string {
   const ran = cells.filter((c): c is Ran => !('refused' in c));

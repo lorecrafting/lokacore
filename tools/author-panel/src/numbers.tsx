@@ -1,7 +1,7 @@
 // The Numbers tab: balancing reports read from the watcher. Read-only; anything unknown says so.
 import { useState } from 'react';
 import {
-  cellRow,
+  fightTable,
   FIGHT_LIMITS,
   hours,
   verdict,
@@ -37,12 +37,7 @@ export const Fight = ({ target }: { target: Target }) => (
       {shortName(target.target)}
     </p>
     <p className="text-muted-foreground text-xs">{verdict(target)}</p>
-    <Cols
-      rows={[
-        ['no build', 'win', 'death', 'fled', 'no end (runs)', 'rounds', 'hp left'],
-        ...target.cells.filter((c) => c.build === 'none').map(cellRow),
-      ]}
-    />
+    <Cols rows={fightTable(target)} />
   </div>
 );
 
