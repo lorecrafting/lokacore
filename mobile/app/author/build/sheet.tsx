@@ -30,11 +30,24 @@ export const CONTROL = {
   minHeight: size.touch,
   justifyContent: 'center',
 } as const;
-export const act = (label: string, run: () => void, expanded?: boolean) => (
+export const act = (
+  label: string,
+  run: () => void,
+  expanded?: boolean,
+  key = label,
+  selected?: boolean,
+) => (
   <Pressable
-    key={label}
+    key={key}
     accessibilityRole="button"
-    accessibilityState={expanded === undefined ? undefined : { expanded }}
+    accessibilityState={
+      expanded === undefined && selected === undefined
+        ? undefined
+        : {
+            ...(expanded !== undefined && { expanded }),
+            ...(selected !== undefined && { selected }),
+          }
+    }
     onPress={run}
     style={CONTROL}
   >

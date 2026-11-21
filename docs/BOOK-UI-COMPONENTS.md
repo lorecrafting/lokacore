@@ -305,8 +305,14 @@ It slides in over `motion.quick`, none under reduced motion. The title pencil: `
 `space.md` sides and gaps, wrapping: the summary `type.small` `dim`; an exit's words `type.small`
 `fg`, a touch target tall; every act (One-way, Delete, ＋, Move to area, Delete room, Delete all,
 Keep) `type.control` in `action`, a touch target in both axes, no border or fill; the Area field
-`type.small` `fg` taking the row's free width; the refusal `type.small` in `danger` (a barred
-edit); the also-deletes question `type.small` `fg`. Worst pair: `warning` on `card`, 4.75 (light).
+`type.small` `fg` taking the row's free width, a `size.rule` rule in `action` beneath it as Build's
+tap field; the refusal `type.small` in `danger` (a barred edit); the also-deletes question
+`type.small` `fg`. Builder 2.2: the Add here row is a Room sheet row, `＋ Add here` `type.small`
+`fg`, its buttons acts; the Person and Item sheets and the Notebook sheet use the same rows, their
+summary and `Spawned by` lines `type.small` `dim`, the holder and name fields as the Area field;
+the strip's Notebook button is a strip button. The name pencil is the title pencil. An unwritten
+link in Build: the unwritten line's look (a `size.rule` `line` rule, its field name `type.small`
+`dim`). Worst pair: `warning` on `card`, 4.75 (light).
 
 Not adopted from the mock (no live consumer): the text drawer and its command chips, topic
 chips and scene pick cards. The mock's shop price rows are not adopted either: a stock, sale or service row is an

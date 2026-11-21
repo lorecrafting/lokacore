@@ -5,6 +5,7 @@
 
 import type { ListState } from './storylist.ts';
 import NEW from '../../../kernel/ts/play/new.json' with { type: 'json' };
+import { nodeOf } from '../../../kernel/ts/play/mapedit.ts';
 
 export type Selection = { file?: string; kind: string; key: string };
 /** The World card's selection: cartridge.json, which no graph node names (its card opens the root files). */
@@ -128,9 +129,6 @@ export const COMMANDS: Item[] = [
   ['map-lock', 'Lock on exit'],
   ['map-undo', 'Undo the last map edit'],
 ].map(([id, label]) => ({ kind: 'command', label, detail: 'command', id }));
-const NODE: Record<string, string> = { cutscene: 'scene', areas: 'room' };
-/** The graph kind a starter compiles to (`rooms` → `room`, `statuses` → `status`, `cutscene` → `scene`). */
-export const nodeOf = (kind: string) => NODE[kind] ?? kind.replace(/(us)es$|s$/, '$1');
 /** The starter a Hierarchy kind header's + makes: `room` → rooms (the later of areas and rooms wins). */
 // The actions starter writes a scripted action, not the command `action` nodes listed under that header, so it gets no +.
 export const STARTER: Record<string, string> = Object.fromEntries(NEW.filter((k) => k !== 'actions').map((k) => [nodeOf(k), k]));

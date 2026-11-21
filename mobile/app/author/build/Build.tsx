@@ -22,6 +22,8 @@ import {
   type Builder,
 } from './build.ts';
 import { pencil, story } from './room.tsx';
+import { thingPen } from './thing.tsx';
+import { CONTENTS } from './contents.tsx';
 import { act, CONTROL, Frame, parts, sheets } from './sheet.tsx';
 
 export { Sheet, sheets } from './sheet.tsx';
@@ -97,18 +99,18 @@ export function install(book: Pick<Hooks, 'seen' | 'said' | 'redraw' | 'api'>) {
     focus: hold.focus,
     commit: hold.commit,
     wrote,
-    pencil: (shown) => pencil(shown, placed?.here(), open),
+    pencil: (shown, key) => pencil(shown, placed?.here(), open) ?? thingPen(key, open),
   });
   builder = restored(localStorage);
   mapped = () => (redrawStrip(), book.redraw());
-  story(api, mapped, back);
+  story(api, mapped, back, open);
   addEventListener('pagehide', hold.leave);
 }
 export function hear(message: Message) {
   heard = message;
   hold.heard(message.held);
   told(message.unconfirmed?.map((u) => u.key));
-  story(api, mapped, back); // a compile may have added, moved or renamed rooms
+  story(api, mapped, back, open); // a compile may have added, moved or renamed rooms
 }
 const set = (next: Builder) => {
   builder = next;
@@ -191,6 +193,23 @@ function Notice() {
     </View>
   );
 }
+/** The Build switch: on, it reads as on, in action ink. */
+const buildSwitch = (flip: () => void) => (
+  <Pressable
+    accessibilityRole="switch"
+    accessibilityState={{ checked: builder.on }}
+    accessibilityLabel={WORDS.build}
+    onPress={flip}
+    style={CONTROL}
+  >
+    <Text style={{ ...type.control, color: ink(builder.on ? 'action' : 'fg') }}>
+      {builder.on ? WORDS.on : WORDS.build}
+    </Text>
+  </Pressable>
+);
+/** A strip chip that opens sheet `id`, or goes back when it is the top sheet. */
+const pad = (label: string, id: string, top?: string) =>
+  act(label, () => (top === id ? back() : open(id)), top === id);
 /** The strip at `size.touch` above the Book: the Build switch, the Hold status, the Undo chip, the
  * Checks badge, and the keep-my-place notice when a replay was refused. */
 export function Strip({ children }: { children: ReactNode }) {
@@ -201,24 +220,13 @@ export function Strip({ children }: { children: ReactNode }) {
   return (
     <View style={{ flex: 1 }} /* mutate-skip: layout */>
       <View style={{ ...STRIP, backgroundColor: ink('bg'), borderColor: ink('line') }}>
-        <Pressable
-          accessibilityRole="switch"
-          accessibilityState={{ checked: builder.on }}
-          accessibilityLabel={WORDS.build}
-          onPress={() => change(toggled(builder))}
-          style={CONTROL}
-        >
-          <Text style={{ ...type.control, color: ink(builder.on ? 'action' : 'fg') }}>
-            {builder.on ? WORDS.on : WORDS.build}
-          </Text>
-        </Pressable>
+        {buildSwitch(() => change(toggled(builder)))}
         {warn(heard.held ? WORDS.held(heard.pending ?? 0) : '')}
         {undo ? act(WORDS.undo, () => void putBack(undo!)) : null}
         {notBack ? warn(WORDS.notUndone(notBack.file)) : null}
         {notBack ? act(WORDS.source, openBack) : null}
-        {builder.on
-          ? act(badge(heard), () => (top === 'checks' ? back() : open('checks')), top === 'checks')
-          : null}
+        {builder.on ? pad(CONTENTS.contents, 'contents', top) : null}
+        {builder.on ? pad(badge(heard), 'checks', top) : null}
       </View>
       <Notice />
       <View style={{ flex: 1, flexDirection: 'row' }} /* mutate-skip: layout */>

@@ -223,12 +223,12 @@ test('a line changed on disk offers Keep mine and Take theirs', async () => {
   sent.length = 0;
 });
 
-// Breaks (ruling 9): an unwritten line showing the owner `~`, its field opening on `~`, or leaving
-// it empty writing an empty line or refusing to close.
+// Breaks (ruling 9): an unwritten line showing the owner `~` or unruled, its field opening on `~`, or
+// leaving it empty writing an empty line or refusing to close.
 test('an unwritten line is a blank ruled line whose field opens empty', async () => {
-  const drawn = page('~');
-  assert.ok(!JSON.stringify(line(drawn).props.children).includes('~'), 'the owner sees `~`');
-  assert.equal(line(drawn).props.accessibilityLabel, 'Unwritten description, edit');
+  const on = line(page('~')).props;
+  assert.ok(!/~/.test(JSON.stringify(on.children)) && /loka-line/.test(JSON.stringify(on.style)));
+  assert.equal(on.accessibilityLabel, 'Unwritten description, edit');
   const input = await opened('~', at('~'));
   assert.equal(input.props.defaultValue, '');
   input.props.onSubmitEditing();
@@ -236,6 +236,21 @@ test('an unwritten line is a blank ruled line whose field opens empty', async ()
   assert.deepEqual(edits(), []);
   assert.equal(field(page('~')), undefined, 'an empty unwritten line stays open');
   sent.length = 0;
+});
+
+// Breaks: an unwritten link (a new person's name on the room page) showing `~` in Build, losing its
+// press or its rule; out of Build that link no longer drawn as the Book draws it.
+test('an unwritten link is a blank captioned line that still plays; out of Build it is as drawn', () => {
+  const link = (drawn: any[]) => drawn.find((n) => n.props?.onPress === hearth);
+  const on = link(page('A [~](hearth) smokes.'));
+  assert.equal(on.props.children.props.children, 'name', 'the caption, no `~`');
+  assert.equal(on.props.accessibilityLabel, 'Unwritten name, open');
+  assert.ok(on.props.style.flat().some((s: any) => s?.borderBottomWidth)); // ruled
+  button('✎ Build').props.onPress(); // Build off
+  const off = link(page('A [~](hearth) smokes.'));
+  button('Build').props.onPress();
+  assert.ok(JSON.stringify(off.props.children).includes('~'), 'out of Build the `~` is gone');
+  assert.equal(off.props.accessibilityLabel.startsWith('~'), true);
 });
 
 // Breaks: a refused compile's line drawn like a confirmed one.
@@ -425,10 +440,10 @@ test('the keep-my-place notice offers its three ways back', async () => {
   }
 });
 
-// Breaks: the pencil missing from the room's own title, shown on another room's title or on a
-// line that is not a title, a press (or Enter, Space) opening no Room sheet, another key opening
-// one, its press also the title's look, the Book not redrawn when the map comes (no pencil until
-// some other redraw), or an unwritten title or exit showing `~` (ruling 9).
+// Breaks: the pencil missing from the room's own title, on another room's or a non-title line, a
+// press (or Enter, Space) opening no Room sheet, another key opening one, its press also looking,
+// no redraw when the map comes, an unwritten title or exit showing `~` (ruling 9), or a person's
+// name pencil keyed by the words drawn (two names in the same words: one gets the other's sheet).
 test("the room title's pencil opens its Room sheet: summary and exits", async () => {
   map = [
     { key: 'loft', area: 'mill', title: 'Loft', exits: [{ dir: 'down', to: 'cellar' }] },
@@ -478,5 +493,8 @@ test("the room title's pencil opens its Room sheet: summary and exits", async ()
   const title = drawn.find((n) => n.props?.accessibilityRole === 'header');
   assert.equal(title.props.children[0].props.children, 'title', 'a `~` title drawn');
   assert.equal(pencil(page('A low loft.', 'Loft')), undefined, "another room's title");
+  const hen = (k: string) => (said.set(k, 'Hen'), pencil(page('', 'Hen')));
+  assert.equal(hen('npc.hen.name').props.accessibilityLabel, 'Edit hen');
+  assert.equal(hen('item.hen.name'), undefined, 'two names in the same words: no pencil');
   build.install({ seen, said, redraw() {}, api }); // the stored state: no sheet open
 });

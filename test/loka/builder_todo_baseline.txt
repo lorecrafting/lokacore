@@ -241,8 +241,6 @@ items.intended_level.book.delete
 items.keywords.book.create
 items.keywords.book.edit
 items.keywords.book.delete
-items.location.book.create
-items.location.book.edit
 items.location.book.delete
 items.locks.book.create
 items.locks.book.edit
@@ -388,8 +386,6 @@ npcs.resistances.book.delete
 npcs.resource_starts.book.create
 npcs.resource_starts.book.edit
 npcs.resource_starts.book.delete
-npcs.room.book.create
-npcs.room.book.edit
 npcs.room.book.delete
 npcs.room_line.book.create
 npcs.room_line.book.edit
@@ -829,7 +825,6 @@ treatment:reverie.book.edit
 treatment:reverie.book.delete
 parity:hierarchy
 parity:play-from-here
-parity:new-menu
 parity:world-button
 parity:project-tabs
 parity:world-picker
@@ -844,7 +839,6 @@ parity:map-drag-room
 parity:map-join
 parity:map-pan-zoom-keys
 parity:map-grow-handles
-parity:map-templates
 parity:map-wire
 parity:map-exit-edits
 parity:map-undo
@@ -883,7 +877,6 @@ parity:schedule-block
 parity:palette
 parity:delete-definition
 parity:undo
-parity:new-kind
 parity:open-source-key
 parity:column-folds
 parity:prose-walk-keys

@@ -992,8 +992,8 @@ reasons and limits: [prose in the Book rulings](../design/prose-in-the-book-ruli
     from full halves it, from half closes it as Back does, and a tap or Enter toggles the height.
     A sheet slides in from the side it docks on (from below on a phone); under reduced motion it
     cuts in. Closing never animates.
-  - **Title pencil.** In Build the room page's own title, and only it, is followed by a pencil
-    button named `Edit <title>`, which opens that room's sheet. An unwritten title shows its field
+  - **Title pencil.** In Build the room page's own title is followed by a pencil button named
+    `Edit <title>`, which opens that room's sheet (2.2 adds the name pencil). An unwritten title shows its field
     name `title`, as Build's in-place field draws an unwritten line.
   - **Room sheet.** Titled by the room's title. At its top, a summary line: `<area> · N exits`
     (`No area` at the root, `1 exit`). Then a row per exit, `<dir> → <room>`, with `One-way` (drops
@@ -1011,6 +1011,33 @@ reasons and limits: [prose in the Book rulings](../design/prose-in-the-book-ruli
     then does its own edit. The server's refusal names a deleted room's referrers; no count is
     shown before. A deleted room's sheet closes wherever it sits in the stack. Labels here are
     placeholder words, the owner's to replace.
+- **Build: Add here, the Person and Item sheets, Contents, unwritten links** (slice 2.2,
+  [builder mode §4.4, §4.9, ruling 9](../rnd/in-game-builder-mode-2026-11-19.md)). Every edit here
+  runs, refuses and answers a pending Delete question as Room sheet edits do. Looks:
+  [author-mode marks](../BOOK-UI-COMPONENTS.md#component-catalogue).
+  - **Add here.** On the Room sheet, after the `＋ <dir>` row: `＋ Add here`, then `Person`,
+    `Item` and one button per template (abstract person or item), named by its key. Each makes a
+    new thing placed in this room, keyed `npc_N`, `item_N` or `<template>_N`, every word
+    unwritten, and opens its sheet on top.
+  - **Name pencil.** In Build a page title that is exactly one person's or item's name (unless it
+    is this room's own title) is followed by a pencil named `Edit <key>`, which opens its Person or Item sheet. Two
+    things drawn in the same words get none.
+  - **Person and Item sheets.** Titled by the key. A summary line names where it starts: `Room ·
+    <key>`, `Person · <key>` or `Item · <key>`. A person then has a `Room` field and `Move`; an item
+    has `Room`, `Person` and `Item`, which pick the holder's kind, then a field named by that kind
+    and `Move`. The field shows the current holder while its kind is the current one, else empty.
+    Move with the field empty does nothing; a key no definition of that kind holds is refused
+    without a write. A thing a spawn places shows `Spawned by <template>` instead, with no field.
+  - **Contents (minimal).** While Build is on the strip carries a button `Notebook` before
+    `Checks`; it opens the Notebook sheet, or closes it when that is the top sheet. One row per
+    kind a starter exists for, each with `New <kind>`; a kind whose key is the author's (text,
+    behaviours) has a field named by the kind before it, and New with it empty does nothing. New
+    makes the kind's starter under a free key (or the typed one); a person or item opens its
+    sheet, any other kind stays on Contents.
+  - **Unwritten links.** In Build a link whose words are unwritten draws as an unwritten line
+    does (Build: in-place field): a blank ruled line with the caption `name`, never `~`, named
+    `Unwritten name, open`. It keeps its own press. Out of Build every link draws as before.
+  - Labels here are placeholder words, the owner's to replace.
 - **No field.** A double-click on a line that is not words opens nothing; a note under it, in a
   row of its own (the lines below move down by its height while it shows and back when it goes,
   with no motion; a note never covers a line, loka-wfrgk.39), until the next click or key, read politely: `A choice label is its key. Alt-click opens the scene.`,

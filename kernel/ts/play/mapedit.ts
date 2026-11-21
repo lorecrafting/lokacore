@@ -1,7 +1,10 @@
 // The map's edits (editor-map-and-story-rulings.md, Left to E3b; gui-editor-design §3): each gesture
 // as write-route calls (§5.1) in order, undone together. No React or fetch here: the panel passes its
 // routes in; tested from kernel/ts/test/author_mapedit.test.ts.
+import { placed } from './card.ts';
 import type { At, MapRoom } from './map.ts';
+import { freeKey, NAMED, nodeOf } from './keys.ts';
+export { childKey, freeKey, NAMED, nodeOf } from './keys.ts';
 
 type Told = { ok: boolean; told: unknown };
 export type Io = {
@@ -140,39 +143,37 @@ async function made(s: Run, r: MapRoom, kind: 'npcs' | 'items', key: string, up?
   const area = r.area ? { area: r.area } : {};
   const told = await s.call('new', { kind, name: key, ...area, ...(up ? { extends: up } : {}) });
   const file = told.files?.find((f) => f.endsWith(`${kind}/${key}.json`));
-  await s.change(file ?? no(`no ${kind}/${key}.json was made`), () => [
-    kind === 'npcs'
-      ? { path: ['room'], value: r.key }
-      : { path: ['location'], value: { in: 'room', room: r.key } },
-  ]);
+  await s.change(file ?? no(`no ${kind}/${key}.json was made`), () => [spot(kind, 'room', r.key)]);
 }
+/** An NPC's `room` or an item's whole `location` (no old holder stays): holder `kind` `key` (card.ts). */
+const spot = (dir: 'npcs' | 'items', kind: string, key: string): Op => {
+  const [[field, value]] = Object.entries(placed({}, dir, kind, key));
+  return { path: [field], value };
+};
 
-const minted = new Set<string>(); // `kind/key` handed out here: a second New before the recompile skips the first
-/** A new definition's key, no name asked: the first `<base>_<n>` from 1 that no `kind` node in the graph,
- * no template and no key handed out before holds (a template's child: `<template>_<n>`). */
-export function freeKey(
-  base: string,
+/** New <kind> (kernel/ts/play/new.json; `bin/loka new`, its words `~`): an outline or layout has its one
+ * fixed name, a NAMED kind the author's `named`, any other a free `<kind>_<n>` (freeKey). Resolves the
+ * key made, or '' when a NAMED kind has no name; a refusal throws. */
+export async function create(
+  io: Io,
   kind: string,
   nodes: { kind: string; ref: string }[],
   templates: string[],
+  named = '',
 ) {
-  const taken = new Set([
-    ...templates,
-    ...nodes.filter((o) => o.kind === kind).map((o) => o.ref.split('/')[1]),
-  ]);
-  let n = 1;
-  while (taken.has(`${base}_${n}`) || minted.has(`${kind}/${base}_${n}`)) n++;
-  minted.add(`${kind}/${base}_${n}`);
-  return `${base}_${n}`;
+  const one = kind.replace(/(us)es$|s$/, '$1');
+  const fixed = kind === 'outline' || kind === 'layout';
+  const name = fixed
+    ? kind
+    : NAMED.includes(kind)
+      ? named.trim()
+      : freeKey(one, nodeOf(kind), nodes, templates);
+  if (!name) return '';
+  const { ok, told } = await io.post('new', { kind, name });
+  if (!ok) no(said(told));
+  if (!(told as { files: string[] }).files.length) no(`${name} already exists`); // the starter reran on its file
+  return name;
 }
-
-/** A dropped template's child key, `<template>_<n>`, free among the nodes of the template's kind. */
-export const childKey = (
-  dir: 'npcs' | 'items',
-  template: string,
-  nodes: { kind: string; ref: string }[],
-  templates: string[],
-) => freeKey(template, dir === 'npcs' ? 'npc' : 'item', nodes, templates);
 
 /** Move to area: the file moves to `areas/<area>/rooms/`, or to the root for null. */
 const move = async (s: Run, r: MapRoom, area: string | null) =>
@@ -285,6 +286,9 @@ export function editor(io: Io) {
     grow: (a: MapRoom, dir: string, key: string) => run((s) => grow(s, a, dir, key)),
     made: (r: MapRoom, kind: 'npcs' | 'items', key: string, up?: string) =>
       run((s) => made(s, r, kind, key, up)),
+    /** Placement (the Person and Item sheets): `file`'s NPC or item now starts in holder `kind` `key`. */
+    put: (file: string, dir: 'npcs' | 'items', kind: string, key: string) =>
+      run((s) => s.change(file, () => [spot(dir, kind, key)])),
     move: (r: MapRoom, area: string | null) => run((s) => move(s, r, area)),
     bind: (part: number, n: number, short: string, known: string[]) =>
       run((s) => bind(s, part, n, short, known)),

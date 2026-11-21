@@ -1,10 +1,9 @@
 // The panel's one map editor (mapedit.ts over /__author) and the palette's map commands; a refusal
 // shows on the map's footer line (areamap.tsx registers it), else in an alert.
-import { ask, io, templates, type Story } from './author.ts';
+import { io, templates, type Story } from './author.ts';
 import type { MapRoom } from '../../../kernel/ts/play/map.ts';
 export { kept } from '../../../kernel/ts/play/map.ts'; // App's /story failure rule
-import { editor, freeKey, type Editor } from '../../../kernel/ts/play/mapedit.ts';
-import { nodeOf } from './shell.ts';
+import { create, editor, freeKey, NAMED, nodeOf, type Editor } from '../../../kernel/ts/play/mapedit.ts';
 
 const ed = editor(io);
 /** The mounted map's footer line, else an alert; the last story's rooms (App.tsx useStory), so the
@@ -18,20 +17,12 @@ export const shown = {
   shorts: [] as string[],
 };
 
-const NAMED = ['text', 'behaviours']; // no graph node holds their keys: a reused one would merge silently, so the author names it
-
-/** The palette's New <kind>: a free `<kind>_<n>` key, then its card (an outline or layout has one fixed name). */
+/** The palette's New <kind> (mapedit.ts `create`), then its card; text and behaviours have no node. */
 export async function created(kind: string) {
-  const one = kind.replace(/(us)es$|s$/, '$1');
-  const node = nodeOf(kind);
   const held = kind === 'npcs' || kind === 'items' ? (await templates()).filter((t) => t.dir === kind).map((t) => t.key) : [];
-  const fixed = kind === 'outline' || kind === 'layout';
-  const name = fixed ? kind : NAMED.includes(kind) ? prompt(`New ${one} key`) : freeKey(one, node, shown.nodes, held);
-  if (!name) return;
-  const { ok, told } = await ask('new', { kind, name });
-  if (!ok) alert(String(told));
-  else if (!(told as { files: string[] }).files.length) alert(`${name} already exists`); // the starter reran on its file
-  else if (!fixed && !NAMED.includes(kind)) shown.pick({ kind: node, key: name }); // text and behaviours have no node
+  const named = NAMED.includes(kind) ? (prompt(`New ${kind.replace(/(us)es$|s$/, '$1')} key`) ?? '') : '';
+  const name = await create(io, kind, shown.nodes, held, named).catch((e: Error) => void alert(e.message));
+  if (name && name !== kind && !NAMED.includes(kind)) shown.pick({ kind: nodeOf(kind), key: name });
 }
 
 /** The last map edit's id if it read or wrote `file` (mapedit.ts `newest`). */

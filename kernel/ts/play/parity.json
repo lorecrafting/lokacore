@@ -12,7 +12,7 @@
   {
     "id": "new-menu",
     "panel": "tools/author-panel/src/left.tsx",
-    "book": "todo"
+    "book": "contents.tsx"
   },
   {
     "id": "world-button",
@@ -87,7 +87,7 @@
   {
     "id": "map-templates",
     "panel": "tools/author-panel/src/maptemplates.tsx",
-    "book": "todo"
+    "book": "roomedit.tsx"
   },
   {
     "id": "map-wire",
@@ -282,7 +282,7 @@
   {
     "id": "new-kind",
     "panel": "kernel/ts/play/new.json",
-    "book": "todo"
+    "book": "contents.tsx"
   },
   {
     "id": "open-source-key",

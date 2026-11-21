@@ -3,7 +3,14 @@
 // (kernel/ts/play/mapedit.ts, drop.ts) over the same write routes; no words are written here.
 import { Text, TextInput, View } from 'react-native';
 import { grows as sides, type MapRoom } from '../../../../kernel/ts/play/map.ts';
-import { BACK, editor, freeKey, type Io } from '../../../../kernel/ts/play/mapedit.ts';
+import {
+  BACK,
+  childKey,
+  editor,
+  freeKey,
+  nodeOf,
+  type Io,
+} from '../../../../kernel/ts/play/mapedit.ts';
 import { drop } from '../../../../kernel/ts/play/drop.ts';
 import { size, space, type } from '../../book/tokens.ts';
 import { ink } from './build.ts';
@@ -21,8 +28,12 @@ const WORDS = {
   yes: 'Delete all',
   no: 'Keep',
   noFile: (key: string) => `${key}: no source file`,
+  add: '＋ Add here',
+  npcs: 'Person',
+  items: 'Item',
 };
 export type Node = { kind: string; ref: string };
+export type Template = { dir: 'npcs' | 'items'; key: string }; // /templates' abstract NPC or item
 
 let api: Hooks['api'] | undefined;
 let after = () => {}; // reads the map again and redraws (room.tsx `story`)
@@ -45,7 +56,7 @@ export const io: Io = {
   },
 };
 // ponytail: one editor per page; its Undo history and freeKey's handed-out keys end with a reload
-const ed = editor(io);
+export const ed = editor(io);
 
 export function wire(a: Hooks['api'] | undefined, then: () => void, shut: (id: string) => void) {
   api = a;
@@ -118,6 +129,34 @@ export const grows = (r: MapRoom, nodes: Node[], rooms: MapRoom[]) => (
     )}
   </View>
 );
+
+/** `＋ Add here`: a new person or item (`npc_<n>`, `item_<n>`), or a child of each template
+ * (`<template>_<n>`), placed in this room, its words `~`; then its sheet opens. */
+export function addHere(r: MapRoom, nodes: Node[], held: Template[], open: (id: string) => void) {
+  const add = (dir: Template['dir'], up?: string) =>
+    act(
+      up ?? WORDS[dir],
+      () =>
+        void run(async () => {
+          const taken = held.filter((t) => t.dir === dir).map((t) => t.key);
+          const key = up
+            ? childKey(dir, up, nodes, taken)
+            : freeKey(nodeOf(dir), nodeOf(dir), nodes, taken);
+          await ed.made(r, dir, key, up);
+          open(`${nodeOf(dir)}:${key}`);
+        }),
+      undefined,
+      `${dir}:${up ?? ''}`, // a template named in both kinds, or `Person`, keeps its own button
+    );
+  return (
+    <View key="add" style={row}>
+      <Text style={inRow}>{WORDS.add}</Text>
+      {add('npcs')}
+      {add('items')}
+      {held.map((t) => add(t.dir, t.key))}
+    </View>
+  );
+}
 
 /** Move to area: the field's area, or the root when it is empty. */
 export const moveTo = (r: MapRoom) => (

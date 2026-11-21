@@ -14,7 +14,7 @@ import { added } from '../play/card.ts';
 import { paired } from '../play/action.ts';
 import { serve } from '../play/live.ts';
 import { cellAt, dragged, toward, type MapRoom } from '../play/map.ts';
-import { editor, childKey, freeKey, type Editor, type Io } from '../play/mapedit.ts';
+import { editor, freeKey, type Editor, type Io } from '../play/mapedit.ts';
 
 const REPO = join(import.meta.dirname, '../../..');
 const dir = realpathSync(mkdtempSync(join(tmpdir(), 'loka-mapedit-')));
@@ -341,6 +341,18 @@ test("a new NPC or item lands in the selected room's area, placed in that room",
   assert.equal(existsSync(join(src, 'items/pail.json')), false);
 });
 
+test("placement moves an NPC's room and replaces an item's whole location; undo puts it back", async () => {
+  // Breaks: an item's old `room` kept beside its new holder, an NPC given a `location`, or no Undo.
+  const [hen, pail] = ['areas/yard/npcs/hen.json', 'areas/yard/items/pail.json'];
+  await ed.put(hen, 'npcs', 'room', 'b');
+  await ed.put(pail, 'items', 'npc', 'hen');
+  assert.deepEqual([json(hen).room, json(hen).location], ['b', undefined]);
+  assert.deepEqual(json(pail).location, { in: 'npc', npc: 'hen' });
+  await ed.undo();
+  await ed.undo();
+  assert.deepEqual([json(hen).room, json(pail).location], ['c', { in: 'room', room: 'c' }]);
+});
+
 test('two New item in a row, before a recompile, write item_1 then item_2', async () => {
   // Breaks: the second New reusing item_1 because the story still lacks it (the starter refuses it).
   await ed.made(start, 'items', freeKey('item', 'item', [], []));
@@ -370,17 +382,6 @@ test('a map point maps to its layout cell, and a drag between cells to a compass
     ],
     ['east', 'west', 'south', 'north', 'east', 'west', 'north', undefined, undefined],
   );
-});
-
-test("a dropped template's child takes the first free <template>_<n>", () => {
-  // Breaks: a child key reusing a compiled one (the starter refuses the drop), or starting past _1.
-  // Also: an item's key counted against an NPC child, or a template's key (no node holds it) missed.
-  const nodes = ['npc/wild', 'npc/wild_1', 'item/wild_2', 'npc/wild_4'].map((r) => ({
-    kind: r.split('/')[0],
-    ref: `cart@0:${r}`,
-  }));
-  const wild = (held: string[], on = nodes) => childKey('npcs', 'wild', on, held); // each call mints its key
-  assert.deepEqual([wild([], []), wild([]), wild(['wild_3'])], ['wild_1', 'wild_2', 'wild_5']);
 });
 
 test('a press that stays within 4 px is a click (it selects); one that leaves is a drag', () => {
