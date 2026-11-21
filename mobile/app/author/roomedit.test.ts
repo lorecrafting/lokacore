@@ -8,6 +8,8 @@ import { nodes, words } from '../book/__tests__/combat-book.test.ts'; // also re
 const { story } = await import('./build/room.tsx');
 const { sheets } = await import('./build/sheet.tsx');
 const { foot, io, wire } = await import('./build/roomedit.tsx');
+const { thingPen } = await import('./build/thing.tsx');
+await import('./build/contents.tsx');
 
 const room = (key: string, exits: { dir: string; to: string }[], area: string | null = 'yard') => ({
   ref: key,
@@ -22,6 +24,8 @@ const loft = room('loft', [{ dir: 'south', to: 'hall' }]);
 const doc = {
   'rooms/hall.json': { exits: { north: { to: 'loft' } } },
   'rooms/loft.json': { exits: { south: { to: 'hall' } } },
+  'npcs/hen.json': { room: 'hall' },
+  'npcs/npc_1.json': {},
 };
 const settle = () => new Promise((r) => setTimeout(r));
 
@@ -33,26 +37,41 @@ async function opened(answer: (path: string) => [number, unknown] = () => [200, 
     if (path === '/story')
       return [
         200,
-        { map: [hall, loft], graph: { nodes: [{ kind: 'room', ref: 'rooms/room_1' }] } },
+        {
+          map: [hall, loft],
+          graph: {
+            nodes: [
+              { kind: 'room', ref: 'rooms/room_1' },
+              { kind: 'room', ref: 's:room/loft' },
+              { kind: 'npc', ref: 's:npc/hen' },
+            ],
+          },
+          files: { 's:npc/hen': 'npcs/hen.json' },
+        },
       ];
+    if (path === '/templates') return [200, [{ dir: 'npcs', key: 'goose' }]];
     const file = decodeURIComponent(path.split('file=')[1]) as keyof typeof doc;
     return doc[file] ? [200, { bytes: JSON.stringify(doc[file]), sha256: 'S' }] : [404, null];
   };
   const closed: string[] = [];
+  const opens: string[] = [];
   story(
     api,
     () => {},
     (id) => closed.push(id),
+    (id) => opens.push(id),
   );
   await settle();
-  const shown = () => nodes(sheets.room.body('hall'));
+  let sheet = () => sheets.room.body('hall');
+  const shown = () => nodes(sheet());
+  const on = (next: () => unknown) => void (sheet = next as typeof sheet);
   const press = async (label: string) => {
     shown()
       .find((n) => n.props?.accessibilityRole === 'button' && words(n) === label)!
       .props.onPress();
     await settle();
   };
-  return { posts, shown, press, closed };
+  return { posts, shown, press, closed, opens, on };
 }
 
 // Breaks: a `＋` on a side that has an exit, a new room taking a key the graph holds or outside this
@@ -104,6 +123,79 @@ test('Move to area sends the area as shown, or the typed one; an empty field is 
     s.posts.map(([, sent]) => sent.area),
     ['yard', 'cellar', null],
   );
+});
+
+const made = (path: string): [number, unknown] =>
+  path === '/new' ? [200, { files: ['npcs/npc_1.json'] }] : [200, { id: 1 }];
+
+// Breaks: Add here making the person outside this room (no `room`, another room, no area) or under
+// a key the graph holds, or not opening the new person's sheet.
+test('Add here makes a person in this room under a free key and opens its sheet', async () => {
+  const s = await opened(made);
+  await s.press('Person');
+  assert.deepEqual(s.posts[0], ['/new', { kind: 'npcs', name: 'npc_1', area: 'yard' }]);
+  assert.equal(s.posts[1][0], '/change');
+  assert.equal(s.posts[1][1].file, 'npcs/npc_1.json');
+  assert.deepEqual(s.posts[1][1].ops, [{ path: ['room'], value: 'hall' }]);
+  assert.deepEqual(s.opens, ['npc:npc_1']);
+});
+
+// Breaks: a template's act missing from Add here, or making a plain person instead of the
+// template's child (no `extends`, a key not the template's).
+test("Add here offers each template, whose act makes the template's child here", async () => {
+  const s = await opened(made);
+  s.shown(); // asks /templates
+  await settle();
+  await s.press('goose');
+  assert.deepEqual(s.posts[0], [
+    '/new',
+    { kind: 'npcs', name: 'goose_1', area: 'yard', extends: 'goose' },
+  ]);
+});
+
+// Breaks: Move writing a holder no compiled node holds, or a person's move writing anything but
+// its `room`.
+test("a person's sheet refuses a room no node holds without writing, and moves to one that is", async () => {
+  const s = await opened();
+  s.on(() => sheets.npc.body('hen'));
+  s.shown(); // reads its source
+  await settle();
+  const field = () => s.shown().find((n) => n.props?.accessibilityLabel === 'Room');
+  field().props.onChangeText('attic');
+  await s.press('Move');
+  assert.deepEqual(s.posts, []);
+  assert.ok(s.shown().some((n) => words(n).includes('no room attic')));
+  field().props.onChangeText('loft');
+  await s.press('Move');
+  assert.deepEqual(
+    s.posts.map(([path, sent]) => [path, sent.file, sent.ops]),
+    [['/change', 'npcs/hen.json', [{ path: ['room'], value: 'loft' }]]],
+  );
+});
+
+// Breaks: the pencil after a person's name opening another sheet, or one after a room's own title
+// bound key (the Room pencil's) opening a person's.
+test("the pencil after a person's name opens that person's sheet; no other key gets one", () => {
+  const opened: string[] = [];
+  const pen = thingPen('npc.hen.name', (id) => opened.push(id)) as any;
+  pen.props.onPress({ stopPropagation() {} });
+  assert.deepEqual(opened, ['npc:hen']);
+  assert.equal(
+    thingPen('room.hall.title', () => {}),
+    undefined,
+  );
+});
+
+// Breaks: Contents' New making a named kind under a free key, or a new person not opening its sheet.
+test("Contents' New makes a person under a free key and opens it; a named kind needs its name", async () => {
+  const s = await opened(made);
+  s.on(() => sheets.contents.body(''));
+  await s.press('New text');
+  await s.press('New npcs');
+  const [[path, sent], ...more] = s.posts; // New text, unnamed, sent nothing
+  assert.deepEqual([path, sent.kind, more], ['/new', 'npcs', []]);
+  assert.match(sent.name, /^npc_\d+$/); // free: the key Add here made before is taken
+  assert.deepEqual(s.opens, [`npc:${sent.name}`]);
 });
 
 // Breaks: the other files a delete takes sent without asking, a Keep still deleting, or a refusal

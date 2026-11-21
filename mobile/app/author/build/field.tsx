@@ -29,7 +29,7 @@ export type Hooks = {
   commit: () => void;
   api: typeof api; // E5's, handed in by panel.tsx behind its require gate
   wrote: (w: Wrote) => void; // a saved write, for the strip's Undo chip
-  pencil?: (shown: string) => ReactNode; // the title pencil, on the room page's own title only
+  pencil?: (shown: string, key?: string) => ReactNode; // the title pencil: a room page's own title, a person's or item's name
 };
 /** A saved write as /undo puts it back: its journal id, and the key and old words the Book shows at once. */
 export type Wrote = { id: number; key: string; words: string; file: string };
@@ -61,18 +61,30 @@ function keyOf(h: Hooks, shown: string) {
   return keys.length === 1 && keys[0].endsWith('.description') ? keys[0] : undefined;
 }
 
-/** The seam's line: Build off, a press of its own (a link) or no key leaves it as drawn. */
+/** The seam's line: Build off or no key leaves it as drawn; a link keeps its own press, an unwritten
+ * one drawn blank with its caption (ruling 9). */
 export function line(p: Props): Props {
   const h = hooks;
-  if (!h?.on() || p.onPress) return p;
+  if (!h?.on()) return p;
   const shown = flat(p.children);
-  const pen = p.accessibilityRole === 'header' ? h.pencil?.(shown) : undefined;
-  if (pen) return { ...p, children: [unwritten(shown) ? hint('title') : p.children, pen] };
+  const blank = unwritten(shown);
+  if (p.onPress)
+    return blank
+      ? {
+          ...p,
+          accessibilityLabel: 'Unwritten name, open',
+          style: [p.style, BLANK],
+          children: hint('name'),
+        }
+      : p;
+  if (p.accessibilityRole === 'header') {
+    const pen = h.pencil?.(shown, h.seen.get(drawnWords(h.seen, shown) ?? ''));
+    if (pen || blank) return { ...p, children: [blank ? hint('title') : p.children, pen] };
+  }
   const key = keyOf(h, shown);
   if (!key) return p;
   const name = key.slice(key.lastIndexOf('.') + 1);
   if (field?.key === key && field.at) return { ...p, children: open(h, field, field.at, name, p) };
-  const blank = unwritten(shown);
   const marked = unconfirmed.has(key);
   const press = () => void edit(h, key);
   return {
@@ -81,11 +93,7 @@ export function line(p: Props): Props {
     accessibilityLabel: `${blank ? `Unwritten ${name}` : shown}${marked ? ', unconfirmed' : ''}, edit`,
     onPress: press,
     ...({ onKeyDown: keyed(press) } as object), // web Text has no key press
-    style: [
-      p.style,
-      blank && { borderBottomWidth: size.rule, borderColor: ink('line') },
-      marked && MARKED,
-    ],
+    style: [p.style, blank && BLANK, marked && MARKED],
     children: [
       blank ? hint(name) : p.children,
       field?.key === key && field.note ? (
@@ -105,6 +113,7 @@ const keyed = (press: () => void) => (e: KeyboardEvent) =>
   e.target === e.currentTarget &&
   (e.key === 'Enter' || e.key === ' ') &&
   (e.preventDefault(), press());
+const BLANK = { borderBottomWidth: size.rule, borderColor: ink('line') };
 const MARKED = {
   textDecorationLine: 'underline',
   textDecorationStyle: 'wavy' as 'dashed', // web draws wavy; RN's types stop at dashed

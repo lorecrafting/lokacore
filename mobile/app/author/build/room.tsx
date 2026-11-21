@@ -15,8 +15,10 @@ import {
   inRow,
   refusal,
   row,
+  addHere,
   wire,
   type Node,
+  type Template,
 } from './roomedit.tsx';
 
 const WORDS = {
@@ -25,29 +27,57 @@ const WORDS = {
   root: 'No area',
 };
 type Room = MapRoom; // /story's `map` (kernel/ts/play/story.ts `rooms`)
-let rooms: Room[] = [];
-let nodes: Node[] = []; // /story's graph nodes: the keys a new room must not take
+/** The last /story's rooms, graph nodes (the keys a new definition must not take) and source file
+ * per node ref; /templates' abstract NPCs and items; the Book's redraw, a sheet's open and the api. */
+export const known = {
+  rooms: [] as Room[],
+  nodes: [] as Node[],
+  files: {} as Record<string, string>,
+  held: [] as Template[],
+  redraw: () => {},
+  open: (_id: string) => {},
+  api: undefined as Hooks['api'] | undefined,
+};
+let listed: object | undefined; // the /story the templates were asked under
+
+/** /templates' abstract NPCs and items, asked again once under each new /story; then the Book redraws. */
+function held() {
+  if (listed !== known.files) {
+    listed = known.files;
+    void known.api?.('/templates').then(
+      ([status, all]) =>
+        status === 200 && Array.isArray(all) && ((known.held = all), known.redraw()),
+      () => {}, // the server down: Add here offers no templates until the next /story
+    );
+  }
+  return known.held;
+}
+type Story = { map?: Room[]; graph?: { nodes?: Node[] }; files?: Record<string, string> };
 // The latest /story request: a slower, older answer is dropped.
 let asked = 0; // mutate-skip: any start value counts the same
-const find = (key: string | undefined) => rooms.find((x) => x.key === key);
+const find = (key: string | undefined) => known.rooms.find((x) => x.key === key);
 // An unwritten title shows the key, never `~` (ruling 9).
 const named = (r: Room) => (unwritten(r.title) ? r.key : r.title);
 
-/** Reads the map again; `redraw` once it has come. `close` shuts a sheet by id (a deleted room's). */
+/** Reads the map again; `redraw` once it has come. `close` shuts a sheet by id (a deleted room's),
+ * `open` opens one (a new person's). */
 export function story(
   api: Hooks['api'] | undefined,
   redraw: () => void,
   close: (id: string) => void,
+  open = (_id: string) => {},
 ) {
-  wire(api, () => story(api, redraw, close), close);
+  wire(api, () => story(api, redraw, close, open), close);
+  Object.assign(known, { redraw, open, api });
   const n = ++asked;
   void api?.('/story').then(
     ([status, json]) => {
       if (n !== asked) return;
       if (status === 200) {
-        const told = json as { map?: Room[]; graph?: { nodes?: Node[] } } | null;
-        rooms = Array.isArray(told?.map) ? told.map : [];
-        nodes = told?.graph?.nodes ?? [];
+        const told = json as Story | null;
+        known.rooms = Array.isArray(told?.map) ? told.map : [];
+        known.nodes = told?.graph?.nodes ?? [];
+        known.files = told?.files ?? {};
       }
       redraw(); // a refusal or question still shows when the map does not come (a compile error)
     },
@@ -59,12 +89,16 @@ export function story(
 export function pencil(shown: string, here: string | undefined, open: (id: string) => void) {
   const r = find(here);
   if (!r || (r.title !== shown && !(unwritten(r.title) && unwritten(shown)))) return undefined; // `~` is drawn tagged
-  const press = () => open(`room:${r.key}`);
+  return pen(WORDS.edit(named(r)), () => open(`room:${r.key}`));
+}
+
+/** A pencil labelled `label` after a page title, pressed by touch, click, Enter or Space. */
+export function pen(label: string, press: () => void) {
   return (
     <Text
       key="pencil"
       accessibilityRole="button"
-      accessibilityLabel={WORDS.edit(named(r))}
+      accessibilityLabel={label}
       onPress={(e) => (e.stopPropagation(), press())} // not the title's own look
       {...({
         onKeyDown: (e: KeyboardEvent) =>
@@ -109,11 +143,12 @@ sheets.room = {
             <Text style={{ ...inRow, minHeight: size.touch }}>
               {`${e.dir} → ${to ? named(to) : e.to}`}
             </Text>
-            {exitActs(r, e.dir, rooms)}
+            {exitActs(r, e.dir, known.rooms)}
           </View>
         );
       }),
-      grows(r, nodes, rooms),
+      grows(r, known.nodes, known.rooms),
+      addHere(r, known.nodes, held(), known.open),
       moveTo(r),
       foot(r),
     ];

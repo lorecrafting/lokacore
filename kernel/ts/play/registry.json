@@ -814,8 +814,8 @@
     "edit": "cards/Entity.tsx",
     "delete": "cards/Entity.tsx",
     "book": {
-      "create": "todo",
-      "edit": "todo",
+      "create": "roomedit.tsx",
+      "edit": "thing.tsx",
       "delete": "todo"
     }
   },
@@ -1304,8 +1304,8 @@
     "edit": "cards/Entity.tsx",
     "delete": "cards/Entity.tsx",
     "book": {
-      "create": "todo",
-      "edit": "todo",
+      "create": "roomedit.tsx",
+      "edit": "thing.tsx",
       "delete": "todo"
     }
   },

@@ -238,6 +238,22 @@ test('an unwritten line is a blank ruled line whose field opens empty', async ()
   sent.length = 0;
 });
 
+// Breaks: an unwritten link (a new person's name on the room page) showing `~` in Build, losing its
+// press or its rule; out of Build that link no longer drawn as the Book draws it.
+test('an unwritten link is a blank captioned line that still plays; out of Build it is as drawn', () => {
+  const link = (drawn: any[]) => drawn.find((n) => n.props?.onPress === hearth);
+  const on = link(page('A [~](hearth) smokes.'));
+  assert.ok(!JSON.stringify(on.props.children).includes('~'), 'the owner sees `~`');
+  assert.equal(on.props.children.props.children, 'name');
+  assert.equal(on.props.accessibilityLabel, 'Unwritten name, open');
+  assert.ok(on.props.style.flat().some((s: any) => s?.borderBottomWidth)); // ruled
+  button('✎ Build').props.onPress(); // Build off
+  const off = link(page('A [~](hearth) smokes.'));
+  button('Build').props.onPress();
+  assert.ok(JSON.stringify(off.props.children).includes('~'), 'out of Build the `~` is gone');
+  assert.equal(off.props.accessibilityLabel.startsWith('~'), true);
+});
+
 // Breaks: a refused compile's line drawn like a confirmed one.
 test('a line the compile refused carries the unconfirmed mark', () => {
   const marked = () => line(page('A low loft.')).props;

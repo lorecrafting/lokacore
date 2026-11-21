@@ -1,4 +1,4 @@
-// size: allow 540, one scaffolded cartridge the tests edit in turn and the last undoes; a split needs a second scaffold
+// size: allow 545, one scaffolded cartridge the tests edit in turn and the last undoes; a split needs a second scaffold
 // The editor map's edits (kernel/ts/play/mapedit.ts) through the real write routes
 // (play/write.ts) and the real `mix loka.new`, on one scaffolded cartridge the tests edit in turn;
 // the last one undoes every gesture. Expected files are written by hand.
@@ -339,6 +339,18 @@ test("a new NPC or item lands in the selected room's area, placed in that room",
   assert.deepEqual([pail.location, pail.room], [{ in: 'room', room: 'c' }, undefined]);
   assert.equal(existsSync(join(src, 'npcs/hen.json')), false);
   assert.equal(existsSync(join(src, 'items/pail.json')), false);
+});
+
+test("placement moves an NPC's room and replaces an item's whole location; undo puts it back", async () => {
+  // Breaks: an item's old `room` kept beside its new holder, an NPC given a `location`, or no Undo.
+  const [hen, pail] = ['areas/yard/npcs/hen.json', 'areas/yard/items/pail.json'];
+  await ed.put(hen, 'npcs', 'room', 'b');
+  await ed.put(pail, 'items', 'npc', 'hen');
+  assert.deepEqual([json(hen).room, json(hen).location], ['b', undefined]);
+  assert.deepEqual(json(pail).location, { in: 'npc', npc: 'hen' });
+  await ed.undo();
+  await ed.undo();
+  assert.deepEqual([json(hen).room, json(pail).location], ['c', { in: 'room', room: 'c' }]);
 });
 
 test('two New item in a row, before a recompile, write item_1 then item_2', async () => {
