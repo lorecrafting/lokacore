@@ -5,7 +5,7 @@ import { Text, TextInput, View } from 'react-native';
 import { grows as sides, type MapRoom } from '../../../../kernel/ts/play/map.ts';
 import { BACK, editor, freeKey, type Io } from '../../../../kernel/ts/play/mapedit.ts';
 import { drop } from '../../../../kernel/ts/play/drop.ts';
-import { space, type } from '../../book/tokens.ts';
+import { size, space, type } from '../../book/tokens.ts';
 import { ink } from './build.ts';
 import type { Hooks } from './field.tsx';
 import { act } from './sheet.tsx';
@@ -127,7 +127,13 @@ export const moveTo = (r: MapRoom) => (
       placeholder={WORDS.area}
       accessibilityLabel={WORDS.area}
       onChangeText={(d) => void drafts.set(r.key, d)}
-      style={{ ...text, paddingHorizontal: 0, flex: 1 }} // mutate-skip: layout; the field takes the row's free width
+      style={{
+        ...text,
+        paddingHorizontal: 0,
+        flex: 1,
+        borderBottomWidth: size.rule,
+        borderColor: ink('action'),
+      }} // mutate-skip: layout; the field takes the row's free width, ruled as Build's tap field
     />
     {act(
       WORDS.move,
