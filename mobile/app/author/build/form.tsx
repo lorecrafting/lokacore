@@ -80,6 +80,7 @@ function block(at: At, path: Step[], node: Obj | undefined, value: unknown, remo
   const [s] = shapeOf(node, value, at.defs, at.seen);
   const folds = s.as === 'object' || s.as === 'array';
   const name = String(path.at(-1));
+  const flag = s.as === 'const' && removable; // an On/Off switch
   return (
     <View key={key} style={{ paddingLeft: space.md }}>
       <View style={row}>
@@ -88,7 +89,7 @@ function block(at: At, path: Step[], node: Obj | undefined, value: unknown, remo
         ) : (
           <Text style={LABEL}>{name}</Text>
         )}
-        {s.as === 'const' && removable
+        {flag
           ? act(WORDS.on, () => set(at, path, s.value), undefined, `on ${key}`, value === s.value)
           : null}
         {removable
@@ -101,11 +102,7 @@ function block(at: At, path: Step[], node: Obj | undefined, value: unknown, remo
             )
           : null}
       </View>
-      {s.as === 'const' && removable
-        ? null
-        : !folds || opened.has(key)
-          ? field(at, path, node, value)
-          : null}
+      {flag ? null : !folds || opened.has(key) ? field(at, path, node, value) : null}
     </View>
   );
 }
