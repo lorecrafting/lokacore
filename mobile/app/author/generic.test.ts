@@ -8,7 +8,7 @@ import { nodes, words } from '../book/__tests__/combat-book.test.ts'; // also re
 
 const { story } = await import('./build/room.tsx');
 const { sheets } = await import('./build/sheet.tsx');
-await import('./build/generic.tsx');
+await import('./build/Build.tsx'); // the app's registration of the def: sheet
 
 const root = new URL('../../../', import.meta.url);
 const read = (rel: string) => JSON.parse(readFileSync(new URL(rel, root), 'utf8'));
