@@ -141,7 +141,7 @@ test('ghosts: a dialogue ghost is the way in the kernel would offer', () => {
     'c@1:dialogue/greet': said('greet', { entry: true }),
     'c@1:dialogue/aside': said('aside', { entry: false, choices: { a: { then: 'greet' } } }),
     'c@1:dialogue/whisper': said('whisper'),
-    'c@1:dialogue/rumor': said('rumor', { keyword: 'rumor' }, ref('npc', 'smith')),
+    'c@1:dialogue/rumor': said('rumor', { keyword: 'rumor', npc: ref('npc', 'smith') }),
   };
   const talks = ghosts(
     view(['e1', 'e2'], [], []),
