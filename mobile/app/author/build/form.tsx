@@ -46,10 +46,10 @@ const drafts = new Map<string, string>(); // each typed field, as typed
 const LABEL = { ...type.label, color: ink('dim') };
 const INPUT = {
   ...inRow,
-  flex: 1,
+  flex: 1, // mutate-skip: layout
   minWidth: 0, // mutate-skip: layout; a row may shrink the field below its own width, to the docked sheet's
-  borderBottomWidth: size.rule,
-  borderColor: ink('action'),
+  borderBottomWidth: size.rule, // mutate-skip: layout
+  borderColor: ink('action'), // mutate-skip: layout
 }; // mutate-skip: layout; ruled as the Room sheet's Move field
 
 const id = (at: At, path: Step[]) => `${at.file}:${JSON.stringify(path)}`;
