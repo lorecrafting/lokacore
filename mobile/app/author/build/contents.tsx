@@ -1,5 +1,5 @@
 // The notebook's Contents, minimal (design §7, slice 2.2): every kind New makes (kernel/ts/play/new.json),
-// each with its New; a person or item made opens its sheet. The full notebook is a later slice's.
+// each with its New, then its files; a person or item made, or a file, opens its sheet. The full notebook is a later slice's.
 import { TextInput, View } from 'react-native';
 import NEW from '../../../../kernel/ts/play/new.json' with { type: 'json' };
 import { create, NAMED, nodeOf } from '../../../../kernel/ts/play/mapedit.ts';
@@ -11,6 +11,12 @@ import { act, sheets } from './sheet.tsx';
 
 const WORDS = { contents: 'Notebook', new: (kind: string) => `New ${kind}` };
 const names = new Map<string, string>(); // a NAMED kind's key, as typed
+/** `kind`'s JSON source files the last /story named (a `.scene` has no schema sheet): `<kind>.json`,
+ * `<kind>/<key>.json` or `areas/<area>/<kind>/<key>.json` (guard.ts `placed`). */
+const filesOf = (kind: string) =>
+  [...new Set(Object.values(known.files))]
+    .filter((f) => f.endsWith('.json') && (f.split('/').at(-2) ?? f.split('.')[0]) === kind)
+    .sort();
 
 /** New `kind`: its starter under a free key (or the typed one); a person or item opens its sheet. */
 const made = (kind: string) =>
@@ -27,7 +33,7 @@ sheets.contents = {
   title: () => WORDS.contents,
   body: () => [
     refusal(),
-    ...NEW.map((kind) => (
+    ...NEW.flatMap((kind) => [
       <View key={kind} style={row}>
         {NAMED.includes(kind) ? (
           <TextInput
@@ -39,8 +45,11 @@ sheets.contents = {
           />
         ) : null}
         {act(WORDS.new(kind), () => void made(kind))}
-      </View>
-    )),
+      </View>,
+      <View key={`${kind}/`} style={row}>
+        {filesOf(kind).map((f) => act(f, () => known.open(`def:${f}`)))}
+      </View>,
+    ]),
   ],
 };
 export { WORDS as CONTENTS };

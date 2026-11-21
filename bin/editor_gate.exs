@@ -6,11 +6,14 @@
 # exactly the baseline, which only shrinks against main's copy, so a new path ships hand-built.
 # The Book builder's parity (in-game-builder-mode §6.7): each row also has `book` create, edit
 # and delete, and each kernel/ts/play/parity.json row (a panel feature outside the schema) names
-# its panel file and a `book`; a book value is a file under mobile/app/author/build/ or `todo`
-# (`generic` is refused until the generic form editor exists). The todos are exactly the shared
-# todo baseline, which only shrinks against main's copy (absent there: this gate's first change).
-# Arguments 4 to 9 after --check:
-#   registry.json baseline.txt main_baseline.txt parity.json todo.txt main_todo.txt
+# its panel file and a `book`; a book value is a file under mobile/app/author/build/, `todo` or
+# (a schema row only) `generic`, the builder's generic sheet: mobile/app/author/generic.test.ts
+# draws and writes every generic row. The todos are exactly the shared todo baseline, which only
+# shrinks against main's copy (absent there: this gate's first change). The panel's generic rows
+# still todo in the Book are exactly the not-yet list (each line `<row>  # its home`), which
+# only shrinks against main's copy: a not-yet row turned generic is refused until its line goes.
+# Arguments 4 to 11 after --check: registry.json baseline.txt main_baseline.txt parity.json
+#   todo.txt main_todo.txt notyet.txt main_notyet.txt
 schema_paths =
   for f <- File.ls!(Path.join(root, "schemas/source")),
       f not in ["defs.schema.json", "areas.schema.json"],
@@ -25,12 +28,22 @@ arg = &Enum.at(System.argv(), &1, &2)
 editor_path = arg.(4, "kernel/ts/play/registry.json")
 editor = json.(editor_path)
 baseline_path = arg.(5, "test/loka/editor_generic_baseline.txt")
-lines = &MapSet.new(String.split(&1, "\n", trim: true))
+# a baseline's lines, each without its `# note` (the not-yet list's homes)
+lines =
+  &MapSet.new(
+    for(
+      l <- String.split(&1, "\n", trim: true),
+      do: l |> String.split("#") |> hd() |> String.trim()
+    )
+  )
+
 baseline = lines.(read.(baseline_path))
 parity_path = arg.(7, "kernel/ts/play/parity.json")
 parity = json.(parity_path)
 todo_path = arg.(8, "test/loka/builder_todo_baseline.txt")
 todo_base = lines.(read.(todo_path))
+notyet_path = arg.(10, "test/loka/builder_generic_notyet.txt")
+notyet_base = lines.(read.(notyet_path))
 git = &System.cmd("git", &1, cd: root, stderr_to_stdout: true)
 
 # main's copy of a baseline: shrink-only gates --check; generating (merge_resolve, no
@@ -87,6 +100,13 @@ todo =
       for(r <- parity, r["book"] == "todo", do: "parity:#{r["id"]}")
   )
 
+notyet =
+  for l <- baseline,
+      [p, v] = String.split(l, ~r/\.(?=[a-z]+$)/),
+      editor[p]["book"][v] == "todo",
+      into: MapSet.new(),
+      do: "#{p}.book.#{v}"
+
 # a safe relative path to a regular file under dir, never a path out of it
 file? = &(match?({:ok, _}, Path.safe_relative(&2)) and File.regular?(Path.join([root, &1, &2])))
 
@@ -97,18 +117,12 @@ surface? = fn
   _ -> false
 end
 
-# `generic` is refused until the builder's generic form editor exists (in-game-builder-mode §6.4):
-# before it, a todo turned generic would shrink the todo baseline with no working home. The slice
-# that builds that editor lifts this and holds generic book values to a shrink-only baseline.
 book = fn
   nil ->
     "missing (todo or a file under mobile/app/author/build/)"
 
-  "todo" ->
+  v when v in ["todo", "generic"] ->
     nil
-
-  "generic" ->
-    "generic: refused until the builder's generic form editor exists"
 
   s when is_binary(s) ->
     if(!file?.("mobile/app/author/build", s),
@@ -136,7 +150,11 @@ problems =
     for(
       p <- schema_paths,
       v <- verbs,
-      m = book.(editor[p]["book"][v]),
+      m =
+        if(editor[p]["book"][v] == "generic" and editor[p][v] != "generic",
+          do: "generic: refused, the panel's own #{v} is #{inspect(editor[p][v])}",
+          else: book.(editor[p]["book"][v])
+        ),
       do: "#{editor_path}: #{p}: book #{v} #{m}"
     ) ++
     for(
@@ -145,7 +163,10 @@ problems =
         if(!(is_binary(r["panel"]) and file?.("", r["panel"])),
           do: "no panel file #{inspect(r["panel"])}"
         ),
-        if(m = book.(r["book"]), do: "book #{m}")
+        if(r["book"] == "generic",
+          do: "book generic: refused, a panel feature outside the schema has no generic sheet",
+          else: if(m = book.(r["book"]), do: "book #{m}")
+        )
       ],
       m,
       do: "#{parity_path}: #{inspect(r["id"])}: #{m}"
@@ -155,6 +176,7 @@ problems =
       n > 1 or not is_binary(id),
       do: "#{parity_path}: #{inspect(id)}: ids are unique strings"
     ) ++
-    held.(todo, todo_base, reference.(todo_path, 9, true), todo_path, "todo")
+    held.(todo, todo_base, reference.(todo_path, 9, true), todo_path, "todo") ++
+    held.(notyet, notyet_base, reference.(notyet_path, 11, true), notyet_path, "not yet generic")
 
 {problems, editor}

@@ -24,6 +24,7 @@ import {
 import { pencil, story } from './room.tsx';
 import { thingPen } from './thing.tsx';
 import { CONTENTS } from './contents.tsx';
+import './generic.tsx'; // registers the def:<file> sheet
 import { act, CONTROL, Frame, parts, sheets } from './sheet.tsx';
 
 export { Sheet, sheets } from './sheet.tsx';

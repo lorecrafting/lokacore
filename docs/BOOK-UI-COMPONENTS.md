@@ -312,7 +312,12 @@ tap field; the refusal `type.small` in `danger` (a barred edit); the also-delete
 summary and `Spawned by` lines `type.small` `dim`, the holder and name fields as the Area field;
 the strip's Notebook button is a strip button. The name pencil is the title pencil. An unwritten
 link in Build: the unwritten line's look (a `size.rule` `line` rule, its field name `type.small`
-`dim`). Worst pair: `warning` on `card`, 4.75 (light).
+`dim`). The generic sheet (2.3) uses the same rows: each nested block indented `space.md` more;
+a field's name `type.label` in `dim`; fold names, `Add…` and its field names, Remove, On/Off, Move
+up, Copy, Add item and every option or branch button are acts; a required constant's value
+`type.small` `fg`; the typed fields and the map's Key field as the Area field, shrinking to the
+free width (`minWidth: 0` in a row) so the rule never runs past the sheet. Worst pair: `warning`
+on `card`, 4.75 (light).
 
 Not adopted from the mock (no live consumer): the text drawer and its command chips, topic
 chips and scene pick cards. The mock's shop price rows are not adopted either: a stock, sale or service row is an

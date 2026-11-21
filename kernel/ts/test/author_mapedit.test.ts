@@ -342,9 +342,12 @@ test("a new NPC or item lands in the selected room's area, placed in that room",
 });
 
 test("placement moves an NPC's room and replaces an item's whole location; undo puts it back", async () => {
-  // Breaks: an item's old `room` kept beside its new holder, an NPC given a `location`, or no Undo.
+  // Breaks: an item's old `room` kept beside its new holder, an NPC given a `location`, no Undo, or
+  // the generic sheet's write sent with the fresh hash, so a sheet read before the move overwrites it.
   const [hen, pail] = ['areas/yard/npcs/hen.json', 'areas/yard/items/pail.json'];
+  const was = (await io.source(hen)).sha256; // the sheet's read
   await ed.put(hen, 'npcs', 'room', 'b');
+  await assert.rejects(ed.change(hen, was, [{ path: ['room'], value: 'c' }]));
   await ed.put(pail, 'items', 'npc', 'hen');
   assert.deepEqual([json(hen).room, json(hen).location], ['b', undefined]);
   assert.deepEqual(json(pail).location, { in: 'npc', npc: 'hen' });
