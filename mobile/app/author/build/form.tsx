@@ -49,7 +49,14 @@ export const WORDS = {
   first: 'needs another field first',
 };
 const opened = new Set<string>(); // the folded blocks and Add… menus open, by file and path
-const revealed = new Set<string>(); // fields added with no least value: drawn empty until written
+// Fields added with no least value, drawn empty until written; web reloads on each write (App.tsx)
+const REVEALED = 'loka-build-revealed';
+let memory = '[]'; // native: no reload, no sessionStorage
+const reveals = (): string[] => JSON.parse(globalThis.sessionStorage?.getItem(REVEALED) ?? memory);
+const reveal = (k: string, on: boolean) => {
+  const v = JSON.stringify([...reveals().filter((x) => x !== k), ...(on ? [k] : [])]);
+  globalThis.sessionStorage ? globalThis.sessionStorage.setItem(REVEALED, v) : (memory = v);
+};
 const drafts = new Map<string, string>(); // each typed field, as typed
 const LABEL = { ...type.label, color: ink('dim') };
 const INPUT = {
@@ -67,11 +74,9 @@ const toggle = (key: string) => (
 );
 const set = (at: At, path: Step[], value: unknown) =>
   value === undefined
-    ? (revealed.add(id(at, path)), known.redraw())
+    ? (reveal(id(at, path), true), known.redraw())
     : void run(() =>
-        ed
-          .change([at.file, at.was, ops(path, value)])
-          .then(() => void revealed.delete(id(at, path))),
+        ed.change([at.file, at.was, ops(path, value)]).then(() => reveal(id(at, path), false)),
       );
 /** A write at `path`; at the root (a picked branch, a whole list) one op per top-level field. */
 const ops = (path: Step[], value: unknown) =>
@@ -133,7 +138,7 @@ function block(at: At, path: Step[], node: Obj | undefined, value: unknown, remo
 /** An object's present fields, then Add… for the absent ones (a map: a typed key's new entry). */
 function object(at: At, path: Step[], s: Extract<Shape, { as: 'object' }>, value: unknown) {
   const v: Obj = plain(value) ? value : {};
-  const shown = (k: string) => Object.hasOwn(v, k) || revealed.has(id(at, [...path, k]));
+  const shown = (k: string) => Object.hasOwn(v, k) || reveals().includes(id(at, [...path, k]));
   const keys = [...new Set([...Object.keys(v), ...Object.keys(s.props)])].filter(shown);
   const m = at.mech; // the root only (field)
   const theirs = new Set([...(m?.allowed ?? []), ...(m?.blocked ?? []).map((b) => b.field)]);
@@ -170,7 +175,13 @@ function mechanics(
   const turn = (k: string, on: Write) => () => {
     const value = start(k); // none: the field is revealed empty once the capability is on
     const field: Write[] = value === undefined ? [] : [[at.file, at.was, ops([k], value)]];
-    void run(() => ed.change(on, ...field).then(() => value === undefined && set(at, [k], value)));
+    const empty = value === undefined && id(at, [k]); // revealed before the write: web reloads on it
+    void run(() => {
+      if (empty) reveal(empty, true);
+      return ed
+        .change(on, ...field)
+        .catch((e) => (empty && reveal(empty, false), Promise.reject(e)));
+    });
   };
   return [
     act(WORDS.mechanic, () => toggle(menu), opened.has(menu), `mechanic ${menu}`),

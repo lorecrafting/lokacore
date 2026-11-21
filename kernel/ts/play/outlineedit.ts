@@ -30,12 +30,8 @@ export const addBeat = (s: Run, part: number, n: number) =>
     if (!Number.isInteger(n) || n < 1) no(`a beat's number is a whole number from 1, not ${n}`);
     if (doc.parts.some((p) => p.beats.some((b) => b.n === n)))
       no(`outline.json already has beat ${n}`);
-    const beats = partOf(doc, part);
-    const j = beats.findIndex((b) => b.n > n); // in number order, as play reads them
-    const at = j < 0 ? beats.length : j;
-    return [
-      { path: ['parts', part, 'beats'], value: [...beats.slice(0, at), { n }, ...beats.slice(at)] },
-    ];
+    const beats = [...partOf(doc, part), { n }].sort((a, b) => a.n - b.n); // play reads number order
+    return [{ path: ['parts', part, 'beats'], value: beats }];
   });
 export const titleBeat = (s: Run, part: number, n: number, title: string) =>
   s.change<Outline>('outline.json', (doc) => {

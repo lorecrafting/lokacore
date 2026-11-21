@@ -288,7 +288,8 @@ async function narrow(kind: string, doc: object) {
 }
 
 // Breaks: a refused row pressable with no turn-on, or showing no reason; the turn-on missing the
-// capability write, writing it after the field, at the wrong path or version, or into the sheet's file.
+// capability write, writing it after the field, at the wrong path or version, or into the sheet's file;
+// a field with no least value revealed only in memory, so web's reload drops it (a second press).
 test('a greyed mechanic turns its capability on in cartridge.json, then adds the field', async () => {
   const s = await narrow('actions', {});
   const row = s.shown().find((x) => String(x.key).startsWith('mechanic policy '));
@@ -305,13 +306,21 @@ test('a greyed mechanic turns its capability on in cartridge.json, then adds the
   const amount = l.shown().find((x) => String(x.key).startsWith('mechanic amount '));
   assert.deepEqual([amount.props.disabled, amount.props.accessibilityState.disabled], [true, true]);
   assert.equal(words(amount).includes(WORDS.first), true);
-  const i = await narrow('items', {}); // slot has no least value: revealed empty once equipment is on
+  // slot has no least value: revealed empty once equipment is on, and kept where web's reload
+  // after the cartridge.json write (App.tsx) finds it: the page's sessionStorage
+  const kept = new Map<string, string>();
+  Object.assign(globalThis, {
+    sessionStorage: { getItem: (k: string) => kept.get(k) ?? null, setItem: kept.set.bind(kept) },
+  });
+  const i = await narrow('items', {});
   (await i.press('mechanic slot '), await settle());
   assert.deepEqual(
     posts.splice(0).map((p) => p.file),
     ['cartridge.json'],
   );
   assert.ok(i.shown().some((x) => String(x.key).includes('"slot"')));
+  assert.match([...kept.values()].join(), /slot/); // a reload wipes the module, not this
+  delete (globalThis as { sessionStorage?: unknown }).sessionStorage;
 });
 
 // Breaks: Add… listing a mechanic field too; an empty Add mechanic… drawn; a stale or missing cartridge's menu.
@@ -332,12 +341,15 @@ test('Add… lists no mechanic field; no mechanic to add, or an unread cartridge
 });
 
 // Breaks: the field written when the cartridge.json write is refused (two gestures, not one), or the
-// refusal silent.
+// refusal silent; a refused field with no least value left revealed as if added.
 test('a turn-on refused as stale writes nothing and shows the refusal', async () => {
   const s = await narrow('actions', {});
   stale.add('cartridge.json');
   await s.press('mechanic policy ');
-  stale.clear();
   assert.deepEqual(posts.splice(0), []);
   assert.ok(s.shown().some((x) => x.props?.accessibilityRole === 'alert'));
+  const i = await narrow('items', {});
+  (await i.press('mechanic slot '), await settle());
+  stale.clear();
+  assert.ok(!i.shown().some((x) => String(x.key).includes('"slot"')));
 });
