@@ -158,21 +158,39 @@ for (const [p, op] of rows) {
 }
 
 // Breaks: a number written as text, or rewritten unchanged; an optional constant's On or Off, a
-// list's Move up or Copy, or a text's words writing the wrong value or path; a union's picker
-// marking the wrong branch; a map's Add over an existing key.
+// list's Move up or Copy, a text's words, a text key or a definition key writing the wrong value
+// or path; a boolean not shown as two picks; a field's name, label, Off or Remove words, a
+// required constant's value, a list's folding or Move up on its first item shown wrongly; a
+// union's picker marking the wrong branch; a map's Add over an existing key.
 test('each gesture writes the exact value at the exact path', async () => {
   const s = await opened('statuses', {
     fear: true,
     tick_every: 5,
-    allows: ['a', 'b'],
+    allows: ['a', 'b', 'c'],
     duration: 'permanent',
     name: { prose: 'x' },
+    resource: 'hp',
+    narration: { applied: 'k.a' },
   });
   sent();
+  const tick = within(s, ['tick_every']);
+  assert.ok(tick.some((x) => words(x) === 'tick_every' && !x.props?.onPress)); // its name
+  assert.ok(tick.some((x) => x.props?.accessibilityLabel === 'tick_every')); // its input
+  assert.ok(within(s, ['duration']).some((x) => words(x) === 'permanent')); // a required constant
+  assert.equal(words(button(s, WORDS.off)), WORDS.off);
+  assert.equal(
+    words(s.shown().find((x) => x.key === `remove ${s.file}:["resource"]`)),
+    WORDS.remove,
+  );
   assert.deepEqual(await typeIn(s, ['tick_every'], '5'), []);
   assert.deepEqual(await typeIn(s, ['tick_every'], 'six'), []);
   assert.deepEqual(await typeIn(s, ['tick_every'], '6'), [{ path: ['tick_every'], value: 6 }]);
   assert.deepEqual(await typeIn(s, ['name'], 'y'), [{ path: ['name'], value: { prose: 'y' } }]);
+  assert.deepEqual(await typeIn(s, ['resource'], 'mp'), [{ path: ['resource'], value: 'mp' }]);
+  await edit(s, ['narration'], () => {}); // unfolded
+  assert.deepEqual(await typeIn(s, ['narration', 'applied'], 'k.b'), [
+    { path: ['narration', 'applied'], value: 'k.b' },
+  ]);
   await s.press(`on ${s.file}:["fear"]`);
   await s.press(`remove ${s.file}:["fear"]`);
   assert.deepEqual(sent(), [
@@ -184,9 +202,11 @@ test('each gesture writes the exact value at the exact path', async () => {
     selected.map((x) => String(x.key)),
     ['branch 1'],
   );
-  await edit(s, ['allows'], () => {}); // unfolded
   const list = () => within(s, ['allows']);
-  for (const k of ['up 1', 'copy 0']) {
+  assert.ok(!list().some((x) => x.key === 'up 1')); // folded
+  await edit(s, ['allows'], () => {}); // unfolded
+  assert.ok(!list().some((x) => x.key === 'up 0'));
+  for (const k of ['up 2', 'copy 0']) {
     list()
       .find((x) => x.key === k)
       .props.onPress();
@@ -194,9 +214,15 @@ test('each gesture writes the exact value at the exact path', async () => {
     await settle();
   }
   assert.deepEqual(sent(), [
-    { path: ['allows'], value: ['b', 'a'] },
-    { path: ['allows'], value: ['a', 'a', 'b'] },
+    { path: ['allows'], value: ['a', 'c', 'b'] },
+    { path: ['allows'], value: ['a', 'a', 'b', 'c'] },
   ]);
+  const d = await opened('dialogues', { entry: true }); // a boolean field: two picks
+  within(d, ['entry'])
+    .find((x) => x.key === 'false')
+    .props.onPress();
+  await settle();
+  assert.deepEqual(sent(), [{ path: ['entry'], value: false }]);
   const f = await opened('facts', { facts: { lit: { type: 'boolean', initial: false } } });
   await edit(f, ['facts'], () => {}); // unfolded
   sent();

@@ -12,7 +12,7 @@ defmodule Loka.RedControlsTest do
                   docs/MECHANICS-TOOLBOX.md cartridges/toolbox_showcase/transcripts/walk_combat.jsonl
                   kernel/ts/play/registry.json test/loka/editor_generic_baseline.txt
                   bin/editor_red_controls.exs kernel/ts/play/parity.json
-                  test/loka/builder_todo_baseline.txt) do
+                  test/loka/builder_todo_baseline.txt test/loka/builder_generic_notyet.txt) do
       File.mkdir_p!(Path.dirname(Path.join(root, rel)))
       File.cp!(rel, Path.join(root, rel))
     end

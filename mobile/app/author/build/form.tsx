@@ -71,7 +71,6 @@ export function field(at: At, path: Step[], node: Obj | undefined, value: unknow
   if (s.as === 'const') return <Text style={inRow}>{String(s.value)}</Text>;
   if (s.as === 'scalar' && s.type === 'boolean') return picks(at, path, [true, false], value);
   if (s.as === 'scalar' || s.as === 'claimed') return typed(at, path, s, value);
-  return null;
 }
 
 /** A field's block: its name, Remove when it may go, and its value, folded when it holds fields;
