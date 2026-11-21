@@ -1073,8 +1073,8 @@ reasons and limits: [prose in the Book rulings](../design/prose-in-the-book-ruli
     `needs X in cartridge.json` (several joined by ` + `) or `needs another field first`. A greyed
     row whose only lack is capabilities in the registry is pressable: it writes them on in
     `cartridge.json` (`requires.capabilities`, each at its registry version) and then the field,
-    one gesture that one Undo takes back and a refusal undoes whole; it asks no confirm. Any other
-    greyed row is disabled. A turned-on field with no least value shows empty, as an `Add…` pick's
+    one gesture that one Undo takes back and a refusal undoes whole; it asks no confirm. Its reason
+    reads as an action. Any other greyed row is disabled, its reason greyed with it. A turned-on field with no least value shows empty, as an `Add…` pick's
     does, and stays shown through the page's reload after the write (on web, for the browser
     session) until it is written or removed. `Remove` on a mechanic takes only its field off; the
     capability stays on. `Remove` on a field shown empty and never written hides it, writing

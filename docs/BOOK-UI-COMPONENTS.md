@@ -319,8 +319,8 @@ up, Copy, Add item and every option or branch button are acts; a required consta
 free width (`minWidth: 0` in a row) so the rule never runs past the sheet. Contents' file names
 are acts, wrapping in a Room sheet row under their kind's row. `Add mechanic…` and its allowed
 names are acts; a greyed row is a touch target tall with no border or fill, its name
-`type.control` and its reason `type.label` beneath, both `dim`, the same look whether it can be
-pressed or not. Worst pair: `warning` on `card`, 4.75 (light).
+`type.control` in `dim` and its reason `type.label` beneath, in `action` when the row can be
+pressed, else `dim`. Worst pair: `warning` on `card`, 4.75 (light).
 
 Not adopted from the mock (no live consumer): the text drawer and its command chips, topic
 chips and scene pick cards. The mock's shop price rows are not adopted either: a stock, sale or service row is an
