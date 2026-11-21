@@ -28,11 +28,11 @@ function hour(at: At, path: Step[], sched: Obj, h: string, each: Obj | undefined
   const key = id(at, [...path, h, '#']);
   const move = () => {
     const t = (drafts.get(key) ?? h).trim();
-    drafts.delete(key);
     void run(async () => {
       const moved = rehour(sched, h, t, perDay);
-      if (typeof moved === 'string') return moved;
+      if (typeof moved === 'string') return moved; // the draft stays, as shown: leaving again refuses again
       if (t !== h) await ed.change([at.file, at.was, ops(path, moved)]);
+      drafts.delete(key);
     });
   };
   return (
@@ -59,7 +59,7 @@ export const schedule =
     const each = s.as === 'object' ? s.each : undefined;
     const next = addHour(sched, room, perDay);
     const key = id(at, [...path, '+hour']);
-    return block(at, path, node, value, removable, [
+    return block(at, path, node, value, removable, () => [
       ...Object.keys(sched).map((h) => hour(at, path, sched, h, each, perDay)),
       next
         ? act(WORDS.add, () => set(at, path, next), undefined, key)

@@ -26,7 +26,11 @@ function ask(file: string, key: string, wield: boolean) {
       status === 200 ? fightsShown((r as Fights).fights, key, wield) : String(r),
     )
     .catch((e: Error) => e.message)
-    .then((shown) => (ran.set(file, { of, shown }), known.redraw()));
+    .then((shown) => {
+      if (ran.get(file)?.of !== of) return; // a later run's, or a later /story's
+      ran.set(file, { of, shown });
+      known.redraw();
+    });
 }
 
 const fight = (t: Exclude<Shown, string | unknown[]>) => (

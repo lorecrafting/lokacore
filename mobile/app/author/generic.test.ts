@@ -11,6 +11,7 @@ const { sheets } = await import('./build/sheet.tsx');
 await import('./build/Build.tsx'); // the app's registration of the def: sheet
 const { WORDS } = await import('./build/form.tsx');
 const HOURS = (await import('./build/schedule.tsx')).WORDS;
+const COMBAT = (await import('./build/combat.tsx')).WORDS;
 
 const root = new URL('../../../', import.meta.url);
 const read = (rel: string) => JSON.parse(readFileSync(new URL(rel, root), 'utf8'));
@@ -36,6 +37,7 @@ let hash = 'S'; // every file's sha256 now
 const stale = new Set<string>(); // files changed on disk since the sheet read them
 const asked: string[] = []; // each GET /fights
 let fights: object = { why: 'none yet' }; // what it answers
+let held: (() => void)[] | undefined; // when set, each /fights waits here to answer
 const posts: { file: string; ops: { path: unknown[]; value?: unknown; delete?: true }[] }[] = [];
 /** The builder api: each file's source and its kind's `/schema/<dir>` as write.ts answers it. */
 async function api(path: string, sent?: any): Promise<[number, any]> {
@@ -43,7 +45,11 @@ async function api(path: string, sent?: any): Promise<[number, any]> {
     return sent.was === hash && !stale.has(sent.file)
       ? (posts.push(sent), [200, { id: 1 }])
       : [409, { bytes: '{}', sha256: hash }]; // write.ts's stale answer: the file changed since read
-  if (path.startsWith('/fights')) return (asked.push(path), [200, { hash, fights }]);
+  if (path.startsWith('/fights')) {
+    asked.push(path);
+    if (held) await new Promise<void>((r) => held!.push(r));
+    return [200, { hash, fights }];
+  }
   if (path === '/story') return [200, { map: [], graph: { nodes: [] }, files: {} }];
   if (path === '/templates') return [200, []];
   const dir = /^\/schema\/(\w+)$/.exec(path)?.[1];
@@ -414,6 +420,15 @@ test('Combat: Run fights asks GET /fights and shows the rows it answers, until t
   );
   (load(), await settle(), await settle());
   assert.ok(!texts(npc).includes(row('25.00%', '75.00%')));
+  // An answer from before the /story changed never overwrites a later run still running.
+  held = [];
+  assert.ok(await npc.press(`fights ${npc.file}`));
+  (load(), await settle(), await settle());
+  assert.ok(await npc.press(`fights ${npc.file}`));
+  (held[0](), await settle());
+  assert.ok(texts(npc).includes(COMBAT.running));
+  (held[1](), (held = undefined), await settle());
+  assert.ok(texts(npc).includes(row('25.00%', '75.00%')));
   fights = { why: 'none yet' };
 });
 
@@ -431,6 +446,9 @@ test('Schedule: an hour moves within the day, a refusal writes nothing, Add hour
     await settle()
   );
   await move('3', '21');
+  assert.deepEqual(sent(), []);
+  assert.ok(s.shown().some((x) => words(x) === 'an hour is below 20'));
+  (hour('3').props.onBlur(), await settle()); // the field still shows 21: leaving it again refuses again
   assert.deepEqual(sent(), []);
   assert.ok(s.shown().some((x) => words(x) === 'an hour is below 20'));
   await move('3', '5');

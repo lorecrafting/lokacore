@@ -74,7 +74,7 @@ export function block(
   node: Obj | undefined,
   value: unknown,
   removable: boolean,
-  drawn = field(at, path, node, value),
+  drawn = () => field(at, path, node, value), // built only when shown
 ) {
   const key = id(at, path);
   const [s] = shapeOf(node, value, at.defs, at.seen);
@@ -102,7 +102,7 @@ export function block(
             )
           : null}
       </View>
-      {flag ? null : !folds || opened.has(key) ? drawn : null}
+      {flag ? null : !folds || opened.has(key) ? drawn() : null}
     </View>
   );
 }
