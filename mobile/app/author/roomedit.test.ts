@@ -197,16 +197,24 @@ test("a person's sheet refuses a room no node holds without writing, and moves t
   doc['npcs/hen.json'] = hen;
 });
 
-// Breaks: the pencil after a person's name opening another sheet, or one after a room's own title
-// bound key (the Room pencil's) opening a person's.
+// Breaks: the pencil after a person's or item's name opening another sheet, or one after a room's
+// own title (the Room pencil's) or another field of the person opening a person's.
 test("the pencil after a person's name opens that person's sheet; no other key gets one", () => {
   const opened: string[] = [];
   const pen = thingPen('npc.hen.name', (id) => opened.push(id)) as any;
   pen.props.onPress({ stopPropagation() {} });
-  assert.deepEqual(opened, ['npc:hen']);
+  (thingPen('item.cup.name', (id) => opened.push(id)) as any).props.onPress({
+    stopPropagation() {},
+  });
+  assert.deepEqual(opened, ['npc:hen', 'item:cup']);
   assert.equal(
     thingPen('room.hall.title', () => {}),
     undefined,
+  );
+  assert.equal(
+    thingPen('npc.hen.description', () => {}),
+    undefined,
+    'only the name',
   );
 });
 

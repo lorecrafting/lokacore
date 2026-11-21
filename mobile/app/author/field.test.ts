@@ -223,12 +223,12 @@ test('a line changed on disk offers Keep mine and Take theirs', async () => {
   sent.length = 0;
 });
 
-// Breaks (ruling 9): an unwritten line showing the owner `~`, its field opening on `~`, or leaving
-// it empty writing an empty line or refusing to close.
+// Breaks (ruling 9): an unwritten line showing the owner `~` or unruled, its field opening on `~`, or
+// leaving it empty writing an empty line or refusing to close.
 test('an unwritten line is a blank ruled line whose field opens empty', async () => {
-  const drawn = page('~');
-  assert.ok(!JSON.stringify(line(drawn).props.children).includes('~'), 'the owner sees `~`');
-  assert.equal(line(drawn).props.accessibilityLabel, 'Unwritten description, edit');
+  const on = line(page('~')).props;
+  assert.ok(!/~/.test(JSON.stringify(on.children)) && /loka-line/.test(JSON.stringify(on.style)));
+  assert.equal(on.accessibilityLabel, 'Unwritten description, edit');
   const input = await opened('~', at('~'));
   assert.equal(input.props.defaultValue, '');
   input.props.onSubmitEditing();
