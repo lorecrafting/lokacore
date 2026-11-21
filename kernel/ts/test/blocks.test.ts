@@ -6,7 +6,15 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { test } from 'node:test';
 import { Ajv2020 } from 'ajv/dist/2020.js';
-import { addHour, fightOf, rehour, roomPicks } from '../play/blocks.ts';
+import {
+  addHour,
+  fightOf,
+  fightsShown,
+  NOT_TARGET,
+  NO_TARGETS,
+  rehour,
+  roomPicks,
+} from '../play/blocks.ts';
 import { added, allowed, pickKind } from '../play/card.ts';
 import { uiSchema } from '../play/ui_schema.ts';
 
@@ -82,6 +90,13 @@ test("an NPC's fight rows are its own target's", () => {
   assert.deepEqual(fightOf(report, 'warden'), t('c@1:npc/warden'));
   assert.equal(fightOf(report, 'rat'), undefined);
   assert.equal(fightOf({ why: 'no world' }, 'warden'), 'no world');
+  // Break: a weapon shown one NPC's rows, an NPC every target, a missing target or an empty world
+  // shown nothing, or a failed run's reason dropped (the panel's and the builder's Combat block).
+  assert.deepEqual(fightsShown(report, 'warden', false), t('c@1:npc/warden'));
+  assert.equal(fightsShown(report, 'rat', false), NOT_TARGET);
+  assert.deepEqual(fightsShown(report, 'warden', true), report.report.targets);
+  assert.equal(fightsShown({ report: { ...report.report, targets: [] } }, 'x', true), NO_TARGETS);
+  assert.equal(fightsShown({ why: 'no world' }, 'warden', true), 'no world');
 });
 
 // Break: an hour's room key (a lone room, a case list's fallback) stays free text, or the

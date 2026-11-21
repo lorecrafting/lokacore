@@ -217,9 +217,6 @@ items.tags.book.delete
 items.vessel.book.create
 items.vessel.book.edit
 items.vessel.book.delete
-items.weapon.book.create
-items.weapon.book.edit
-items.weapon.book.delete
 items.words.book.create
 items.words.book.edit
 items.words.book.delete
@@ -245,9 +242,6 @@ npcs.ambient.book.delete
 npcs.ask.book.create
 npcs.ask.book.edit
 npcs.ask.book.delete
-npcs.attack.book.create
-npcs.attack.book.edit
-npcs.attack.book.delete
 npcs.attributes.book.create
 npcs.attributes.book.edit
 npcs.attributes.book.delete
@@ -260,9 +254,6 @@ npcs.capacity.book.delete
 npcs.cues.book.create
 npcs.cues.book.edit
 npcs.cues.book.delete
-npcs.daily_schedule.book.create
-npcs.daily_schedule.book.edit
-npcs.daily_schedule.book.delete
 npcs.description.book.create
 npcs.description.book.edit
 npcs.description.book.delete
@@ -275,9 +266,6 @@ npcs.disposition.book.delete
 npcs.drops.book.create
 npcs.drops.book.edit
 npcs.drops.book.delete
-npcs.hp.book.create
-npcs.hp.book.edit
-npcs.hp.book.delete
 npcs.immune.book.create
 npcs.immune.book.edit
 npcs.immune.book.delete

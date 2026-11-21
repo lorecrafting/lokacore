@@ -4,37 +4,28 @@
 import type { ReactNode } from 'react';
 import { Text, TextInput, View } from 'react-native';
 import { branchOf, entered, plain } from '../../../../kernel/ts/play/card.ts';
-import {
-  least,
-  moved,
-  picked,
-  shapeOf,
-  type Defs,
-  type Shape,
-} from '../../../../kernel/ts/play/generic.ts';
+import { least, moved, picked, shapeOf, type Shape } from '../../../../kernel/ts/play/generic.ts';
 import type { Blocked } from '../../../../kernel/ts/play/allowed.ts';
 import { titles } from '../../../../kernel/ts/play/ui_schema.ts';
 import { size, space, type } from '../../book/tokens.ts';
 import { ink } from './build.ts';
 import { reveal, reveals } from './reveal.ts';
-import { known } from './room.tsx';
 import { ed, inRow, row, run } from './roomedit.tsx';
+import {
+  drafts,
+  drop,
+  id,
+  opened,
+  ops,
+  set,
+  toggle,
+  type At,
+  type Mechanics,
+  type Obj,
+  type Step,
+  type Write,
+} from './formwrite.ts';
 import { act, greyed } from './sheet.tsx';
-
-type Obj = Record<string, unknown>;
-type Step = string | number;
-type Write = Parameters<typeof ed.change>[number];
-/** Add mechanic…'s fields the cartridge takes, and those it refuses with any turn-on write (`turnOn`). */
-export type Mechanics = { allowed: string[]; blocked: (Blocked & { on?: Write })[] };
-/** The file drawn and the hash it was read at, its schema's `$defs`, the definitions entered so far and a root field's least value. */
-export type At = {
-  file: string;
-  was: string;
-  defs: Defs;
-  seen: string[];
-  seed?: (f: string) => unknown;
-  mech?: Mechanics;
-};
 
 export const WORDS = {
   add: 'Add…',
@@ -49,10 +40,8 @@ export const WORDS = {
   needs: (caps: string[]) => `needs ${caps.join(' + ')} in cartridge.json`,
   first: 'needs another field first',
 };
-const opened = new Set<string>(); // the folded blocks and Add… menus open, by file and path
-const drafts = new Map<string, string>(); // each typed field, as typed
 const LABEL = { ...type.label, color: ink('dim') };
-const INPUT = {
+export const INPUT = {
   ...inRow,
   flex: 1, // mutate-skip: layout
   minWidth: 0, // mutate-skip: layout; a row may shrink the field below its own width, to the docked sheet's
@@ -60,33 +49,14 @@ const INPUT = {
   borderColor: ink('action'), // mutate-skip: layout
 }; // mutate-skip: layout; ruled as the Room sheet's Move field
 
-const id = (at: At, path: Step[]) => `${at.file}:${JSON.stringify(path)}`;
-const toggle = (key: string) => (
-  opened.has(key) ? opened.delete(key) : opened.add(key),
-  known.redraw()
-);
-const set = (at: At, path: Step[], value: unknown) =>
-  value === undefined
-    ? (reveal(id(at, path), true), known.redraw())
-    : void run(() =>
-        ed.change([at.file, at.was, ops(path, value)]).then(() => reveal(id(at, path), false)),
-      );
-/** A write at `path`; at the root (a picked branch, a whole list) one op per top-level field. */
-const ops = (path: Step[], value: unknown) =>
-  path.length
-    ? [{ path, value }]
-    : Array.isArray(value)
-      ? value.map((v, i) => ({ path: [i], value: v }))
-      : Object.entries(value as Obj).map(([k, v]) => ({ path: [k], value: v }));
-const drop = (at: At, path: Step[], value: unknown) =>
-  value === undefined // only revealed: nothing on disk to delete
-    ? (reveal(id(at, path), false), known.redraw())
-    : void run(() => ed.change([at.file, at.was, [{ path, delete: true }]]));
-
 /** `value` at `path` drawn as `node` says. */
 export function field(at: At, path: Step[], node: Obj | undefined, value: unknown): ReactNode {
   const [s, seen] = shapeOf(node, value, at.defs, at.seen);
-  const inner = { ...at, seen, ...(path.length && { seed: undefined, mech: undefined }) };
+  const inner = {
+    ...at,
+    seen,
+    ...(path.length && { seed: undefined, mech: undefined, claim: undefined }),
+  };
   if (s.as === 'object') return object(inner, path, s, value);
   if (s.as === 'array') return array(inner, path, s.items, value);
   if (s.as === 'union') return union(inner, path, s.branches, value);
@@ -98,7 +68,14 @@ export function field(at: At, path: Step[], node: Obj | undefined, value: unknow
 
 /** A field's block: its name, Remove when it may go, and its value, folded when it holds fields;
  * an optional constant (a flag such as `hidden`) is an On/Off switch: present or absent. */
-function block(at: At, path: Step[], node: Obj | undefined, value: unknown, removable: boolean) {
+export function block(
+  at: At,
+  path: Step[],
+  node: Obj | undefined,
+  value: unknown,
+  removable: boolean,
+  drawn = () => field(at, path, node, value), // built only when shown
+) {
   const key = id(at, path);
   const [s] = shapeOf(node, value, at.defs, at.seen);
   const folds = s.as === 'object' || s.as === 'array';
@@ -125,7 +102,7 @@ function block(at: At, path: Step[], node: Obj | undefined, value: unknown, remo
             )
           : null}
       </View>
-      {flag ? null : !folds || opened.has(key) ? field(at, path, node, value) : null}
+      {flag ? null : !folds || opened.has(key) ? drawn() : null}
     </View>
   );
 }
@@ -143,7 +120,13 @@ function object(at: At, path: Step[], s: Extract<Shape, { as: 'object' }>, value
   const add = (k: string) => set(at, [...path, k], start(k));
   return [
     ...keys.map((k) =>
-      block(at, [...path, k], s.props[k] ?? s.each, v[k], !s.required.includes(k)),
+      (at.claim?.(k) ?? block)(
+        at,
+        [...path, k],
+        s.props[k] ?? s.each,
+        v[k],
+        !s.required.includes(k),
+      ),
     ),
     absent.length ? act(WORDS.add, () => toggle(menu), opened.has(menu), `add ${menu}`) : null,
     ...(opened.has(menu)

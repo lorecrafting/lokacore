@@ -320,7 +320,13 @@ free width (`minWidth: 0` in a row) so the rule never runs past the sheet. Conte
 are acts, wrapping in a Room sheet row under their kind's row. `Add mechanic…` and its allowed
 names are acts; a greyed row is a touch target tall with no border or fill, its name
 `type.control` in `dim` and its reason `type.label` beneath, in `action` when the row can be
-pressed, else `dim`. Worst pair: `warning` on `card`, 4.75 (light).
+pressed, else `dim`. Builder 2.4: Combat's `Run fights` is an act; `running the fights…`, which
+stands in for it, and the answer under it (a target's name, its verdict, each table row, a
+why-not line) are `type.small` `fg`, one per line in one column with `space.md` sides, a row's
+cells joined by ` · ` and wrapping at word gaps, with no columns and no sideways scroll (a row wraps on a 384 px docked sheet or a 390 px phone).
+Schedule's hours are Room sheet rows; an hour's number is the Area field at a fixed width that
+holds two digits, not the free width; Remove and `Add hour` are acts, and `Add hour` greyed is the
+greyed row, disabled. Worst pair: `warning` on `card`, 4.75 (light).
 
 Not adopted from the mock (no live consumer): the text drawer and its command chips, topic
 chips and scene pick cards. The mock's shop price rows are not adopted either: a stock, sale or service row is an

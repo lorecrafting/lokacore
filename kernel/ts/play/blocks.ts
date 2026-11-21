@@ -1,6 +1,6 @@
 // The NPC and Item cards' Combat and Schedule blocks (docs/rnd/gui-editor-design-2026-11-04.md §4.2,
 // §4.3): what they write and read; the blocks draw only (tools/author-panel/src/edit/blocks/).
-import type { FightsReport, Section } from './numbers.ts';
+import type { FightsReport, Section, Target } from './numbers.ts';
 import type { Ui } from './ui_schema.ts';
 
 type Schedule = Record<string, unknown>;
@@ -29,6 +29,22 @@ export const fightOf = (fights: Section<FightsReport>, key: string) =>
   'why' in fights
     ? fights.why
     : fights.report.targets.find((t) => t.target.endsWith(`:npc/${key}`));
+
+export const NOT_TARGET = 'not a fight target (an NPC with an attack, alive at start)';
+export const NO_TARGETS = 'no fight targets in this world';
+export const NO_HOUR = 'place the NPC in a room first, or the day is full';
+
+/** What a Combat block shows from GET /fights: why it did not run; for a weapon (`wield`) every
+ * target, its hand in each fight; else the NPC `key`'s own rows. */
+export function fightsShown(
+  fights: Section<FightsReport>,
+  key: string,
+  wield: boolean,
+): string | Target | Target[] {
+  if ('why' in fights) return fights.why;
+  if (wield) return fights.report.targets.length ? fights.report.targets : NO_TARGETS;
+  return fightOf(fights, key) ?? NOT_TARGET;
+}
 
 /** An hour's walker ui with its room keys (a lone room, a case list's fallback) drawn by the room picker. */
 export function roomPicks(ui: Ui): Ui {

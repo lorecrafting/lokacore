@@ -924,9 +924,9 @@
     "edit": "blocks/Combat.tsx",
     "delete": "cards/Entity.tsx",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "combat.tsx",
+      "edit": "combat.tsx",
+      "delete": "combat.tsx"
     }
   },
   "items.words": {
@@ -1104,9 +1104,9 @@
     "edit": "blocks/Combat.tsx",
     "delete": "cards/Entity.tsx",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "combat.tsx",
+      "edit": "combat.tsx",
+      "delete": "combat.tsx"
     }
   },
   "npcs.attributes": {
@@ -1154,9 +1154,9 @@
     "edit": "blocks/Schedule.tsx",
     "delete": "cards/Entity.tsx",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "schedule.tsx",
+      "edit": "schedule.tsx",
+      "delete": "schedule.tsx"
     }
   },
   "npcs.description": {
@@ -1204,9 +1204,9 @@
     "edit": "blocks/Combat.tsx",
     "delete": "cards/Entity.tsx",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "combat.tsx",
+      "edit": "combat.tsx",
+      "delete": "combat.tsx"
     }
   },
   "npcs.immune": {
