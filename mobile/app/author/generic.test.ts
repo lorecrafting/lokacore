@@ -445,6 +445,7 @@ test('Schedule: an hour moves within the day, a refusal writes nothing, Add hour
     hour(h).props.onBlur(),
     await settle()
   );
+  assert.ok(s.shown().some((x) => words(x) === 'cases')); // each hour drawn by the schedule's own shape
   await move('3', '21');
   assert.deepEqual(sent(), []);
   assert.ok(s.shown().some((x) => words(x) === 'an hour is below 20'));

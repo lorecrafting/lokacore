@@ -21,6 +21,7 @@ import { ed, row, run } from './roomedit.tsx';
 import { act, greyed } from './sheet.tsx';
 
 export const WORDS = { add: 'Add hour', hour: (h: string) => `hour ${h}` };
+const HOUR = { ...INPUT, flexGrow: 0, width: 48 }; // mutate-skip: a style, no logic
 
 /** Hour `h`: its number, written as the schedule moved on leaving the field (a refusal is shown,
  * never written), its value, and its Remove. */
@@ -40,7 +41,7 @@ function hour(at: At, path: Step[], sched: Obj, h: string, each: Obj | undefined
       <TextInput
         accessibilityLabel={WORDS.hour(h)}
         defaultValue={h}
-        style={{ ...INPUT, flexGrow: 0, width: 48 }}
+        style={HOUR}
         onChangeText={(t) => void drafts.set(key, t)}
         onBlur={move}
       />
