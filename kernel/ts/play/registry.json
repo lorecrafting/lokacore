@@ -1974,9 +1974,9 @@
     "edit": "cards/Room.tsx",
     "delete": "cards/Room.tsx",
     "book": {
-      "create": "todo",
+      "create": "roomedit.tsx",
       "edit": "todo",
-      "delete": "todo"
+      "delete": "roomedit.tsx"
     }
   },
   "rooms.locks": {

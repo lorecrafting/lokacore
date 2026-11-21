@@ -95,6 +95,7 @@ test('every server route has a client caller or an exemption', () => {
     ...files(join(REPO, 'tools/author-panel/src')),
     ...files(join(REPO, 'mobile/app/author')),
     join(REPO, 'kernel/ts/play/mapedit.ts'), // the map's edits, a client shared by the panel and the builder
+    join(REPO, 'kernel/ts/play/drop.ts'), // Delete, shared the same way
   ])
     visit(parsed(f), (n) => {
       if (!ts.isCallExpression(n) && !ts.isNewExpression(n)) return;

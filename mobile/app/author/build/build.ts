@@ -10,9 +10,12 @@ import { named, type Step } from '../place.ts';
 export const ink = (role: keyof typeof color.light) => `var(--loka-${role}, ${color.light[role]})`;
 /** Where the builder state is kept, beside the place (`loka-place`), so a reload restores it. */
 export const BUILD = 'loka-build';
-/** Build on or off, and the open sheet with its scroll offset; a sheet is open only in Build.
+/** Build on or off, and the open sheets (bottom first, ids like `checks` or `room:<key>`) with the
+ * top one's scroll offset; sheets are open only in Build.
  * `room`: the room of the last write, which Start in this room goes back to. */
-export type Builder = { on: boolean; sheet?: string; scroll?: number; room?: string };
+export type Builder = { on: boolean; sheets?: string[]; scroll?: number; room?: string };
+/** At most four sheets stack; a fifth replaces the top (design §5). */
+const STACK = 4;
 type Store = Pick<Storage, 'getItem' | 'setItem'>;
 
 export function restored(store: Store): Builder {
@@ -20,10 +23,11 @@ export function restored(store: Store): Builder {
     const b = JSON.parse(store.getItem(BUILD) ?? 'null') as Partial<Builder> | null;
     const room = typeof b?.room === 'string' ? { room: b.room } : {};
     if (b?.on !== true) return { on: false, ...room };
-    if (typeof b.sheet !== 'string') return { on: true, ...room };
+    const sheets = Array.isArray(b.sheets) ? b.sheets.filter((id) => typeof id === 'string') : [];
+    if (!sheets.length) return { on: true, ...room };
     return {
       on: true,
-      sheet: b.sheet,
+      sheets: sheets.slice(-STACK),
       scroll: typeof b.scroll === 'number' ? b.scroll : 0,
       ...room,
     };
@@ -36,6 +40,18 @@ export const keep = (store: Store, builder: Builder) =>
   store.setItem(BUILD, JSON.stringify(builder));
 /** Leaving Build closes every sheet. */
 export const toggled = ({ on, room }: Builder): Builder => ({ on: !on, ...(room && { room }) });
+/** `id` on top of the stack (moved there if it is lower), scrolled to its start; already on top,
+ * nothing changes. */
+export function opened(b: Builder, id: string): Builder {
+  if (b.sheets?.at(-1) === id) return b;
+  const s = (b.sheets ?? []).filter((x) => x !== id);
+  return { ...b, sheets: [...(s.length < STACK ? s : s.slice(0, -1)), id], scroll: 0 };
+}
+/** Back: the top sheet (or sheet `id`) closes, the one under it shows again. */
+export function closed({ sheets, scroll: _, ...b }: Builder, id?: string): Builder {
+  const rest = (id ? sheets?.filter((x) => x !== id) : sheets?.slice(0, -1)) ?? [];
+  return rest.length ? { ...b, sheets: rest, scroll: 0 } : b;
+}
 
 /** The strip's notice for a replay refused at step index `at`. */
 export const refusal = (steps: Step[], at: number) =>

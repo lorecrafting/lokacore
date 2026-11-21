@@ -32,7 +32,7 @@ registerHooks({
         format: 'module',
         shortCircuit: true,
         source:
-          "export const Pressable='Pressable',Text='Text',TextInput='TextInput',View='View',ScrollView='ScrollView',SafeAreaView='SafeAreaView',AccessibilityInfo={},Easing={},Animated={View:'View'},PanResponder={},StyleSheet={absoluteFill:{}},useColorScheme=()=>null;",
+          "export const Pressable='Pressable',Text='Text',TextInput='TextInput',View='View',ScrollView='ScrollView',SafeAreaView='SafeAreaView',AccessibilityInfo={},Easing={},Animated={View:'View'},PanResponder={},StyleSheet={absoluteFill:{},create:(s)=>s},useColorScheme=()=>null,useWindowDimensions=()=>({width:globalThis.innerWidth??0,height:0});",
       };
     if (!url.endsWith('.tsx')) return next(url, context);
     return {

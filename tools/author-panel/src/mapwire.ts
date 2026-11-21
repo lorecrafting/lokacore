@@ -1,18 +1,12 @@
 // The panel's one map editor (mapedit.ts over /__author) and the palette's map commands; a refusal
 // shows on the map's footer line (areamap.tsx registers it), else in an alert.
-import { ask, templates, type Story } from './author.ts';
+import { ask, io, templates, type Story } from './author.ts';
 import type { MapRoom } from '../../../kernel/ts/play/map.ts';
 export { kept } from '../../../kernel/ts/play/map.ts'; // App's /story failure rule
 import { editor, freeKey, type Editor } from '../../../kernel/ts/play/mapedit.ts';
 import { nodeOf } from './shell.ts';
 
-const ed = editor({
-  post: ask,
-  source: (file) =>
-    fetch(`/__author/source?file=${encodeURIComponent(file)}`).then(async (r) =>
-      r.ok ? r.json() : Promise.reject(new Error(await r.text())),
-    ),
-});
+const ed = editor(io);
 /** The mounted map's footer line, else an alert; the last story's rooms (App.tsx useStory), so the
  * palette's and the Room card's map commands work with the map closed; App's selection (`pick`). */
 export const alone = (why: string): void => void (why && alert(why));

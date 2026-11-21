@@ -5,6 +5,8 @@ export type { Edge, Beat, Outline, Story, Todo } from './storylist.ts';
 import type { Timings } from './shell.ts';
 import type { useBook } from './book.ts';
 import type { Fights, Numbers } from '../../../kernel/ts/play/numbers.ts';
+import { drop as remove } from '../../../kernel/ts/play/drop.ts';
+import type { Io } from '../../../kernel/ts/play/mapedit.ts';
 
 export const ask = (path: string, sent: object) =>
   fetch(`/__author/${path}`, { method: 'POST', body: JSON.stringify(sent) }).then(async (r) => ({
@@ -15,25 +17,22 @@ export const ask = (path: string, sent: object) =>
 const refused = ({ ok, told }: { ok: boolean; told: unknown }) =>
   ok || alert(typeof told === 'string' ? told : 'Changed outside: try again');
 
-/** The palette's Delete (POST /delete): the definition's file, or its row of a root file; a refusal
- * (what still names it) shows as an alert, as the palette's New does. */
+/** The map's and Delete's routes (kernel/ts/play/mapedit.ts `Io`): a missing source rejects. */
+export const io: Io = {
+  post: ask,
+  source: (file) =>
+    fetch(`/__author/source?file=${encodeURIComponent(file)}`).then(async (r) =>
+      r.ok ? r.json() : Promise.reject(new Error(await r.text())),
+    ),
+};
+/** The palette's Delete (kernel/ts/play/drop.ts); a refusal (what still names it) shows as an
+ * alert, as the palette's New does. */
 export async function drop(key: string, file?: string) {
   if (!file) return alert(`${key}: no source file`);
-  const { sha256 } = await fetch(`/__author/source?file=${encodeURIComponent(file)}`).then((r) =>
-    r.ok ? r.json() : { sha256: undefined },
+  const why = await remove(io, key, file, (files) => confirm(`Also deletes ${files.join(', ')}`)).catch(
+    () => `${file}: not found`,
   );
-  if (!sha256) return alert(`${file}: not found`);
-  const sent = { file, was: sha256, ...(!file.includes('/') && { key }) };
-  let { ok, told } = await ask('delete', sent);
-  // a delete that takes other files (a return leg, a template) names them with their shas once
-  const set = (told as { set?: { file: string; sha256: string }[] })?.set;
-  if (set && confirm(`Also deletes ${set.map((m) => m.file).join(', ')}`))
-    ({ ok, told } = await ask('delete', {
-      ...sent,
-      also: Object.fromEntries(set.map((m) => [m.file, m.sha256])),
-    }));
-  else if (set) return;
-  refused({ ok, told });
+  if (why) alert(why);
 }
 /** The palette's Undo: the newest journal entry if it is a Delete, which leaves no card to undo it
  * from (loka-wfrgk.92); else the Book's Cmd-Z, which puts back its own words. */

@@ -12,6 +12,7 @@ const seen = new Map<string, string>();
 const said = new Map<string, string>();
 const sent: [string, any][] = []; // every request the page makes, hold included
 let answers: [number, unknown][] = []; // the next /line and /edit answers, in order
+let map: object[] = []; // /story's rooms
 const hearth = () => {};
 const tick = () => new Promise((r) => setTimeout(r));
 const edits = () => sent.filter(([path]) => path === '/__author/edit').map(([, b]) => b);
@@ -21,6 +22,7 @@ Object.assign(globalThis, {
   localStorage: { getItem: (k: string) => (k === BUILD ? '{"on":true}' : null), setItem() {} },
   addEventListener() {},
   fetch: async (path: string, init?: { body: string }) => {
+    if (path === '/__author/story') return { status: 200, json: async () => ({ map }) };
     sent.push([path.split('?')[0], init && JSON.parse(init.body)]);
     const [status, body] = path.startsWith('/__author/hold') ? [200, null] : answers.shift()!;
     return { status, json: async () => body };
@@ -36,9 +38,9 @@ const api = async (path: string, body?: object): Promise<[number, any]> => {
 build.install({ seen, said, redraw() {}, api });
 
 /** The room page as the author preview draws it: panel.tsx's played().text binds each line. */
-function page(description: string) {
+function page(description: string, title = 'Loft') {
   const text = (key: string) => {
-    const words = key === KEY ? description : 'Loft';
+    const words = key === KEY ? description : title;
     const shown = tagged(key, words);
     bind(seen, shown, key);
     said.set(key, words);
@@ -318,7 +320,9 @@ test('Checks: the badge opens the list, each row goes to its line', async () => 
   const rows = () => strip().filter((n) => n.props?.accessibilityRole === 'link');
   const row = (label: string) => rows().find((n) => n.props.children.props.children === label);
   page(LINKED); // binds KEY on this page
+  assert.deepEqual(button(BADGE).props.accessibilityState, { expanded: false });
   button(BADGE).props.onPress();
+  assert.deepEqual(button(BADGE).props.accessibilityState, { expanded: true });
   answers = [[200, at(LINKED)]];
   row(`${KEY}: not confirmed`).props.onPress();
   await tick();
@@ -419,4 +423,60 @@ test('the keep-my-place notice offers its three ways back', async () => {
     build.install({ seen, said, redraw() {}, api });
     sent.length = 0;
   }
+});
+
+// Breaks: the pencil missing from the room's own title, shown on another room's title or on a
+// line that is not a title, a press (or Enter, Space) opening no Room sheet, another key opening
+// one, its press also the title's look, the Book not redrawn when the map comes (no pencil until
+// some other redraw), or an unwritten title or exit showing `~` (ruling 9).
+test("the room title's pencil opens its Room sheet: summary and exits", async () => {
+  map = [
+    { key: 'loft', area: 'mill', title: 'Loft', exits: [{ dir: 'down', to: 'cellar' }] },
+    { key: 'cellar', area: null, title: '~', exits: [] },
+  ];
+  let here = 'loft';
+  build.place({
+    place: () => ({ steps: [] }),
+    here: () => here,
+    drop() {},
+    back() {},
+    startIn() {},
+  });
+  let redrawn = 0;
+  build.install({ seen, said, redraw: () => redrawn++, api });
+  await tick();
+  assert.equal(redrawn, 1, 'the map came: the Book draws its pencil');
+  const pencils = (drawn: any[]) =>
+    drawn.filter((n) => n.props?.accessibilityLabel?.startsWith('Edit '));
+  const pencil = (drawn: any[]) => pencils(drawn)[0];
+  const pen = pencil(page('A low loft.'));
+  assert.equal(pen.props.accessibilityLabel, 'Edit Loft');
+  assert.equal(pencils(page('Loft')).length, 1, 'a description in the title words has a pencil');
+  const dialog = () =>
+    nodes(build.Strip({ children: 'book' })).find((n) => n.props?.role === 'dialog');
+  const key = (k: string) =>
+    pen.props.onKeyDown({ key: k, preventDefault() {}, stopPropagation() {} });
+  key('a');
+  assert.equal(dialog(), undefined, 'another key opens no sheet');
+  for (const k of ['Enter', ' ']) {
+    key(k);
+    nodes(dialog())
+      .find((n) => n.props?.children?.props?.children === 'Back')
+      .props.onPress();
+  }
+  let looked = true;
+  pen.props.onPress({ stopPropagation: () => (looked = false) });
+  assert.equal(looked, false, "the pencil's press also looks");
+  const words = nodes(dialog())
+    .map((n) => n.props?.children)
+    .filter((c) => typeof c === 'string');
+  const at = words.indexOf('mill · 1 exit') - 1; // the summary, above the sheet's edits
+  assert.deepEqual(words.slice(at, at + 3), ['Loft', 'mill · 1 exit', 'down → cellar']);
+  here = 'cellar';
+  const drawn = page('A low loft.', '~');
+  assert.equal(pencil(drawn).props.accessibilityLabel, 'Edit cellar');
+  const title = drawn.find((n) => n.props?.accessibilityRole === 'header');
+  assert.equal(title.props.children[0].props.children, 'title', 'a `~` title drawn');
+  assert.equal(pencil(page('A low loft.', 'Loft')), undefined, "another room's title");
+  build.install({ seen, said, redraw() {}, api }); // the stored state: no sheet open
 });
