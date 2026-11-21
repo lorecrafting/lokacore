@@ -19,6 +19,7 @@ type Dialogue = Def & {
   npc: Ref;
   prompt?: string;
   entry?: boolean;
+  keyword?: string;
   choices?: Record<string, Next>;
 };
 type Next = { then?: string; then_failed?: string };
@@ -120,18 +121,20 @@ function unoffered(c: Cartridge, here: string, { seen, offered }: Seen): Ghost[]
       words: a.name ?? a.key,
       reason: when(a.policy),
     }));
-  // A drawn speaker offers one talk, and only a way in (not `entry: false`, no answer leads to it).
+  // A drawn speaker offers one talk, and only a way in, as the kernel's `entries` and `talks` (selection.ts):
+  // never a keyword one (G9) or `entry: false`; an `entry: true` one, else one no answer leads to.
+  // ponytail: the kernel's hub fallback (a speaker whose dialogues all lead to each other) is not mirrored.
   const all = list(c.dialogues);
   const named = new Set(
     all.flatMap(([, d]) => Object.values(d.choices ?? {}).flatMap((x) => [x.then, x.then_failed])),
   );
   const speaker = (d: Dialogue) => refString(d.npc as DefinitionRef);
   const talking = new Set(all.filter(([, d]) => offered(d.key)).map(([, d]) => speaker(d)));
+  const marked = new Set(all.filter(([, d]) => d.entry).map(([, d]) => speaker(d)));
+  const way = (d: Dialogue) =>
+    !d.keyword && d.entry !== false && (d.entry || (!marked.has(speaker(d)) && !named.has(d.key)));
   const talks = all
-    .filter(
-      ([, d]) =>
-        seen(speaker(d)) && !talking.has(speaker(d)) && d.entry !== false && !named.has(d.key),
-    )
+    .filter(([, d]) => seen(speaker(d)) && !talking.has(speaker(d)) && way(d))
     .map(([ref, d]): Ghost => ({
       kind: 'dialogue',
       key: d.key,

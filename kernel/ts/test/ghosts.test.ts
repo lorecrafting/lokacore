@@ -127,3 +127,25 @@ test('ghosts: the dialogue of who is drawn but not offered; absent people and it
     `dialogue:whisper dialogue.whisper.prompt | ${NOT_OFFERED}`,
   ]);
 });
+
+// Breaks caught: a keyword dialogue ghosted (a talk never opens one, row G9); an `entry: true` dialogue an
+// answer leads to not ghosted; the speaker's other dialogues ghosted beside their `entry: true` one.
+test('ghosts: a dialogue ghost is the way in the kernel would offer', () => {
+  const said = (key: string, more = {}) => ({
+    key,
+    prompt: key,
+    npc: ref('npc', 'thief'),
+    ...more,
+  });
+  const dialogues = {
+    'c@1:dialogue/greet': said('greet', { entry: true }),
+    'c@1:dialogue/aside': said('aside', { entry: false, choices: { a: { then: 'greet' } } }),
+    'c@1:dialogue/whisper': said('whisper'),
+    'c@1:dialogue/rumor': said('rumor', { keyword: 'rumor' }),
+  };
+  const talks = ghosts(view(['e1'], [], []), { ...CART, dialogues } as Cartridge, 'yard', IDS);
+  assert.deepEqual(
+    talks.filter((g) => g.kind === 'dialogue').map((g) => g.key),
+    ['greet'],
+  );
+});
