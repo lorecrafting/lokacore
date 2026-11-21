@@ -4,9 +4,9 @@
     "edit": "generic",
     "delete": "generic",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "generic",
+      "edit": "generic",
+      "delete": "generic"
     }
   },
   "actions.accessibility": {
@@ -14,9 +14,9 @@
     "edit": "generic",
     "delete": "generic",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "generic",
+      "edit": "generic",
+      "delete": "generic"
     }
   },
   "actions.aliases": {
@@ -44,9 +44,9 @@
     "edit": "generic",
     "delete": "generic",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "generic",
+      "edit": "generic",
+      "delete": "generic"
     }
   },
   "actions.cooldown": {
@@ -94,9 +94,9 @@
     "edit": "generic",
     "delete": "generic",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "generic",
+      "edit": "generic",
+      "delete": "generic"
     }
   },
   "actions.name": {
@@ -104,9 +104,9 @@
     "edit": "generic",
     "delete": "generic",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "generic",
+      "edit": "generic",
+      "delete": "generic"
     }
   },
   "actions.outcomes": {
@@ -124,9 +124,9 @@
     "edit": "blocks/Rules.tsx",
     "delete": "generic",
     "book": {
-      "create": "todo",
+      "create": "generic",
       "edit": "todo",
-      "delete": "todo"
+      "delete": "generic"
     }
   },
   "actions.priority": {
@@ -134,9 +134,9 @@
     "edit": "generic",
     "delete": "generic",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "generic",
+      "edit": "generic",
+      "delete": "generic"
     }
   },
   "actions.reason": {
@@ -154,9 +154,9 @@
     "edit": "blocks/Rules.tsx",
     "delete": "generic",
     "book": {
-      "create": "todo",
+      "create": "generic",
       "edit": "todo",
-      "delete": "todo"
+      "delete": "generic"
     }
   },
   "actions.tip": {
@@ -254,9 +254,9 @@
     "edit": "generic",
     "delete": "generic",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "generic",
+      "edit": "generic",
+      "delete": "generic"
     }
   },
   "behaviours.reactions": {
@@ -264,9 +264,9 @@
     "edit": "generic",
     "delete": "generic",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "generic",
+      "edit": "generic",
+      "delete": "generic"
     }
   },
   "bleeds.abstract": {
@@ -274,9 +274,9 @@
     "edit": "generic",
     "delete": "generic",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "generic",
+      "edit": "generic",
+      "delete": "generic"
     }
   },
   "bleeds.duration": {
@@ -284,9 +284,9 @@
     "edit": "generic",
     "delete": "generic",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "generic",
+      "edit": "generic",
+      "delete": "generic"
     }
   },
   "bleeds.hp_loss": {
@@ -294,9 +294,9 @@
     "edit": "generic",
     "delete": "generic",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "generic",
+      "edit": "generic",
+      "delete": "generic"
     }
   },
   "bleeds.narration": {
@@ -304,9 +304,9 @@
     "edit": "generic",
     "delete": "generic",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "generic",
+      "edit": "generic",
+      "delete": "generic"
     }
   },
   "bleeds.tick_every": {
@@ -314,9 +314,9 @@
     "edit": "generic",
     "delete": "generic",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "generic",
+      "edit": "generic",
+      "delete": "generic"
     }
   },
   "cartridge.alternates": {
@@ -574,9 +574,9 @@
     "edit": "generic",
     "delete": "generic",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "generic",
+      "edit": "generic",
+      "delete": "generic"
     }
   },
   "emotes.others": {
@@ -584,9 +584,9 @@
     "edit": "generic",
     "delete": "generic",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "generic",
+      "edit": "generic",
+      "delete": "generic"
     }
   },
   "emotes.to": {
@@ -594,9 +594,9 @@
     "edit": "generic",
     "delete": "generic",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "generic",
+      "edit": "generic",
+      "delete": "generic"
     }
   },
   "facts.facts": {
@@ -604,9 +604,9 @@
     "edit": "generic",
     "delete": "generic",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "generic",
+      "edit": "generic",
+      "delete": "generic"
     }
   },
   "items.abstract": {
@@ -984,9 +984,9 @@
     "edit": "generic",
     "delete": "generic",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "generic",
+      "edit": "generic",
+      "delete": "generic"
     }
   },
   "liquids.amount": {
@@ -994,9 +994,9 @@
     "edit": "generic",
     "delete": "generic",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "generic",
+      "edit": "generic",
+      "delete": "generic"
     }
   },
   "liquids.applies": {
@@ -1004,9 +1004,9 @@
     "edit": "blocks/Rules.tsx",
     "delete": "generic",
     "book": {
-      "create": "todo",
+      "create": "generic",
       "edit": "todo",
-      "delete": "todo"
+      "delete": "generic"
     }
   },
   "liquids.cures": {
@@ -1014,9 +1014,9 @@
     "edit": "generic",
     "delete": "generic",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "generic",
+      "edit": "generic",
+      "delete": "generic"
     }
   },
   "liquids.drink_amount": {
@@ -1024,9 +1024,9 @@
     "edit": "generic",
     "delete": "generic",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "generic",
+      "edit": "generic",
+      "delete": "generic"
     }
   },
   "liquids.grams_per_unit": {
@@ -1034,9 +1034,9 @@
     "edit": "generic",
     "delete": "generic",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "generic",
+      "edit": "generic",
+      "delete": "generic"
     }
   },
   "liquids.name": {
@@ -1044,9 +1044,9 @@
     "edit": "generic",
     "delete": "generic",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "generic",
+      "edit": "generic",
+      "delete": "generic"
     }
   },
   "liquids.resource": {
@@ -1054,9 +1054,9 @@
     "edit": "generic",
     "delete": "generic",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "generic",
+      "edit": "generic",
+      "delete": "generic"
     }
   },
   "liquids.unit_label": {
@@ -1064,9 +1064,9 @@
     "edit": "generic",
     "delete": "generic",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "generic",
+      "edit": "generic",
+      "delete": "generic"
     }
   },
   "npcs.abstract": {
@@ -1814,9 +1814,9 @@
     "edit": "generic",
     "delete": "generic",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "generic",
+      "edit": "generic",
+      "delete": "generic"
     }
   },
   "replenish.cap": {
@@ -1824,9 +1824,9 @@
     "edit": "generic",
     "delete": "generic",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "generic",
+      "edit": "generic",
+      "delete": "generic"
     }
   },
   "replenish.count": {
@@ -1834,9 +1834,9 @@
     "edit": "generic",
     "delete": "generic",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "generic",
+      "edit": "generic",
+      "delete": "generic"
     }
   },
   "replenish.every": {
@@ -1844,9 +1844,9 @@
     "edit": "generic",
     "delete": "generic",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "generic",
+      "edit": "generic",
+      "delete": "generic"
     }
   },
   "replenish.from": {
@@ -1854,9 +1854,9 @@
     "edit": "blocks/Rules.tsx",
     "delete": "generic",
     "book": {
-      "create": "todo",
+      "create": "generic",
       "edit": "todo",
-      "delete": "todo"
+      "delete": "generic"
     }
   },
   "replenish.items": {
@@ -1864,9 +1864,9 @@
     "edit": "generic",
     "delete": "generic",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "generic",
+      "edit": "generic",
+      "delete": "generic"
     }
   },
   "replenish.to": {
@@ -1874,9 +1874,9 @@
     "edit": "blocks/Rules.tsx",
     "delete": "generic",
     "book": {
-      "create": "todo",
+      "create": "generic",
       "edit": "todo",
-      "delete": "todo"
+      "delete": "generic"
     }
   },
   "resources.resources": {
@@ -2065,8 +2065,8 @@
     "delete": "generic",
     "book": {
       "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "edit": "generic",
+      "delete": "generic"
     }
   },
   "scenes.control": {
@@ -2074,9 +2074,9 @@
     "edit": "generic",
     "delete": "generic",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "generic",
+      "edit": "generic",
+      "delete": "generic"
     }
   },
   "scenes.description": {
@@ -2085,8 +2085,8 @@
     "delete": "generic",
     "book": {
       "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "edit": "generic",
+      "delete": "generic"
     }
   },
   "scenes.name": {
@@ -2095,8 +2095,8 @@
     "delete": "generic",
     "book": {
       "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "edit": "generic",
+      "delete": "generic"
     }
   },
   "scenes.on": {
@@ -2104,9 +2104,9 @@
     "edit": "generic",
     "delete": "generic",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "generic",
+      "edit": "generic",
+      "delete": "generic"
     }
   },
   "scenes.on_end": {
@@ -2114,9 +2114,9 @@
     "edit": "generic",
     "delete": "generic",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "generic",
+      "edit": "generic",
+      "delete": "generic"
     }
   },
   "scenes.steps": {
@@ -2124,9 +2124,9 @@
     "edit": "generic",
     "delete": "generic",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "generic",
+      "edit": "generic",
+      "delete": "generic"
     }
   },
   "scenes.treatment": {
@@ -2144,9 +2144,9 @@
     "edit": "generic",
     "delete": "generic",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "generic",
+      "edit": "generic",
+      "delete": "generic"
     }
   },
   "services.action": {
@@ -2154,9 +2154,9 @@
     "edit": "generic",
     "delete": "generic",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "generic",
+      "edit": "generic",
+      "delete": "generic"
     }
   },
   "services.benefit": {
@@ -2164,9 +2164,9 @@
     "edit": "blocks/Rules.tsx",
     "delete": "generic",
     "book": {
-      "create": "todo",
+      "create": "generic",
       "edit": "todo",
-      "delete": "todo"
+      "delete": "generic"
     }
   },
   "services.currency": {
@@ -2174,9 +2174,9 @@
     "edit": "generic",
     "delete": "generic",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "generic",
+      "edit": "generic",
+      "delete": "generic"
     }
   },
   "services.name": {
@@ -2184,9 +2184,9 @@
     "edit": "generic",
     "delete": "generic",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "generic",
+      "edit": "generic",
+      "delete": "generic"
     }
   },
   "services.narration": {
@@ -2194,9 +2194,9 @@
     "edit": "generic",
     "delete": "generic",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "generic",
+      "edit": "generic",
+      "delete": "generic"
     }
   },
   "services.price": {
@@ -2204,9 +2204,9 @@
     "edit": "generic",
     "delete": "generic",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "generic",
+      "edit": "generic",
+      "delete": "generic"
     }
   },
   "services.provider": {
@@ -2214,9 +2214,9 @@
     "edit": "generic",
     "delete": "generic",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "generic",
+      "edit": "generic",
+      "delete": "generic"
     }
   },
   "skills.abstract": {
@@ -2224,9 +2224,9 @@
     "edit": "generic",
     "delete": "generic",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "generic",
+      "edit": "generic",
+      "delete": "generic"
     }
   },
   "skills.growth": {
@@ -2234,9 +2234,9 @@
     "edit": "generic",
     "delete": "generic",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "generic",
+      "edit": "generic",
+      "delete": "generic"
     }
   },
   "skills.hidden": {
@@ -2244,9 +2244,9 @@
     "edit": "generic",
     "delete": "generic",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "generic",
+      "edit": "generic",
+      "delete": "generic"
     }
   },
   "skills.learned": {
@@ -2254,9 +2254,9 @@
     "edit": "generic",
     "delete": "generic",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "generic",
+      "edit": "generic",
+      "delete": "generic"
     }
   },
   "skills.name": {
@@ -2264,9 +2264,9 @@
     "edit": "generic",
     "delete": "generic",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "generic",
+      "edit": "generic",
+      "delete": "generic"
     }
   },
   "skills.prerequisite": {
@@ -2274,9 +2274,9 @@
     "edit": "blocks/Rules.tsx",
     "delete": "generic",
     "book": {
-      "create": "todo",
+      "create": "generic",
       "edit": "todo",
-      "delete": "todo"
+      "delete": "generic"
     }
   },
   "skills.profession": {
@@ -2284,9 +2284,9 @@
     "edit": "generic",
     "delete": "generic",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "generic",
+      "edit": "generic",
+      "delete": "generic"
     }
   },
   "skills.qualification": {
@@ -2294,9 +2294,9 @@
     "edit": "blocks/Rules.tsx",
     "delete": "generic",
     "book": {
-      "create": "todo",
+      "create": "generic",
       "edit": "todo",
-      "delete": "todo"
+      "delete": "generic"
     }
   },
   "skills.ranks": {
@@ -2304,9 +2304,9 @@
     "edit": "generic",
     "delete": "generic",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "generic",
+      "edit": "generic",
+      "delete": "generic"
     }
   },
   "skills.requirement": {
@@ -2314,9 +2314,9 @@
     "edit": "generic",
     "delete": "generic",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "generic",
+      "edit": "generic",
+      "delete": "generic"
     }
   },
   "statuses.abstract": {
@@ -2324,9 +2324,9 @@
     "edit": "generic",
     "delete": "generic",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "generic",
+      "edit": "generic",
+      "delete": "generic"
     }
   },
   "statuses.allows": {
@@ -2334,9 +2334,9 @@
     "edit": "generic",
     "delete": "generic",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "generic",
+      "edit": "generic",
+      "delete": "generic"
     }
   },
   "statuses.blocks": {
@@ -2344,9 +2344,9 @@
     "edit": "generic",
     "delete": "generic",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "generic",
+      "edit": "generic",
+      "delete": "generic"
     }
   },
   "statuses.concealment": {
@@ -2354,9 +2354,9 @@
     "edit": "generic",
     "delete": "generic",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "generic",
+      "edit": "generic",
+      "delete": "generic"
     }
   },
   "statuses.cues": {
@@ -2364,9 +2364,9 @@
     "edit": "generic",
     "delete": "generic",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "generic",
+      "edit": "generic",
+      "delete": "generic"
     }
   },
   "statuses.duration": {
@@ -2374,9 +2374,9 @@
     "edit": "blocks/Rules.tsx",
     "delete": "generic",
     "book": {
-      "create": "todo",
+      "create": "generic",
       "edit": "todo",
-      "delete": "todo"
+      "delete": "generic"
     }
   },
   "statuses.fear": {
@@ -2384,9 +2384,9 @@
     "edit": "generic",
     "delete": "generic",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "generic",
+      "edit": "generic",
+      "delete": "generic"
     }
   },
   "statuses.kind": {
@@ -2394,9 +2394,9 @@
     "edit": "generic",
     "delete": "generic",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "generic",
+      "edit": "generic",
+      "delete": "generic"
     }
   },
   "statuses.modifies": {
@@ -2404,9 +2404,9 @@
     "edit": "generic",
     "delete": "generic",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "generic",
+      "edit": "generic",
+      "delete": "generic"
     }
   },
   "statuses.movement": {
@@ -2414,9 +2414,9 @@
     "edit": "generic",
     "delete": "generic",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "generic",
+      "edit": "generic",
+      "delete": "generic"
     }
   },
   "statuses.name": {
@@ -2424,9 +2424,9 @@
     "edit": "generic",
     "delete": "generic",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "generic",
+      "edit": "generic",
+      "delete": "generic"
     }
   },
   "statuses.narration": {
@@ -2434,9 +2434,9 @@
     "edit": "generic",
     "delete": "generic",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "generic",
+      "edit": "generic",
+      "delete": "generic"
     }
   },
   "statuses.per_tick": {
@@ -2444,9 +2444,9 @@
     "edit": "generic",
     "delete": "generic",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "generic",
+      "edit": "generic",
+      "delete": "generic"
     }
   },
   "statuses.perception": {
@@ -2454,9 +2454,9 @@
     "edit": "generic",
     "delete": "generic",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "generic",
+      "edit": "generic",
+      "delete": "generic"
     }
   },
   "statuses.pierced_by": {
@@ -2464,9 +2464,9 @@
     "edit": "generic",
     "delete": "generic",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "generic",
+      "edit": "generic",
+      "delete": "generic"
     }
   },
   "statuses.resistances": {
@@ -2474,9 +2474,9 @@
     "edit": "generic",
     "delete": "generic",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "generic",
+      "edit": "generic",
+      "delete": "generic"
     }
   },
   "statuses.resource": {
@@ -2484,9 +2484,9 @@
     "edit": "generic",
     "delete": "generic",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "generic",
+      "edit": "generic",
+      "delete": "generic"
     }
   },
   "statuses.tick_every": {
@@ -2494,9 +2494,9 @@
     "edit": "generic",
     "delete": "generic",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "generic",
+      "edit": "generic",
+      "delete": "generic"
     }
   },
   "statuses.ticks": {
@@ -2504,9 +2504,9 @@
     "edit": "generic",
     "delete": "generic",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "generic",
+      "edit": "generic",
+      "delete": "generic"
     }
   },
   "structures.abstract": {
@@ -2514,9 +2514,9 @@
     "edit": "generic",
     "delete": "generic",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "generic",
+      "edit": "generic",
+      "delete": "generic"
     }
   },
   "structures.description": {
@@ -2524,9 +2524,9 @@
     "edit": "generic",
     "delete": "generic",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "generic",
+      "edit": "generic",
+      "delete": "generic"
     }
   },
   "structures.locks": {
@@ -2534,9 +2534,9 @@
     "edit": "generic",
     "delete": "generic",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "generic",
+      "edit": "generic",
+      "delete": "generic"
     }
   },
   "structures.max_per_owner": {
@@ -2544,9 +2544,9 @@
     "edit": "generic",
     "delete": "generic",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "generic",
+      "edit": "generic",
+      "delete": "generic"
     }
   },
   "structures.name": {
@@ -2554,9 +2554,9 @@
     "edit": "generic",
     "delete": "generic",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "generic",
+      "edit": "generic",
+      "delete": "generic"
     }
   },
   "structures.ruin": {
@@ -2564,9 +2564,9 @@
     "edit": "generic",
     "delete": "generic",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "generic",
+      "edit": "generic",
+      "delete": "generic"
     }
   },
   "structures.tags": {
@@ -2574,9 +2574,9 @@
     "edit": "generic",
     "delete": "generic",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "generic",
+      "edit": "generic",
+      "delete": "generic"
     }
   },
   "structures.variants": {
@@ -2584,9 +2584,9 @@
     "edit": "generic",
     "delete": "generic",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "generic",
+      "edit": "generic",
+      "delete": "generic"
     }
   },
   "structures.weathering": {
@@ -2594,9 +2594,9 @@
     "edit": "generic",
     "delete": "generic",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "generic",
+      "edit": "generic",
+      "delete": "generic"
     }
   },
   "text": {
@@ -2614,9 +2614,9 @@
     "edit": "generic",
     "delete": "generic",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "generic",
+      "edit": "generic",
+      "delete": "generic"
     }
   },
   "topics.fact": {
@@ -2624,9 +2624,9 @@
     "edit": "generic",
     "delete": "generic",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "generic",
+      "edit": "generic",
+      "delete": "generic"
     }
   },
   "topics.name": {
@@ -2634,9 +2634,9 @@
     "edit": "generic",
     "delete": "generic",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "generic",
+      "edit": "generic",
+      "delete": "generic"
     }
   },
   "transports.abstract": {

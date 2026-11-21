@@ -1,6 +1,6 @@
 # Editor gate controls (bin/editor_gate.exs via toolbox_page.exs), evaluated by
 # bin/red_controls.exs, which runs the list this returns: a planted registry, baseline, parity
-# table, todo baseline or main's copy of one, each at tmp/red-editor-<name>.*; the files not
+# table, todo baseline, not-yet list or main's copy of one, each at tmp/red-editor-<name>.*; the files not
 # planted are the committed ones.
 root = Path.expand("..", __DIR__)
 editor_registry = "kernel/ts/play/registry.json"
@@ -11,6 +11,8 @@ editor = JSON.decode!(File.read!(Path.join(root, editor_registry)))
 base = File.read!(Path.join(root, editor_baseline))
 parity = JSON.decode!(File.read!(Path.join(root, parity_table)))
 todo = File.read!(Path.join(root, todo_baseline))
+notyet_list = "test/loka/builder_generic_notyet.txt"
+notyet = File.read!(Path.join(root, notyet_list))
 # rooms.name with its book create set to v (nil drops the key)
 book = fn v ->
   b = editor["rooms.name"]["book"]
@@ -73,8 +75,12 @@ editor_controls =
         {"grown", %{main: String.replace(base, "services.name.edit\n", "")},
          "services.name.edit: not in main's baseline"},
         {"book-dropped", %{registry: book.(nil)}, "rooms.name: book create missing"},
-        {"book-generic", %{registry: book.("generic")},
-         "rooms.name: book create generic: refused"},
+        {"notyet-generic",
+         %{registry: put_in(editor, ["outline.parts", "book", "delete"], "generic")},
+         "outline.parts.book.delete: no longer not yet generic, delete the line"},
+        {"notyet-grown",
+         %{notyet_main: String.replace(notyet, ~r/^outline\.parts\.book\.delete .*\n/m, "")},
+         "outline.parts.book.delete: not in main's baseline"},
         {"book-missing", %{registry: book.("Nope.tsx")},
          "rooms.name: book create Nope.tsx: no such file"},
         {"book-escape", %{registry: book.("../panel.tsx")},
@@ -118,7 +124,9 @@ editor_controls =
          at.(:main, editor_baseline),
          at.(:parity, parity_table),
          at.(:todo, todo_baseline),
-         at.(:todo_main, todo_baseline)
+         at.(:todo_main, todo_baseline),
+         at.(:notyet, notyet_list),
+         at.(:notyet_main, notyet_list)
        ], expect}
   end
 

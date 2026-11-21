@@ -1,6 +1,6 @@
-// The generic sheet (author/build/generic.tsx, form.tsx; design §7, slice 2.3): every field of the
-// generic baseline (test/loka/editor_generic_baseline.txt) is added, edited and removed by the
-// sheet, each a `/change` op at the baseline line's own path.
+// The generic sheet (author/build/generic.tsx, form.tsx; design §7, slice 2.3): every registry row
+// whose book verb is `generic` (kernel/ts/play/registry.json, held by bin/editor_gate.exs) is
+// added, edited or removed by the sheet, each a `/change` op at the row's own path.
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
@@ -13,7 +13,8 @@ await import('./build/generic.tsx');
 const root = new URL('../../../', import.meta.url);
 const read = (rel: string) => JSON.parse(readFileSync(new URL(rel, root), 'utf8'));
 const defs = read('schemas/source/defs.schema.json').$defs;
-const ROOTS = ['facts', 'layout', 'text']; // the baseline's single-file kinds
+// kernel/ts/play/guard.ts ROOTS: one file each (mobile/app reaches the kernel only through local-story)
+const ROOTS = ['cartridge', 'facts', 'text', 'resources', 'attributes', 'layout'];
 const settle = () => new Promise((r) => setTimeout(r));
 
 const files = new Map<string, unknown>();
@@ -24,6 +25,7 @@ async function api(path: string, sent?: any): Promise<[number, any]> {
   if (path === '/story') return [200, { map: [], graph: { nodes: [] }, files: {} }];
   if (path === '/templates') return [200, []];
   const dir = /^\/schema\/(\w+)$/.exec(path)?.[1];
+  if (dir === 'outline') return [404, null]; // write.ts serves no /schema/outline (guard.ts DIRS)
   if (dir) {
     const stub = read(`schemas/source/${dir}.schema.json`);
     return [200, { ...stub, $ref: stub.$ref.replace(/^defs\.schema\.json/, ''), $defs: defs }];
@@ -34,12 +36,14 @@ async function api(path: string, sent?: any): Promise<[number, any]> {
     ? [200, { bytes: JSON.stringify(files.get(file)), sha256: 'S', kind }]
     : [404, null];
 }
-story(
-  api,
-  () => {},
-  () => {},
-  () => {},
-);
+const load = () =>
+  story(
+    api,
+    () => {},
+    () => {},
+    () => {},
+  );
+load();
 await settle();
 
 let n = 0;
@@ -47,6 +51,7 @@ let n = 0;
 async function opened(kind: string, doc: unknown) {
   const file = ROOTS.includes(kind) ? `${kind}.json` : `${kind}/f${n++}.json`;
   files.set(file, doc);
+  if (ROOTS.includes(kind)) (load(), await settle()); // a new /story: the sheet reads the file again
   sheets.def.body(file);
   await settle();
   await settle();
@@ -67,14 +72,20 @@ const VARIANTS = [{}, { command: 'x' }, { abstract: true }, { extends: 'x' }]; /
 const button = (s: { shown: () => any[] }, w: string) =>
   s.shown().find((x) => x.props?.accessibilityRole === 'button' && words(x) === w);
 const sent = () => posts.splice(0).flatMap((p) => p.ops);
-const input = (s: { shown: () => any[] }, label: string) =>
-  s.shown().find((x) => x.props?.onBlur && x.props.accessibilityLabel === label);
 
 /** The writes one gesture on field `f` of `doc` sends, the field found as `op` needs it. */
 async function gesture(kind: string, f: string, op: string, doc: Record<string, unknown>) {
   const s = await opened(kind, doc);
   sent();
-  if (op === 'delete') return (await s.press(`remove ${s.file}:${JSON.stringify([f])}`), sent());
+  if (op === 'delete') {
+    if (await s.press(`remove ${s.file}:${JSON.stringify([f])}`)) return sent();
+    const entry = (await edit(s, [f]), sent()).find((o) => o.path.length === 2); // a required map: one entry
+    if (!entry) return [];
+    const t = await opened(kind, { ...doc, [f]: { [entry.path[1]]: entry.value } });
+    await edit(t, [f], () => {});
+    sent();
+    return (await t.press(`remove ${t.file}:${JSON.stringify(entry.path)}`), sent());
+  }
   if (op === 'create') {
     button(s, 'Add…')?.props.onPress();
     await settle();
@@ -89,29 +100,37 @@ async function gesture(kind: string, f: string, op: string, doc: Record<string, 
 }
 
 /** One edit inside the block at `path`: typed into its input, else a pick, an Add item or an Add… field. */
-async function edit(s: { file: string; shown: () => any[] }, path: unknown[]) {
+async function edit(s: { file: string; shown: () => any[] }, path: unknown[], then?: () => void) {
   const key = `${s.file}:${JSON.stringify(path)}`;
   const inside = () => nodes(s.shown().find((x) => x.key === key)?.props.children);
   const hit = (pred: (x: any) => boolean) =>
     inside().find((x) => x.props?.accessibilityRole === 'button' && pred(x));
   const press = async (x: any) => x && (x.props.onPress(), await settle(), true);
-  if (await press(hit((x) => String(x.key) === `fold ${key}`))) void 0;
+  await press(hit((x) => String(x.key) === `fold ${key}` && !x.props.accessibilityState?.expanded));
+  if (then) return then();
   const typed = inside().find((x) => x.props?.onBlur);
-  if (typed) return (typed.props.onChangeText('7'), typed.props.onBlur(), await settle());
+  const t = typed?.props.defaultValue === '7' ? '8' : '7'; // a change: the same words write nothing
+  if (typed) return (typed.props.onChangeText(t), typed.props.onBlur(), await settle());
+  const named = inside().find((x) => x.props?.accessibilityLabel === 'Key');
+  if (named) named.props.onChangeText('k');
+  if (named && (await press(hit((x) => String(x.key).startsWith('entry '))))) return;
   if (await press(hit((x) => x.props.accessibilityState?.selected === false))) return;
   if (await press(hit((x) => words(x) === 'Add item'))) return;
-  if (await press(hit((x) => words(x) === 'Add…')))
-    await press(hit((x) => String(x.key).startsWith('add ') && words(x) !== 'Add…'));
+  if (!(await press(hit((x) => words(x) === 'Add…')))) return;
+  await press(hit((x) => String(x.key).startsWith('add ') && words(x) !== 'Add…'));
+  if (!posts.length) await press(hit((x) => x.props.accessibilityState?.selected === false)); // drawn empty: pick its value
 }
 
-const baseline = readFileSync(new URL('test/loka/editor_generic_baseline.txt', root), 'utf8')
-  .trim()
-  .split('\n');
-for (const line of baseline) {
-  const [kind, ...rest] = line.split('.');
-  const op = rest.pop()!;
-  const f = rest[0];
-  test(line, async () => {
+const rows = Object.entries(read('kernel/ts/play/registry.json') as Record<string, any>).flatMap(
+  ([p, r]) =>
+    Object.keys(r.book ?? {})
+      .filter((op) => r.book[op] === 'generic')
+      .map((op) => [p, op]),
+);
+assert.ok(rows.length > 0);
+for (const [p, op] of rows) {
+  const [kind, f] = p.split('.');
+  test(`${p}.book.${op}`, async () => {
     let ops: any[] = [];
     for (const v of ROOTS.includes(kind) ? [{}] : VARIANTS) {
       ops = await gesture(kind, f, 'create', { ...v });

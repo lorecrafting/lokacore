@@ -31,6 +31,8 @@ export const WORDS = {
   copy: 'Copy',
   item: 'Add item',
   key: 'Key',
+  on: 'On',
+  off: 'Off',
 };
 const opened = new Set<string>(); // the folded blocks and Add… menus open, by file and path
 const revealed = new Set<string>(); // fields added with no least value: drawn empty until written
@@ -72,7 +74,8 @@ export function field(at: At, path: Step[], node: Obj | undefined, value: unknow
   return null;
 }
 
-/** A field's block: its name, Remove when it may go, and its value, folded when it holds fields. */
+/** A field's block: its name, Remove when it may go, and its value, folded when it holds fields;
+ * an optional constant (a flag such as `hidden`) is an On/Off switch: present or absent. */
 function block(at: At, path: Step[], node: Obj | undefined, value: unknown, removable: boolean) {
   const key = id(at, path);
   const [s] = shapeOf(node, value, at.defs, at.seen);
@@ -86,9 +89,24 @@ function block(at: At, path: Step[], node: Obj | undefined, value: unknown, remo
         ) : (
           <Text style={LABEL}>{name}</Text>
         )}
-        {removable ? act(WORDS.remove, () => drop(at, path), undefined, `remove ${key}`) : null}
+        {s.as === 'const' && removable
+          ? act(WORDS.on, () => set(at, path, s.value), undefined, `on ${key}`, value === s.value)
+          : null}
+        {removable
+          ? act(
+              s.as === 'const' ? WORDS.off : WORDS.remove,
+              () => drop(at, path),
+              undefined,
+              `remove ${key}`,
+              s.as === 'const' ? value !== s.value : undefined,
+            )
+          : null}
       </View>
-      {!folds || opened.has(key) ? field(at, path, node, value) : null}
+      {s.as === 'const' && removable
+        ? null
+        : !folds || opened.has(key)
+          ? field(at, path, node, value)
+          : null}
     </View>
   );
 }
