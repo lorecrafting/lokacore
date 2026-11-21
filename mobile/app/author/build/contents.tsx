@@ -15,8 +15,8 @@ const names = new Map<string, string>(); // a NAMED kind's key, as typed
 /** New `kind`: its starter under a free key (or the typed one); a person or item opens its sheet. */
 const made = (kind: string) =>
   run(async () => {
-    const [status, all] = (await known.api?.('/templates')) ?? []; // the templates' keys are taken too
-    const temps: { dir: string; key: string }[] = status === 200 && Array.isArray(all) ? all : [];
+    const [, all] = (await known.api?.('/templates')) ?? []; // the templates' keys are taken too
+    const temps: { dir: string; key: string }[] = Array.isArray(all) ? all : []; // a refusal is words
     const held = temps.filter((t) => t.dir === kind).map((t) => t.key);
     const key = await create(io, kind, known.nodes, held, names.get(kind));
     names.delete(kind);
