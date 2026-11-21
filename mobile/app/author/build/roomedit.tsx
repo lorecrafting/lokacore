@@ -145,6 +145,8 @@ export function addHere(r: MapRoom, nodes: Node[], held: Template[], open: (id: 
           await ed.made(r, dir, key, up);
           open(`${nodeOf(dir)}:${key}`);
         }),
+      undefined,
+      `${dir}:${up ?? ''}`, // a template named in both kinds, or `Person`, keeps its own button
     );
   return (
     <View key="add" style={row}>

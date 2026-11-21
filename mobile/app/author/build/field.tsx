@@ -86,8 +86,9 @@ export function line(p: Props): Props {
         }
       : p;
   if (p.accessibilityRole === 'header') {
-    const pen = h.pencil?.(shown, nameKey(h, shown));
-    if (pen || blank) return { ...p, children: [blank ? hint('title') : p.children, pen] };
+    const [thing, pen] = [nameKey(h, shown), h.pencil?.(shown, nameKey(h, shown))];
+    const caption = pen && !thing ? 'title' : 'name'; // a pencil with no thing's key is the room's title
+    if (pen || blank) return { ...p, children: [blank ? hint(caption) : p.children, pen] };
   }
   const key = keyOf(h, shown);
   if (!key) return p;

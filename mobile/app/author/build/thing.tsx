@@ -85,7 +85,13 @@ function holderForm(dir: Dir, key: string, file: string, now: { kind: string; ke
     dir === 'items' ? (
       <View key="kinds" style={row}>
         {['room', 'npc', 'item'].map((k) =>
-          act(WORDS.holder[k], () => (chosen.set(`${dir}:${key}`, k), known.redraw())),
+          act(
+            WORDS.holder[k],
+            () => (chosen.set(`${dir}:${key}`, k), known.redraw()),
+            undefined,
+            k,
+            k === holder, // the picked kind, said to a screen reader too
+          ),
         )}
       </View>
     ) : null,
