@@ -241,3 +241,21 @@ export const cardMenuWith = (
     blocked: blocked(kind, fields, caps, mine, cart.world),
   };
 };
+
+/** The cartridge.json write that lets blocked field `f` in (Add mechanic…, book-ui.md "Build: the
+ * generic sheet"): one op per missing owning capability, at its registry version. None when
+ * the field's own need fails or a capability is not in the registry: the row stays greyed. */
+export const turnOn = (
+  kind: string,
+  f: string,
+  cart: { requires?: { capabilities?: object }; world?: Record<string, unknown> },
+  doc: Obj = {},
+) => {
+  const need = NEEDS[`${kind}.${f}`];
+  if (need && !need(doc, cart.world ?? {}, [])) return undefined;
+  const caps = cart.requires?.capabilities ?? {};
+  const missing = (OWNERS[`${kind}.${f}`]?.split(' ') ?? []).filter((o) => !Object.hasOwn(caps, o));
+  const rows = missing.map((o) => REGISTRY.find((c) => c.key === o));
+  if (!rows.length || !rows.every((c) => c)) return undefined;
+  return rows.map((c) => ({ path: ['requires', 'capabilities', c!.key], value: c!.version }));
+};

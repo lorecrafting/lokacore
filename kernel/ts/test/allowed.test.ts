@@ -5,6 +5,7 @@ import { join } from 'node:path';
 import { test } from 'node:test';
 import { added, allowed, blocked, held } from '../play/card.ts';
 import { contentGraph } from '../play/reach.ts';
+import { turnOn } from '../play/allowed.ts';
 
 const defs = JSON.parse(
   readFileSync(join(import.meta.dirname, '../../../schemas/source/defs.schema.json'), 'utf8'),
@@ -152,4 +153,30 @@ test("a menu's refused fields come back with the reason, and the halves partitio
   assert.deepEqual(blocked('npcs', ['daily_schedule'], { schedule: 1 }, { spawn_template: true }), [
     { field: 'daily_schedule', caps: [], needs: true }, // calendar.ex template_schedules
   ]);
+});
+
+// Break: Add mechanic… turning on the wrong capability, a stale version, one of several missing, or
+// offering a turn-on for a field whose own need no capability can meet (book-ui.md generic sheet).
+test('turnOn writes each missing owning capability at its registry version, or nothing', () => {
+  const cart = { requires: { capabilities: { speech: 1 } }, world: {} };
+  const at = (cap: string, version: number) => ({
+    path: ['requires', 'capabilities', cap],
+    value: version,
+  });
+  assert.deepEqual(turnOn('actions', 'policy', cart), [at('policy', 1)]);
+  assert.deepEqual(turnOn('items', 'edible', cart), [
+    at('food', 1),
+    at('resource', 1),
+    at('containment', 1),
+  ]); // OWNERS 'food resource containment'; registry versions all 1
+  assert.deepEqual(turnOn('npcs', 'ask', cart), [at('topic', 1)]); // speech is already on
+  // world.combat unset: a world number, not a capability, so no turn-on (the row stays greyed)
+  assert.equal(turnOn('npcs', 'attack', cart, { hp: 5 }), undefined);
+  assert.deepEqual(turnOn('npcs', 'attack', { ...cart, world: { combat: {} } }, { hp: 5 }), [
+    at('combat', 1),
+  ]);
+  assert.equal(
+    turnOn('actions', 'policy', { requires: { capabilities: { policy: 1 } } }),
+    undefined,
+  ); // none missing
 });

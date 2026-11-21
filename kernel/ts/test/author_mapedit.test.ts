@@ -343,11 +343,14 @@ test("a new NPC or item lands in the selected room's area, placed in that room",
 
 test("placement moves an NPC's room and replaces an item's whole location; undo puts it back", async () => {
   // Breaks: an item's old `room` kept beside its new holder, an NPC given a `location`, no Undo, or
-  // the generic sheet's write sent with the fresh hash, so a sheet read before the move overwrites it.
+  // the generic sheet's write sent with the fresh hash, so a sheet read before the move overwrites it,
+  // or a later write's refusal leaving the gesture's earlier write on disk.
   const [hen, pail] = ['areas/yard/npcs/hen.json', 'areas/yard/items/pail.json'];
   const was = (await io.source(hen)).sha256; // the sheet's read
   await ed.put(hen, 'npcs', 'room', 'b');
-  await assert.rejects(ed.change(hen, was, [{ path: ['room'], value: 'c' }]));
+  const [x, c] = [[{ path: ['x'], value: 1 }], [{ path: ['room'], value: 'c' }]];
+  await assert.rejects(ed.change([pail, (await io.source(pail)).sha256, x], [hen, was, c]));
+  assert.equal(json(pail).x, undefined);
   await ed.put(pail, 'items', 'npc', 'hen');
   assert.deepEqual([json(hen).room, json(hen).location], ['b', undefined]);
   assert.deepEqual(json(pail).location, { in: 'npc', npc: 'hen' });
@@ -413,6 +416,7 @@ test("a bind appends the short ref to that beat's nodes, and refuses a missing b
     [['rooms/c'], ['rooms/b', 'rooms/c']],
   );
   await assert.rejects(ed.bind(0, 3, 'rooms/c', known), /part 1 has no beat 3/);
+  await assert.rejects(ed.bind(1, 1, 'rooms/c', known), /outline.json has no part 2/);
   await assert.rejects(ed.bind(0, 2, 'rooms/b', known), /beat 2 already binds rooms\/b/);
 });
 
@@ -447,6 +451,7 @@ test('a beat is added in number order, retitled and removed; a repeated or a bel
     [5, undefined],
   ]);
   await assert.rejects(ed.dropBeat(0, 1), /part 1 has no beat 1/);
+  await assert.rejects(ed.dropBeat(1, 1), /outline.json has no part 2/);
   await ed.addBeat(0, 1); // 1 is the least number, and goes first
   assert.deepEqual(beats()[0], [1, undefined]);
 });

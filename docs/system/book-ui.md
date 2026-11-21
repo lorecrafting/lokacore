@@ -1033,7 +1033,9 @@ reasons and limits: [prose in the Book rulings](../design/prose-in-the-book-ruli
     kind a starter exists for, each with `New <kind>`; a kind whose key is the author's (text,
     behaviours) has a field named by the kind before it, and New with it empty does nothing. New
     makes the kind's starter under a free key (or the typed one); a person or item opens its
-    sheet, any other kind stays on Contents.
+    sheet, any other kind stays on Contents. Under each kind's row, in a row of its own, its JSON
+    source files the latest story names, sorted by path; a file opens its `def:<file>` sheet
+    (Build: the generic sheet) on top.
   - **Unwritten links.** In Build a link whose words are unwritten draws as an unwritten line
     does (Build: in-place field): a blank ruled line with the caption `name`, never `~`, named
     `Unwritten name, open`. It keeps its own press. Out of Build every link draws as before.
@@ -1064,6 +1066,19 @@ reasons and limits: [prose in the Book rulings](../design/prose-in-the-book-ruli
   - **Typed fields** (a string, a number, a text's words, a definition's key) show the present
     value on a ruled line and write when they lose focus, only when changed; a number field that
     does not read as a number writes nothing. Each fits the sheet's width, however deep its block.
+  - **Add mechanic…** (slice 2.3b; root fields only, after `Add…`). The fields that are mechanics
+    are never in `Add…`; they are in `Add mechanic…`, which opens or closes their list and is not
+    drawn while the list would be empty. First the absent mechanics this cartridge allows for the
+    kind, a pick written as an `Add…` pick; then the absent ones it refuses, greyed, each with why:
+    `needs X in cartridge.json` (several joined by ` + `) or `needs another field first`. A greyed
+    row whose only lack is capabilities in the registry is pressable: it writes them on in
+    `cartridge.json` (`requires.capabilities`, each at its registry version) and then the field,
+    one gesture that one Undo takes back and a refusal undoes whole; it asks no confirm. Its reason
+    reads as an action. Any other greyed row is disabled, its reason greyed with it. A turned-on field with no least value shows empty, as an `Add…` pick's
+    does, and stays shown through the page's reload after the write (on web, for the browser
+    session) until it is written or removed. `Remove` on a mechanic takes only its field off; the
+    capability stays on. `Remove` on a field shown empty and never written hides it, writing
+    nothing.
   - Labels here are placeholder words, the owner's to replace.
 - **No field.** A double-click on a line that is not words opens nothing; a note under it, in a
   row of its own (the lines below move down by its height while it shows and back when it goes,
