@@ -16,6 +16,7 @@ const WORDS = {
   holder: { room: 'Room', npc: 'Person', item: 'Item' } as Record<string, string>,
   move: 'Move',
   spawned: (by: string) => `Spawned by ${by}`,
+  dialogue: '＋ Add dialogue',
 };
 type Dir = 'npcs' | 'items';
 type Doc = Record<string, unknown>;
@@ -66,8 +67,12 @@ function body(dir: Dir, key: string) {
       style={text}
     >{`${WORDS.holder[now.kind] ?? now.kind} · ${String(now.key ?? '')}`}</Text>,
     now.kind === 'template' ? null : holderForm(dir, key, file, now),
+    dir === 'npcs' ? act(WORDS.dialogue, () => talk(key), undefined, `dialogue ${key}`) : null,
   ];
 }
+
+/** A new dialogue spoken by person `key`, one Undo step (mapedit.ts `talk`), then its sheet opens. */
+const talk = (key: string) => run(async () => known.open(`def:${await ed.talk(key, known.nodes)}`));
 
 /** An item's holder kinds, then the holder field and Move (the panel's Placement, Entity.tsx). */
 function holderForm(dir: Dir, key: string, file: string, now: { kind: string; key?: unknown }) {

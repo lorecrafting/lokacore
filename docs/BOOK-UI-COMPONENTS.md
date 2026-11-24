@@ -350,6 +350,11 @@ the prompt takes the selected line's place in the same `type.label` `fg`, the se
 Move… prompt over its usual acts (`Go here`, `Sheet`, `Area…`). Area…'s field
 is the Room sheet's Area row between the words and `Cancel`. A refusal is the Room sheet's refusal
 line at the sheet's top; a refused put-back is the strip's `warning` line.
+Builder 5.1a: the Dialogue sheet is the generic sheet; a choice is a fold. `Rename`, `Remove choice`,
+`Add choice`, a link's fold (`then: <key>`), each link pick, `Clear` and `Open <key>` are acts; the
+`Choice key` field is the map's Key field, its placeholder `type.small` in `dim`. A link and its
+nested set are each indented `space.md` more; the set's prompt and labels `type.small` in `dim`,
+one per line, wrapping. `＋ Add dialogue` on the Person sheet is an act.
 Worst pair: `warning` on `card`,
 4.75 (light).
 

@@ -10,6 +10,7 @@ import { ed, run } from './roomedit.tsx';
 export type Obj = Record<string, unknown>;
 export type Step = string | number;
 export type Write = Parameters<typeof ed.change>[number];
+export type Ops = Write[2]; // mutate-skip: a type, erased at run time
 /** Add mechanic…'s fields the cartridge takes, and those it refuses with any turn-on write (`turnOn`). */
 export type Mechanics = { allowed: string[]; blocked: (Blocked & { on?: Write })[] };
 /** The file drawn and the hash it was read at, its schema's `$defs`, the definitions entered so far,
@@ -22,6 +23,7 @@ export type At = {
   seed?: (f: string) => unknown;
   mech?: Mechanics;
   claim?: (f: string) => Block | undefined;
+  gate?: (ops: Ops) => string | undefined; // a write's refusal before it is sent (generic.tsx)
 };
 export const opened = new Set<string>(); // the folded blocks and Add… menus open, by file and path
 export const drafts = new Map<string, string>(); // each typed field, as typed
@@ -33,9 +35,10 @@ export const toggle = (key: string) => (
 export const set = (at: At, path: Step[], value: unknown) =>
   value === undefined
     ? (reveal(id(at, path), true), known.redraw())
-    : void run(() =>
-        ed.change([at.file, at.was, ops(path, value)]).then(() => reveal(id(at, path), false)),
-      );
+    : send(at, ops(path, value), () => reveal(id(at, path), false));
+/** One `/change` of `o` to the file, unless the gate refuses it: then the refusal shows, nothing sent. */
+export const send = (at: At, o: Ops, then = () => {}) =>
+  void run(async () => at.gate?.(o) ?? ed.change([at.file, at.was, o]).then(then));
 /** A write at `path`; at the root (a picked branch, a whole list) one op per top-level field. */
 export const ops = (path: Step[], value: unknown) =>
   path.length
@@ -46,7 +49,7 @@ export const ops = (path: Step[], value: unknown) =>
 export const drop = (at: At, path: Step[], value: unknown) =>
   value === undefined // only revealed: nothing on disk to delete
     ? (reveal(id(at, path), false), known.redraw())
-    : void run(() => ed.change([at.file, at.was, [{ path, delete: true }]]));
+    : send(at, [{ path, delete: true }]);
 /** A root field's block: its name, Remove when it may go, and its value (form.tsx `block`). */
 export type Block = (
   at: At,
