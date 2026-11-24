@@ -76,7 +76,12 @@ const talk = (key: string) =>
   run(async () => {
     const k = await create(io, 'dialogues', known.nodes, []);
     const file = `dialogues/${k}.json`;
-    await ed.change([file, (await io.source(file)).sha256, [{ path: ['npc'], value: key }]]);
+    // The speaker must be one of the roles (the compiler's unknown_kind), so the starter's roles go.
+    const ops = [
+      { path: ['npc'], value: key },
+      { path: ['roles'], value: { [key]: { role: 'npc', npc: key } } },
+    ];
+    await ed.change([file, (await io.source(file)).sha256, ops]);
     known.open(`def:${file}`);
   });
 

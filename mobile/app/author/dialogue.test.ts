@@ -167,9 +167,10 @@ test("then: 'side_set' is written, and Clear drops the field", async () => {
   );
 });
 
-// Breaks: Add dialogue posting another kind or name, the npc written as anything but the person's
-// key or to another file, or the new sheet not opened.
-test('Add dialogue posts /new dialogues dialogue_1, then sets its npc and opens it', async () => {
+// Breaks: Add dialogue posting another kind or name, the npc or its role written as anything but
+// the person's key (the starter's roles name another npc, so it would not compile) or to another
+// file, or the new sheet not opened.
+test('Add dialogue posts /new dialogues dialogue_1, then sets its npc and role and opens it', async () => {
   posts.length = 0;
   sheets.npc.body('smith');
   await settle();
@@ -183,7 +184,10 @@ test('Add dialogue posts /new dialogues dialogue_1, then sets its npc and opens 
       sent: {
         file: 'dialogues/dialogue_1.json',
         was: 'S',
-        ops: [{ path: ['npc'], value: 'smith' }],
+        ops: [
+          { path: ['npc'], value: 'smith' },
+          { path: ['roles'], value: { smith: { role: 'npc', npc: 'smith' } } },
+        ],
       },
     },
   ]);
