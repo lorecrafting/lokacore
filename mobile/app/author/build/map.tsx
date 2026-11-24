@@ -96,7 +96,7 @@ function move(e: Pe) {
   zoom(Math.hypot(a.x - b.x, a.y - b.y) / Math.hypot(a0.x - b0.x, a0.y - b0.y), mid, v);
 }
 function lift(e: Pe) {
-  if (!down.delete(e.nativeEvent.pointerId)) return;
+  down.delete(e.nativeEvent.pointerId);
   if (down.size) regrab();
   else grab = undefined;
 }
@@ -136,7 +136,7 @@ function Line(p: { from: Point; to: Point }) {
         left: (p.from.x + p.to.x) / 2 - len / 2,
         top: (p.from.y + p.to.y) / 2 - 1,
         width: len,
-        height: 2,
+        height: 2, // mutate-skip: the exit's stroke; the test checks the bar centres on it
         backgroundColor: ink('line'),
         transform: [{ rotate: `${(Math.atan2(dy, dx) * 180) / Math.PI}deg` }],
       }}
@@ -191,9 +191,9 @@ const resized = (e: { nativeEvent: { layout: { width: number; height: number } }
   known.redraw();
 };
 const GROUND = {
-  aspectRatio: 1,
+  aspectRatio: 1, // mutate-skip: layout, a square ground
   overflow: 'hidden',
-  borderWidth: 1,
+  borderWidth: 1, // mutate-skip: placeholder frame
   borderColor: ink('line'),
   touchAction: 'none', // the page neither scrolls nor zooms under a drag or pinch
 } as object;
@@ -259,6 +259,7 @@ function body() {
       </View>
     ) : null,
     selected ? (
+      // mutate-skip: placeholder rule above the bar
       <View key="bar" style={{ borderTopWidth: 1, borderColor: ink('line'), paddingTop: space.sm }}>
         <Text style={{ ...type.label, color: ink('fg'), paddingHorizontal: space.md }}>
           {WORDS.selected(selected)}
