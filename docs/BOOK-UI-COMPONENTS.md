@@ -326,11 +326,11 @@ why-not line) are `type.small` `fg`, one per line in one column with `space.md` 
 cells joined by ` · ` and wrapping at word gaps, with no columns and no sideways scroll (a row wraps on a 384 px docked sheet or a 390 px phone).
 Schedule's hours are Room sheet rows; an hour's number is the Area field at a fixed width that
 holds two digits, not the free width; Remove and `Add hour` are acts, and `Add hour` greyed is the
-greyed row, disabled. Builder 2.5: a ghost line (or `N not shown`) is `type.small` in `dim` on page paper,
+greyed row, disabled. Builder 2.5: a ghost line is `type.small` in `dim` on page paper,
 left-aligned at the page column's full width, one line cut with an ellipsis, a touch target tall, a `size.speechBar` dashed bar
 in `dim` at its left and `space.sm` before its words (dashed and `dim`, never the `~` line's solid
 `warning` bar in the margin). A ghost row is a Room sheet row: its words and reason `type.small` `dim`,
-a touch target tall; a variant's `See as` an act. The `Seeing: … · Back` chip is a strip button. Worst pair: `warning` on `card`,
+wrapping whole, a touch target tall; a variant's row only `See as`, an act. The `Seeing: … · Back` chip is a strip button. Worst pair: `warning` on `card`,
 4.75 (light).
 
 Not adopted from the mock (no live consumer): the text drawer and its command chips, topic
