@@ -17,6 +17,7 @@ distinguished_name = dn
 [ca]
 basicConstraints = critical, CA:TRUE
 keyUsage = critical, keyCertSign, cRLSign
+extendedKeyUsage = serverAuth
 subjectKeyIdentifier = hash
 nameConstraints = critical, permitted;IP:10.0.0.0/255.0.0.0, permitted;IP:172.16.0.0/255.240.0.0, permitted;IP:192.168.0.0/255.255.0.0, permitted;DNS:.local
 `;

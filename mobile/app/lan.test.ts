@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import { execFileSync, spawnSync } from 'node:child_process';
 import { createPrivateKey, X509Certificate } from 'node:crypto';
 import { once } from 'node:events';
-import { mkdtempSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdtempSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { createServer, request, type IncomingHttpHeaders, type Server } from 'node:http';
 import { request as secure } from 'node:https';
 import { createRequire } from 'node:module';
@@ -50,7 +50,7 @@ test('the CA is made once, name-constrained, its key readable by the owner alone
   // Breaks: the CA is not a CA or its constraints are missing or not critical (a leaked key signs a
   // public IP or name the phone then trusts); the folder or key is readable by others; a later run
   // makes a new CA (the phone must reinstall); the leaf lacks a LAN IP, serverAuth or its own key,
-  // outlives Apple's 397 days, or is not signed by the CA.
+  // outlives Apple's 397 days, or is not signed by the CA; the CA may sign more than TLS servers.
   const dir = scratch(t);
   const caPem = join(dir, 'ca.pem');
   const leaf = lanCert(dir, ['192.168.1.20', '10.0.0.7']);
@@ -63,6 +63,7 @@ test('the CA is made once, name-constrained, its key readable by the owner alone
   });
   assert.match(text, /Basic Constraints: critical\s+CA:TRUE/);
   assert.match(text, /Name Constraints: critical/);
+  assert.match(text, /Extended Key Usage:\s+TLS Web Server Authentication\n/); // no S/MIME or code signing
 
   const cert = new X509Certificate(leaf.cert);
   assert.equal(cert.subjectAltName, 'IP Address:192.168.1.20, IP Address:10.0.0.7');
@@ -111,6 +112,19 @@ test('the CA is made once, name-constrained, its key readable by the owner alone
   assert.notEqual(verify(lanCert(dir, ['8.8.8.8']).cert), 0);
 
   assert.equal(new X509Certificate(readFileSync(caPem)).fingerprint256, ca.fingerprint256);
+});
+
+test('without --lan the preview is one loopback listener and makes no CA', async (t) => {
+  // Breaks: a run without a token listens on the LAN (no guard on the author write routes) or makes a CA.
+  const dir = scratch(t);
+  const servers: Server[] = serve({ previewPort: 0, metroPort: 1, authorPort: 1, dir });
+  t.after(() => servers.forEach((s) => s.close()));
+  await once(servers[0], 'listening');
+  assert.deepEqual(
+    servers.map((s) => (s.address() as AddressInfo).address),
+    ['127.0.0.1'],
+  );
+  assert.equal(existsSync(dir), false);
 });
 
 test('--lan: loopback stays plain http; the LAN gets the paired https preview and the CA, never its key', async (t) => {
