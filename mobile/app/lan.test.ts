@@ -91,7 +91,7 @@ test('the CA is made once, name-constrained, its key readable by the owner alone
         '-extfile',
         join(dir, 'san.cnf'),
       ],
-      { input: csr },
+      { input: csr, stdio: 'pipe' },
     );
   };
   assert.equal(verify(leaf.cert), 0);

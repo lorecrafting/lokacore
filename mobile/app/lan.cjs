@@ -20,6 +20,7 @@ keyUsage = critical, keyCertSign, cRLSign
 subjectKeyIdentifier = hash
 nameConstraints = critical, permitted;IP:10.0.0.0/255.0.0.0, permitted;IP:172.16.0.0/255.240.0.0, permitted;IP:192.168.0.0/255.255.0.0, permitted;DNS:.local
 `;
+const QUIET = { stdio: 'pipe' }; // LibreSSL's progress lines off the terminal; errors keep stderr
 const newKey = () =>
   generateKeyPairSync('ec', { namedCurve: 'P-256' }).privateKey.export({
     type: 'pkcs8',
@@ -44,24 +45,28 @@ function lanCert(dir, ips) {
   if (!fs.existsSync(caCert)) {
     fs.writeFileSync(caKey, newKey(), { mode: 0o600 });
     fs.writeFileSync(config, CA_CONFIG);
-    execFileSync(OPENSSL, [
-      'req',
-      '-new',
-      '-x509',
-      '-sha256',
-      '-key',
-      caKey,
-      '-subj',
-      '/CN=Loka LAN CA',
-      '-days',
-      '3650',
-      '-config',
-      config,
-      '-extensions',
-      'ca',
-      '-out',
-      caCert,
-    ]);
+    execFileSync(
+      OPENSSL,
+      [
+        'req',
+        '-new',
+        '-x509',
+        '-sha256',
+        '-key',
+        caKey,
+        '-subj',
+        '/CN=Loka LAN CA',
+        '-days',
+        '3650',
+        '-config',
+        config,
+        '-extensions',
+        'ca',
+        '-out',
+        caCert,
+      ],
+      QUIET,
+    );
   }
   fs.chmodSync(caKey, 0o600);
   const key = newKey();
@@ -75,7 +80,7 @@ function lanCert(dir, ips) {
   const csr = execFileSync(
     OPENSSL,
     ['req', '-new', '-key', '/dev/stdin', '-subj', '/CN=Loka LAN preview', '-config', config],
-    { input: key },
+    { input: key, ...QUIET },
   );
   const cert = execFileSync(
     OPENSSL,
@@ -94,7 +99,7 @@ function lanCert(dir, ips) {
       '-extfile',
       leaf,
     ],
-    { input: csr, encoding: 'utf8' },
+    { input: csr, encoding: 'utf8', ...QUIET },
   );
   return { key, cert: cert + fs.readFileSync(caCert, 'utf8') };
 }
