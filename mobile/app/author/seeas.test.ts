@@ -107,7 +107,7 @@ function page() {
 const strip = () => nodes(build.Strip({ children: 'book' }));
 const button = (label: string) =>
   strip().find((n) => n.type === 'Pressable' && n.props.children?.props?.children === label);
-const GHOST = /, (hidden|only when|not here)|^\d+ not shown/;
+const GHOST = /, (hidden|only when|not here)/;
 const ghosts = () => page().filter((n) => n.props?.accessibilityLabel?.match(GHOST)); // under the title
 const rows = () => strip().filter((n) => n.props?.accessibilityLabel?.match(GHOST)); // the Room sheet's
 const top = () => JSON.parse(kept.get(BUILD)!).sheets?.at(-1);
@@ -124,26 +124,24 @@ const hash = () =>
 // Breaks: no ghost for a person the room holds but its perception gate hides, the gate's reason not
 // said, a ghost drawn twice (as its own title line too) or out of Build, a talk or detail action the
 // real view offers still ghosted, an action's ghost opening no file, a live edit of the words not shown,
-// a tap opening no sheet or another's, more than one line under the title, a ghost missing from the
-// Room sheet, or a ghost with no sheet still pressable or saying edit.
-test("the room's title has one ghost line with its reason, else one line to the Room sheet's ghosts", () => {
-  const { scripted_actions, rooms } = CANON;
-  Object.assign(CANON, { scripted_actions: {}, rooms: {} }); // only the hidden person
-  const [one, ...more] = ghosts();
-  Object.assign(CANON, { scripted_actions, rooms });
-  assert.deepEqual(
-    [one.props.accessibilityLabel, one.props.numberOfLines, more],
-    ['npc.shade.short, hidden: until fact saw_shade, edit', 1, []], // the sampler has no words for him,
-  );
-  one.props.onPress({ stopPropagation() {} });
+// a tap opening no sheet or another's, a ghost collapsed or a line not cut to one, a ghost missing
+// from the Room sheet, or a ghost with no sheet still pressable or saying edit.
+test("the room's title has one line per hidden thing, with its reason; the Room sheet lists them too", () => {
+  overlay['npc.shade.short'] = 'Shade, as edited';
+  const shown = ghosts().map((n) => [n.props.accessibilityLabel, n.props.numberOfLines]);
+  delete overlay['npc.shade.short'];
+  assert.deepEqual(shown, [
+    ['Shade, as edited, hidden: until fact saw_shade, edit', 1],
+    [
+      'An old elm shades a patch of trodden grass., only when: the time of day is from 20 to 6, edit',
+      1,
+    ],
+    ['dig, not here now, edit', 1],
+  ]);
+  ghosts()[0].props.onPress({ stopPropagation() {} });
   assert.equal(top(), 'npc:shade');
   button('Back')?.props.onPress();
-
-  assert.deepEqual(
-    ghosts().map((n) => n.props.accessibilityLabel),
-    ['3 not shown, open'],
-  );
-  ghosts()[0].props.onPress({ stopPropagation() {} });
+  ghosts()[1].props.onPress({ stopPropagation() {} }); // the variant's line opens the Room sheet
   assert.equal(top(), 'room:ferry_landing');
   overlay['npc.shade.short'] = 'Shade, as edited';
   const lines = rows().map((n) => n.props.accessibilityLabel);
@@ -183,7 +181,7 @@ test('See as at night redraws the words and leaves the save hash unchanged', asy
   const drawn = (words?: string) =>
     page().some((n) => n.props?.accessibilityLabel === `${words}, edit`);
   const seeAs = () => {
-    ghosts()[0].props.onPress({ stopPropagation() {} }); // `3 not shown` opens the Room sheet
+    ghosts()[1].props.onPress({ stopPropagation() {} }); // the variant's line opens the Room sheet
     assert.equal(top(), 'room:ferry_landing');
     button('See as').props.onPress();
     assert.ok(
@@ -213,7 +211,7 @@ test('See as at night redraws the words and leaves the save hash unchanged', asy
 test("See as lasts through the clock's pulses and ends on a new room or a new game", () => {
   const description = game.view().view.place.description.key;
   const seeAs = () => {
-    ghosts()[0].props.onPress({ stopPropagation() {} });
+    ghosts()[1].props.onPress({ stopPropagation() {} });
     button('See as').props.onPress();
   };
   seeAs();

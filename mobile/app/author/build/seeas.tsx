@@ -16,8 +16,6 @@ const WORDS = {
   seeing: (when: string) => `Seeing: ${when} · Back`,
   ghost: (words: string, reason: string, edit: boolean) =>
     `${words}, ${reason}${edit ? ', edit' : ''}`,
-  hidden: (n: number) => `${n} not shown`,
-  more: (n: number) => `${n} not shown, open`,
 };
 /** The game and compiled cartridge a ghost reads; panel.tsx hands them in per game. */
 export type Game = {
@@ -86,14 +84,10 @@ const see = (base: string, ghost: Ghost, at: string) => ((as = { base, ghost, at
 /** The strip's chip while See as is on: what is seen, and a press goes back to the page's words. */
 export const chip = () => (as ? act(WORDS.seeing(as.ghost.reason), unsee) : null);
 
-/** Under the room title, one line: its one ghost, else `N not shown` opening the Room sheet, so
- * the fixed header grows by at most a touch target. */
-export function ghostLines(open: Open, sheet: Sheet) {
-  const all = here();
-  if (all.length < 2) return all.map((g) => ghostLine(g, open, sheet));
-  const id = `room:${given!.here()}`;
-  return line(WORDS.hidden(all.length), WORDS.more(all.length), () => open(id));
-}
+/** Under the room title, one line per ghost, each cut to one line (owner, 2026-11-23: every ghost
+ * shown, not collapsed). */
+export const ghostLines = (open: Open, sheet: Sheet) =>
+  here().map((g) => ghostLine(g, open, sheet));
 function ghostLine(g: Ghost, open: Open, sheet: Sheet, wrap?: object) {
   const id = sheet(g);
   const words = said(g.words);
