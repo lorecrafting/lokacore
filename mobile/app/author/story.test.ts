@@ -36,6 +36,9 @@ const story = {
         set: true,
       },
       { from: R('npc', 'nell'), to: R('room', 'hall'), path: '.room' },
+      // a room places its items: Go there on the lamp follows the cellar's edge, not the hall's first one
+      { from: R('room', 'hall'), to: R('item', 'cup'), path: '.items' },
+      { from: R('room', 'cellar'), to: R('item', 'lamp'), path: '.items' },
     ],
   },
   report: {
@@ -51,7 +54,7 @@ const story = {
         n: 1,
         title: 'Meet Nell',
         status: 'built',
-        nodes: [R('dialogue', 'greet'), R('fact', 'met_nell'), R('npc', 'nell')],
+        nodes: [R('dialogue', 'greet'), R('fact', 'met_nell'), R('npc', 'nell'), R('item', 'lamp')],
       },
       { part: 1, n: 2, status: '~', nodes: [R('dialogue', 'farewell')] },
     ],
@@ -70,8 +73,11 @@ const story = {
     [R('dialogue', 'farewell')]: 'dialogues/farewell.json',
   },
   bundled: {},
-  map: [{ ref: R('room', 'hall'), key: 'hall', area: null, title: 'Hall', exits: [] }],
-  words: {},
+  map: [
+    { ref: R('room', 'hall'), key: 'hall', area: null, title: 'Hall', exits: [] },
+    { ref: R('room', 'cellar'), key: 'cellar', area: null, title: 'Cellar', exits: [] },
+  ],
+  words: { [R('dialogue', 'greet')]: 120 },
   names: {},
   choices: {},
   hidden: [],
@@ -83,7 +89,11 @@ const outline = {
   parts: [
     {
       beats: [
-        { n: 1, title: 'Meet Nell', nodes: ['dialogues/greet', 'facts/met_nell', 'npcs/nell'] },
+        {
+          n: 1,
+          title: 'Meet Nell',
+          nodes: ['dialogues/greet', 'facts/met_nell', 'npcs/nell', 'items/lamp'],
+        },
       ],
     },
     { beats: [{ n: 2, nodes: ['dialogues/farewell'] }] },
@@ -101,6 +111,7 @@ const api = async (path: string, sent?: object): Promise<[number, any]> => {
 const started: string[] = [];
 const build = await import('./build/Build.tsx');
 const { known } = await import('./build/room.tsx');
+const story_ = await import('./build/story.tsx');
 build.place({
   place: () => ({ steps: [] }),
   here: () => 'hall',
@@ -140,6 +151,11 @@ test('the Story tab marks a beat unwritten, a node with its refusals, unwritten 
     'farewell · 2 unwritten · unreached',
   ])
     assert.equal(all(row).length, 1, row);
+  const selected = (name: string) => all(name)[0].props.accessibilityState.selected;
+  assert.deepEqual(
+    [selected('Story'), selected('Contents'), selected('2 · unwritten')],
+    [true, false, true],
+  );
   assert.deepEqual(
     texts().filter((t) => t.includes('~')),
     [],
@@ -198,19 +214,40 @@ test("Trace of met_nell lists its setter then its reader; a listed row opens tha
   assert.equal(top(), 'def:dialogues/greet.json');
 });
 
-test('Go there on nell starts in the room a story edge joins her to', async () => {
+test('Go there starts in the room a story edge joins the node to, either way: nell to the hall, the cellar to its lamp', async () => {
   await press('nell');
   await press('Go there');
   assert.deepEqual(started, ['hall']);
+  await press('lamp');
+  await press('Go there');
+  assert.deepEqual(started, ['hall', 'cellar']);
+});
+
+const shown = (head: 'knowledge' | 'pacing', arg: string) =>
+  nodes(build.sheets[head].body(arg)).flatMap((e) =>
+    e.type === 'Text' || e.type === 'Pressable' ? [[e.type, label(e) ?? e.props.children]] : [],
+  );
+test('Knowledge at beat 2 lists met_nell, set at beat 1, as words: a fact has no sheet', () => {
+  assert.deepEqual(shown('knowledge', '2'), [['Text', 'Knows met_nell']]);
+});
+
+test('Pacing lists the thin part (under half the median) first, numbered from 1, untitled parts bare', () => {
+  assert.deepEqual(shown('pacing', ''), [
+    ['Text', 'Part 2 · 0 words · thin'],
+    ['Text', 'Part 1 · Arrival · 120 words'],
+  ]);
 });
 
 test('a sheet restored before /story arrives says Nothing here instead of throwing', () => {
   const s = known.story;
   known.story = undefined;
   try {
+    assert.deepEqual(story_.storyRows(), []);
     for (const head of ['trace', 'consequences', 'knowledge', 'facts', 'pacing'] as const)
       assert.deepEqual(
-        nodes(build.sheets[head].body('1')).map((e) => e.props.children),
+        nodes(build.sheets[head].body('1'))
+          .filter((e) => e.type === 'Text')
+          .map((e) => e.props.children),
         ['Nothing here.'],
         head,
       );

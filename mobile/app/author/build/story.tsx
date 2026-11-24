@@ -44,6 +44,7 @@ const numbers = new Map<string, string>(); // a part's new beat number, as typed
 const titles = new Map<string, string>(); // a beat's new title, as typed
 let go = (_room: string) => {};
 
+const column = { ...row, flexDirection: 'column', alignItems: 'flex-start' } as const; // mutate-skip: layout; padded as a row, one line each
 const keyOf = (ref: string) => L.fromRef(ref)?.key ?? ref;
 const partNo = (id: string) => Number(id.slice('part:'.length)); // the panel's: `part:<i>`, 0-based
 const line = (words: string, key: string) => (
@@ -85,12 +86,14 @@ function nodeActs(r: L.Row) {
   const room = roomOf(r.ref!);
   const sheet = sheetOf(r.ref);
   return [
-    room ? act(WORDS.go, () => go(room)) : null,
-    sheet ? act(WORDS.sheet, () => known.open(sheet)) : null,
-    L.TRACED.has(r.node!) ? act(WORDS.trace, () => known.open(`trace:${r.ref}`)) : null,
-    L.CONSEQUENCES.has(r.node!)
-      ? act(WORDS.consequences, () => known.open(`consequences:${r.ref}`))
-      : null,
+    <View key="acts" style={row}>
+      {room ? act(WORDS.go, () => go(room)) : null}
+      {sheet ? act(WORDS.sheet, () => known.open(sheet)) : null}
+      {L.TRACED.has(r.node!) ? act(WORDS.trace, () => known.open(`trace:${r.ref}`)) : null}
+      {L.CONSEQUENCES.has(r.node!)
+        ? act(WORDS.consequences, () => known.open(`consequences:${r.ref}`))
+        : null}
+    </View>,
   ];
 }
 
@@ -144,12 +147,13 @@ function storyRow(r: L.Row, s: L.Story) {
           ? beatActs(r, s)
           : [];
   return (
+    // mutate-skip: layout; half a touch target per level
     <View key={r.id} style={{ paddingLeft: ((r.level - 1) * size.touch) / 2 }}>
       <View style={row}>
         {head}
         {adds}
       </View>
-      <View style={row}>{acts}</View>
+      {acts /* each its own wrapping row: a row inside a row runs off a phone's width */}
     </View>
   );
 }
@@ -165,21 +169,28 @@ export function storyRows() {
       {act(WORDS.facts, () => known.open('facts:'))}
       {act(WORDS.pacing, () => known.open('pacing:'))}
     </View>,
-    why ? line(why, 'why') : null,
+    why ? (
+      <View key="why" style={column}>
+        {line(why, 'why')}
+      </View>
+    ) : null,
     ...L.rows(s, st).map((r) => storyRow(r, s)),
   ];
 }
 
 /** A sheet's rows: each names a node opens its sheet, the rest are words. */
-const listed = (rows: { label: string; ref?: string }[]) =>
-  rows.length
-    ? rows.map((r, i) => {
-        const sheet = sheetOf(r.ref);
-        return sheet
-          ? act(r.label, () => known.open(sheet), undefined, `${i}`)
-          : line(r.label, `${i}`);
-      })
-    : [line(WORDS.nothing, 'none')];
+const listed = (rows: { label: string; ref?: string }[]) => [
+  <View key="list" style={column}>
+    {rows.length
+      ? rows.map((r, i) => {
+          const sheet = sheetOf(r.ref);
+          return sheet
+            ? act(r.label, () => known.open(sheet), undefined, `${i}`)
+            : line(r.label, `${i}`);
+        })
+      : line(WORDS.nothing, 'none')}
+  </View>,
+];
 const withKey = (label: string, ref?: string) => ({
   label: ref ? `${label} ${keyOf(ref)}` : label,
   ref,
