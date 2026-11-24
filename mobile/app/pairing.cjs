@@ -44,7 +44,8 @@ function pairing(token, now = Date.now, say = console.log) {
       last = now();
       // A 200 page, not a 302: a link from another app or site is a cross-site navigation, so a
       // redirect's load goes without the Strict cookie (403); this same-origin replace sends it.
-      const to = JSON.stringify(url.pathname + url.search).replaceAll('<', '\\u003c');
+      // URL encodes `<` in the path and query, so the target cannot close the script tag.
+      const to = JSON.stringify(url.pathname + url.search);
       return [
         200,
         {
