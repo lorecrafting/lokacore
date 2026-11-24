@@ -1,5 +1,6 @@
 // The author server's HTTP side of the editor (docs/system/cartridge.md#author-preview): who may
 // ask at all (Host, Origin), the write routes (write.ts) and the Hold the watcher parks under.
+import { timingSafeEqual } from 'node:crypto';
 import { realpathSync } from 'node:fs';
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import { dirname, join } from 'node:path';
@@ -15,12 +16,22 @@ export async function body(request: IncomingMessage) {
 
 const HOST = /^(localhost|127\.0\.0\.1)(:\d+)?$/; // the Metro proxy forwards `localhost:<port>`
 const ORIGIN = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/;
+const same = (sent: unknown, pair: string) =>
+  typeof sent === 'string' &&
+  Buffer.byteLength(sent) === Buffer.byteLength(pair) &&
+  timingSafeEqual(Buffer.from(sent), Buffer.from(pair));
 /** Answers 403 (and is true) for a request not from the author's own page: a rebinding DNS name's
- * Host, or a cross-site page's Origin on anything but a GET (its simple POST would run). */
-export function foreign(request: IncomingMessage, response: ServerResponse) {
-  const { host, origin } = request.headers;
-  if (!HOST.test(host ?? '')) json(response, 403, `not the author host: ${host}`);
-  else if (request.method !== 'GET' && origin && !ORIGIN.test(origin))
+ * Host, or a cross-site page's Origin on anything but a GET (its simple POST would run). With `pair`
+ * (`bin/author.sh --lan`), a request carrying it as `x-loka-pair` (the preview adds it to a paired
+ * LAN request) may use a LAN Host and its own Host as Origin, and a non-GET with no Origin needs it. */
+export function foreign(request: IncomingMessage, response: ServerResponse, pair?: string) {
+  const { host, origin, 'x-loka-pair': sent } = request.headers;
+  const paired = !!pair && same(sent, pair);
+  const page = origin
+    ? ORIGIN.test(origin) || (paired && origin === `http://${host}`)
+    : !pair || paired;
+  if (!paired && !HOST.test(host ?? '')) json(response, 403, `not the author host: ${host}`);
+  else if (request.method !== 'GET' && !page)
     json(response, 403, `not from the author page: ${origin}`);
   else return false;
   return true;
@@ -36,8 +47,8 @@ type Said = {
  * the page names, before the compile (told.ts); `once` sends `changed` without keeping it.
  * `on.release` runs when the Hold ends, to write what the watcher parked; `on.leave` once a POST
  * /world's answer is sent or its client is gone, with the world's folder (author.ts restarts on
- * it: a fresh guard root, journal and Hold). */
-export type Hooks = { release?: () => void; leave?: (world: string) => void };
+ * it: a fresh guard root, journal and Hold). `pair`: the `--lan` token `foreign` takes. */
+export type Hooks = { release?: () => void; leave?: (world: string) => void; pair?: string };
 export function editing(source: string, said: Said, once: Push, on: Hooks, artifact?: string) {
   const { push, tell, places } = said;
   const editor = writer(source, (changed) => once({ changed }), places, artifact);

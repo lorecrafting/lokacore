@@ -45,6 +45,17 @@ The globe at the left of the Book's toolbar switches worlds or makes a new one (
 
 A dev save made before the Book kept its save across edits may still show "The save could not be opened": clear the preview's site data once (the browser's storage for http://localhost:19009) and it does not come back.
 
+### On a phone (`--lan`)
+
+`bin/author.sh cartridges/<name> --lan` also lets a phone on the same home network open the Book.
+It cannot save yet: over plain http the phone's browser refuses the save's storage, so the Book shows
+"The save could not be opened" (loka-xetp3); HTTPS comes next (loka-hcnlh.18.2). The terminal prints
+a link, `http://<this Mac's LAN address>:19006/?dev=1&pair=<token>`: open it once on the phone and it
+is paired (a cookie; the token leaves the address bar). Any other device gets 403 on every page and
+author request. The token is new each start, and after 8 hours with no request from the phone the LAN
+side closes every open connection and refuses every new request until you start again. There is no
+TLS: use it only on a network you trust. The watcher and Metro stay on this Mac alone.
+
 ## The shell
 
 The panel is three columns around the Book, each foldable with a divider you drag (arrow keys nudge it

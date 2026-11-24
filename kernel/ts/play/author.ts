@@ -61,6 +61,7 @@ const live =
           if (failed) notCompiled(failed); // the source on disk is the failed save's, not the parked
         },
         leave,
+        pair: process.env.LOKA_PAIR,
       })
     : undefined;
 // Another world: no late compile of this one may overwrite the artifact after the next one's.

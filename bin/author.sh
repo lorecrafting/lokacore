@@ -3,8 +3,15 @@
 # (docs/guides/writing-the-game.md#start-the-tools). Ctrl-C stops all three.
 set -eu
 # With no cartridge: the one the watcher last opened (the editor's world picker switches it).
-[ $# -le 1 ] || { echo "usage: bin/author.sh [cartridges/<name>]" >&2; exit 2; }
+# --lan: the Book preview also listens on the LAN, for a phone paired by the token it prints (pairing.cjs).
+lan=; unset LOKA_PAIR
+if [ "${1-}" = --lan ]; then shift; lan=1; elif [ $# -eq 2 ] && [ "$2" = --lan ]; then set -- "$1"; lan=1; fi
+[ $# -le 1 ] || { echo "usage: bin/author.sh [cartridges/<name>] [--lan]" >&2; exit 2; }
 cd "$(dirname "$0")/.."
+if [ -n "${lan-}" ]; then
+  LOKA_PAIR=$(mise exec -- node -p "require('node:crypto').randomBytes(16).toString('hex')")
+  export LOKA_PAIR
+fi
 # npm ci when node_modules is missing or older than the lockfile: a stale panel fails to resolve a
 # newly added package (rjsf, loka-wfrgk.99). Marker of bin/lib/serve.sh and bin/worktree_setup.sh.
 fresh() { [ ! -f "$1/package-lock.json" ] || [ "$(cat "$1/node_modules/.loka-lock-cksum" 2> /dev/null)" = "$(cksum < "$1/package-lock.json")" ]; }
