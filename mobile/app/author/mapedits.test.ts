@@ -57,6 +57,7 @@ const api = async (path: string, sent?: object): Promise<[number, any]> => {
   return doc[file] ? [200, { bytes: JSON.stringify(doc[file]), sha256: 'S' }] : [404, null];
 };
 const build = await import('./build/Build.tsx');
+const roomedit = await import('./build/roomedit.tsx');
 build.place({ place: () => ({ steps: [] }), here: () => 'hall' } as never);
 build.install({ seen: new Map(), said: new Map(), redraw() {}, api } as never);
 const settle = () => new Promise((r) => setTimeout(r));
@@ -79,18 +80,18 @@ const pick = (key: string) =>
 const ground = () => sheet().find((e) => e.props?.onLayout).props;
 ground().onLayout({ nativeEvent: { layout: { width: 384, height: 384 } } });
 /** A tap on the ground at cell (x, y), counted from hall's cell. */
-async function tap(x: number, y: number) {
+async function tap(x: number, y: number, end = 'onPointerUp', id = 1) {
   const hall = sheet().find((e) => e.props?.accessibilityLabel?.startsWith('hall, ')).props.style;
   const at = {
     nativeEvent: {
-      pointerId: 1,
+      pointerId: id,
       clientX: hall.left + hall.width * (x + 0.5),
       clientY: hall.top + hall.height * (y + 0.5),
     },
     currentTarget: { getBoundingClientRect: () => ({ left: 0, top: 0 }), setPointerCapture() {} },
   };
   ground().onPointerDown(at);
-  ground().onPointerUp(at);
+  if (end) ground()[end](at);
   await settle();
 }
 const bar = () =>
@@ -114,6 +115,8 @@ test('after the reload a gesture brings, loft stays selected and Undo puts back 
 
 test('＋ east on the selected room makes room_1 there in its area and selects it; Undo puts it back', async () => {
   pick('hall');
+  assert.ok(named(sheet(), '＋ up'), 'up and down grow from the bar');
+  assert.equal(named(sheet(), 'New room up'), undefined, 'not from a cell on this level');
   posts = [];
   await press('New room east');
   assert.deepEqual(posts, [
@@ -123,6 +126,7 @@ test('＋ east on the selected room makes room_1 there in its area and selects i
     ],
   ]);
   assert.equal(bar(), 'room_1 — selected', 'the new room, before /story has it');
+  assert.equal(named(sheet(), 'Area…'), undefined, 'not yet a file Area… can move');
   assert.equal(kept.get('loka-build-map'), 'room_1', 'kept for the reload');
   assert.deepEqual(JSON.parse(kept.get('loka-build-undo')!).w, { ids: [id] }, 'the chip, kept');
   const last = await undo();
@@ -171,14 +175,14 @@ test('Move… then a tap on an empty cell writes its layout row; a tap on a take
   posts = [];
   await tap(0, 0); // hall's cell
   assert.deepEqual(posts, []);
-  await tap(1, 0);
+  await tap(2, 0); // yard's column, not its cell
   assert.deepEqual(posts, [
     [
       '/change',
       {
         file: 'layout.json',
         was: 'S',
-        ops: [{ path: [1], value: { room: 'loft', x: 1, y: 0, z: 0 } }],
+        ops: [{ path: [1], value: { room: 'loft', x: 2, y: 0, z: 0 } }],
       },
     ],
   ]);
@@ -190,6 +194,11 @@ test('Move… then a tap on an empty cell writes its layout row; a tap on a take
 test('an unplaced room selected from its strip goes to the tapped cell; a placed one does not move on a tap', async () => {
   await press('cellar');
   posts = [];
+  await tap(-1, 0, 'onPointerCancel');
+  await tap(-1, 0, ''); // a second finger lands and lifts: a pinch, no tap
+  await tap(-1, 0, 'onPointerUp', 2);
+  assert.deepEqual(posts, [], 'a cancelled pointer or a two-finger lift places nothing');
+  ground().onPointerCancel({ nativeEvent: { pointerId: 1 } }); // the first finger goes too
   await tap(-1, 0);
   assert.deepEqual(posts, [
     [
@@ -236,6 +245,8 @@ test('Undo pressed while a gesture still runs keeps the chip; a refused put-back
   refuse = 'Hold on';
   await press('Undo', strip());
   refuse = '';
+  await roomedit.run(async () => {}); // wrote nothing: no chip
+  assert.equal(named(strip(), 'Undo'), undefined);
   const said = strip()
     .filter((e) => e.type === 'Text')
     .map((e) => e.props.children);

@@ -249,8 +249,8 @@ function plusses(s: Seen) {
           style={{
             ...CENTRED,
             position: 'absolute',
-            left: x - cell / 2,
-            top: y - cell / 2,
+            left: x - cell / 2, // mutate-skip: layout; the target centres on its cell
+            top: y - cell / 2, // mutate-skip: layout
             width: cell,
             height: cell,
           }}
@@ -276,8 +276,8 @@ function room(s: Seen, r: map.MapRoom) {
       style={{
         ...CENTRED,
         position: 'absolute',
-        left: x - cell / 2,
-        top: y - cell / 2,
+        left: x - cell / 2, // mutate-skip: layout; the target centres on its cell
+        top: y - cell / 2, // mutate-skip: layout
         width: cell,
         height: cell,
       }}
