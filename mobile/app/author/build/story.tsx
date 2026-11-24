@@ -146,9 +146,9 @@ function storyRow(r: L.Row, s: L.Story) {
         : r.kind === 'beat'
           ? beatActs(r, s)
           : [];
+  const indent = ((r.level - 1) * size.touch) / 2; // mutate-skip: layout; half a touch target per level
   return (
-    // mutate-skip: layout; half a touch target per level
-    <View key={r.id} style={{ paddingLeft: ((r.level - 1) * size.touch) / 2 }}>
+    <View key={r.id} style={{ paddingLeft: indent }}>
       <View style={row}>
         {head}
         {adds}
