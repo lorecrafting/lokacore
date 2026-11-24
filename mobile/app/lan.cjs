@@ -43,7 +43,7 @@ function lanCert(dir, ips) {
   const caCert = path.join(dir, 'ca.pem');
   const config = path.join(dir, 'ca.cnf');
   if (!fs.existsSync(caCert)) {
-    fs.writeFileSync(caKey, newKey(), { mode: 0o600 });
+    fs.writeFileSync(caKey, newKey()); // in the 700 folder; the chmod below sets 600
     fs.writeFileSync(config, CA_CONFIG);
     execFileSync(
       OPENSSL,
