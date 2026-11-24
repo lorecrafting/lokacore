@@ -176,10 +176,10 @@ test('zoom, pinch and wheel act about their point; a room press within slop taps
     'and selects',
   );
   g.onPointerDown(ev(1, c.x, {}));
-  g.onPointerMove(ev(1, c.x + 12)); // past it
-  g.onPointerUp(ev(1, c.x + 12));
+  g.onPointerMove(ev(1, c.x + 11)); // at the slop: a drag
+  g.onPointerUp(ev(1, c.x + 11));
   room('smithy').onPress();
-  near(mid('crossroads_inn'), { ...c, x: c.x + 12 }, 'a room press that moves pans');
+  near(mid('crossroads_inn'), { ...c, x: c.x + 11 }, 'a room press that moves pans');
   assert.ok(!sheet().some((e) => e.props?.children === 'smithy — selected'), 'and selects nothing');
   press('Fit');
   g.onPointerDown(ev(1, c.x));
@@ -285,7 +285,7 @@ test('on a phone the drawing leaves the selection bar inside the half-height she
   // measured in the 390x844 web Book: the sheet is 399.5 high from y 444.5; 153 above the ground, 67
   // under it to the acts' foot at 844
   assert.equal(ground().props.style.maxHeight, 399.5 - 153 - 67);
-  Object.assign(globalThis, { innerWidth: 1280, innerHeight: 800 });
+  Object.assign(globalThis, { innerWidth: 1152, innerHeight: 800 }); // DOCK.at: docked from here
   assert.equal(ground().props.style.maxHeight, undefined);
   Object.assign(globalThis, { innerWidth: undefined, innerHeight: undefined });
 });
@@ -332,6 +332,10 @@ test('a stepped level that loses its rooms falls back; an unplaced room selects 
   );
   known.rooms = all.filter((r) => r.at?.z === 0);
   assert.equal(named(sheet(), 'Level up'), undefined, 'one level: no ⌃ ⌄');
+  known.rooms = all.filter((r) => r.at?.z === 0 || r.at?.z === 1);
+  assert.ok(named(sheet(), 'Level up'), 'two levels: ⌃ ⌄');
+  const ink = (label: string) => named(sheet(), label).props.children.props.style.transform[0];
+  assert.deepEqual(ink('Zoom out'), { translateY: 0 }, 'only the chevrons are nudged');
   known.rooms = all;
   assert.ok(!bar());
 });
