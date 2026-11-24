@@ -54,4 +54,7 @@ test('a LAN Host or an Origin-less POST needs the token header; the paired phone
   const phone = { host: LAN, origin: `http://${LAN}`, 'x-loka-pair': TOKEN };
   assert.equal(await ask('/change', phone, sent), 200);
   assert.match(readFileSync(join(dir, 'rooms/a.json'), 'utf8'), /"name": "x"/);
+  const now = readFileSync(join(dir, 'rooms/a.json'), 'utf8');
+  const next = { file: 'rooms/a.json', was: sha256(now), ops: [{ path: ['name'], value: 'y' }] };
+  assert.equal(await ask('/change', { host: LAN, 'x-loka-pair': TOKEN }, next), 200); // no Origin, token
 });
