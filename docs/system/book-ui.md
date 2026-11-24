@@ -1128,6 +1128,38 @@ reasons and limits: [prose in the Book rulings](../design/prose-in-the-book-ruli
     it. A tap on a line while See as is on only ends it, so the true words show before any field
     opens. It never writes to the save.
   - Labels here are placeholder words, the owner's to replace.
+- **Build: the Build map** (slice 4.2, [builder mode §4.7](../rnd/in-game-builder-mode-2026-11-19.md)).
+  Looks: [author-mode marks](../BOOK-UI-COMPONENTS.md#component-catalogue). While Build is on the
+  strip carries `Map` between `Notebook` and `Checks`; it opens the map sheet, or closes it when
+  that is the top sheet. The map is the builder's drawing of every placed room in the story's
+  layout, not the player's discovered [Map](#minimap-map-and-presentation-controls), which keeps
+  its rule against actions.
+  - **The drawing.** One level at a time, titled `Map · level N`: each room a box at its cell
+    showing its key (cut with an ellipsis; no key when the box cannot hold one), each exit between
+    two rooms on the level a line from centre to centre under the boxes, the current room ringed
+    (told by shape as well as colour, as on Map). It opens on the current room's level, fitted, and
+    follows the current room until a level step; Go here makes it follow again, refitted.
+  - **Controls.** A row above the drawing: `⌃` `⌄` step up or down a level, fitted; they show only
+    when the placed rooms span levels, and at the top (bottom) level `⌃` (`⌄`) is disabled. `−` `+`
+    zoom about the drawing's centre; `⤢` fits. A one-finger drag on empty ground pans, two fingers
+    pinch about their midpoint, and on the web the wheel zooms about the cursor. The view never
+    leaves the level: at least one cell of it stays on screen.
+  - **Touch** (designer ruling, 2026-11-24, after Map's touch-sized dots; the PM may overrule).
+    Every room box is a button at least a touch target in both axes: its target is its whole cell,
+    centred on its box. The least zoom, `⤢` and the first fit included, makes a cell a touch target
+    wide, so no two targets overlap and fitting never shrinks a box below one. A level that does
+    not fit at that zoom is shown at it, centred on the current room when that room is on the
+    level, else on the level's middle, and the author pans. A press on a room that moves past a
+    tap's slop pans and selects nothing.
+  - **Selection.** A tap selects a room and never plays. A bar under the drawing reads
+    `<key> — selected`, then `Go here` (play starts in that room, as `Start in this room` does) and
+    `Sheet` (its Room sheet opens on top). On a phone the bar shows without scrolling the sheet at
+    half height. A selected room that is renamed or deleted is no longer selected.
+  - **Unplaced.** Rooms with no cell are a row under the drawing: `Unplaced (n):`, then one button
+    per key; a press selects that room as a tap on its box does.
+  - Not in 4.2: `＋` grow, `Join…`, `Move…`, `Area…`, placing an unplaced room (4.3), the
+    minimap's open gesture and map keys.
+  - Labels here are placeholder words, the owner's to replace.
 - **No field.** A double-click on a line that is not words opens nothing; a note under it, in a
   row of its own (the lines below move down by its height while it shows and back when it goes,
   with no motion; a note never covers a line, loka-wfrgk.39), until the next click or key, read politely: `A choice label is its key. Alt-click opens the scene.`,
