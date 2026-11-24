@@ -6,6 +6,8 @@ import { size, space, type } from '../../book/tokens.ts';
 import { unwritten } from '../prose_rules.ts';
 import { ink } from './build.ts';
 import type { Hooks } from './field.tsx';
+import type { Ghost } from '../../../../kernel/ts/play/ghosts.ts';
+import { ghostRows } from './seeas.tsx';
 import { sheets } from './sheet.tsx';
 import {
   exitActs,
@@ -92,6 +94,13 @@ export function pencil(shown: string, here: string | undefined, open: (id: strin
   return pen(WORDS.edit(named(r)), () => open(`room:${r.key}`));
 }
 
+/** A ghost line's sheet: its person's, item's or room's, else its definition's file (none unlisted). */
+export function ghostSheet(g: Ghost) {
+  if (g.kind === 'npc' || g.kind === 'item') return `${g.kind}:${g.key}`;
+  if (g.kind === 'variant') return `room:${g.key}`;
+  return known.files[g.ref] && `def:${known.files[g.ref]}`;
+}
+
 /** A pencil labelled `label` after a page title, pressed by touch, click, Enter or Space. */
 export function pen(label: string, press: () => void) {
   return (
@@ -147,6 +156,7 @@ sheets.room = {
           </View>
         );
       }),
+      ...ghostRows(r.key, known.open, ghostSheet),
       grows(r, known.nodes, known.rooms),
       addHere(r, known.nodes, held(), known.open),
       moveTo(r),
