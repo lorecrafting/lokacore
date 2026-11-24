@@ -44,7 +44,7 @@ const press = (label: string) => named(sheet(), label).props.onPress();
 /** The room boxes drawn, by key (a box's accessible name starts with its key). */
 const drawn = () =>
   sheet()
-    .filter((e) => e.type === 'Pressable' && e.props.accessibilityState?.selected !== undefined)
+    .filter((e) => e.type === 'Pressable' && e.props.style?.position === 'absolute')
     .map((e) => e.props.accessibilityLabel.split(', ')[0]);
 const room = (key: string) =>
   sheet().find((e) => e.props?.accessibilityLabel?.startsWith(`${key}, `)).props;
@@ -95,9 +95,9 @@ test('⌃ and ⌄ step through the levels, and stop at the top', () => {
 
 test('fit, then a far drag and a zoom in, keep one cell of the level on screen', () => {
   press('Fit'); // level 0 spans 13 cells (832 px): zoom 384 / 832 = 6/13
-  const t = { setPointerCapture() {} };
+  const t = { setPointerCapture() {}, getBoundingClientRect: () => ({ left: 100, top: 100 }) };
   const at = (x: number) => ({
-    nativeEvent: { pointerId: 1, offsetX: x, offsetY: x },
+    nativeEvent: { pointerId: 1, clientX: x, clientY: x },
     target: t,
     currentTarget: t,
   });
@@ -108,4 +108,16 @@ test('fit, then a far drag and a zoom in, keep one cell of the level on screen',
   assert.equal(box('crossroads_inn').left.toFixed(2), (384 + (520 * 6) / 13).toFixed(2)); // 624
   press('Zoom in'); // zoom 7.5/13, about the centre, then kept again
   assert.equal(box('crossroads_inn').left.toFixed(2), (384 + (520 * 7.5) / 13).toFixed(2)); // 684
+});
+
+test('Go here lets the map follow the current room again, refitted to the level it reaches', () => {
+  press('Level down'); // stepped: level -1
+  room(drawn()[0]).onPress();
+  press('Go here');
+  here = 'mill'; // (level 1): the Book took the stairs
+  assert.equal(title(), 'Map · level 1');
+  for (const key of drawn()) {
+    const { left, top, width, height } = box(key);
+    assert.ok(left >= 0 && top >= 0 && left + width <= SIZE && top + height <= SIZE, key);
+  }
 });

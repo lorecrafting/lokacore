@@ -27,7 +27,7 @@ const WORDS = {
 
 type Point = { x: number; y: number };
 let z: number | undefined; // the level stepped to; until then the map follows the current room
-let view: map.View | undefined;
+let view: { v: map.View; z: number } | undefined; // and the level it shows
 let selected: string | undefined;
 let box: map.Box = { w: 0, h: 0 };
 const down = new Map<number, Point>(); // the pointers held on the ground
@@ -43,8 +43,12 @@ function level() {
 }
 const extent = () => map.bounds(map.onLevel(rooms(), level()));
 const fitted = () => map.fit(extent(), box, M.floor);
-const seen = () => (view ??= fitted());
-const set = (v: map.View) => ((view = map.keep(v, extent(), box)), known.redraw());
+/** The view, fitted again when the level shown changed under it (the current room took the stairs). */
+const seen = () => (view?.z === level() ? view.v : (view = { v: fitted(), z: level() }).v);
+const set = (v: map.View) => (
+  (view = { v: map.keep(v, extent(), box), z: level() }),
+  known.redraw()
+);
 const centre = (): Point => ({ x: box.w / 2, y: box.h / 2 });
 const zoom = (f: number, p = centre(), from = seen()) =>
   set(map.zoomAt(from, f, p, map.least(extent(), box)));
@@ -54,31 +58,32 @@ function step(by: number) {
   const next = all[all.indexOf(level()) + by];
   if (next === undefined) return;
   z = next;
-  view = fitted();
-  known.redraw();
+  set(fitted());
 }
 
-const pointer = (e: { nativeEvent: { offsetX: number; offsetY: number } }): Point => ({
-  x: e.nativeEvent.offsetX,
-  y: e.nativeEvent.offsetY,
-});
+type Ground = { getBoundingClientRect: () => { left: number; top: number } };
+/** A pointer on the ground's surface (a room's own offsets would be the room's). */
+const pointer = (e: { clientX: number; clientY: number }, on: Ground): Point => {
+  const r = on.getBoundingClientRect();
+  return { x: e.clientX - r.left, y: e.clientY - r.top };
+};
 const regrab = () => (grab = { at: [...down.values()], v: seen() });
 type Pe = {
-  nativeEvent: { pointerId: number; offsetX: number; offsetY: number };
+  nativeEvent: { pointerId: number; clientX: number; clientY: number };
   target: unknown;
-  currentTarget: { setPointerCapture: (id: number) => void };
+  currentTarget: Ground & { setPointerCapture: (id: number) => void };
 };
 /** A first pointer on a room is its tap; on the ground, or a second one anywhere, it starts a gesture. */
 function press(e: Pe) {
   if (!down.size && e.target !== e.currentTarget) return;
-  e.currentTarget.setPointerCapture(e.nativeEvent.pointerId); // offsets stay the surface's while held
-  down.set(e.nativeEvent.pointerId, pointer(e));
+  e.currentTarget.setPointerCapture(e.nativeEvent.pointerId);
+  down.set(e.nativeEvent.pointerId, pointer(e.nativeEvent, e.currentTarget));
   regrab();
 }
 /** One pointer pans; two pinch about their midpoint and pan with it. */
 function move(e: Pe) {
   if (!grab || !down.has(e.nativeEvent.pointerId)) return;
-  down.set(e.nativeEvent.pointerId, pointer(e));
+  down.set(e.nativeEvent.pointerId, pointer(e.nativeEvent, e.currentTarget));
   const [a, b] = [...down.values()];
   const [a0, b0] = grab.at;
   if (!b || !b0) return set({ ...grab.v, x: grab.v.x + a.x - a0.x, y: grab.v.y + a.y - a0.y });
@@ -98,10 +103,14 @@ function lift(e: Pe) {
 /** The wheel zooms about the cursor (the panel's factor); React Native Web forwards no onWheel. */
 const wheel = (e: WheelEvent) => {
   e.preventDefault();
-  zoom(Math.exp(-e.deltaY / 100), { x: e.offsetX, y: e.offsetY });
+  zoom(Math.exp(-e.deltaY / 100), pointer(e, e.currentTarget as HTMLElement));
 };
-const wheeled = (node: unknown) =>
-  (node as HTMLElement | null)?.addEventListener('wheel', wheel, { passive: false });
+/** The ground's ref: the wheel on mount; on unmount, drop a gesture whose pointers never lifted. */
+function wheeled(node: HTMLElement | null) {
+  if (node) return node.addEventListener('wheel', wheel, { passive: false });
+  down.clear();
+  grab = undefined;
+}
 
 const glyph = (g: { glyph: string; name: string }, run: () => void) => (
   <Pressable
@@ -116,12 +125,11 @@ const glyph = (g: { glyph: string; name: string }, run: () => void) => (
 );
 
 /** An exit as a rotated bar between two room centres on screen (MapDrawing.tsx's Line). */
-function Line(p: { from: Point; to: Point; key: string }) {
+function Line(p: { from: Point; to: Point }) {
   const [dx, dy] = [p.to.x - p.from.x, p.to.y - p.from.y];
   const len = Math.hypot(dx, dy);
   return (
     <View
-      key={p.key}
       pointerEvents="none"
       style={{
         position: 'absolute',
@@ -179,7 +187,7 @@ const resized = (e: { nativeEvent: { layout: { width: number; height: number } }
   const { width: w, height: h } = e.nativeEvent.layout;
   if (w === box.w && h === box.h) return;
   box = { w, h };
-  view = fitted();
+  view = undefined; // seen() fits once the level has rooms
   known.redraw();
 };
 const GROUND = {
@@ -256,7 +264,7 @@ function body() {
           {WORDS.selected(selected)}
         </Text>
         <View style={row}>
-          {act(WORDS.go, () => hooks.go(selected!))}
+          {act(WORDS.go, () => ((z = undefined), hooks.go(selected!)))}
           {act(WORDS.sheet, () => known.open(`room:${selected}`))}
         </View>
       </View>
