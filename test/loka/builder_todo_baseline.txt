@@ -312,9 +312,6 @@ npcs.unattackable.book.delete
 npcs.words.book.create
 npcs.words.book.edit
 npcs.words.book.delete
-outline.parts.book.create
-outline.parts.book.edit
-outline.parts.book.delete
 populations.abstract.book.create
 populations.abstract.book.edit
 populations.abstract.book.delete
@@ -562,9 +559,6 @@ parity:hold
 parity:map-pan-zoom-keys
 parity:map-wire
 parity:map-exit-edits
-parity:story-list
-parity:story-row-sheets
-parity:story-beats
 parity:flow-graph
 parity:inspector-header
 parity:card-picker

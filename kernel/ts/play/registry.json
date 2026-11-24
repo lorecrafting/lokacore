@@ -1374,9 +1374,9 @@
     "edit": "generic",
     "delete": "generic",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "story.tsx",
+      "edit": "story.tsx",
+      "delete": "story.tsx"
     }
   },
   "populations.abstract": {

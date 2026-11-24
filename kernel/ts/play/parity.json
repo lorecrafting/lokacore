@@ -107,17 +107,17 @@
   {
     "id": "story-list",
     "panel": "tools/author-panel/src/storylist.tsx",
-    "book": "todo"
+    "book": "story.tsx"
   },
   {
     "id": "story-row-sheets",
     "panel": "tools/author-panel/src/storylist.tsx",
-    "book": "todo"
+    "book": "story.tsx"
   },
   {
     "id": "story-beats",
     "panel": "tools/author-panel/src/storylist.tsx",
-    "book": "todo"
+    "book": "story.tsx"
   },
   {
     "id": "flow-graph",
