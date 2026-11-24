@@ -67,6 +67,9 @@ export function wire(a: Hooks['api'] | undefined, then: () => void, shut: (id: s
 
 /** Build.tsx's Undo chip: shown after each gesture that wrote. */
 export const onSaved = (chip: (ids: number[]) => void) => void (saved = chip);
+/** A gesture still writing, and the last refusal: Build's chip waits on the one and shows the other. */
+export const running = () => busy;
+export const refused = () => said;
 
 /** Runs one gesture; a refusal (a thrown or returned reason) shows in the sheet. */
 export async function run(go: () => Promise<unknown>) {

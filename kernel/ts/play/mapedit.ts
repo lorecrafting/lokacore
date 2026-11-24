@@ -180,7 +180,6 @@ export async function create(
 const move = async (s: Run, r: MapRoom, area: string | null) =>
   s.call('move', { file: fileOf(r), was: (await s.read(fileOf(r))).was, area });
 
-/** Undoes `ids` newest first, dropping each as it goes, so a refusal leaves only what stands. */
 /** Puts back journal `ids`, newest first (popping each); Build's chip after a reload has only these. */
 export async function undo(io: Io, ids: number[]) {
   while (ids.length) {

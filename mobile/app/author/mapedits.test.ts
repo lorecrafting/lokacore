@@ -48,7 +48,9 @@ const doc: Record<string, unknown> = {
 };
 let posts: [string, any][] = [];
 let id = 0;
+let refuse = ''; // an /undo refused with these words
 const api = async (path: string, sent?: object): Promise<[number, any]> => {
+  if (refuse && path === '/undo') return [409, refuse];
   if (sent) return (posts.push([path, sent]), [200, { id: ++id }]);
   if (path === '/story') return [200, { map, files: {} }];
   const file = decodeURIComponent(path.split('file=')[1]!);
@@ -125,6 +127,7 @@ test('＋ east on the selected room makes room_1 there in its area and selects i
   assert.deepEqual(JSON.parse(kept.get('loka-build-undo')!).w, { ids: [id] }, 'the chip, kept');
   const last = await undo();
   assert.deepEqual(posts, [['/undo', { id: last }]]);
+  assert.equal(bar(), undefined, 'the put-back room is no longer selected');
 });
 
 test('Join… then a tap on a room writes the exit toward it and the way back; one Undo puts back both', async () => {
@@ -163,6 +166,8 @@ test('Move… then a tap on an empty cell writes its layout row; a tap on a take
   pick('loft');
   await press('Move…');
   assert.equal(bar(), 'loft — tap an empty cell');
+  pick('hall');
+  assert.equal(bar(), 'loft — tap an empty cell', 'a taken cell neither moves nor selects');
   posts = [];
   await tap(0, 0); // hall's cell
   assert.deepEqual(posts, []);
@@ -218,4 +223,21 @@ test('Cancel and Esc leave Join… and Move… writing nothing', async () => {
   await tap(1, 0);
   assert.deepEqual(posts, []);
   assert.equal(bar(), 'yard — selected');
+});
+
+test('Undo pressed while a gesture still runs keeps the chip; a refused put-back says so on the strip', async () => {
+  pick('hall');
+  await press('New room east');
+  pick('hall');
+  await press('Join…');
+  pick('hall'); // a refusal, still running when Undo is pressed
+  named(strip(), 'Undo').props.onPress();
+  await settle();
+  refuse = 'Hold on';
+  await press('Undo', strip());
+  refuse = '';
+  const said = strip()
+    .filter((e) => e.type === 'Text')
+    .map((e) => e.props.children);
+  assert.ok(said.includes('put back stopped: Hold on'), String(said));
 });

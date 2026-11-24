@@ -52,6 +52,7 @@ const PICKED = 'loka-build-map'; // the selection, kept across the reload a stru
 let selected = globalThis.localStorage?.getItem(PICKED) || undefined;
 let mode: 'join' | 'move' | 'area' | undefined; // Join…, Move… or Area… on the selection
 let born: string | undefined; // the room ＋ just made, selected before /story has it
+export const unborn = () => void (born = undefined); // its gesture put back
 let box: map.Box = { w: 0, h: 0 };
 const down = new Map<number, Point>(); // the pointers held on the ground
 let grab: { at: Point[]; v: map.View } | undefined; // the pointers and view when the gesture last changed
@@ -157,7 +158,7 @@ function wheeled(node: HTMLElement | null) {
     );
   removeEventListener('keydown', esc);
   down.clear();
-  grab = undefined;
+  grab = mode = undefined; // a mode left open ends with the sheet
 }
 
 /** A control glyph; without `run` it is disabled, in `dim`. */
@@ -271,7 +272,7 @@ function room(s: Seen, r: map.MapRoom) {
       accessibilityRole="button"
       accessibilityLabel={map.name(r, marks)}
       accessibilityState={{ selected: marks.selected }}
-      onPress={() => panned || (mode === 'join' ? join(r) : pick(r.key))}
+      onPress={() => panned || (mode === 'join' ? join(r) : mode === 'move' || pick(r.key))}
       style={{
         ...CENTRED,
         position: 'absolute',
@@ -378,8 +379,7 @@ const BAR = {
   borderColor: ink('line'),
   paddingTop: space.sm,
 };
-/** The selection's words and acts; in Join…, Move… or Area…, that mode's. A just-grown room is
- * selected before /story has it: Go here and Sheet only. */
+/** The selection's words and acts, or the open mode's; a just-grown room: Go here and Sheet only. */
 function bar(r: map.MapRoom | undefined) {
   const words =
     mode === 'join'
@@ -400,7 +400,7 @@ function bar(r: map.MapRoom | undefined) {
           : [
               act(WORDS.go, () => ((z = undefined), hooks.go(selected!))),
               act(WORDS.sheet, () => known.open(`room:${selected}`)),
-              r?.at && act(WORDS.join, () => ((mode = 'join'), known.redraw())),
+              r?.at?.z === level() && act(WORDS.join, () => ((mode = 'join'), known.redraw())),
               r?.at && act(WORDS.move, () => ((mode = 'move'), known.redraw())),
               r && act(WORDS.area, () => ((mode = 'area'), known.redraw())),
               ...free.map((dir) => act(WORDS.growAct(dir), () => grow(r!, dir))),
