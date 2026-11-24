@@ -112,7 +112,7 @@
   {
     "id": "story-row-sheets",
     "panel": "tools/author-panel/src/storylist.tsx",
-    "book": "story.tsx"
+    "book": "todo"
   },
   {
     "id": "story-beats",

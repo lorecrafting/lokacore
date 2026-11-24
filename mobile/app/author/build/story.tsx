@@ -118,7 +118,10 @@ function beatActs(r: L.Row, s: L.Story) {
 
 /** One list row: a part or beat opens or shuts and shows its edits, a node shows its actions. */
 function storyRow(r: L.Row, s: L.Story) {
-  const label = [r.kind === 'beat' ? `${r.n}  ${r.label}` : r.label, ...marks(r)]
+  const label = [
+    r.kind === 'beat' ? [String(r.n), r.label].filter(Boolean).join('  ') : r.label,
+    ...marks(r),
+  ]
     .filter(Boolean)
     .join(' · ');
   const press = () => {
@@ -181,53 +184,53 @@ const withKey = (label: string, ref?: string) => ({
   label: ref ? `${label} ${keyOf(ref)}` : label,
   ref,
 });
-const story = () => known.story!;
+/** A sheet's body from the last /story; none yet (a restored stack, a refused compile), nothing listed. */
+const told =
+  (rows: (s: L.Story, arg: string) => { label: string; ref?: string }[]) => (arg: string) =>
+    listed(known.story ? rows(known.story, arg) : []);
 
 sheets.trace = {
   title: (ref) => `${WORDS.trace} ${keyOf(ref)}`,
-  body: (ref) =>
-    listed(
-      L.trace(story(), ref).map((r) => {
-        const row = withKey(r.label, r.ref);
-        return r.beat ? { ...row, label: `${row.label} (${WORDS.beat(r.beat)})` } : row;
-      }),
-    ),
+  body: told((s, ref) =>
+    L.trace(s, ref).map((r) => {
+      const row = withKey(r.label, r.ref);
+      return r.beat ? { ...row, label: `${row.label} (${WORDS.beat(r.beat)})` } : row;
+    }),
+  ),
 };
 sheets.consequences = {
   title: (ref) => `${WORDS.consequences} ${keyOf(ref)}`,
-  body: (ref) =>
-    listed(
-      consequenceRows(story(), ref).map((r) => ({
-        label: [r.label, r.key].filter(Boolean).join(' '),
-        ref: r.ref,
-      })),
-    ),
+  body: told((s, ref) =>
+    consequenceRows(s, ref).map((r) => ({
+      label: [r.label, r.key].filter(Boolean).join(' '),
+      ref: r.ref,
+    })),
+  ),
 };
 sheets.knowledge = {
   title: (n) => `${WORDS.knowledge} · ${WORDS.beat(Number(n))}`,
-  body: (n) => {
-    const k = knowledge(story(), Number(n));
-    return listed([
+  body: told((s, n) => {
+    const k = knowledge(s, Number(n));
+    return [
       ...k.knows.map((ref) => withKey(WORDS.knows, ref)),
       ...k.may.map((ref) => withKey(WORDS.may, ref)),
       ...k.not.map((ref) => withKey(WORDS.not, ref)),
-    ]);
-  },
+    ];
+  }),
 };
 sheets.facts = {
   title: () => WORDS.facts,
-  body: () => listed(factRows(story()).map((f) => ({ label: f.label, ref: f.ref }))),
+  body: told((s) => factRows(s).map((f) => ({ label: f.label, ref: f.ref }))),
 };
 sheets.pacing = {
   title: () => WORDS.pacing,
-  body: () =>
-    listed(
-      pacing(story()).map((p) => ({
-        label: [`Part ${p.part + 1}`, p.title, WORDS.words(p.words), p.thin && WORDS.thin]
-          .filter(Boolean)
-          .join(' · '),
-      })),
-    ),
+  body: told((s) =>
+    pacing(s).map((p) => ({
+      label: [`Part ${p.part + 1}`, p.title, WORDS.words(p.words), p.thin && WORDS.thin]
+        .filter(Boolean)
+        .join(' · '),
+    })),
+  ),
 };
 
 /** Build.tsx hands in Go there: start in the room. */

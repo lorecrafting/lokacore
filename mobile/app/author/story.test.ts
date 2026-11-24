@@ -53,7 +53,7 @@ const story = {
         status: 'built',
         nodes: [R('dialogue', 'greet'), R('fact', 'met_nell'), R('npc', 'nell')],
       },
-      { part: 1, n: 2, title: 'Leave', status: '~', nodes: [R('dialogue', 'farewell')] },
+      { part: 1, n: 2, status: '~', nodes: [R('dialogue', 'farewell')] },
     ],
     unpaid: [],
     unseeded: [],
@@ -86,7 +86,7 @@ const outline = {
         { n: 1, title: 'Meet Nell', nodes: ['dialogues/greet', 'facts/met_nell', 'npcs/nell'] },
       ],
     },
-    { beats: [{ n: 2, title: 'Leave', nodes: ['dialogues/farewell'] }] },
+    { beats: [{ n: 2, nodes: ['dialogues/farewell'] }] },
   ],
 };
 let posts: [string, any][] = [];
@@ -100,6 +100,7 @@ const api = async (path: string, sent?: object): Promise<[number, any]> => {
 };
 const started: string[] = [];
 const build = await import('./build/Build.tsx');
+const { known } = await import('./build/room.tsx');
 build.place({
   place: () => ({ steps: [] }),
   here: () => 'hall',
@@ -129,7 +130,7 @@ await press('Story');
 
 test('the Story tab marks a beat unwritten, a node with its refusals, unwritten count and unreached, and never shows ~', async () => {
   await press('1  Meet Nell');
-  await press('2  Leave · unwritten');
+  await press('2 · unwritten');
   for (const row of [
     'Part 1  Arrival',
     'Part 2',
@@ -153,7 +154,7 @@ test('Add beat 3 on the second part (part:1) writes beat 3 after beat 2 there', 
     change([
       {
         path: ['parts', 1, 'beats'],
-        value: [{ n: 2, title: 'Leave', nodes: ['dialogues/farewell'] }, { n: 3 }],
+        value: [{ n: 2, nodes: ['dialogues/farewell'] }, { n: 3 }],
       },
     ]),
   ]);
@@ -173,7 +174,7 @@ test("Retitle with the field emptied removes beat 1's title; one Undo puts back 
 });
 
 test('Bind on beat 2 (part:1) adds the short ref pressed to its nodes', async () => {
-  await press('2  Leave · unwritten'); // beat 2 shut and picked
+  await press('2 · unwritten'); // beat 2 shut and picked
   posts = [];
   await press('Bind npcs/nell');
   assert.deepEqual(posts, [
@@ -201,4 +202,19 @@ test('Go there on nell starts in the room a story edge joins her to', async () =
   await press('nell');
   await press('Go there');
   assert.deepEqual(started, ['hall']);
+});
+
+test('a sheet restored before /story arrives says Nothing here instead of throwing', () => {
+  const s = known.story;
+  known.story = undefined;
+  try {
+    for (const head of ['trace', 'consequences', 'knowledge', 'facts', 'pacing'] as const)
+      assert.deepEqual(
+        nodes(build.sheets[head].body('1')).map((e) => e.props.children),
+        ['Nothing here.'],
+        head,
+      );
+  } finally {
+    known.story = s;
+  }
 });

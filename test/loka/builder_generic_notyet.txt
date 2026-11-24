@@ -10,6 +10,9 @@ layout.y.book.edit  # home: phase 4, the map
 layout.z.book.create  # home: phase 4, the map
 layout.z.book.delete  # home: phase 4, the map
 layout.z.book.edit  # home: phase 4, the map
+outline.parts.book.create  # home: 5.4, the Story tab (no /schema/outline)
+outline.parts.book.delete  # home: 5.4, the Story tab (no /schema/outline)
+outline.parts.book.edit  # home: 5.4, the Story tab (no /schema/outline)
 scenes.abstract.book.create  # home: 5.2 (a field the picked scene shape requires)
 scenes.description.book.create  # home: 5.2 (a field the picked scene shape requires)
 scenes.name.book.create  # home: 5.2 (a field the picked scene shape requires)
