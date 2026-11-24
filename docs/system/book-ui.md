@@ -64,7 +64,7 @@ log follows to its end, so the pop is seen on a full page. It does not rise unde
 log line stays the record.
 
 In Build only (author preview, `?dev=1`; PM, 2026-11-23): the [ghost lines](#author-mode-dev-only)
-between the title and the description, never in the record or the save.
+under the title, at most one line, never in the record or the save.
 
 Under-ink layers (night sky, lamp glow, low-health vignette, lightning, wind flutter) are paper, not
 parts: they draw no block, hold no words and take no touch.
@@ -1111,13 +1111,16 @@ reasons and limits: [prose in the Book rulings](../design/prose-in-the-book-ruli
     [room page anatomy](#room-page-anatomy)). On the room page, after the title and before the
     description, each person, item, description variant, detail action or way into a dialogue
     that this room holds and the page does not show is one line: `<words> · <reason>`, the reason
-    `hidden: until …`, `only when: …`, `not here now` or `not offered now`. They scroll with the
-    page, never in the fixed title, and are not part of the title's heading. A tap opens the
-    ghost's sheet (its person's, item's or room's, else its definition file's); a ghost with no
+    `hidden: until …`, `only when: …`, `not here now` or `not offered now`. They sit under the
+    fixed title (the seam's only room-level anchor), capped at one line so the fixed header grows
+    by at most a touch target: one ghost draws as its line, on one line, cut with an ellipsis;
+    two or more draw as one line, `N not shown`, whose tap opens the Room sheet. A ghost's tap
+    opens its sheet (its person's, item's or room's, else its definition file's); a ghost with no
     sheet is not pressable and its label does not say edit. Ghost lines are never in the log or
     the save, and leaving Build removes them.
-  - **See as…** On the Room sheet of the page's own room, after the exit rows, each variant not in
-    force is a row: its reason and `See as`. A press redraws the room's words with that variant's
+  - **Room sheet ghosts.** On the Room sheet of the page's own room, after the exit rows, every
+    ghost is a row, `<words> · <reason>`, opening its own sheet as its ghost line does.
+  - **See as…** A variant's row also has `See as`. A press redraws the room's words with that variant's
     words, writing nothing, and the strip shows a chip, `Seeing: <reason> · Back`, whose press
     ends it. A same-room act does not end it, nor do the clock's pulses. Any write, a hear (a live
     message), the Build toggle, a tap on a line, a new room, new words in force or a new game end
