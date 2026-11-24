@@ -3,8 +3,7 @@
 // one level as boxes at their cells, exits as lines, the current room marked. A tap selects and never
 // plays; Go here and Sheet act on the selection. ⌃ ⌄ step levels; − + ⤢, drag on empty ground, pinch
 // and wheel move the view with the panel's math (kernel/ts/play/map.ts, as areamap.tsx's useLevel).
-// Slice 4.3: ＋ grows, Join…, Move… (and a tap placing an unplaced room) and Area… edit through the
-// Room sheet's editor (roomedit.tsx `ed`, `run`), each one Undo step on the strip's chip.
+// Slice 4.3: ＋, Join…, Move…, a tap placing an unplaced room, Area…: roomedit's `ed`, one Undo each.
 import { useState } from 'react';
 import { Pressable, Text, useWindowDimensions, View } from 'react-native';
 import * as map from '../../../../kernel/ts/play/map.ts';
@@ -49,7 +48,8 @@ const LEAST = size.touch / M.cell;
 const SLOP = size.touch / 4; // a tap's slop, as the sheet's Grip
 let z: number | undefined; // the level stepped to; until then the map follows the current room
 let view: { v: map.View; z: number } | undefined; // and the level it shows
-let selected: string | undefined;
+const PICKED = 'loka-build-map'; // the selection, kept across the reload a structural compile brings
+let selected = globalThis.localStorage?.getItem(PICKED) || undefined;
 let mode: 'join' | 'move' | 'area' | undefined; // Join…, Move… or Area… on the selection
 let born: string | undefined; // the room ＋ just made, selected before /story has it
 let box: map.Box = { w: 0, h: 0 };
@@ -411,8 +411,9 @@ function bar(r: map.MapRoom | undefined) {
 }
 function body() {
   if (rooms().some((r) => r.key === born)) born = undefined;
-  if (selected && selected !== born && !rooms().some((r) => r.key === selected))
+  if (selected && selected !== born && rooms().length && !rooms().some((r) => r.key === selected))
     selected = undefined; // renamed or deleted
+  localStorage.setItem(PICKED, selected ?? '');
   const unplaced = rooms().filter((r) => !r.at);
   const all = map.levels(rooms());
   const at = all.indexOf(level());

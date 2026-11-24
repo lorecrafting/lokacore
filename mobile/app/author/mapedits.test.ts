@@ -6,7 +6,12 @@ import { test } from 'node:test';
 import { nodes } from '../book/__tests__/combat-book.test.ts'; // the React Native stand-ins
 import { BUILD } from './build/build.ts';
 
-const kept = new Map([[BUILD, '{"on":true}']]);
+// a reload after a gesture's compile: its chip (the gesture's journal ids) and the map's selection kept
+const kept = new Map([
+  [BUILD, '{"on":true}'],
+  ['loka-build-undo', JSON.stringify({ w: { ids: [3, 4] }, end: Date.now() + 60_000 })],
+  ['loka-build-map', 'loft'],
+]);
 const keys: ((e: { key: string }) => void)[] = [];
 Object.assign(globalThis, {
   localStorage: {
@@ -53,6 +58,7 @@ const build = await import('./build/Build.tsx');
 build.place({ place: () => ({ steps: [] }), here: () => 'hall' } as never);
 build.install({ seen: new Map(), said: new Map(), redraw() {}, api } as never);
 const settle = () => new Promise((r) => setTimeout(r));
+nodes(build.sheets.map.body('')); // the reloaded sheet draws before /story answers
 await settle(); // the map
 
 const sheet = () => nodes(build.sheets.map.body(''));
@@ -95,6 +101,15 @@ async function undo() {
   return last;
 }
 
+test('after the reload a gesture brings, loft stays selected and Undo puts back its writes, newest first', async () => {
+  assert.equal(bar(), 'loft — selected');
+  await undo(); // the editor's journal is empty: the kept ids go
+  assert.deepEqual(posts, [
+    ['/undo', { id: 4 }],
+    ['/undo', { id: 3 }],
+  ]);
+});
+
 test('＋ east on the selected room makes room_1 there in its area and selects it; Undo puts it back', async () => {
   pick('hall');
   posts = [];
@@ -106,6 +121,8 @@ test('＋ east on the selected room makes room_1 there in its area and selects i
     ],
   ]);
   assert.equal(bar(), 'room_1 — selected', 'the new room, before /story has it');
+  assert.equal(kept.get('loka-build-map'), 'room_1', 'kept for the reload');
+  assert.deepEqual(JSON.parse(kept.get('loka-build-undo')!).w, { ids: [id] }, 'the chip, kept');
   const last = await undo();
   assert.deepEqual(posts, [['/undo', { id: last }]]);
 });

@@ -27,7 +27,8 @@ import { thingPen } from './thing.tsx';
 import { CONTENTS } from './contents.tsx';
 import './generic.tsx'; // registers the def:<file> sheet
 import { MAP, mapSheet } from './map.tsx';
-import { ed, onSaved, run } from './roomedit.tsx';
+import { undo as putBackIds } from '../../../../kernel/ts/play/mapedit.ts';
+import { ed, io, onSaved, run } from './roomedit.tsx';
 import { act, CONTROL, Frame, parts, sheets } from './sheet.tsx';
 
 export { Sheet, sheets } from './sheet.tsx';
@@ -47,10 +48,12 @@ const WORDS = {
   checks: 'Checks',
 };
 const UNDO_MS = 5000; // the chip's life after a write (docs/rnd/in-game-builder-mode-2026-11-19.md)
+const KEPT = 'loka-build-undo'; // the chip and its end: a map gesture's compile reloads the Book
+type Gesture = { ids: number[] }; // a sheet's gesture: its journal ids, oldest first
 let builder: Builder = { on: false };
 let heard: Message = { text: {}, said: [] };
 let api: Hooks['api'] | undefined;
-let undo: Wrote | 'gesture' | undefined; // the last write (a field's, or a sheet's gesture), while its chip shows
+let undo: Wrote | Gesture | undefined; // the last write (a field's, or a sheet's gesture), while its chip shows
 let undoTimer: ReturnType<typeof setTimeout> | undefined;
 let notBack: Wrote | undefined; // a refused put-back
 let redrawStrip = () => {};
@@ -66,7 +69,7 @@ export type Place = Game & {
 let placed: Place | undefined;
 export const place = (given: Place) => void ((placed = given), seeWith(given, () => mapped()));
 mapSheet({ go: (room) => placed?.startIn(room), here: () => placed?.here() });
-onSaved(() => wrote('gesture'));
+onSaved((ids) => wrote({ ids }));
 let asked = Promise.resolve();
 /** One at a time: the server keeps the last flag it got, so an on overtaking its off would stick.
  * A refused or failed request shows as no Held in the strip. */
@@ -119,6 +122,11 @@ export function install(book: Pick<Hooks, 'seen' | 'said' | 'redraw' | 'api'>) {
     },
   });
   builder = restored(localStorage);
+  const kept = JSON.parse(localStorage.getItem(KEPT) ?? 'null') as {
+    w: Wrote | Gesture;
+    end: number;
+  };
+  if (kept?.end > Date.now()) showUndo(kept.w, kept.end);
   mapped = () => (redrawStrip(), book.redraw());
   story(api, mapped, back, open);
   addEventListener('pagehide', hold.leave);
@@ -135,21 +143,28 @@ const set = (next: Builder) => {
   keep(localStorage, next);
 };
 /** A field saved: its Undo chip for UNDO_MS, and the room Start in this room goes back to. */
-function wrote(w: Wrote | 'gesture') {
+function wrote(w: Wrote | Gesture) {
   unsee();
   const room = placed?.here();
   set({ ...builder, ...(room && { room }) });
-  undo = w;
   notBack = undefined;
+  showUndo(w, Date.now() + UNDO_MS);
+}
+/** The Undo chip for `w` until `end`, kept so the reload a structural compile brings shows it on. */
+function showUndo(w: Wrote | Gesture, end: number) {
+  undo = w;
+  localStorage.setItem(KEPT, JSON.stringify({ w, end }));
   clearTimeout(undoTimer);
-  undoTimer = setTimeout(() => ((undo = undefined), redrawStrip()), UNDO_MS);
+  undoTimer = setTimeout(() => ((undo = undefined), redrawStrip()), end - Date.now());
   redrawStrip();
 }
-async function putBack(w: Wrote | 'gesture') {
+async function putBack(w: Wrote | Gesture) {
   undo = undefined;
+  localStorage.setItem(KEPT, 'null');
   clearTimeout(undoTimer);
   redrawStrip();
-  if (w === 'gesture') return run(() => ed.undo()); // a refused put-back shows in the sheet
+  // a refused put-back shows in the sheet; after a reload the editor's journal is gone, the ids are not
+  if ('ids' in w) return run(() => (ed.undoable() ? ed.undo() : putBackIds(io, [...w.ids])));
   const undone = api!('/undo', { id: w.id, key: w.key, words: w.words });
   const [status] = await undone.catch(() => []); // the server down: not put back, said so
   notBack = status === 200 ? undefined : w;
