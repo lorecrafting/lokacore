@@ -65,6 +65,7 @@ const BY: Record<string, [string, ReturnType<typeof walk>]> = {
   'potential problems': [lit, { above: [cnd], below: [], thread: [cnd] }],
 };
 test('each Flow filter changes what the walk shows', () => {
+  assert.deepEqual(Object.keys(BY).sort(), [...FILTERS].sort());
   for (const filter of FILTERS) {
     const [at, want] = BY[filter]!;
     assert.deepEqual(walk(S, at, [filter]), want, filter);
