@@ -10,7 +10,7 @@ import { request as secure } from 'node:https';
 import { createRequire } from 'node:module';
 import type { AddressInfo } from 'node:net';
 import { networkInterfaces, tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { dirname, join } from 'node:path';
 import { test } from 'node:test';
 
 const require = createRequire(import.meta.url);
@@ -56,6 +56,7 @@ test('the CA is made once, name-constrained, its key readable by the owner alone
   const leaf = lanCert(dir, ['192.168.1.20', '10.0.0.7']);
   assert.equal(statSync(dir).mode & 0o777, 0o700);
   assert.equal(statSync(join(dir, 'ca.key')).mode & 0o777, 0o600);
+  assert.equal(statSync(join(dir, 'leaf.key')).mode & 0o777, 0o600);
   const ca = new X509Certificate(readFileSync(caPem));
   assert.equal(ca.ca, true);
   const text = execFileSync(OPENSSL, ['x509', '-noout', '-text', '-in', caPem], {
@@ -127,6 +128,32 @@ test('without --lan the preview is one loopback listener and makes no CA', async
   assert.equal(existsSync(dir), false);
 });
 
+test('a CA that cannot be made fails the start with nothing listening', async (t) => {
+  // Breaks: the loopback preview listens before the cert is made, so a failed --lan start keeps it open.
+  const probe = createServer().listen(0, '127.0.0.1');
+  await once(probe, 'listening');
+  const port = (probe.address() as AddressInfo).port;
+  probe.close();
+  const file = join(dirname(scratch(t)), 'file');
+  writeFileSync(file, '');
+  assert.throws(
+    () =>
+      serve({
+        previewPort: port,
+        caPort: 0,
+        metroPort: 1,
+        authorPort: 1,
+        token: TOKEN,
+        ips: ['10.0.0.7'],
+        dir: join(file, 'lan-ca'),
+      }),
+    { code: 'ENOTDIR' },
+  );
+  const again = createServer().listen(port, '127.0.0.1');
+  t.after(() => again.close());
+  await once(again, 'listening'); // EADDRINUSE here if the preview were left listening
+});
+
 test('--lan: loopback stays plain http; the LAN gets the paired https preview and the CA, never its key', async (t) => {
   // Breaks: the loopback preview turns https or guarded (the Mac's own Book breaks); a LAN request
   // without the cookie reaches Metro; the LAN preview is not https under a chain the CA vouches for;
@@ -137,6 +164,7 @@ test('--lan: loopback stays plain http; the LAN gets the paired https preview an
   t.mock.timers.enable({ apis: ['Date'], now: Date.now() });
   const metro = createServer((_req, res) => res.end('metro'));
   metro.listen(0, '127.0.0.1');
+  t.after(() => metro.close());
   await once(metro, 'listening');
   const dir = scratch(t);
   const servers: Server[] = serve({
@@ -149,7 +177,7 @@ test('--lan: loopback stays plain http; the LAN gets the paired https preview an
     ips: [ip],
     dir,
   });
-  t.after(() => [metro, ...servers].forEach((s) => s.close()));
+  t.after(() => servers.forEach((s) => s.close()));
   await Promise.all(servers.map((s) => s.listening || once(s, 'listening')));
   const [loopback, preview, caDownload] = servers.map((s) => (s.address() as AddressInfo).port);
   const ca = readFileSync(join(dir, 'ca.pem'), 'utf8');

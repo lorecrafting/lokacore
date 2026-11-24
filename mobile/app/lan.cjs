@@ -72,6 +72,8 @@ function lanCert(dir, ips) {
   }
   fs.chmodSync(caKey, 0o600);
   const key = newKey();
+  const leafKey = path.join(dir, 'leaf.key'); // a file, not /dev/stdin: Linux cannot open a socket stdin there
+  fs.writeFileSync(leafKey, key, { mode: 0o600 });
   const leaf = path.join(dir, 'leaf.cnf');
   fs.writeFileSync(
     leaf,
@@ -81,8 +83,8 @@ function lanCert(dir, ips) {
   // The CN has a space: OpenSSL would check a hostname-like CN against the DNS constraint.
   const csr = execFileSync(
     OPENSSL,
-    ['req', '-new', '-key', '/dev/stdin', '-subj', '/CN=Loka LAN preview', '-config', config],
-    { input: key, ...QUIET },
+    ['req', '-new', '-key', leafKey, '-subj', '/CN=Loka LAN preview', '-config', config],
+    QUIET,
   );
   const cert = execFileSync(
     OPENSSL,
@@ -122,10 +124,10 @@ function caServer(caToken, pair, dir) {
 /** The preview's listeners: plain http on loopback, unguarded as ever; with `token` (`--lan`), on each
  * of `ips` the paired https preview and the CA download. */
 function serve({ previewPort, caPort, metroPort, authorPort, token, caToken, ips, dir }) {
+  const tls = token && lanCert(dir, ips); // before any listen: a failed cert leaves nothing open
   const servers = [proxy({ metroPort, authorPort }).listen(previewPort, '127.0.0.1')];
   if (!token) return servers;
   const pair = pairing(token);
-  const tls = lanCert(dir, ips);
   for (const ip of ips)
     servers.push(
       proxy({ pair, metroPort, authorPort, tls }).listen(previewPort, ip),
