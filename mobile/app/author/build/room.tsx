@@ -2,6 +2,7 @@
 // roomedit.tsx's.
 import { Text, View } from 'react-native';
 import type { MapRoom } from '../../../../kernel/ts/play/map.ts';
+import type { Story as Told } from '../../../../kernel/ts/play/storylist.ts';
 import { size, space, type } from '../../book/tokens.ts';
 import { unwritten } from '../prose_rules.ts';
 import { ink } from './build.ts';
@@ -29,12 +30,13 @@ const WORDS = {
   root: 'No area',
 };
 type Room = MapRoom; // /story's `map` (kernel/ts/play/story.ts `rooms`)
-/** The last /story's rooms, graph nodes (the keys a new definition must not take) and source file
+/** The last /story (the notebook's Story tab reads it whole), its rooms, graph nodes (the keys a new definition must not take) and source file
  * per node ref; /templates' abstract NPCs and items; the Book's redraw, a sheet's open and the api. */
 export const known = {
   rooms: [] as Room[],
   nodes: [] as Node[],
   files: {} as Record<string, string>,
+  story: undefined as Told | undefined,
   hidden: [] as string[], // skills no add menu offers (story.ts `hidden`)
   unlinkable: {} as Record<string, string>, // dialogues no then may name, with why (story.ts `unlinkable`)
   held: [] as Template[],
@@ -88,6 +90,7 @@ export function story(
         known.rooms = Array.isArray(told?.map) ? told.map : [];
         known.nodes = told?.graph?.nodes ?? [];
         known.files = told?.files ?? {};
+        known.story = (told as Told | null) ?? undefined;
         known.hidden = told?.hidden ?? [];
         known.unlinkable = told?.unlinkable ?? {};
       }

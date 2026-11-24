@@ -27,6 +27,7 @@ import { thingPen } from './thing.tsx';
 import { CONTENTS } from './contents.tsx';
 import './generic.tsx'; // registers the def:<file> sheet
 import { MAP, mapSheet, measured, unborn } from './map.tsx';
+import { storySheet } from './story.tsx';
 import { undo as putBackIds } from '../../../../kernel/ts/play/mapedit.ts';
 import { io, onSaved, refused, run, running } from './roomedit.tsx';
 import { act, CONTROL, Frame, parts, sheets } from './sheet.tsx';
@@ -70,6 +71,7 @@ export type Place = Game & {
 let placed: Place | undefined;
 export const place = (given: Place) => void ((placed = given), seeWith(given, () => mapped()));
 mapSheet({ go: (room) => placed?.startIn(room), here: () => placed?.here() });
+storySheet((room) => placed?.startIn(room));
 onSaved((ids) => wrote({ ids }));
 let asked = Promise.resolve();
 /** One at a time: the server keeps the last flag it got, so an on overtaking its off would stick.
