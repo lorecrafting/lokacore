@@ -1,10 +1,13 @@
 // Local-only header proxy: Expo's root HTML does not set the isolation headers
-// required by expo-sqlite's synchronous browser worker. Both ports stay on localhost.
+// required by expo-sqlite's synchronous browser worker. Both ports stay on localhost, except the
+// proxy's with LOKA_PAIR set (`bin/author.sh --lan`): then it listens on the LAN behind pairing.cjs.
 const http = require('node:http');
 const net = require('node:net');
 const { execFileSync, spawn } = require('node:child_process');
 const path = require('node:path');
 const readline = require('node:readline');
+const { networkInterfaces } = require('node:os');
+const { pairing } = require('./pairing.cjs');
 const { quiet } = require('./quiet-metro.cjs');
 
 const previewPort = Number(process.env.LOKA_PREVIEW_PORT || 19006);
@@ -40,7 +43,11 @@ for (const [from, to] of [[expo.stdout, process.stdout], [expo.stderr, process.s
 
 // `/__author/*` goes to `bin/loka dev --watch`'s live stream (kernel/ts/play/live.ts).
 const authorPort = Number(process.env.LOKA_AUTHOR_PORT || 19008);
+const token = process.env.LOKA_PAIR;
+const pair = token ? pairing(token) : undefined;
 const server = http.createServer((request, response) => {
+  const refused = pair?.check(request);
+  if (refused) return response.writeHead(...refused).end();
   const author = request.url.startsWith('/__author/');
   const port = author ? authorPort : metroPort;
   const upstream = http.request(
@@ -50,7 +57,11 @@ const server = http.createServer((request, response) => {
       path: author ? request.url.slice('/__author'.length) : request.url,
       method: request.method,
       // the author server checks the page's own Host (a rebinding name's is foreign)
-      headers: { ...request.headers, host: author ? request.headers.host : `localhost:${port}` },
+      headers: {
+        ...request.headers,
+        host: author ? request.headers.host : `localhost:${port}`,
+        ...(author && pair?.forwarded(request)),
+      },
     },
     (result) => {
       response.writeHead(result.statusCode, {
@@ -73,6 +84,7 @@ const server = http.createServer((request, response) => {
 });
 
 server.on('upgrade', (request, socket, head) => {
+  if (pair?.check(request)) return socket.end('HTTP/1.1 403 Forbidden\r\n\r\n');
   const upstream = net.connect(metroPort, 'localhost', () => {
     upstream.write(`${request.method} ${request.url} HTTP/1.1\r\n`);
     for (const [key, value] of Object.entries(request.headers))
@@ -85,9 +97,12 @@ server.on('upgrade', (request, socket, head) => {
   socket.on('error', () => upstream.destroy());
 });
 
-server.listen(previewPort, '127.0.0.1', () =>
-  console.log(`Book preview: http://localhost:${previewPort}`),
-);
+server.listen(previewPort, token ? '0.0.0.0' : '127.0.0.1', () => {
+  console.log(`Book preview: http://localhost:${previewPort}`);
+  const lan = Object.values(networkInterfaces()).flat().find((a) => a.family === 'IPv4' && !a.internal);
+  if (token) console.log(`On the LAN (open once to pair): http://${lan?.address}:${previewPort}/?dev=1&pair=${token}`);
+});
+if (pair) setInterval(pair.idle, 60_000).unref();
 server.on('error', (error) => {
   expo.kill();
   throw error;

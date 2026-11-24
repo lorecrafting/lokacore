@@ -244,7 +244,7 @@ export function serve(port: number, source: string, artifact: string, on: Hooks 
   }, source);
   const editor = editing(source, said, (o) => clients.forEach((c) => send(c, o)), on, artifact);
   const route = async (request: IncomingMessage, response: ServerResponse) => {
-    if (foreign(request, response) || (await editor.route(request, response))) return;
+    if (foreign(request, response, on.pair) || (await editor.route(request, response))) return;
     if (request.url === '/story') return map.answer(request, response, last.diagnostics ?? []);
     const answered = column(request, response, source, artifact, editor.busy);
     if (answered !== false) return answered;
