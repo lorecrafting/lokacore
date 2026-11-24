@@ -31,7 +31,7 @@ const newKey = () =>
 const lanAddresses = (nets) =>
   Object.values(nets)
     .flat()
-    .filter((a) => a.family === 'IPv4' && !a.internal && PRIVATE.test(a.address))
+    .filter((a) => PRIVATE.test(a.address))
     .map((a) => a.address);
 
 /** `{ key, cert }` for `ips`, issued each start (the key stays in memory) by the CA in `dir`, made on
@@ -101,7 +101,7 @@ function lanCert(dir, ips) {
     ],
     { input: csr, encoding: 'utf8', ...QUIET },
   );
-  return { key, cert: cert + fs.readFileSync(caCert, 'utf8') };
+  return { key, cert };
 }
 
 /** The CA certificate, never its key, on plain http for the phone to install: `/loka-ca.pem?pair=<token>`. */
