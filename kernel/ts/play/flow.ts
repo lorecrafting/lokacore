@@ -150,7 +150,7 @@ export function layers(refs: string[], edges: Edge[]) {
 }
 
 // The nodes the filters keep, among the lane kinds.
-function shownOf(s: Story, st: FlowState, all: string[]) {
+export function shownOf(s: Story, st: FlowState, all: string[]) {
   const off = new Set(Object.values(s.report.unreachable).flat());
   const f = new Set(st.filters ?? []);
   return all.filter(
