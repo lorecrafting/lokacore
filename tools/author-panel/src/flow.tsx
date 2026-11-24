@@ -12,7 +12,7 @@ import { entry, focusInk, followed, footer, inked, search } from './flowread.ts'
 import { fit, keep, zoomAt } from '../../../kernel/ts/play/map.ts';
 import type { SetLayout } from './columns.tsx';
 import { BUDGET, fromRef, type Layout, type Selection } from './shell.ts';
-import { LIST, toggle, type Story } from './storylist.ts';
+import { LIST, toggle, type Story } from '../../../kernel/ts/play/storylist.ts';
 
 export type Props = {
   story: Story;

@@ -8,7 +8,7 @@ import { card } from './flowread.ts';
 import { M } from '../../../kernel/ts/play/map.ts';
 import { ICON } from './storylist.tsx';
 import { ICONED } from './storylower.tsx';
-import type { Story } from './storylist.ts';
+import type { Story } from '../../../kernel/ts/play/storylist.ts';
 
 const DASH = '[stroke-dasharray:4_3]';
 const dim = (on: boolean) => ({ opacity: on ? 1 : F.dim });

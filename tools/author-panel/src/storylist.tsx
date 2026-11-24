@@ -32,7 +32,7 @@ import { Button } from './components/ui/button.tsx';
 import type { SetLayout } from './columns.tsx';
 import { edit, shown } from './mapwire.ts';
 import { fromRef, type Layout, type Selection } from './shell.ts';
-import * as L from './storylist.ts';
+import * as L from '../../../kernel/ts/play/storylist.ts';
 import { FactsButton, ICONED, LowerPanel, PacingButton, type Act } from './storylower.tsx';
 
 /** Each story kind's icon (the List's rows and Flow's chips): a quest is a scroll, a story point a flag. */

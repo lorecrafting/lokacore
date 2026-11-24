@@ -2,8 +2,8 @@
 // value worked by hand from the design, never from the code.
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import type { Story } from '../../../tools/author-panel/src/storylist.ts';
-import * as F from '../../../tools/author-panel/src/storyfacts.ts';
+import type { Story } from '../play/storylist.ts';
+import * as F from '../play/storyfacts.ts';
 import { factUsage } from '../play/reach.ts';
 
 const ref = (kind: string, key: string) => `demo@1:${kind}/${key}`;

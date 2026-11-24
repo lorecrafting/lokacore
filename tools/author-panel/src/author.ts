@@ -1,7 +1,7 @@
 // `bin/loka dev --watch`'s API (kernel/ts/play/live.ts), proxied at /__author by vite.config.ts.
 import { useEffect, useState } from 'react';
-import type { Story, Todo } from './storylist.ts';
-export type { Edge, Beat, Outline, Story, Todo } from './storylist.ts';
+import type { Story, Todo } from '../../../kernel/ts/play/storylist.ts';
+export type { Edge, Beat, Outline, Story, Todo } from '../../../kernel/ts/play/storylist.ts';
 import type { Timings } from './shell.ts';
 import type { useBook } from './book.ts';
 import type { Fights, Numbers } from '../../../kernel/ts/play/numbers.ts';

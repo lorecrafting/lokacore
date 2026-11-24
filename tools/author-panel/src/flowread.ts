@@ -4,7 +4,7 @@ import { reads } from '../../../kernel/ts/play/reads.ts';
 import { cmp, F, inColumn, key, laneOf, plural, solid, type Chip, type Flow, type Part, type Stub } from './flow.ts';
 import { nearest, type MapRoom } from '../../../kernel/ts/play/map.ts';
 import { fromRef, type Item, type Layout } from './shell.ts';
-import { go, isOpen, LIST, outlineOf, toggle, type Edge, type Story } from './storylist.ts';
+import { go, isOpen, LIST, outlineOf, toggle, type Edge, type Story } from '../../../kernel/ts/play/storylist.ts';
 
 /** The refs inked by a focus: the node and `hops` steps of edges either way, between lane refs
  * only (a room, NPC or item is not a node; walking through one would ink unrelated nodes). */

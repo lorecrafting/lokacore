@@ -2,7 +2,7 @@
 // grid of beats (or dependency layers) and the drawn edges. No React and no layout library;
 // tested from kernel/ts/test/author_flow.test.ts. Ink, keys and the palette are in flowread.ts.
 import { fromRef, type Layout } from './shell.ts';
-import { isOpen, LIST, outlineOf, type Edge, type Story } from './storylist.ts';
+import { isOpen, LIST, outlineOf, type Edge, type Story } from '../../../kernel/ts/play/storylist.ts';
 
 /** Drawing constants in px at zoom 1, exempt from the space tokens as the map's `M` is. */
 export const F = {

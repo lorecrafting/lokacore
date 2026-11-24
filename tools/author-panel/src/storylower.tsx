@@ -4,10 +4,10 @@ import { Gauge, Table2, X } from 'lucide-react';
 import type { Story } from './author.ts';
 import { Button } from './components/ui/button.tsx';
 import { fromRef, type Selection } from './shell.ts';
-import * as C from './storyconseq.ts';
-import * as F from './storyfacts.ts';
-import * as K from './storyknow.ts';
-import * as L from './storylist.ts';
+import * as C from '../../../kernel/ts/play/storyconseq.ts';
+import * as F from '../../../kernel/ts/play/storyfacts.ts';
+import * as K from '../../../kernel/ts/play/storyknow.ts';
+import * as L from '../../../kernel/ts/play/storylist.ts';
 
 export const ICONED = { className: 'size-3.5 shrink-0', strokeWidth: 1.5, absoluteStrokeWidth: true };
 export type Act = { st: L.ListState; put: (st: L.ListState) => void; pick: (s: Selection) => void; open: (ref: string) => void };
