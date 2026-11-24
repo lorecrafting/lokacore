@@ -31,7 +31,11 @@ const api = async (path: string): Promise<[number, any]> =>
   path === '/story' ? [200, { map, files: {} }] : [200, null];
 let books = 0; // the Book's redraws
 let paints = 0; // a component's own redraws (useState setters; the shim reads this per call)
-(globalThis as any)[Symbol.for('combat-state')] = (v: unknown) => [v, () => paints++];
+// as React: a set to the same value redraws nothing
+(globalThis as any)[Symbol.for('combat-state')] = (v: unknown) => [
+  v,
+  (next: unknown) => !Object.is(typeof next === 'function' ? next(v) : next, v) && paints++,
+];
 build.install({ seen: new Map(), said: new Map(), redraw: () => books++, api } as never);
 await new Promise((r) => setTimeout(r)); // the map
 

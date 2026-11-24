@@ -247,7 +247,7 @@ const GROUND = {
  * On a phone it is never so tall that the selection bar falls below the half-height sheet. */
 function Drawing({ drawn }: { drawn: map.MapRoom[] }) {
   const [, bump] = useState(0); // mutate-skip: any start value redraws the same
-  paint = () => bump((n) => n + 1); // mutate-skip: any step changes the state, so it redraws
+  paint = () => bump((n) => n + 1);
   const window = useWindowDimensions();
   const s: Seen | undefined =
     box.w && drawn.length
