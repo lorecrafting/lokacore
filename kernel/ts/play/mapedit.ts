@@ -227,7 +227,8 @@ export function editor(io: Io) {
   const done: Done[] = []; // each gesture's journal ids and files, oldest first
   const run = (steps: (s: Run) => Promise<unknown>) => gesture(io, done, steps);
   return {
-    undoable: () => done.length > 0,
+    /** How many gestures Undo can put back: a run that raised it wrote (one on its own cell did not). */
+    undoable: () => done.length,
     async undo() {
       await undo(io, done.at(-1)?.ids ?? no('no map edit to undo'));
       done.pop();

@@ -52,7 +52,12 @@ const press = (label: string) => named(sheet(), label).props.onPress();
 /** The room boxes drawn, by key (a box's accessible name starts with its key). */
 const drawn = () =>
   sheet()
-    .filter((e) => e.type === 'Pressable' && e.props.style?.position === 'absolute')
+    .filter(
+      (e) =>
+        e.type === 'Pressable' &&
+        e.props.style?.position === 'absolute' &&
+        e.props.accessibilityState,
+    )
     .map((e) => e.props.accessibilityLabel.split(', ')[0]);
 const room = (key: string) =>
   sheet().find((e) => e.props?.accessibilityLabel?.startsWith(`${key}, `)).props;
@@ -327,11 +332,11 @@ test('a stepped level that loses its rooms falls back; an unplaced room selects 
     true,
   );
   const bar = () =>
-    sheet().some((e) => e.type === 'Text' && e.props.children === 'nowhere — selected');
+    sheet().some((e) => e.type === 'Text' && e.props.children === 'nowhere — tap an empty cell');
   assert.ok(bar());
   const order = sheet().map((e) => e.key ?? e.props?.children);
   assert.ok(
-    order.indexOf('nowhere — selected') < order.indexOf('unplaced nowhere'),
+    order.indexOf('nowhere — tap an empty cell') < order.indexOf('unplaced nowhere'),
     'the bar first',
   );
   known.rooms = all.filter((r) => r.at?.z === 0);

@@ -27,6 +27,7 @@ import { thingPen } from './thing.tsx';
 import { CONTENTS } from './contents.tsx';
 import './generic.tsx'; // registers the def:<file> sheet
 import { MAP, mapSheet } from './map.tsx';
+import { ed, onSaved, run } from './roomedit.tsx';
 import { act, CONTROL, Frame, parts, sheets } from './sheet.tsx';
 
 export { Sheet, sheets } from './sheet.tsx';
@@ -49,7 +50,7 @@ const UNDO_MS = 5000; // the chip's life after a write (docs/rnd/in-game-builder
 let builder: Builder = { on: false };
 let heard: Message = { text: {}, said: [] };
 let api: Hooks['api'] | undefined;
-let undo: Wrote | undefined; // the last write, while its chip shows
+let undo: Wrote | 'gesture' | undefined; // the last write (a field's, or a sheet's gesture), while its chip shows
 let undoTimer: ReturnType<typeof setTimeout> | undefined;
 let notBack: Wrote | undefined; // a refused put-back
 let redrawStrip = () => {};
@@ -65,6 +66,7 @@ export type Place = Game & {
 let placed: Place | undefined;
 export const place = (given: Place) => void ((placed = given), seeWith(given, () => mapped()));
 mapSheet({ go: (room) => placed?.startIn(room), here: () => placed?.here() });
+onSaved(() => wrote('gesture'));
 let asked = Promise.resolve();
 /** One at a time: the server keeps the last flag it got, so an on overtaking its off would stick.
  * A refused or failed request shows as no Held in the strip. */
@@ -133,7 +135,7 @@ const set = (next: Builder) => {
   keep(localStorage, next);
 };
 /** A field saved: its Undo chip for UNDO_MS, and the room Start in this room goes back to. */
-function wrote(w: Wrote) {
+function wrote(w: Wrote | 'gesture') {
   unsee();
   const room = placed?.here();
   set({ ...builder, ...(room && { room }) });
@@ -143,10 +145,11 @@ function wrote(w: Wrote) {
   undoTimer = setTimeout(() => ((undo = undefined), redrawStrip()), UNDO_MS);
   redrawStrip();
 }
-async function putBack(w: Wrote) {
+async function putBack(w: Wrote | 'gesture') {
   undo = undefined;
   clearTimeout(undoTimer);
   redrawStrip();
+  if (w === 'gesture') return run(() => ed.undo()); // a refused put-back shows in the sheet
   const undone = api!('/undo', { id: w.id, key: w.key, words: w.words });
   const [status] = await undone.catch(() => []); // the server down: not put back, said so
   notBack = status === 200 ? undefined : w;

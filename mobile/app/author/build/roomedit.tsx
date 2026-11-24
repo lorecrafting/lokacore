@@ -43,6 +43,7 @@ let ran: Promise<void> = Promise.resolve(); // the gesture running now
 let said = ''; // the last refusal, shown at the sheet's top until the next press
 let asking: { key: string; files: string[]; answer: (yes: boolean) => void } | undefined;
 const drafts = new Map<string, string>(); // each room's Move field, as typed
+let saved = () => {}; // Build.tsx's Undo chip
 
 /** mapedit's Io over the builder's /__author calls: a missing source rejects, as the panel's does. */
 export const io: Io = {
@@ -64,6 +65,9 @@ export function wire(a: Hooks['api'] | undefined, then: () => void, shut: (id: s
   close = shut;
 }
 
+/** Build.tsx's Undo chip: shown after each gesture that wrote. */
+export const onSaved = (chip: () => void) => void (saved = chip);
+
 /** Runs one gesture; a refusal (a thrown or returned reason) shows in the sheet. */
 export async function run(go: () => Promise<unknown>) {
   if (asking) {
@@ -76,9 +80,11 @@ export async function run(go: () => Promise<unknown>) {
   busy = true;
   said = '';
   ran = (async () => {
+    const was = ed.undoable();
     try {
       const why = await go();
       if (typeof why === 'string') said = why;
+      else if (ed.undoable() > was) saved();
     } catch (e) {
       said = (e as Error).message;
     } finally {
