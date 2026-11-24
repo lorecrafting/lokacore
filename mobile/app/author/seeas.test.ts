@@ -107,7 +107,7 @@ function page() {
 const strip = () => nodes(build.Strip({ children: 'book' }));
 const button = (label: string) =>
   strip().find((n) => n.type === 'Pressable' && n.props.children?.props?.children === label);
-const GHOST = /, (hidden|only when|not here)|^\d+ not shown$/;
+const GHOST = /, (hidden|only when|not here)|^\d+ not shown/;
 const ghosts = () => page().filter((n) => n.props?.accessibilityLabel?.match(GHOST)); // under the title
 const rows = () => strip().filter((n) => n.props?.accessibilityLabel?.match(GHOST)); // the Room sheet's
 const top = () => JSON.parse(kept.get(BUILD)!).sheets?.at(-1);
@@ -141,7 +141,7 @@ test("the room's title has one ghost line with its reason, else one line to the 
 
   assert.deepEqual(
     ghosts().map((n) => n.props.accessibilityLabel),
-    ['3 not shown'],
+    ['3 not shown, open'],
   );
   ghosts()[0].props.onPress({ stopPropagation() {} });
   assert.equal(top(), 'room:ferry_landing');
@@ -150,7 +150,7 @@ test("the room's title has one ghost line with its reason, else one line to the 
   delete overlay['npc.shade.short'];
   assert.deepEqual(lines, [
     'Shade, as edited, hidden: until fact saw_shade, edit',
-    'An old elm shades a patch of trodden grass., only when: the time of day is from 20 to 6, edit',
+    'An old elm shades a patch of trodden grass., only when: the time of day is from 20 to 6', // this sheet: See as only
     'dig, not here now, edit',
   ]);
   const files = known.files; // a ghost with no sheet is no button and says no edit

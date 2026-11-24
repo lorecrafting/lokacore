@@ -17,6 +17,7 @@ const WORDS = {
   ghost: (words: string, reason: string, edit: boolean) =>
     `${words}, ${reason}${edit ? ', edit' : ''}`,
   hidden: (n: number) => `${n} not shown`,
+  more: (n: number) => `${n} not shown, open`,
 };
 /** The game and compiled cartridge a ghost reads; panel.tsx hands them in per game. */
 export type Game = {
@@ -65,15 +66,16 @@ export const updated = (u: GameSubscription) =>
 
 type Open = (id: string) => void;
 type Sheet = (g: Ghost) => string | undefined;
-/** The Room sheet's ghost rows for `room`, each opening its sheet, a variant's with See as; only for
- * the page's own room. */
+/** The Room sheet's ghost rows for `room`, wrapped whole, each opening its sheet, a variant's (this
+ * sheet) none but See as; only for the page's own room. */
 export function ghostRows(room: string, open: Open, sheet: Sheet) {
   const shown = room === given?.here() ? here() : [];
   if (!shown.length) return [];
   const { place } = given!.game.view().view;
+  const elsewhere: Sheet = (g) => (g.kind === 'variant' ? undefined : sheet(g));
   return shown.map((g, i) => (
     <View key={`as:${i}`} style={ROW}>
-      {ghostLine(g, open, sheet, { flex: 1 /* mutate-skip: style */ })}
+      {ghostLine(g, open, elsewhere, WRAP)}
       {g.kind === 'variant' &&
         act(WORDS.see, () => see(place.description.key, g, place.id), undefined, `see:${i}`)}
     </View>
@@ -90,31 +92,32 @@ export function ghostLines(open: Open, sheet: Sheet) {
   const all = here();
   if (all.length < 2) return all.map((g) => ghostLine(g, open, sheet));
   const id = `room:${given!.here()}`;
-  return line(WORDS.hidden(all.length), WORDS.hidden(all.length), () => open(id));
+  return line(WORDS.hidden(all.length), WORDS.more(all.length), () => open(id));
 }
-function ghostLine(g: Ghost, open: Open, sheet: Sheet, style?: object) {
+function ghostLine(g: Ghost, open: Open, sheet: Sheet, wrap?: object) {
   const id = sheet(g);
   const words = said(g.words);
   return line(
     `${words} · ${g.reason}`,
     WORDS.ghost(words, g.reason, !!id),
     id ? () => open(id) : undefined,
-    style,
+    wrap,
   );
 }
-const line = (shown: string, label: string, press?: () => void, style?: object) => (
+const line = (shown: string, label: string, press?: () => void, wrap?: object) => (
   <Text
     key={`ghost:${shown}`}
-    numberOfLines={1}
+    numberOfLines={wrap ? undefined : 1}
     accessibilityRole={press ? 'button' : undefined}
     accessibilityLabel={label}
     onPress={press && ((e) => (e.stopPropagation(), press()))}
-    style={{ ...GHOST, borderColor: ink('dim'), color: ink('dim'), ...style }}
+    style={{ ...GHOST, borderColor: ink('dim'), color: ink('dim'), ...wrap }}
   >
     {shown}
   </Text>
 );
 const ROW = { flexDirection: 'row', alignItems: 'center', paddingHorizontal: space.md } as const;
+const WRAP = { flex: 1, lineHeight: type.small.lineHeight, paddingVertical: space.sm }; // mutate-skip: style
 const GHOST = {
   ...type.small,
   display: 'block' as 'flex', // web: its own line under the title; a flex box draws no ellipsis
