@@ -10,6 +10,7 @@ of closed work are deleted once their lesson is folded, and linked by permalink
 Reviews before R2 live in the [legacy repository](https://github.com/lorecrafting/lokacore-v2-legacy)
 (commit `997a7a8`, `docs/rewrite-v3/reviews/`).
 
+- [Review: builder 3.1b, https on `--lan` under a name-constrained local CA (PR #783, loka-hcnlh.18.2)](2026-11-24-builder-3.1b-lan-tls-review.md): **CHANGES REQUIRED**
 - [Review: builder 3.1a, the LAN pairing guard (PR #781, loka-hcnlh.18.1)](2026-11-24-builder-3.1-lan-pairing-review.md): **APPROVE**
 - [Review: builder 2.3, the generic sheet and the gate lift (PR #776, loka-hcnlh.15)](2026-11-20-builder-2.3-generic-review.md): **APPROVE**
 - [Review: builder 1.1, the dev-only author seam in book/Text.tsx (PR #765, loka-hcnlh.5)](2026-11-20-builder-1.1-text-seam-review.md): **APPROVE**
