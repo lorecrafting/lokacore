@@ -5,7 +5,7 @@ set -eu
 # With no cartridge: the one the watcher last opened (the editor's world picker switches it).
 # --lan: the Book preview also listens on the LAN, for a phone paired by the token it prints (pairing.cjs).
 lan=; unset LOKA_PAIR
-if [ "${1-}" = --lan ]; then shift; lan=1; elif [ "${2-}" = --lan ]; then set -- "$1"; lan=1; fi
+if [ "${1-}" = --lan ]; then shift; lan=1; elif [ $# -eq 2 ] && [ "$2" = --lan ]; then set -- "$1"; lan=1; fi
 [ $# -le 1 ] || { echo "usage: bin/author.sh [cartridges/<name>] [--lan]" >&2; exit 2; }
 cd "$(dirname "$0")/.."
 if [ -n "${lan-}" ]; then

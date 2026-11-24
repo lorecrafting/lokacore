@@ -14,8 +14,9 @@ const TOKEN = '0123456789abcdef0123456789abcdef';
 const LAN = '192.168.1.5:19006';
 
 test('a LAN Host or an Origin-less POST needs the token header; the paired phone writes', async (t) => {
-  // Breaks: the LAN Host is taken without the token (any LAN device reads the tree); a native-style
-  // POST with no Origin writes in --lan mode; the paired page's own LAN Origin is refused.
+  // Breaks: the LAN Host is taken without the token (any LAN device reads the tree); a header longer
+  // in bytes than in characters throws; a native-style POST with no Origin writes in --lan mode; the
+  // token waives the Origin check (another page on the phone writes); the paired page is refused.
   const dir = mkdtempSync(join(tmpdir(), 'loka-lan-'));
   mkdirSync(join(dir, 'rooms'));
   writeFileSync(join(dir, 'rooms/a.json'), ROOM);
@@ -40,11 +41,15 @@ test('a LAN Host or an Origin-less POST needs the token header; the paired phone
     403,
   );
   assert.equal(await ask(source, { host: LAN, 'x-loka-pair': '0123' }), 403);
+  assert.equal(await ask(source, { host: LAN, 'x-loka-pair': `\u00e9${'a'.repeat(31)}` }), 403);
   assert.equal(await ask(source, { host: LAN, 'x-loka-pair': TOKEN }), 200);
   assert.equal(await ask(source, { host: local }), 200); // loopback GET: as before
   const sent = { file: 'rooms/a.json', was: sha256(ROOM), ops: [{ path: ['name'], value: 'x' }] };
   assert.equal(await ask('/change', { host: local }, sent), 403); // no Origin, no token
   assert.equal(await ask('/change', { host: LAN, origin: `http://${LAN}` }, sent), 403);
+  assert.equal(readFileSync(join(dir, 'rooms/a.json'), 'utf8'), ROOM);
+  const other = { host: LAN, origin: 'http://192.168.1.5:3000', 'x-loka-pair': TOKEN };
+  assert.equal(await ask('/change', other, sent), 403);
   assert.equal(readFileSync(join(dir, 'rooms/a.json'), 'utf8'), ROOM);
   const phone = { host: LAN, origin: `http://${LAN}`, 'x-loka-pair': TOKEN };
   assert.equal(await ask('/change', phone, sent), 200);

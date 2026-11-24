@@ -99,8 +99,10 @@ server.on('upgrade', (request, socket, head) => {
 
 server.listen(previewPort, token ? '0.0.0.0' : '127.0.0.1', () => {
   console.log(`Book preview: http://localhost:${previewPort}`);
-  const lan = Object.values(networkInterfaces()).flat().find((a) => a.family === 'IPv4' && !a.internal);
-  if (token) console.log(`On the LAN (open once to pair): http://${lan?.address}:${previewPort}/?dev=1&pair=${token}`);
+  if (!token) return; // one line per address: the first may be a VPN's, not the Wi-Fi's
+  for (const a of Object.values(networkInterfaces()).flat())
+    if (a.family === 'IPv4' && !a.internal)
+      console.log(`On the LAN (open once to pair): http://${a.address}:${previewPort}/?dev=1&pair=${token}`);
 });
 if (pair) setInterval(pair.idle, 60_000).unref();
 server.on('error', (error) => {

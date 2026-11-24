@@ -16,8 +16,9 @@ const ask = (url: string, remoteAddress: string, cookie?: string, method = 'GET'
 const quiet = () => {};
 
 test('the pairing link sets the cookie and drops pair from the URL; a wrong token gets 403 and no cookie', () => {
-  // Breaks: any token pairs; a short guess throws (timingSafeEqual on unequal lengths); the
-  // redirect keeps the token in the address bar or loses the other query.
+  // Breaks: any token pairs; a short guess, or a 32-character one longer in bytes (é), throws
+  // (timingSafeEqual on unequal lengths) and the preview dies; so does a target URL cannot parse; the
+  // redirect keeps the token in the address bar or loses the other query; the Mac's own Book is paired.
   const { check } = pairing(TOKEN, () => 0, quiet);
   assert.deepEqual(check(ask(`/?dev=1&pair=${TOKEN}`, PHONE)), [
     302,
@@ -25,6 +26,9 @@ test('the pairing link sets the cookie and drops pair from the URL; a wrong toke
   ]);
   assert.deepEqual(check(ask('/?dev=1&pair=0123456789abcdef0123456789abcdee', PHONE)), [403]);
   assert.deepEqual(check(ask('/?pair=0123', PHONE)), [403]);
+  assert.deepEqual(check(ask(`/?pair=%C3%A9${'a'.repeat(31)}`, PHONE)), [403]);
+  assert.deepEqual(check(ask('//[', PHONE)), [400]);
+  assert.equal(check(ask('/?pair=0123', '127.0.0.1')), undefined);
 });
 
 test('a LAN peer needs the cookie on every path; loopback does not', () => {
