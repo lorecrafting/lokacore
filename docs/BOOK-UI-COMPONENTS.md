@@ -342,6 +342,14 @@ selected box is `action` filled, its key in `bg`. The current room's ring is Map
 unplaced row: `Unplaced (n):` `type.label` `dim`, each key an act. The selection bar: a `size.rule`
 `line` rule above it, `space.sm` above its words, `<key> — selected` `type.label` `fg` with
 `space.md` sides, `Go here` and `Sheet` acts. No raw widths: rules and rings are `size` tokens.
+Builder 4.3: a `＋` handle is a button the size of the free cell it sits in (at least a touch
+target, as a room's), no fill or border, its `＋` `type.control` in `action` centred. `Join…`,
+`Move…`, `Area…`, `＋ up`, `＋ down` and `Cancel` are acts in the bar's row. Armed (Join…, Move…):
+the prompt takes the selected line's place in the same `type.label` `fg`, the selected box keeps its
+`action` fill, the handles go and the row holds `Cancel` only. An unplaced room picked shows the
+Move… prompt over its usual acts (`Go here`, `Sheet`, `Area…`). Area…'s field
+is the Room sheet's Area row between the words and `Cancel`. A refusal is the Room sheet's refusal
+line at the sheet's top; a refused put-back is the strip's `warning` line.
 Worst pair: `warning` on `card`,
 4.75 (light).
 

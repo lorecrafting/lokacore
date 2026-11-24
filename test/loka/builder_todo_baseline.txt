@@ -559,14 +559,9 @@ parity:map-story-flow-segment
 parity:device-size
 parity:last-edit-timing
 parity:hold
-parity:unplaced-strip
-parity:map-drag-room
-parity:map-join
 parity:map-pan-zoom-keys
-parity:map-grow-handles
 parity:map-wire
 parity:map-exit-edits
-parity:map-undo
 parity:story-list
 parity:story-row-sheets
 parity:story-beats

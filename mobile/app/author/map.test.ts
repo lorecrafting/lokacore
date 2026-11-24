@@ -52,7 +52,12 @@ const press = (label: string) => named(sheet(), label).props.onPress();
 /** The room boxes drawn, by key (a box's accessible name starts with its key). */
 const drawn = () =>
   sheet()
-    .filter((e) => e.type === 'Pressable' && e.props.style?.position === 'absolute')
+    .filter(
+      (e) =>
+        e.type === 'Pressable' &&
+        e.props.style?.position === 'absolute' &&
+        e.props.accessibilityState,
+    )
     .map((e) => e.props.accessibilityLabel.split(', ')[0]);
 const room = (key: string) =>
   sheet().find((e) => e.props?.accessibilityLabel?.startsWith(`${key}, `)).props;
@@ -160,7 +165,7 @@ test('fit, then a far drag and a zoom in, keep one cell of the level on screen',
   assert.equal(mid('crossroads_inn').x.toFixed(2), (384 + 544 * (55 / 64)).toFixed(2)); // 851.5
 });
 
-test('zoom, pinch and wheel act about their point; a room press within slop taps, past it pans; an exit joins room centres', () => {
+test('zoom, pinch and wheel act about their point; a room press within slop taps, past it pans', () => {
   press('Fit');
   const c = mid('crossroads_inn');
   const t = { setPointerCapture() {}, getBoundingClientRect: () => ({ left: 100, top: 50 }) };
@@ -234,30 +239,6 @@ test('zoom, pinch and wheel act about their point; a room press within slop taps
   );
   press('Zoom out');
   near(mid('crossroads_inn'), f, 'Zoom out undoes it');
-  const lines = sheet()
-    .filter((e) => e.props?.pointerEvents === 'none')
-    .map((e) => e.props.style);
-  const from = mid('crossroads_inn');
-  const exits = map.find((r: any) => r.key === 'crossroads_inn').exits;
-  const to = mid(exits.find((e: any) => drawn().includes(e.to) && mid(e.to).y !== from.y).to);
-  const want = {
-    x: (from.x + to.x) / 2,
-    y: (from.y + to.y) / 2,
-    w: Math.hypot(to.x - from.x, to.y - from.y),
-  };
-  const turn = `${(Math.atan2(to.y - from.y, to.x - from.x) * 180) / Math.PI}deg`;
-  const bar = lines.find(
-    (l: any) =>
-      Math.abs(l.left + l.width / 2 - want.x) + Math.abs(l.top + l.height / 2 - want.y) < 1e-6,
-  );
-  assert.ok(bar, 'a bar centred between the rooms');
-  assert.deepEqual([bar.height, bar.backgroundColor], [size.rule, ink('dim')], "Map's line");
-  assert.equal(bar.width.toFixed(3), want.w.toFixed(3));
-  assert.ok(
-    [turn, `${(Math.atan2(from.y - to.y, from.x - to.x) * 180) / Math.PI}deg`].includes(
-      bar.transform[0].rotate,
-    ),
-  );
 });
 
 test('a drag, pinch or zoom redraws only the drawing; a level step redraws the Book (its title)', () => {
@@ -283,12 +264,21 @@ test('a drag, pinch or zoom redraws only the drawing; a level step redraws the B
   press('Level down');
 });
 
-test('on a phone the drawing leaves the selection bar inside the half-height sheet; docked it stays square', () => {
+test('on a phone the drawing leaves the selection bar inside the half-height sheet; docked it stays square', async () => {
   Object.assign(globalThis, { innerWidth: 390, innerHeight: 844 });
   // the grip, Back, the title and the controls over it; the bar's rule, gap, words and acts under it
   // measured in the 390x844 web Book: the sheet is 399.5 high from y 444.5; 153 above the ground, 67
   // under it to the acts' foot at 844
   assert.equal(ground().props.style.maxHeight, 399.5 - 153 - 67);
+  // once measured, the Book's row (Undo wraps Build's strip) and the bar (its acts wrap) rule
+  const { measured } = await import('./build/map.tsx');
+  const tall = (part: 'book' | 'bar', height: number) =>
+    measured(part)({ nativeEvent: { layout: { width: 390, height } } });
+  tall('book', 747);
+  tall('bar', 119);
+  assert.equal(ground().props.style.maxHeight, 747 / 2 - 153 - 119);
+  tall('book', 799);
+  tall('bar', 67);
   Object.assign(globalThis, { innerWidth: 1152, innerHeight: 800 }); // DOCK.at: docked from here
   assert.equal(ground().props.style.maxHeight, undefined);
   Object.assign(globalThis, { innerWidth: undefined, innerHeight: undefined });
@@ -327,11 +317,11 @@ test('a stepped level that loses its rooms falls back; an unplaced room selects 
     true,
   );
   const bar = () =>
-    sheet().some((e) => e.type === 'Text' && e.props.children === 'nowhere — selected');
+    sheet().some((e) => e.type === 'Text' && e.props.children === 'nowhere — tap an empty cell');
   assert.ok(bar());
   const order = sheet().map((e) => e.key ?? e.props?.children);
   assert.ok(
-    order.indexOf('nowhere — selected') < order.indexOf('unplaced nowhere'),
+    order.indexOf('nowhere — tap an empty cell') < order.indexOf('unplaced nowhere'),
     'the bar first',
   );
   known.rooms = all.filter((r) => r.at?.z === 0);
@@ -342,4 +332,35 @@ test('a stepped level that loses its rooms falls back; an unplaced room selects 
   assert.deepEqual(ink('Zoom out'), { translateY: 0 }, 'only the chevrons are nudged');
   known.rooms = all;
   assert.ok(!bar());
+});
+
+test('an exit runs box edge to box edge over a room between its two rooms', async () => {
+  const { known } = await import('./build/room.tsx');
+  const all = known.rooms;
+  const r = (key: string, x: number, exits: object[]) => ({
+    ...all[0]!,
+    key,
+    at: { x, y: 0, z: 0 },
+    exits,
+  });
+  known.rooms = [
+    r('a', 0, [{ dir: 'east', to: 'b' }]),
+    r('m', 1, []),
+    r('b', 2, [{ dir: 'west', to: 'a' }]),
+  ];
+  const n = sheet();
+  const at = n.findIndex((e) => e.props?.pointerEvents === 'none');
+  const line = n[at].props.style;
+  const [a, b] = [mid('a'), mid('b')];
+  assert.deepEqual(
+    [line.left + line.width / 2, line.top + line.height / 2, line.width].map((v) => v.toFixed(3)),
+    [(a.x + b.x) / 2, a.y, b.x - a.x - a.w].map((v) => v.toFixed(3)),
+    'centred between the rooms, from the right edge of a to the left edge of b',
+  );
+  assert.deepEqual([line.height, line.backgroundColor], [size.rule, ink('dim')], "Map's line");
+  assert.ok(
+    at > n.findIndex((e) => e.props?.accessibilityLabel?.startsWith('m, ')),
+    'drawn after the middle box',
+  );
+  known.rooms = all;
 });

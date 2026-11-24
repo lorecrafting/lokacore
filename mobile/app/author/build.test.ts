@@ -67,7 +67,16 @@ test('the Build switch changes no game state; the strip says what the Hold parks
 
     keep(s, { on: true, sheets: ['gone'] }); // saved on a branch that had a sheet this one lacks
     Object.assign(globalThis, { addEventListener: () => {} });
+    const T = Date.now();
+    const now = Date.now;
+    Date.now = () => T;
+    s.setItem('loka-build-undo', JSON.stringify({ w: { ids: [1] }, end: T })); // a chip ending as the page loads
     install({ seen: new Map(), said: new Map(), redraw() {}, api: async () => [200, { map: [] }] }); // the reload
+    Date.now = now;
+    const undo = drawn().some(
+      (n) => n.type === 'Pressable' && n.props.children?.props?.children === 'Undo',
+    );
+    assert.equal(undo, false, 'a chip whose time is up is not shown');
     const sheet = () => drawn().some((n) => n.type === 'ScrollView');
     assert.equal(sheet(), false, 'an unknown sheet covers the Book');
     sheets.gone = { title: () => 'Gone', body: () => 'gone' };

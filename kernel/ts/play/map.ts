@@ -55,6 +55,13 @@ const cmp = (a: string, b: string) => Number(a > b) - Number(a < b);
 const byKey = (a: MapRoom, b: MapRoom) => cmp(a.key, b.key);
 
 export const centre = (at: At) => ({ x: (at.x + 0.5) * M.cell, y: (at.y + 0.5) * M.cell });
+type Pt = { x: number; y: number };
+/** Where the line from centre `a` to centre `b` leaves `a`'s box of half sizes `hw` `hh`: an exit runs box edge to box edge (E3a). */
+export function rim(a: Pt, b: Pt, hw: number, hh: number) {
+  const [dx, dy] = [b.x - a.x, b.y - a.y];
+  const s = Math.min(dx ? hw / Math.abs(dx) : Infinity, dy ? hh / Math.abs(dy) : Infinity);
+  return { x: a.x + dx * s, y: a.y + dy * s };
+}
 
 /** One line per reciprocal pair on the level, else one per one-way exit; up and down are stubs. */
 export function edges(level: MapRoom[]) {

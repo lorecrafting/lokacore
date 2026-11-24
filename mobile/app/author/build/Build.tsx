@@ -26,7 +26,9 @@ import { chip, ghostLines, seeWith, unsee, type Game } from './seeas.tsx';
 import { thingPen } from './thing.tsx';
 import { CONTENTS } from './contents.tsx';
 import './generic.tsx'; // registers the def:<file> sheet
-import { MAP, mapSheet } from './map.tsx';
+import { MAP, mapSheet, measured, unborn } from './map.tsx';
+import { undo as putBackIds } from '../../../../kernel/ts/play/mapedit.ts';
+import { io, onSaved, refused, run, running } from './roomedit.tsx';
 import { act, CONTROL, Frame, parts, sheets } from './sheet.tsx';
 
 export { Sheet, sheets } from './sheet.tsx';
@@ -46,12 +48,15 @@ const WORDS = {
   checks: 'Checks',
 };
 const UNDO_MS = 5000; // the chip's life after a write (docs/rnd/in-game-builder-mode-2026-11-19.md)
+const KEPT = 'loka-build-undo'; // the chip and its end: a map gesture's compile reloads the Book
+type Gesture = { ids: number[] }; // a sheet's gesture: its journal ids, oldest first
 let builder: Builder = { on: false };
 let heard: Message = { text: {}, said: [] };
 let api: Hooks['api'] | undefined;
-let undo: Wrote | undefined; // the last write, while its chip shows
+let undo: Wrote | Gesture | undefined; // the last write (a field's, or a sheet's gesture), while its chip shows
 let undoTimer: ReturnType<typeof setTimeout> | undefined;
 let notBack: Wrote | undefined; // a refused put-back
+let stopped = ''; // a gesture's put-back refused
 let redrawStrip = () => {};
 let mapped = () => {}; // the map has come: the strip and the Book's pencil draw again
 let opener: { focus?: () => void } | null | undefined; // what had focus before the first sheet opened
@@ -65,6 +70,7 @@ export type Place = Game & {
 let placed: Place | undefined;
 export const place = (given: Place) => void ((placed = given), seeWith(given, () => mapped()));
 mapSheet({ go: (room) => placed?.startIn(room), here: () => placed?.here() });
+onSaved((ids) => wrote({ ids }));
 let asked = Promise.resolve();
 /** One at a time: the server keeps the last flag it got, so an on overtaking its off would stick.
  * A refused or failed request shows as no Held in the strip. */
@@ -117,6 +123,11 @@ export function install(book: Pick<Hooks, 'seen' | 'said' | 'redraw' | 'api'>) {
     },
   });
   builder = restored(localStorage);
+  let kept: { w: Wrote | Gesture; end: number } | null = null;
+  try {
+    kept = JSON.parse(localStorage.getItem(KEPT) ?? 'null');
+  } catch {} // a damaged entry: no chip
+  if (kept && kept.end > Date.now()) showUndo(kept.w, kept.end);
   mapped = () => (redrawStrip(), book.redraw());
   story(api, mapped, back, open);
   addEventListener('pagehide', hold.leave);
@@ -133,20 +144,35 @@ const set = (next: Builder) => {
   keep(localStorage, next);
 };
 /** A field saved: its Undo chip for UNDO_MS, and the room Start in this room goes back to. */
-function wrote(w: Wrote) {
+function wrote(w: Wrote | Gesture) {
   unsee();
   const room = placed?.here();
   set({ ...builder, ...(room && { room }) });
-  undo = w;
   notBack = undefined;
+  stopped = '';
+  showUndo(w, Date.now() + UNDO_MS);
+}
+/** The Undo chip for `w` until `end`, kept so the reload a structural compile brings shows it on. */
+function showUndo(w: Wrote | Gesture, end: number) {
+  undo = w;
+  localStorage.setItem(KEPT, JSON.stringify({ w, end }));
   clearTimeout(undoTimer);
-  undoTimer = setTimeout(() => ((undo = undefined), redrawStrip()), UNDO_MS);
+  undoTimer = setTimeout(() => ((undo = undefined), redrawStrip()), end - Date.now());
   redrawStrip();
 }
-async function putBack(w: Wrote) {
+async function putBack(w: Wrote | Gesture) {
+  if ('ids' in w && running()) return; // a gesture still writing: the chip stays for a later press
   undo = undefined;
+  localStorage.setItem(KEPT, 'null');
   clearTimeout(undoTimer);
   redrawStrip();
+  // the chip's own ids, not the editor's newest: after a reload the editor's journal is gone
+  if ('ids' in w) {
+    unborn();
+    await run(() => putBackIds(io, [...w.ids]));
+    stopped = refused(); // shown on the strip, as no sheet may be open
+    return redrawStrip();
+  }
   const undone = api!('/undo', { id: w.id, key: w.key, words: w.words });
   const [status] = await undone.catch(() => []); // the server down: not put back, said so
   notBack = status === 200 ? undefined : w;
@@ -242,13 +268,17 @@ export function Strip({ children }: { children: ReactNode }) {
         {chip()}
         {undo ? act(WORDS.undo, () => void putBack(undo!)) : null}
         {notBack ? warn(WORDS.notUndone(notBack.file)) : null}
+        {stopped ? warn(stopped) : null}
         {notBack ? act(WORDS.source, openBack) : null}
         {builder.on ? pad(CONTENTS.contents, 'contents', top) : null}
         {builder.on ? pad(MAP.map, 'map', top) : null}
         {builder.on ? pad(badge(heard), 'checks', top) : null}
       </View>
       <Notice />
-      <View style={{ flex: 1, flexDirection: 'row' }} /* mutate-skip: layout */>
+      <View
+        style={{ flex: 1, flexDirection: 'row' }} /* mutate-skip: layout */
+        onLayout={measured('book')} // the phone sheet is half this row
+      >
         <View
           style={{ flex: 1 }} /* mutate-skip: layout; the Book keeps its place as sheets open */
         >

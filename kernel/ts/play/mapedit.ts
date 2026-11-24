@@ -180,8 +180,8 @@ export async function create(
 const move = async (s: Run, r: MapRoom, area: string | null) =>
   s.call('move', { file: fileOf(r), was: (await s.read(fileOf(r))).was, area });
 
-/** Undoes `ids` newest first, dropping each as it goes, so a refusal leaves only what stands. */
-async function undo(io: Io, ids: number[]) {
+/** Puts back journal `ids`, newest first (popping each); Build's chip after a reload has only these. */
+export async function undo(io: Io, ids: number[]) {
   while (ids.length) {
     const r = await io.post('undo', { id: ids.at(-1) });
     if (!r.ok) no(`put back stopped: ${said(r.told)}`);
@@ -227,7 +227,10 @@ export function editor(io: Io) {
   const done: Done[] = []; // each gesture's journal ids and files, oldest first
   const run = (steps: (s: Run) => Promise<unknown>) => gesture(io, done, steps);
   return {
-    undoable: () => done.length > 0,
+    /** How many gestures Undo can put back: a run that raised it wrote (one on its own cell did not). */
+    undoable: () => done.length,
+    /** The last gesture's journal ids, oldest first. */
+    last: () => [...(done.at(-1)?.ids ?? [])],
     async undo() {
       await undo(io, done.at(-1)?.ids ?? no('no map edit to undo'));
       done.pop();

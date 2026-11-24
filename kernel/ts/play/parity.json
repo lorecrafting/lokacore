@@ -57,7 +57,7 @@
   {
     "id": "unplaced-strip",
     "panel": "tools/author-panel/src/areamap.tsx",
-    "book": "todo"
+    "book": "map.tsx"
   },
   {
     "id": "map-select-go-source",
@@ -67,12 +67,12 @@
   {
     "id": "map-drag-room",
     "panel": "tools/author-panel/src/mapsvg.tsx",
-    "book": "todo"
+    "book": "map.tsx"
   },
   {
     "id": "map-join",
     "panel": "tools/author-panel/src/mapsvg.tsx",
-    "book": "todo"
+    "book": "map.tsx"
   },
   {
     "id": "map-pan-zoom-keys",
@@ -82,7 +82,7 @@
   {
     "id": "map-grow-handles",
     "panel": "tools/author-panel/src/mapsvg.tsx",
-    "book": "todo"
+    "book": "map.tsx"
   },
   {
     "id": "map-templates",
@@ -102,7 +102,7 @@
   {
     "id": "map-undo",
     "panel": "kernel/ts/play/mapedit.ts",
-    "book": "todo"
+    "book": "map.tsx"
   },
   {
     "id": "story-list",

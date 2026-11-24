@@ -1,15 +1,18 @@
-// size: allow 345, the level's view, its gestures and its drawing share the sheet's module state
+// size: allow 450, the level's view, its gestures, its edits and its drawing share the sheet's module state
 // The Build map (docs/rnd/in-game-builder-mode-2026-11-19.md §4.7, slice 4.2): the /story map's rooms on
 // one level as boxes at their cells, exits as lines, the current room marked. A tap selects and never
 // plays; Go here and Sheet act on the selection. ⌃ ⌄ step levels; − + ⤢, drag on empty ground, pinch
 // and wheel move the view with the panel's math (kernel/ts/play/map.ts, as areamap.tsx's useLevel).
+// Slice 4.3: ＋, Join…, Move…, a tap placing an unplaced room, Area…: roomedit's `ed`, one Undo each.
 import { useState } from 'react';
 import { Pressable, Text, useWindowDimensions, View } from 'react-native';
 import * as map from '../../../../kernel/ts/play/map.ts';
 import { M } from '../../../../kernel/ts/play/map.ts';
+import { freeKey } from '../../../../kernel/ts/play/mapedit.ts';
 import { size, space, type } from '../../book/tokens.ts';
 import { ink } from './build.ts';
 import { known } from './room.tsx';
+import { ed, moveTo, refusal, run } from './roomedit.tsx';
 import { act, CONTROL, DOCK, sheets } from './sheet.tsx';
 
 // ponytail: placeholder chrome; the designer words it (the owner writes player-facing words only).
@@ -27,6 +30,16 @@ const WORDS = {
   selected: (key: string) => `${key} — selected`,
   go: 'Go here',
   sheet: 'Sheet',
+  grow: (dir: string) => `New room ${dir}`,
+  plus: '＋',
+  growAct: (dir: string) => `＋ ${dir}`,
+  join: 'Join…',
+  move: 'Move…',
+  area: 'Area…',
+  cancel: 'Cancel',
+  joining: (key: string) => `${key} — tap a room to join`,
+  moving: (key: string) => `${key} — tap an empty cell`,
+  self: 'Tap another room to join',
 };
 
 type Point = { x: number; y: number };
@@ -35,7 +48,11 @@ const LEAST = size.touch / M.cell;
 const SLOP = size.touch / 4; // a tap's slop, as the sheet's Grip
 let z: number | undefined; // the level stepped to; until then the map follows the current room
 let view: { v: map.View; z: number } | undefined; // and the level it shows
-let selected: string | undefined;
+const PICKED = 'loka-build-map'; // the selection, kept across the reload a structural compile brings
+let selected = globalThis.localStorage?.getItem(PICKED) || undefined;
+let mode: 'join' | 'move' | 'area' | undefined; // Join…, Move… or Area… on the selection
+let born: string | undefined; // the room ＋ just made, selected before /story has it
+export const unborn = () => void (born = undefined); // its gesture put back
 let box: map.Box = { w: 0, h: 0 };
 const down = new Map<number, Point>(); // the pointers held on the ground
 let grab: { at: Point[]; v: map.View } | undefined; // the pointers and view when the gesture last changed
@@ -44,6 +61,7 @@ let paint = () => {}; // the drawing's own redraw: a drag or pinch redraws the m
 let hooks = { go: (_room: string) => {}, here: (): string | undefined => undefined };
 
 const rooms = () => known.rooms;
+const chosen = () => rooms().find((r) => r.key === selected);
 /** The level shown: the one stepped to while it still has rooms, else the current room's, else the lowest.
  * Not stored: a call before the Book knows its room must not pin the lowest level. */
 function level() {
@@ -109,10 +127,22 @@ function move(e: Pe) {
   };
   zoom(Math.hypot(a.x - b.x, a.y - b.y) / Math.hypot(a0.x - b0.x, a0.y - b0.y), mid, v);
 }
-function lift(e: Pe) {
+function lift(e: Pe, cancelled = false) {
+  const tap = !cancelled && !panned && down.size === 1;
   down.delete(e.nativeEvent.pointerId);
   if (down.size) regrab();
   else grab = undefined;
+  if (tap) put(pointer(e.nativeEvent, e.currentTarget));
+}
+/** A tap on an empty cell, in Move… or with an unplaced room selected, sets the room there; on an
+ * empty map it lays every room out (mapedit `first`, as the panel's drop). A room takes its own tap. */
+function put(p: Point) {
+  const r = chosen();
+  if (!r || (r.at && mode !== 'move')) return;
+  const at = { ...map.cellAt(seen(), p), z: level() };
+  if (map.onLevel(rooms(), at.z).some((o) => o.at!.x === at.x && o.at!.y === at.y)) return;
+  mode = undefined;
+  void run(() => (rooms().some((o) => o.at) ? ed.place(r, at) : ed.first()));
 }
 /** The wheel zooms about the cursor (the panel's factor); React Native Web forwards no onWheel. */
 const wheel = (e: WheelEvent) => {
@@ -121,9 +151,14 @@ const wheel = (e: WheelEvent) => {
 };
 /** The ground's ref: the wheel on mount; on unmount, drop a gesture whose pointers never lifted. */
 function wheeled(node: HTMLElement | null) {
-  if (node) return node.addEventListener('wheel', wheel, { passive: false });
+  if (node)
+    return (
+      node.addEventListener('wheel', wheel, { passive: false }),
+      addEventListener('keydown', esc)
+    );
+  removeEventListener('keydown', esc);
   down.clear();
-  grab = undefined;
+  grab = mode = undefined; // a mode left open ends with the sheet
 }
 
 /** A control glyph; without `run` it is disabled, in `dim`. */
@@ -149,59 +184,108 @@ const glyph = (g: { glyph: string; name: string; drop?: number }, run?: () => vo
   </Pressable>
 );
 
-/** An exit as a rotated bar between two room centres on screen (MapDrawing.tsx's Line). */
-function Line(p: { from: Point; to: Point }) {
-  const [dx, dy] = [p.to.x - p.from.x, p.to.y - p.from.y];
-  const len = Math.hypot(dx, dy);
-  return (
-    <View
-      pointerEvents="none"
-      style={{
-        position: 'absolute',
-        left: (p.from.x + p.to.x) / 2 - len / 2,
-        top: (p.from.y + p.to.y) / 2 - size.rule / 2,
-        width: len,
-        height: size.rule,
-        backgroundColor: ink('dim'), // Map's line: `line` is under 3:1 on `card`
-        transform: [{ rotate: `${(Math.atan2(dy, dx) * 180) / Math.PI}deg` }],
-      }}
-    />
-  );
+/** The level's exits as rotated bars (MapDrawing.tsx's Line), box edge to box edge, drawn over the
+ * boxes: a room between two joined rooms hides no line. */
+function lines(s: Seen, drawn: map.MapRoom[]) {
+  const [hw, hh] = [(M.w / 2) * s.v.zoom, (M.h / 2) * s.v.zoom];
+  return map.edges(drawn).map((e) => {
+    const [a, b] = [screen(s, s.at.get(e.from)!), screen(s, s.at.get(e.to)!)];
+    const [p, q] = [map.rim(a, b, hw, hh), map.rim(b, a, hw, hh)];
+    const len = Math.hypot(q.x - p.x, q.y - p.y);
+    const style = {
+      position: 'absolute',
+      left: (p.x + q.x) / 2 - len / 2,
+      top: (p.y + q.y) / 2 - size.rule / 2,
+      width: len,
+      height: size.rule,
+      backgroundColor: ink('dim'), // Map's line: `line` is under 3:1 on `card`
+      transform: [{ rotate: `${(Math.atan2(q.y - p.y, q.x - p.x) * 180) / Math.PI}deg` }],
+    } as const;
+    return <View key={`${e.from} ${e.to}`} pointerEvents="none" style={style} />;
+  });
 }
 
+const CENTRED = { justifyContent: 'center', alignItems: 'center' } as const;
 type Seen = { v: map.View; here?: string; at: Map<string, map.At> };
 /** A room's cell centre on screen. */
 const screen = (s: Seen, at: map.At) => {
   const c = map.centre(at);
   return { x: c.x * s.v.zoom + s.v.x, y: c.y * s.v.zoom + s.v.y };
 };
-const pick = (key: string) => ((selected = key), known.redraw());
+const pick = (key: string) => ((selected = key), (mode = undefined), known.redraw());
+const cancel = () => ((mode = undefined), known.redraw());
+/** Esc leaves Join…, Move… or Area… writing nothing, as Cancel does. */
+const esc = (e: KeyboardEvent) => e.key === 'Escape' && mode && cancel();
+/** Join… then a tap on `b`: an exit from the selection toward it and the way back (the panel's Shift-drag). */
+function join(b: map.MapRoom) {
+  const a = chosen()!;
+  const dir = map.toward(a.at!, b.at!);
+  if (dir) mode = undefined; // a tap on the room itself keeps Join… armed
+  void run(async () => (dir ? ed.link(a, dir, b) : WORDS.self));
+}
+/** ＋: a new room `dir` of `r` (`room_<n>`, its words `~`), selected. */
+const grow = (r: map.MapRoom, dir: string) =>
+  void run(async () => {
+    const key = freeKey('room', 'room', known.nodes, []);
+    await ed.grow(r, dir, key);
+    born = selected = key;
+  });
+/** ＋ on each free side of the selection on this level, a cell-wide target in the empty cell. */
+function plusses(s: Seen) {
+  const r = chosen();
+  if (mode || !r?.at || r.at.z !== level()) return null;
+  const cell = M.cell * s.v.zoom;
+  return map
+    .grows(r, rooms())
+    .filter((dir) => !map.STEP[dir]![2])
+    .map((dir) => {
+      const [dx, dy] = map.STEP[dir]!;
+      const { x, y } = screen(s, { ...r.at!, x: r.at!.x + dx, y: r.at!.y + dy });
+      return (
+        <Pressable
+          key={`grow ${dir}`}
+          accessibilityRole="button"
+          accessibilityLabel={WORDS.grow(dir)}
+          onPress={() => panned || grow(r, dir)}
+          style={{
+            ...CENTRED,
+            position: 'absolute',
+            left: x - cell / 2, // mutate-skip: layout; the target centres on its cell
+            top: y - cell / 2, // mutate-skip: layout
+            width: cell,
+            height: cell,
+          }}
+        >
+          <Text style={{ ...type.control, color: ink('action') }}>{WORDS.plus}</Text>
+        </Pressable>
+      );
+    });
+}
 
 /** A room: its button is its whole cell (at LEAST a touch target), its box drawn centred in it. */
 function room(s: Seen, r: map.MapRoom) {
   const { x, y } = screen(s, r.at!);
   const cell = M.cell * s.v.zoom;
   const marks = { here: r.key === s.here, selected: r.key === selected };
-  const centred = { justifyContent: 'center', alignItems: 'center' } as const;
   return (
     <Pressable
       key={r.key}
       accessibilityRole="button"
       accessibilityLabel={map.name(r, marks)}
       accessibilityState={{ selected: marks.selected }}
-      onPress={() => panned || pick(r.key)}
+      onPress={() => panned || (mode === 'join' ? join(r) : mode === 'move' || pick(r.key))}
       style={{
-        ...centred,
+        ...CENTRED,
         position: 'absolute',
-        left: x - cell / 2,
-        top: y - cell / 2,
+        left: x - cell / 2, // mutate-skip: layout; the target centres on its cell
+        top: y - cell / 2, // mutate-skip: layout
         width: cell,
         height: cell,
       }}
     >
       <View
         style={{
-          ...centred,
+          ...CENTRED,
           width: M.w * s.v.zoom,
           height: M.h * s.v.zoom,
           backgroundColor: ink(marks.selected ? 'action' : 'card'),
@@ -217,24 +301,26 @@ function room(s: Seen, r: map.MapRoom) {
   );
 }
 
-const resized = (e: { nativeEvent: { layout: { width: number; height: number } } }) => {
+type Layout = { nativeEvent: { layout: { width: number; height: number } } };
+const resized = (e: Layout) => {
   const { width: w, height: h } = e.nativeEvent.layout;
   if (w === box.w && h === box.h) return;
   box = { w, h };
   view = undefined; // seen() fits once the level has rooms
   paint();
 };
-/** A phone sheet's height around the ground at half height: its top rule, the grip, Back and the
- * title over the controls; under it the selection bar's rule, gap, words and acts. */
-const CHROME =
-  size.rule +
-  size.touch +
-  size.touch +
-  type.control.lineHeight +
-  size.touch +
-  (size.rule + space.sm + type.label.lineHeight + size.touch);
-// ponytail: Build.tsx's strip at one row; a wrapped strip (Hold, Undo) shrinks the sheet further.
-const STRIP = size.touch + size.rule;
+/** A phone sheet's height over the ground at half height: its top rule, the grip, Back and the
+ * title over the controls. */
+const CHROME = size.rule + size.touch + size.touch + type.control.lineHeight + size.touch;
+const STRIP = size.touch + size.rule; // Build.tsx's strip at one row, until the Book's row is measured
+/** Measured on a phone, as each wraps: the Book's row under Build's strip, whose half the sheet
+ * is, and the selection bar under the ground (its rule, gap, words and acts at one row first). */
+const tall = { book: 0, bar: size.rule + space.sm + type.label.lineHeight + size.touch };
+export const measured = (part: keyof typeof tall) => (e: Layout) => {
+  if (e.nativeEvent.layout.height === tall[part]) return;
+  tall[part] = e.nativeEvent.layout.height;
+  paint();
+};
 const GROUND = {
   aspectRatio: 1, // mutate-skip: layout, a square ground (capped by height on a phone)
   overflow: 'hidden',
@@ -260,24 +346,16 @@ function Drawing({ drawn }: { drawn: map.MapRoom[] }) {
       onPointerDown={press as never}
       onPointerMove={move as never}
       onPointerUp={lift as never}
-      onPointerCancel={lift as never}
+      onPointerCancel={((e: Pe) => lift(e, true)) as never}
       style={
         window.width >= DOCK.at
           ? GROUND
-          : { ...GROUND, maxHeight: (window.height - STRIP) / 2 - CHROME }
+          : { ...GROUND, maxHeight: (tall.book || window.height - STRIP) / 2 - CHROME - tall.bar }
       }
     >
-      {s &&
-        map
-          .edges(drawn)
-          .map((e) => (
-            <Line
-              key={`${e.from} ${e.to}`}
-              from={screen(s, s.at.get(e.from)!)}
-              to={screen(s, s.at.get(e.to)!)}
-            />
-          ))}
       {s && drawn.map((r) => room(s, r))}
+      {s && lines(s, drawn)}
+      {s && plusses(s)}
     </View>
   );
 }
@@ -295,12 +373,49 @@ const BAR = {
   borderColor: ink('line'),
   paddingTop: space.sm,
 };
+/** The selection's words and acts, or the open mode's; a just-grown room: Go here and Sheet only. */
+function bar(r: map.MapRoom | undefined) {
+  const words =
+    mode === 'join'
+      ? WORDS.joining
+      : mode === 'move' || (r && !r.at)
+        ? WORDS.moving
+        : WORDS.selected;
+  const free = r ? map.grows(r, rooms()).filter((dir) => map.STEP[dir]![2]) : [];
+  return (
+    <View key="bar" style={BAR} onLayout={measured('bar')}>
+      <Text
+        aria-live="polite"
+        style={{ ...type.label, color: ink('fg'), paddingHorizontal: space.md }}
+      >
+        {words(selected!)}
+      </Text>
+      {mode === 'area' && moveTo(r!)}
+      <View style={row}>
+        {mode
+          ? act(WORDS.cancel, cancel)
+          : [
+              act(WORDS.go, () => ((z = undefined), hooks.go(selected!))),
+              act(WORDS.sheet, () => known.open(`room:${selected}`)),
+              r?.at?.z === level() && act(WORDS.join, () => ((mode = 'join'), known.redraw())),
+              r?.at && act(WORDS.move, () => ((mode = 'move'), known.redraw())),
+              r && act(WORDS.area, () => ((mode = 'area'), known.redraw())),
+              ...free.map((dir) => act(WORDS.growAct(dir), () => grow(r!, dir))),
+            ]}
+      </View>
+    </View>
+  );
+}
 function body() {
-  if (selected && !rooms().some((r) => r.key === selected)) selected = undefined; // renamed or deleted
+  if (rooms().some((r) => r.key === born)) born = undefined;
+  if (selected && selected !== born && rooms().length && !rooms().some((r) => r.key === selected))
+    selected = undefined; // renamed or deleted
+  localStorage.setItem(PICKED, selected ?? '');
   const unplaced = rooms().filter((r) => !r.at);
   const all = map.levels(rooms());
   const at = all.indexOf(level());
   return [
+    refusal(),
     <View key="controls" style={{ ...row, justifyContent: 'flex-end' }}>
       {all.length > 1 && [
         glyph(WORDS.up, at < all.length - 1 ? () => step(1) : undefined),
@@ -311,17 +426,7 @@ function body() {
       {glyph(WORDS.fit, () => set(fitted()))}
     </View>,
     <Drawing key="ground" drawn={map.onLevel(rooms(), level())} />,
-    selected ? (
-      <View key="bar" style={BAR}>
-        <Text style={{ ...type.label, color: ink('fg'), paddingHorizontal: space.md }}>
-          {WORDS.selected(selected)}
-        </Text>
-        <View style={row}>
-          {act(WORDS.go, () => ((z = undefined), hooks.go(selected!)))}
-          {act(WORDS.sheet, () => known.open(`room:${selected}`))}
-        </View>
-      </View>
-    ) : null,
+    selected ? bar(chosen()) : null,
     unplaced.length ? (
       <View key="unplaced" style={row}>
         <Text style={{ ...type.label, color: ink('dim') }}>{WORDS.unplaced(unplaced.length)}</Text>
