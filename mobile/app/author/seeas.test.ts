@@ -32,6 +32,7 @@ Object.assign(globalThis, {
 });
 const build = await import('./build/Build.tsx');
 const { RoomPage } = await import('../book/Body.tsx');
+const { known } = await import('./build/room.tsx');
 const api = async (path: string): Promise<[number, any]> => {
   const r = await fetch(`/__author${path}`);
   return [r.status, await r.json()];
@@ -107,9 +108,7 @@ const strip = () => nodes(build.Strip({ children: 'book' }));
 const button = (label: string) =>
   strip().find((n) => n.type === 'Pressable' && n.props.children?.props?.children === label);
 const ghosts = () =>
-  page().filter((n) =>
-    n.props?.accessibilityLabel?.match(/, (hidden|only when|not here).*, edit$/),
-  );
+  page().filter((n) => n.props?.accessibilityLabel?.match(/, (hidden|only when|not here)/));
 const top = () => JSON.parse(kept.get(BUILD)!).sheets?.at(-1);
 const tables = () =>
   (host.sql.prepare("SELECT name FROM sqlite_master WHERE type='table'").all() as any[]).map(
@@ -133,6 +132,16 @@ test("the room's title has one ghost per hidden thing, with its reason; a tap op
     'An old elm shades a patch of trodden grass., only when: the time of day is from 20 to 6, edit',
     'dig, not here now, edit',
   ]);
+  const files = known.files; // a ghost with no sheet is no button and says no edit
+  known.files = Object.fromEntries(
+    Object.entries(files).filter(([, f]) => f !== 'actions/dig.json'),
+  );
+  const [dig] = ghosts().slice(2);
+  known.files = files;
+  assert.deepEqual(
+    [dig.props.accessibilityLabel, dig.props.accessibilityRole, dig.props.onPress],
+    ['dig, not here now', undefined, undefined],
+  );
   ghosts()[0].props.onPress({ stopPropagation() {} });
   assert.equal(top(), 'npc:shade');
   ghosts()[2].props.onPress({ stopPropagation() {} }); // an action's sheet is its file's

@@ -14,7 +14,8 @@ import { act } from './sheet.tsx';
 const WORDS = {
   see: 'See as',
   seeing: (when: string) => `Seeing: ${when} · Back`,
-  ghost: (words: string, reason: string) => `${words}, ${reason}, edit`,
+  ghost: (words: string, reason: string, edit: boolean) =>
+    `${words}, ${reason}${edit ? ', edit' : ''}`,
 };
 /** The game and compiled cartridge a ghost reads; panel.tsx hands them in per game. */
 export type Game = {
@@ -89,7 +90,7 @@ export function ghostLines(open: (id: string) => void, sheet: (g: Ghost) => stri
       <Text
         key={`ghost:${i}`}
         accessibilityRole={id ? 'button' : undefined}
-        accessibilityLabel={WORDS.ghost(words, g.reason)}
+        accessibilityLabel={WORDS.ghost(words, g.reason, !!id)}
         onPress={id ? (e) => (e.stopPropagation(), open(id)) : undefined}
         style={{ ...GHOST, borderColor: ink('dim'), color: ink('dim') }}
       >
