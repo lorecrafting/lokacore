@@ -1157,8 +1157,30 @@ reasons and limits: [prose in the Book rulings](../design/prose-in-the-book-ruli
     half height. A selected room that is renamed or deleted is no longer selected.
   - **Unplaced.** Rooms with no cell are a row under the drawing: `Unplaced (n):`, then one button
     per key; a press selects that room as a tap on its box does.
-  - Not in 4.2: `＋` grow, `Join…`, `Move…`, `Area…`, placing an unplaced room (4.3), the
-    minimap's open gesture and map keys.
+  - **Edits** (slice 4.3). After `Sheet` the bar carries `Join…` (when the room is on the level
+    shown), `Move…` (when it is placed), `Area…`, and `＋ up` `＋ down` for each free side up or
+    down. On the drawing a `＋` sits in each free cell north, east, south or west of the selected
+    room; a side is free when the room has no exit that way and no room holds the cell. A tap on
+    `＋` grows `room_<n>` there, in the room's area, with the exit and its way back, and selects it.
+    - `Join…` and `Move…` arm the map: the bar's words read `<key> — tap a room to join` or
+      `<key> — tap an empty cell`, read politely when they change; its acts are `Cancel` alone and
+      the `＋` hide. In Join… a tap on another room writes the exit toward it (the larger offset's
+      side, east or west on a tie, as the panel's Shift-drag) and the way back; a tap on the room
+      itself writes nothing and Join… stays armed. In Move… a tap on an empty cell writes the room's
+      layout row; a tap on a room does nothing. A write ends the mode.
+    - An unplaced room picked from its row reads `<key> — tap an empty cell`; a tap on an empty cell
+      places it there (on a map with no placed room, every room is laid out, as the panel's first
+      drop).
+    - `Area…` shows the Room sheet's Area row under the bar's words, then `Cancel`.
+    - `Cancel`, Esc or the sheet closing ends a mode, writing nothing. Every act of the bar, `Cancel`
+      included, shows without scrolling the sheet at half height on a phone.
+    - Each gesture is one step on the strip's Undo chip. The chip and the selection outlast the
+      reload a structural compile brings. A refusal shows at the sheet's top; a refused put-back on
+      the strip.
+    - A moved room's exits keep their directions: a line runs centre to centre even when the
+      layout contradicts its direction ([E3a Exits](../design/editor-map-and-story-rulings.md)),
+      so it may slant; a line is never hidden by a box that is not one of its two rooms.
+  - Not in 4.3: a long-press drag (`Move…` stands in), the minimap's open gesture and map keys.
   - Labels here are placeholder words, the owner's to replace.
 - **No field.** A double-click on a line that is not words opens nothing; a note under it, in a
   row of its own (the lines below move down by its height while it shows and back when it goes,
