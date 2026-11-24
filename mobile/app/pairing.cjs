@@ -10,21 +10,29 @@ const same = (a, b) =>
   Buffer.byteLength(a) === Buffer.byteLength(b) &&
   timingSafeEqual(Buffer.from(a), Buffer.from(b));
 
-/** `check(request)` answers undefined (forward it) or the `[status, headers]` to refuse or redirect
- * with; `forwarded(request)` is the header the author server requires of a LAN request. */
+/** `check(request)` answers undefined (forward it) or the `[status, headers, body]` to answer with;
+ * `forwarded(request)` is the header the author server requires of a LAN request; `watch(socket)`
+ * (each new connection) lets expiry cut a LAN socket already open: SSE, websocket, keep-alive. */
 function pairing(token, now = Date.now, say = console.log) {
   let last = now();
   let off = false;
+  const open = new Set();
+  const lan = (request) => !LOOPBACK.test(request.socket.remoteAddress ?? '');
+  const watch = (socket) => {
+    if (!lan({ socket })) return;
+    open.add(socket);
+    socket.on('close', () => open.delete(socket));
+  };
   const idle = () => {
     if (!off && now() - last > IDLE_MS) {
       off = true;
+      for (const socket of open) socket.destroy();
       say(
         '--lan is off after 8 idle hours: LAN requests now get 403. Restart bin/author.sh --lan to pair again.',
       );
     }
     return off;
   };
-  const lan = (request) => !LOOPBACK.test(request.socket.remoteAddress ?? '');
   function check(request) {
     const url = URL.parse(request.url, 'http://x');
     if (!url) return [400];
@@ -34,10 +42,17 @@ function pairing(token, now = Date.now, say = console.log) {
       if (!same(pair, token)) return [403];
       url.searchParams.delete('pair');
       last = now();
-      const location = url.pathname + url.search;
+      // A 200 page, not a 302: a link from another app or site is a cross-site navigation, so a
+      // redirect's load goes without the Strict cookie (403); this same-origin replace sends it.
+      const to = JSON.stringify(url.pathname + url.search).replaceAll('<', '\\u003c');
       return [
-        302,
-        { location, 'set-cookie': `loka_pair=${token}; HttpOnly; SameSite=Strict; Path=/` },
+        200,
+        {
+          'content-type': 'text/html',
+          'cache-control': 'no-store',
+          'set-cookie': `loka_pair=${token}; HttpOnly; SameSite=Strict; Path=/`,
+        },
+        `<!doctype html><script>location.replace(${to})</script>`,
       ];
     }
     if (!lan(request)) return undefined;
@@ -47,7 +62,7 @@ function pairing(token, now = Date.now, say = console.log) {
     return undefined;
   }
   const forwarded = (request) => (lan(request) ? { 'x-loka-pair': token } : {});
-  return { check, forwarded, idle };
+  return { check, forwarded, idle, watch };
 }
 
 module.exports = { pairing, IDLE_MS };
