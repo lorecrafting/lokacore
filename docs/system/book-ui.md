@@ -1182,6 +1182,35 @@ reasons and limits: [prose in the Book rulings](../design/prose-in-the-book-ruli
       so it may slant; a line is never hidden by a box that is not one of its two rooms.
   - Not in 4.3: a long-press drag (`Move…` stands in), the minimap's open gesture and map keys.
   - Labels here are placeholder words, the owner's to replace.
+- **Build: the Dialogue sheet** (slice 5.1a, [builder mode §4.6, §6.4](../rnd/in-game-builder-mode-2026-11-19.md)).
+  A JSON dialogue's `def:<file>` sheet is [the generic sheet](#author-mode-dev-only) with its
+  `choices` drawn by a block of its own; every write runs and refuses as the generic sheet's do.
+  Looks: [author-mode marks](../BOOK-UI-COMPONENTS.md#component-catalogue).
+  - **Gate.** Before a dialogue write is sent it is checked against the compiler's dialogue rules
+    (the panel's gate): a write that would add a refusal is not sent, and its reason shows on the
+    sheet's refusal line as any refused write's does. A write the rules cannot judge goes to the
+    server, which validates it.
+  - **Choices.** One folded block per choice, in the file's order, named by its key; last, a
+    `Choice key` field and `Add choice`, which adds a least choice (its label and narration `~`)
+    under the trimmed key and clears the field. An empty key adds nothing; a refused key (not
+    lowercase letters, digits and `_`, or already present) shows why and keeps the typed key.
+  - **A choice** opens to `Rename` and `Remove choice`, then its fields present, then `Add…` with
+    the absent fields the compiler takes for it. A key is the choice's id, so `Rename` changes
+    nothing and only shows why. `Remove choice` removes it, but not
+    a dialogue's last choice nor its riddle's answer, which show why instead. A field the compiler asks at play (`sitting`, `exchange`) is revealed
+    empty, never written, by its pick.
+  - **Links.** `then`, and `then_failed` when the choice has a check (or already holds one), each a
+    fold reading `<field>: <dialogue>` (or `none`). Open, it lists this cartridge's dialogues that
+    may be linked, then `end`, the linked one picked, then `Clear` when one is linked. A pick the
+    rules refuse shows why; `Clear` removes the field.
+  - **Nested set.** Under a link to a nested set: `Open <key>`, which opens that file's sheet on top,
+    then the set's prompt and each choice's label, read-only. A set inside an area bundle shows none.
+  - **Add dialogue.** A person's sheet ends with `＋ Add dialogue`: it makes `dialogue_N` from the
+    starter, spoken by that person (its `npc` and its `roles` name them, as the compiler requires),
+    then opens its sheet on top.
+  - Not in 5.1a: the conversation in Build (§4.6's icon row and in-place words), `.scene`
+    dialogues and their line rows.
+  - Labels here are placeholder words, the owner's to replace.
 - **No field.** A double-click on a line that is not words opens nothing; a note under it, in a
   row of its own (the lines below move down by its height while it shows and back when it goes,
   with no motion; a note never covers a line, loka-wfrgk.39), until the next click or key, read politely: `A choice label is its key. Alt-click opens the scene.`,

@@ -237,7 +237,7 @@
   {
     "id": "dialogue-card",
     "panel": "tools/author-panel/src/edit/cards/Dialogue.tsx",
-    "book": "todo"
+    "book": "choices.tsx"
   },
   {
     "id": "scene-text",

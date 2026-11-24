@@ -1,7 +1,7 @@
 // The builder's generic schema renderer (design §6.4, slice 2.3): one source file's fields drawn
 // from its kind's schema, each gesture one `/change` op (mapedit.ts `change`). What a node draws as
 // is kernel/ts/play/generic.ts `shapeOf`; the server validates. Labels are placeholders.
-import type { ReactNode } from 'react';
+import type { ReactElement, ReactNode } from 'react';
 import { Text, TextInput, View } from 'react-native';
 import { branchOf, entered, plain } from '../../../../kernel/ts/play/card.ts';
 import { least, moved, picked, shapeOf, type Shape } from '../../../../kernel/ts/play/generic.ts';
@@ -114,10 +114,13 @@ function object(at: At, path: Step[], s: Extract<Shape, { as: 'object' }>, value
   const keys = [...new Set([...Object.keys(v), ...Object.keys(s.props)])].filter(shown);
   const m = at.mech; // the root only (field)
   const theirs = new Set([...(m?.allowed ?? []), ...(m?.blocked ?? []).map((b) => b.field)]);
+  const start = (k: string) => at.seed?.(k) ?? least(s.props[k], at.defs);
+  // Add mechanic… offers no field whose first write the gate would refuse (generic.tsx `gate`)
+  const refused = (k: string) => start(k) !== undefined && !!at.gate?.(ops([...path, k], start(k)));
   const absent = Object.keys(s.props).filter((k) => !shown(k) && !theirs.has(k));
   const menu = id(at, [...path, '+']);
-  const start = (k: string) => at.seed?.(k) ?? least(s.props[k], at.defs);
   const add = (k: string) => set(at, [...path, k], start(k));
+  const more = act(WORDS.add, () => toggle(menu), opened.has(menu), `add ${menu}`);
   return [
     ...keys.map((k) =>
       (at.claim?.(k) ?? block)(
@@ -128,15 +131,26 @@ function object(at: At, path: Step[], s: Extract<Shape, { as: 'object' }>, value
         !s.required.includes(k),
       ),
     ),
-    absent.length ? act(WORDS.add, () => toggle(menu), opened.has(menu), `add ${menu}`) : null,
+    absent.length ? side(path, more) : null,
     ...(opened.has(menu)
       ? absent.map((k) => act(k, () => add(k), undefined, `add ${k} ${menu}`))
       : []),
-    ...(m ? mechanics(at, m, (k) => shown(k) || !Object.hasOwn(s.props, k), start) : []), // this branch's fields
+    ...(m
+      ? mechanics(at, m, (k) => shown(k) || !Object.hasOwn(s.props, k) || refused(k), start)
+      : []), // this branch's fields
     s.each ? entry(at, path, s.each, v) : null,
   ];
 }
 
+/** A root menu's opener, inset like the sheet's text; a nested one sits in its block already. */
+const side = (path: Step[], el: ReactElement) =>
+  path.length ? (
+    el
+  ) : (
+    <View key={el.key} style={{ marginHorizontal: space.md }}>
+      {el}
+    </View>
+  ); // mutate-skip: layout
 const why = (b: Blocked) => (b.caps.length ? WORDS.needs(b.caps) : WORDS.first);
 /** Add mechanic…: the fields the cartridge takes, then the refused ones greyed with why; a greyed one
  * `on` can turn on writes cartridge.json and then the field, one gesture (a refusal undoes both). */
@@ -154,7 +168,9 @@ function mechanics(
     const value = start(k); // none: the field is revealed empty once the capability is on
     const field: Write[] = value === undefined ? [] : [[at.file, at.was, ops([k], value)]];
     const empty = value === undefined && id(at, [k]); // revealed before the write: web reloads on it
-    void run(() => {
+    void run(async () => {
+      const why = field.length ? at.gate?.(field[0]![2]) : undefined;
+      if (why) return why; // the field's write refused: the capability is not turned on either
       if (empty) reveal(empty, true);
       return ed
         .change(on, ...field)
@@ -162,7 +178,10 @@ function mechanics(
     });
   };
   return [
-    act(WORDS.mechanic, () => toggle(menu), opened.has(menu), `mechanic ${menu}`),
+    side(
+      [],
+      act(WORDS.mechanic, () => toggle(menu), opened.has(menu), `mechanic ${menu}`),
+    ),
     ...(opened.has(menu)
       ? [
           ...yes.map((k) =>
@@ -189,6 +208,7 @@ function entry(at: At, path: Step[], each: Obj, map: Obj) {
       <TextInput
         accessibilityLabel={WORDS.key}
         placeholder={WORDS.key}
+        placeholderTextColor={ink('dim')}
         style={INPUT}
         onChangeText={(t) => void drafts.set(key, t)}
       />

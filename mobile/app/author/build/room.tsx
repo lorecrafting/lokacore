@@ -37,6 +37,8 @@ export const known = {
   nodes: [] as Node[],
   files: {} as Record<string, string>,
   story: undefined as Told | undefined,
+  hidden: [] as string[], // skills no add menu offers (story.ts `hidden`)
+  unlinkable: {} as Record<string, string>, // dialogues no then may name, with why (story.ts `unlinkable`)
   held: [] as Template[],
   redraw: () => {},
   open: (_id: string) => {},
@@ -56,7 +58,13 @@ function held() {
   }
   return known.held;
 }
-type Story = { map?: Room[]; graph?: { nodes?: Node[] }; files?: Record<string, string> };
+type Story = {
+  map?: Room[];
+  graph?: { nodes?: Node[] };
+  files?: Record<string, string>;
+  hidden?: string[];
+  unlinkable?: Record<string, string>;
+};
 // The latest /story request: a slower, older answer is dropped.
 let asked = 0; // mutate-skip: any start value counts the same
 const find = (key: string | undefined) => known.rooms.find((x) => x.key === key);
@@ -83,6 +91,8 @@ export function story(
         known.nodes = told?.graph?.nodes ?? [];
         known.files = told?.files ?? {};
         known.story = (told as Told | null) ?? undefined;
+        known.hidden = told?.hidden ?? [];
+        known.unlinkable = told?.unlinkable ?? {};
       }
       redraw(); // a refusal or question still shows when the map does not come (a compile error)
     },

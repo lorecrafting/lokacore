@@ -464,9 +464,9 @@
     "edit": "cards/Dialogue.tsx",
     "delete": "cards/Dialogue.tsx",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "generic.tsx",
+      "edit": "generic.tsx",
+      "delete": "generic.tsx"
     }
   },
   "dialogues.choices": {
@@ -474,9 +474,9 @@
     "edit": "cards/Dialogue.tsx",
     "delete": "cards/Dialogue.tsx",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "choices.tsx",
+      "edit": "choices.tsx",
+      "delete": "choices.tsx"
     }
   },
   "dialogues.entry": {
@@ -484,9 +484,9 @@
     "edit": "cards/Dialogue.tsx",
     "delete": "cards/Dialogue.tsx",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "generic.tsx",
+      "edit": "generic.tsx",
+      "delete": "generic.tsx"
     }
   },
   "dialogues.keyword": {
@@ -494,9 +494,9 @@
     "edit": "cards/Dialogue.tsx",
     "delete": "cards/Dialogue.tsx",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "generic.tsx",
+      "edit": "generic.tsx",
+      "delete": "generic.tsx"
     }
   },
   "dialogues.name": {
@@ -504,9 +504,9 @@
     "edit": "cards/Dialogue.tsx",
     "delete": "cards/Dialogue.tsx",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "generic.tsx",
+      "edit": "generic.tsx",
+      "delete": "generic.tsx"
     }
   },
   "dialogues.npc": {
@@ -514,9 +514,9 @@
     "edit": "cards/Dialogue.tsx",
     "delete": "cards/Dialogue.tsx",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "generic.tsx",
+      "edit": "generic.tsx",
+      "delete": "generic.tsx"
     }
   },
   "dialogues.policy": {
@@ -534,9 +534,9 @@
     "edit": "cards/Dialogue.tsx",
     "delete": "cards/Dialogue.tsx",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "generic.tsx",
+      "edit": "generic.tsx",
+      "delete": "generic.tsx"
     }
   },
   "dialogues.quest": {
@@ -544,9 +544,9 @@
     "edit": "cards/Dialogue.tsx",
     "delete": "cards/Dialogue.tsx",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "generic.tsx",
+      "edit": "generic.tsx",
+      "delete": "generic.tsx"
     }
   },
   "dialogues.riddle": {
@@ -554,9 +554,9 @@
     "edit": "cards/Dialogue.tsx",
     "delete": "cards/Dialogue.tsx",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "generic.tsx",
+      "edit": "generic.tsx",
+      "delete": "generic.tsx"
     }
   },
   "dialogues.roles": {
@@ -564,9 +564,9 @@
     "edit": "cards/Dialogue.tsx",
     "delete": "cards/Dialogue.tsx",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "generic.tsx",
+      "edit": "generic.tsx",
+      "delete": "generic.tsx"
     }
   },
   "emotes.abstract": {
