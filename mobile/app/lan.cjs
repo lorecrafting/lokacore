@@ -36,7 +36,7 @@ const lanAddresses = (nets) =>
     .map((a) => a.address)
     .filter((ip, i, all) => all.indexOf(ip) === i); // an address on two interfaces is one listener
 
-/** `{ key, cert }` for `ips`, issued each start (the key stays in memory) by the CA in `dir`, made on
+/** `{ key, cert }` for `ips`, issued each start (its key a 0600 file beside the CA's) by the CA in `dir`, made on
  * the first run (dir 700, key 600) and reused, so the phone installs it once. */
 function lanCert(dir, ips) {
   fs.mkdirSync(dir, { recursive: true });

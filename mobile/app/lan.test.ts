@@ -64,6 +64,7 @@ test('the CA is made once, name-constrained, its key readable by the owner alone
   });
   assert.match(text, /Basic Constraints: critical\s+CA:TRUE/);
   assert.match(text, /Name Constraints: critical/);
+  assert.match(text, /Key Usage: critical\s+Certificate Sign, CRL Sign\n/);
   assert.match(text, /Extended Key Usage:\s+TLS Web Server Authentication\n/); // no S/MIME or code signing
 
   const cert = new X509Certificate(leaf.cert);
@@ -111,6 +112,18 @@ test('the CA is made once, name-constrained, its key readable by the owner alone
   assert.equal(verify(signed('DNS:mac.local')), 0);
   assert.notEqual(verify(signed('DNS:example.com')), 0);
   assert.notEqual(verify(lanCert(dir, ['8.8.8.8']).cert), 0);
+  // Each range's edges: a mask too wide vouches for public hosts, one too narrow fails a LAN phone.
+  for (const ip of [
+    '10.0.0.1',
+    '10.255.255.1',
+    '172.16.0.1',
+    '172.31.255.1',
+    '192.168.0.1',
+    '192.168.255.1',
+  ])
+    assert.equal(verify(signed(`IP:${ip}`)), 0, ip);
+  for (const ip of ['11.0.0.1', '172.15.255.1', '172.32.0.1', '192.167.255.1', '192.169.0.1'])
+    assert.notEqual(verify(signed(`IP:${ip}`)), 0, ip);
 
   assert.equal(new X509Certificate(readFileSync(caPem)).fingerprint256, ca.fingerprint256);
 });
