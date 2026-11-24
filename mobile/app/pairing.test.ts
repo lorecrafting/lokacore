@@ -17,15 +17,18 @@ const ask = (url: string, remoteAddress: string, cookie?: string, method = 'GET'
 const quiet = () => {};
 
 test('the pairing link sets the cookie and drops pair from the URL; a wrong token gets 403 and no cookie', () => {
-  // Breaks: any token pairs; a short guess, or a 32-character one longer in bytes (é), throws
-  // (timingSafeEqual on unequal lengths) and the preview dies; so does a target URL cannot parse; the
+  // Breaks: any token pairs; the cookie lacks Secure (sent over plain http too); a short guess, or a
+  // 32-character one longer in bytes (é), throws (timingSafeEqual on unequal lengths) and the preview dies; so does a target URL cannot parse; the
   // page keeps the token in the address bar or loses the other query; a 302 (a link opened from
   // another app is cross-site, so the redirected load goes without the Strict cookie: 403); the
   // page's script lets the query close its tag; the Mac's own Book is paired.
   const { check } = pairing(TOKEN, () => 0, quiet);
   const [status, headers, body] = check(ask(`/?dev=1&pair=${TOKEN}&q=</script>`, PHONE));
   assert.equal(status, 200);
-  assert.equal(headers['set-cookie'], `loka_pair=${TOKEN}; HttpOnly; SameSite=Strict; Path=/`);
+  assert.equal(
+    headers['set-cookie'],
+    `loka_pair=${TOKEN}; HttpOnly; Secure; SameSite=Strict; Path=/`,
+  );
   assert.equal(headers['content-type'], 'text/html');
   const script = /^<!doctype html><script>(.*)<\/script>$/.exec(body)![1];
   const went: string[] = [];

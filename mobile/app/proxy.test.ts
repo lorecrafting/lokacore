@@ -6,7 +6,7 @@ import { connect, type AddressInfo, type Socket } from 'node:net';
 import { createRequire } from 'node:module';
 import { test } from 'node:test';
 
-const { proxy, bindHost } = createRequire(import.meta.url)('./proxy.cjs');
+const { proxy } = createRequire(import.meta.url)('./proxy.cjs');
 const listen = (server: Server) =>
   new Promise<number>((done) =>
     server.listen(0, '127.0.0.1', () => done((server.address() as AddressInfo).port)),
@@ -78,10 +78,4 @@ test('the proxy answers with the guard, forwards its header to the author server
   assert.match(await upgrade('/hot'), /^HTTP\/1\.1 101/);
   assert.equal(upgraded, 1);
   assert.equal(watched.length, 7); // one per connection: five requests (no keep-alive agent), two upgrades
-});
-
-test('the preview binds the LAN only under --lan', () => {
-  // Break: the proxy listens on every interface without a pairing token (no guard), or never under --lan.
-  assert.equal(bindHost(undefined), '127.0.0.1');
-  assert.equal(bindHost('0123456789abcdef0123456789abcdef'), '0.0.0.0');
 });

@@ -1,14 +1,13 @@
 // The preview's proxy (preview-server.cjs): adds the isolation headers, sends `/__author/*` to the
 // author server and the rest to Metro, both on localhost. With `pair` (pairing.cjs, `--lan`), every
-// request and upgrade passes its check first and the author server gets its header.
+// request and upgrade passes its check first and the author server gets its header; `tls` (lan.cjs)
+// makes it https.
 const http = require('node:http');
+const https = require('node:https');
 const net = require('node:net');
 
-/** Where the preview listens: the LAN only under `--lan` (a pairing token). */
-const bindHost = (token) => (token ? '0.0.0.0' : '127.0.0.1');
-
-function proxy({ pair, metroPort, authorPort }) {
-  const server = http.createServer((request, response) => {
+function proxy({ pair, metroPort, authorPort, tls }) {
+  const handle = (request, response) => {
     const answer = pair?.check(request);
     if (answer) return response.writeHead(answer[0], answer[1]).end(answer[2]);
     const author = request.url.startsWith('/__author/');
@@ -44,7 +43,8 @@ function proxy({ pair, metroPort, authorPort }) {
       }
     });
     request.pipe(upstream);
-  });
+  };
+  const server = tls ? https.createServer(tls, handle) : http.createServer(handle);
 
   server.on('upgrade', (request, socket, head) => {
     if (pair?.check(request)) return socket.end('HTTP/1.1 403 Forbidden\r\n\r\n');
@@ -63,4 +63,4 @@ function proxy({ pair, metroPort, authorPort }) {
   return server;
 }
 
-module.exports = { proxy, bindHost };
+module.exports = { proxy };

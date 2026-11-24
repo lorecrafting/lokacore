@@ -1,5 +1,5 @@
 // `bin/author.sh --lan`'s guard on the preview port (docs/rnd/in-game-builder-mode-2026-11-19.md §6.8):
-// a non-loopback peer needs the pairing cookie on every request; `?pair=<token>` sets it.
+// a non-loopback peer (on https, lan.cjs) needs the pairing cookie on every request; `?pair=<token>` sets it.
 const { timingSafeEqual } = require('node:crypto');
 
 const IDLE_MS = 8 * 60 * 60 * 1000; // --lan turns off after 8 hours with no paired LAN request
@@ -51,7 +51,7 @@ function pairing(token, now = Date.now, say = console.log) {
         {
           'content-type': 'text/html',
           'cache-control': 'no-store',
-          'set-cookie': `loka_pair=${token}; HttpOnly; SameSite=Strict; Path=/`,
+          'set-cookie': `loka_pair=${token}; HttpOnly; Secure; SameSite=Strict; Path=/`,
         },
         `<!doctype html><script>location.replace(${to})</script>`,
       ];
@@ -66,4 +66,4 @@ function pairing(token, now = Date.now, say = console.log) {
   return { check, forwarded, idle, watch };
 }
 
-module.exports = { pairing, IDLE_MS };
+module.exports = { pairing, same, IDLE_MS };

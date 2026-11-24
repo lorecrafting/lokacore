@@ -23,12 +23,12 @@ const same = (sent: unknown, pair: string) =>
 /** Answers 403 (and is true) for a request not from the author's own page: a rebinding DNS name's
  * Host, or a cross-site page's Origin on anything but a GET (its simple POST would run). With `pair`
  * (`bin/author.sh --lan`), a request carrying it as `x-loka-pair` (the preview adds it to a paired
- * LAN request) may use a LAN Host and its own Host as Origin, and a non-GET with no Origin needs it. */
+ * LAN request) may use a LAN Host and its own https Host as Origin, and a non-GET with no Origin needs it. */
 export function foreign(request: IncomingMessage, response: ServerResponse, pair?: string) {
   const { host, origin, 'x-loka-pair': sent } = request.headers;
   const paired = !!pair && same(sent, pair);
   const page = origin
-    ? ORIGIN.test(origin) || (paired && origin === `http://${host}`)
+    ? ORIGIN.test(origin) || (paired && origin === `https://${host}`)
     : !pair || paired;
   if (!paired && !HOST.test(host ?? '')) json(response, 403, `not the author host: ${host}`);
   else if (request.method !== 'GET' && !page)
