@@ -85,8 +85,8 @@ function move(e: Pe) {
   if (!grab || !down.has(e.nativeEvent.pointerId)) return;
   down.set(e.nativeEvent.pointerId, pointer(e.nativeEvent, e.currentTarget));
   const [a, b] = [...down.values()];
-  const [a0, b0] = grab.at;
-  if (!b || !b0) return set({ ...grab.v, x: grab.v.x + a.x - a0.x, y: grab.v.y + a.y - a0.y });
+  const [a0, b0] = grab.at as [Point, Point]; // as many as held: press and lift regrab
+  if (!b) return set({ ...grab.v, x: grab.v.x + a.x - a0.x, y: grab.v.y + a.y - a0.y });
   const mid = { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
   const v = {
     ...grab.v,
@@ -238,6 +238,11 @@ const row = {
   gap: space.md,
   paddingHorizontal: space.md,
 } as const;
+const BAR = {
+  borderTopWidth: 1, // mutate-skip: placeholder rule above the bar
+  borderColor: ink('line'),
+  paddingTop: space.sm,
+};
 function body() {
   if (selected && !rooms().some((r) => r.key === selected)) selected = undefined; // renamed or deleted
   const unplaced = rooms().filter((r) => !r.at);
@@ -259,8 +264,7 @@ function body() {
       </View>
     ) : null,
     selected ? (
-      // mutate-skip: placeholder rule above the bar
-      <View key="bar" style={{ borderTopWidth: 1, borderColor: ink('line'), paddingTop: space.sm }}>
+      <View key="bar" style={BAR}>
         <Text style={{ ...type.label, color: ink('fg'), paddingHorizontal: space.md }}>
           {WORDS.selected(selected)}
         </Text>

@@ -140,6 +140,10 @@ test('zoom, pinch and wheel act about their point; a room press starts no drag; 
   g.onPointerMove(ev(1, c.x + 50));
   g.onPointerUp(ev(1, c.x + 50));
   near(mid('crossroads_inn'), c, 'a room press drags nothing');
+  g.onPointerDown(ev(1, c.x));
+  g.onPointerMove(ev(3, c.x + 50)); // a pointer not held (a hovering mouse)
+  g.onPointerUp(ev(1, c.x));
+  near(mid('crossroads_inn'), c, 'only held pointers move the view');
   g.onPointerDown(ev(1, c.x - 10));
   g.onPointerDown(ev(2, c.x + 10));
   g.onPointerMove(ev(1, c.x - 20));
@@ -159,6 +163,13 @@ test('zoom, pinch and wheel act about their point; a room press starts no drag; 
   near(mid('crossroads_inn'), { ...c, w: (c.w * 2) / Math.E }, 'the wheel zooms about the cursor');
   g.onLayout({ nativeEvent: { layout: { width: SIZE, height: SIZE } } });
   near(mid('crossroads_inn'), { ...c, w: (c.w * 2) / Math.E }, 'a same-size layout keeps the view');
+  g.onLayout({ nativeEvent: { layout: { width: SIZE, height: SIZE / 2 } } });
+  assert.notEqual(
+    mid('crossroads_inn').w.toFixed(3),
+    ((c.w * 2) / Math.E).toFixed(3),
+    'a new height refits',
+  );
+  g.onLayout({ nativeEvent: { layout: { width: SIZE, height: SIZE } } });
   press('Fit');
   const f = mid('crossroads_inn');
   press('Zoom in'); // about the ground's centre
@@ -174,7 +185,7 @@ test('zoom, pinch and wheel act about their point; a room press starts no drag; 
     .map((e) => e.props.style);
   const from = mid('crossroads_inn');
   const exits = map.find((r: any) => r.key === 'crossroads_inn').exits;
-  const to = mid(exits.find((e: any) => drawn().includes(e.to)).to);
+  const to = mid(exits.find((e: any) => drawn().includes(e.to) && mid(e.to).y !== from.y).to);
   const want = {
     x: (from.x + to.x) / 2,
     y: (from.y + to.y) / 2,
