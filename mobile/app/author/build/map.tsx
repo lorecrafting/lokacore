@@ -184,24 +184,25 @@ const glyph = (g: { glyph: string; name: string; drop?: number }, run?: () => vo
   </Pressable>
 );
 
-/** An exit as a rotated bar between two room centres on screen (MapDrawing.tsx's Line). */
-function Line(p: { from: Point; to: Point }) {
-  const [dx, dy] = [p.to.x - p.from.x, p.to.y - p.from.y];
-  const len = Math.hypot(dx, dy);
-  return (
-    <View
-      pointerEvents="none"
-      style={{
-        position: 'absolute',
-        left: (p.from.x + p.to.x) / 2 - len / 2,
-        top: (p.from.y + p.to.y) / 2 - size.rule / 2,
-        width: len,
-        height: size.rule,
-        backgroundColor: ink('dim'), // Map's line: `line` is under 3:1 on `card`
-        transform: [{ rotate: `${(Math.atan2(dy, dx) * 180) / Math.PI}deg` }],
-      }}
-    />
-  );
+/** The level's exits as rotated bars (MapDrawing.tsx's Line), box edge to box edge, drawn over the
+ * boxes: a room between two joined rooms hides no line. */
+function lines(s: Seen, drawn: map.MapRoom[]) {
+  const [hw, hh] = [(M.w / 2) * s.v.zoom, (M.h / 2) * s.v.zoom];
+  return map.edges(drawn).map((e) => {
+    const [a, b] = [screen(s, s.at.get(e.from)!), screen(s, s.at.get(e.to)!)];
+    const [p, q] = [map.rim(a, b, hw, hh), map.rim(b, a, hw, hh)];
+    const len = Math.hypot(q.x - p.x, q.y - p.y);
+    const style = {
+      position: 'absolute',
+      left: (p.x + q.x) / 2 - len / 2,
+      top: (p.y + q.y) / 2 - size.rule / 2,
+      width: len,
+      height: size.rule,
+      backgroundColor: ink('dim'), // Map's line: `line` is under 3:1 on `card`
+      transform: [{ rotate: `${(Math.atan2(q.y - p.y, q.x - p.x) * 180) / Math.PI}deg` }],
+    } as const;
+    return <View key={`${e.from} ${e.to}`} pointerEvents="none" style={style} />;
+  });
 }
 
 const CENTRED = { justifyContent: 'center', alignItems: 'center' } as const;
@@ -219,7 +220,7 @@ const esc = (e: KeyboardEvent) => e.key === 'Escape' && mode && cancel();
 function join(b: map.MapRoom) {
   const a = chosen()!;
   const dir = map.toward(a.at!, b.at!);
-  mode = undefined;
+  if (dir) mode = undefined; // a tap on the room itself keeps Join… armed
   void run(async () => (dir ? ed.link(a, dir, b) : WORDS.self));
 }
 /** ＋: a new room `dir` of `r` (`room_<n>`, its words `~`), selected. */
@@ -350,17 +351,8 @@ function Drawing({ drawn }: { drawn: map.MapRoom[] }) {
           : { ...GROUND, maxHeight: (window.height - STRIP) / 2 - CHROME }
       }
     >
-      {s &&
-        map
-          .edges(drawn)
-          .map((e) => (
-            <Line
-              key={`${e.from} ${e.to}`}
-              from={screen(s, s.at.get(e.from)!)}
-              to={screen(s, s.at.get(e.to)!)}
-            />
-          ))}
       {s && drawn.map((r) => room(s, r))}
+      {s && lines(s, drawn)}
       {s && plusses(s)}
     </View>
   );
@@ -390,7 +382,10 @@ function bar(r: map.MapRoom | undefined) {
   const free = r ? map.grows(r, rooms()).filter((dir) => map.STEP[dir]![2]) : [];
   return (
     <View key="bar" style={BAR}>
-      <Text style={{ ...type.label, color: ink('fg'), paddingHorizontal: space.md }}>
+      <Text
+        aria-live="polite"
+        style={{ ...type.label, color: ink('fg'), paddingHorizontal: space.md }}
+      >
         {words(selected!)}
       </Text>
       {mode === 'area' && moveTo(r!)}

@@ -234,6 +234,25 @@ test('Cancel and Esc leave Join… and Move… writing nothing', async () => {
   assert.equal(bar(), 'yard — selected');
 });
 
+test('Join… then a tap on the room itself writes nothing, says why and stays armed; the bar is read when it changes', async () => {
+  pick('hall');
+  await press('Join…');
+  posts = [];
+  pick('hall');
+  await settle();
+  assert.deepEqual(posts, []);
+  assert.equal(bar(), 'hall — tap a room to join');
+  assert.ok(
+    sheet().some(
+      (e) =>
+        e.props?.accessibilityRole === 'alert' && e.props.children === 'Tap another room to join',
+    ),
+  );
+  const words = sheet().find((e) => e.props?.children === bar());
+  assert.equal(words.props['aria-live'], 'polite');
+  await press('Cancel');
+});
+
 test('Undo pressed while a gesture still runs keeps the chip; a refused put-back says so on the strip', async () => {
   pick('hall');
   await press('New room east');

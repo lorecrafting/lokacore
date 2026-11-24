@@ -268,7 +268,7 @@ export function Strip({ children }: { children: ReactNode }) {
         {chip()}
         {undo ? act(WORDS.undo, () => void putBack(undo!)) : null}
         {notBack ? warn(WORDS.notUndone(notBack.file)) : null}
-        {warn(stopped)}
+        {stopped ? warn(stopped) : null}
         {notBack ? act(WORDS.source, openBack) : null}
         {builder.on ? pad(CONTENTS.contents, 'contents', top) : null}
         {builder.on ? pad(MAP.map, 'map', top) : null}
