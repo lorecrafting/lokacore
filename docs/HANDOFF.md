@@ -4,10 +4,19 @@ The present only: open work, next steps, owner questions, and standing owner rul
 yet. Rewrite this page in place once per session, at its end; never add dated session sections. History lives in git, Beads and `docs/reviews/`; lessons
 go to [PM lessons](lessons/pm.md) ([harness patterns](decisions/owner-decision-harness-patterns-2026-10-28.md)).
 
-AS OF main after 4d226f866; written 2026-11-20 in Claude Code (Opus 5.5), PM session. The Anthropic
+AS OF main after 0ed522f3e; written 2026-11-23 in Claude Code (Opus 5.5), PM session. The Anthropic
 subscription is on the $20 Pro plan: low-token workflow, **subagents on Opus, never Fable** (no usage
-credits; a developer hit the 5-hour limit once this session and was finished by the PM). `kernel_api`
-is 1.159. **Nothing is in flight, no agent is running.** #454 is the owner's P3 hold.
+credits). `kernel_api` is 1.159. **Nothing is in flight, no agent is running.** #454 is the owner's P3 hold.
+
+Shipped 2026-11-23: **#780** `loka-0s4wv` (the nightly's red: the map test now polls the room files
+too, not only `layout.json`) and **#779** `hcnlh.17` (2.5, ghost lines and See as…). Rulings on 2.5:
+- **The owner (paraphrased): every ghost is its own line under the title, never collapsed.** Each line is
+  cut to one line; the Room sheet lists every ghost again, whole. The owner accepted the fixed header
+  growing one touch target per ghost.
+- PM: a same-room act does not end See as. Ghost lines are the Build-only exception to the room page
+  anatomy (`book-ui.md`, `AGENTS.md`).
+- Open 2.5 limits are in #779's body: canon cached until reload; placement by starting room; a dark room
+  ghosts every variant; gate reasons shown even when the fact is true.
 
 ## Direction
 
@@ -65,14 +74,13 @@ corrected the same way (`village_regard`, `mill_gate` did not exist). Grep the r
 
 ## Resume, in order
 
-1. **Builder phase 2, starting with 2.1 `loka-hcnlh.13`** (Sheet and stack, title pencil, Room sheet; designer).
-   - Slices 2.1-6.8 are beads `loka-hcnlh.13`-`.35`, chained in the design's §7 order, each with its acceptance.
+1. **Builder 3.1 `loka-hcnlh.18`** (`--lan`, pairing; phase 2 is done).
+   - Slices 3.1-6.8 are beads `loka-hcnlh.18`-`.35`, chained in the design's §7 order, each with its acceptance.
    - Reviewer and designer flags are the **R** and **D** marks in the design's table: 3.1 needs a reviewer
      (it is security work).
    - Brief the developer to browser-check every acceptance line at 390 px before handback (retro `loka-p971b`
      item 4).
-2. **The two panel smoke flakes** cost a rerun on most PRs: `loka-61se9` (map test, half-written JSON) and
-   `loka-wfrgk.127` (palette Undo). Fix them early in phase 2.
+2. **The panel smoke flake `loka-wfrgk.127`** (palette Undo) still costs reruns; the map-test flake is fixed (#780).
 3. Builder follow-ups (small, dev-only):
    - `loka-hcnlh.9`: a failed hold request is silent.
    - `loka-hcnlh.11`: the field's E5 overlap and silent failures, the 1.4 nits, and Esc focus.
