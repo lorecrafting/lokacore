@@ -15,7 +15,7 @@ import { Hierarchy, MapSlot, WorldButton } from './left.tsx';
 import { Palette } from './palette.tsx';
 import { Project } from './project.tsx';
 import { Counts, Unconfirmed } from './prose.tsx';
-import { flowGo, flowItems } from './flowread.ts';
+import { flowGo, flowItems } from '../../../kernel/ts/play/flowread.ts';
 import { Feed, Inspector } from './right.tsx';
 import { Compile, Source } from './sections.tsx';
 import {

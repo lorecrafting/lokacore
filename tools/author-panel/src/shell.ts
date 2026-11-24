@@ -3,26 +3,14 @@
 // timings against their budgets, and the OS colour scheme. No React here: tested from
 // kernel/ts/test/author_shell.test.ts.
 
-import { fromRef, type Item, type ListState, type Selection } from '../../../kernel/ts/play/storylist.ts';
+import { fromRef, type Item, type Selection } from '../../../kernel/ts/play/storylist.ts';
+import type { Layout } from '../../../kernel/ts/play/flow.ts';
 import NEW from '../../../kernel/ts/play/new.json' with { type: 'json' };
 import { nodeOf } from '../../../kernel/ts/play/mapedit.ts';
 
-export { fromRef, type Item, type Selection };
+export { fromRef, type Item, type Layout, type Selection };
 /** The World card's selection: cartridge.json, which no graph node names (its card opens the root files). */
 export const WORLD: Selection = { file: 'cartridge.json', kind: 'cartridge', key: 'world' };
-export type Layout = {
-  left: number;
-  right: number;
-  slot: number; // the map slot's height
-  leftOpen: boolean;
-  rightOpen: boolean;
-  tablet: boolean;
-  tab: 'hierarchy' | 'project';
-  map: 'map' | 'story' | 'flow';
-  selection?: Selection;
-  story?: ListState; // the Story list's folds, focus and trace (Flow shares the folds)
-  flow?: { follow?: string; filters?: string[] }; // the Flow graph's followed fact and filters
-};
 type Side = 'left' | 'right' | 'slot';
 
 // The slot's most is its column less the tab strip, measured by the divider.

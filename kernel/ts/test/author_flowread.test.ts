@@ -1,9 +1,9 @@
-// The Flow graph's reads (tools/author-panel/src/flowread.ts): ink, search, the card, keys and the
+// The Flow graph's reads (kernel/ts/play/flowread.ts): ink, search, the card, keys and the
 // palette rows, worked by hand on the planted models of author_flow_fixture.ts (rulings S3).
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { layout } from '../../../tools/author-panel/src/flow.ts';
-import * as read from '../../../tools/author-panel/src/flowread.ts';
+import { layout } from '../play/flow.ts';
+import * as read from '../play/flowread.ts';
 import { LAYOUT } from '../../../tools/author-panel/src/shell.ts';
 import { d1, d2, d3, f, model, OPEN, planted, q, r1, thera, V } from './author_flow_fixture.ts';
 

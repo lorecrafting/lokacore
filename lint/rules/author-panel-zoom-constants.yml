@@ -2,8 +2,8 @@ id: author-panel-zoom-constants
 language: tsx
 severity: error
 message: 'Zoom numbers live in map.ts `M` and flow.ts `F` (rulings S3 Tests): name the constant there.'
-files: [tools/author-panel/src/**]
-ignores: [kernel/ts/play/map.ts, tools/author-panel/src/flow.ts]
+files: [tools/author-panel/src/**, kernel/ts/play/flowread.ts]
+ignores: [kernel/ts/play/map.ts, kernel/ts/play/flow.ts]
 rule:
   kind: number
   not: { regex: '^1$' } # zoom 1 is the unit the constants are drawn at, not a tunable
