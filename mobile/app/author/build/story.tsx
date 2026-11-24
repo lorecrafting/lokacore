@@ -54,11 +54,15 @@ const line = (words: string, key: string) => (
 );
 /** A row's node's sheet, if the last /story named its file. */
 const sheetOf = (ref?: string) => (ref && known.files[ref] ? `def:${known.files[ref]}` : undefined);
-// ponytail: the first room a story edge joins `ref` to (an NPC's start, a scene's room); none, no Go there
+// The room a placement edge joins `ref` to (an NPC's or scene's `.room`, a room's `.items`); none, no Go there.
+// ponytail: a dialogue gets no Go there; follow its speaker when an author asks
+const PLACED = new Set(['.room', '.items']);
 const roomOf = (ref: string) => {
   const rooms = new Map(known.rooms.map((r) => [r.ref, r.key]));
   const e = known.story?.graph.edges.find(
-    (e) => (e.from === ref && rooms.has(e.to)) || (e.to === ref && rooms.has(e.from)),
+    (e) =>
+      PLACED.has(e.path) &&
+      ((e.from === ref && rooms.has(e.to)) || (e.to === ref && rooms.has(e.from))),
   );
   return e && rooms.get(e.from === ref ? e.to : e.from);
 };

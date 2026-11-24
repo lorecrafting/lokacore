@@ -35,6 +35,8 @@ const story = {
         op: 'fact.set',
         set: true,
       },
+      // not a placement: Go there on nell must skip it for her `.room`
+      { from: R('npc', 'nell'), to: R('room', 'cellar'), path: '.flees_to' },
       { from: R('npc', 'nell'), to: R('room', 'hall'), path: '.room' },
       // a room places its items: Go there on the lamp follows the cellar's edge, not the hall's first one
       { from: R('room', 'hall'), to: R('item', 'cup'), path: '.items' },
