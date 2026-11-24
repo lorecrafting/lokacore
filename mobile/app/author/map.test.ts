@@ -264,12 +264,21 @@ test('a drag, pinch or zoom redraws only the drawing; a level step redraws the B
   press('Level down');
 });
 
-test('on a phone the drawing leaves the selection bar inside the half-height sheet; docked it stays square', () => {
+test('on a phone the drawing leaves the selection bar inside the half-height sheet; docked it stays square', async () => {
   Object.assign(globalThis, { innerWidth: 390, innerHeight: 844 });
   // the grip, Back, the title and the controls over it; the bar's rule, gap, words and acts under it
   // measured in the 390x844 web Book: the sheet is 399.5 high from y 444.5; 153 above the ground, 67
   // under it to the acts' foot at 844
   assert.equal(ground().props.style.maxHeight, 399.5 - 153 - 67);
+  // once measured, the Book's row (Undo wraps Build's strip) and the bar (its acts wrap) rule
+  const { measured } = await import('./build/map.tsx');
+  const tall = (part: 'book' | 'bar', height: number) =>
+    measured(part)({ nativeEvent: { layout: { width: 390, height } } });
+  tall('book', 747);
+  tall('bar', 119);
+  assert.equal(ground().props.style.maxHeight, 747 / 2 - 153 - 119);
+  tall('book', 799);
+  tall('bar', 67);
   Object.assign(globalThis, { innerWidth: 1152, innerHeight: 800 }); // DOCK.at: docked from here
   assert.equal(ground().props.style.maxHeight, undefined);
   Object.assign(globalThis, { innerWidth: undefined, innerHeight: undefined });

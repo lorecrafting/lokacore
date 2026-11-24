@@ -301,24 +301,26 @@ function room(s: Seen, r: map.MapRoom) {
   );
 }
 
-const resized = (e: { nativeEvent: { layout: { width: number; height: number } } }) => {
+type Layout = { nativeEvent: { layout: { width: number; height: number } } };
+const resized = (e: Layout) => {
   const { width: w, height: h } = e.nativeEvent.layout;
   if (w === box.w && h === box.h) return;
   box = { w, h };
   view = undefined; // seen() fits once the level has rooms
   paint();
 };
-/** A phone sheet's height around the ground at half height: its top rule, the grip, Back and the
- * title over the controls; under it the selection bar's rule, gap, words and acts. */
-const CHROME =
-  size.rule +
-  size.touch +
-  size.touch +
-  type.control.lineHeight +
-  size.touch +
-  (size.rule + space.sm + type.label.lineHeight + size.touch);
-// ponytail: Build.tsx's strip at one row; a wrapped strip (Hold, Undo) shrinks the sheet further.
-const STRIP = size.touch + size.rule;
+/** A phone sheet's height over the ground at half height: its top rule, the grip, Back and the
+ * title over the controls. */
+const CHROME = size.rule + size.touch + size.touch + type.control.lineHeight + size.touch;
+const STRIP = size.touch + size.rule; // Build.tsx's strip at one row, until the Book's row is measured
+/** Measured on a phone, as each wraps: the Book's row under Build's strip, whose half the sheet
+ * is, and the selection bar under the ground (its rule, gap, words and acts at one row first). */
+const tall = { book: 0, bar: size.rule + space.sm + type.label.lineHeight + size.touch };
+export const measured = (part: keyof typeof tall) => (e: Layout) => {
+  if (e.nativeEvent.layout.height === tall[part]) return;
+  tall[part] = e.nativeEvent.layout.height;
+  paint();
+};
 const GROUND = {
   aspectRatio: 1, // mutate-skip: layout, a square ground (capped by height on a phone)
   overflow: 'hidden',
@@ -348,7 +350,7 @@ function Drawing({ drawn }: { drawn: map.MapRoom[] }) {
       style={
         window.width >= DOCK.at
           ? GROUND
-          : { ...GROUND, maxHeight: (window.height - STRIP) / 2 - CHROME }
+          : { ...GROUND, maxHeight: (tall.book || window.height - STRIP) / 2 - CHROME - tall.bar }
       }
     >
       {s && drawn.map((r) => room(s, r))}
@@ -381,7 +383,7 @@ function bar(r: map.MapRoom | undefined) {
         : WORDS.selected;
   const free = r ? map.grows(r, rooms()).filter((dir) => map.STEP[dir]![2]) : [];
   return (
-    <View key="bar" style={BAR}>
+    <View key="bar" style={BAR} onLayout={measured('bar')}>
       <Text
         aria-live="polite"
         style={{ ...type.label, color: ink('fg'), paddingHorizontal: space.md }}

@@ -26,7 +26,7 @@ import { chip, ghostLines, seeWith, unsee, type Game } from './seeas.tsx';
 import { thingPen } from './thing.tsx';
 import { CONTENTS } from './contents.tsx';
 import './generic.tsx'; // registers the def:<file> sheet
-import { MAP, mapSheet, unborn } from './map.tsx';
+import { MAP, mapSheet, measured, unborn } from './map.tsx';
 import { undo as putBackIds } from '../../../../kernel/ts/play/mapedit.ts';
 import { io, onSaved, refused, run, running } from './roomedit.tsx';
 import { act, CONTROL, Frame, parts, sheets } from './sheet.tsx';
@@ -275,7 +275,10 @@ export function Strip({ children }: { children: ReactNode }) {
         {builder.on ? pad(badge(heard), 'checks', top) : null}
       </View>
       <Notice />
-      <View style={{ flex: 1, flexDirection: 'row' }} /* mutate-skip: layout */>
+      <View
+        style={{ flex: 1, flexDirection: 'row' }} /* mutate-skip: layout */
+        onLayout={measured('book')} // the phone sheet is half this row
+      >
         <View
           style={{ flex: 1 }} /* mutate-skip: layout; the Book keeps its place as sheets open */
         >
