@@ -3,9 +3,11 @@
 // No React; tested from kernel/ts/test/author_flowwalk.test.ts.
 import { laneOf, shownOf } from './flow.ts';
 import { followed } from './flowread.ts';
+import { reads } from './reads.ts';
 import { fromRef, type Story } from './storylist.ts';
 
-/** The walk around `ref`: `above` the nodes with an edge into it, `below` those its edges reach,
+/** The walk around `ref`: `above` what leads to it, `below` what it unlocks (design §7 5.5; a fact
+ * read is flipped, so a fact's setters are above it and its readers below),
  * `thread` a fact's setters then readers ([] for any other kind); lane refs only (an anchor is
  * not a node), deduped in edge order, kept by the Flow `filters` (FILTERS entries). */
 export function walk(s: Story, ref: string, filters: string[] = []) {
@@ -15,7 +17,11 @@ export function walk(s: Story, ref: string, filters: string[] = []) {
       { fold: [], filters },
       [...new Set(refs)].filter((r) => r !== ref && laneOf(r)),
     );
-  const edges = s.graph.edges;
+  const edges = s.graph.edges.map((e) =>
+    fromRef(e.to)?.kind === 'fact' && reads(!!e.set, fromRef(e.from)?.kind)
+      ? { from: e.to, to: e.from }
+      : e,
+  );
   return {
     above: keep(edges.filter((e) => e.to === ref).map((e) => e.from)),
     below: keep(edges.filter((e) => e.from === ref).map((e) => e.to)),

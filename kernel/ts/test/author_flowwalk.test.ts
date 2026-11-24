@@ -43,13 +43,19 @@ test("a choice's below holds the fact it sets; anchors, self edges and repeats d
   assert.deepEqual(walk(S, dlg), { above: [sp], below: [lit], thread: [] });
 });
 
-// Breaks: the thread misses a reader, lists readers before the setter, or keeps the fact itself.
-test("a fact's thread is its setter, then every reader", () => {
+// Breaks: a read is not flipped (readers above the fact), the thread misses a reader, lists
+// readers before the setter, or keeps the fact itself.
+test("a fact's setter leads to it, its readers are unlocked; its thread is setter then readers", () => {
   assert.deepEqual(walk(S, lit), {
-    above: [rx, dlg, qq, cnd],
-    below: [],
+    above: [dlg],
+    below: [rx, qq, cnd],
     thread: [dlg, rx, qq, cnd],
   });
+});
+
+// Breaks: the flip applied only on the fact's side, so a reader lists its fact below.
+test('a reader has the fact it reads above it', () => {
+  assert.deepEqual(walk(S, rx), { above: [lit], below: [], thread: [] });
 });
 
 // Breaks: walk() ignores its filters or one of them; `needs words` counts a todo with no
@@ -57,12 +63,12 @@ test("a fact's thread is its setter, then every reader", () => {
 const BY: Record<string, [string, ReturnType<typeof walk>]> = {
   story: [dlg, { above: [], below: [lit], thread: [] }],
   fact: [dlg, { above: [sp], below: [], thread: [] }],
-  quest: [lit, { above: [rx, dlg, cnd], below: [], thread: [dlg, rx, cnd] }],
-  dialogue: [lit, { above: [rx, qq, cnd], below: [], thread: [rx, qq, cnd] }],
-  reaction: [lit, { above: [dlg, qq, cnd], below: [], thread: [dlg, qq, cnd] }],
-  condition: [lit, { above: [rx, dlg, qq], below: [], thread: [dlg, rx, qq] }],
-  'needs words': [lit, { above: [rx], below: [], thread: [rx] }],
-  'potential problems': [lit, { above: [cnd], below: [], thread: [cnd] }],
+  quest: [lit, { above: [dlg], below: [rx, cnd], thread: [dlg, rx, cnd] }],
+  dialogue: [lit, { above: [], below: [rx, qq, cnd], thread: [rx, qq, cnd] }],
+  reaction: [lit, { above: [dlg], below: [qq, cnd], thread: [dlg, qq, cnd] }],
+  condition: [lit, { above: [dlg], below: [rx, qq], thread: [dlg, rx, qq] }],
+  'needs words': [lit, { above: [], below: [rx], thread: [rx] }],
+  'potential problems': [lit, { above: [], below: [cnd], thread: [cnd] }],
 };
 test('each Flow filter changes what the walk shows', () => {
   assert.deepEqual(Object.keys(BY).sort(), [...FILTERS].sort());
