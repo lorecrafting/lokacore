@@ -28,6 +28,7 @@ const WORDS = {
   title: 'title',
   retitle: 'Retitle',
   remove: 'Remove',
+  binds: 'Bind…',
   bind: (short: string) => `Bind ${short}`,
   beat: (n: number) => `Beat ${n}`,
   knows: 'Knows',
@@ -36,10 +37,12 @@ const WORDS = {
   words: (n: number) => `${n} words`,
   thin: 'thin',
   nothing: 'Nothing here.',
+  none: 'No story yet.', // placeholder words: the owner writes the line
 };
 
 let st: L.ListState = L.LIST; // the parts and beats opened or shut
 let picked: string | undefined; // the row whose actions show under it
+let binding: string | undefined; // the beat whose Bind… fold is open
 const numbers = new Map<string, string>(); // a part's new beat number, as typed
 const titles = new Map<string, string>(); // a beat's new title, as typed
 let go = (_room: string) => {};
@@ -74,16 +77,33 @@ const marks = (r: L.Row) =>
         r.todo ? WORDS.unwritten(r.todo) : '',
         r.unreached ? WORDS.unreached : '',
       ];
-const field = (label: string, drafts: Map<string, string>, id: string, shown?: string) => (
+const TWO = { flex: 0, width: size.touch }; // mutate-skip: layout; two digits, as Schedule's hour field
+const field = (
+  label: string,
+  drafts: Map<string, string>,
+  id: string,
+  shown?: string,
+  width: object = { flex: 1 }, // mutate-skip: layout
+) => (
   <TextInput
     key={`${label}:${id}`}
     accessibilityLabel={label}
     placeholder={label}
+    placeholderTextColor={ink('dim')}
     defaultValue={drafts.get(id) ?? shown}
     onChangeText={(v) => void drafts.set(id, v)}
-    style={{ ...inRow, flex: 1, borderBottomWidth: size.rule, borderColor: ink('action') }} // mutate-skip: layout; ruled as the Room sheet's Move field
+    style={{ ...inRow, ...width, borderBottomWidth: size.rule, borderColor: ink('action') }} // mutate-skip: layout; ruled as the Room sheet's Move field
   />
 );
+// ponytail: /story gives a beat's refs, not its shorts; `dir/key` is bound when the beat binds that key
+// under a kind `dir` starts with (npcs: npc), a dialogue's choice as its dialogue
+const bound = (short: string, refs: string[]) => {
+  const [dir, key] = short.split('/');
+  return refs.some((ref) => {
+    const n = L.fromRef(ref);
+    return n?.key === key && dir.startsWith(n.kind.replace(/^scripted_/, ''));
+  });
+};
 
 /** A node row's actions: each one a sheet or the room it plays in. */
 function nodeActs(r: L.Row) {
@@ -101,9 +121,15 @@ function nodeActs(r: L.Row) {
   ];
 }
 
-/** A beat's edits, each one gesture (one Undo): Retitle ('' removes the title), Remove, Bind a short ref. */
+/** A beat's edits, each one gesture (one Undo): Retitle ('' removes the title), Remove, and in the
+ * Bind… fold, Bind each short ref the beat does not bind yet. */
 function beatActs(r: L.Row, s: L.Story) {
   const part = partNo(r.parent!);
+  const refs = L.outlineOf(s)?.beats.find((b) => b.n === r.n)?.nodes ?? [];
+  const fold = () => {
+    binding = binding === r.id ? undefined : r.id;
+    known.redraw();
+  };
   return [
     <View key="edit" style={row}>
       {field(WORDS.title, titles, r.id, r.label)}
@@ -113,13 +139,17 @@ function beatActs(r: L.Row, s: L.Story) {
       )}
       {act(WORDS.remove, () => void run(() => ed.dropBeat(part, r.n!)))}
       {act(WORDS.knowledge, () => known.open(`knowledge:${r.n}`))}
+      {act(WORDS.binds, fold, binding === r.id)}
     </View>,
-    <View key="bind" style={row}>
-      {/* ponytail: every short ref; one already bound is refused (outlineedit), as /story gives refs, not shorts */}
-      {s.shorts.map((short) =>
-        act(WORDS.bind(short), () => void run(() => ed.bind(part, r.n!, short, s.shorts))),
-      )}
-    </View>,
+    binding === r.id ? (
+      <View key="bind" style={row}>
+        {s.shorts
+          .filter((short) => !bound(short, refs))
+          .map((short) =>
+            act(WORDS.bind(short), () => void run(() => ed.bind(part, r.n!, short, s.shorts))),
+          )}
+      </View>
+    ) : null,
   ];
 }
 
@@ -131,15 +161,18 @@ function storyRow(r: L.Row, s: L.Story) {
   ]
     .filter(Boolean)
     .join(' · ');
+  // open and selected are one state: a shut row opens and is picked, the picked row shuts and is
+  // dropped, another open row is only picked; a node is picked or dropped, never opened
   const press = () => {
-    if (r.open !== undefined) st = L.toggle(st, r.id);
+    const shuts = r.open !== undefined && (!r.open || picked === r.id);
+    if (shuts) st = L.toggle(st, r.id);
     picked = picked === r.id ? undefined : r.id;
     known.redraw();
   };
   const head =
     r.kind === 'seed' ? line(label, 'head') : act(label, press, r.open, 'head', picked === r.id);
   const adds = r.id.startsWith('part:') && [
-    field(WORDS.number, numbers, r.id),
+    field(WORDS.number, numbers, r.id, undefined, TWO),
     act(WORDS.add, () => void run(() => ed.addBeat(partNo(r.id), Number(numbers.get(r.id))))),
   ];
   const acts =
@@ -162,20 +195,23 @@ function storyRow(r: L.Row, s: L.Story) {
   );
 }
 
-/** The Story tab's body: the refusal, Facts and Pacing, why there are no beats, then the rows. */
+/** The Story tab's body: the refusal, Facts and Pacing, why there are no beats, then the rows; no
+ * story or no parts, the plain line (no Add beat: outlineedit adds a beat only to a part that exists). */
 export function storyRows() {
   const s = known.story;
-  if (!s) return [];
-  const why = L.note(s);
+  if (!s) return [refusal(), line(WORDS.none, 'none')];
+  const why = s.outline && 'refused' in s.outline ? s.outline.refused : undefined;
+  const bare = !L.outlineOf(s)?.parts.length;
   return [
     refusal(),
     <View key="sheets" style={row}>
       {act(WORDS.facts, () => known.open('facts:'))}
       {act(WORDS.pacing, () => known.open('pacing:'))}
     </View>,
-    why ? (
+    why || bare ? (
       <View key="why" style={column}>
-        {line(why, 'why')}
+        {why ? line(why, 'why') : null}
+        {bare ? line(WORDS.none, 'none') : null}
       </View>
     ) : null,
     ...L.rows(s, st).map((r) => storyRow(r, s)),

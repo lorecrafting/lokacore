@@ -114,6 +114,7 @@ const started: string[] = [];
 const build = await import('./build/Build.tsx');
 const { known } = await import('./build/room.tsx');
 const story_ = await import('./build/story.tsx');
+const roomedit = await import('./build/roomedit.tsx');
 build.place({
   place: () => ({ steps: [] }),
   here: () => 'hall',
@@ -180,7 +181,7 @@ test('Add beat 3 on the second part (part:1) writes beat 3 after beat 2 there', 
 
 test("Retitle with the field emptied removes beat 1's title; one Undo puts back that gesture", async () => {
   await press('greet · 1 refusal'); // a node picked
-  await press('1  Meet Nell'); // beat 1 shut and picked
+  await press('1  Meet Nell'); // beat 1 open, now picked
   posts = [];
   type('title', '');
   await press('Retitle');
@@ -192,7 +193,8 @@ test("Retitle with the field emptied removes beat 1's title; one Undo puts back 
 });
 
 test('Bind on beat 2 (part:1) adds the short ref pressed to its nodes', async () => {
-  await press('2 · unwritten'); // beat 2 shut and picked
+  await press('2 · unwritten'); // beat 2 open, now picked
+  await press('Bind…');
   posts = [];
   await press('Bind npcs/nell');
   assert.deepEqual(posts, [
@@ -203,7 +205,7 @@ test('Bind on beat 2 (part:1) adds the short ref pressed to its nodes', async ()
 });
 
 test("Trace of met_nell lists its setter then its reader; a listed row opens that node's sheet", async () => {
-  await press('1  Meet Nell'); // open again
+  await press('1  Meet Nell'); // picked
   await press('met_nell');
   await press('Trace');
   assert.equal(top(), `trace:${R('fact', 'met_nell')}`);
@@ -240,11 +242,42 @@ test('Pacing lists the thin part (under half the median) first, numbered from 1,
   ]);
 });
 
-test('a sheet restored before /story arrives says Nothing here instead of throwing', () => {
+const words = (n: any[]) => n.filter((e) => e.type === 'Text').map((e) => e.props.children);
+test('one press on the picked beat shuts it and drops the pick; on an open, unpicked beat it only picks', async () => {
+  await press('nell'); // a node under open beat 1 picked
+  await press('1  Meet Nell');
+  assert.deepEqual([all('met_nell').length, all('Retitle').length], [1, 1]);
+  await press('1  Meet Nell');
+  assert.deepEqual([all('met_nell').length, all('Retitle').length], [0, 0]);
+});
+
+test('Bind… folds the binds: shut, none; open, only the shorts beat 1 binds no node of', async () => {
+  await press('1  Meet Nell'); // shut: opens and is picked
+  const binds = () => sheet().filter((e) => e.type === 'Pressable' && /^Bind /.test(label(e)));
+  assert.deepEqual(binds().map(label), []);
+  await press('Bind…');
+  assert.deepEqual(binds().map(label), ['Bind dialogues/farewell']);
+});
+
+test('a story with no outline shows the plain no-story line and no Add beat', () => {
+  const s = known.story;
+  known.story = { ...story, outline: null } as never;
+  try {
+    assert.deepEqual([texts().includes('No story yet.'), all('Add beat').length], [true, 0]);
+  } finally {
+    known.story = s;
+  }
+});
+
+test('a sheet restored before /story arrives says Nothing here, the tab the refusal then the no-story line', async () => {
   const s = known.story;
   known.story = undefined;
   try {
-    assert.deepEqual(story_.storyRows(), []);
+    assert.deepEqual(words(nodes(story_.storyRows())), ['No story yet.']);
+    roomedit.tell('refused: x');
+    await settle();
+    known.story = undefined; // the refusal's run fetched /story again
+    assert.deepEqual(words(nodes(story_.storyRows())), ['refused: x', 'No story yet.']);
     for (const head of ['trace', 'consequences', 'knowledge', 'facts', 'pacing'] as const)
       assert.deepEqual(
         nodes(build.sheets[head].body('1'))
