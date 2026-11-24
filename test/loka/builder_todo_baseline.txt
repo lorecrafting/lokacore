@@ -559,9 +559,7 @@ parity:map-story-flow-segment
 parity:device-size
 parity:last-edit-timing
 parity:hold
-parity:map-header
 parity:unplaced-strip
-parity:map-select-go-source
 parity:map-drag-room
 parity:map-join
 parity:map-pan-zoom-keys

@@ -52,7 +52,7 @@
   {
     "id": "map-header",
     "panel": "tools/author-panel/src/areamap.tsx",
-    "book": "todo"
+    "book": "map.tsx"
   },
   {
     "id": "unplaced-strip",
@@ -62,7 +62,7 @@
   {
     "id": "map-select-go-source",
     "panel": "tools/author-panel/src/mapsvg.tsx",
-    "book": "todo"
+    "book": "map.tsx"
   },
   {
     "id": "map-drag-room",
