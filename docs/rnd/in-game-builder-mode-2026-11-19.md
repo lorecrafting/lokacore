@@ -515,8 +515,12 @@ Today, loopback is the trust boundary. A LAN phone breaks that. Proposed:
 - **Close the missing-Origin gap.** In `--lan` mode a non-GET with no Origin is refused
   unless it carries the token (`editing.ts:22`). A native app's fetch sends no Origin.
 - **The token dies** when the process restarts, and `--lan` turns off after 8 idle hours.
-- **No TLS** on the home LAN (decision 8): a LAN observer could read the token. A native dev build
-  later sends the token as a header from its dev config. EAS is never used (owner rule).
+- **TLS through a private CA** (decision 8, amended 2026-11-23, loka-xetp3): over plain http the phone's
+  browser gives no secure context, so the save cannot open. `--lan` serves the LAN preview over https
+  with a leaf for the Mac's private IPs, signed by a local CA (`~/.loka/lan-ca`, key mode 600) that is
+  name-constrained to 10/8, 172.16/12, 192.168/16 and `.local`. The phone installs the CA once from a
+  token-guarded plain-http download; loopback stays plain http. No change to the Mac's trust store.
+  A native dev build later sends the token as a header from its dev config. EAS is never used (owner rule).
 - **Unknown for 3.1: a second port.** If the phone's browser takes the dev bundle from Metro's own
   port instead of through the preview server, that port is an unauthenticated LAN exposure serving
   the whole dev bundle and cartridge. Slice 3.1 must show that only the token-guarded port listens
@@ -680,7 +684,7 @@ auto-hold while a field has focus (decision 7) covers the warm reload. Not measu
 | 6 | Generic forms: our own RN renderer, with validation on the server, rather than rjsf with a native theme | **Own renderer**, confirmed by 2.3's probe. No Ajv under Hermes, and no new dependency in `mobile/app` |
 | 7 | Auto-hold only while a text field has focus. Open sheets survive reloads through the builder-state restore | **Yes.** Holding for a whole sheet would freeze the live Book (a hold blocks text overlays). Holding for a field protects the one thing a reload would lose: a draft |
 | 11 | `.100.4`: may a JSON dialogue's choice label be reworded through `/edit`? (`HANDOFF.md:95-98`) | **Yes, ruled.** The owner already decided it on 2026-11-06 (ruling 11 reversed, `gui-editor-design-2026-11-04.md:234`: a choice's key is fixed, its words free); a JSON choice's label is its own field (`choices.<key>.label`), and `/edit` accepts it (`kernel/ts/play/prose.ts:14-25`). The panel card's refusal (`tools/author-panel/src/edit/fields.tsx:39`) is stale and goes; the builder's **words** icon rewords it |
-| 8 | LAN security: an opt-in flag, a pairing token in a cookie, idle expiry, no TLS on the home LAN | **Yes** for the home network. Revisit before any shared network |
+| 8 | LAN security: an opt-in flag, a pairing token in a cookie, idle expiry, TLS through a private CA the phone trusts (amended 2026-11-23: plain http gave no secure context, loka-xetp3) | **Yes** for the home network. Revisit before any shared network |
 | 9 | **Amended by the owner:** a Flow graph that works on a phone, not panel-only | **A focus walk**, built with talk and story (phase 5): one node centred, what leads to it above, what it unlocks below; tap a neighbour to re-centre (breadcrumb back); tap a fact for its set/read thread; every node opens its sheet or goes there; the panel's filters as toggles. On a wide screen it widens toward the canvas. Not the desktop canvas shrunk |
 | 10 | Phase order as in section 7 (phone after things, then map) | **Yes.** It follows ruling 4. The map is the largest slice group and benefits from real-phone gestures |
 

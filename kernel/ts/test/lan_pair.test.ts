@@ -16,7 +16,8 @@ const LAN = '192.168.1.5:19006';
 test('a LAN Host or an Origin-less POST needs the token header; the paired phone writes', async (t) => {
   // Breaks: the LAN Host is taken without the token (any LAN device reads the tree); a header longer
   // in bytes than in characters throws; a native-style POST with no Origin writes in --lan mode; the
-  // token waives the Origin check (another page on the phone writes); the paired page is refused.
+  // token waives the Origin check (another page on the phone writes); the paired page, served over
+  // https (lan.cjs), is refused, or its plain-http twin is taken.
   const dir = mkdtempSync(join(tmpdir(), 'loka-lan-'));
   mkdirSync(join(dir, 'rooms'));
   writeFileSync(join(dir, 'rooms/a.json'), ROOM);
@@ -51,7 +52,8 @@ test('a LAN Host or an Origin-less POST needs the token header; the paired phone
   const other = { host: LAN, origin: 'http://192.168.1.5:3000', 'x-loka-pair': TOKEN };
   assert.equal(await ask('/change', other, sent), 403);
   assert.equal(readFileSync(join(dir, 'rooms/a.json'), 'utf8'), ROOM);
-  const phone = { host: LAN, origin: `http://${LAN}`, 'x-loka-pair': TOKEN };
+  assert.equal(await ask('/change', { ...other, origin: `http://${LAN}` }, sent), 403);
+  const phone = { host: LAN, origin: `https://${LAN}`, 'x-loka-pair': TOKEN };
   assert.equal(await ask('/change', phone, sent), 200);
   assert.match(readFileSync(join(dir, 'rooms/a.json'), 'utf8'), /"name": "x"/);
   const now = readFileSync(join(dir, 'rooms/a.json'), 'utf8');

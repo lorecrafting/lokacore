@@ -1035,8 +1035,8 @@ build. The author tools below are reachable only in that bundle (a production ex
 - **Editor write path** ([`write.ts`](../../kernel/ts/play/write.ts), [GUI editor design §11](../rnd/gui-editor-design-2026-11-04.md)): the only way the editor changes the source tree.
   Every request whose `Host` is not `localhost` or `127.0.0.1` (any port) is answered 403, and so is
   any non-GET whose `Origin` is not one of those. Under `bin/author.sh --lan` (the token in `LOKA_PAIR`), a
-  request whose `x-loka-pair` header matches the token passes both checks (the preview adds it to a paired LAN
-  request, [in-game builder §6.8](../rnd/in-game-builder-mode-2026-11-19.md#68-the-security-model-for-the-phone-phase)),
+  request whose `x-loka-pair` header matches the token passes the Host check, and the Origin check with its
+  own `https://` Host as Origin (the preview adds it to a paired LAN request, over https, [in-game builder §6.8](../rnd/in-game-builder-mode-2026-11-19.md#68-the-security-model-for-the-phone-phase)),
   and a non-GET with no `Origin` needs it. `GET /source?file=` answers the file's bytes, its
   sha256 and its kind, key and area, and for a `.scene` its dialogue's words in the last compile's
   artifact (`text`, `dialogue.<key>.` and `dialogue.<key>_` keys); `GET /schema/<dir>` the source schema with its `$defs` inlined;

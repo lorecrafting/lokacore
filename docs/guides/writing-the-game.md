@@ -47,14 +47,34 @@ A dev save made before the Book kept its save across edits may still show "The s
 
 ### On a phone (`--lan`)
 
-`bin/author.sh cartridges/<name> --lan` also lets a phone on the same home network open the Book.
-It cannot save yet: over plain http the phone's browser refuses the save's storage, so the Book shows
-"The save could not be opened" (loka-xetp3); HTTPS comes next (loka-hcnlh.18.2). The terminal prints
-a link, `http://<this Mac's LAN address>:19006/?dev=1&pair=<token>`: open it once on the phone and it
-is paired (a cookie; the token leaves the address bar). Any other device gets 403 on every page and
-author request. The token is new each start, and after 8 hours with no request from the phone the LAN
-side closes every open connection and refuses every new request until you start again. There is no
-TLS: use it only on a network you trust. The watcher and Metro stay on this Mac alone.
+`bin/author.sh cartridges/<name> --lan` also lets a phone on the same home network open the Book, over
+https: the phone's browser opens the save only on a secure page. The first `--lan` run makes a small
+certificate authority (CA) in `~/.loka/lan-ca` on this Mac, outside the repo; its key never leaves that
+folder. It can vouch only for home-network addresses (10.x, 172.16-31.x, 192.168.x) and `.local` names,
+so it cannot impersonate a real website. Each later run reuses it, so the phone installs it once.
+
+The terminal prints the CA's SHA-256 fingerprint and, for each LAN address of this Mac, two links: `CA:
+http://<address>:19005/loka-ca.pem?ca=<token>` and `Pair: https://<address>:19006/?dev=1&pair=<token>`.
+
+Once per phone, install the CA. It travels over plain http, so compare the SHA-256 fingerprint the phone
+shows with the one the terminal printed; if they differ, another device on the network answered instead:
+do not install it (Android shows the fingerprint only after install, so remove it there).
+- **iPhone or iPad:** open the CA link in Safari and allow the download. Open Settings, tap "Profile
+  Downloaded", and check the fingerprint under More Details before you tap Install. Then go to Settings >
+  General > About > Certificate Trust Settings and turn on full trust for "Loka LAN CA".
+- **Android 11 or later:** open the CA link in Chrome to download it. Then go to Settings > Security >
+  Encryption & credentials > Install a certificate > CA certificate, and choose the downloaded file
+  (`loka-ca.pem`). Android shows no fingerprint before it installs, so check it straight after under
+  Encryption & credentials > Trusted credentials > User, and remove the CA there if it differs. The menu
+  names differ by maker (some put it under Security & privacy > More security settings); search Settings
+  for "CA certificate".
+
+Then open the Pair link on the phone: it is paired (a cookie; the token leaves the address bar). Any other
+device gets 403 on every page and author request. The token is new each start, and after 8 hours with no
+request from the phone the LAN side closes every open connection and refuses every new request until you
+start again. If this Mac's address changes, restart `--lan`. Remove the CA from the phone (the same
+Settings screens) when you stop using it. Use `--lan` only on a network you trust. The watcher and Metro
+stay on this Mac alone.
 
 ## The shell
 
