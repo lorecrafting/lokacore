@@ -5,7 +5,6 @@
 import { hidePulses, tickPulse } from './clock-tick';
 import { useEffect, useRef, useState } from 'react';
 import { Alert, AppState, PixelRatio, Platform, View } from 'react-native';
-import { releaseOnHide } from './release-save.ts';
 import { getRandomValues, randomUUID } from 'expo-crypto';
 import { useFonts } from 'expo-font';
 import {
@@ -232,12 +231,6 @@ function useWebSession() {
     g.loka_web_opening ??= openDatabaseAsync(NAME)
       .then((opened) => {
         db = opened;
-        if (devCartridge)
-          releaseOnHide(
-            window,
-            () => (db?.closeSync(), (db = undefined)),
-            () => location.reload(),
-          );
         return createSession(() => webDb((db ??= openDatabaseSync(NAME))));
       })
       .catch((error) =>
