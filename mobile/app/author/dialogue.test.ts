@@ -7,7 +7,9 @@ import { nodes } from '../book/__tests__/combat-book.test.ts'; // also registers
 
 const { story } = await import('./build/room.tsx');
 const { sheets } = await import('./build/sheet.tsx');
-const { refused } = await import('./build/roomedit.tsx');
+const { ed, refused } = await import('./build/roomedit.tsx');
+const store = { getItem: () => null, setItem() {} }; // Build's Undo chip keeps its state there
+Object.assign(globalThis, { localStorage: store });
 await import('./build/Build.tsx'); // the app's registration of the def: and npc: sheets
 
 const root = new URL('../../../', import.meta.url);
@@ -30,19 +32,23 @@ const FILES = {
   'c:npc/smith': 'npcs/smith.json',
   'c:dialogue/side_set': 'dialogues/side_set.json',
 };
+let held: Promise<void> | undefined;
 const posts: { route: string; sent: any }[] = [];
 const opens: string[] = [];
 async function api(path: string, sent?: any): Promise<[number, any]> {
   if (path === '/new') {
     posts.push({ route: 'new', sent });
-    files.set(`dialogues/${sent.name}.json`, {
-      choices: { a: { label: 'x.a', narration: 'x.n' } },
-    });
-    return [200, { id: 1, files: [`dialogues/${sent.name}.json`] }];
+    const made = `areas/a/dialogues/${sent.name}.json`; // not dialogues/: the sheet takes /new's path
+    files.set(made, { choices: { a: { label: 'x.a', narration: 'x.n' } } });
+    return [200, { id: 2, files: [made] }];
   }
-  if (sent) return (posts.push({ route: path.slice(1), sent }), [200, { id: 1 }]);
+  if (sent) {
+    posts.push({ route: path.slice(1), sent });
+    await held; // a save still out while the test presses again
+    return [200, { id: 1 }];
+  }
   if (path === '/story')
-    return [200, { map: [], graph: { nodes: NODES }, files: FILES, hidden: [], unlinkable: {} }];
+    return [200, { map: [], graph: { nodes: NODES }, files: FILES, hidden: ['h'], unlinkable: {} }];
   const dir = /^\/schema\/(\w+)$/.exec(path)?.[1];
   if (dir) {
     const stub = read(`schemas/source/${dir}.schema.json`);
@@ -168,8 +174,8 @@ test("then: 'side_set' is written, and Clear drops the field", async () => {
 });
 
 // Breaks: Add dialogue posting another kind or name, the npc or its role written as anything but
-// the person's key (the starter's roles name another npc, so it would not compile) or to another
-// file, or the new sheet not opened.
+// the person's key (the starter's roles name another npc, so it would not compile) or to a file
+// other than /new's, the two writes not one Undo step, or the new sheet not opened.
 test('Add dialogue posts /new dialogues dialogue_1, then sets its npc and role and opens it', async () => {
   posts.length = 0;
   sheets.npc.body('smith');
@@ -182,7 +188,7 @@ test('Add dialogue posts /new dialogues dialogue_1, then sets its npc and role a
     {
       route: 'change',
       sent: {
-        file: 'dialogues/dialogue_1.json',
+        file: 'areas/a/dialogues/dialogue_1.json',
         was: 'S',
         ops: [
           { path: ['npc'], value: 'smith' },
@@ -191,5 +197,46 @@ test('Add dialogue posts /new dialogues dialogue_1, then sets its npc and role a
       },
     },
   ]);
-  assert.deepEqual(opens.at(-1), 'def:dialogues/dialogue_1.json');
+  assert.deepEqual([ed.last(), opens.at(-1)], [[2, 1], 'def:areas/a/dialogues/dialogue_1.json']);
+});
+
+// Breaks: a refusal from a press while a save is out dropped (run() returns early when busy).
+test('a refusal pressed while a save is out is kept and shown', async () => {
+  const s = await sheet(ONE, 'a', 'a.then');
+  let release = () => {};
+  held = new Promise((r) => (release = r));
+  await s.press(`link side_set ${s.file}:["choices","a","then"]`);
+  await s.press(`remove choice ${s.file}:["choices","a"]`);
+  release();
+  held = undefined;
+  await settle();
+  assert.deepEqual([posts.length, refused()], [1, 'a dialogue keeps one choice at least']);
+});
+
+// Breaks: a root Add… or Add mechanic… offering a field whose write the gate refuses (a name on a
+// dialogue that teaches a hidden skill).
+test('the root menus offer no field the gate would refuse', async () => {
+  const doc = { choices: { a: { label: 'x.a', narration: 'x.n', steps: [{ skill: 'h' }] } } };
+  const s = await sheet(doc);
+  await s.press(`add ${s.file}:["+"]`);
+  await s.press(`mechanic ${s.file}:["+mechanic"]`);
+  const names = s
+    .shown()
+    .map((b) => b.key)
+    .filter((k) => /^(add|mechanic) name /.test(k ?? ''));
+  assert.deepEqual(names, []);
+});
+
+// Breaks: an Add… pick of a choice field written at another path or value, or an asked field
+// (`sitting`) written instead of revealed.
+test("a choice's Add… writes the picked field, and reveals an asked one unwritten", async () => {
+  const s = await sheet(ONE, 'a');
+  const menu = `${s.file}:["choices","a","+"]`;
+  await s.press(`add ${menu}`);
+  await s.press(`add sitting ${menu}`);
+  await s.press(`add once ${menu}`);
+  const op = { path: ['choices', 'a', 'once'], value: true };
+  const sitting = s.shown().some((b) => b.key === `${s.file}:["choices","a","sitting"]`);
+  assert.deepEqual(posts, [{ route: 'change', sent: { file: s.file, was: 'S', ops: [op] } }]);
+  assert.equal(sitting, true);
 });

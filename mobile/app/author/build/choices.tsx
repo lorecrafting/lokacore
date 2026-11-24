@@ -25,14 +25,14 @@ import {
 } from './formwrite.ts';
 import { reveals } from './reveal.ts';
 import { known } from './room.tsx';
-import { row, run } from './roomedit.tsx';
-import { act } from './sheet.tsx';
+import { row, tell } from './roomedit.tsx';
+import { act, greyed } from './sheet.tsx';
 
 export const WORDS = {
   add: 'Add choice',
   key: 'Choice key',
-  field: 'Add…',
   rename: 'Rename',
+  field: 'Add…',
   remove: 'Remove choice',
   clear: 'Clear',
   none: 'none',
@@ -41,8 +41,7 @@ export const WORDS = {
 const CHOICE = 'DialogueChoice';
 const LINKS = ['then', 'then_failed'];
 const ASKED = ['sitting', 'exchange']; // the compiler asks these at play: revealed, never written
-const LINE = { ...type.label, color: ink('dim') };
-const say = (why: string) => void run(async () => why); // a refusal shown, nothing sent
+const LINE = { ...type.small, color: ink('dim') };
 
 /** The `choices` block of dialogue `doc`: `caps` the cartridge's capabilities (unread: no Add…),
  * `read` a linked file's document as last read. */
@@ -55,7 +54,7 @@ export const choices =
       const add = () => {
         const k = (drafts.get(typed) ?? '').trim();
         const why = k && refuseKey(k, all);
-        if (why) return say(why);
+        if (why) return tell(why);
         drafts.delete(typed);
         if (k) set(at, [...path, k], minimal(at.defs[CHOICE]!, at.defs));
       };
@@ -69,6 +68,7 @@ export const choices =
           <TextInput
             accessibilityLabel={WORDS.key}
             placeholder={WORDS.key}
+            placeholderTextColor={ink('dim')}
             style={INPUT}
             defaultValue={drafts.get(typed)}
             onChangeText={(t) => drafts.set(typed, t)}
@@ -122,11 +122,11 @@ function edits(at: At, path: (string | number)[], doc: Obj, k: string, c: Obj) {
   const key = id(at, path);
   const remove = () => {
     const why = refuseRemove(doc, k);
-    return why ? say(why) : drop(at, path, c);
+    return why ? tell(why) : drop(at, path, c);
   };
   return (
     <View key={`edit ${key}`} style={row}>
-      {act(WORDS.rename, () => say(RENAME), undefined, `rename ${key}`)}
+      {greyed(WORDS.rename, RENAME, `rename ${key}`)}
       {act(WORDS.remove, remove, undefined, `remove choice ${key}`)}
     </View>
   );
@@ -147,7 +147,7 @@ function link(
   const keys = named('dialogue', known.nodes);
   const pick = (t: string) => {
     const why = refuseLink(f, t, c, doc, keys, known.unlinkable);
-    return why ? say(why) : set(at, path, t);
+    return why ? tell(why) : set(at, path, t);
   };
   return (
     <View key={key} style={{ paddingLeft: space.md }}>

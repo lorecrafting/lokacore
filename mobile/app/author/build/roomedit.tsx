@@ -71,6 +71,10 @@ export const onSaved = (chip: (ids: number[]) => void) => void (saved = chip);
 export const running = () => busy;
 export const refused = () => said;
 
+/** Shows refusal `why`, nothing sent; one arriving while a gesture writes is kept, not dropped. */
+export const tell = (why: string) =>
+  busy ? void ((said = why), after()) : void run(async () => why);
+
 /** Runs one gesture; a refusal (a thrown or returned reason) shows in the sheet. */
 export async function run(go: () => Promise<unknown>) {
   if (asking) {

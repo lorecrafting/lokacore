@@ -176,6 +176,20 @@ export async function create(
   return name;
 }
 
+/** A new dialogue (/new's starter, at the root) spoken by NPC `npc`, one gesture; resolves its file. */
+async function talk(s: Run, npc: string, nodes: { kind: string; ref: string }[]) {
+  const name = freeKey('dialogue', nodeOf('dialogues'), nodes, []);
+  const told = await s.call('new', { kind: 'dialogues', name });
+  const file = told.files?.[0] ?? no(`${name} already exists`); // the starter reran on its file
+  // The speaker must be one of the roles (the compiler's unknown_kind), so the starter's roles go.
+  const role = { role: 'npc', npc };
+  await s.change(file, () => [
+    { path: ['npc'], value: npc },
+    { path: ['roles'], value: { [npc]: role } },
+  ]);
+  return file;
+}
+
 /** Move to area: the file moves to `areas/<area>/rooms/`, or to the root for null. */
 const move = async (s: Run, r: MapRoom, area: string | null) =>
   s.call('move', { file: fileOf(r), was: (await s.read(fileOf(r))).was, area });
@@ -191,7 +205,7 @@ export async function undo(io: Io, ids: number[]) {
 
 type Done = { ids: number[]; files: Set<string> };
 /** Runs one gesture's calls in order; a refusal puts back the calls before it, then throws. */
-async function gesture(io: Io, done: Done[], steps: (s: Run) => Promise<unknown>) {
+async function gesture<T>(io: Io, done: Done[], steps: (s: Run) => Promise<T>) {
   const ids: number[] = [];
   const files = new Set<string>(); // read or written: the rooms whose Undo it is (loka-wfrgk.77)
   const call: Run['call'] = async (route, sent) => {
@@ -212,20 +226,23 @@ async function gesture(io: Io, done: Done[], steps: (s: Run) => Promise<unknown>
     const ops = edit(got.doc);
     if (ops.length) await call('change', { file, was: was ?? got.was, ops }); // a stale `was` is refused
   };
+  let out: T;
   try {
-    await steps({ call, read, change });
+    out = await steps({ call, read, change });
   } catch (e) {
     // ponytail: a put-back refused here (a Hold, an outside edit) is reported with the refusal, not retried
     await undo(io, ids).catch((u: Error) => no(`${(e as Error).message}; ${u.message}`));
     throw e;
   }
   if (ids.length) done.push({ ids, files });
+  return out;
 }
 
 /** The map's gestures over the panel's routes, and an undo of the last whole gesture. */
+// size: allow 45, a flat table: one line per gesture the builder's sheets run
 export function editor(io: Io) {
   const done: Done[] = []; // each gesture's journal ids and files, oldest first
-  const run = (steps: (s: Run) => Promise<unknown>) => gesture(io, done, steps);
+  const run = <T>(steps: (s: Run) => Promise<T>) => gesture(io, done, steps);
   return {
     /** How many gestures Undo can put back: a run that raised it wrote (one on its own cell did not). */
     undoable: () => done.length,
@@ -251,6 +268,8 @@ export function editor(io: Io) {
     put: (file: string, dir: 'npcs' | 'items', kind: string, key: string) =>
       run((s) => s.change(file, () => [spot(dir, kind, key)])),
     move: (r: MapRoom, area: string | null) => run((s) => move(s, r, area)),
+    /** Add dialogue (the Person sheet): a new dialogue `npc` speaks; resolves its file. */
+    talk: (npc: string, nodes: { kind: string; ref: string }[]) => run((s) => talk(s, npc, nodes)),
     /** Each `[file, was, ops]` written in order, as one gesture (a refusal undoes the earlier ones). */
     change: (...writes: [string, string, Op[]][]) =>
       run(async (s) => {

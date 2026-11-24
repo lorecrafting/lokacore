@@ -3,7 +3,7 @@
 // world_card.ts `choices` and `refusePick`), written by mapedit.ts `put`; no words are written here.
 import { Text, TextInput, View } from 'react-native';
 import { placement } from '../../../../kernel/ts/play/card.ts';
-import { create, nodeOf } from '../../../../kernel/ts/play/mapedit.ts';
+import { nodeOf } from '../../../../kernel/ts/play/mapedit.ts';
 import { choices, refusePick } from '../../../../kernel/ts/play/world_card.ts';
 import { size, space, type } from '../../book/tokens.ts';
 import { ink } from './build.ts';
@@ -16,7 +16,7 @@ const WORDS = {
   holder: { room: 'Room', npc: 'Person', item: 'Item' } as Record<string, string>,
   move: 'Move',
   spawned: (by: string) => `Spawned by ${by}`,
-  dialogue: '+ Add dialogue',
+  dialogue: '＋ Add dialogue',
 };
 type Dir = 'npcs' | 'items';
 type Doc = Record<string, unknown>;
@@ -71,19 +71,8 @@ function body(dir: Dir, key: string) {
   ];
 }
 
-/** A new dialogue (/new's starter, at the root) spoken by person `key`, then its sheet opens. */
-const talk = (key: string) =>
-  run(async () => {
-    const k = await create(io, 'dialogues', known.nodes, []);
-    const file = `dialogues/${k}.json`;
-    // The speaker must be one of the roles (the compiler's unknown_kind), so the starter's roles go.
-    const ops = [
-      { path: ['npc'], value: key },
-      { path: ['roles'], value: { [key]: { role: 'npc', npc: key } } },
-    ];
-    await ed.change([file, (await io.source(file)).sha256, ops]);
-    known.open(`def:${file}`);
-  });
+/** A new dialogue spoken by person `key`, one Undo step (mapedit.ts `talk`), then its sheet opens. */
+const talk = (key: string) => run(async () => known.open(`def:${await ed.talk(key, known.nodes)}`));
 
 /** An item's holder kinds, then the holder field and Move (the panel's Placement, Entity.tsx). */
 function holderForm(dir: Dir, key: string, file: string, now: { kind: string; key?: unknown }) {
