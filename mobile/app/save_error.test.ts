@@ -18,7 +18,8 @@ const draw = (failed: Failed, tried: string[]) => {
 };
 const labels = (shown: any[]) => shown.map((n) => n.props.accessibilityLabel);
 
-// Breaks (loka-x6t.25): the other-tab lock screen is a dead end with no Try again, or Try again is
+// Breaks (loka-x6t.25, loka-hcnlh.19.1): the other-tab lock screen is a dead end with no Try again (in
+// Chrome or Safari), or Try again is
 // offered for a cause a retry cannot clear (a damaged save).
 test('Try again retries the open on the other-tab lock and nowhere else', () => {
   const tried: string[] = [];
@@ -28,6 +29,9 @@ test('Try again retries the open on the other-tab lock and nowhere else', () => 
   assert.deepEqual(labels(locked), ['Try again']);
   locked[0].props.onPress();
   assert.deepEqual(tried, ['try again']);
+  // Safari's word for the same lock (WebKit's InvalidStateError on a second sync access handle)
+  const safari = draw({ message: 'The object is in an invalid state.', startOver: false }, tried);
+  assert.deepEqual(labels(safari), ['Try again']);
   const corrupt = {
     kind: 'save_corrupt',
     message: 'row 4 failed its hash',

@@ -39,14 +39,14 @@ export const sayers = (g: Game): { text: Say; label: Say } => ({
 const COUNT = 'one two three four five six seven eight nine ten eleven twelve'.split(' ');
 export const chapterLabel = (index: number) => `Chapter ${COUNT[index] ?? index + 1}`;
 
-// The browser's save-file lock: another tab holds the save (Try again once it closes).
-export const locked = (f: Failed) => /Access Handles? cannot be created/.test(f.message);
+export const locked = (f: Failed) =>
+  /Access Handles? cannot be created|^The object is in an invalid state\.?$/.test(f.message);
 
 /**
  * The line under the save-error headline, never a raw code or exception text: a Start over that is
  * not confirmed gets its words, an empty message or one that is only the kind none (the headline
  * says it), the browser's save-file lock a sentence, any other message one plain sentence.
- * ponytail: the lock is matched on Chrome's OPFS message text.
+ * ponytail: the lock is matched on its message text (Chrome's, Safari's bare InvalidStateError).
  */
 export const detail = (f: Failed) =>
   f.code === 'start_over_pending'
