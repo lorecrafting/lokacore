@@ -5,6 +5,7 @@
 import assert from 'node:assert/strict';
 import { readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { isDeepStrictEqual } from 'node:util';
 import { test, type TestContext } from 'node:test';
 import type { Page } from 'playwright';
 import { boot, dir, open, QUEST } from './harness.ts';
@@ -286,20 +287,22 @@ test('the New list gives dialogues the first sentence of its schema description'
 // level, or does not select the new room.
 // Last: it writes rooms into the shared showcase copy.
 test('a + on a free side of the selected room makes and links a room there and selects it', async () => {
-  const room = (k: string) =>
-    JSON.parse(readFileSync(join(dir, `showcase/areas/homestead/rooms/${k}.json`), 'utf8')).exits;
-  const row = async (k: string) => {
+  const read = (f: string) => JSON.parse(readFileSync(join(dir, 'showcase', f), 'utf8'));
+  // the server writes layout.json and each room file in turn: poll until want lands (loka-61se9)
+  const eventually = async (get: () => unknown, want: unknown) => {
+    let got;
     for (let t = 0; t < 100; t++) {
-      let r;
       try {
-        r = JSON.parse(readFileSync(join(dir, 'showcase/layout.json'), 'utf8')).find(
-          (o: { room: string }) => o.room === k,
-        );
-      } catch {} // read while the server rewrites it (loka-61se9): poll again
-      if (r) return r;
+        got = get();
+      } catch {} // read mid-write
+      if (isDeepStrictEqual(got, want)) break;
       await new Promise((r) => setTimeout(r, 100));
     }
+    assert.deepEqual(got, want);
   };
+  const room = (k: string) => read(`areas/homestead/rooms/${k}.json`).exits;
+  const row = (k: string) =>
+    read('layout.json').find((o: { room: string }) => o.room === k);
   const handles = (page: Page, key: string) =>
     page.getByLabel('Map slot').getByRole('button', { name: new RegExp(`^${key}: new room `) });
   let page = await open({ selection: { kind: 'room', key: 'farm_kitchen' } });
@@ -317,15 +320,15 @@ test('a + on a free side of the selected room makes and links a room there and s
     ],
   ); // north: farm_yard
   await page.getByRole('button', { name: 'farm_kitchen: new room east', exact: true }).click();
-  assert.deepEqual(await row('room_1'), { room: 'room_1', x: -3, y: 1, z: 0 });
-  assert.deepEqual(room('farm_kitchen').east, { to: 'room_1' });
-  assert.deepEqual(room('room_1'), { west: { to: 'farm_kitchen' } });
+  await eventually(() => row('room_1'), { room: 'room_1', x: -3, y: 1, z: 0 });
+  await eventually(() => room('farm_kitchen').east, { to: 'room_1' });
+  await eventually(() => room('room_1'), { west: { to: 'farm_kitchen' } });
   // selected: its handles show; Enter (and below, Space) on one grows, as a button's keys do
   await page
     .getByRole('button', { name: 'room_1: new room up', exact: true })
     .focus({ timeout: boot });
   await page.keyboard.press('Enter');
-  assert.deepEqual(await row('room_2'), { room: 'room_2', x: -3, y: 1, z: 1 });
+  await eventually(() => row('room_2'), { room: 'room_2', x: -3, y: 1, z: 1 });
   await page
     .getByRole('button', { name: 'room_2: new room north', exact: true })
     .waitFor({ timeout: boot });
@@ -344,7 +347,7 @@ test('a + on a free side of the selected room makes and links a room there and s
   })()`);
   await page.getByRole('button', { name: 'room_2: new room north', exact: true }).focus();
   await page.keyboard.press('Shift+Enter'); // grows; the map's Shift-Enter (play there) never sees it
-  assert.deepEqual(await row('room_3'), { room: 'room_3', x: -3, y: 0, z: 1 });
+  await eventually(() => row('room_3'), { room: 'room_3', x: -3, y: 0, z: 1 });
   await page
     .getByRole('button', { name: 'room_3: new room north', exact: true })
     .waitFor({ timeout: boot }); // compiled: the next page's free key is room_4
@@ -364,6 +367,6 @@ test('a + on a free side of the selected room makes and links a room there and s
     .getByRole('button', { name: 'farm_kitchen: new room down', exact: true })
     .focus({ timeout: boot });
   await page.keyboard.press('Space');
-  assert.deepEqual(await row('room_4'), { room: 'room_4', x: -4, y: 1, z: -1 });
+  await eventually(() => row('room_4'), { room: 'room_4', x: -4, y: 1, z: -1 });
   await page.close();
 });
