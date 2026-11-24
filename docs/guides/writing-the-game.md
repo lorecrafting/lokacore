@@ -56,9 +56,9 @@ so it cannot impersonate a real website. Each later run reuses it, so the phone 
 The terminal prints the CA's SHA-256 fingerprint and, for each LAN address of this Mac, two links: `CA:
 http://<address>:19005/loka-ca.pem?ca=<token>` and `Pair: https://<address>:19006/?dev=1&pair=<token>`.
 
-Once per phone, install the CA. It travels over plain http, so before you trust it, compare the SHA-256
-fingerprint the phone shows with the one the terminal printed; if they differ, do not install it (another
-device on the network answered instead).
+Once per phone, install the CA. It travels over plain http, so compare the SHA-256 fingerprint the phone
+shows with the one the terminal printed; if they differ, another device on the network answered instead:
+do not install it (Android shows the fingerprint only after install, so remove it there).
 - **iPhone or iPad:** open the CA link in Safari and allow the download. Open Settings, tap "Profile
   Downloaded", and check the fingerprint under More Details before you tap Install. Then go to Settings >
   General > About > Certificate Trust Settings and turn on full trust for "Loka LAN CA".
