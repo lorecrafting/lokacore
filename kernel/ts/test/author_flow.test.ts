@@ -1,4 +1,4 @@
-// The Flow graph (tools/author-panel/src/flow.ts, flowread.ts): expected values worked by hand from
+// The Flow graph (kernel/ts/play/flow.ts, flowread.ts): expected values worked by hand from
 // the S3 table (docs/design/editor-map-and-story-rulings.md) on planted models, and the showcase.
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
@@ -6,16 +6,8 @@ import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { test } from 'node:test';
-import {
-  burst,
-  cmp,
-  F,
-  inColumn,
-  layers,
-  layout,
-  type Flow,
-} from '../../../tools/author-panel/src/flow.ts';
-import * as read from '../../../tools/author-panel/src/flowread.ts';
+import { burst, cmp, F, inColumn, layers, layout, type Flow } from '../play/flow.ts';
+import * as read from '../play/flowread.ts';
 import { LAYOUT } from '../../../tools/author-panel/src/shell.ts';
 import type { Story } from '../play/storylist.ts';
 import { story as build } from '../play/story.ts';

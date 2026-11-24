@@ -1,8 +1,17 @@
 // The Flow graph's layout (docs/design/editor-map-and-story-rulings.md S3): the story lanes on a
 // grid of beats (or dependency layers) and the drawn edges. No React and no layout library;
 // tested from kernel/ts/test/author_flow.test.ts. Ink, keys and the palette are in flowread.ts.
-import { fromRef, type Layout } from './shell.ts';
-import { isOpen, LIST, outlineOf, type Edge, type Story } from '../../../kernel/ts/play/storylist.ts';
+// size: allow 380, the kernel's prettier reflow and Layout (moved with this file, builder 5.5a)
+import {
+  fromRef,
+  isOpen,
+  LIST,
+  outlineOf,
+  type Edge,
+  type ListState,
+  type Selection,
+  type Story,
+} from './storylist.ts';
 
 /** Drawing constants in px at zoom 1, exempt from the space tokens as the map's `M` is. */
 export const F = {
@@ -42,6 +51,21 @@ export const solid = (e: Edge) =>
   !(e.op && !e.op.includes('.') && !CHAIN.has(e.op)) &&
   (fromRef(e.to)?.kind !== 'fact' || !!e.set);
 
+/** The panel's remembered layout (moved from its shell.ts, which re-exports it). */
+export type Layout = {
+  left: number;
+  right: number;
+  slot: number; // the map slot's height
+  leftOpen: boolean;
+  rightOpen: boolean;
+  tablet: boolean;
+  tab: 'hierarchy' | 'project';
+  map: 'map' | 'story' | 'flow';
+  selection?: Selection;
+  story?: ListState; // the Story list's folds, focus and trace (Flow shares the folds)
+  flow?: { follow?: string; filters?: string[] }; // the Flow graph's followed fact and filters
+};
+
 export type FlowState = { fold: string[]; filters?: string[]; open?: string[]; reveal?: string };
 /** The kept Flow state (Layout.flow) with the list's folds (Layout.story): one fold set for both. */
 export const stateOf = (l: Layout, more: { open?: string[]; reveal?: string } = {}): FlowState => ({
@@ -65,12 +89,40 @@ const problem = (s: Story, off: Set<string>, ref: string) => {
 };
 
 type At = { x: number; y: number; col: number };
-export type Chip = At & { id: string; key: string; kind: string; lane: string; shape: string; name: string };
-export type Stub = At & { id: string; kind: 'more' | 'count'; lane: string; icon: string; n: number };
-export type Column = { id: string; part: string; x: number; n?: number; title?: string; status?: string };
+export type Chip = At & {
+  id: string;
+  key: string;
+  kind: string;
+  lane: string;
+  shape: string;
+  name: string;
+};
+export type Stub = At & {
+  id: string;
+  kind: 'more' | 'count';
+  lane: string;
+  icon: string;
+  n: number;
+};
+export type Column = {
+  id: string;
+  part: string;
+  x: number;
+  n?: number;
+  title?: string;
+  status?: string;
+};
 export type Part = { id: string; label: string; open: boolean; x: number; w: number };
 export type Lane = { lane: string; y: number; h: number };
-export type Line = { id: string; from: string; to: string; solid: boolean; loop: boolean; d: string; edges: Edge[] };
+export type Line = {
+  id: string;
+  from: string;
+  to: string;
+  solid: boolean;
+  loop: boolean;
+  d: string;
+  edges: Edge[];
+};
 export type Flow = ReturnType<typeof layout>;
 type Cell = { id: string; col: number; lane: string; refs: string[]; rows: number; keep: number };
 
@@ -79,8 +131,7 @@ export function layers(refs: string[], edges: Edge[]) {
   const inside = new Set(refs);
   const out = new Map<string, string[]>();
   for (const e of edges)
-    if (inside.has(e.to))
-      out.set(e.from, [...(out.get(e.from) ?? []), e.to].sort(cmp));
+    if (inside.has(e.to)) out.set(e.from, [...(out.get(e.from) ?? []), e.to].sort(cmp));
   const seen = new Set<string>();
   const post: string[] = [];
   const visit = (r: string) => {
@@ -111,6 +162,7 @@ function shownOf(s: Story, st: FlowState, all: string[]) {
 }
 
 // Columns: an open part's beats, a collapsed part as one; Unplaced's layers when open.
+// size: allow 50, the kernel's prettier reflow (builder 5.5a move)
 function columnsOf(s: Story, st: FlowState, shown: string[], edges: Edge[]) {
   const o = outlineOf(s);
   const beatOf = new Map<string, number>();
@@ -118,7 +170,13 @@ function columnsOf(s: Story, st: FlowState, shown: string[], edges: Edge[]) {
   const columns: Column[] = [];
   const parts: Part[] = [];
   const colOf = new Map<string, number>();
-  const part = (id: string, label: string, members: string[], cols: Omit<Column, 'x' | 'part'>[], within: (r: string) => number) => {
+  const part = (
+    id: string,
+    label: string,
+    members: string[],
+    cols: Omit<Column, 'x' | 'part'>[],
+    within: (r: string) => number,
+  ) => {
     const open = isOpen({ ...LIST, fold: st.fold }, id, !!o);
     const first = columns.length;
     const list = open ? cols : [{ id }];
@@ -128,16 +186,29 @@ function columnsOf(s: Story, st: FlowState, shown: string[], edges: Edge[]) {
   };
   (o?.parts ?? []).forEach((title, i) => {
     const beats = o!.beats.filter((b) => b.part === i);
-    const cols = beats.map((b) => ({ id: `beat:${b.n}`, n: b.n, title: b.title, status: b.status }));
+    const cols = beats.map((b) => ({
+      id: `beat:${b.n}`,
+      n: b.n,
+      title: b.title,
+      status: b.status,
+    }));
     const index = (r: string) => beats.findIndex((b) => b.n === beatOf.get(r));
     const label = [`Part ${i + 1}`, title].filter(Boolean).join('  ');
-    if (beats.length) part(`part:${i}`, label, shown.filter((r) => index(r) >= 0), cols, index);
+    if (beats.length)
+      part(
+        `part:${i}`,
+        label,
+        shown.filter((r) => index(r) >= 0),
+        cols,
+        index,
+      );
   });
   const loose = shown.filter((r) => !beatOf.has(r));
   const layer = layers(loose, edges.filter(solid));
   const depth = Math.max(0, ...layer.values());
   const cols = Array.from({ length: depth + 1 }, (_, i) => ({ id: `layer:${i}` }));
-  if (loose.length) part('unplaced', `Unplaced (${loose.length})`, loose, cols, (r) => layer.get(r)!);
+  if (loose.length)
+    part('unplaced', `Unplaced (${loose.length})`, loose, cols, (r) => layer.get(r)!);
   return { columns, parts, colOf, beatOf };
 }
 
@@ -177,13 +248,25 @@ function lanesOf(cells: Cell[]) {
 }
 
 // Chips and stubs; `at` maps each shown ref to the id it draws as.
-function drawn(s: Story, cells: Cell[], columns: Column[], lanes: Lane[], beatOf: Map<string, number>, edges: Edge[]) {
+// size: allow 56, the kernel's prettier reflow (builder 5.5a move)
+function drawn(
+  s: Story,
+  cells: Cell[],
+  columns: Column[],
+  lanes: Lane[],
+  beatOf: Map<string, number>,
+  edges: Edge[],
+) {
   const off = new Set(Object.values(s.report.unreachable).flat());
   const chips: Chip[] = [];
   const stubs: Stub[] = [];
   const at = new Map<string, string>();
   for (const c of cells) {
-    const place = (i: number) => ({ x: columns[c.col].x + (F.col - F.w) / 2, y: lanes.find((l) => l.lane === c.lane)!.y + i * F.pitch, col: c.col });
+    const place = (i: number) => ({
+      x: columns[c.col].x + (F.col - F.w) / 2,
+      y: lanes.find((l) => l.lane === c.lane)!.y + i * F.pitch,
+      col: c.col,
+    });
     c.refs.slice(0, c.keep).forEach((r, i) => {
       const sel = fromRef(r)!;
       const name = [
@@ -195,13 +278,28 @@ function drawn(s: Story, cells: Cell[], columns: Column[], lanes: Lane[], beatOf
         `${edges.filter((e) => e.from === r).length} outbound`,
         `${edges.filter((e) => e.to === r).length} inbound`,
       ];
-      chips.push({ id: r, key: sel.key, kind: sel.kind, lane: c.lane, shape: laneOf(r)!.shape, name: name.filter(Boolean).join(', '), ...place(i) });
+      chips.push({
+        id: r,
+        key: sel.key,
+        kind: sel.kind,
+        lane: c.lane,
+        shape: laneOf(r)!.shape,
+        name: name.filter(Boolean).join(', '),
+        ...place(i),
+      });
       at.set(r, r);
     });
     if (c.keep === c.refs.length) continue;
     const id = c.keep ? `more:${c.id}` : `count:${columns[c.col].part}|${c.lane}`;
     const icon = c.keep ? fromRef(c.refs[c.keep])!.kind : laneOf(c.refs[0])!.kinds[0];
-    stubs.push({ id, kind: c.keep ? 'more' : 'count', lane: c.lane, icon, n: c.refs.length - c.keep, ...place(c.keep) });
+    stubs.push({
+      id,
+      kind: c.keep ? 'more' : 'count',
+      lane: c.lane,
+      icon,
+      n: c.refs.length - c.keep,
+      ...place(c.keep),
+    });
     for (const r of c.refs.slice(c.keep)) at.set(r, id);
   }
   return { chips, stubs, at };
@@ -211,8 +309,10 @@ function drawn(s: Story, cells: Cell[], columns: Column[], lanes: Lane[], beatOf
 // loop's back arc above the top lane.
 function path(p: At, q: At) {
   const [x1, y1, x2, y2] = [p.x + F.w, p.y + F.h / 2, q.x, q.y + F.h / 2];
-  if (p.col > q.col) return `M${x1},${y1} C${x1 + F.pad},${F.top / 4} ${x2 - F.pad},${F.top / 4} ${x2},${y2}`;
-  if (p.col === q.col) return `M${x1},${y1} C${x1 + F.pad},${y1} ${x1 + F.pad},${y2} ${q.x + F.w},${y2}`;
+  if (p.col > q.col)
+    return `M${x1},${y1} C${x1 + F.pad},${F.top / 4} ${x2 - F.pad},${F.top / 4} ${x2},${y2}`;
+  if (p.col === q.col)
+    return `M${x1},${y1} C${x1 + F.pad},${y1} ${x1 + F.pad},${y2} ${q.x + F.w},${y2}`;
   const mid = (x1 + x2) / 2;
   return `M${x1},${y1} C${mid},${y1} ${mid},${y2} ${x2},${y2}`;
 }
@@ -228,7 +328,15 @@ function linesOf(edges: Edge[], at: Map<string, string>, pos: Map<string, At>) {
     if (line) line.edges.push(e);
     else {
       const [p, q] = [pos.get(a)!, pos.get(b)!];
-      lines.set(id, { id, from: a, to: b, solid: solid(e), loop: p.col > q.col, d: path(p, q), edges: [e] });
+      lines.set(id, {
+        id,
+        from: a,
+        to: b,
+        solid: solid(e),
+        loop: p.col > q.col,
+        d: path(p, q),
+        edges: [e],
+      });
     }
   }
   return [...lines.values()];

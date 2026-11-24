@@ -1,6 +1,6 @@
 // The Flow graph's planted models (kernel/ts/test/author_flow*.test.ts): q and d1 in beat 1, d2 and d3
 // in beat 2, r1, thera_greets and the fact f unplaced; V adds the edges the line and card cases need.
-import type { Flow } from '../../../tools/author-panel/src/flow.ts';
+import type { Flow } from '../play/flow.ts';
 import type { Edge, Story } from '../play/storylist.ts';
 
 export const ref = (kind: string, key: string) => `demo@1:${kind}/${key}`;

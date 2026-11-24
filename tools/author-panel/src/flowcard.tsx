@@ -3,8 +3,8 @@
 import { CircleAlert } from 'lucide-react';
 import { Button } from './components/ui/button.tsx';
 import { PopoverContent } from './components/ui/popover.tsx';
-import { F, key, type Chip, type Flow, type Line, type Stub } from './flow.ts';
-import { card } from './flowread.ts';
+import { F, key, type Chip, type Flow, type Line, type Stub } from '../../../kernel/ts/play/flow.ts';
+import { card } from '../../../kernel/ts/play/flowread.ts';
 import { M } from '../../../kernel/ts/play/map.ts';
 import { ICON } from './storylist.tsx';
 import { ICONED } from './storylower.tsx';
