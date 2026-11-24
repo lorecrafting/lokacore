@@ -1,7 +1,7 @@
 // Consequences (docs/design/story-tooling.md §2 C1): what taking a choice writes, two hops out. The walk
 // is kernel/ts/play/consequences.ts; this maps it to panel rows. No React here: tested from
 // kernel/ts/test/author_story.test.ts.
-import { consequences } from '../../../kernel/ts/play/consequences.ts';
+import { consequences } from './consequences.ts';
 import type { Story } from './storylist.ts';
 
 export type ConsequenceRow = {
@@ -24,7 +24,8 @@ export const choicesOf = (s: Story, ref: string): string[] => [
   ),
 ];
 
-const shown = (k: string, what?: unknown) => (what === undefined ? k : `${k} = ${JSON.stringify(what)}`);
+const shown = (k: string, what?: unknown) =>
+  what === undefined ? k : `${k} = ${JSON.stringify(what)}`;
 
 /** What `<node>#<choice>` (or a bare node) writes, then who reads it with each reader's gates. */
 function walk(s: Story, at: string): ConsequenceRow[] {

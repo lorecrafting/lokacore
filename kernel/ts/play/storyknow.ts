@@ -3,7 +3,8 @@
 import { outlineOf, type Edge, type Story } from './storylist.ts';
 
 export type Known = { knows: string[]; may: string[]; not: string[] };
-const choiceOf = (e: Edge) => /^\.choices(?:\.([^.[]+)|\["([^"]+)"\])/.exec(e.path)?.slice(1).join('');
+const choiceOf = (e: Edge) =>
+  /^\.choices(?:\.([^.[]+)|\["([^"]+)"\])/.exec(e.path)?.slice(1).join('');
 /** Knowledge at beat `n` (design 5e): the facts set and topics granted by nodes bound to beats up to
  * it in outline order; `may` when one choice among several sets it or a false assign up to n also clears it,
  * `not` when only a later beat sets it. A fact only ever set false up to n is not listed as known. */
@@ -17,16 +18,21 @@ export function knowledge(s: Story, n: number): Known {
   const bound = s.graph.edges.filter((e) => first.has(e.from));
   const sets = bound.filter((e) => (e.set && !e.cleared) || e.op === 'topic.grant');
   // set false at or before n as well as true: it may hold either way, so `may` (re-review S1)
-  const cleared = new Set(bound.filter((e) => e.cleared && first.get(e.from)! <= upto).map((e) => e.to));
+  const cleared = new Set(
+    bound.filter((e) => e.cleared && first.get(e.from)! <= upto).map((e) => e.to),
+  );
   // every choice of the dialogue sets it, or no choice scopes it (an on_end, a reaction, a site)
   const sure = (e: Edge) =>
     !choiceOf(e) ||
-    new Set(sets.filter((x) => x.from === e.from && x.to === e.to).map(choiceOf)).size >= (s.choices[e.from] ?? 0);
+    new Set(sets.filter((x) => x.from === e.from && x.to === e.to).map(choiceOf)).size >=
+      (s.choices[e.from] ?? 0);
   const knows = new Set<string>();
   const may = new Set<string>();
   const later = new Set<string>();
-  for (const e of sets) (first.get(e.from)! > upto ? later : sure(e) && !cleared.has(e.to) ? knows : may).add(e.to);
-  const sorted = (xs: Set<string>, minus: Set<string>[]) => [...xs].filter((x) => !minus.some((m) => m.has(x))).sort();
+  for (const e of sets)
+    (first.get(e.from)! > upto ? later : sure(e) && !cleared.has(e.to) ? knows : may).add(e.to);
+  const sorted = (xs: Set<string>, minus: Set<string>[]) =>
+    [...xs].filter((x) => !minus.some((m) => m.has(x))).sort();
   return { knows: sorted(knows, []), may: sorted(may, [knows]), not: sorted(later, [knows, may]) };
 }
 

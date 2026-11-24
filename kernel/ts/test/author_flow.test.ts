@@ -17,7 +17,7 @@ import {
 } from '../../../tools/author-panel/src/flow.ts';
 import * as read from '../../../tools/author-panel/src/flowread.ts';
 import { LAYOUT } from '../../../tools/author-panel/src/shell.ts';
-import type { Story } from '../../../tools/author-panel/src/storylist.ts';
+import type { Story } from '../play/storylist.ts';
 import { story as build } from '../play/story.ts';
 import {
   col,

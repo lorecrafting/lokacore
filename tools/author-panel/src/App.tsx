@@ -30,7 +30,7 @@ import {
   type Layout,
   type Selection,
 } from './shell.ts';
-import { go, LIST, storyItems } from './storylist.ts';
+import { go, LIST, storyItems } from '../../../kernel/ts/play/storylist.ts';
 
 type Book = ReturnType<typeof useBook>;
 

@@ -1,12 +1,12 @@
-// The Story list and Trace (tools/author-panel/src/storylist.ts): expected rows worked by hand from
+// The Story list and Trace (kernel/ts/play/storylist.ts): expected rows worked by hand from
 // the S2 table (docs/design/editor-map-and-story-rulings.md) on a planted model, not from the code.
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import type { Story } from '../../../tools/author-panel/src/storylist.ts';
+import type { Story } from '../play/storylist.ts';
 import { rank } from '../../../tools/author-panel/src/shell.ts';
-import * as list from '../../../tools/author-panel/src/storylist.ts';
-import { knowledge, pacing } from '../../../tools/author-panel/src/storyknow.ts';
-import { choicesOf, consequenceRows } from '../../../tools/author-panel/src/storyconseq.ts';
+import * as list from '../play/storylist.ts';
+import { knowledge, pacing } from '../play/storyknow.ts';
+import { choicesOf, consequenceRows } from '../play/storyconseq.ts';
 import { contentGraph } from '../play/reach.ts';
 
 const ref = (kind: string, key: string) => `demo@1:${kind}/${key}`;

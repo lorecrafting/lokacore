@@ -3,11 +3,11 @@
 // timings against their budgets, and the OS colour scheme. No React here: tested from
 // kernel/ts/test/author_shell.test.ts.
 
-import type { ListState } from './storylist.ts';
+import { fromRef, type Item, type ListState, type Selection } from '../../../kernel/ts/play/storylist.ts';
 import NEW from '../../../kernel/ts/play/new.json' with { type: 'json' };
 import { nodeOf } from '../../../kernel/ts/play/mapedit.ts';
 
-export type Selection = { file?: string; kind: string; key: string };
+export { fromRef, type Item, type Selection };
 /** The World card's selection: cartridge.json, which no graph node names (its card opens the root files). */
 export const WORLD: Selection = { file: 'cartridge.json', kind: 'cartridge', key: 'world' };
 export type Layout = {
@@ -78,12 +78,6 @@ export function load(storage: Pick<Storage, 'getItem'>): Layout {
 export const save = (storage: Pick<Storage, 'setItem'>, l: Layout) =>
   storage.setItem(STORE, JSON.stringify(l));
 
-const REF = /^[^@]+@[^:]+:([a-z_]+)\/(.+)$/; // a DefinitionRefString, kernel/ts/play/reach.ts
-/** The selection of a /story node (`id@ver:kind/key`). */
-export const fromRef = (ref: string): Selection | undefined => {
-  const m = REF.exec(ref);
-  return m ? { kind: m[1], key: m[2] } : undefined;
-};
 /** The selection of a Book line's text key (`kind.key.field`). */
 export const fromTextKey = (textKey: string): Selection | undefined => {
   const [kind, key] = textKey.split('.');
@@ -105,12 +99,6 @@ export function places(sel: Selection | undefined, nodes: Node[]) {
   };
 }
 
-export type Item = {
-  kind: 'command' | 'key' | 'text' | 'todo' | 'story';
-  label: string;
-  detail: string;
-  id: string;
-};
 export const COMMANDS: Item[] = [
   // a starter of every editable kind (`bin/loka new`; test/loka/content_starters_test.exs compiles each)
   ...NEW.map((kind) => [`new-${kind}`, `New ${kind}`]),

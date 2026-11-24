@@ -1,7 +1,7 @@
 // The Facts table (docs/design/story-tooling.md F1 and W4): every declared fact as one row, with its
 // type, default, scope, meaning, set count, read count, status and reachable range, worst first.
 // No React here: tested from kernel/ts/test/author_facts.test.ts.
-import type { FactUsage } from '../../../kernel/ts/play/fact_usage.ts';
+import type { FactUsage } from './fact_usage.ts';
 import type { Story } from './storylist.ts';
 
 export type FactRow = FactUsage & {

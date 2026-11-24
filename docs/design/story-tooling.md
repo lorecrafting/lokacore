@@ -72,7 +72,7 @@ touches. articy shows the next node; BioWare's plot editor shows the flag's read
 | **"Never read."** A fact hop 1 writes that no edge reads is one row, `write_only`, from `reachReport` | The cheapest catch of a dead consequence | A planted write-only fact shows the row; adding a reader removes it |
 | **Where.** The Story slot's lower section, like Trace (`Consequences <key>`, `×`); `c` on a focused choice or node row; Cmd-K `consequences <key>`; a row click selects that node | One lower-section idiom; following is reading, as S2 ruled for Trace | Keyboard only: focus a choice row, `c`, arrow to a hop-2 row, Enter selects it |
 
-Built 2026-11-13 (`kernel/ts/play/consequences.ts`, `tools/author-panel/src/storyconseq.ts` and the panel
+Built 2026-11-13 (`kernel/ts/play/consequences.ts`, `kernel/ts/play/storyconseq.ts` and the panel
 wiring; tests in `kernel/ts/test/consequences.test.ts` and `test/author_story.test.ts`). Eight facts the build
 settled:
 

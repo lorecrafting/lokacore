@@ -10,7 +10,7 @@ import { Card, ChipButton, Lines, StubButton, type CardAct } from './flowcard.ts
 import { step } from './flowread.ts';
 import { M } from '../../../kernel/ts/play/map.ts';
 import { fromRef } from './shell.ts';
-import type { Story } from './storylist.ts';
+import type { Story } from '../../../kernel/ts/play/storylist.ts';
 
 // Esc clears one thing per press: card, search, focus ink, follow, then back to the segment.
 function esc(g: Graph, from: HTMLElement) {
