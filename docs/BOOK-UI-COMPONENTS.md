@@ -330,7 +330,19 @@ greyed row, disabled. Builder 2.5: a ghost line is `type.small` in `dim` on page
 left-aligned at the page column's full width, one line cut with an ellipsis, a touch target tall, a `size.speechBar` dashed bar
 in `dim` at its left and `space.sm` before its words (dashed and `dim`, never the `~` line's solid
 `warning` bar in the margin). A ghost row is a Room sheet row: its words and reason `type.small` `dim`,
-wrapping whole, a touch target tall; a variant's row only `See as`, an act. The `Seeing: … · Back` chip is a strip button. Worst pair: `warning` on `card`,
+wrapping whole, a touch target tall; a variant's row only `See as`, an act. The `Seeing: … · Back` chip is a strip button.
+Builder 4.2: the strip's `Map` is a strip button. The Build map sheet's rows are Room sheet rows;
+its controls row is right-aligned, each glyph an act, a disabled one `type.control` in `dim`. The
+drawing: the sheet's full width on `card` paper with a `size.rule` `line` frame, square, but never
+so tall that the selection bar falls below a phone's half-height sheet. A room box is the map's cell
+box at the zoom, `card` fill, a `size.rule` border in `dim`, its key `type.label` `fg` centred; a
+selected box is `action` filled, its key in `bg`. The current room's ring is Map's: a
+`size.speechBar` border in `action`, in `fg` on a selected box so the ring still shows. An exit is a
+`size.rule` bar in `dim` (Map's line), never the `line` hairline, which is under 3:1 on `card`. The
+unplaced row: `Unplaced (n):` `type.label` `dim`, each key an act. The selection bar: a `size.rule`
+`line` rule above it, `space.sm` above its words, `<key> — selected` `type.label` `fg` with
+`space.md` sides, `Go here` and `Sheet` acts. No raw widths: rules and rings are `size` tokens.
+Worst pair: `warning` on `card`,
 4.75 (light).
 
 Not adopted from the mock (no live consumer): the text drawer and its command chips, topic

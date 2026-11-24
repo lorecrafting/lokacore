@@ -26,6 +26,7 @@ import { chip, ghostLines, seeWith, unsee, type Game } from './seeas.tsx';
 import { thingPen } from './thing.tsx';
 import { CONTENTS } from './contents.tsx';
 import './generic.tsx'; // registers the def:<file> sheet
+import { MAP, mapSheet } from './map.tsx';
 import { act, CONTROL, Frame, parts, sheets } from './sheet.tsx';
 
 export { Sheet, sheets } from './sheet.tsx';
@@ -63,6 +64,7 @@ export type Place = Game & {
 };
 let placed: Place | undefined;
 export const place = (given: Place) => void ((placed = given), seeWith(given, () => mapped()));
+mapSheet({ go: (room) => placed?.startIn(room), here: () => placed?.here() });
 let asked = Promise.resolve();
 /** One at a time: the server keeps the last flag it got, so an on overtaking its off would stick.
  * A refused or failed request shows as no Held in the strip. */
@@ -242,6 +244,7 @@ export function Strip({ children }: { children: ReactNode }) {
         {notBack ? warn(WORDS.notUndone(notBack.file)) : null}
         {notBack ? act(WORDS.source, openBack) : null}
         {builder.on ? pad(CONTENTS.contents, 'contents', top) : null}
+        {builder.on ? pad(MAP.map, 'map', top) : null}
         {builder.on ? pad(badge(heard), 'checks', top) : null}
       </View>
       <Notice />
