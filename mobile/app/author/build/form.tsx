@@ -154,7 +154,9 @@ function mechanics(
     const value = start(k); // none: the field is revealed empty once the capability is on
     const field: Write[] = value === undefined ? [] : [[at.file, at.was, ops([k], value)]];
     const empty = value === undefined && id(at, [k]); // revealed before the write: web reloads on it
-    void run(() => {
+    void run(async () => {
+      const why = field.length ? at.gate?.(field[0]![2]) : undefined;
+      if (why) return why; // the field's write refused: the capability is not turned on either
       if (empty) reveal(empty, true);
       return ed
         .change(on, ...field)

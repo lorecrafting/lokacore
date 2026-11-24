@@ -167,12 +167,14 @@ async function edit(s: { file: string; shown: () => any[] }, path: unknown[], th
   if (!(await press(hit((x) => words(x) === WORDS.add)))) return;
   await press(hit((x) => String(x.key).startsWith('add ') && words(x) !== WORDS.add));
   if (!posts.length) await press(hit((x) => x.props.accessibilityState?.selected === false)); // drawn empty: pick its value
+  const empty = !posts.length && inside().find((x) => x.props?.onBlur); // revealed empty: type a word
+  if (empty) (empty.props.onChangeText('a'), empty.props.onBlur(), await settle()); // a riddle's answer: letters only
 }
 
 const rows = Object.entries(read('kernel/ts/play/registry.json') as Record<string, any>).flatMap(
   ([p, r]) =>
     Object.keys(r.book ?? {})
-      .filter((op) => ['generic', 'combat.tsx', 'schedule.tsx'].includes(r.book[op])) // the blocks claim a root field (generic.tsx)
+      .filter((op) => ['generic', 'generic.tsx', 'combat.tsx', 'schedule.tsx'].includes(r.book[op])) // the blocks claim a root field (generic.tsx)
       .map((op) => [p, op]),
 );
 assert.ok(rows.length > 0);

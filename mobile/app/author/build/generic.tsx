@@ -3,11 +3,14 @@
 // reads them; the server validates each write.
 import { cardMenuWith, turnOn } from '../../../../kernel/ts/play/allowed.ts';
 import { added, addable, definitionOf } from '../../../../kernel/ts/play/card.ts';
+import { refuseNew } from '../../../../kernel/ts/play/choice.ts';
+import { change } from '../../../../kernel/ts/play/edit_model.ts';
 import type { Defs } from '../../../../kernel/ts/play/generic.ts';
 import REGISTRY from '../../../../kernel/ts/play/registry.json' with { type: 'json' };
+import { choices } from './choices.tsx';
 import { combat } from './combat.tsx';
 import { field } from './form.tsx';
-import type { Block, Mechanics } from './formwrite.ts';
+import type { Block, Mechanics, Write } from './formwrite.ts';
 import { known } from './room.tsx';
 import { io, refusal } from './roomedit.tsx';
 import { schedule } from './schedule.tsx';
@@ -68,9 +71,27 @@ function claims(kind: string, doc: Record<string, unknown>) {
   const by: Record<string, Block> = {
     'combat.tsx': combat,
     'schedule.tsx': schedule(doc.room, cart?.doc.calendar?.hours_per_day),
+    'choices.tsx': choices(
+      doc,
+      cart && (cart.doc.requires?.capabilities ?? {}),
+      (f) => load(f)?.doc,
+    ),
   };
   return (f: string) => by[(REGISTRY as Record<string, Row>)[`${kind}.${f}`]?.book?.edit ?? ''];
 }
+
+/** A dialogue's writes pass the compiler's dialogue rules first (choice.ts `refuseNew`, the panel's
+ * useGated): a write that adds a refusal is not sent; one whose ops do not apply is left to the server. */
+const gate = (kind: string, doc: unknown) => (o: Write[2]) => {
+  if (kind !== 'dialogues') return undefined;
+  const after = structuredClone(doc) as Record<string, unknown>;
+  try {
+    change(after, o);
+  } catch {
+    return undefined;
+  }
+  return refuseNew(doc as Record<string, unknown>, after, known.hidden);
+};
 
 /** A source file's sheet: its definition's fields, each written as it is entered. */
 function body(file: string) {
@@ -80,7 +101,17 @@ function body(file: string) {
   const doc = g.doc as Record<string, unknown>;
   const seed = (f: string) => (Array.isArray(doc) ? undefined : added(doc, f, g.defs, def)?.[f]);
   const mech = mechanics(g.kind, doc);
-  const at = { file, was: g.was, defs: g.defs, seen: [], seed, mech, claim: claims(g.kind, doc) };
+  const claim = claims(g.kind, doc);
+  const at = {
+    file,
+    was: g.was,
+    defs: g.defs,
+    seen: [],
+    seed,
+    mech,
+    claim,
+    gate: gate(g.kind, doc),
+  };
   return [refusal(), field(at, [], g.root, g.doc)];
 }
 
