@@ -16,6 +16,7 @@ const WORDS = {
   seeing: (when: string) => `Seeing: ${when} · Back`,
   ghost: (words: string, reason: string, edit: boolean) =>
     `${words}, ${reason}${edit ? ', edit' : ''}`,
+  hidden: (n: number) => `${n} not shown`,
 };
 /** The game and compiled cartridge a ghost reads; panel.tsx hands them in per game. */
 export type Game = {
@@ -62,17 +63,19 @@ export const updated = (u: GameSubscription) =>
   (u.projection.view.place.id !== as?.at || u.projection.view.place.description.key !== as?.base) &&
   unsee();
 
-/** The Room sheet's variant rows for `room`, each with See as; only for the page's own room. */
-export function variantRows(room: string) {
-  const shown = room === given?.here() ? here().filter((g) => g.kind === 'variant') : [];
+type Open = (id: string) => void;
+type Sheet = (g: Ghost) => string | undefined;
+/** The Room sheet's ghost rows for `room`, each opening its sheet, a variant's with See as; only for
+ * the page's own room. */
+export function ghostRows(room: string, open: Open, sheet: Sheet) {
+  const shown = room === given?.here() ? here() : [];
   if (!shown.length) return [];
   const { place } = given!.game.view().view;
   return shown.map((g, i) => (
     <View key={`as:${i}`} style={ROW}>
-      <Text style={{ ...type.small, color: ink('dim'), flex: 1 /* mutate-skip: style */ }}>
-        {g.reason}
-      </Text>
-      {act(WORDS.see, () => see(place.description.key, g, place.id), undefined, `see:${i}`)}
+      {ghostLine(g, open, sheet, { flex: 1 /* mutate-skip: style */ })}
+      {g.kind === 'variant' &&
+        act(WORDS.see, () => see(place.description.key, g, place.id), undefined, `see:${i}`)}
     </View>
   ));
 }
@@ -81,30 +84,41 @@ const see = (base: string, ghost: Ghost, at: string) => ((as = { base, ghost, at
 /** The strip's chip while See as is on: what is seen, and a press goes back to the page's words. */
 export const chip = () => (as ? act(WORDS.seeing(as.ghost.reason), unsee) : null);
 
-/** The ghost lines under the room title; `sheet` is a ghost's sheet id, undefined when it has none. */
-export function ghostLines(open: (id: string) => void, sheet: (g: Ghost) => string | undefined) {
-  return here().map((g, i) => {
-    const id = sheet(g);
-    const words = said(g.words);
-    return (
-      <Text
-        key={`ghost:${i}`}
-        accessibilityRole={id ? 'button' : undefined}
-        accessibilityLabel={WORDS.ghost(words, g.reason, !!id)}
-        onPress={id ? (e) => (e.stopPropagation(), open(id)) : undefined}
-        style={{ ...GHOST, borderColor: ink('dim'), color: ink('dim') }}
-      >
-        {`${words} · ${g.reason}`}
-      </Text>
-    );
-  });
+/** Under the room title, one line: its one ghost, else `N not shown` opening the Room sheet, so
+ * the fixed header grows by at most a touch target. */
+export function ghostLines(open: Open, sheet: Sheet) {
+  const all = here();
+  if (all.length < 2) return all.map((g) => ghostLine(g, open, sheet));
+  const id = `room:${given!.here()}`;
+  return line(WORDS.hidden(all.length), WORDS.hidden(all.length), () => open(id));
 }
+function ghostLine(g: Ghost, open: Open, sheet: Sheet, style?: object) {
+  const id = sheet(g);
+  const words = said(g.words);
+  return line(
+    `${words} · ${g.reason}`,
+    WORDS.ghost(words, g.reason, !!id),
+    id ? () => open(id) : undefined,
+    style,
+  );
+}
+const line = (shown: string, label: string, press?: () => void, style?: object) => (
+  <Text
+    key={`ghost:${shown}`}
+    numberOfLines={1}
+    accessibilityRole={press ? 'button' : undefined}
+    accessibilityLabel={label}
+    onPress={press && ((e) => (e.stopPropagation(), press()))}
+    style={{ ...GHOST, borderColor: ink('dim'), color: ink('dim'), ...style }}
+  >
+    {shown}
+  </Text>
+);
 const ROW = { flexDirection: 'row', alignItems: 'center', paddingHorizontal: space.md } as const;
 const GHOST = {
   ...type.small,
-  display: 'flex' as const, // web: each ghost on its own line under the title
-  minHeight: size.touch,
-  alignItems: 'center',
+  display: 'block' as 'flex', // web: its own line under the title; a flex box draws no ellipsis
+  lineHeight: size.touch,
   borderLeftWidth: size.speechBar,
   borderStyle: 'dashed',
   paddingLeft: space.sm,

@@ -7,7 +7,7 @@ import { unwritten } from '../prose_rules.ts';
 import { ink } from './build.ts';
 import type { Hooks } from './field.tsx';
 import type { Ghost } from '../../../../kernel/ts/play/ghosts.ts';
-import { variantRows } from './seeas.tsx';
+import { ghostRows } from './seeas.tsx';
 import { sheets } from './sheet.tsx';
 import {
   exitActs,
@@ -156,7 +156,7 @@ sheets.room = {
           </View>
         );
       }),
-      ...variantRows(r.key),
+      ...ghostRows(r.key, known.open, ghostSheet),
       grows(r, known.nodes, known.rooms),
       addHere(r, known.nodes, held(), known.open),
       moveTo(r),
