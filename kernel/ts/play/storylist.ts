@@ -1,8 +1,8 @@
 // The Story list and Trace (docs/design/editor-map-and-story-rulings.md S2): the tree's visible
 // rows, the arrow keys' moves, which rows a selection or a palette row opens, a trace's rows and
 // the palette's story rows. No React here: tested from kernel/ts/test/author_story.test.ts.
-// size: allow 397, R2's coverage rows (`covered`, `uncovered`, the uncovered filter) sit beside the
-// rows they colour; the trace panel and palette rows come out together when this next needs room
+// size: allow 397, the kernel's prettier reflow and fromRef (moved with this file, builder 5.4a);
+// the trace panel and palette rows come out together when this next needs room
 import { reads } from './reads.ts';
 import type { Edge } from './consequences.ts';
 import type { FactUsage } from './fact_usage.ts';
