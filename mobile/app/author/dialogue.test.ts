@@ -91,7 +91,7 @@ const typeKey = (s: Awaited<ReturnType<typeof sheet>>, k: string) =>
 // another path, or as more than one /change.
 test('Add choice yes sends one /change of the least choice at choices.yes', async () => {
   const s = await sheet(ONE);
-  typeKey(s, 'yes');
+  typeKey(s, 'yes ');
   await s.press(`add choice ${s.file}:["choices","+"]`);
   assert.deepEqual(posts, [
     {
@@ -132,7 +132,9 @@ test('a refused key, link, remove or gated write sends nothing and shows why', a
   );
 });
 
-// Breaks: a picked target not written at the link's path, or Clear writing anything but a delete.
+// Breaks: a picked target not written at the link's path, Clear writing anything but a delete, a
+// choice's own field hidden, the linked target not marked or its nested set not drawn, or
+// then_failed drawn without a check (or hidden with one).
 test("then: 'side_set' is written, and Clear drops the field", async () => {
   const s = await sheet(ONE, 'a', 'a.then');
   await s.press(`link side_set ${s.file}:["choices","a","then"]`);
@@ -141,6 +143,19 @@ test("then: 'side_set' is written, and Clear drops the field", async () => {
     { choices: { a: { label: 'x.a', narration: 'x.n', then: 'side_set' } } },
     'a',
     'a.then',
+  );
+  const keys = (x: typeof s) => x.shown().map((b) => b.key);
+  const failed = (x: typeof s) => keys(x).includes(`fold ${x.file}:["choices","a","then_failed"]`);
+  const link = t.shown().find((b) => b.key === `link side_set ${t.file}:["choices","a","then"]`);
+  assert.deepEqual(
+    [
+      keys(s).includes(`${s.file}:["choices","a","label"]`),
+      link.props.accessibilityState,
+      keys(t).includes('open side_set'),
+      failed(t),
+      failed(await sheet({ choices: { a: { ...ONE.choices.a, check: {} } } }, 'a')),
+    ],
+    [true, { selected: true }, true, false, true],
   );
   await t.press(`clear ${t.file}:["choices","a","then"]`);
   assert.deepEqual(

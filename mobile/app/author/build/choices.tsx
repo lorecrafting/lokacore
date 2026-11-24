@@ -53,9 +53,10 @@ export const choices =
       const all = (value ?? {}) as Record<string, Obj>;
       const typed = id(at, [...path, '+']);
       const add = () => {
-        const k = drafts.get(typed) ?? '';
+        const k = (drafts.get(typed) ?? '').trim();
         const why = k && refuseKey(k, all);
         if (why) return say(why);
+        drafts.delete(typed);
         if (k) set(at, [...path, k], minimal(at.defs[CHOICE]!, at.defs));
       };
       return [
@@ -168,6 +169,7 @@ function link(
 
 /** Dialogue `to` when a nested set (choice.ts `nested`): Open, its prompt and choice labels read-only. */
 function linked(to: string, read: (file: string) => unknown) {
+  // ponytail: files only; a nested set inside an area bundle (story's `bundled`) draws no preview
   const ref = known.nodes.find((n) => n.ref.endsWith(`:dialogue/${to}`))?.ref;
   const file = ref && known.files[ref];
   const set = file ? nested(read(file) as Obj | undefined, to) : undefined;

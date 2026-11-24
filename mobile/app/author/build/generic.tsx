@@ -10,7 +10,7 @@ import REGISTRY from '../../../../kernel/ts/play/registry.json' with { type: 'js
 import { choices } from './choices.tsx';
 import { combat } from './combat.tsx';
 import { field } from './form.tsx';
-import type { Block, Mechanics, Write } from './formwrite.ts';
+import type { Block, Mechanics, Ops, Write } from './formwrite.ts';
 import { known } from './room.tsx';
 import { io, refusal } from './roomedit.tsx';
 import { schedule } from './schedule.tsx';
@@ -82,13 +82,13 @@ function claims(kind: string, doc: Record<string, unknown>) {
 
 /** A dialogue's writes pass the compiler's dialogue rules first (choice.ts `refuseNew`, the panel's
  * useGated): a write that adds a refusal is not sent; one whose ops do not apply is left to the server. */
-const gate = (kind: string, doc: unknown) => (o: Write[2]) => {
+const gate = (kind: string, doc: unknown) => (o: Ops) => {
   if (kind !== 'dialogues') return undefined;
   const after = structuredClone(doc) as Record<string, unknown>;
   try {
     change(after, o);
   } catch {
-    return undefined;
+    // change() rolls back: `after` stays `doc`, so no refusal is added
   }
   return refuseNew(doc as Record<string, unknown>, after, known.hidden);
 };
