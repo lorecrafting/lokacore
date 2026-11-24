@@ -1,5 +1,5 @@
-// The notebook's Contents, minimal (design §7, slice 2.2): every kind New makes (kernel/ts/play/new.json),
-// each with its New, then its files; a person or item made, or a file, opens its sheet. The full notebook is a later slice's.
+// The notebook (design §7, slice 2.2; tabs, slice 5.4b): Contents lists every kind New makes (kernel/ts/play/new.json),
+// each with its New, then its files; a person or item made, or a file, opens its sheet. Story is story.tsx's.
 import { TextInput, View } from 'react-native';
 import NEW from '../../../../kernel/ts/play/new.json' with { type: 'json' };
 import { create, NAMED, nodeOf } from '../../../../kernel/ts/play/mapedit.ts';
@@ -8,8 +8,14 @@ import { ink } from './build.ts';
 import { known } from './room.tsx';
 import { inRow, io, refusal, row, run } from './roomedit.tsx';
 import { act, sheets } from './sheet.tsx';
+import { storyRows } from './story.tsx';
 
-const WORDS = { contents: 'Notebook', new: (kind: string) => `New ${kind}` };
+const WORDS = {
+  contents: 'Notebook',
+  tabs: ['Contents', 'Story'],
+  new: (kind: string) => `New ${kind}`,
+};
+let tab = WORDS.tabs[0]; // the open tab
 const names = new Map<string, string>(); // a NAMED kind's key, as typed
 /** `kind`'s JSON source files the last /story named (a `.scene` has no schema sheet): `<kind>.json`,
  * `<kind>/<key>.json` or `areas/<area>/<kind>/<key>.json` (guard.ts `placed`). */
@@ -32,24 +38,30 @@ const made = (kind: string) =>
 sheets.contents = {
   title: () => WORDS.contents,
   body: () => [
-    refusal(),
-    ...NEW.flatMap((kind) => [
-      <View key={kind} style={row}>
-        {NAMED.includes(kind) ? (
-          <TextInput
-            accessibilityLabel={kind}
-            placeholder={kind}
-            defaultValue={names.get(kind)}
-            onChangeText={(v) => void names.set(kind, v)}
-            style={{ ...inRow, flex: 1, borderBottomWidth: size.rule, borderColor: ink('action') }} // mutate-skip: layout; ruled as the Room sheet's Move field
-          />
-        ) : null}
-        {act(WORDS.new(kind), () => void made(kind))}
-      </View>,
-      <View key={`${kind}/`} style={row}>
-        {filesOf(kind).map((f) => act(f, () => known.open(`def:${f}`)))}
-      </View>,
-    ]),
+    <View key="tabs" style={row}>
+      {WORDS.tabs.map((t) => act(t, () => ((tab = t), known.redraw()), undefined, t, tab === t))}
+    </View>,
+    ...(tab === WORDS.tabs[1] ? storyRows() : kinds()),
   ],
 };
+const kinds = () => [
+  refusal(),
+  ...NEW.flatMap((kind) => [
+    <View key={kind} style={row}>
+      {NAMED.includes(kind) ? (
+        <TextInput
+          accessibilityLabel={kind}
+          placeholder={kind}
+          defaultValue={names.get(kind)}
+          onChangeText={(v) => void names.set(kind, v)}
+          style={{ ...inRow, flex: 1, borderBottomWidth: size.rule, borderColor: ink('action') }} // mutate-skip: layout; ruled as the Room sheet's Move field
+        />
+      ) : null}
+      {act(WORDS.new(kind), () => void made(kind))}
+    </View>,
+    <View key={`${kind}/`} style={row}>
+      {filesOf(kind).map((f) => act(f, () => known.open(`def:${f}`)))}
+    </View>,
+  ]),
+];
 export { WORDS as CONTENTS };

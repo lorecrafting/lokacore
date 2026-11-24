@@ -532,9 +532,7 @@ parity:hold
 parity:map-pan-zoom-keys
 parity:map-wire
 parity:map-exit-edits
-parity:story-list
 parity:story-row-sheets
-parity:story-beats
 parity:flow-graph
 parity:inspector-header
 parity:card-picker

@@ -1039,6 +1039,27 @@ reasons and limits: [prose in the Book rulings](../design/prose-in-the-book-ruli
     sheet, any other kind stays on Contents. Under each kind's row, in a row of its own, its JSON
     source files the latest story names, sorted by path; a file opens its `def:<file>` sheet
     (Build: the generic sheet) on top.
+  - **Story (5.4b, [builder mode §4.8](../rnd/in-game-builder-mode-2026-11-19.md#48-the-story-on-a-phone)).**
+    The Notebook sheet has two tabs, `Contents` and `Story`; the open tab is marked selected. Story
+    shows the refusal line, then `Facts` and `Pacing`, then each part (`Part n Title`) with a number
+    field and `Add beat`, its beats (`n Title`, `· unwritten` where the panel marks it `~`, `· missing`
+    when unbuilt), each beat's bound definitions, Seeds as plain lines that are not buttons, and
+    `Unplaced (n)`. A row is marked built, missing or unreached, with its refusal count, and never
+    `~`. Open and selected are one state: the first press on a part or beat opens and selects it, a
+    press on the selected row shuts and deselects it, and a press on an open row that is not
+    selected only selects it. A definition row is selected without opening. Only the selected row
+    shows its acts, in rows of their own under it. A definition offers `Go there` (the room a
+    placement edge, `.room` or `.items`, joins it to; none, no Go there), `Sheet`, `Trace` (a fact's
+    setters, then its readers, each naming a definition opening its sheet) and `Consequences`. A
+    beat offers a title field with `Retitle` (empty removes the title), `Remove` (no confirm: the
+    Undo chip covers it), `Knowledge` (the facts set before it, as words) and `Bind…`, a fold of
+    `Bind <short>` per short ref. Each edit is one gesture with one Undo. Facts, Pacing, Trace,
+    Consequences and Knowledge open as sheets.
+    - **No story yet.** Until a story arrives, or while the compile is refused, the tab shows the
+      refusal line (if any) and one plain line saying there is no story yet, never a blank tab.
+      With a story but no parts (no outline file, or none in it), it shows that plain line, then
+      the number field and `Add beat`, which writes beat n into the first part. A sheet opened
+      from it with no story says Nothing here.
   - **Unwritten links.** In Build a link whose words are unwritten draws as an unwritten line
     does (Build: in-place field): a blank ruled line with the caption `name`, never `~`, named
     `Unwritten name, open`. It keeps its own press. Out of Build every link draws as before.
