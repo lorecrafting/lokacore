@@ -15,8 +15,11 @@ too, not only `layout.json`) and **#779** `hcnlh.17` (2.5, ghost lines and See a
   growing one touch target per ghost.
 - PM: a same-room act does not end See as. Ghost lines are the Build-only exception to the room page
   anatomy (`book-ui.md`, `AGENTS.md`).
-- Open 2.5 limits are in #779's body: canon cached until reload; placement by starting room; a dark room
-  ghosts every variant; gate reasons shown even when the fact is true.
+- Open 2.5 limits are in #779's body: placement by starting room (a person who walked off reads
+  `not here now` there); a dark room ghosts every variant; gate reasons shown even when the fact is true.
+  #779's "canon cached until reload" is wrong in practice: a compile that changes the world reloads the
+  preview by itself (`App.tsx` `loka_dev_hash`), so a new hidden person ghosts at once. Browser-checked
+  2026-11-23; live word edits update ghosts through the overlay. Only Hold's parked compiles wait.
 
 ## Direction
 
