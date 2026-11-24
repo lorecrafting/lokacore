@@ -54,7 +54,7 @@ folder. It can vouch only for home-network addresses (10.x, 172.16-31.x, 192.168
 so it cannot impersonate a real website. Each later run reuses it, so the phone installs it once.
 
 The terminal prints the CA's SHA-256 fingerprint and, for each LAN address of this Mac, two links: `CA:
-http://<address>:19005/loka-ca.pem?pair=<token>` and `Pair: https://<address>:19006/?dev=1&pair=<token>`.
+http://<address>:19005/loka-ca.pem?ca=<token>` and `Pair: https://<address>:19006/?dev=1&pair=<token>`.
 
 Once per phone, install the CA:
 - **iPhone or iPad:** open the CA link in Safari and allow the download. Open Settings, tap "Profile

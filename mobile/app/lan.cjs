@@ -32,7 +32,8 @@ const lanAddresses = (nets) =>
   Object.values(nets)
     .flat()
     .filter((a) => PRIVATE.test(a.address))
-    .map((a) => a.address);
+    .map((a) => a.address)
+    .filter((ip, i, all) => all.indexOf(ip) === i); // an address on two interfaces is one listener
 
 /** `{ key, cert }` for `ips`, issued each start (the key stays in memory) by the CA in `dir`, made on
  * the first run (dir 700, key 600) and reused, so the phone installs it once. */
@@ -42,9 +43,9 @@ function lanCert(dir, ips) {
   const caKey = path.join(dir, 'ca.key');
   const caCert = path.join(dir, 'ca.pem');
   const config = path.join(dir, 'ca.cnf');
+  fs.writeFileSync(config, CA_CONFIG); // the CA's and each leaf's request read it
   if (!fs.existsSync(caCert)) {
     fs.writeFileSync(caKey, newKey()); // in the 700 folder; the chmod below sets 600
-    fs.writeFileSync(config, CA_CONFIG);
     execFileSync(
       OPENSSL,
       [
@@ -104,20 +105,22 @@ function lanCert(dir, ips) {
   return { key, cert };
 }
 
-/** The CA certificate, never its key, on plain http for the phone to install: `/loka-ca.pem?pair=<token>`. */
-function caServer(token, dir) {
+/** The CA certificate, never its key, on plain http for the phone to install: `/loka-ca.pem?ca=<caToken>`.
+ * Its own token: one sent in clear text must not be the pairing token, and it ends with the pairing. */
+function caServer(caToken, pair, dir) {
   const ca = fs.readFileSync(path.join(dir, 'ca.pem'));
   return http.createServer((request, response) => {
     const url = URL.parse(request.url, 'http://x');
     if (url?.pathname !== '/loka-ca.pem') return response.writeHead(404).end();
-    if (!same(url.searchParams.get('pair'), token)) return response.writeHead(403).end();
+    if (pair.idle() || !same(url.searchParams.get('ca'), caToken))
+      return response.writeHead(403).end();
     response.writeHead(200, { 'content-type': 'application/x-x509-ca-cert' }).end(ca);
   });
 }
 
 /** The preview's listeners: plain http on loopback, unguarded as ever; with `token` (`--lan`), on each
  * of `ips` the paired https preview and the CA download. */
-function serve({ previewPort, caPort, metroPort, authorPort, token, ips, dir }) {
+function serve({ previewPort, caPort, metroPort, authorPort, token, caToken, ips, dir }) {
   const servers = [proxy({ metroPort, authorPort }).listen(previewPort, '127.0.0.1')];
   if (!token) return servers;
   const pair = pairing(token);
@@ -125,7 +128,7 @@ function serve({ previewPort, caPort, metroPort, authorPort, token, ips, dir }) 
   for (const ip of ips)
     servers.push(
       proxy({ pair, metroPort, authorPort, tls }).listen(previewPort, ip),
-      caServer(token, dir).listen(caPort, ip),
+      caServer(caToken, pair, dir).listen(caPort, ip),
     );
   setInterval(pair.idle, 60_000).unref();
   return servers;

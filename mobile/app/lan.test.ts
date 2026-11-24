@@ -13,9 +13,12 @@ import { networkInterfaces, tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { test } from 'node:test';
 
-const { lanAddresses, lanCert, serve } = createRequire(import.meta.url)('./lan.cjs');
+const require = createRequire(import.meta.url);
+const { lanAddresses, lanCert, serve } = require('./lan.cjs');
+const { IDLE_MS } = require('./pairing.cjs');
 const OPENSSL = '/usr/bin/openssl';
 const TOKEN = '0123456789abcdef0123456789abcdef';
+const CA_TOKEN = 'fedcba9876543210fedcba9876543210';
 const scratch = (t: { after: (f: () => void) => void }) => {
   const root = mkdtempSync(join(tmpdir(), 'loka-lan-ca-'));
   t.after(() => rmSync(root, { recursive: true, force: true }));
@@ -24,12 +27,20 @@ const scratch = (t: { after: (f: () => void) => void }) => {
 
 test('--lan serves private IPv4 addresses only', () => {
   // Breaks: a public, carrier-grade NAT (a VPN's 100.64/10), IPv6 or loopback address gets a SAN (one
-  // outside the CA's ranges fails the whole chain) or a listener; a private range is dropped.
+  // outside the CA's ranges fails the whole chain) or a listener; a private range is dropped; an address
+  // on two interfaces gets two listeners (the second: EADDRINUSE).
   const a = (address: string, family = 'IPv4', internal = false) => ({ address, family, internal });
   const nets = {
     lo0: [a('127.0.0.1', 'IPv4', true)],
     en0: [a('fe80::1', 'IPv6'), a('192.168.0.68')],
-    en1: [a('10.2.3.4'), a('172.15.0.1'), a('172.16.0.1'), a('172.31.255.1'), a('172.32.0.1')],
+    en1: [
+      a('10.2.3.4'),
+      a('192.168.0.68'),
+      a('172.15.0.1'),
+      a('172.16.0.1'),
+      a('172.31.255.1'),
+      a('172.32.0.1'),
+    ],
     utun3: [a('100.100.1.1'), a('8.8.8.8')],
   };
   assert.deepEqual(lanAddresses(nets), ['192.168.0.68', '10.2.3.4', '172.16.0.1', '172.31.255.1']);
@@ -105,9 +116,11 @@ test('the CA is made once, name-constrained, its key readable by the owner alone
 test('--lan: loopback stays plain http; the LAN gets the paired https preview and the CA, never its key', async (t) => {
   // Breaks: the loopback preview turns https or guarded (the Mac's own Book breaks); a LAN request
   // without the cookie reaches Metro; the LAN preview is not https under a chain the CA vouches for;
-  // the CA download answers without the token, serves the key, or any other file.
+  // the CA download answers without its own token (the pairing token must not travel in clear text),
+  // serves the key, or any other file, or outlives the pairing's idle expiry.
   const [ip] = lanAddresses(networkInterfaces());
   assert.ok(ip, 'this test needs a private IPv4 address to listen on');
+  t.mock.timers.enable({ apis: ['Date'], now: Date.now() });
   const metro = createServer((_req, res) => res.end('metro'));
   metro.listen(0, '127.0.0.1');
   await once(metro, 'listening');
@@ -118,6 +131,7 @@ test('--lan: loopback stays plain http; the LAN gets the paired https preview an
     metroPort: (metro.address() as AddressInfo).port,
     authorPort: 1,
     token: TOKEN,
+    caToken: CA_TOKEN,
     ips: [ip],
     dir,
   });
@@ -147,15 +161,19 @@ test('--lan: loopback stays plain http; the LAN gets the paired https preview an
   assert.deepEqual((await get(`${lan}/`, { cookie })).slice(0, 2), [200, 'metro']);
 
   const download = `http://${ip}:${caDownload}`;
-  assert.deepEqual((await get(`${download}/loka-ca.pem?pair=${TOKEN}`)).slice(0, 2), [200, ca]);
+  assert.deepEqual((await get(`${download}/loka-ca.pem?ca=${CA_TOKEN}`)).slice(0, 2), [200, ca]);
   for (const [path, status] of [
     ['/loka-ca.pem', 403],
-    ['/loka-ca.pem?pair=fedcba9876543210fedcba9876543210', 403],
-    [`/ca.key?pair=${TOKEN}`, 404],
-    [`/../ca.key?pair=${TOKEN}`, 404],
+    [`/loka-ca.pem?ca=${TOKEN}`, 403],
+    [`/loka-ca.pem?pair=${CA_TOKEN}`, 403],
+    [`/ca.key?ca=${CA_TOKEN}`, 404],
+    [`/../ca.key?ca=${CA_TOKEN}`, 404],
   ] as const) {
     const [answered, body] = await get(`${download}${path}`);
     assert.equal(answered, status, path);
     assert.doesNotMatch(body, /PRIVATE KEY/);
   }
+
+  t.mock.timers.tick(IDLE_MS + 1); // --lan turns off: the CA download ends with the pairing
+  assert.equal((await get(`${download}/loka-ca.pem?ca=${CA_TOKEN}`))[0], 403);
 });

@@ -2,7 +2,7 @@
 // required by expo-sqlite's synchronous browser worker. Both ports stay on localhost; with LOKA_PAIR
 // set (`bin/author.sh --lan`) the proxy also serves https on the LAN behind pairing.cjs (lan.cjs).
 const { execFileSync, spawn } = require('node:child_process');
-const { X509Certificate } = require('node:crypto');
+const { randomBytes, X509Certificate } = require('node:crypto');
 const { readFileSync } = require('node:fs');
 const path = require('node:path');
 const readline = require('node:readline');
@@ -11,8 +11,9 @@ const { lanAddresses, serve } = require('./lan.cjs');
 const { quiet } = require('./quiet-metro.cjs');
 
 const previewPort = Number(process.env.LOKA_PREVIEW_PORT || 19006);
-const caPort = 19005;
+const caPort = Number(process.env.LOKA_CA_PORT || 19005);
 const token = process.env.LOKA_PAIR;
+const caToken = token && randomBytes(16).toString('hex');
 const ips = token ? lanAddresses(networkInterfaces()) : [];
 if (token && !ips.length)
   throw new Error('--lan: no private IPv4 address (10/8, 172.16/12, 192.168/16) to serve');
@@ -31,7 +32,7 @@ const metroPort =
 const authorPort = Number(process.env.LOKA_AUTHOR_PORT || 19008);
 const dir = path.join(homedir(), '.loka/lan-ca');
 // Before Expo starts: a failed CA setup throws with no Metro left behind.
-const servers = serve({ previewPort, caPort, metroPort, authorPort, token, ips, dir });
+const servers = serve({ previewPort, caPort, metroPort, authorPort, token, caToken, ips, dir });
 const expo = spawn(
   process.execPath,
   [
@@ -64,12 +65,12 @@ console.log(`Book preview: http://localhost:${previewPort}`);
 if (token) {
   const sha = new X509Certificate(readFileSync(path.join(dir, 'ca.pem'))).fingerprint256;
   console.log(
-    `On the phone, once: install the Loka CA (SHA-256 ${sha}), then pair (docs/guides/writing-the-game.md).`,
+    `On the phone, once: install the Loka CA and check its SHA-256 is ${sha}; then pair (docs/guides/writing-the-game.md).`,
   );
   for (const ip of ips)
     // one pair per address: the first may be a VPN's, not the Wi-Fi's
     console.log(
-      `  CA: http://${ip}:${caPort}/loka-ca.pem?pair=${token}\n  Pair: https://${ip}:${previewPort}/?dev=1&pair=${token}`,
+      `  CA: http://${ip}:${caPort}/loka-ca.pem?ca=${caToken}\n  Pair: https://${ip}:${previewPort}/?dev=1&pair=${token}`,
     );
 }
 for (const server of servers)
