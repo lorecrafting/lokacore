@@ -5,7 +5,8 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { storyMap } from '../../authority/local-story/__tests__/compiled.ts';
 import { nodes } from '../book/__tests__/combat-book.test.ts'; // the React Native stand-ins
-import { BUILD } from './build/build.ts';
+import { size } from '../book/tokens.ts';
+import { BUILD, ink } from './build/build.ts';
 
 const map = storyMap('cartridges/toolbox_showcase');
 const kept = new Map([[BUILD, '{"on":true}']]);
@@ -28,7 +29,10 @@ build.place({
 } as never);
 const api = async (path: string): Promise<[number, any]> =>
   path === '/story' ? [200, { map, files: {} }] : [200, null];
-build.install({ seen: new Map(), said: new Map(), redraw() {}, api } as never);
+let books = 0; // the Book's redraws
+let paints = 0; // a component's own redraws (useState setters; the shim reads this per call)
+(globalThis as any)[Symbol.for('combat-state')] = (v: unknown) => [v, () => paints++];
+build.install({ seen: new Map(), said: new Map(), redraw: () => books++, api } as never);
 await new Promise((r) => setTimeout(r)); // the map
 
 const strip = () => nodes(build.Strip({ children: 'book' }));
@@ -48,7 +52,19 @@ const drawn = () =>
     .map((e) => e.props.accessibilityLabel.split(', ')[0]);
 const room = (key: string) =>
   sheet().find((e) => e.props?.accessibilityLabel?.startsWith(`${key}, `)).props;
-const box = (key: string) => room(key).style;
+/** A room's drawn box (its button is the whole cell around it). */
+const box = (key: string) => room(key).children.props.style;
+/** A room's centre on the ground and its box's width. */
+const mid = (key: string) => {
+  const c = room(key).style;
+  return { x: c.left + c.width / 2, y: c.top + c.height / 2, w: box(key).width };
+};
+const near = (a: { x: number; y: number; w: number }, b: typeof a, m: string) =>
+  assert.deepEqual(
+    [a.x, a.y, a.w].map((n) => n.toFixed(3)),
+    [b.x, b.y, b.w].map((n) => n.toFixed(3)),
+    m,
+  );
 const ground = () => sheet().find((e) => e.props?.onLayout);
 const SIZE = 384; // the docked sheet's width (sheet.tsx DOCK)
 
@@ -82,24 +98,49 @@ test('a tap selects and plays nothing; Go here starts in that room, Sheet opens 
   assert.equal(JSON.parse(kept.get(BUILD)!).sheets.at(-1), 'room:smithy');
 });
 
-test('⌃ and ⌄ step through the levels, and stop at the top', () => {
+test('the least zoom makes a cell a touch target; a level too big for it centres on the current room', () => {
+  press('Fit'); // level 0: 13 cells, 384 / 832 under 44 / 64
+  const c = mid('crossroads_inn'); // (0, 0): centred
+  near(c, { x: SIZE / 2, y: SIZE / 2, w: (48 * 44) / 64 }, 'fit stops at the least zoom');
+  assert.equal(room('crossroads_inn').style.width, size.touch, 'the button is the cell');
+  press('Zoom out');
+  near(mid('crossroads_inn'), c, 'zoom out stops there too');
+  const ring = () => [box('crossroads_inn').borderWidth, box('crossroads_inn').borderColor];
+  assert.deepEqual(ring(), [size.speechBar, ink('action')], 'the current room is ringed');
+  assert.equal(box('smithy').borderWidth, size.rule);
+  room('crossroads_inn').onPress();
+  assert.deepEqual(ring(), [size.speechBar, ink('fg')], 'in fg on its selected box');
+  const g = ground().props;
+  g.onLayout({ nativeEvent: { layout: { width: 572, height: 572 } } }); // 572 / 832 = 44 / 64: it fits
+  near(
+    mid('crossroads_inn'),
+    { x: 286 + 192 * (44 / 64), y: 286 + 192 * (44 / 64), w: 33 }, // its middle is cell (-2.5, -2.5)
+    'a level that fits at the least zoom centres on its middle',
+  );
+  g.onLayout({ nativeEvent: { layout: { width: SIZE, height: SIZE } } });
+});
+
+test('⌃ ⌄ step through the levels, disabled at the top and bottom, hidden on one level', () => {
   press('Level up');
   assert.equal(title(), 'Map · level 1');
   assert.equal(drawn().sort().join(' '), LEVEL1);
   press('Level up');
-  press('Level up');
   assert.equal(title(), 'Map · level 2');
   assert.deepEqual(drawn(), ['loft_attic']);
-  press('Level down');
-  press('Level down');
-  press('Level down');
+  const off = (label: string) => named(sheet(), label).props.accessibilityState.disabled;
+  assert.deepEqual([off('Level up'), off('Level down')], [true, false], 'the top');
+  for (let i = 0; i < 5; i++) press('Level down'); // 2 to -3
+  assert.equal(title(), 'Map · level -3');
+  assert.deepEqual([off('Level up'), off('Level down')], [false, true], 'the bottom');
+  press('Level up');
+  press('Level up');
   assert.equal(title(), 'Map · level -1');
   press('Level up');
   assert.equal(title(), 'Map · level 0');
 });
 
 test('fit, then a far drag and a zoom in, keep one cell of the level on screen', () => {
-  press('Fit'); // level 0 spans 13 cells (832 px): zoom 384 / 832 = 6/13
+  press('Fit'); // level 0 spans 13 cells (832 px): the least zoom, 44 / 64
   const t = { setPointerCapture() {}, getBoundingClientRect: () => ({ left: 100, top: 100 }) };
   const at = (x: number) => ({
     nativeEvent: { pointerId: 1, clientX: x, clientY: x },
@@ -109,24 +150,13 @@ test('fit, then a far drag and a zoom in, keep one cell of the level on screen',
   ground().props.onPointerDown(at(0));
   ground().props.onPointerMove(at(10000));
   ground().props.onPointerUp(at(10000));
-  // keep: x ≤ 384 - 64z + 576z, so crossroads_inn's box (centre 32z in, half-width 24z) is at 384 + 520z
-  assert.equal(box('crossroads_inn').left.toFixed(2), (384 + (520 * 6) / 13).toFixed(2)); // 624
-  press('Zoom in'); // zoom 7.5/13, about the centre, then kept again
-  assert.equal(box('crossroads_inn').left.toFixed(2), (384 + (520 * 7.5) / 13).toFixed(2)); // 684
+  // keep: x ≤ 384 - 64z + 576z, so crossroads_inn's centre (32z in) is at 384 + 544z
+  assert.equal(mid('crossroads_inn').x.toFixed(2), (384 + 544 * (44 / 64)).toFixed(2)); // 758
+  press('Zoom in'); // about the centre, then kept again
+  assert.equal(mid('crossroads_inn').x.toFixed(2), (384 + 544 * (55 / 64)).toFixed(2)); // 851.5
 });
 
-const mid = (key: string) => {
-  const b = box(key);
-  return { x: b.left + b.width / 2, y: b.top + b.height / 2, w: b.width };
-};
-const near = (a: { x: number; y: number; w: number }, b: typeof a, m: string) =>
-  assert.deepEqual(
-    [a.x, a.y, a.w].map((n) => n.toFixed(3)),
-    [b.x, b.y, b.w].map((n) => n.toFixed(3)),
-    m,
-  );
-
-test('zoom, pinch and wheel act about their point; a room press starts no drag; an exit joins room centres', () => {
+test('zoom, pinch and wheel act about their point; a room press within slop taps, past it pans; an exit joins room centres', () => {
   press('Fit');
   const c = mid('crossroads_inn');
   const t = { setPointerCapture() {}, getBoundingClientRect: () => ({ left: 100, top: 50 }) };
@@ -136,10 +166,22 @@ test('zoom, pinch and wheel act about their point; a room press starts no drag; 
     currentTarget: t,
   });
   const g = ground().props;
-  g.onPointerDown(ev(1, c.x, {})); // on the room: its tap
-  g.onPointerMove(ev(1, c.x + 50));
-  g.onPointerUp(ev(1, c.x + 50));
-  near(mid('crossroads_inn'), c, 'a room press drags nothing');
+  g.onPointerDown(ev(1, c.x, {})); // on the room
+  g.onPointerMove(ev(1, c.x + 10)); // within a tap's slop (11)
+  g.onPointerUp(ev(1, c.x + 10));
+  room('crossroads_inn').onPress();
+  near(mid('crossroads_inn'), c, 'a tap drags nothing');
+  assert.ok(
+    sheet().some((e) => e.props?.children === 'crossroads_inn — selected'),
+    'and selects',
+  );
+  g.onPointerDown(ev(1, c.x, {}));
+  g.onPointerMove(ev(1, c.x + 12)); // past it
+  g.onPointerUp(ev(1, c.x + 12));
+  room('smithy').onPress();
+  near(mid('crossroads_inn'), { ...c, x: c.x + 12 }, 'a room press that moves pans');
+  assert.ok(!sheet().some((e) => e.props?.children === 'smithy — selected'), 'and selects nothing');
+  press('Fit');
   g.onPointerDown(ev(1, c.x));
   g.onPointerMove(ev(3, c.x + 50)); // a pointer not held (a hovering mouse)
   g.onPointerUp(ev(1, c.x));
@@ -155,18 +197,26 @@ test('zoom, pinch and wheel act about their point; a room press starts no drag; 
   g.ref({ addEventListener: (_: string, f: typeof wheel) => (wheel = f) });
   wheel({
     preventDefault() {},
-    deltaY: 100,
+    deltaY: -50,
     clientX: c.x + 100,
     clientY: c.y + 50,
     currentTarget: t,
   });
-  near(mid('crossroads_inn'), { ...c, w: (c.w * 2) / Math.E }, 'the wheel zooms about the cursor');
+  near(
+    mid('crossroads_inn'),
+    { ...c, w: c.w * 2 * Math.exp(0.5) },
+    'the wheel zooms about the cursor',
+  );
   g.onLayout({ nativeEvent: { layout: { width: SIZE, height: SIZE } } });
-  near(mid('crossroads_inn'), { ...c, w: (c.w * 2) / Math.E }, 'a same-size layout keeps the view');
+  near(
+    mid('crossroads_inn'),
+    { ...c, w: c.w * 2 * Math.exp(0.5) },
+    'a same-size layout keeps the view',
+  );
   g.onLayout({ nativeEvent: { layout: { width: SIZE, height: SIZE / 2 } } });
   assert.notEqual(
     mid('crossroads_inn').w.toFixed(3),
-    ((c.w * 2) / Math.E).toFixed(3),
+    (c.w * 2 * Math.exp(0.5)).toFixed(3),
     'a new height refits',
   );
   g.onLayout({ nativeEvent: { layout: { width: SIZE, height: SIZE } } });
@@ -197,12 +247,47 @@ test('zoom, pinch and wheel act about their point; a room press starts no drag; 
       Math.abs(l.left + l.width / 2 - want.x) + Math.abs(l.top + l.height / 2 - want.y) < 1e-6,
   );
   assert.ok(bar, 'a bar centred between the rooms');
+  assert.deepEqual([bar.height, bar.backgroundColor], [size.rule, ink('dim')], "Map's line");
   assert.equal(bar.width.toFixed(3), want.w.toFixed(3));
   assert.ok(
     [turn, `${(Math.atan2(from.y - to.y, from.x - to.x) * 180) / Math.PI}deg`].includes(
       bar.transform[0].rotate,
     ),
   );
+});
+
+test('a drag, pinch or zoom redraws only the drawing; a level step redraws the Book (its title)', () => {
+  const t = { setPointerCapture() {}, getBoundingClientRect: () => ({ left: 0, top: 0 }) };
+  const ev = (id: number, x: number) => ({
+    nativeEvent: { pointerId: id, clientX: x, clientY: x },
+    target: t,
+    currentTarget: t,
+  });
+  const g = ground().props;
+  const [b0, p0] = [books, paints];
+  g.onPointerDown(ev(1, 100));
+  g.onPointerMove(ev(1, 120)); // a drag
+  g.onPointerDown(ev(2, 200));
+  g.onPointerMove(ev(2, 220)); // a pinch
+  g.onPointerUp(ev(1, 120));
+  g.onPointerUp(ev(2, 220));
+  press('Zoom in');
+  press('Fit');
+  assert.deepEqual([books - b0, paints - p0], [0, 4]);
+  press('Level up');
+  assert.equal(books - b0, 1);
+  press('Level down');
+});
+
+test('on a phone the drawing leaves the selection bar inside the half-height sheet; docked it stays square', () => {
+  Object.assign(globalThis, { innerWidth: 390, innerHeight: 844 });
+  // the grip, Back, the title and the controls over it; the bar's rule, gap, words and acts under it
+  // measured in the 390x844 web Book: the sheet is 399.5 high from y 444.5; 153 above the ground, 67
+  // under it to the acts' foot at 844
+  assert.equal(ground().props.style.maxHeight, 399.5 - 153 - 67);
+  Object.assign(globalThis, { innerWidth: 1280, innerHeight: 800 });
+  assert.equal(ground().props.style.maxHeight, undefined);
+  Object.assign(globalThis, { innerWidth: undefined, innerHeight: undefined });
 });
 
 test('Go here lets the map follow the current room again, refitted to the level it reaches', () => {
@@ -216,8 +301,8 @@ test('Go here lets the map follow the current room again, refitted to the level 
     ['mill'],
   );
   for (const key of drawn()) {
-    const { left, top, width, height } = box(key);
-    assert.ok(left >= 0 && top >= 0 && left + width <= SIZE && top + height <= SIZE, key);
+    const { x, y, w } = mid(key);
+    assert.ok(x - w / 2 >= 0 && y >= 0 && x + w / 2 <= SIZE && y <= SIZE, key); // level 1 fits
   }
 });
 
@@ -240,6 +325,13 @@ test('a stepped level that loses its rooms falls back; an unplaced room selects 
   const bar = () =>
     sheet().some((e) => e.type === 'Text' && e.props.children === 'nowhere — selected');
   assert.ok(bar());
+  const order = sheet().map((e) => e.key ?? e.props?.children);
+  assert.ok(
+    order.indexOf('nowhere — selected') < order.indexOf('unplaced nowhere'),
+    'the bar first',
+  );
+  known.rooms = all.filter((r) => r.at?.z === 0);
+  assert.equal(named(sheet(), 'Level up'), undefined, 'one level: no ⌃ ⌄');
   known.rooms = all;
   assert.ok(!bar());
 });

@@ -9,7 +9,7 @@ import { ink, type Builder } from './build.ts';
 const WORDS = { close: 'Back', grow: 'Full height' };
 /** Where the sheet docks beside the Book instead of rising over it, and its docked width.
  * ponytail: a placeholder; the designer names the breakpoint (ruling 7 gives none). */
-const DOCK = { at: size.column + size.column / 2, width: size.column / 2 }; // mutate-skip: placeholder
+export const DOCK = { at: size.column + size.column / 2, width: size.column / 2 }; // mutate-skip: placeholder
 
 /** Sheet kinds by the id's head (`room:cellar` is `room` with `cellar`). */
 export const sheets: Record<
