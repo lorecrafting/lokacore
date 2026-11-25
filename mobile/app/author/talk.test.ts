@@ -7,9 +7,9 @@ import { bind, tagged } from './prose_rules.ts';
 
 Object.assign(globalThis, { localStorage: { getItem: () => null, setItem() {} } });
 const { attach, go, line, shut } = await import('./build/field.tsx');
-const { icons, sceneLine } = await import('./build/talk.tsx');
+const { header, icons, sceneLine, titled } = await import('./build/talk.tsx');
 const { known } = await import('./build/room.tsx');
-const { wire } = await import('./build/roomedit.tsx');
+const { refused, running, wire } = await import('./build/roomedit.tsx');
 const { ink } = await import('./build/build.ts');
 const { opened } = await import('./build/formwrite.ts');
 
@@ -92,10 +92,11 @@ test('a JSON label commits through /line then /edit, no /restructure', async () 
 });
 
 // Breaks: a `.scene` label sent to /line, /edit or /set (decision 11: /set takes no label), or its
-// reword aimed at the wrong line or without the source's sha.
+// reword aimed at the wrong line or without the source's sha; the def sheet's icons on a `.scene`.
 test('a .scene label commits one reword at its own line, no /set', async () => {
   sent.length = 0;
   const p = label('world/cook.scene');
+  assert.equal(icon(p, 'when'), undefined, 'a .scene choice drew the JSON icons');
   answers = [[200, { id: 4 }]];
   await commit(p, 'Ask about eels');
   assert.deepEqual(sent, [
@@ -162,4 +163,89 @@ test('a Checks row for a label on the page opens its field here', async () => {
   assert.equal(go(KEY), true);
   await tick();
   shut();
+});
+
+/** The field's note as drawn under the label (field.tsx `say`). */
+const note = (p: object) => JSON.stringify(drawn(p)).match(/Changed on disk[^"]*/)?.[0];
+async function stale(theirs: string) {
+  const p = label('world/cook.scene');
+  icon(p, 'words').props.onPress(stop);
+  await tick();
+  const input = drawn(p).find((n) => n.type === 'TextInput');
+  input.props.onChangeText('Ask about eels');
+  [SCENE, answers] = [theirs, [[409, 'stale']]];
+  input.props.onSubmitEditing();
+  await tick();
+  await tick();
+  return p;
+}
+
+// Breaks: a `.scene` 409 not reading the line again (their words unshown), or reading words from a
+// source that lost the choice (a throw, the field stuck open with no Open source).
+test('a .scene label that changed on disk shows their words, or Open source when it is gone', async () => {
+  const was = SCENE;
+  assert.equal(
+    note(await stale('- Ask about cod #first\n')),
+    'Changed on disk since you opened it. Ask about cod',
+  );
+  shut();
+  assert.equal(note(await stale('- Other #second\n')), 'Changed on disk since you opened it.');
+  shut();
+  SCENE = was;
+});
+
+/** A game whose talk with the cook waits on its prompt; `policy` is the dialogue's. */
+const talking = (policy?: object) =>
+  ({
+    game: {
+      view: () => ({ view: { choice: { prompt: { key: 'dialogue.cook_lesson.prompt' } } } }),
+    },
+    canon: () => ({ dialogues: { [REF]: { policy } } }),
+  }) as any;
+const pens = (row: any[]) =>
+  row
+    .filter(Boolean)
+    .map((n) => n.props.accessibilityLabel)
+    .filter(Boolean);
+
+// Breaks: Add choice or Add line aimed at the wrong line (inside a nested set, before the words, at
+// a blank run), a refused add shown as nothing, or Add line drawn for a JSON dialogue.
+test('the header adds a .scene choice after the last top-level block and words before the first choice', async () => {
+  label('world/cook.scene');
+  const was = SCENE;
+  SCENE = 'One.\nTwo.\n\n- A #first\n  ~\n- B #second\n  - Deep #third\n';
+  const row = header(talking(), () => {})!;
+  assert.deepEqual(pens(row), ['Offered when: always · repeats', '＋ Add choice', '＋ Add line']);
+  const add = async (name: string) => {
+    sent.length = 0;
+    answers = [[409, 'stale']];
+    row.find((n: any) => n?.props.accessibilityLabel === name).props.onPress(stop);
+    while (running()) await tick();
+    return sent[1][1].op.add;
+  };
+  assert.deepEqual(await add('＋ Add choice'), { after: 6, kind: 'choice' });
+  assert.equal(refused(), 'stale');
+  assert.deepEqual(await add('＋ Add line'), { after: 2, kind: 'words' });
+  SCENE = was;
+  label('world/cook.json');
+  assert.deepEqual(pens(header(talking(), () => {})!), [
+    'Offered when: always · repeats',
+    '＋ Add choice',
+  ]);
+});
+
+// Breaks: a JSON Add choice not opening the def sheet at its choices; titled drawing a fragment or
+// nothing when only the header has something to draw, or a header with no talk waiting.
+test('a JSON Add choice opens the choices fold; titled draws the header alone, or nothing', () => {
+  label('world/cook.json');
+  let shown = '';
+  const row = header(talking(), (id) => (shown = id))!;
+  row.find((n: any) => n?.props.accessibilityLabel === '＋ Add choice').props.onPress(stop);
+  assert.equal(shown, 'def:world/cook.json');
+  assert.ok(opened.has('world/cook.json:["choices"]'));
+  assert.ok(Array.isArray(titled(talking(), () => {})));
+  assert.equal(
+    titled({ canon: () => ({}) } as any, () => {}),
+    undefined,
+  );
 });
