@@ -181,13 +181,14 @@ test('Turn on commerce: one op at requires.capabilities.commerce, then npcs.shop
 
 // break: a resource field offers no keys, offers a room's, or takes a key no resources.json entry has
 test('a cartridge resource field picks hp, ma, mv and resources.json keys; a room stays free text', async () => {
+  files.get('resources.json').resources.focus ??= {}; // its own, so it runs alone
   const s = await cartridge();
   const at = (path: string[]) =>
     s.shown().find((x) => x.key === `picks cartridge.json:${JSON.stringify(path)}`);
   const picks = nodes(at(['world', 'movement', 'cost', 'resource'])?.props.children).filter(
     (x) => x.props?.onPress,
   );
-  assert.deepEqual(picks.map(words), ['hp', 'ma', 'mv', 'gold', 'focus']); // the pools, then resources.json (focus from the test above)
+  assert.deepEqual(picks.map(words), ['hp', 'ma', 'mv', 'gold', 'focus']); // the pools, then resources.json
   assert.equal(at(['entry']), undefined);
   sent();
   const input = s.shown().find((x) => x.props?.defaultValue === 'mv' && x.props.onBlur);
