@@ -355,7 +355,7 @@ Builder 5.1a: the Dialogue sheet is the generic sheet; a choice is a fold. `Rena
 `Choice key` field is the map's Key field, its placeholder `type.small` in `dim`. A link and its
 nested set are each indented `space.md` more; the set's prompt and labels `type.small` in `dim`,
 one per line, wrapping. `＋ Add dialogue` on the Person sheet is an act.
-Builder 5.4b: the Notebook's `Contents` and `Story` tabs are acts. Story rows are Room sheet rows,
+Builder 5.4b: the Notebook's `Contents`, `Story` and (6.1a) `World` tabs are acts. Story rows are Room sheet rows,
 each level indented half a touch target more; a part's, beat's or definition's name with its marks
 (joined by ` · `) is an act, a Seed's name `type.small` `fg`; Facts, Pacing, Add beat, Go there,
 Sheet, Trace, Consequences, Retitle, Remove, Knowledge, `Bind…` and each `Bind <short>` are acts,
@@ -390,6 +390,10 @@ two `size.rule` rules in `line` across the sheet, `space.sm` inside each: its `<
 height on a 390 px phone the centre's name shows without a scroll when `Leads here` holds one
 node. No raw sizes.
 Builder 5.1a and 5.4b add `Flow`, an act, to a choice's and a Story row's acts.
+Builder 6.1a: the World tab's file names and each `Turn on <key>` are acts in Room sheet rows,
+wrapping at 390 px and in the 384 px docked sheet. A reference field's picks are the generic
+sheet's option buttons under its typed field, the present one a selected act, wrapping the same.
+No raw sizes.
 Worst pair: `warning` on `card`,
 4.75 (light).
 

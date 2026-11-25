@@ -1041,7 +1041,7 @@ reasons and limits: [prose in the Book rulings](../design/prose-in-the-book-ruli
     source files the latest story names, sorted by path; a file opens its `def:<file>` sheet
     (Build: the generic sheet) on top.
   - **Story (5.4b, [builder mode §4.8](../rnd/in-game-builder-mode-2026-11-19.md#48-the-story-on-a-phone)).**
-    The Notebook sheet has two tabs, `Contents` and `Story`; the open tab is marked selected. Story
+    The Notebook sheet has three tabs, `Contents`, `Story` and `World` (6.1a); the open tab is marked selected. Story
     shows the refusal line, then `Facts` and `Pacing`, then each part (`Part n Title`) with a number
     field and `Add beat`, its beats (`n Title`, `· unwritten` where the panel marks it `~`, `· missing`
     when unbuilt), each beat's bound definitions, Seeds as plain lines that are not buttons, and
@@ -1062,6 +1062,14 @@ reasons and limits: [prose in the Book rulings](../design/prose-in-the-book-ruli
       With a story but no parts (no outline file, or none in it), it shows that plain line, then
       the number field and `Add beat`, which writes beat n into the first part. A sheet opened
       from it with no story says Nothing here.
+  - **World (6.1a).** The refusal line, then a row of the world's root files that were read, in
+    the order `cartridge.json`, `facts.json`, `resources.json`, `attributes.json`, `text.json`; a
+    file absent or not yet read is not listed. A file opens its `def:<file>` sheet on top (on the
+    generic sheet; `text.json` has no block). Once `cartridge.json` is read, a row of
+    `Turn on <key>`, one per capability in the registry the cartridge lacks, in registry order:
+    a press writes it into `requires.capabilities` at its registry version, one write that one
+    Undo takes back, no confirm; it leaves the row after the reread. A write sent from an old read
+    is refused as the generic sheet's are, never overwritten.
   - **Flow walk (5.5b, [builder mode decision 9 as amended](../rnd/in-game-builder-mode-2026-11-19.md)).**
     `flow:<ref>`, one sheet titled `Flow <key>`; not the panel's canvas shrunk. In order: the
     walk's trail, when it has more than one step (its keys joined ` › `, under the header); a
@@ -1148,6 +1156,13 @@ reasons and limits: [prose in the Book rulings](../design/prose-in-the-book-ruli
       `Add hour` writes the first free hour, sending the person to the room in their own file;
       with no room there, or every hour taken, it is a disabled greyed row with
       `place the NPC in a room first, or the day is full`.
+  - **World block** (6.1a, [`world_card.ts`](../../kernel/ts/play/world_card.ts)). In
+    `resources.json` and `attributes.json`, a root entry's `Add` writes the World card's new entry
+    for that key instead of the least value. Elsewhere, a field that names a resource or an
+    attribute gets one pick per key of the read root file under its typed field, the present one
+    picked; a press writes it. A typed value naming no key is refused without a write
+    (`no <kind> <key>`). While that root file is unread the field is free text, as are fields
+    naming rooms, items and people until 6.1b.
   - Labels here are placeholder words, the owner's to replace.
 - **Build: ghost lines and See as…** (slice 2.5, [builder mode §4.5](../rnd/in-game-builder-mode-2026-11-19.md)).
   Looks: [author-mode marks](../BOOK-UI-COMPONENTS.md#component-catalogue).
