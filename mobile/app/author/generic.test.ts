@@ -195,9 +195,7 @@ async function edit(s: { file: string; shown: () => any[] }, path: unknown[], th
 const rows = Object.entries(read('kernel/ts/play/registry.json') as Record<string, any>).flatMap(
   ([p, r]) =>
     Object.keys(r.book ?? {})
-      .filter((op) =>
-        ['generic', 'generic.tsx', 'combat.tsx', 'schedule.tsx', 'rules.tsx'].includes(r.book[op]),
-      ) // the blocks claim a root field (generic.tsx)
+      .filter((op) => /^(generic|(generic|combat|schedule|rules|world)\.tsx)$/.test(r.book[op])) // the blocks claim a root field (generic.tsx)
       .map((op) => [p, op]),
 );
 assert.ok(rows.length > 0);
@@ -205,6 +203,7 @@ for (const [p, op] of rows) {
   const [kind, f] = p.split('.');
   test(`${p}.book.${op}`, async () => {
     let ops: any[] = [];
+    if (!f) return assert.deepEqual(await catalog(kind, op), [kind === 'text' ? 'k' : '?']); // a root map: its typed key
     for (const v of ROOTS.includes(kind) ? [{}] : [...VARIANTS, ...[FIRST[kind] ?? {}].flat()]) {
       ops = await gesture(kind, f, 'create', { ...v });
       if (op !== 'create') ops = await gesture(kind, f, op, { ...v, [f]: ops[0]?.value ?? '7' });
@@ -215,7 +214,19 @@ for (const [p, op] of rows) {
       [f],
     );
     if (op === 'delete') assert.equal(ops[0].delete, true);
+    if (kind === 'cartridge') (files.set('cartridge.json', CART), load(), await settle()); // the later rows' capabilities
   });
+}
+
+/** `op` on a root map's entry `k` (the text catalog): the paths it writes. */
+async function catalog(kind: string, op: string) {
+  const s = await opened(kind, op === 'create' ? {} : { k: 'a' });
+  sent();
+  if (op === 'edit') return (await typeIn(s, ['k'], 'b')).map((o) => o.path[0]);
+  const key = () => s.shown().find((x) => x.props?.accessibilityLabel === WORDS.key);
+  if (op === 'delete') await s.press(`remove ${s.file}:["k"]`);
+  else (key().props.onChangeText('k'), await s.press('entry '));
+  return sent().map((o) => o.path[0]);
 }
 
 // Breaks: a number written as text, or rewritten unchanged; an optional constant's On or Off, a

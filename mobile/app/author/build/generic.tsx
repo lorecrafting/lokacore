@@ -17,6 +17,7 @@ import { io, refusal } from './roomedit.tsx';
 import { lines, pages, scenic } from './scene.tsx';
 import { schedule } from './schedule.tsx';
 import { sheets } from './sheet.tsx';
+import { world } from './world.tsx';
 
 type Got = { doc: unknown; was: string; kind: string; defs: Defs; root: Record<string, unknown> };
 const got = new Map<string, Got>(); // each file with its schema, as last read
@@ -26,7 +27,7 @@ type Cart = Parameters<typeof turnOn>[2] & { calendar?: { hours_per_day?: number
 let cart: { doc: Cart; was: string } | undefined; // cartridge.json as last read: its capabilities gate Add mechanic…
 
 /** `file` and its kind's schema as last read; read again under a new /story, then the Book redraws. */
-function load(file: string) {
+export function load(file: string) {
   if (of !== known.files) (fresh.clear(), (of = known.files), cartridge());
   if (!fresh.has(file)) {
     fresh.add(file);
@@ -90,6 +91,7 @@ function claims(kind: string, doc: Record<string, unknown>) {
     ),
     'scene.tsx': scenic(doc),
     'rules.tsx': block, // the form's unions are the Rules block already (form.tsx `field`)
+    'world.tsx': world((f) => load(f)?.doc),
   };
   return (f: string) => by[(REGISTRY as Record<string, Row>)[`${kind}.${f}`]?.book?.edit ?? ''];
 }
