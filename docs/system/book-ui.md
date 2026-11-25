@@ -1232,6 +1232,32 @@ reasons and limits: [prose in the Book rulings](../design/prose-in-the-book-ruli
   - Not in 5.1a: the conversation in Build (§4.6's icon row and in-place words), `.scene`
     dialogues and their line rows.
   - Labels here are placeholder words, the owner's to replace.
+- **Build: the conversation** (slice 5.1b, [builder mode §4.6](../rnd/in-game-builder-mode-2026-11-19.md)).
+  In Build, a waiting talk on the Book page gains three things; outside Build it draws as without
+  them. Looks: [author-mode marks](../BOOK-UI-COMPONENTS.md#component-catalogue).
+  - **Words.** The talk's prompt and each choice label edit in place, as a description does. A JSON
+    label saves through its line (`/line`, then `/edit`); a `.scene` label through one `/restructure`
+    reword of its `- ` line (decision 11: `/set` takes no label). A label whose key repeats in the
+    scene, or whose source is gone, opens no field; a label changed on disk shows the
+    changed-on-disk notice with their words, or `Open source` when the choice is gone.
+  - **The icon row.** Under each choice label, inside its card, one row: `✎ words`, `◇ when`,
+    `↦ does`, `→ goes`. An icon is lit when the choice has that field, dim when it does not; words
+    is always lit. words turns the label into its field in place (the row goes while it is open).
+    when, does and goes open the dialogue's sheet with that choice's fold open (every other choice
+    folded) at the field, or at its `Add…` when absent; goes opens the `then` fold, which is always
+    drawn (`then_failed` when only that is set). A `.scene` choice has words only.
+  - **The card still plays.** A tap on the card plays the choice; the label takes no press of its
+    own, and neither an icon nor the open field is the card's press.
+  - **The header line.** Under the person's title, while their talk waits: `Offered when: <the
+    policy in words, or always> · repeats` with `⚙→`, which opens the sheet at `policy`; then
+    `＋ Add choice` (JSON: the sheet at `choices`; `.scene`: a least choice after the last top-level
+    choice's block) and, for a `.scene`, `＋ Add line` (new words after the last line before the
+    first choice). A refused add shows its reason.
+  - **The reading page stays first.** Nothing here covers or reorders the conversation's lines:
+    the header sits between the title and the first line, and the icon row inside its own card.
+  - Not in 5.1b: an authored label key (not `choices.<key>.label`) gets no row; the sheet does not
+    scroll to the choice; `repeats` is constant; a `.scene` add makes no Undo entry.
+  - Labels here are placeholder words, the owner's to replace.
 - **No field.** A double-click on a line that is not words opens nothing; a note under it, in a
   row of its own (the lines below move down by its height while it shows and back when it goes,
   with no motion; a note never covers a line, loka-wfrgk.39), until the next click or key, read politely: `A choice label is its key. Alt-click opens the scene.`,
