@@ -37,7 +37,13 @@ const picks = (
 ) => (
   <View style={{ ...row, flexWrap: 'wrap' }}>
     {vs.map((v) =>
-      act(String(v), () => put(next(v as never)), undefined, `${what} ${String(v)}`, v === now),
+      act(
+        String(v),
+        () => v === now || put(next(v as never)),
+        undefined,
+        `${what} ${String(v)}`,
+        v === now,
+      ),
     )}
   </View>
 );

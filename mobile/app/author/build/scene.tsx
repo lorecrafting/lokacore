@@ -58,12 +58,14 @@ function source(file: string) {
   return got.get(file);
 }
 
-const ROW = 'loka-build-row'; // [row, open]: a `.scene` op's compile reloads the Book (App.tsx)
+const ROW = 'loka-build-row'; // [row, open, end]: a `.scene` op's compile reloads the Book (App.tsx)
 let focus: string | undefined; // the row to take focus once drawn (rulings §5)
 try {
-  const [k, open] = JSON.parse(localStorage.getItem(ROW) ?? 'null') ?? [];
-  if (open) opened.add(k);
-  focus = k;
+  const [k, open, end] = JSON.parse(localStorage.getItem(ROW) ?? 'null') ?? [];
+  if (end > Date.now()) {
+    if (open) opened.add(k);
+    focus = k;
+  }
   localStorage.setItem(ROW, 'null');
 } catch {} // a damaged entry or none (a test, native): no row takes focus
 /** Line `op` leaves its row at in `now` (was `was`): an add's new line, the first changed non-blank
@@ -92,7 +94,8 @@ const restructure = (
     // after a remove, split or join `${file}:undefined`: no row takes focus
     const to = `${file}:${landed(op, s.bytes.split('\n'), now.split('\n'), starts)}`;
     const from = 'move' in op && `${file}:${op.move}`;
-    localStorage.setItem(ROW, JSON.stringify([to, from && opened.has(from)])); // kept first: the reload can come first
+    // kept first, as the reload can come first; so not cleared on success, but ending soon
+    localStorage.setItem(ROW, JSON.stringify([to, from && opened.has(from), Date.now() + 10_000]));
     try {
       await ed.call('restructure', { file, was: s.sha256, op, carry: [] }); // a refusal throws
     } catch (e) {
@@ -100,7 +103,8 @@ const restructure = (
       throw e;
     }
     focus = to;
-    if (from && opened.delete(from)) opened.add(to);
+    if (from) opened.delete(from) && opened.add(to);
+    else for (const k of opened) if (k.startsWith(`${file}:`)) opened.delete(k); // the lines shifted
   });
 /** An act: pressable when `why` is undefined, else greyed with it. */
 const acted = (label: string, why: string | undefined, go: () => void) =>

@@ -180,7 +180,8 @@ test('a cut draws each line once under its page caption, its end mark bare; page
 // Breaks: after a move the row's acts closed or left on its old line, focus not following the row to
 // its new line (above or below, a choice with its block or past a nested choice, a page with its
 // lines), or an added line not taking focus; neither kept across the reload a compile makes; a
-// refused op moving or keeping either.
+// refused op moving or keeping either; a row left open after a remove shifts the lines, or an old
+// entry restoring a row on a later load.
 test('a moved row stays open and takes focus at its new line; an added line takes focus', async () => {
   const file = 'scenes/f.scene';
   const cutFile = 'scenes/f.cut';
@@ -224,7 +225,7 @@ test('a moved row stays open and takes focus at its new line; an added line take
   await press(named(nodes(lines(file)), 'words line'));
   opened.clear();
   assert.deepEqual(focused(() => lines(file), file)[0], `${file}:4`);
-  assert.deepEqual(JSON.parse(stored['loka-build-row']), [`${file}:4`, false]); // kept shut
+  assert.deepEqual(JSON.parse(stored['loka-build-row']).slice(0, 2), [`${file}:4`, false]); // shut
   all = await drawn(() => pages(cutFile, false), cutFile, 1);
   await press(named(all, 'Move down page 1'));
   assert.deepEqual(
@@ -235,6 +236,19 @@ test('a moved row stays open and takes focus at its new line; an added line take
   files[g] = 'npc: bram\n\n- A #a\n  * x\n  - A1 #a1\n    * y\n- B #b\n  * z\n';
   await press(named(await drawn(() => lines(g), g, 7), 'Move up line 7'));
   assert.deepEqual(focused(() => lines(g), g)[0], `${g}:3`);
+  await press(named(nodes(lines(g)), 'Remove line 3'));
+  assert.deepEqual(
+    focused(() => lines(g), g),
+    ['', []],
+  ); // the lines shifted: no row stays open
+  stored['loka-build-row'] = JSON.stringify([`${g}:3`, true, Date.now() - 1]);
+  const late = (await import('./build/scene.tsx?late.tsx')).lines as typeof lines;
+  late(g);
+  await tick();
+  assert.deepEqual(
+    focused(() => late(g), g),
+    ['', []],
+  ); // an ended entry restores nothing
   answer = [409, 'stale'];
 });
 
@@ -295,11 +309,12 @@ const wrote = () => sent.map(([, b]) => b.ops[0].value);
 
 // Breaks: a value pick writing another point's offer, an outcome pick writing another point, the
 // lit kind or value not lit or drawn like the rest (not Map's selected box: the action fill, its
-// words in the background colour), unoffered kinds drawn, or a press on the lit kind rewriting the on.
+// words in the background colour), unoffered kinds drawn, or a press on a lit kind, value or outcome
+// rewriting the on (a lit value reset to the point's first outcome).
 test('a point trigger: its kinds, values and outcomes lit and each pick writes its own on', async () => {
   const sp = (r: string) => ({ ref: `story_point/${r}`, kind: 'story_point' });
   const draw = () =>
-    trigger({ story_point: 'p', outcome: 'a' }, { points: { p: ['a', 'b'], q: ['c'] } }, [
+    trigger({ story_point: 'p', outcome: 'b' }, { points: { p: ['a', 'b'], q: ['c'] } }, [
       sp('p'),
       sp('q'),
     ]);
@@ -323,12 +338,13 @@ test('a point trigger: its kinds, values and outcomes lit and each pick writes i
       [undefined, ink('action')],
     ],
   );
-  await press(all.find((x) => x.key === 'kind story_point'));
+  for (const k of ['kind story_point', 'value p', 'outcome b'])
+    await press(all.find((x) => x.key === k));
   assert.deepEqual(sent, []);
   await press(all.find((x) => x.key === 'value q'));
   assert.deepEqual(wrote(), [{ story_point: 'q', outcome: 'c' }]);
-  await press(draw().find((x) => x.key === 'outcome b'));
-  assert.deepEqual(wrote(), [{ story_point: 'p', outcome: 'b' }]);
+  await press(draw().find((x) => x.key === 'outcome a'));
+  assert.deepEqual(wrote(), [{ story_point: 'p', outcome: 'a' }]);
 });
 
 // Breaks: a quest's typed outcome not written on leaving the field, an unchanged or refused one
