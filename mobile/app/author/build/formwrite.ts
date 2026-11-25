@@ -11,8 +11,13 @@ export type Obj = Record<string, unknown>;
 export type Step = string | number;
 export type Write = Parameters<typeof ed.change>[number];
 export type Ops = Write[2]; // mutate-skip: a type, erased at run time
-/** Add mechanic…'s fields the cartridge takes, and those it refuses with any turn-on write (`turnOn`). */
-export type Mechanics = { allowed: string[]; blocked: (Blocked & { on?: Write })[] };
+/** Add mechanic…'s fields the cartridge takes, those it refuses with any turn-on write (`turnOn`), and
+ * those no Add offers (`hide`: another action definition's, action.ts `menuOf`). */
+export type Mechanics = {
+  allowed: string[];
+  blocked: (Blocked & { on?: Write })[];
+  hide?: string[];
+};
 /** The file drawn and the hash it was read at, its schema's `$defs`, the definitions entered so far,
  * a root field's least value and the root fields a block draws instead (combat.tsx, schedule.tsx). */
 export type At = {

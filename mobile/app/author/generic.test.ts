@@ -1,4 +1,4 @@
-// size: allow 600, one mocked /story and /change harness serves the registry rows and the Rules block cases
+// size: allow 640, one mocked /story and /change harness serves the registry rows and the Rules block cases
 // The generic sheet (author/build/generic.tsx, form.tsx; design §7, slice 2.3): every registry row
 // whose book verb is `generic` (kernel/ts/play/registry.json, held by bin/editor_gate.exs) is
 // added, edited or removed by the sheet, each a `/change` op at the row's own path.
@@ -578,6 +578,27 @@ test("adding an action's check writes its failure in the same /change; removing 
     { path: ['check'], delete: true },
     { path: ['outcomes'], value: { success: {} } },
   ]);
+});
+
+// Breaks: a scripted action offered `command` (or a command action `check`) by Add… or Add mechanic…
+test("an action's two Adds offer no field of the other action definition", async () => {
+  for (const [doc, other] of [
+    [{ outcomes: { success: {} } }, 'command'],
+    [{ command: { verb: 'x' } }, 'check'],
+  ] as const) {
+    const s = await opened('actions', doc);
+    await s.press(`add ${s.file}`);
+    await s.press(`mechanic ${s.file}`);
+    const offers = s
+      .shown()
+      .map((x) => String(x.key))
+      .filter((k) => /^(add|mechanic) /.test(k));
+    assert.ok(offers.length > 2, offers.join());
+    assert.ok(
+      !offers.some((k) => k.startsWith(`add ${other} `) || k.startsWith(`mechanic ${other} `)),
+      offers.join(),
+    );
+  }
 });
 
 // Breaks: no divider before a wait's later steps, or one drawn before every step.

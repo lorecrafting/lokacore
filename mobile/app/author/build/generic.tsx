@@ -64,6 +64,10 @@ function mechanics(kind: string, doc: Record<string, unknown>, defs: Defs): Mech
   const on = (f: string) => turnOn(kind, f, c.doc, doc);
   return {
     allowed,
+    // a new action (neither `command` nor `outcomes` yet) may still become either: Add… keeps both
+    hide: ['command', 'outcomes'].some((f) => Object.hasOwn(doc, f))
+      ? menu.filter((f) => !own.includes(f))
+      : [],
     blocked: blocked.map((b) => ({
       ...b,
       on: on(b.field) && ['cartridge.json', c.was, on(b.field)!],
@@ -105,8 +109,8 @@ const gate = (kind: string, doc: unknown) => (o: Ops) => {
 
 /** A scripted action's write brings its failure outcome with its check, or drops it with the check
  * (action.ts `paired`, the panel's Action card): one more op on `outcomes`, in the same /change. */
-const pair = (kind: string, doc: unknown, defs: Defs) => (o: Ops) => {
-  if (kind !== 'actions' || Object.hasOwn(doc as object, 'command')) return o;
+// only an action has a root `outcomes` (paired leaves every other doc as it is)
+const pair = (doc: unknown, defs: Defs) => (o: Ops) => {
   const after = structuredClone(doc) as Record<string, unknown>;
   try {
     change(after, o);
@@ -140,7 +144,7 @@ function body(file: string) {
     mech,
     claim,
     gate: gate(g.kind, doc),
-    pair: pair(g.kind, doc, g.defs),
+    pair: pair(doc, g.defs),
     kind: g.kind,
   };
   // a scene's `.cut` twin, when it has one: its pages above its fields

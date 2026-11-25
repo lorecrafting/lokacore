@@ -114,7 +114,11 @@ function object(at: At, path: Step[], s: Extract<Shape, { as: 'object' }>, value
   const shown = (k: string) => Object.hasOwn(v, k) || reveals().includes(id(at, [...path, k]));
   const keys = [...new Set([...Object.keys(v), ...Object.keys(s.props)])].filter(shown);
   const m = at.mech; // the root only (field)
-  const theirs = new Set([...(m?.allowed ?? []), ...(m?.blocked ?? []).map((b) => b.field)]);
+  const theirs = new Set([
+    ...(m?.allowed ?? []),
+    ...(m?.hide ?? []),
+    ...(m?.blocked ?? []).map((b) => b.field),
+  ]);
   const start = (k: string) => at.seed?.(k) ?? least(s.props[k], at.defs);
   // Add mechanic… offers no field whose first write the gate would refuse (generic.tsx `gate`)
   const refused = (k: string) => start(k) !== undefined && !!at.gate?.(ops([...path, k], start(k)));
