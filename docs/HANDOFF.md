@@ -4,22 +4,36 @@ The present only: open work, next steps, owner questions, and standing owner rul
 yet. Rewrite this page in place once per session, at its end; never add dated session sections. History lives in git, Beads and `docs/reviews/`; lessons
 go to [PM lessons](lessons/pm.md) ([harness patterns](decisions/owner-decision-harness-patterns-2026-10-28.md)).
 
-AS OF main after 0ed522f3e; written 2026-11-23 in Claude Code (Opus 5.5), PM session. The Anthropic
-subscription is on the $20 Pro plan: low-token workflow, **subagents on Opus, never Fable** (no usage
-credits). `kernel_api` is 1.159. **Nothing is in flight, no agent is running.** #454 is the owner's P3 hold.
+AS OF main after the #790 merge; written 2026-11-24 in Claude Code (Opus 5.5), PM session. The $20 Pro
+plan: **one developer agent at a time** (owner reaffirmed 2026-11-24). A designer or reviewer may run
+beside it. Subagents use Opus. `kernel_api` is 1.159.
 
-Shipped 2026-11-23: **#780** `loka-0s4wv` (the nightly's red: the map test now polls the room files
-too, not only `layout.json`) and **#779** `hcnlh.17` (2.5, ghost lines and See as…). Rulings on 2.5:
-- **The owner (paraphrased): every ghost is its own line under the title, never collapsed.** Each line is
-  cut to one line; the Room sheet lists every ghost again, whole. The owner accepted the fixed header
-  growing one touch target per ghost.
-- PM: a same-room act does not end See as. Ghost lines are the Build-only exception to the room page
-  anatomy (`book-ui.md`, `AGENTS.md`).
-- Open 2.5 limits are in #779's body: placement by starting room (a person who walked off reads
-  `not here now` there); a dark room ghosts every variant; gate reasons shown even when the fact is true.
-  #779's "canon cached until reload" is wrong in practice: a compile that changes the world reloads the
-  preview by itself (`App.tsx` `loka_dev_hash`), so a new hidden person ghosts at once. Browser-checked
-  2026-11-23; live word edits update ghosts through the overlay. Only Hold's parked compiles wait.
+**Live state at this handoff:**
+- **Developer running:** slice 5.2 (`loka-hcnlh.24`, worktree `loka-hcnlh.24`, scene rows). Check `ListAgents`
+  after a /clear; it keeps running.
+- **The owner's author server runs from worktree `pm-pagehide`** (branch `fix/dev-save-pagehide`,
+  **PR #789**), with `--lan` on the prologue: preview 19006, panel 19009, CA 19005. Never touch those ports
+  or that worktree while the owner tests. `merge_pr.sh 789` would delete the worktree under the live
+  server, so merge #789 only after the owner stops testing, then restart `bin/author.sh cartridges/prologue --lan`
+  from main.
+- **#789:** Safari's save lock (WebKit's "The object is in an invalid state.") now reads as "open in
+  another tab" with Try again. Uncommitted in pm-pagehide: `mobile/app/SaveError.tsx` shows the raw
+  error in the dev preview (`loka-hcnlh.19.2`). Commit it to #789 once it has a test.
+- **Open phone bug:** Safari on the Mac and the iPhone show "The save could not be opened" (not the lock).
+  The raw error line is pending from the owner. Bead `loka-hcnlh.19.2` (fresh WebKit profiles hit
+  "Sync operation timeout"). Repro tool: Playwright WebKit is installed; OPFS needs `launchPersistentContext`.
+- **Owner checks:** 3.1 passed on the iPhone (closed). 3.2 (`loka-hcnlh.19`) is blocked on the save bug. 6.7
+  and 6.8 wait for the owner.
+
+**Shipped this session:** #780 (map test flake), #779 (ghost lines; the owner's every-ghost ruling), #781
+and #783 (LAN pairing + HTTPS under a name-constrained CA; `loka-xetp3`), #782 and #784 (the Build map and its
+edits), #785 and #786 (story-list and flow logic moved to `kernel/ts/play`), #787 and #790 (5.1 dialogue sheet
+and conversation), #788 (5.4b Story tab).
+
+**Next, in order (briefs are in each bead's notes; split parts merge under their own child id):** 5.2 (running),
+5.3 (`.25`), 5.5b (`.27`, readers below, setters above), then phase 6 (`.28`-`.33`; parity is checked at 6.5b).
+6.8 waits for the owner's 6.7 yes. Follow-ups: `.42` (parity rows), `.43`, `.44`, `.45` (create the outline),
+`.46` (builder dark palette + a stale book-ui line), `loka-x38dh` (inbook flake).
 
 ## Direction
 
