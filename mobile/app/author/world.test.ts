@@ -90,6 +90,17 @@ async function opened(id: string) {
   const press = async (key: string) => (find(key).props.onPress(), await drawn());
   return { shown, find, press };
 }
+/** The cartridge sheet with world.movement.cost unfolded. */
+async function cartridge() {
+  const s = await opened('def:cartridge.json');
+  for (const path of [['world'], ['world', 'movement'], ['world', 'movement', 'cost']])
+    if (
+      s.find(`fold cartridge.json:${JSON.stringify(path)}`)?.props.accessibilityState?.expanded ===
+      false
+    )
+      await s.press(`fold cartridge.json:${JSON.stringify(path)}`);
+  return s;
+}
 const sent = () => posts.splice(0).flatMap((p) => p.ops.map((o) => [o.path.join('.'), o.value]));
 /** Key `k` typed into sheet `s`'s new-entry field (its map unfolded at `fold` first), then Add. */
 async function added(s: Awaited<ReturnType<typeof opened>>, fold: string, k: string) {
@@ -102,6 +113,20 @@ async function added(s: Awaited<ReturnType<typeof opened>>, fold: string, k: str
   key().props.onChangeText(k);
   await s.press(`entry ${id}`);
 }
+
+// break: an unread resources.json counts as one with no keys, so a real key is refused (code review)
+test('with resources.json unread, a cartridge resource field takes gold as free text', async () => {
+  const [kept, cart] = [files.get('resources.json'), structuredClone(files.get('cartridge.json'))];
+  files.delete('resources.json'); // before any test reads it
+  const s = await cartridge();
+  sent();
+  const input = s.shown().find((x) => x.props?.defaultValue === 'mv' && x.props.onBlur);
+  input.props.onChangeText('gold');
+  input.props.onBlur();
+  await settle();
+  assert.deepEqual(sent(), [['world.movement.cost.resource', 'gold']]);
+  files.set('resources.json', kept).set('cartridge.json', cart); // the /story test 3 sends rereads both
+});
 
 // break: a new fact's value_type is written without its default (picked's required fields dropped)
 test('a new fact lit, then its value_type: the entry, then the type with its default true', async () => {
@@ -171,13 +196,7 @@ test('Turn on commerce: one op at requires.capabilities.commerce, then npcs.shop
 
 // break: a resource field offers no keys, offers a room's, or takes a key no resources.json entry has
 test('a cartridge resource field picks hp, ma, mv and resources.json keys; a room stays free text', async () => {
-  const s = await opened('def:cartridge.json');
-  for (const path of [['world'], ['world', 'movement'], ['world', 'movement', 'cost']])
-    if (
-      s.find(`fold cartridge.json:${JSON.stringify(path)}`)?.props.accessibilityState?.expanded ===
-      false
-    )
-      await s.press(`fold cartridge.json:${JSON.stringify(path)}`);
+  const s = await cartridge();
   const at = (path: string[]) =>
     s.shown().find((x) => x.key === `picks cartridge.json:${JSON.stringify(path)}`);
   const picks = nodes(at(['world', 'movement', 'cost', 'resource'])?.props.children).filter(

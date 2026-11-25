@@ -59,7 +59,7 @@ export function worldRows(read: Read) {
 export const world =
   (read: (file: string) => unknown): Block =>
   (at, path, node, value, removable) => {
-    const root = ROOTS.find((r) => r.rel === at.file && r.field === path[0]);
+    const root = ROOTS.find((r) => r.rel === at.file);
     if (root)
       return block(
         { ...at, fresh: (p, k) => (p.length === 1 ? newEntry(root, k) : undefined) },
@@ -68,7 +68,9 @@ export const world =
         value,
         removable,
       );
-    const named = rootNames(ROOTS.map((r) => read(r.rel)));
+    const docs = ROOTS.map((r) => read(r.rel));
+    // a root file not read (yet, or at all) names no keys: its field stays free text, refusing nothing
+    const named = Object.fromEntries(Object.entries(rootNames(docs)).filter((_, i) => docs[i]));
     // a room, item or person stays free text here (the panel's datalist; 6.1b's pickers)
     const pick = (p: (string | number)[], v: unknown) => {
       const got = pickable(p, known.nodes, named, v);
@@ -77,9 +79,7 @@ export const world =
     const gate = (o: Ops) =>
       o
         .map((x) =>
-          'value' in x && typeof x.value === 'string'
-            ? refusePick(pick(x.path, x.value), x.value)
-            : undefined,
+          typeof x.value === 'string' ? refusePick(pick(x.path, x.value), x.value) : undefined,
         )
         .find(Boolean) ?? at.gate?.(o);
     return block({ ...at, pick: (p, v) => pick(p, v)?.keys, gate }, path, node, value, removable);
