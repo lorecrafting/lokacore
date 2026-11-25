@@ -374,6 +374,12 @@ their own, wrapping at 390 px, each indented `space.md` more; a refused act is a
 caption, on the sheet and in ScenePage, is the field caption (`type.label` `dim`); the end mark is
 `type.label` `dim`. A selected act is Map's selected box: `action` filled, its words in `bg`, its
 touch target kept. A quest's outcome field is the Area field.
+Builder 5.3: a Rules block's branch picker is the generic sheet's branch buttons, the picked one a
+selected act, wrapping at 390 px. The later-rules divider: a `size.rule` dashed rule in `dim` (the
+ghost line's dashed `dim`, never `line`) across the item's indent, `space.sm` above and below it,
+`later rules` `type.label` in `dim` at the item's text edge. An object's `Add…` and its field names
+sit at the indent of that object's own fields, so a nested `Add…` stands `space.md` right of its
+parent's.
 Worst pair: `warning` on `card`,
 4.75 (light).
 
