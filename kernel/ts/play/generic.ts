@@ -62,6 +62,8 @@ export function shapeOf(
     return keyed(n, shapeOf(branch(n, value), value, defs, s), value, defs);
   if (Array.isArray(n.allOf)) n = merged(n, n.allOf as Obj[], defs, s);
   if ('const' in n) return [{ as: 'const', value: n.const }, s];
+  // a one-value enum (a reaction's `once`) is a constant: it has nothing to pick, only On or Off
+  if (Array.isArray(n.enum) && n.enum.length === 1) return [{ as: 'const', value: n.enum[0] }, s];
   if (Array.isArray(n.enum)) return [{ as: 'enum', options: n.enum }, s];
   const branches = (n.anyOf ?? n.oneOf) as Obj[] | undefined;
   if (branches && !n.properties) return [{ as: 'union', branches }, s];

@@ -1,6 +1,7 @@
 // The generic sheet (design §6.4, slice 2.3): any source file's fields, drawn from its kind's schema
 // by form.tsx (`def:<file>`). The file and its `/schema/<dir>` are read as the panel's Generic card
 // reads them; the server validates each write.
+import { paired, menuOf } from '../../../../kernel/ts/play/action.ts';
 import { cardMenuWith, turnOn } from '../../../../kernel/ts/play/allowed.ts';
 import { added, addable, definitionOf } from '../../../../kernel/ts/play/card.ts';
 import { refuseNew } from '../../../../kernel/ts/play/choice.ts';
@@ -9,7 +10,7 @@ import type { Defs } from '../../../../kernel/ts/play/generic.ts';
 import REGISTRY from '../../../../kernel/ts/play/registry.json' with { type: 'json' };
 import { choices } from './choices.tsx';
 import { combat } from './combat.tsx';
-import { field } from './form.tsx';
+import { block, field } from './form.tsx';
 import type { Block, Mechanics, Ops, Write } from './formwrite.ts';
 import { known } from './room.tsx';
 import { io, refusal } from './roomedit.tsx';
@@ -52,10 +53,14 @@ function cartridge() {
 }
 
 /** Add mechanic…'s menu for `doc`, once cartridge.json is read: each refused field's turn-on write. */
-function mechanics(kind: string, doc: Record<string, unknown>): Mechanics | undefined {
+function mechanics(kind: string, doc: Record<string, unknown>, defs: Defs): Mechanics | undefined {
   if (!cart || Array.isArray(doc)) return undefined;
   const c = cart;
-  const { allowed, blocked } = cardMenuWith(kind, addable(kind, REGISTRY, doc, []), c.doc, doc);
+  const menu = addable(kind, REGISTRY, doc, []);
+  // an action is offered only its own definition's fields (action.ts `menuOf`; a command action its own)
+  const def = Object.hasOwn(doc, 'command') ? COMMAND : undefined;
+  const own = kind === 'actions' ? menuOf(menu, defs as never, def) : menu;
+  const { allowed, blocked } = cardMenuWith(kind, own, c.doc, doc);
   const on = (f: string) => turnOn(kind, f, c.doc, doc);
   return {
     allowed,
@@ -65,6 +70,8 @@ function mechanics(kind: string, doc: Record<string, unknown>): Mechanics | unde
     })),
   };
 }
+
+const COMMAND = 'source.ActionDefinition'; // a command action's own definition (the panel's Action card)
 
 type Row = { book?: { edit?: string } };
 /** The root fields a block draws instead of the form: the registry row's Book edit file. */
@@ -78,6 +85,7 @@ function claims(kind: string, doc: Record<string, unknown>) {
       (f) => load(f)?.doc,
     ),
     'scene.tsx': scenic(doc),
+    'rules.tsx': block, // the form's unions are the Rules block already (form.tsx `field`)
   };
   return (f: string) => by[(REGISTRY as Record<string, Row>)[`${kind}.${f}`]?.book?.edit ?? ''];
 }
@@ -95,6 +103,24 @@ const gate = (kind: string, doc: unknown) => (o: Ops) => {
   return refuseNew(doc as Record<string, unknown>, after, known.hidden);
 };
 
+/** A scripted action's write brings its failure outcome with its check, or drops it with the check
+ * (action.ts `paired`, the panel's Action card): one more op on `outcomes`, in the same /change. */
+const pair = (kind: string, doc: unknown, defs: Defs) => (o: Ops) => {
+  if (kind !== 'actions' || Object.hasOwn(doc as object, 'command')) return o;
+  const after = structuredClone(doc) as Record<string, unknown>;
+  try {
+    change(after, o);
+  } catch {
+    return o; // ops that do not apply are left to the server
+  }
+  const both = paired(after, defs as never);
+  if (both === after) return o;
+  return [
+    ...o.filter((x) => x.path[0] !== 'outcomes'),
+    { path: ['outcomes'], value: both.outcomes },
+  ];
+};
+
 /** A source file's sheet: its definition's fields, each written as it is entered. */
 function body(file: string) {
   if (file.endsWith('.scene')) return [refusal(), lines(file)]; // no JSON: its lines (scene.tsx)
@@ -103,7 +129,7 @@ function body(file: string) {
   const def = definitionOf(g.defs, g.kind, g.doc);
   const doc = g.doc as Record<string, unknown>;
   const seed = (f: string) => (Array.isArray(doc) ? undefined : added(doc, f, g.defs, def)?.[f]);
-  const mech = mechanics(g.kind, doc);
+  const mech = mechanics(g.kind, doc, g.defs);
   const claim = claims(g.kind, doc);
   const at = {
     file,
@@ -114,6 +140,8 @@ function body(file: string) {
     mech,
     claim,
     gate: gate(g.kind, doc),
+    pair: pair(g.kind, doc, g.defs),
+    kind: g.kind,
   };
   // a scene's `.cut` twin, when it has one: its pages above its fields
   const cut = g.kind === 'scenes' && pages(file.replace(/\.json$/, '.cut'), 'steps' in doc);

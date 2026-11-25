@@ -1,3 +1,4 @@
+// size: allow 600, one mocked /story and /change harness serves the registry rows and the Rules block cases
 // The generic sheet (author/build/generic.tsx, form.tsx; design §7, slice 2.3): every registry row
 // whose book verb is `generic` (kernel/ts/play/registry.json, held by bin/editor_gate.exs) is
 // added, edited or removed by the sheet, each a `/change` op at the row's own path.
@@ -99,11 +100,16 @@ async function opened(kind: string, doc: unknown) {
 
 const VARIANTS = [{}, { command: 'x' }, { abstract: true }, { extends: 'x' }]; // definitionOf's branches
 // allowed.ts NEEDS: a field Add mechanic… greys until the field it depends on is there
-const FIRST: Record<string, object> = {
+const FIRST: Record<string, object | object[]> = {
   liquids: { resource: 'hp' },
   skills: { prerequisite: 'x', growth: [1] },
   npcs: { hp: 10, room: 'r' }, // attack; Add hour sends the NPC to its room
   items: { slot: 'wield' }, // weapon
+  quests: [
+    { objective: { evidence: 'expedition' } },
+    { objective: { evidence: 'patrol' } },
+    { exchange: {} },
+  ],
 };
 const button = (s: { shown: () => any[] }, w: string) =>
   s.shown().find((x) => x.props?.accessibilityRole === 'button' && words(x) === w);
@@ -136,8 +142,17 @@ async function gesture(kind: string, f: string, op: string, doc: Record<string, 
   if (op === 'create') {
     button(s, WORDS.add)?.props.onPress();
     await settle();
-    if (!button(s, f)) await s.press(`mechanic ${s.file}`); // a mechanic row: Add mechanic… opens it
-    const b = button(s, f);
+    // the Add… or Add mechanic… entry for f, not a union branch titled f (an objective's `patrol`)
+    const offer = () =>
+      s
+        .shown()
+        .find(
+          (x) =>
+            x.props?.onPress &&
+            [`add ${f} `, `mechanic ${f} `].some((k) => String(x.key).startsWith(k)),
+        );
+    if (!offer()) await s.press(`mechanic ${s.file}`); // a mechanic row: Add mechanic… opens it
+    const b = offer();
     // a field only a union branch requires (a scene's name): picking that branch writes it
     for (let j = 0; !b && (await s.press(`branch ${j}`)); j++) {
       const mine = sent().filter((o) => o.path[0] === f);
@@ -180,7 +195,9 @@ async function edit(s: { file: string; shown: () => any[] }, path: unknown[], th
 const rows = Object.entries(read('kernel/ts/play/registry.json') as Record<string, any>).flatMap(
   ([p, r]) =>
     Object.keys(r.book ?? {})
-      .filter((op) => ['generic', 'generic.tsx', 'combat.tsx', 'schedule.tsx'].includes(r.book[op])) // the blocks claim a root field (generic.tsx)
+      .filter((op) =>
+        ['generic', 'generic.tsx', 'combat.tsx', 'schedule.tsx', 'rules.tsx'].includes(r.book[op]),
+      ) // the blocks claim a root field (generic.tsx)
       .map((op) => [p, op]),
 );
 assert.ok(rows.length > 0);
@@ -188,7 +205,7 @@ for (const [p, op] of rows) {
   const [kind, f] = p.split('.');
   test(`${p}.book.${op}`, async () => {
     let ops: any[] = [];
-    for (const v of ROOTS.includes(kind) ? [{}] : [...VARIANTS, FIRST[kind] ?? {}]) {
+    for (const v of ROOTS.includes(kind) ? [{}] : [...VARIANTS, ...[FIRST[kind] ?? {}].flat()]) {
       ops = await gesture(kind, f, 'create', { ...v });
       if (op !== 'create') ops = await gesture(kind, f, op, { ...v, [f]: ops[0]?.value ?? '7' });
       if (ops.length) break;
@@ -486,4 +503,97 @@ test('a scene sheet draws its .cut twin’s pages; steps in the .json refuse the
     const why = 'the twin .json carries steps: edit its pages there';
     assert.equal(s.shown().filter((x) => x.props?.children === why).length > 0, 'steps' in doc);
   }
+});
+
+// The Rules block (author/build/rules.tsx, slice 5.3): every union of the form, offered as the compiler
+// takes it in the sheet's kind (rules.ts `offered`).
+const RULES = (await import('./build/rules.tsx')).WORDS;
+/** The words of the branch picks inside the block at `path`, its folds opened. */
+async function picks(s: Awaited<ReturnType<typeof opened>>, path: unknown[]) {
+  for (let i = 1; i <= path.length; i++) await edit(s, path.slice(0, i), () => {});
+  return within(s, path)
+    .filter((x) => String(x.key).startsWith('branch '))
+    .map((x) => words(x));
+}
+
+// Breaks: a reaction offered a step its compiler refuses (steps.ex:14 @ops; red: the offered() filter dropped).
+test("a reaction's steps picker lists no damage", async () => {
+  const s = await opened('reactions', { steps: [{ op: 'narrate', text: { prose: '~' } }] });
+  const got = await picks(s, ['steps', 0]);
+  assert.ok(got.includes('narrate') && got.includes('fact.assign'));
+  assert.ok(!got.includes('damage'));
+});
+
+// Breaks: a dialogue offering a step outside the choice context, or the kind not read from the sheet's dir.
+test("a dialogue choice's does picker lists exactly the choice-context ops", async () => {
+  const s = await opened('dialogues', {
+    choices: { c: { steps: [{ op: 'narrate', text: { prose: '~' } }] } },
+  });
+  assert.deepEqual(await picks(s, ['choices', 'c', 'steps', 0]), [
+    'fact.assign',
+    'fact.adjust',
+    'narrate',
+    'skill.acquire',
+    'topic.grant',
+  ]);
+});
+
+// Breaks: a switch dropping the field both branches have, keeping the old tag, or sent as two writes.
+test('a branch switch sends one /change with the new tag and a kept shared field', async () => {
+  const s = await opened('reactions', { steps: [{ op: 'fact.assign', fact: 'f', value: 1 }] });
+  await picks(s, ['steps', 0]);
+  sent();
+  within(s, ['steps', 0])
+    .find((x) => String(x.key).startsWith('branch ') && words(x) === 'fact.adjust')
+    .props.onPress();
+  await settle();
+  assert.equal(posts.length, 1);
+  const [o] = sent();
+  assert.deepEqual(o.path, ['steps', 0]);
+  assert.equal((o.value as any).op, 'fact.adjust');
+  assert.equal((o.value as any).fact, 'f');
+});
+
+// Breaks: check written without its failure outcome (or after it, as a second /change), or a removed
+// check leaving failure behind (paired() not applied to the write).
+test("adding an action's check writes its failure in the same /change; removing it drops both", async () => {
+  const doc = { outcomes: { success: {} } };
+  const s = await opened('actions', doc);
+  await s.press(`mechanic ${s.file}`);
+  sent();
+  await s.press('mechanic check '); // revealed: a check has no least value
+  await s.press('branch 0'); // luck
+  assert.equal(posts.length, 1);
+  const ops = sent();
+  assert.deepEqual(
+    ops.map((o) => o.path),
+    [['check'], ['outcomes']],
+  );
+  assert.deepEqual(Object.keys(ops[1].value as any).sort(), ['failure', 'success']);
+  const t = await opened('actions', { check: ops[0].value, outcomes: ops[1].value });
+  sent();
+  assert.ok(await t.press(`remove ${t.file}:${JSON.stringify(['check'])}`));
+  assert.equal(posts.length, 1);
+  assert.deepEqual(sent(), [
+    { path: ['check'], delete: true },
+    { path: ['outcomes'], value: { success: {} } },
+  ]);
+});
+
+// Breaks: no divider before a wait's later steps, or one drawn before every step.
+test('a wait step draws the later-rules divider and a narrate step does not', async () => {
+  const s = await opened('reactions', {
+    steps: [
+      { op: 'narrate', text: { prose: '~' } },
+      { op: 'wait', seconds: 5 },
+    ],
+  });
+  await picks(s, ['steps', 1]);
+  await picks(s, ['steps', 0]);
+  const later = (i: number) =>
+    within(s, ['steps', i]).filter(
+      (x) => String(x.key).startsWith('later ') && words(x) === RULES.later,
+    );
+  assert.equal(later(1).length, 1);
+  assert.equal(later(0).length, 0);
 });

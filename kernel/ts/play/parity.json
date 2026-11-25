@@ -232,7 +232,7 @@
   {
     "id": "action-quest-reaction-cards",
     "panel": "tools/author-panel/src/edit/cards/Action.tsx",
-    "book": "todo"
+    "book": "generic.tsx"
   },
   {
     "id": "dialogue-card",

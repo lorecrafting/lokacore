@@ -34,9 +34,9 @@
     "edit": "blocks/Rules.tsx",
     "delete": "cards/Action.tsx",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "generic.tsx",
+      "edit": "rules.tsx",
+      "delete": "generic.tsx"
     }
   },
   "actions.command": {
@@ -114,9 +114,9 @@
     "edit": "cards/Action.tsx",
     "delete": "cards/Action.tsx",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "generic.tsx",
+      "edit": "generic.tsx",
+      "delete": "generic.tsx"
     }
   },
   "actions.policy": {
@@ -125,7 +125,7 @@
     "delete": "generic",
     "book": {
       "create": "generic",
-      "edit": "todo",
+      "edit": "rules.tsx",
       "delete": "generic"
     }
   },
@@ -155,7 +155,7 @@
     "delete": "generic",
     "book": {
       "create": "generic",
-      "edit": "todo",
+      "edit": "rules.tsx",
       "delete": "generic"
     }
   },
@@ -1624,9 +1624,9 @@
     "edit": "cards/Quest.tsx",
     "delete": "cards/Quest.tsx",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "generic.tsx",
+      "edit": "generic.tsx",
+      "delete": "generic.tsx"
     }
   },
   "quests.deadline": {
@@ -1634,9 +1634,9 @@
     "edit": "cards/Quest.tsx",
     "delete": "cards/Quest.tsx",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "generic.tsx",
+      "edit": "generic.tsx",
+      "delete": "generic.tsx"
     }
   },
   "quests.exchange": {
@@ -1644,9 +1644,9 @@
     "edit": "cards/Quest.tsx",
     "delete": "cards/Quest.tsx",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "generic.tsx",
+      "edit": "generic.tsx",
+      "delete": "generic.tsx"
     }
   },
   "quests.expedition": {
@@ -1654,9 +1654,9 @@
     "edit": "cards/Quest.tsx",
     "delete": "cards/Quest.tsx",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "generic.tsx",
+      "edit": "generic.tsx",
+      "delete": "generic.tsx"
     }
   },
   "quests.journal": {
@@ -1664,9 +1664,9 @@
     "edit": "cards/Quest.tsx",
     "delete": "cards/Quest.tsx",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "generic.tsx",
+      "edit": "generic.tsx",
+      "delete": "generic.tsx"
     }
   },
   "quests.name": {
@@ -1674,9 +1674,9 @@
     "edit": "cards/Quest.tsx",
     "delete": "cards/Quest.tsx",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "generic.tsx",
+      "edit": "generic.tsx",
+      "delete": "generic.tsx"
     }
   },
   "quests.objective": {
@@ -1684,9 +1684,9 @@
     "edit": "blocks/Rules.tsx",
     "delete": "cards/Quest.tsx",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "generic.tsx",
+      "edit": "rules.tsx",
+      "delete": "generic.tsx"
     }
   },
   "quests.offer": {
@@ -1694,9 +1694,9 @@
     "edit": "cards/Quest.tsx",
     "delete": "cards/Quest.tsx",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "generic.tsx",
+      "edit": "generic.tsx",
+      "delete": "generic.tsx"
     }
   },
   "quests.patrol": {
@@ -1704,9 +1704,9 @@
     "edit": "cards/Quest.tsx",
     "delete": "cards/Quest.tsx",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "generic.tsx",
+      "edit": "generic.tsx",
+      "delete": "generic.tsx"
     }
   },
   "quests.repeatable": {
@@ -1714,9 +1714,9 @@
     "edit": "cards/Quest.tsx",
     "delete": "cards/Quest.tsx",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "generic.tsx",
+      "edit": "generic.tsx",
+      "delete": "generic.tsx"
     }
   },
   "reactions.abstract": {
@@ -1724,9 +1724,9 @@
     "edit": "cards/Reaction.tsx",
     "delete": "cards/Reaction.tsx",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "generic.tsx",
+      "edit": "generic.tsx",
+      "delete": "generic.tsx"
     }
   },
   "reactions.after": {
@@ -1734,9 +1734,9 @@
     "edit": "cards/Reaction.tsx",
     "delete": "cards/Reaction.tsx",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "generic.tsx",
+      "edit": "generic.tsx",
+      "delete": "generic.tsx"
     }
   },
   "reactions.on": {
@@ -1744,9 +1744,9 @@
     "edit": "blocks/Rules.tsx",
     "delete": "cards/Reaction.tsx",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "generic.tsx",
+      "edit": "rules.tsx",
+      "delete": "generic.tsx"
     }
   },
   "reactions.cooldown": {
@@ -1754,9 +1754,9 @@
     "edit": "cards/Reaction.tsx",
     "delete": "cards/Reaction.tsx",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "generic.tsx",
+      "edit": "generic.tsx",
+      "delete": "generic.tsx"
     }
   },
   "reactions.once": {
@@ -1764,9 +1764,9 @@
     "edit": "cards/Reaction.tsx",
     "delete": "cards/Reaction.tsx",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "generic.tsx",
+      "edit": "generic.tsx",
+      "delete": "generic.tsx"
     }
   },
   "reactions.silent": {
@@ -1774,9 +1774,9 @@
     "edit": "cards/Reaction.tsx",
     "delete": "cards/Reaction.tsx",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "generic.tsx",
+      "edit": "generic.tsx",
+      "delete": "generic.tsx"
     }
   },
   "reactions.steps": {
@@ -1784,9 +1784,9 @@
     "edit": "blocks/Rules.tsx",
     "delete": "cards/Reaction.tsx",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "generic.tsx",
+      "edit": "rules.tsx",
+      "delete": "generic.tsx"
     }
   },
   "reactions.when": {
@@ -1794,9 +1794,9 @@
     "edit": "blocks/Rules.tsx",
     "delete": "cards/Reaction.tsx",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "generic.tsx",
+      "edit": "rules.tsx",
+      "delete": "generic.tsx"
     }
   },
   "reactions.zone": {
@@ -1804,9 +1804,9 @@
     "edit": "cards/Reaction.tsx",
     "delete": "cards/Reaction.tsx",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "generic.tsx",
+      "edit": "generic.tsx",
+      "delete": "generic.tsx"
     }
   },
   "replenish.abstract": {
