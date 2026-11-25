@@ -179,7 +179,7 @@ async function edit(h: Hooks, key: string) {
  * editor, as E5 does (inbook.ts `edit`). False: not on this page. */
 export function go(key: string) {
   const h = hooks!; // install attaches it before Build can open the Checks sheet
-  const here = key.endsWith('.description') && [...h.seen.values()].includes(key); // as keyOf draws
+  const here = EDITS.test(key) && [...h.seen.values()].includes(key); // as keyOf draws
   void (here ? edit(h, key) : h.api('/open', { key, words: h.said.get(key) ?? '' }));
   return here;
 }

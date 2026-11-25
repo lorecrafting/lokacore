@@ -6,15 +6,16 @@ import { nodes } from '../book/__tests__/combat-book.test.ts'; // the React Nati
 import { bind, tagged } from './prose_rules.ts';
 
 Object.assign(globalThis, { localStorage: { getItem: () => null, setItem() {} } });
-const { attach, line, shut } = await import('./build/field.tsx');
+const { attach, go, line, shut } = await import('./build/field.tsx');
 const { icons, sceneLine } = await import('./build/talk.tsx');
 const { known } = await import('./build/room.tsx');
 const { wire } = await import('./build/roomedit.tsx');
 const { ink } = await import('./build/build.ts');
+const { opened } = await import('./build/formwrite.ts');
 
 const KEY = 'dialogue.cook_lesson.choices.first.label';
 const REF = 'kit@0.0.1:dialogue/cook_lesson';
-const SCENE = '"Want to learn the pot?" the cook asks.\n- Ask about fish #first\n  ~\n';
+let SCENE = '"Want to learn the pot?" the cook asks.\n- Ask about fish #first\n  ~\n';
 const seen = new Map<string, string>();
 const said = new Map<string, string>();
 const sent: [string, any][] = [];
@@ -131,13 +132,34 @@ test("an icon press and the open field's tap are not the card's press", async ()
   shut();
 });
 
-// Breaks: an empty `then` drawn lit (goes looks set), or a set field drawn dim.
-test('an empty then draws goes dim; a set field draws lit', () => {
+// Breaks: an empty `then` drawn lit (goes looks set), or a set field drawn dim; goes with no
+// destination opening the Add… menu, which never offers `then` (choices.tsx LINKS).
+test('an empty then draws goes dim and opens the then fold; a set field draws lit', () => {
   choice = { steps: [{ say: 'x' }] };
   const p = label('world/cook.json');
   const color = (name: string) => icon(p, name).props.style.color;
   assert.equal(color('goes'), ink('dim'));
   assert.equal(color('when'), ink('dim'));
   assert.equal(color('does'), ink('action'));
+  icon(p, 'goes').props.onPress(stop);
+  assert.ok(opened.has('world/cook.json:["choices","first","then"]'));
   choice = {};
+});
+
+// Breaks: a choice key repeated in a nested set rewording the first match, another choice's line.
+test('a .scene label whose key repeats opens no reword', async () => {
+  label('world/cook.scene');
+  const was = SCENE;
+  SCENE = '- Ask about fish #first\n  - Ask again #first\n'; // the nested set's dialogue is another
+  assert.equal(await sceneLine(KEY), undefined);
+  SCENE = was;
+});
+
+// Breaks: a Checks row naming a label on this page sent to the owner's editor, not its field here.
+test('a Checks row for a label on the page opens its field here', async () => {
+  label('world/cook.json');
+  answers = [[200, { file: 'world/cook.json', line: 7, was: 'w1', words: 'Ask about fish' }]];
+  assert.equal(go(KEY), true);
+  await tick();
+  shut();
 });

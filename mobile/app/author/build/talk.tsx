@@ -45,7 +45,7 @@ export function icons(g: Game | undefined, open: Opens, key: string, words: () =
   const has = (f: string) => choice?.[f] !== undefined;
   // the choice's own field when it has one, else its Add… menu
   const at = (f: string) => (has(f) ? ['choices', c, f] : ['choices', c, '+']);
-  const goes = has('then') ? 'then' : 'then_failed';
+  const goes = has('then_failed') && !has('then') ? 'then_failed' : 'then'; // `then` is always drawn
   const json = file && !file.endsWith('.scene');
   return [
     <Text key="row">{'\n'}</Text>,
@@ -54,7 +54,7 @@ export function icons(g: Game | undefined, open: Opens, key: string, words: () =
       ? [
           pen(WORDS.when, () => sheetAt(file, open, at('policy')), '  ◇ when', has('policy')),
           pen(WORDS.does, () => sheetAt(file, open, at('steps')), '  ↦ does', has('steps')),
-          pen(WORDS.goes, () => sheetAt(file, open, at(goes)), '  → goes', has(goes)),
+          pen(WORDS.goes, () => sheetAt(file, open, ['choices', c, goes]), '  → goes', has(goes)),
         ]
       : []),
   ];
@@ -65,9 +65,12 @@ export async function sceneLine(key: string) {
   const [, d, c] = LABEL.exec(key) ?? [];
   const file = d && fileOf(d);
   if (!file?.endsWith('.scene')) return undefined;
-  const got = await io.source(file);
-  const at = rows(got.bytes.split('\n')).findIndex((r) => r.key === c);
-  if (at < 0) return undefined;
+  const got = await io.source(file).catch(() => undefined); // gone: no field, else Changed on disk
+  if (!got) return undefined;
+  const keys = rows(got.bytes.split('\n')).map((r) => r.key);
+  const at = keys.indexOf(c);
+  // ponytail: a key repeated in nested sets is not told apart (no dialogue nesting here): no field
+  if (at < 0 || keys.lastIndexOf(c) !== at) return undefined;
   const words = choiceLabel(got.bytes.split('\n')[at].trim().slice(2));
   return { file, line: at + 1, was: got.sha256, words, scene: true as const };
 }
