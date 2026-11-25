@@ -78,7 +78,7 @@ export const world =
     const docs = ROOTS.map((r) => read(r.rel));
     // a root file not read (yet, or at all) names no keys: its field stays free text, refusing nothing
     const named = Object.fromEntries(Object.entries(rootNames(docs)).filter((_, i) => docs[i]));
-    // a room, item or person stays free text here: its picker (the panel's datalist) is an open question on loka-hcnlh.28.2
+    // a room, item or person stays free text here: its picker (the panel's datalist) waits on the long-list picker design, loka-hcnlh.66
     const pick = (p: (string | number)[], v: unknown) => {
       const got = pickable(p, known.nodes, named, v);
       return got && Object.hasOwn(named, got.kind) ? got : undefined;
