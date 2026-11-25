@@ -11,8 +11,13 @@ export type Obj = Record<string, unknown>;
 export type Step = string | number;
 export type Write = Parameters<typeof ed.change>[number];
 export type Ops = Write[2]; // mutate-skip: a type, erased at run time
-/** Add mechanic…'s fields the cartridge takes, and those it refuses with any turn-on write (`turnOn`). */
-export type Mechanics = { allowed: string[]; blocked: (Blocked & { on?: Write })[] };
+/** Add mechanic…'s fields the cartridge takes, those it refuses with any turn-on write (`turnOn`), and
+ * those no Add offers (`hide`: another action definition's, action.ts `menuOf`). */
+export type Mechanics = {
+  allowed: string[];
+  blocked: (Blocked & { on?: Write })[];
+  hide?: string[];
+};
 /** The file drawn and the hash it was read at, its schema's `$defs`, the definitions entered so far,
  * a root field's least value and the root fields a block draws instead (combat.tsx, schedule.tsx). */
 export type At = {
@@ -24,6 +29,8 @@ export type At = {
   mech?: Mechanics;
   claim?: (f: string) => Block | undefined;
   gate?: (ops: Ops) => string | undefined; // a write's refusal before it is sent (generic.tsx)
+  pair?: (ops: Ops) => Ops; // a write with the ops it brings along (generic.tsx: an action's check and failure)
+  kind?: string; // the file's dir, which the Rules block offers branches by (rules.tsx)
 };
 export const opened = new Set<string>(); // the folded blocks and Add… menus open, by file and path
 export const drafts = new Map<string, string>(); // each typed field, as typed
@@ -36,9 +43,13 @@ export const set = (at: At, path: Step[], value: unknown) =>
   value === undefined
     ? (reveal(id(at, path), true), known.redraw())
     : send(at, ops(path, value), () => reveal(id(at, path), false));
+/** `o` with the ops it brings along (`At.pair`). */
+export const own = (at: At, o: Ops) => at.pair?.(o) ?? o;
 /** One `/change` of `o` to the file, unless the gate refuses it: then the refusal shows, nothing sent. */
-export const send = (at: At, o: Ops, then = () => {}) =>
-  void run(async () => at.gate?.(o) ?? ed.change([at.file, at.was, o]).then(then));
+export const send = (at: At, o: Ops, then = () => {}) => {
+  const w = own(at, o);
+  void run(async () => at.gate?.(w) ?? ed.change([at.file, at.was, w]).then(then));
+};
 /** A write at `path`; at the root (a picked branch, a whole list) one op per top-level field. */
 export const ops = (path: Step[], value: unknown) =>
   path.length

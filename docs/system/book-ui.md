@@ -1087,7 +1087,10 @@ reasons and limits: [prose in the Book rulings](../design/prose-in-the-book-ruli
     least valid item.
   - **Picks.** An enum or a boolean is one button per option, a union one button per branch
     (named as the panel names them), the present one picked; a press writes it, and a union then
-    shows the picked branch's own fields.
+    shows the picked branch's own fields. A union offers only the branches the compiler takes in
+    the file's kind, plus the one present (slice 5.3); a switch is one write that sets the new tag
+    and keeps the fields the two branches share. A union that only constrains (a missing or second
+    subject) draws nothing; the compiler reports it.
   - **Typed fields** (a string, a number, a text's words, a definition's key) show the present
     value on a ruled line and write when they lose focus, only when changed; a number field that
     does not read as a number writes nothing. Each fits the sheet's width, however deep its block.
@@ -1285,6 +1288,24 @@ reasons and limits: [prose in the Book rulings](../design/prose-in-the-book-ruli
   - Not in 5.2: a current trigger value that is not offered is not drawn; a speaker line is always
     greyed; a new cutscene makes no `.cut` and the Notebook lists no scene files; only a page's first
     line edits in ScenePage; the scenes create row; Esc does not close the Add menu.
+  - Labels here are placeholder words, the owner's to replace.
+- **Build: the Rules block** (slice 5.3, [builder mode §4.6, §6.4](../rnd/in-game-builder-mode-2026-11-19.md)).
+  A reaction's, action's or quest's `def:<file>` sheet is [the generic sheet](#author-mode-dev-only);
+  its Policy, Steps, Trigger and Check fields are unions drawn as its Picks. Looks:
+  [author-mode marks](../BOOK-UI-COMPONENTS.md#component-catalogue).
+  - **Branch names.** Each branch is named by its tag (`op`, `event` or `kind`) or its definition's
+    name; never `option N` where the branch has a tag of its own (a `wait` step reads `wait`).
+  - **Later rules.** A `wait` step starts the steps that run later: above that step's whole item
+    (its name and Remove included), a dashed rule and `later rules`; the steps below it are the
+    later rule's. No other step draws it.
+  - **Check and failure.** On a scripted action a check and its failure outcome come and go
+    together: the write that adds `check` also writes the failure outcome (its words `~`), the one
+    that removes `check` removes it; one `/change`, one Undo. An action whose `extends` parent may
+    hold either is left as written.
+  - **One definition's fields.** Once an action has `command` or `outcomes`, its `Add…` and `Add
+    mechanic…` offer only that definition's fields; a new action, with neither, is offered both.
+  - Not in 5.3: a dialogue's `policy` (its row stays todo); a failure outcome added or removed by
+    hand against its check is rewritten silently to match, with no reason shown.
   - Labels here are placeholder words, the owner's to replace.
 - **No field.** A double-click on a line that is not words opens nothing; a note under it, in a
   row of its own (the lines below move down by its height while it shows and back when it goes,

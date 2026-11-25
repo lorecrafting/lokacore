@@ -233,11 +233,12 @@ export function branchOf(branches: Obj[], value: unknown): number {
   );
   if (fits >= 0) return fits;
   const t = typeOf(value);
-  return branches.findIndex(
-    (b) =>
-      constOf(b, k) === undefined &&
-      (!b.type || b.type === t || (b.type === 'integer' && t === 'number')),
+  const open = (b: Obj) => constOf(b, k) === undefined;
+  // a branch of the value's own type before an untyped one (`FactValue`'s `$ref: Key` takes any)
+  const typed = branches.findIndex(
+    (b) => open(b) && (b.type === t || (b.type === 'integer' && t === 'number')),
   );
+  return typed >= 0 ? typed : branches.findIndex((b) => open(b) && !b.type);
 }
 
 const shape = (node: unknown) => {

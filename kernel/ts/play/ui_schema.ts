@@ -31,7 +31,9 @@ export function titles(branches: Node[], defs: Record<string, Node>): string[] {
       (b.$ref ? named(b.$ref) : undefined) ??
       (key && at[i].properties[key].const) ??
       (at[i].required?.length === 1 ? at[i].required[0] : undefined) ??
-      (byType ? types[i] : undefined),
+      (byType ? types[i] : undefined) ??
+      // the branch's own tag when its siblings share none (a steps item's `wait` beside `Step`)
+      Object.values<Node>(at[i].properties ?? {}).find((p) => typeof p.const === 'string')?.const,
   );
   return names.map((n, i) =>
     n && names.indexOf(n) === names.lastIndexOf(n) ? n : `option ${i + 1}`,
