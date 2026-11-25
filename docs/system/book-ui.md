@@ -1062,10 +1062,14 @@ reasons and limits: [prose in the Book rulings](../design/prose-in-the-book-ruli
       With a story but no parts (no outline file, or none in it), it shows that plain line, then
       the number field and `Add beat`, which writes beat n into the first part. A sheet opened
       from it with no story says Nothing here.
-  - **World (6.1a).** The refusal line, then a row of the world's root files that were read, in
+  - **World (6.1a-b).** The refusal line, then a row of the world's root files that were read, in
     the order `cartridge.json`, `facts.json`, `resources.json`, `attributes.json`, `text.json`; a
     file absent or not yet read is not listed. A file opens its `def:<file>` sheet on top (on the
-    generic sheet; `text.json` has no block). Once `cartridge.json` is read, a row of
+    generic sheet; `text.json` has no block). Then (6.1b) a row of the world files, populations,
+    transports and barriers (never checkpoints or cheats), chosen as Contents chooses a kind's
+    source files: those the latest story names, sorted by path, so a file the story compiles no
+    node from (an abstract one) is not listed (open item). Each opens its `def:<file>` sheet on
+    top, drawn with the World block. Once `cartridge.json` is read, a row of
     `Turn on <key>`, one per capability in the registry the cartridge lacks, in registry order:
     a press writes it into `requires.capabilities` at its registry version, one write that one
     Undo takes back, no confirm; it leaves the row after the reread. A write sent from an old read
@@ -1161,8 +1165,10 @@ reasons and limits: [prose in the Book rulings](../design/prose-in-the-book-ruli
     for that key instead of the least value. Elsewhere, a field that names a resource or an
     attribute gets one pick per key of the read root file under its typed field, the present one
     picked; a press writes it. A typed value naming no key is refused without a write
-    (`no <kind> <key>`). While that root file is unread the field is free text, as are fields
-    naming rooms, items and people until 6.1b.
+    (`no <kind> <key>`). While that root file is unread the field is free text. A field naming a
+    room, an item, a person or a transport is free text and refuses nothing: the panel offers and
+    checks those keys as a type-ahead list, and the Book has no form for a list that long (open
+    item, for a new design).
   - Labels here are placeholder words, the owner's to replace.
 - **Build: ghost lines and See as…** (slice 2.5, [builder mode §4.5](../rnd/in-game-builder-mode-2026-11-19.md)).
   Looks: [author-mode marks](../BOOK-UI-COMPONENTS.md#component-catalogue).
