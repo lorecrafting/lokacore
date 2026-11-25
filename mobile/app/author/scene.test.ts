@@ -156,6 +156,8 @@ test('a cut draws each line once, its end mark bare; page moves send {move, by}'
   assert.deepEqual(ops(), [{ move: 3, by: -1 }]);
   await key(all, file, 1, 'ArrowDown');
   assert.deepEqual(ops(), [{ move: 1, by: 1 }]);
+  await key(all, file, 3, 'ArrowUp');
+  assert.deepEqual(ops(), [{ move: 3, by: -1 }]);
 });
 
 // Breaks: a switch merging into the old on (its point and outcome left behind), or the trigger and

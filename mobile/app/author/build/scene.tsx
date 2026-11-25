@@ -37,6 +37,7 @@ export const WORDS = {
   kind: (k: SceneKind) => (k === 'speaker' || k === 'words' ? `${k} line` : k),
 };
 const UNDER = 1; // mutate-skip: layout only (an act row's indent under its line)
+const FLUSH = 0; // mutate-skip: layout only (a cut line's indent)
 const LABEL = { ...type.label, color: ink('dim') };
 
 type Src = { bytes: string; sha256: string };
@@ -86,7 +87,7 @@ type Key = {
   preventDefault: () => void;
 };
 /** One line of a file: its words, a press that opens its acts, Alt-arrows a move, Alt-Enter Add. */
-function line(key: string, text: string, keys: Record<string, () => void>, indent = 0) {
+function line(key: string, text: string, keys: Record<string, () => void>, indent: number) {
   return (
     <Pressable
       accessibilityRole="button"
@@ -111,7 +112,7 @@ function line(key: string, text: string, keys: Record<string, () => void>, inden
 /** A `.scene` file's lines (the Dialogue sheet), each opening to its acts. */
 export function lines(file: string) {
   const s = source(file);
-  if (!s) return null;
+  if (!s) return null; // unread
   const rs = rows(s.bytes.split('\n'));
   return rs.map((r, i) => (r.text.trim() ? sceneRow(file, s, rs, i) : null));
 }
@@ -158,7 +159,7 @@ function sceneRow(file: string, s: Src, rs: ReturnType<typeof rows>, i: number) 
  * carries its pages, so cut() refuses every op. */
 export function pages(file: string, steps: boolean) {
   const s = source(file);
-  if (!s) return null;
+  if (!s) return null; // not read yet, or no .cut
   const all = s.bytes.split('\n');
   let page = 0;
   return blocks(all).map(([first, last]) => {
@@ -190,7 +191,7 @@ function cutRow(file: string, s: Src, steps: boolean, p: number, n: number, k: n
   const { press, draw } = acts(file, s, (op) => why(cut(s.bytes, op, steps)));
   return (
     <View key={key}>
-      {line(key, text, k ? {} : { ArrowUp: press(ops[1][1]), ArrowDown: press(ops[2][1]) })}
+      {line(key, text, k ? {} : { ArrowUp: press(ops[1][1]), ArrowDown: press(ops[2][1]) }, FLUSH)}
       {opened.has(key) && wrap(UNDER, ops.map(draw))}
     </View>
   );
