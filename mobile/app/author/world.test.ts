@@ -6,7 +6,7 @@ import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
 import { nodes, words } from '../book/__tests__/combat-book.test.ts'; // also registers the .tsx loader
 
-const { story } = await import('./build/room.tsx');
+const { story, known } = await import('./build/room.tsx');
 const { sheets } = await import('./build/sheet.tsx');
 Object.assign(globalThis, { localStorage: { getItem: () => null, setItem() {} } }); // Build's Undo chip
 await import('./build/Build.tsx'); // the app's registration of the def: and contents sheets
@@ -205,7 +205,9 @@ test('a cartridge resource field picks hp, ma, mv and resources.json keys; a roo
 
 // break: the World tab lists no population, transport or barrier (or opens no sheet), or a world file's sheet writes
 // the wrong path or value (a number as text, opens_when not the least Policy)
-test('the World tab lists the world files; each sheet writes cap 3, fare 5 and opens_when (Add mechanic…)', async () => {
+test('the World tab lists the world files; each sheet writes cap 3, fare 5 and opens_when (Add mechanic…)', async (t) => {
+  const was = known.open;
+  t.after(() => ((storyFiles = {}), (known.open = was))); // the next /story names none again, even on a failure
   files
     .set('populations/p.json', { cap: 1 })
     .set('transports/t.json', { fare: 0 })
@@ -253,5 +255,4 @@ test('the World tab lists the world files; each sheet writes cap 3, fare 5 and o
     ['fare', 5],
     ['opens_when', { op: 'all', items: [] }], // the least Policy (anyOf's first: all of nothing)
   ]);
-  storyFiles = {}; // the next /story names none again
 });
