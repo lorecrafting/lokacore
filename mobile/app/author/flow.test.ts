@@ -24,6 +24,7 @@ const story = {
       { ref: R('dialogue', 'farewell'), kind: 'dialogue' },
       { ref: R('fact', 'met_nell'), kind: 'fact' },
       { ref: R('npc', 'nell'), kind: 'npc' },
+      { ref: R('item', 'lamp'), kind: 'item' },
     ],
     edges: [
       // the reader first: the walk draws the setter above, the reader below, whatever the order
@@ -31,6 +32,8 @@ const story = {
       { from: R('dialogue', 'greet'), to: R('fact', 'met_nell'), path: '.on', set: true },
       { from: R('dialogue', 'greet'), to: R('npc', 'nell'), path: '.speaker' },
       { from: R('dialogue', 'greet'), to: R('room', 'hall'), path: '.room' },
+      { from: R('dialogue', 'greet'), to: R('item', 'lamp'), path: '.gives' },
+      { from: R('npc', 'nell'), to: R('dialogue', 'farewell'), path: '.dialogue' }, // into a centre
     ],
   },
   report: { unreachable: {}, orphan_facts: { unused: [], write_only: [], read_only: [] } },
@@ -43,6 +46,7 @@ const api = async (path: string): Promise<[number, any]> =>
   path === '/story' ? [200, story] : [404, null];
 const started: string[] = [];
 const build = await import('./build/Build.tsx');
+const { known } = await import('./build/room.tsx');
 build.place({
   place: () => ({ steps: [] }),
   here: () => 'hall',
@@ -57,6 +61,7 @@ const label = (e: any) => e.props.children?.props?.children;
 const press = (name: string, n = sheet()) =>
   n.find((e) => e.type === 'Pressable' && label(e) === name).props.onPress();
 const back = () => press('Back', nodes(build.Strip({ children: 'book' })));
+const texts = () => sheet().flatMap((e) => (e.type === 'Text' ? [e.props.children] : []));
 // the headings and node names drawn, without the filters and the acts beside each node
 const drawn = () =>
   sheet()
@@ -91,8 +96,11 @@ test('a tap re-centres in place, Back steps back along the trail to the first re
   assert.equal(stack().length, depth, 're-centring does not push');
   press('fact met_nell');
   assert.equal(stack().at(-1), `flow:${R('dialogue', 'greet')} ${R('fact', 'met_nell')}`, 'cut');
+  assert.equal(texts().includes('greet › met_nell'), true, 'the trail as a breadcrumb');
+  assert.equal(build.sheets.flow.title(stack().at(-1)!.slice(5)), 'Flow met_nell');
   back();
   assert.equal(stack().at(-1), `flow:${R('dialogue', 'greet')}`);
+  assert.equal(texts().includes('greet'), false, 'no breadcrumb at the first ref');
   back();
   assert.equal(stack().length, depth - 1, 'at the first ref, Back closes the walk');
 });
@@ -117,6 +125,12 @@ test("the centre offers its file's Sheet, its person's sheet and its room's Go t
   press('nell');
   assert.equal(stack().at(-1), 'npc:nell');
   build.open(`flow:${R('dialogue', 'greet')}`);
+  press('lamp');
+  assert.equal(stack().at(-1), 'item:lamp');
+  build.open(`flow:${R('dialogue', 'farewell')}`);
+  press('nell'); // nell's edge leads into the centre
+  assert.equal(stack().at(-1), 'npc:nell');
+  build.open(`flow:${R('dialogue', 'greet')}`);
   press('Sheet');
   assert.equal(stack().at(-1), 'def:dialogues/greet.json');
 });
@@ -133,4 +147,12 @@ test('from DOCK.at the walk adds the second hop: greet reaches farewell through 
   assert.equal(drawn().includes('Two steps out'), false, 'no second hop through a hidden node');
   press('fact');
   Object.assign(globalThis, { innerWidth: 390 });
+});
+
+// Breaks: a walk restored before /story arrives throwing instead of saying so.
+test('before /story the walk says Nothing here', () => {
+  const told = known.story;
+  known.story = undefined;
+  assert.deepEqual(texts(), ['Nothing here.']);
+  known.story = told;
 });

@@ -33,6 +33,7 @@ const line = (words: string, key: string, color = ink('fg')) => (
     {words}
   </Text>
 );
+const under = { ...row, paddingHorizontal: 0 }; // mutate-skip: layout; the acts under the name
 const column = { ...row, flexDirection: 'column', alignItems: 'flex-start' } as const; // mutate-skip: layout; one row a line
 
 /** The centre's people, items and rooms (not nodes: walk() leaves them out); a room is Go there. */
@@ -97,7 +98,7 @@ const centre = (ref: string) => {
   return (
     <View key="centre" style={column}>
       {line(named(ref), 'centre')}
-      <View style={{ ...row, paddingHorizontal: 0 }}>
+      <View style={under}>
         {sheet ? act(WORDS.sheet, () => known.open(sheet), undefined, 'sheet') : null}
         {around(ref)}
       </View>
