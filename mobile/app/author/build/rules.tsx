@@ -19,7 +19,7 @@ import { act } from './sheet.tsx';
 export const WORDS = { later: 'later rules' };
 const LATER = {
   marginTop: space.sm, // mutate-skip: layout
-  marginLeft: space.md, // mutate-skip: layout; level with the item's name and picks (block's paddingLeft)
+  marginLeft: space.md, // mutate-skip: layout; the rule starts at the item's name, the label at its picks
   paddingTop: space.sm, // mutate-skip: layout
   borderTopWidth: size.rule, // mutate-skip: layout
   borderStyle: 'dashed', // mutate-skip: layout
@@ -30,7 +30,7 @@ const LATER = {
 export const later = (at: At, path: Step[], value: unknown) =>
   (value as Obj | undefined)?.op === 'wait' ? (
     <View key={`later ${id(at, path)}`} style={LATER}>
-      <Text style={{ ...type.label, color: ink('dim') }}>{WORDS.later}</Text>
+      <Text style={{ ...type.label, color: ink('dim'), paddingLeft: space.md }}>{WORDS.later}</Text>
     </View>
   ) : null;
 
