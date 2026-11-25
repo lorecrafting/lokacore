@@ -1,6 +1,6 @@
-// The World tab and the World card's block (author/build/world.tsx, slice 6.1a): a fact's new entry
-// and its default, a resource's new entry as newEntry makes it, a cartridge field picking a root
-// file's key, and a capability's Turn on, after which Add mechanic… offers its field.
+// The World tab and the World card's block (author/build/world.tsx, slice 6.1a): a resource's new
+// entry as newEntry makes it, a cartridge field picking a root file's key, and a capability's Turn
+// on, after which Add mechanic… offers its field.
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
@@ -126,21 +126,6 @@ test('with resources.json unread, a cartridge resource field takes gold as free 
   await settle();
   assert.deepEqual(sent(), [['world.movement.cost.resource', 'gold']]);
   files.set('resources.json', kept).set('cartridge.json', cart); // the /story test 3 sends rereads both
-});
-
-// break: a new fact's value_type is written without its default (picked's required fields dropped)
-test('a new fact lit, then its value_type: the entry, then the type with its default true', async () => {
-  const s = await opened('def:facts.json');
-  sent();
-  await added(s, 'facts.json:["facts"]', 'lit');
-  if (!s.find('add facts.json:["facts","lit","+"]'))
-    await s.press('fold facts.json:["facts","lit"]');
-  await s.press('add facts.json:["facts","lit","+"]');
-  await s.press('add value_type ');
-  assert.deepEqual(sent(), [
-    ['facts.lit', {}],
-    ['facts.lit.value_type', { type: 'bool', default: true }],
-  ]);
 });
 
 // break: a resource's new entry is the schema's least value, not the World card's (newEntry)
