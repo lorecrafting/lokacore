@@ -55,7 +55,9 @@ const flat = (c: ReactNode): string =>
         ? flat((c.props as { children?: ReactNode }).children)
         : '';
 const LABEL = /^dialogue\.\w+\.choices\.\w+\.label$/; // drawn inside its card, which plays
-const EDITS = /\.description$|^dialogue\.\w+\.(prompt|choices\.\w+\.label)$/;
+const PAGE = /^scene\.\w+\.steps\.(\d+)\.text$/; // a `.cut` page, compiled to its scene's steps
+const EDITS =
+  /\.description$|^dialogue\.\w+\.(prompt|choices\.\w+\.label)$|^scene\.\w+\.steps\.\d+\.text$/;
 /** The key a line draws whole (a description, a dialogue's prompt or a choice's label): its bound
  * words, else its source with links as words.
  * ponytail: one paragraph of a many-paragraph description matches no key, so it does not edit. */
@@ -116,6 +118,9 @@ function editable(h: Hooks, p: Props, key: string, shown: string, blank: boolean
   const own = {
     style: [p.style, blank && !label && BLANK, marked && MARKED],
     children: [
+      PAGE.test(key) && (
+        <Text key="page" style={CAPTION}>{`page ${Number(PAGE.exec(key)![1]) + 1}\n`}</Text>
+      ),
       // a label's rule sits under its words, not under the icon row after them
       blank ? hint(name, label) : p.children,
       field?.key === key && field.note && (

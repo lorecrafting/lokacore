@@ -242,12 +242,12 @@
   {
     "id": "scene-text",
     "panel": "tools/author-panel/src/edit/cards/Scene.tsx",
-    "book": "todo"
+    "book": "scene.tsx"
   },
   {
     "id": "modal-scene",
     "panel": "tools/author-panel/src/edit/cards/ScenePages.tsx",
-    "book": "todo"
+    "book": "scene.tsx"
   },
   {
     "id": "world-card",

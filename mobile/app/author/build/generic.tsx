@@ -13,6 +13,7 @@ import { field } from './form.tsx';
 import type { Block, Mechanics, Ops, Write } from './formwrite.ts';
 import { known } from './room.tsx';
 import { io, refusal } from './roomedit.tsx';
+import { lines, pages, scenic } from './scene.tsx';
 import { schedule } from './schedule.tsx';
 import { sheets } from './sheet.tsx';
 
@@ -76,6 +77,7 @@ function claims(kind: string, doc: Record<string, unknown>) {
       cart && (cart.doc.requires?.capabilities ?? {}),
       (f) => load(f)?.doc,
     ),
+    'scene.tsx': scenic(doc),
   };
   return (f: string) => by[(REGISTRY as Record<string, Row>)[`${kind}.${f}`]?.book?.edit ?? ''];
 }
@@ -95,6 +97,7 @@ const gate = (kind: string, doc: unknown) => (o: Ops) => {
 
 /** A source file's sheet: its definition's fields, each written as it is entered. */
 function body(file: string) {
+  if (file.endsWith('.scene')) return [refusal(), lines(file)]; // no JSON: its lines (scene.tsx)
   const g = load(file);
   if (!g) return refusal();
   const def = definitionOf(g.defs, g.kind, g.doc);
@@ -112,7 +115,9 @@ function body(file: string) {
     claim,
     gate: gate(g.kind, doc),
   };
-  return [refusal(), field(at, [], g.root, g.doc)];
+  // a scene's `.cut` twin, when it has one: its pages above its fields
+  const cut = g.kind === 'scenes' && pages(file.replace(/\.json$/, '.cut'), 'steps' in doc);
+  return [refusal(), cut, field(at, [], g.root, g.doc)];
 }
 
 sheets.def = { title: (file) => file, body };

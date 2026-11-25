@@ -14,8 +14,6 @@ outline.parts.book.create  # home: 5.4, the Story tab (no /schema/outline)
 outline.parts.book.delete  # home: 5.4, the Story tab (no /schema/outline)
 outline.parts.book.edit  # home: 5.4, the Story tab (no /schema/outline)
 scenes.abstract.book.create  # home: 5.2 (a field the picked scene shape requires)
-scenes.description.book.create  # home: 5.2 (a field the picked scene shape requires)
-scenes.name.book.create  # home: 5.2 (a field the picked scene shape requires)
 text.book.create  # home: none yet; words are written in place (1.3), a bare key has no builder gesture
 text.book.delete  # home: none yet; words are written in place (1.3), a bare key has no builder gesture
 text.book.edit  # home: none yet; words are written in place (1.3), a bare key has no builder gesture

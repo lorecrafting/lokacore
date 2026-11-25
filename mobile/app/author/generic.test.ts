@@ -137,6 +137,11 @@ async function gesture(kind: string, f: string, op: string, doc: Record<string, 
     await settle();
     if (!button(s, f)) await s.press(`mechanic ${s.file}`); // a mechanic row: Add mechanic… opens it
     const b = button(s, f);
+    // a field only a union branch requires (a scene's name): picking that branch writes it
+    for (let j = 0; !b && (await s.press(`branch ${j}`)); j++) {
+      const mine = sent().filter((o) => o.path[0] === f);
+      if (mine.length) return mine;
+    }
     if (!b) return [];
     b.props.onPress();
     await settle();
