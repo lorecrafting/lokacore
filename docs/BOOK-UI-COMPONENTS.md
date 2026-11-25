@@ -380,6 +380,16 @@ ghost line's dashed `dim`, never `line`) across the item's indent, `space.sm` ab
 `later rules` `type.label` in `dim` at the item's text edge. An object's `Add…` and its field names
 sit at the indent of that object's own fields, so a nested `Add…` stands `space.md` right of its
 parent's.
+Builder 5.5b: the Flow walk's rows are Room sheet rows with `space.md` sides. The trail is the
+header breadcrumb's look (`type.small` `dim`, wrapping), first under the title. `Filters…`, each
+filter toggle and every band node, `Sheet`, person, item and `Go there` are acts, wrapping at
+390 px; a filter that is on is a selected act. A band's heading (`Leads here`, `Unlocks`, `Set by`,
+`Read by`, `Two steps out`) is the field caption, `type.label` in `dim`. The centre stands between
+two `size.rule` rules in `line` across the sheet, `space.sm` inside each: its `<kind> <key>` in
+`type.control` `fg` (the sheet title's look, never an act), its acts in a row under it. At half
+height on a 390 px phone the centre's name shows without a scroll when `Leads here` holds one
+node. No raw sizes.
+Builder 5.1a and 5.4b add `Flow`, an act, to a choice's and a Story row's acts.
 Worst pair: `warning` on `card`,
 4.75 (light).
 

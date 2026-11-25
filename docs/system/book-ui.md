@@ -986,7 +986,7 @@ reasons and limits: [prose in the Book rulings](../design/prose-in-the-book-ruli
     joined ` › `), and its title, a header that takes focus whenever a new sheet comes on top; its
     body scrolls, from its start when it comes on top. Sheets stack, at most four: opening a fifth
     replaces the top one, opening one already lower moves it to the top, and Back closes only the
-    top one. Closing the last returns focus to what opened the first. The stack and the top
+    top one (a Flow walk first steps back along its trail, Flow walk below). Closing the last returns focus to what opened the first. The stack and the top
     sheet's scroll survive a reload; leaving Build closes every sheet.
   - **Two layouts** (ruling 7). Where the window holds the full page column with a docked sheet
     beside it (the page column and half of it again), the sheet docks at the Book's right edge,
@@ -1051,7 +1051,8 @@ reasons and limits: [prose in the Book rulings](../design/prose-in-the-book-ruli
     selected only selects it. A definition row is selected without opening. Only the selected row
     shows its acts, in rows of their own under it. A definition offers `Go there` (the room a
     placement edge, `.room` or `.items`, joins it to; none, no Go there), `Sheet`, `Trace` (a fact's
-    setters, then its readers, each naming a definition opening its sheet) and `Consequences`. A
+    setters, then its readers, each naming a definition opening its sheet), `Consequences` and,
+    for a node the Flow draws, `Flow` (the walk centred on it). A
     beat offers a title field with `Retitle` (empty removes the title), `Remove` (no confirm: the
     Undo chip covers it), `Knowledge` (the facts set before it, as words) and `Bind…`, a fold of
     `Bind <short>` per short ref. Each edit is one gesture with one Undo. Facts, Pacing, Trace,
@@ -1061,6 +1062,24 @@ reasons and limits: [prose in the Book rulings](../design/prose-in-the-book-ruli
       With a story but no parts (no outline file, or none in it), it shows that plain line, then
       the number field and `Add beat`, which writes beat n into the first part. A sheet opened
       from it with no story says Nothing here.
+  - **Flow walk (5.5b, [builder mode decision 9 as amended](../rnd/in-game-builder-mode-2026-11-19.md)).**
+    `flow:<ref>`, one sheet titled `Flow <key>`; not the panel's canvas shrunk. In order: the
+    walk's trail, when it has more than one step (its keys joined ` › `, under the header); a
+    `Filters…` fold (expanded while open), followed while shut by each filter that is on, so a
+    filter hiding nodes always shows and one press turns it off; open, every Flow filter as a
+    toggle, on marked selected. A filter hides its lane's nodes from every band, never the centre.
+    The filters on are kept from walk to walk until the Book reloads. Then `Leads here` (the nodes
+    with an edge into the centre), the centre, `Unlocks` (the nodes it leads to); a band with no
+    nodes is not drawn. For a fact the bands are its thread, as Trace's: `Set by`, then `Read by`.
+    A band's node is `<kind> <key>`, a press re-centres the walk on it, with `Sheet` when /story
+    named its file. The centre offers `Sheet`, each person and item an edge joins it to (opening
+    their own sheets) and `Go there: <room>` for each room. A press on a node already on the trail
+    cuts the trail back to it (never a loop). Re-centring keeps the walk one sheet: the stack
+    neither grows nor reorders, and the body starts at its top. Back, and the grip's drag down
+    from half height (Back, Two layouts), step back one trail step; on the first they close it. With
+    the docked layout (Two layouts) the walk adds two hops: `Two steps out` above `Leads here`
+    (what leads to those nodes) and below `Unlocks` (what those nodes lead to), each node a band
+    node, the filters applied; the phone draws none. With no story the sheet says Nothing here.
   - **Unwritten links.** In Build a link whose words are unwritten draws as an unwritten line
     does (Build: in-place field): a blank ruled line with the caption `name`, never `~`, named
     `Unwritten name, open`. It keeps its own press. Out of Build every link draws as before.
@@ -1219,7 +1238,8 @@ reasons and limits: [prose in the Book rulings](../design/prose-in-the-book-ruli
     `Choice key` field and `Add choice`, which adds a least choice (its label and narration `~`)
     under the trimmed key and clears the field. An empty key adds nothing; a refused key (not
     lowercase letters, digits and `_`, or already present) shows why and keeps the typed key.
-  - **A choice** opens to `Rename` and `Remove choice`, then its fields present, then `Add…` with
+  - **A choice** opens to `Rename`, `Remove choice` and `Flow` (the walk centred on this dialogue, a
+    choice being no node of its own; only once /story has named the dialogue's file), then its fields present, then `Add…` with
     the absent fields the compiler takes for it. A key is the choice's id, so `Rename` changes
     nothing and only shows why. `Remove choice` removes it, but not
     a dialogue's last choice nor its riddle's answer, which show why instead. A field the compiler asks at play (`sitting`, `exchange`) is revealed
