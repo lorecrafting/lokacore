@@ -25,7 +25,8 @@ const open = 'await handle.createSyncAccessHandle()';
 const pool = join(moduleRoot, 'web/wa-sqlite/AccessHandlePoolVFS.js');
 const upstream = readFileSync(join(installed, 'web/wa-sqlite/AccessHandlePoolVFS.js'), 'utf8')
   .replaceAll(`warmed(${open})`, open)
-  .split('\n// ponytail: 32 MB')[0];
+  .split('\n// loka-hcnlh.19.2 warm-up')[0];
+assert.ok(!upstream.includes('warmed'));
 writeFileSync(pool, upstream);
 cpSync(join(import.meta.dirname, 'patch-sqlite-web.cjs'), join(fixture, 'patch.cjs'));
 execFileSync(process.execPath, [join(fixture, 'patch.cjs')]);
@@ -37,8 +38,8 @@ writeFileSync(
 // WebKit's sync handle: a write past its granted capacity needs the page's main thread, free only
 // while the open is async; once the sync bridge spins, such a write never returns.
 let spinning = false;
-const files: { size: number; capacity: number; data: Uint8Array }[] = [];
-const syncHandle = (f: (typeof files)[number]) => ({
+type File = { size: number; capacity: number; data: Uint8Array };
+const syncHandle = (f: File) => ({
   getSize: () => f.size,
   read: (into: Uint8Array, { at }: { at: number }) => {
     const bytes = new Uint8Array(into.buffer, into.byteOffset, into.byteLength);
@@ -64,10 +65,6 @@ const syncHandle = (f: (typeof files)[number]) => ({
   flush() {},
   close() {},
 });
-const file = (f: (typeof files)[number]) => (
-  files.push(f),
-  { kind: 'file', createSyncAccessHandle: async () => syncHandle(f) }
-);
 // An existing save: a pool file whose header names the main database (upstream's on-disk format:
 // path, flags SQLITE_OPEN_MAIN_DB, then its digest), with one 4 KB page after the header.
 const header = new Uint8Array(8192);
@@ -81,28 +78,56 @@ for (const value of header.subarray(0, 516)) {
 h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
 h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
 header.set(new Uint8Array(new Uint32Array([h1 >>> 0, h2 >>> 0]).buffer), 516);
-const saved = file({ size: 8192, capacity: 8192, data: header });
-const dir = {
-  getDirectoryHandle: async () => dir,
-  getFileHandle: async () => file({ size: 0, capacity: 0, data: new Uint8Array(0) }),
-  async *[Symbol.asyncIterator]() {
-    yield ['saved', saved];
-  },
-};
-Object.defineProperty(globalThis, 'navigator', {
-  value: { storage: { getDirectory: async () => dir } },
+
+// A fresh browser with that save, and a pool module evaluated under its user agent.
+async function opened(userAgent: string) {
+  spinning = false;
+  const files: File[] = [];
+  const file = (f: File) => (
+    files.push(f),
+    { kind: 'file', createSyncAccessHandle: async () => syncHandle(f) }
+  );
+  const saved = file({ size: 8192, capacity: 8192, data: header.slice() });
+  const dir = {
+    getDirectoryHandle: async () => dir,
+    getFileHandle: async () => file({ size: 0, capacity: 0, data: new Uint8Array(0) }),
+    async *[Symbol.asyncIterator]() {
+      yield ['saved', saved];
+    },
+  };
+  const storage = { getDirectory: async () => dir };
+  Object.defineProperty(globalThis, 'navigator', {
+    value: { userAgent, storage },
+    configurable: true,
+  });
+  const url = `${pathToFileURL(pool).href}?ua=${encodeURIComponent(userAgent)}`;
+  const { AccessHandlePoolVFS } = await import(url);
+  const vfs = await AccessHandlePoolVFS.create('/loka', {});
+  await vfs.addCapacity(1); // a free pool file for the journal, beside the save
+  return { vfs, files };
+}
+const SAFARI =
+  'Mozilla/5.0 (iPhone; CPU iPhone OS 26_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.1 Mobile/15E148 Safari/604.1';
+const CHROME =
+  'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36';
+const flags = new DataView(new ArrayBuffer(4));
+
+// Breaks (loka-hcnlh.19.2): Safari's pool takes no headroom at open, so the first save write that
+// grows a file stalls the page and times out; or the headroom stays in the save, not truncated.
+test('on Safari the save and a new journal grow by sync writes, and the save keeps its size', async () => {
+  const { vfs } = await opened(SAFARI);
+  spinning = true;
+  assert.equal(vfs.jOpen('/loka.db', 1, 0x100 | 0x2, flags), 0);
+  const size = new DataView(new ArrayBuffer(8));
+  vfs.jFileSize(1, size);
+  assert.equal(size.getBigInt64(0, true), 4096n); // one page: no headroom left in the save
+  assert.equal(vfs.jWrite(1, new Uint8Array(1024 * 1024), 4096), 0);
+  assert.equal(vfs.jOpen('/loka.db-journal', 2, 0x800 | 0x4 | 0x2, flags), 0);
+  assert.equal(vfs.jWrite(2, new Uint8Array(64 * 1024), 0), 0);
 });
 
-// Breaks (loka-hcnlh.19.2): the pool takes no headroom at open, so Safari's first save write that
-// grows a file stalls the page and times out; or the headroom is left in the file, not truncated.
-test('each pool file opens with headroom for the sync writes after it, at its own size', async () => {
-  const { AccessHandlePoolVFS } = await import(pathToFileURL(pool).href);
-  const vfs = await AccessHandlePoolVFS.create('/loka', {});
-  await vfs.addCapacity(1); // a new pool file as well as the existing one
-  assert.equal(files.length, 2);
-  assert.equal(files[0].size, 8192); // the headroom byte is truncated away, not kept in the save
-  spinning = true;
-  for (const f of files) {
-    syncHandle(f).write(new Uint8Array(1024 * 1024), { at: f.size });
-  }
+// Breaks: Chromium, which grants growth inside the worker, pays a 32 MB write per pool file per open.
+test('on Chromium the pool writes no headroom', async () => {
+  const { files } = await opened(CHROME);
+  assert.ok(files.every((f) => f.capacity < 1024 * 1024));
 });

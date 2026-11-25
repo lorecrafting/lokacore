@@ -11,6 +11,7 @@ import type { Failed } from '../packages/game-view/session.ts';
 import { LABEL } from './book/labels.ts';
 
 // The web save's worker did not answer in time (Safari, loka-hcnlh.19.2): a reload starts a fresh one.
+// ponytail: a timeout a reload cannot clear (a result over 64 MB) offers Try again on every reload.
 const retryable = (f: Failed) => locked(f) || /^Sync operation timeout/.test(f.message);
 const PLAIN: Record<string, string> = {
   save_corrupt: 'The save is damaged and cannot be read.',
