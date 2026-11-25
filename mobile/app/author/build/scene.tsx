@@ -14,7 +14,7 @@ import {
   type SceneKind,
 } from '../../../../kernel/ts/play/scene_structure.ts';
 import type { On } from '../../../../kernel/ts/play/scene_trigger.ts';
-import { space, type } from '../../book/tokens.ts';
+import { size, space, type } from '../../book/tokens.ts';
 import { ink } from './build.ts';
 import { block } from './form.tsx';
 import { opened, toggle, type Block } from './formwrite.ts';
@@ -41,6 +41,7 @@ const FLUSH = 0; // mutate-skip: layout only (a cut line's indent)
 const LABEL = { ...type.label, color: ink('dim') };
 
 type Src = { bytes: string; sha256: string };
+type Row = ReturnType<typeof rows>[number];
 const got = new Map<string, Src>(); // each file's bytes as last read
 const fresh = new Set<string>(); // read under the latest /story
 let of: unknown;
@@ -57,18 +58,46 @@ function source(file: string) {
   return got.get(file);
 }
 
-const restructure = (file: string, was: string, op: Op) =>
-  run(() => ed.call('restructure', { file, was, op, carry: [] }));
+let focus: string | undefined; // the row to take focus once drawn (rulings §5)
+/** Line `op` leaves its row at in `now` (was `was`): an add's new line, the first changed non-blank
+ * one; a move's row at the start of the unit (`starts`) it passed, above on `was`, below on `now`. */
+function landed(op: Op, was: string[], now: string[], starts: (ls: string[]) => number[]) {
+  if ('add' in op) {
+    let i = now.findIndex((l, j) => l !== was[j]);
+    while (!now[i].trim()) i++;
+    return i + 1;
+  }
+  const { move, by } = op as { move: number; by: number };
+  const at = move - 1;
+  const above = starts(was).filter((k) => k < at);
+  return (by < 0 ? above.at(-1) : starts(now).find((k) => k > at))! + 1;
+}
+/** Sends `op` on `s`; once done, a moved row stays open and focused at its new line, an added row
+ * takes focus. */
+const restructure = (
+  file: string,
+  s: Src,
+  op: Op,
+  now: string,
+  starts: (ls: string[]) => number[],
+) =>
+  run(async () => {
+    const why = await ed.call('restructure', { file, was: s.sha256, op, carry: [] });
+    if (typeof why === 'string' || !('add' in op || 'move' in op)) return why;
+    focus = `${file}:${landed(op, s.bytes.split('\n'), now.split('\n'), starts)}`;
+    if ('move' in op && opened.delete(`${file}:${op.move}`)) opened.add(focus);
+  });
 /** An act: pressable when `why` is undefined, else greyed with it. */
 const acted = (label: string, why: string | undefined, go: () => void) =>
   why === undefined ? act(label, go) : greyed(label, why, label);
-const why = (r: { after: string } | { refused: string }) =>
-  'refused' in r ? r.refused : undefined;
+type Done = { after: string } | { refused: string };
+const why = (r: Done) => ('refused' in r ? r.refused : undefined);
 
 /** `file`'s acts on `s`, each checked by `check`: its refusal, a send, a press that tells or sends,
  * and a drawn act. */
-function acts(file: string, s: Src, check: (op: Op) => string | undefined) {
-  const go = (op: Op) => restructure(file, s.sha256, op);
+function acts(file: string, s: Src, test: (op: Op) => Done, starts: (ls: string[]) => number[]) {
+  const check = (op: Op) => why(test(op));
+  const go = (op: Op) => restructure(file, s, op, (test(op) as { after: string }).after, starts);
   const press = (op: Op) => () => (check(op) === undefined ? go(op) : tell(check(op)!));
   const draw = ([label, op]: readonly [string, Op]) => acted(label, check(op), () => go(op));
   return { press, draw };
@@ -102,9 +131,16 @@ function line(key: string, text: string, keys: Record<string, () => void>, inden
           k();
         },
       } as object)}
-      style={{ paddingLeft: space.md * (indent + 1), minHeight: 44, justifyContent: 'center' }} // mutate-skip: layout only
+      ref={(el) => {
+        if (el && focus === key) ((el as unknown as HTMLElement).focus(), (focus = undefined));
+      }}
+      style={{
+        paddingLeft: space.md * (indent + 1),
+        minHeight: size.touch,
+        justifyContent: 'center',
+      }} // mutate-skip: layout only
     >
-      <Text style={{ ...type.control, color: ink('action') }}>{text.trim()}</Text>
+      <Text style={{ ...type.small, color: ink('fg') }}>{text.trim()}</Text>
     </Pressable>
   );
 }
@@ -117,12 +153,20 @@ export function lines(file: string) {
   return rs.map((r, i) => (r.text.trim() ? sceneRow(file, s, rs, i) : null));
 }
 
+/** A move's units for row `me`: rows at its depth, choices for a choice, lines for a line (shifted()). */
+const units = (me: Row) => (ls: string[]) =>
+  rows(ls).flatMap((r, j) =>
+    r.text.trim() && r.indent === me.indent && (r.key === undefined) === (me.key === undefined)
+      ? [j]
+      : [],
+  );
+
 /** Line `i + 1`'s Add after (its kinds), Move up and down and Remove, checked by scene() on `s`. */
-function sceneRow(file: string, s: Src, rs: ReturnType<typeof rows>, i: number) {
+function sceneRow(file: string, s: Src, rs: Row[], i: number) {
   const n = i + 1;
   const key = `${file}:${n}`;
   const menu = `${key}:+`;
-  const { press, draw } = acts(file, s, (op) => why(scene(s.bytes, op)));
+  const { press, draw } = acts(file, s, (op) => scene(s.bytes, op), units(rs[i]));
   const up: Op = { move: n, by: -1 };
   const down: Op = { move: n, by: 1 };
   const moves: [string, Op][] = [
@@ -164,7 +208,15 @@ export function pages(file: string, steps: boolean) {
   let page = 0;
   return blocks(all).map(([first, last]) => {
     const p = all[first].trim() === '---' ? 0 : ++page;
-    return all.slice(first, last + 1).map((text, k) => cutRow(file, s, steps, p, first + k + 1, k));
+    const caption = (
+      <Text key={`page ${file}:${p}`} style={{ ...LABEL, paddingLeft: space.md }}>
+        {`page ${p}`}
+      </Text>
+    );
+    const its = all
+      .slice(first, last + 1)
+      .map((t, k) => cutRow(file, s, steps, p, first + k + 1, k));
+    return p ? [caption, ...its] : its;
   });
 }
 
@@ -188,7 +240,12 @@ function cutRow(file: string, s: Src, steps: boolean, p: number, n: number, k: n
         [WORDS.join(p), { join: n }],
         [WORDS.removePage(p), { remove: n }],
       ];
-  const { press, draw } = acts(file, s, (op) => why(cut(s.bytes, op, steps)));
+  const { press, draw } = acts(
+    file,
+    s,
+    (op) => cut(s.bytes, op, steps),
+    (ls) => blocks(ls).map(([first]) => first),
+  );
   return (
     <View key={key}>
       {line(key, text, k ? {} : { ArrowUp: press(ops[1][1]), ArrowDown: press(ops[2][1]) }, FLUSH)}

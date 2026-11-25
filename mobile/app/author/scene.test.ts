@@ -10,6 +10,7 @@ const { lines, pages, scenic } = await import('./build/scene.tsx');
 const { known } = await import('./build/room.tsx');
 const { onSaved, refused, running, wire } = await import('./build/roomedit.tsx');
 const { opened } = await import('./build/formwrite.ts');
+const { ink } = await import('./build/build.ts');
 
 const files: Record<string, string> = {};
 const sent: [string, any][] = [];
@@ -142,15 +143,25 @@ test('Split at a page’s second line sends {split: n}', async () => {
   );
 });
 
-// Breaks: a page line drawn twice or the end mark drawn as a page with acts; a page's Move up or
-// Alt-ArrowDown aimed at the wrong line or direction.
-test('a cut draws each line once, its end mark bare; page moves send {move, by}', async () => {
+// Breaks: a page line drawn twice, a page's caption missing, misnumbered or after its first line, or
+// the end mark drawn as a page (captioned, with acts); a page's Move up or Alt-ArrowDown aimed at the
+// wrong line or direction.
+test('a cut draws each line once under its page caption, its end mark bare; page moves send {move, by}', async () => {
   const file = 'scenes/d.cut';
   opened.add(`${file}:5`);
   const all = await drawn(() => pages(file, false), file, 3);
   assert.deepEqual(
-    all.filter((x) => String(x.key).startsWith(file)).map((x) => [x.key, x.type]),
-    [`${file}:1`, `${file}:3`, `${file}:4`].map((k) => [k, 'View']).concat([[`${file}:5`, 'Text']]),
+    all
+      .filter((x) => String(x.key).includes(file))
+      .map((x) => [x.key, x.type, x.type === 'Text' ? x.props.children : '']),
+    [
+      [`page ${file}:1`, 'Text', 'page 1'],
+      [`${file}:1`, 'View', ''],
+      [`page ${file}:2`, 'Text', 'page 2'],
+      [`${file}:3`, 'View', ''],
+      [`${file}:4`, 'View', ''],
+      [`${file}:5`, 'Text', '---'],
+    ],
   );
   await press(named(all, 'Move up page 2'));
   assert.deepEqual(ops(), [{ move: 3, by: -1 }]);
@@ -158,6 +169,52 @@ test('a cut draws each line once, its end mark bare; page moves send {move, by}'
   assert.deepEqual(ops(), [{ move: 1, by: 1 }]);
   await key(all, file, 3, 'ArrowUp');
   assert.deepEqual(ops(), [{ move: 3, by: -1 }]);
+});
+
+// Breaks: after a move the row's acts closed or left on its old line, focus not following the row to
+// its new line (above or below, a choice with its block, a page with its lines), or an added line
+// not taking focus; a refused op moving either.
+test('a moved row stays open and takes focus at its new line; an added line takes focus', async () => {
+  const file = 'scenes/f.scene';
+  const cutFile = 'scenes/f.cut';
+  files[file] = 'npc: bram\n\n- A #a\n  * x\n- B #b\n  * y\n- C #c\n';
+  files[cutFile] = 'A.\n\nB.\nC.\n---\n';
+  /** Which drawn row of `draw` takes focus once drawn, and which rows of `file` are open. */
+  const focused = (draw: () => unknown, f: string) => {
+    let got = '';
+    for (const x of nodes(draw()).filter((x) => String(x.key).startsWith(f)))
+      x.props.children[0]?.props?.ref?.({ focus: () => (got = x.key) });
+    return [got, [...opened].filter((k) => k.startsWith(f))];
+  };
+  let all = await drawn(() => lines(file), file, 3);
+  answer = [409, 'stale'];
+  await press(named(all, 'Move down line 3'));
+  assert.deepEqual(
+    focused(() => lines(file), file),
+    ['', [`${file}:3`]],
+  );
+  answer = [200, { id: 8 }];
+  await press(named(all, 'Move down line 3'));
+  assert.deepEqual(
+    focused(() => lines(file), file),
+    [`${file}:5`, [`${file}:5`]],
+  );
+  await press(named(nodes(lines(file)), 'Move up line 5'));
+  assert.deepEqual(
+    focused(() => lines(file), file),
+    [`${file}:3`, [`${file}:3`]],
+  );
+  await press(named(nodes(lines(file)), 'Add after line 3'));
+  await press(named(nodes(lines(file)), 'words line'));
+  opened.clear();
+  assert.deepEqual(focused(() => lines(file), file)[0], `${file}:4`);
+  all = await drawn(() => pages(cutFile, false), cutFile, 1);
+  await press(named(all, 'Move down page 1'));
+  assert.deepEqual(
+    focused(() => pages(cutFile, false), cutFile),
+    [`${cutFile}:4`, [`${cutFile}:4`]],
+  );
+  answer = [409, 'stale'];
 });
 
 // Breaks: a switch merging into the old on (its point and outcome left behind), or the trigger and
@@ -216,7 +273,8 @@ const lit = (x: any) => x?.props.accessibilityState?.selected;
 const wrote = () => sent.map(([, b]) => b.ops[0].value);
 
 // Breaks: a value pick writing another point's offer, an outcome pick writing another point, the
-// lit kind or value not lit, unoffered kinds drawn, or a press on the lit kind rewriting the on.
+// lit kind or value not lit or drawn like the rest (not Map's selected box: the action fill, its
+// words in the background colour), unoffered kinds drawn, or a press on the lit kind rewriting the on.
 test('a point trigger: its kinds, values and outcomes lit and each pick writes its own on', async () => {
   const sp = (r: string) => ({ ref: `story_point/${r}`, kind: 'story_point' });
   const draw = () =>
@@ -235,6 +293,14 @@ test('a point trigger: its kinds, values and outcomes lit and each pick writes i
   assert.deepEqual(
     [lit(all.find((x) => x.key === 'value p')), lit(all.find((x) => x.key === 'value q'))],
     [true, false],
+  );
+  const box = (x: any) => [x.props.style.backgroundColor, x.props.children.props.style.color];
+  assert.deepEqual(
+    ['value p', 'value q'].map((k) => box(all.find((x) => x.key === k))),
+    [
+      [ink('action'), ink('bg')],
+      [undefined, ink('action')],
+    ],
   );
   await press(all.find((x) => x.key === 'kind story_point'));
   assert.deepEqual(sent, []);
