@@ -10,6 +10,9 @@ import { detail, locked } from './book/words.ts';
 import type { Failed } from '../packages/game-view/session.ts';
 import { LABEL } from './book/labels.ts';
 
+// The web save's worker did not answer in time (Safari, loka-hcnlh.19.2): a reload starts a fresh one.
+// ponytail: a timeout a reload cannot clear (a result over 64 MB) offers Try again on every reload.
+const retryable = (f: Failed) => locked(f) || /^Sync operation timeout/.test(f.message);
 const PLAIN: Record<string, string> = {
   save_corrupt: 'The save is damaged and cannot be read.',
   pinned_release_missing: 'This save was made with a different version of the game.',
@@ -21,8 +24,8 @@ const PLAIN: Record<string, string> = {
  * The screen for a save that does not open (book-ui.md, Chapters, scenes and recovery).
  * - Use: App, when the save fails to open; no GameView behind it.
  * - Rules: an error haptic on arrival, no sound; the Page's centred variant; `startOver` asks first: it destroys the save (10 §31; the
- *   shell's confirm); `tryAgain` (a page reload on web) reopens the save, offered only on the other-tab lock.
- * - States: release; format; corrupt; locked.
+ *   shell's confirm); `tryAgain` (a page reload on web) reopens the save, offered only on the other-tab lock and a worker timeout.
+ * - States: release; format; corrupt; locked; timed out.
  * - Story: RecoveryPages.stories.tsx
  */
 export function SaveError({
@@ -47,7 +50,7 @@ export function SaveError({
       <SafeAreaView style={{ flex: 1, backgroundColor: paper.bg }}>
         <Page centred title={PLAIN[failed.kind!] ?? 'The game cannot go on yet.'}>
           {why ? <Text style={note(paper, type)}>{why}</Text> : null}
-          {tryAgain && locked(failed) && <Control label={LABEL.tryAgain} onPress={tryAgain} />}
+          {tryAgain && retryable(failed) && <Control label={LABEL.tryAgain} onPress={tryAgain} />}
           {failed.startOver && <Control label={LABEL.startOver} onPress={startOver} />}
         </Page>
       </SafeAreaView>

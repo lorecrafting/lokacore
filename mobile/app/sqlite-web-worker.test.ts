@@ -12,11 +12,16 @@ const fixture = mkdtempSync(join(tmpdir(), 'loka-sqlite-worker-'));
 after(() => rmSync(fixture, { recursive: true, force: true }));
 const installed = dirname(createRequire(import.meta.url).resolve('expo-sqlite/package.json'));
 const moduleRoot = join(fixture, 'node_modules/expo-sqlite');
-mkdirSync(join(moduleRoot, 'web'), { recursive: true });
+mkdirSync(join(moduleRoot, 'web/wa-sqlite'), { recursive: true });
 for (const name of ['WorkerChannel', 'Deferred', 'SyncSerializer']) {
   cpSync(join(installed, 'web', `${name}.ts`), join(moduleRoot, 'web', `${name}.ts`));
 }
 cpSync(join(installed, 'package.json'), join(moduleRoot, 'package.json'));
+// The patch also warms the OPFS pool (sqlite-web-pool.test.ts covers it); it needs the file here.
+cpSync(
+  join(installed, 'web/wa-sqlite/AccessHandlePoolVFS.js'),
+  join(moduleRoot, 'web/wa-sqlite/AccessHandlePoolVFS.js'),
+);
 const patch = join(fixture, 'patch.cjs');
 cpSync(join(import.meta.dirname, 'patch-sqlite-web.cjs'), patch);
 execFileSync(process.execPath, [patch]);
