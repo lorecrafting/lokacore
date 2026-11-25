@@ -58,7 +58,14 @@ function source(file: string) {
   return got.get(file);
 }
 
+const ROW = 'loka-build-row'; // [row, open]: a `.scene` op's compile reloads the Book (App.tsx)
 let focus: string | undefined; // the row to take focus once drawn (rulings §5)
+try {
+  const [k, open] = JSON.parse(localStorage.getItem(ROW) ?? 'null') ?? [];
+  if (open) opened.add(k);
+  focus = k;
+  localStorage.setItem(ROW, 'null');
+} catch {} // a damaged entry or none (a test, native): no row takes focus
 /** Line `op` leaves its row at in `now` (was `was`): an add's new line, the first changed non-blank
  * one; a move's row at the start of the unit (`starts`) it passed, above on `was`, below on `now`. */
 function landed(op: Op, was: string[], now: string[], starts: (ls: string[]) => number[]) {
@@ -67,10 +74,10 @@ function landed(op: Op, was: string[], now: string[], starts: (ls: string[]) => 
     while (!now[i].trim()) i++;
     return i + 1;
   }
-  const { move, by } = op as { move: number; by: number };
-  const at = move - 1;
+  if (!('move' in op)) return undefined; // a remove, split or join lands no row
+  const at = op.move - 1;
   const above = starts(was).filter((k) => k < at);
-  return (by < 0 ? above.at(-1) : starts(now).find((k) => k > at))! + 1;
+  return (op.by < 0 ? above.at(-1) : starts(now).find((k) => k > at))! + 1;
 }
 /** Sends `op` on `s`; once done, a moved row stays open and focused at its new line, an added row
  * takes focus. */
@@ -82,10 +89,18 @@ const restructure = (
   starts: (ls: string[]) => number[],
 ) =>
   run(async () => {
-    const why = await ed.call('restructure', { file, was: s.sha256, op, carry: [] });
-    if (typeof why === 'string' || !('add' in op || 'move' in op)) return why;
-    focus = `${file}:${landed(op, s.bytes.split('\n'), now.split('\n'), starts)}`;
-    if ('move' in op && opened.delete(`${file}:${op.move}`)) opened.add(focus);
+    // after a remove, split or join `${file}:undefined`: no row takes focus
+    const to = `${file}:${landed(op, s.bytes.split('\n'), now.split('\n'), starts)}`;
+    const from = 'move' in op && `${file}:${op.move}`;
+    localStorage.setItem(ROW, JSON.stringify([to, from && opened.has(from)])); // kept first: the reload can come first
+    try {
+      await ed.call('restructure', { file, was: s.sha256, op, carry: [] }); // a refusal throws
+    } catch (e) {
+      localStorage.setItem(ROW, 'null');
+      throw e;
+    }
+    focus = to;
+    if (from && opened.delete(from)) opened.add(to);
   });
 /** An act: pressable when `why` is undefined, else greyed with it. */
 const acted = (label: string, why: string | undefined, go: () => void) =>

@@ -5,7 +5,13 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { nodes } from '../book/__tests__/combat-book.test.ts'; // the React Native stand-ins
 
-Object.assign(globalThis, { localStorage: { getItem: () => null, setItem() {} } });
+const stored: Record<string, string> = {};
+Object.assign(globalThis, {
+  localStorage: {
+    getItem: (k: string) => stored[k] ?? null,
+    setItem: (k: string, v: string) => (stored[k] = v),
+  },
+});
 const { lines, pages, scenic } = await import('./build/scene.tsx');
 const { known } = await import('./build/room.tsx');
 const { onSaved, refused, running, wire } = await import('./build/roomedit.tsx');
@@ -172,8 +178,9 @@ test('a cut draws each line once under its page caption, its end mark bare; page
 });
 
 // Breaks: after a move the row's acts closed or left on its old line, focus not following the row to
-// its new line (above or below, a choice with its block, a page with its lines), or an added line
-// not taking focus; a refused op moving either.
+// its new line (above or below, a choice with its block or past a nested choice, a page with its
+// lines), or an added line not taking focus; neither kept across the reload a compile makes; a
+// refused op moving or keeping either.
 test('a moved row stays open and takes focus at its new line; an added line takes focus', async () => {
   const file = 'scenes/f.scene';
   const cutFile = 'scenes/f.cut';
@@ -190,13 +197,22 @@ test('a moved row stays open and takes focus at its new line; an added line take
   answer = [409, 'stale'];
   await press(named(all, 'Move down line 3'));
   assert.deepEqual(
-    focused(() => lines(file), file),
-    ['', [`${file}:3`]],
+    [focused(() => lines(file), file), stored['loka-build-row']],
+    [['', [`${file}:3`]], 'null'],
   );
   answer = [200, { id: 8 }];
   await press(named(all, 'Move down line 3'));
   assert.deepEqual(
     focused(() => lines(file), file),
+    [`${file}:5`, [`${file}:5`]],
+  );
+  opened.clear(); // the move's compile reloads the Book: the new page draws the row open and focused
+  const reload = './build/scene.tsx?again.tsx'; // a fresh module; the loader reads .tsx ends
+  const again = (await import(reload)).lines as typeof lines;
+  again(file);
+  await tick();
+  assert.deepEqual(
+    focused(() => again(file), file),
     [`${file}:5`, [`${file}:5`]],
   );
   await press(named(nodes(lines(file)), 'Move up line 5'));
@@ -208,12 +224,17 @@ test('a moved row stays open and takes focus at its new line; an added line take
   await press(named(nodes(lines(file)), 'words line'));
   opened.clear();
   assert.deepEqual(focused(() => lines(file), file)[0], `${file}:4`);
+  assert.deepEqual(JSON.parse(stored['loka-build-row']), [`${file}:4`, false]); // kept shut
   all = await drawn(() => pages(cutFile, false), cutFile, 1);
   await press(named(all, 'Move down page 1'));
   assert.deepEqual(
     focused(() => pages(cutFile, false), cutFile),
     [`${cutFile}:4`, [`${cutFile}:4`]],
   );
+  const g = 'scenes/g.scene'; // a choice moved up past one holding a choice lands on the outer one
+  files[g] = 'npc: bram\n\n- A #a\n  * x\n  - A1 #a1\n    * y\n- B #b\n  * z\n';
+  await press(named(await drawn(() => lines(g), g, 7), 'Move up line 7'));
+  assert.deepEqual(focused(() => lines(g), g)[0], `${g}:3`);
   answer = [409, 'stale'];
 });
 

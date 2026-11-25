@@ -10,6 +10,7 @@ const { story } = await import('./build/room.tsx');
 const { sheets } = await import('./build/sheet.tsx');
 await import('./build/Build.tsx'); // the app's registration of the def: sheet
 const { WORDS } = await import('./build/form.tsx');
+const rowsOpen = (await import('./build/formwrite.ts')).opened;
 const HOURS = (await import('./build/schedule.tsx')).WORDS;
 const COMBAT = (await import('./build/combat.tsx')).WORDS;
 
@@ -472,12 +473,17 @@ test('Schedule: an hour moves within the day, a refusal writes nothing, Add hour
   assert.ok(lost.shown().some((x) => words(x) === HOURS.add && !x.props?.onPress));
 });
 
-// Breaks: a scene's sheet drawn without its `.cut` twin's pages above its fields.
-test('a scene sheet draws its .cut twin’s pages', async () => {
-  const s = await opened('scenes', {});
-  const cut = s.file.replace(/\.json$/, '.cut');
-  files.set(cut, 'Mist.'); // served as JSON: one line
-  (load(), await settle()); // a new /story: the sheet reads its twin again
-  (s.shown(), await settle());
-  assert.ok(s.shown().some((x) => x.key === `${cut}:1`));
+// Breaks: a scene's sheet drawn without its `.cut` twin's pages above its fields, or a twin whose
+// .json carries steps offering page acts.
+test('a scene sheet draws its .cut twin’s pages; steps in the .json refuse their acts', async () => {
+  for (const doc of [{}, { steps: [] }]) {
+    const s = await opened('scenes', doc);
+    const cut = s.file.replace(/\.json$/, '.cut');
+    files.set(cut, 'Mist.'); // served as JSON: one line
+    (load(), await settle()); // a new /story: the sheet reads its twin again
+    (s.shown(), await settle());
+    rowsOpen.add(`${cut}:1`);
+    const why = 'the twin .json carries steps: edit its pages there';
+    assert.equal(s.shown().filter((x) => x.props?.children === why).length > 0, 'steps' in doc);
+  }
 });
