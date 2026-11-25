@@ -25,7 +25,8 @@ let choice: Record<string, unknown> = {}; // the canon's choice `first`
 const tick = () => new Promise((r) => setTimeout(r));
 const api = async (path: string, body?: object): Promise<[number, any]> => {
   sent.push([path.split('?')[0], body]);
-  return path.startsWith('/source') ? [200, { bytes: SCENE, sha256: 's1' }] : answers.shift()!;
+  if (!path.startsWith('/source')) return answers.shift()!;
+  return SCENE ? [200, { bytes: SCENE, sha256: 's1' }] : [404, 'gone']; // '' is a deleted file
 };
 const g = { canon: () => ({ dialogues: { [REF]: { choices: { first: choice } } } }) } as any;
 wire(
@@ -153,6 +154,8 @@ test('a .scene label whose key repeats opens no reword', async () => {
   const was = SCENE;
   SCENE = '- Ask about fish #first\n  - Ask again #first\n'; // the nested set's dialogue is another
   assert.equal(await sceneLine(KEY), undefined);
+  SCENE = ''; // Breaks: a deleted source rejecting (an unhandled rejection) instead of no field.
+  assert.equal(await sceneLine(KEY), undefined);
   SCENE = was;
 });
 
@@ -226,6 +229,9 @@ test('the header adds a .scene choice after the last top-level block and words b
   assert.deepEqual(await add('＋ Add choice'), { after: 6, kind: 'choice' });
   assert.equal(refused(), 'stale');
   assert.deepEqual(await add('＋ Add line'), { after: 2, kind: 'words' });
+  SCENE = '- A #first\n  ~\n'; // a choice on the first line: no words before it
+  assert.deepEqual(await add('＋ Add choice'), { after: 1, kind: 'choice' });
+  assert.deepEqual(await add('＋ Add line'), { after: 0, kind: 'words' });
   SCENE = was;
   label('world/cook.json');
   assert.deepEqual(pens(header(talking(), () => {})!), [
