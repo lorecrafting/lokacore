@@ -97,8 +97,8 @@ function object(n: Obj, value: unknown): Shape {
   return {
     as: 'object',
     props: {
-      ...((n.properties ?? {}) as Record<string, Obj>),
       ...((b.properties ?? {}) as Record<string, Obj>),
+      ...((n.properties ?? {}) as Record<string, Obj>), // a branch only narrows a field it shares (reactions' `on`)
     },
     each,
     required: [...((n.required ?? []) as string[]), ...((b.required ?? []) as string[])],

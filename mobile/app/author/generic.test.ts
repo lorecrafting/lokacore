@@ -524,6 +524,13 @@ test("a reaction's steps picker lists no damage", async () => {
   assert.ok(!got.includes('damage'));
 });
 
+// Breaks: a reaction's trigger drawn as its label only, with no event picker (the New reaction's `on`).
+test("a reaction's on draws its event picker, the picked event lit", async () => {
+  const s = await opened('reactions', { on: { event: 'item_dropped', item: 'anvil' }, steps: [] });
+  const got = await picks(s, ['on']);
+  assert.ok(got.includes('entity_entered_room') && got.includes('item_dropped'), String(got));
+});
+
 // Breaks: a dialogue offering a step outside the choice context, or the kind not read from the sheet's dir.
 test("a dialogue choice's does picker lists exactly the choice-context ops", async () => {
   const s = await opened('dialogues', {
