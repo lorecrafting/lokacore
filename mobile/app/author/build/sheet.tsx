@@ -11,15 +11,27 @@ const WORDS = { close: 'Back', grow: 'Full height' };
  * ponytail: a placeholder; the designer names the breakpoint (ruling 7 gives none). */
 export const DOCK = { at: size.column + size.column / 2, width: size.column / 2 }; // mutate-skip: placeholder
 
-/** Sheet kinds by the id's head (`room:cellar` is `room` with `cellar`). */
+/** Sheet kinds by the id's head (`room:cellar` is `room` with `cellar`); `back`, the id Back shows
+ * in this sheet's place instead of closing it (the Flow walk's trail). */
 export const sheets: Record<
   string,
-  { title: (arg: string) => string; body: (arg: string) => ReactNode }
+  {
+    title: (arg: string) => string;
+    body: (arg: string) => ReactNode;
+    back?: (arg: string) => string | undefined;
+  }
 > = {};
 export const parts = (id: string) => {
   const [kind, arg = ''] = id.split(/:(.*)/);
   return [sheets[kind], arg] as const;
 };
+/** The id Back shows in place of the top sheet `id`, when its kind steps back. */
+export const stepBack = (id: string) => {
+  const [s, arg] = parts(id);
+  return s?.back?.(arg);
+};
+/** Build.tsx hands in `swap`: the top sheet becomes `id`, the stack does not grow (Flow re-centring). */
+export const stack = { swap: (_id: string) => {} };
 const titled = (id: string) => {
   const [s, arg] = parts(id);
   return s?.title(arg) ?? id;

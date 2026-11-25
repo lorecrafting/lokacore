@@ -18,6 +18,7 @@ import {
   opened,
   refusal,
   restored,
+  swapped,
   toggled,
   type Builder,
 } from './build.ts';
@@ -28,9 +29,10 @@ import { CONTENTS } from './contents.tsx';
 import './generic.tsx'; // registers the def:<file> sheet
 import { MAP, mapSheet, measured, unborn } from './map.tsx';
 import { storySheet } from './story.tsx';
+import './flow.tsx'; // registers the flow:<ref> sheet
 import { undo as putBackIds } from '../../../../kernel/ts/play/mapedit.ts';
 import { io, onSaved, refused, run, running } from './roomedit.tsx';
-import { act, CONTROL, Frame, parts, sheets } from './sheet.tsx';
+import { act, CONTROL, Frame, parts, sheets, stack, stepBack } from './sheet.tsx';
 
 export { Sheet, sheets } from './sheet.tsx';
 export { drawn, unsee, updated } from './seeas.tsx';
@@ -96,8 +98,11 @@ export function open(id: string) {
   redrawStrip();
   shut();
 }
-/** Back: closes the top sheet (or sheet `id`); the last one returns the focus to what opened it. */
+stack.swap = (id) => (set(swapped(builder, id)), redrawStrip(), shut());
+/** Back: closes the top sheet (or `id`), or shows its kind's step back; the last returns the focus. */
 function back(id?: string) {
+  const prev = !id && stepBack(builder.sheets?.at(-1) ?? '');
+  if (prev) return stack.swap(prev);
   set(closed(builder, id));
   redrawStrip();
   if (!builder.sheets) opener?.focus?.();
@@ -254,9 +259,9 @@ const buildSwitch = (flip: () => void) => (
     </Text>
   </Pressable>
 );
-/** A strip chip that opens sheet `id`, or goes back when it is the top sheet. */
+/** A strip chip that opens sheet `id`, or closes it when it is the top sheet. */
 const pad = (label: string, id: string, top?: string) =>
-  act(label, () => (top === id ? back() : open(id)), top === id);
+  act(label, () => (top === id ? back(id) : open(id)), top === id);
 /** The strip at `size.touch` above the Book: the Build switch, the Hold status, the Undo chip, the
  * Checks badge, and the keep-my-place notice when a replay was refused. */
 export function Strip({ children }: { children: ReactNode }) {

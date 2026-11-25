@@ -455,7 +455,6 @@ parity:play-from-here
 parity:world-button
 parity:project-tabs
 parity:world-picker
-parity:map-story-flow-segment
 parity:device-size
 parity:last-edit-timing
 parity:hold
@@ -463,7 +462,6 @@ parity:map-pan-zoom-keys
 parity:map-wire
 parity:map-exit-edits
 parity:story-row-sheets
-parity:flow-graph
 parity:inspector-header
 parity:card-picker
 parity:compile-status
