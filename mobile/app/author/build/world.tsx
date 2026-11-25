@@ -1,5 +1,5 @@
-// The notebook's World tab (slice 6.1a, the panel's World button and card): the root files, each
-// opening its def:<file> sheet, then each capability cartridge.json lacks with its Turn on; and the
+// The notebook's World tab (slices 6.1a-b, the panel's World button and card): the root files, then the
+// populations, transports and barriers, each opening its def:<file> sheet, then each capability cartridge.json lacks with its Turn on; and the
 // World card's block, which a root field the registry gives to world.tsx draws as (generic.tsx `claims`).
 import { View } from 'react-native';
 import {
@@ -8,6 +8,7 @@ import {
   refusePick,
   rootNames,
   ROOTS,
+  worldFile,
 } from '../../../../kernel/ts/play/world_card.ts';
 import CAPS from '../../../../protocol/capability_registry.json' with { type: 'json' };
 import { block } from './form.tsx';
@@ -24,7 +25,7 @@ const FILES = ['cartridge.json', 'facts.json', 'resources.json', 'attributes.jso
 type Read = (file: string) => { doc: unknown; was: string } | undefined;
 type Cart = { requires?: { capabilities?: object } };
 
-/** The World tab: each root file `read` finds, then the capabilities cartridge.json lacks. */
+/** The World tab: each root file `read` finds, the story's world files, then the capabilities cartridge.json lacks. */
 export function worldRows(read: Read) {
   const cart = read('cartridge.json');
   const caps = (cart?.doc as Cart | undefined)?.requires?.capabilities ?? {};
@@ -32,6 +33,12 @@ export function worldRows(read: Read) {
     refusal(),
     <View key="files" style={row}>
       {FILES.filter((f) => read(f)).map((f) => act(f, () => known.open(`def:${f}`)))}
+    </View>,
+    <View key="world" style={row}>
+      {[...new Set(Object.values(known.files))]
+        .filter((f) => worldFile(f) && !worldFile(f, true))
+        .sort()
+        .map((f) => act(f, () => known.open(`def:${f}`)))}
     </View>,
     <View key="caps" style={row}>
       {cart &&
@@ -71,7 +78,7 @@ export const world =
     const docs = ROOTS.map((r) => read(r.rel));
     // a root file not read (yet, or at all) names no keys: its field stays free text, refusing nothing
     const named = Object.fromEntries(Object.entries(rootNames(docs)).filter((_, i) => docs[i]));
-    // a room, item or person stays free text here (the panel's datalist; 6.1b's pickers)
+    // a room, item or person stays free text here (the panel's datalist; not yet in the builder)
     const pick = (p: (string | number)[], v: unknown) => {
       const got = pickable(p, known.nodes, named, v);
       return got && Object.hasOwn(named, got.kind) ? got : undefined;
