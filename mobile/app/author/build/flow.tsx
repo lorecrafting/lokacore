@@ -29,12 +29,16 @@ let filters: string[] = []; // the Flow filters on (a lane's nodes hidden; flow.
 const keyOf = (ref: string) => fromRef(ref)?.key ?? ref;
 const named = (ref: string) => `${fromRef(ref)?.kind} ${keyOf(ref)}`;
 const line = (words: string, key: string, color = ink('fg')) => (
-  <Text key={key} style={{ ...inRow, color }}>
-    {words}
-  </Text>
+  <View key={key} style={row}>
+    <Text style={{ ...inRow, color }}>{words}</Text>
+  </View>
 );
-const under = { ...row, paddingHorizontal: 0 }; // mutate-skip: layout; the acts under the name
-const column = { ...row, flexDirection: 'column', alignItems: 'flex-start' } as const; // mutate-skip: layout; one row a line
+const column = {
+  ...row,
+  flexDirection: 'column',
+  alignItems: 'flex-start',
+  paddingHorizontal: 0, // mutate-skip: layout; the line inside pads itself
+} as const; // the centre: its name, then its acts under it
 
 /** The centre's people, items and rooms (not nodes: walk() leaves them out); a room is Go there. */
 function around(ref: string) {
@@ -98,7 +102,7 @@ const centre = (ref: string) => {
   return (
     <View key="centre" style={column}>
       {line(named(ref), 'centre')}
-      <View style={under}>
+      <View style={row}>
         {sheet ? act(WORDS.sheet, () => known.open(sheet), undefined, 'sheet') : null}
         {around(ref)}
       </View>
