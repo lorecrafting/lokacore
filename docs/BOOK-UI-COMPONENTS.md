@@ -368,6 +368,12 @@ in `action` when lit and `dim` when not, on the night page's own palette. A labe
 prose field inside its card. The header line's policy words are `type.small` in `dim`, wrapping; its
 `⚙→`, `＋ Add choice` and `＋ Add line` are acts aligned to the title's left edge. An unwritten
 label's rule sits under the label's words, not under the icon row.
+Builder 5.2: a scene row's words are an exit's words (`type.small` `fg`, no small caps), a touch
+target tall, indented `space.md` per depth; its acts and the Add menu's kinds are acts on rows of
+their own, wrapping at 390 px, each indented `space.md` more; a refused act is a greyed row. A page
+caption, on the sheet and in ScenePage, is the field caption (`type.label` `dim`); the end mark is
+`type.label` `dim`. A selected act is Map's selected box: `action` filled, its words in `bg`, its
+touch target kept. A quest's outcome field is the Area field.
 Worst pair: `warning` on `card`,
 4.75 (light).
 
