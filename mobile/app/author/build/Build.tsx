@@ -23,7 +23,7 @@ import {
 } from './build.ts';
 import { ghostSheet, pencil, story } from './room.tsx';
 import { chip, ghostLines, seeWith, unsee, type Game } from './seeas.tsx';
-import { thingPen } from './thing.tsx';
+import { icons, sceneLine, titled } from './talk.tsx';
 import { CONTENTS } from './contents.tsx';
 import './generic.tsx'; // registers the def:<file> sheet
 import { MAP, mapSheet, measured, unborn } from './map.tsx';
@@ -120,9 +120,11 @@ export function install(book: Pick<Hooks, 'seen' | 'said' | 'redraw' | 'api'>) {
           {ghostLines(open, ghostSheet)}
         </>
       ) : (
-        thingPen(key, open)
+        titled(placed, open, key)
       );
     },
+    icons: (key, words) => icons(placed, open, key, words),
+    scene: sceneLine,
   });
   builder = restored(localStorage);
   let kept: { w: Wrote | Gesture; end: number } | null = null;

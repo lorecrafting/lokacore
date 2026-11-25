@@ -12,7 +12,7 @@ import { drawnWords, noFieldNote, oneLine, saving, unwritten } from '../prose_ru
 import { ink } from './build.ts';
 
 type Props = ComponentProps<typeof Text>;
-type At = { file: string; line: number; was: string; words: string };
+type At = { file: string; line: number; was: string; words: string; scene?: true }; // scene: a `.scene` choice line
 type Field = {
   key: string;
   at?: At;
@@ -31,6 +31,8 @@ export type Hooks = {
   wrote: (w: Wrote) => void; // a saved write, for the strip's Undo chip
   unsee?: () => boolean; // ends See as (seeas.tsx); true when it was on
   pencil?: (shown: string, key?: string) => ReactNode; // the title pencil: a room page's own title, a person's or item's name
+  icons?: (key: string, words: () => void) => ReactNode; // a choice label's icon row (talk.tsx)
+  scene?: (key: string) => Promise<At | undefined>; // a `.scene` choice label's line, else none
 };
 /** A saved write as /undo puts it back: its journal id, and the key and old words the Book shows at once. */
 export type Wrote = { id: number; key: string; words: string; file: string };
@@ -52,14 +54,17 @@ const flat = (c: ReactNode): string =>
       : c && typeof c === 'object' && 'props' in c
         ? flat((c.props as { children?: ReactNode }).children)
         : '';
-/** The description key a line draws whole: its bound words, else its source with links as words.
+const LABEL = /^dialogue\.\w+\.choices\.\w+\.label$/; // drawn inside its card, which plays
+const EDITS = /\.description$|^dialogue\.\w+\.(prompt|choices\.\w+\.label)$/;
+/** The key a line draws whole (a description, a dialogue's prompt or a choice's label): its bound
+ * words, else its source with links as words.
  * ponytail: one paragraph of a many-paragraph description matches no key, so it does not edit. */
 function keyOf(h: Hooks, shown: string) {
   const w = drawnWords(h.seen, shown);
   const keys = w
     ? [h.seen.get(w)!]
     : [...h.said].filter(([, s]) => s && plain(s).trim() === shown.trim()).map(([k]) => k); // a key with no words is undefined
-  return keys.length === 1 && keys[0].endsWith('.description') ? keys[0] : undefined;
+  return keys.length === 1 && EDITS.test(keys[0]) ? keys[0] : undefined;
 }
 
 /** The one person's or item's name in these words: two in the same words (or two new `~`) get none. */
@@ -92,26 +97,43 @@ export function line(p: Props): Props {
     if (pen || blank) return { ...p, children: [blank ? hint(caption) : p.children, pen] };
   }
   const key = keyOf(h, shown);
-  if (!key) return p;
+  return key ? editable(h, p, key, shown, blank) : p;
+}
+/** Line `p` that draws key `key` whole: its field when open, else a press that opens it. A choice's
+ * label is inside its card, which plays: the label takes no press, its words icon opens the field. */
+function editable(h: Hooks, p: Props, key: string, shown: string, blank: boolean): Props {
   const name = key.slice(key.lastIndexOf('.') + 1);
-  if (field?.key === key && field.at) return { ...p, children: open(h, field, field.at, name, p) };
+  const label = LABEL.test(key);
+  if (field?.key === key && field.at)
+    return {
+      ...p,
+      children: open(h, field, field.at, name, p),
+      // inside a card: a tap or key in the field is not the card's
+      ...(label && ({ onPress: stop, onKeyDown: stop } as object)),
+    };
   const marked = unconfirmed.has(key);
   const press = () => void edit(h, key);
+  const own = {
+    style: [p.style, blank && BLANK, marked && MARKED],
+    children: [
+      blank ? hint(name) : p.children,
+      field?.key === key && field.note && (
+        <Text key="note" style={CAPTION}>{`\n${field.note}`}</Text>
+      ),
+      label && h.icons?.(key, press),
+    ],
+  };
+  if (label) return { ...p, ...own };
   return {
     ...p,
     accessibilityRole: 'button',
     accessibilityLabel: `${blank ? `Unwritten ${name}` : shown}${marked ? ', unconfirmed' : ''}, edit`,
     onPress: press,
     ...({ onKeyDown: keyed(press) } as object), // web Text has no key press
-    style: [p.style, blank && BLANK, marked && MARKED],
-    children: [
-      blank ? hint(name) : p.children,
-      field?.key === key && field.note ? (
-        <Text key="note" style={CAPTION}>{`\n${field.note}`}</Text>
-      ) : null,
-    ],
+    ...own,
   };
 }
+const stop = (e: { stopPropagation: () => void }) => e.stopPropagation();
 /** An unwritten line's name in place of its `~` (ruling 9). */
 const hint = (name: string) => (
   <Text key="blank" style={{ ...type.small, color: ink('dim') }}>
@@ -142,8 +164,10 @@ async function edit(h: Hooks, key: string) {
   if (h.unsee?.()) return; // the words See as shows are not the key's: a tap first shows them again
   if (busy) return; // a tap elsewhere replaces a field left open (a notice, another page)
   busy = true;
-  const [status, at] = await h
-    .api(`/line?key=${enc(key)}&words=${enc(h.said.get(key) ?? '')}`)
+  const [status, at] = await Promise.resolve(h.scene?.(key))
+    .then((s): [number, any] | Promise<[number, any]> =>
+      s ? [200, s] : h.api(`/line?key=${enc(key)}&words=${enc(h.said.get(key) ?? '')}`),
+    )
     .finally(() => (busy = false));
   field =
     status === 200
@@ -181,21 +205,21 @@ async function save(h: Hooks, f: Field) {
   busy = true;
   const { file, line, was } = at;
   const [status, answer] = await h
-    .api('/edit', {
-      file,
-      line,
-      was,
-      words: draft,
-      key: f.key,
-    })
+    .api(
+      ...((at.scene // a `.scene` choice's words: its reword (decision 11; /set takes no label)
+        ? ['/restructure', { file, was, op: { reword: { line, words: draft } }, carry: [] }]
+        : ['/edit', { file, line, was, words: draft, key: f.key }]) as [string, object]),
+    )
     .finally(() => (busy = false));
   if (status === 200) h.wrote({ id: answer.id, key: f.key, words: at.words, file });
   if (field !== f) return; // closed (Esc) while it saved
   if (status === 200) return close(h); // the server sends the new words at once (kernel/ts/play/told.ts)
   if (status !== 409)
     return say(h, f, typeof answer === 'string' ? answer : `Not saved (${status}).`);
-  const [got, theirs] = await h.api(`/line?key=${enc(f.key)}&words=${enc(at.words)}`);
-  if (got !== 200)
+  const [got, theirs] = at.scene
+    ? [200, await h.scene!(f.key)]
+    : await h.api(`/line?key=${enc(f.key)}&words=${enc(at.words)}`);
+  if (got !== 200 || !theirs)
     return say(h, f, 'Changed on disk since you opened it.', [
       ['Open source', () => (void h.api('/open', { key: f.key, words: at.words }), close(h))],
     ]);
