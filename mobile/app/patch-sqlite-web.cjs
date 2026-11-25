@@ -102,3 +102,29 @@ const syncBuffers = new WeakMap<Worker, { lockBuffer: SharedArrayBuffer; resultB
   if (oldCount) patched = patched.replace(before, after);
 }
 if (patched !== source) fs.writeFileSync(file, patched);
+
+// WebKit grants a sync access handle's write capacity through the page's main thread, which a sync
+// call keeps busy: a write that grows a file waits out the timeout (loka-hcnlh.19.2). So each pool
+// handle takes headroom while the open is still async, then truncates back to its size.
+const pool = path.join(moduleRoot, 'web/wa-sqlite/AccessHandlePoolVFS.js');
+const poolSource = fs.readFileSync(pool, 'utf8');
+const open = 'await handle.createSyncAccessHandle()';
+if (!poolSource.includes(`warmed(${open})`)) {
+  if (poolSource.split(open).length - 1 !== 2)
+    throw new Error('Review the SQLite web pool upstream');
+  fs.writeFileSync(
+    pool,
+    `${poolSource.replaceAll(open, `warmed(${open})`)}
+// ponytail: 32 MB of growth past a file's size at open; a save that outgrows it stalls once, and
+// Try again (a reload) warms again from the new size.
+function warmed(accessHandle) {
+  const size = accessHandle.getSize();
+  try {
+    accessHandle.write(new Uint8Array(1), { at: size + 32 * 1024 * 1024 });
+  } catch {} // no headroom granted: the save still opens, as it did before
+  accessHandle.truncate(size);
+  return accessHandle;
+}
+`,
+  );
+}
