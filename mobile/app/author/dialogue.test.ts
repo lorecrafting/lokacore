@@ -147,6 +147,7 @@ test("a choice's Flow opens the walk on its dialogue's node; an unnamed file dra
   known.files['c:dialogue/flowing'] = s.file;
   await s.press(flow);
   assert.equal(opens.at(-1), 'flow:c:dialogue/flowing');
+  delete known.files['c:dialogue/flowing'];
 });
 
 // Breaks: a picked target not written at the link's path, Clear writing anything but a delete, a

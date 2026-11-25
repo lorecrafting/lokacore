@@ -65,6 +65,7 @@ const drawn = () =>
     .filter((t) => / /.test(t) || ['Unlocks', 'Leads here'].includes(t))
     .filter((t) => !t.startsWith('Go there') && !['needs words', 'potential problems'].includes(t));
 
+// Breaks: setters and readers swapped, or a fact's edges read by their order or op, not by `set`.
 test('a fact centred draws its setter above it and its reader below', () => {
   build.open(`flow:${R('fact', 'met_nell')}`);
   assert.deepEqual(drawn(), [
@@ -76,6 +77,8 @@ test('a fact centred draws its setter above it and its reader below', () => {
   ]);
 });
 
+// Breaks: a re-centre that pushes, a tap back onto the trail that lengthens it, or Back closing the
+// walk at once.
 test('a tap re-centres in place, Back steps back along the trail to the first ref', () => {
   build.open(`flow:${R('dialogue', 'greet')}`);
   const depth = stack().length;
@@ -86,13 +89,15 @@ test('a tap re-centres in place, Back steps back along the trail to the first re
     `flow:${R('dialogue', 'greet')} ${R('fact', 'met_nell')} ${R('dialogue', 'farewell')}`,
   );
   assert.equal(stack().length, depth, 're-centring does not push');
-  back();
+  press('fact met_nell');
+  assert.equal(stack().at(-1), `flow:${R('dialogue', 'greet')} ${R('fact', 'met_nell')}`, 'cut');
   back();
   assert.equal(stack().at(-1), `flow:${R('dialogue', 'greet')}`);
   back();
   assert.equal(stack().length, depth - 1, 'at the first ref, Back closes the walk');
 });
 
+// Breaks: a toggle that hides nothing, never shows selected, or never turns off.
 test('a lane filter on hides its nodes and shows selected; off, they are back', () => {
   build.open(`flow:${R('dialogue', 'greet')}`);
   assert.deepEqual(drawn(), ['dialogue greet', 'Unlocks', 'fact met_nell']);
@@ -104,6 +109,7 @@ test('a lane filter on hides its nodes and shows selected; off, they are back', 
   assert.deepEqual(drawn(), ['dialogue greet', 'Unlocks', 'fact met_nell']);
 });
 
+// Breaks: Go there, a person's sheet or the file's Sheet missing or opening the wrong id.
 test("the centre offers its file's Sheet, its person's sheet and its room's Go there", () => {
   build.open(`flow:${R('dialogue', 'greet')}`);
   press('Go there: hall');
@@ -115,10 +121,16 @@ test("the centre offers its file's Sheet, its person's sheet and its room's Go t
   assert.equal(stack().at(-1), 'def:dialogues/greet.json');
 });
 
+// Breaks: the second hop drawn on a phone, missing when wide, or reached through a filtered node.
 test('from DOCK.at the walk adds the second hop: greet reaches farewell through met_nell', () => {
   build.open(`flow:${R('dialogue', 'greet')}`);
   Object.assign(globalThis, { innerWidth: 1152 });
   assert.deepEqual(drawn().slice(-2), ['Two steps out', 'dialogue farewell']);
   Object.assign(globalThis, { innerWidth: 1151 });
   assert.equal(drawn().includes('Two steps out'), false);
+  Object.assign(globalThis, { innerWidth: 1152 });
+  press('fact');
+  assert.equal(drawn().includes('Two steps out'), false, 'no second hop through a hidden node');
+  press('fact');
+  Object.assign(globalThis, { innerWidth: 390 });
 });

@@ -18,6 +18,7 @@ import {
   opened,
   refusal,
   restored,
+  swapped,
   toggled,
   type Builder,
 } from './build.ts';
@@ -97,7 +98,7 @@ export function open(id: string) {
   redrawStrip();
   shut();
 }
-stack.swap = (id) => (set(opened(closed(builder), id)), redrawStrip());
+stack.swap = (id) => (set(swapped(builder, id)), redrawStrip(), shut());
 /** Back: closes the top sheet (or `id`), or shows its kind's step back; the last returns the focus. */
 function back(id?: string) {
   const prev = !id && stepBack(builder.sheets?.at(-1) ?? '');
@@ -258,9 +259,9 @@ const buildSwitch = (flip: () => void) => (
     </Text>
   </Pressable>
 );
-/** A strip chip that opens sheet `id`, or goes back when it is the top sheet. */
+/** A strip chip that opens sheet `id`, or closes it when it is the top sheet. */
 const pad = (label: string, id: string, top?: string) =>
-  act(label, () => (top === id ? back() : open(id)), top === id);
+  act(label, () => (top === id ? back(id) : open(id)), top === id);
 /** The strip at `size.touch` above the Book: the Build switch, the Hold status, the Undo chip, the
  * Checks badge, and the keep-my-place notice when a replay was refused. */
 export function Strip({ children }: { children: ReactNode }) {

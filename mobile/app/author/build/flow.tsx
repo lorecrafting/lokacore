@@ -60,7 +60,7 @@ const node = (trail: string[], ref: string) => {
     <View key={ref} style={row}>
       {act(
         named(ref),
-        () => stack.swap(`flow:${[...trail, ref].join(' ')}`),
+        () => stack.swap(`flow:${trailTo(trail, ref).join(' ')}`),
         undefined,
         `at ${ref}`,
       )}
@@ -68,6 +68,9 @@ const node = (trail: string[], ref: string) => {
     </View>
   );
 };
+/** The trail on to `ref`; back to a ref already on it, cut there (no loop to step back through). */
+const trailTo = (trail: string[], ref: string) =>
+  trail.includes(ref) ? trail.slice(0, trail.indexOf(ref) + 1) : [...trail, ref];
 const band = (title: string, trail: string[], refs: string[]) =>
   refs.length ? [line(title, title, ink('dim')), ...refs.map((r) => node(trail, r))] : [];
 
@@ -110,12 +113,13 @@ function Walk({ arg }: { arg: string }) {
   if (!s) return line(WORDS.nothing, 'none');
   const w = walk(s, ref, filters);
   const fact = fromRef(ref)?.kind === 'fact';
-  const near = focusInk(s, ref, 1);
+  const near = new Set([ref, ...w.above, ...w.below]); // the second hop runs through shown nodes only
+  const hop = [...near].flatMap((r) => [...focusInk(s, r, 1)]);
   const far = wide
     ? shownOf(
         s,
         { fold: [], filters },
-        [...focusInk(s, ref, 2)].filter((r) => !near.has(r) && laneOf(r)),
+        [...new Set(hop)].filter((r) => !near.has(r) && laneOf(r)),
       )
     : [];
   return (
