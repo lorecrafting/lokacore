@@ -37,6 +37,7 @@ export const WORDS = {
   clear: 'Clear',
   none: 'none',
   open: (k: string) => `Open ${k}`,
+  flow: 'Flow',
 };
 const CHOICE = 'DialogueChoice';
 const LINKS = ['then', 'then_failed'];
@@ -120,6 +121,7 @@ function choice(
 /** Rename (a choice's key is its id: refused) and Remove (choice.ts `refuseRemove` checks it). */
 function edits(at: At, path: (string | number)[], doc: Obj, k: string, c: Obj) {
   const key = id(at, path);
+  const ref = Object.keys(known.files).find((r) => known.files[r] === at.file); // the dialogue's node
   const remove = () => {
     const why = refuseRemove(doc, k);
     return why ? tell(why) : drop(at, path, c);
@@ -128,6 +130,7 @@ function edits(at: At, path: (string | number)[], doc: Obj, k: string, c: Obj) {
     <View key={`edit ${key}`} style={row}>
       {greyed(WORDS.rename, RENAME, `rename ${key}`)}
       {act(WORDS.remove, remove, undefined, `remove choice ${key}`)}
+      {ref ? act(WORDS.flow, () => known.open(`flow:${ref}`), undefined, `flow ${key}`) : null}
     </View>
   );
 }

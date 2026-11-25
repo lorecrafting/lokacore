@@ -1,8 +1,9 @@
 // The notebook's Story tab (design §4.8, slice 5.4b): the panel's Story list (kernel/ts/play/storylist.ts `rows`)
-// as rows. A node row has Go there, Sheet, Trace and Consequences; a part adds a beat; a beat binds, retitles,
+// as rows. A node row has Go there, Sheet, Trace, Consequences and Flow (flow.tsx); a part adds a beat; a beat binds, retitles,
 // is removed and shows Knowledge. Trace, Consequences, Knowledge, Facts and Pacing are sheets.
 import { Text, TextInput, View } from 'react-native';
 import * as L from '../../../../kernel/ts/play/storylist.ts';
+import { laneOf } from '../../../../kernel/ts/play/flow.ts';
 import { consequenceRows } from '../../../../kernel/ts/play/storyconseq.ts';
 import { factRows } from '../../../../kernel/ts/play/storyfacts.ts';
 import { knowledge, pacing } from '../../../../kernel/ts/play/storyknow.ts';
@@ -20,6 +21,7 @@ const WORDS = {
   sheet: 'Sheet',
   trace: 'Trace',
   consequences: 'Consequences',
+  flow: 'Flow',
   knowledge: 'Knowledge',
   facts: 'Facts',
   pacing: 'Pacing',
@@ -56,7 +58,8 @@ const line = (words: string, key: string) => (
   </Text>
 );
 /** A row's node's sheet, if the last /story named its file. */
-const sheetOf = (ref?: string) => (ref && known.files[ref] ? `def:${known.files[ref]}` : undefined);
+export const sheetOf = (ref?: string) =>
+  ref && known.files[ref] ? `def:${known.files[ref]}` : undefined;
 // The room a placement edge joins `ref` to (an NPC's or scene's `.room`, a room's `.items`); none, no Go there.
 // ponytail: a dialogue gets no Go there; follow its speaker when an author asks
 const PLACED = new Set(['.room', '.items']);
@@ -117,6 +120,7 @@ function nodeActs(r: L.Row) {
       {L.CONSEQUENCES.has(r.node!)
         ? act(WORDS.consequences, () => known.open(`consequences:${r.ref}`))
         : null}
+      {laneOf(r.ref!) ? act(WORDS.flow, () => known.open(`flow:${r.ref}`)) : null}
     </View>,
   ];
 }
@@ -286,4 +290,5 @@ sheets.pacing = {
 
 /** Build.tsx hands in Go there: start in the room. */
 export const storySheet = (given: typeof go) => void (go = given);
+export const goTo = (room: string) => go(room);
 export { WORDS as STORY };

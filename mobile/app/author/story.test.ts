@@ -227,6 +227,14 @@ test('Go there starts in the room a story edge joins the node to, either way: ne
   assert.deepEqual(started, ['hall', 'cellar']);
 });
 
+test('Flow on a node row opens its walk; a person, not a node of the walk, has none', async () => {
+  await press('nell');
+  assert.equal(all('Flow').length, 0);
+  await press('farewell · 2 unwritten · unreached');
+  await press('Flow');
+  assert.equal(top(), `flow:${R('dialogue', 'farewell')}`);
+});
+
 const shown = (head: 'knowledge' | 'pacing', arg: string) =>
   nodes(build.sheets[head].body(arg)).flatMap((e) =>
     e.type === 'Text' || e.type === 'Pressable' ? [[e.type, label(e) ?? e.props.children]] : [],

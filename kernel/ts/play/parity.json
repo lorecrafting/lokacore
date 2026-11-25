@@ -32,7 +32,7 @@
   {
     "id": "map-story-flow-segment",
     "panel": "tools/author-panel/src/left.tsx",
-    "book": "todo"
+    "book": "flow.tsx"
   },
   {
     "id": "device-size",
@@ -122,7 +122,7 @@
   {
     "id": "flow-graph",
     "panel": "tools/author-panel/src/flow.tsx",
-    "book": "todo"
+    "book": "flow.tsx"
   },
   {
     "id": "inspector-header",
