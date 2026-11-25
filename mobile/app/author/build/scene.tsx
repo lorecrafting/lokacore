@@ -3,7 +3,7 @@
 // scene()/cut() refuse them on the bytes shown (a refused act is greyed with why and sends nothing);
 // and a modal scene's trigger and treatment (scene_trigger.ts, the panel's ModalScene). Labels are
 // placeholders.
-import { Pressable, Text, TextInput, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 import {
   blocks,
   cut,
@@ -13,22 +13,15 @@ import {
   type Op,
   type SceneKind,
 } from '../../../../kernel/ts/play/scene_structure.ts';
-import {
-  kindOf,
-  leftover,
-  offers,
-  outcomeRefused,
-  outcomesOf,
-  type Kind,
-  type On,
-} from '../../../../kernel/ts/play/scene_trigger.ts';
+import type { On } from '../../../../kernel/ts/play/scene_trigger.ts';
 import { space, type } from '../../book/tokens.ts';
 import { ink } from './build.ts';
-import { block, INPUT } from './form.tsx';
-import { id, opened, ops, send, toggle, type At, type Block, type Step } from './formwrite.ts';
+import { block } from './form.tsx';
+import { opened, toggle, type Block } from './formwrite.ts';
 import { known } from './room.tsx';
 import { ed, io, row, run, tell } from './roomedit.tsx';
 import { act, greyed } from './sheet.tsx';
+import { trigger } from './trigger.tsx';
 
 export const WORDS = {
   add: (n: number) => `Add after line ${n}`,
@@ -42,11 +35,8 @@ export const WORDS = {
   removePage: (p: number) => `Remove page ${p}`,
   split: (p: number, n: number) => `Split page ${p} at line ${n}`,
   kind: (k: SceneKind) => (k === 'speaker' || k === 'words' ? `${k} line` : k),
-  on: 'on',
-  outcome: 'outcome',
-  badOutcome: 'not a key, or another scene starts on it',
 };
-const KINDS: Kind[] = ['start', 'story_point', 'quest', 'action'];
+const UNDER = 1; // mutate-skip: layout only (an act row's indent under its line)
 const LABEL = { ...type.label, color: ink('dim') };
 
 type Src = { bytes: string; sha256: string };
@@ -60,7 +50,7 @@ function source(file: string) {
     fresh.add(file);
     io.source(file).then(
       (s) => (got.set(file, s), known.redraw()),
-      () => got.delete(file) && known.redraw(), // gone (a scene with no .cut): nothing to draw
+      () => (got.delete(file), known.redraw()), // gone (a scene with no .cut): nothing to draw
     );
   }
   return got.get(file);
@@ -74,14 +64,29 @@ const acted = (label: string, why: string | undefined, go: () => void) =>
 const why = (r: { after: string } | { refused: string }) =>
   'refused' in r ? r.refused : undefined;
 
+/** `file`'s acts on `s`, each checked by `check`: its refusal, a send, a press that tells or sends,
+ * and a drawn act. */
+function acts(file: string, s: Src, check: (op: Op) => string | undefined) {
+  const go = (op: Op) => restructure(file, s.sha256, op);
+  const press = (op: Op) => () => (check(op) === undefined ? go(op) : tell(check(op)!));
+  const draw = ([label, op]: readonly [string, Op]) => acted(label, check(op), () => go(op));
+  return { press, draw };
+}
+
 const wrap = (indent: number, children: unknown) => (
   <View style={{ ...row, flexWrap: 'wrap', paddingLeft: space.md * indent }}>
     {children as never}
   </View>
 );
 
+type Key = {
+  altKey?: boolean;
+  key: string;
+  target?: { tagName?: string };
+  preventDefault: () => void;
+};
 /** One line of a file: its words, a press that opens its acts, Alt-arrows a move, Alt-Enter Add. */
-function line(key: string, text: string, indent: number, keys: Record<string, () => void>) {
+function line(key: string, text: string, keys: Record<string, () => void>, indent = 0) {
   return (
     <Pressable
       accessibilityRole="button"
@@ -89,12 +94,14 @@ function line(key: string, text: string, indent: number, keys: Record<string, ()
       onPress={() => toggle(key)}
       // the row's keys, never an input's (rulings §5)
       {...({
-        onKeyDown: (e: { altKey?: boolean; key: string; target?: { tagName?: string } }) => {
-          if (!e.altKey || /INPUT|TEXTAREA/.test(e.target?.tagName ?? '')) return;
-          keys[e.key]?.();
+        onKeyDown: (e: Key) => {
+          const k = keys[e.key];
+          if (!k || !e.altKey || /INPUT|TEXTAREA/.test(e.target?.tagName ?? '')) return;
+          e.preventDefault();
+          k();
         },
       } as object)}
-      style={{ paddingLeft: space.md * (indent + 1), minHeight: 44, justifyContent: 'center' }}
+      style={{ paddingLeft: space.md * (indent + 1), minHeight: 44, justifyContent: 'center' }} // mutate-skip: layout only
     >
       <Text style={{ ...type.control, color: ink('action') }}>{text.trim()}</Text>
     </Pressable>
@@ -114,9 +121,7 @@ function sceneRow(file: string, s: Src, rs: ReturnType<typeof rows>, i: number) 
   const n = i + 1;
   const key = `${file}:${n}`;
   const menu = `${key}:+`;
-  const say = (op: Op) => why(scene(s.bytes, op));
-  const go = (op: Op) => restructure(file, s.sha256, op);
-  const press = (op: Op) => () => (say(op) === undefined ? go(op) : tell(say(op)!));
+  const { press, draw } = acts(file, s, (op) => why(scene(s.bytes, op)));
   const up: Op = { move: n, by: -1 };
   const down: Op = { move: n, by: 1 };
   const moves: [string, Op][] = [
@@ -126,25 +131,25 @@ function sceneRow(file: string, s: Src, rs: ReturnType<typeof rows>, i: number) 
   ];
   const kinds = kindsAt(rs, i).map((k) => [WORDS.kind(k), { add: { after: n, kind: k } }] as const);
   const open = opened.has(key);
-  const depth = rs[i].indent / 2;
+  const depth = rs[i].indent / 2; // mutate-skip: layout only
   return (
     <View key={key}>
-      {line(key, rs[i].text, depth, {
-        ArrowUp: press(up),
-        ArrowDown: press(down),
-        Enter: () => (opened.add(key), toggle(menu)),
-      })}
+      {line(
+        key,
+        rs[i].text,
+        {
+          ArrowUp: press(up),
+          ArrowDown: press(down),
+          Enter: () => (opened.add(key), toggle(menu)),
+        },
+        depth,
+      )}
       {open &&
-        wrap(depth + 1, [
+        wrap(depth + UNDER, [
           act(WORDS.add(n), () => toggle(menu), opened.has(menu), `add ${key}`),
-          ...moves.map(([label, op]) => acted(label, say(op), () => go(op))),
+          ...moves.map(draw),
         ])}
-      {open &&
-        opened.has(menu) &&
-        wrap(
-          depth + 2,
-          kinds.map(([l, op]) => acted(l, say(op), () => go(op))),
-        )}
+      {open && opened.has(menu) && wrap(depth + UNDER + UNDER, kinds.map(draw))}
     </View>
   );
 }
@@ -182,17 +187,11 @@ function cutRow(file: string, s: Src, steps: boolean, p: number, n: number, k: n
         [WORDS.join(p), { join: n }],
         [WORDS.removePage(p), { remove: n }],
       ];
-  const say = (op: Op) => why(cut(s.bytes, op, steps));
-  const go = (op: Op) => restructure(file, s.sha256, op);
-  const press = (op: Op) => () => (say(op) === undefined ? go(op) : tell(say(op)!));
+  const { press, draw } = acts(file, s, (op) => why(cut(s.bytes, op, steps)));
   return (
     <View key={key}>
-      {line(key, text, 0, k ? {} : { ArrowUp: press(ops[1][1]), ArrowDown: press(ops[2][1]) })}
-      {opened.has(key) &&
-        wrap(
-          1,
-          ops.map(([label, op]) => acted(label, say(op), () => go(op))),
-        )}
+      {line(key, text, k ? {} : { ArrowUp: press(ops[1][1]), ArrowDown: press(ops[2][1]) })}
+      {opened.has(key) && wrap(UNDER, ops.map(draw))}
     </View>
   );
 }
@@ -209,85 +208,3 @@ export const scenic =
       : path[0] === 'on' && known.story
         ? trigger(at, path, value as On)
         : block(at, path, node, value, removable);
-
-/** A row of trigger picks, `now` lit; a pick puts `next(v)`. */
-const picks = (
-  put: (o: On | undefined) => unknown,
-  what: string,
-  vs: unknown[],
-  next: (v: never) => On | undefined,
-  now: unknown,
-) =>
-  wrap(
-    0,
-    vs.map((v) =>
-      act(String(v), () => put(next(v as never)), undefined, `${what} ${String(v)}`, v === now),
-    ),
-  );
-
-/** The trigger: its kinds with an offer, then its value's, then a point's outcomes or a quest's
- * typed one, then the quest a switch left (`~ q`). A pick writes the whole on at `path`. */
-function trigger(at: At, path: Step[], on: On = {}) {
-  const t = known.story!.triggers;
-  const key = at.file.replace(/^.*\//, '').replace(/\.json$/, '');
-  const all = offers(t, key, known.nodes);
-  const kind = kindOf(on);
-  const put = (next: On | undefined) => next && send(at, ops(path, next));
-  const named = (o: On) => String(o[kind]);
-  const gone = leftover(t, key, on);
-  return (
-    <View key={id(at, path)} style={{ paddingLeft: space.md }}>
-      <Text style={LABEL}>{WORDS.on}</Text>
-      {picks(
-        put,
-        'kind',
-        KINDS.filter((k) => all[k].length || k === kind),
-        (k: Kind) => all[k][0],
-        kind,
-      )}
-      {kind !== 'start' &&
-        picks(
-          put,
-          'value',
-          [...new Set(all[kind].map(named))],
-          (v: string) => all[kind].find((o) => named(o) === v),
-          String(on[kind]),
-        )}
-      {kind === 'story_point' &&
-        picks(
-          put,
-          'outcome',
-          outcomesOf(all.story_point, on),
-          (o: string) => ({ story_point: on.story_point, outcome: o }),
-          on.outcome,
-        )}
-      {kind === 'quest' && questOutcome(at, path, t, key, on, put)}
-      {gone && <Text style={LABEL}>{`~ ${gone}`}</Text>}
-    </View>
-  );
-}
-
-/** A quest trigger's outcome, typed; written on blur unless outcomeRefused refuses it. */
-function questOutcome(
-  at: At,
-  path: Step[],
-  t: Parameters<typeof leftover>[0],
-  key: string,
-  on: On,
-  put: (o: On) => void,
-) {
-  return (
-    <TextInput
-      key={`outcome ${id(at, path)}`}
-      accessibilityLabel={WORDS.outcome}
-      defaultValue={String(on.outcome ?? '')}
-      style={INPUT}
-      onEndEditing={(e) => {
-        const o = e.nativeEvent.text.trim();
-        if (o === on.outcome) return;
-        if (outcomeRefused(t, key, on, o)) tell(WORDS.badOutcome);
-        else put({ quest: on.quest, outcome: o });
-      }}
-    />
-  );
-}

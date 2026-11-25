@@ -471,3 +471,13 @@ test('Schedule: an hour moves within the day, a refusal writes nothing, Add hour
   (await lost.press(`fold ${lost.file}:${JSON.stringify(['daily_schedule'])}`), await settle());
   assert.ok(lost.shown().some((x) => words(x) === HOURS.add && !x.props?.onPress));
 });
+
+// Breaks: a scene's sheet drawn without its `.cut` twin's pages above its fields.
+test('a scene sheet draws its .cut twin’s pages', async () => {
+  const s = await opened('scenes', {});
+  const cut = s.file.replace(/\.json$/, '.cut');
+  files.set(cut, 'Mist.'); // served as JSON: one line
+  (load(), await settle()); // a new /story: the sheet reads its twin again
+  (s.shown(), await settle());
+  assert.ok(s.shown().some((x) => x.key === `${cut}:1`));
+});

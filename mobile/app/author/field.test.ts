@@ -1,3 +1,4 @@
+// size: allow 510, a cut page's caption test joins the field seam's harness
 // Build's in-place field (docs/system/book-ui.md#author-mode; slice 1.3): a room description's
 // line opens its field through the Book seam. The server's /line and /edit: kernel/ts/test/author.test.ts.
 import assert from 'node:assert/strict';
@@ -497,4 +498,12 @@ test("the room title's pencil opens its Room sheet: summary and exits", async ()
   assert.equal(hen('npc.hen.name').props.accessibilityLabel, 'Edit hen');
   assert.equal(hen('item.hen.name'), undefined, 'two names in the same words: no pencil');
   build.install({ seen, said, redraw() {}, api }); // the stored state: no sheet open
+});
+
+// Breaks: a `.cut` page's line drawn without its caption, or captioned with its step index.
+test('a cut page’s line is captioned with its page number', () => {
+  said.set('scene.dawn.steps.1.text', 'Mist rises.');
+  const p = seamLine({ children: 'Mist rises.' } as any);
+  said.delete('scene.dawn.steps.1.text');
+  assert.equal(p.children[0].props.children, 'page 2\n');
 });
