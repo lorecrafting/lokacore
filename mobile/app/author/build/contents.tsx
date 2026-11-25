@@ -1,5 +1,6 @@
 // The notebook (design §7, slice 2.2; tabs, slice 5.4b): Contents lists every kind New makes (kernel/ts/play/new.json),
-// each with its New, then its files; a person or item made, or a file, opens its sheet. Story is story.tsx's.
+// each with its New, then its files; a person or item made, or a file, opens its sheet. Story is story.tsx's,
+// World world.tsx's (slice 6.1a).
 import { TextInput, View } from 'react-native';
 import NEW from '../../../../kernel/ts/play/new.json' with { type: 'json' };
 import { create, NAMED, nodeOf } from '../../../../kernel/ts/play/mapedit.ts';
@@ -8,11 +9,13 @@ import { ink } from './build.ts';
 import { known } from './room.tsx';
 import { inRow, io, refusal, row, run } from './roomedit.tsx';
 import { act, sheets } from './sheet.tsx';
+import { load } from './generic.tsx';
 import { storyRows } from './story.tsx';
+import { WORDS as WORLD, worldRows } from './world.tsx';
 
 const WORDS = {
   contents: 'Notebook',
-  tabs: ['Contents', 'Story'],
+  tabs: ['Contents', 'Story', WORLD.tab],
   new: (kind: string) => `New ${kind}`,
 };
 let tab = WORDS.tabs[0]; // the open tab
@@ -41,7 +44,7 @@ sheets.contents = {
     <View key="tabs" style={row}>
       {WORDS.tabs.map((t) => act(t, () => ((tab = t), known.redraw()), undefined, t, tab === t))}
     </View>,
-    ...(tab === WORDS.tabs[1] ? storyRows() : kinds()),
+    ...(tab === WORDS.tabs[1] ? storyRows() : tab === WORLD.tab ? worldRows(load) : kinds()),
   ],
 };
 const kinds = () => [

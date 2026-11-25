@@ -31,6 +31,8 @@ export type At = {
   gate?: (ops: Ops) => string | undefined; // a write's refusal before it is sent (generic.tsx)
   pair?: (ops: Ops) => Ops; // a write with the ops it brings along (generic.tsx: an action's check and failure)
   kind?: string; // the file's dir, which the Rules block offers branches by (rules.tsx)
+  pick?: (path: Step[], value: unknown) => string[] | undefined; // a reference field's keys (world.tsx)
+  fresh?: (path: Step[], key: string) => unknown; // a map's new entry, when not its least value (world.tsx)
 };
 export const opened = new Set<string>(); // the folded blocks and Add… menus open, by file and path
 export const drafts = new Map<string, string>(); // each typed field, as typed

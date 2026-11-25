@@ -17,7 +17,7 @@
   {
     "id": "world-button",
     "panel": "tools/author-panel/src/left.tsx",
-    "book": "todo"
+    "book": "world.tsx"
   },
   {
     "id": "project-tabs",

@@ -206,7 +206,8 @@ function entry(at: At, path: Step[], each: Obj, map: Obj) {
   const add = () => {
     const k = (drafts.get(key) ?? '').trim();
     drafts.delete(key);
-    if (k && !Object.hasOwn(map, k)) set(at, [...path, k], least(each, at.defs) ?? '');
+    if (k && !Object.hasOwn(map, k))
+      set(at, [...path, k], at.fresh?.(path, k) ?? least(each, at.defs) ?? '');
   };
   return (
     <View key={key} style={row}>
@@ -271,7 +272,8 @@ function typed(at: At, path: Step[], s: Shape, value: unknown) {
     if (v !== undefined && !Number.isNaN(v) && String(v) !== shown)
       set(at, path, prose ? { prose: v } : v);
   };
-  return (
+  const keys = at.pick?.(path, value);
+  const input = (
     <TextInput
       key={key}
       accessibilityLabel={String(path.at(-1))}
@@ -281,4 +283,5 @@ function typed(at: At, path: Step[], s: Shape, value: unknown) {
       onBlur={write}
     />
   );
+  return keys?.length ? [input, picks(at, path, keys, value)] : input; // a reference's keys, as picks
 }

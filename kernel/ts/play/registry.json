@@ -174,9 +174,9 @@
     "edit": "cards/World.tsx",
     "delete": "cards/World.tsx",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "world.tsx",
+      "edit": "world.tsx",
+      "delete": "world.tsx"
     }
   },
   "barriers.abstract": {
@@ -324,9 +324,9 @@
     "edit": "cards/World.tsx",
     "delete": "cards/World.tsx",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "world.tsx",
+      "edit": "world.tsx",
+      "delete": "world.tsx"
     }
   },
   "cartridge.ancestries": {
@@ -334,9 +334,9 @@
     "edit": "cards/World.tsx",
     "delete": "cards/World.tsx",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "world.tsx",
+      "edit": "world.tsx",
+      "delete": "world.tsx"
     }
   },
   "cartridge.api_version": {
@@ -344,7 +344,7 @@
     "edit": "cards/World.tsx",
     "delete": "cards/World.tsx",
     "book": {
-      "create": "todo",
+      "create": "world.tsx",
       "edit": "todo",
       "delete": "todo"
     }
@@ -354,9 +354,9 @@
     "edit": "cards/World.tsx",
     "delete": "cards/World.tsx",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "world.tsx",
+      "edit": "world.tsx",
+      "delete": "world.tsx"
     }
   },
   "cartridge.chapters": {
@@ -364,9 +364,9 @@
     "edit": "cards/World.tsx",
     "delete": "cards/World.tsx",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "world.tsx",
+      "edit": "world.tsx",
+      "delete": "world.tsx"
     }
   },
   "cartridge.entry": {
@@ -374,9 +374,9 @@
     "edit": "cards/World.tsx",
     "delete": "cards/World.tsx",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "world.tsx",
+      "edit": "world.tsx",
+      "delete": "world.tsx"
     }
   },
   "cartridge.id": {
@@ -384,8 +384,8 @@
     "edit": "cards/World.tsx",
     "delete": "cards/World.tsx",
     "book": {
-      "create": "todo",
-      "edit": "todo",
+      "create": "world.tsx",
+      "edit": "world.tsx",
       "delete": "todo"
     }
   },
@@ -394,8 +394,8 @@
     "edit": "cards/World.tsx",
     "delete": "cards/World.tsx",
     "book": {
-      "create": "todo",
-      "edit": "todo",
+      "create": "world.tsx",
+      "edit": "world.tsx",
       "delete": "todo"
     }
   },
@@ -404,9 +404,9 @@
     "edit": "cards/World.tsx",
     "delete": "cards/World.tsx",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "world.tsx",
+      "edit": "world.tsx",
+      "delete": "world.tsx"
     }
   },
   "cartridge.supported_profiles": {
@@ -414,8 +414,8 @@
     "edit": "cards/World.tsx",
     "delete": "cards/World.tsx",
     "book": {
-      "create": "todo",
-      "edit": "todo",
+      "create": "world.tsx",
+      "edit": "world.tsx",
       "delete": "todo"
     }
   },
@@ -424,9 +424,9 @@
     "edit": "cards/World.tsx",
     "delete": "cards/World.tsx",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "world.tsx",
+      "edit": "world.tsx",
+      "delete": "world.tsx"
     }
   },
   "cartridge.title": {
@@ -434,8 +434,8 @@
     "edit": "cards/World.tsx",
     "delete": "cards/World.tsx",
     "book": {
-      "create": "todo",
-      "edit": "todo",
+      "create": "world.tsx",
+      "edit": "world.tsx",
       "delete": "todo"
     }
   },
@@ -444,8 +444,8 @@
     "edit": "cards/World.tsx",
     "delete": "cards/World.tsx",
     "book": {
-      "create": "todo",
-      "edit": "todo",
+      "create": "world.tsx",
+      "edit": "world.tsx",
       "delete": "todo"
     }
   },
@@ -454,9 +454,9 @@
     "edit": "cards/World.tsx",
     "delete": "cards/World.tsx",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "world.tsx",
+      "edit": "world.tsx",
+      "delete": "world.tsx"
     }
   },
   "dialogues.abstract": {
@@ -1884,9 +1884,9 @@
     "edit": "cards/World.tsx",
     "delete": "cards/World.tsx",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "world.tsx",
+      "edit": "world.tsx",
+      "delete": "world.tsx"
     }
   },
   "rooms.abstract": {
@@ -2604,9 +2604,9 @@
     "edit": "generic",
     "delete": "generic",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "generic",
+      "edit": "generic",
+      "delete": "generic"
     }
   },
   "topics.abstract": {
