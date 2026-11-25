@@ -12,6 +12,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 
 - [Review: Builder 5.3, the Rules block on the Reaction, Action and Quest sheets (PR #793, loka-hcnlh.25)](2026-11-25-builder-5.3-rules-blocks-review.md): **APPROVE WITH NOTES**
 - [Review: Safari save, OPFS pool warm-up and Try again on a sync timeout (PR #792, loka-hcnlh.19.2)](2026-11-24-safari-sync-timeout-review.md): **CHANGES REQUIRED**
+- [Review: web save closes on pagehide, Safari's lock offers Try again (PR #789, loka-hcnlh.19.1)](2026-11-24-dev-save-pagehide-review.md): **CHANGES REQUIRED**
 - [Review: builder 3.1b, https on `--lan` under a name-constrained local CA (PR #783, loka-hcnlh.18.2)](2026-11-24-builder-3.1b-lan-tls-review.md): **APPROVE WITH NOTES**
 - [Review: builder 3.1a, the LAN pairing guard (PR #781, loka-hcnlh.18.1)](2026-11-24-builder-3.1-lan-pairing-review.md): **APPROVE**
 - [Review: builder 2.3, the generic sheet and the gate lift (PR #776, loka-hcnlh.15)](2026-11-20-builder-2.3-generic-review.md): **APPROVE**
