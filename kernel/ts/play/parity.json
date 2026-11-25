@@ -32,7 +32,7 @@
   {
     "id": "map-story-flow-segment",
     "panel": "tools/author-panel/src/left.tsx",
-    "book": "todo"
+    "book": "flow.tsx"
   },
   {
     "id": "device-size",
@@ -122,7 +122,7 @@
   {
     "id": "flow-graph",
     "panel": "tools/author-panel/src/flow.tsx",
-    "book": "todo"
+    "book": "flow.tsx"
   },
   {
     "id": "inspector-header",
@@ -232,7 +232,7 @@
   {
     "id": "action-quest-reaction-cards",
     "panel": "tools/author-panel/src/edit/cards/Action.tsx",
-    "book": "todo"
+    "book": "generic.tsx"
   },
   {
     "id": "dialogue-card",
@@ -242,12 +242,12 @@
   {
     "id": "scene-text",
     "panel": "tools/author-panel/src/edit/cards/Scene.tsx",
-    "book": "todo"
+    "book": "scene.tsx"
   },
   {
     "id": "modal-scene",
     "panel": "tools/author-panel/src/edit/cards/ScenePages.tsx",
-    "book": "todo"
+    "book": "scene.tsx"
   },
   {
     "id": "world-card",

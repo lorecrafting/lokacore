@@ -270,6 +270,7 @@ export function editor(io: Io) {
     move: (r: MapRoom, area: string | null) => run((s) => move(s, r, area)),
     /** Add dialogue (the Person sheet): a new dialogue `npc` speaks; resolves its file. */
     talk: (npc: string, nodes: { kind: string; ref: string }[]) => run((s) => talk(s, npc, nodes)),
+    call: (route: string, sent: object) => run((s) => s.call(route, sent)), // one route, one gesture
     /** Each `[file, was, ops]` written in order, as one gesture (a refusal undoes the earlier ones). */
     change: (...writes: [string, string, Op[]][]) =>
       run(async (s) => {

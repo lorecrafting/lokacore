@@ -362,6 +362,34 @@ Sheet, Trace, Consequences, Retitle, Remove, Knowledge, `Bind…` and each `Bind
 wrapping at 390 px. The number field is Schedule's hour field (a fixed width for two digits), the
 title field the Area field; both placeholders `type.small` in `dim`. The no-story line and a
 sheet's rows that name no definition are `type.small` `fg`.
+Builder 5.1b: in the conversation, each icon (`✎ words`, `◇ when`, `↦ does`, `→ goes`) is the title
+pencil's look, inline on its own line under the label inside the card, a touch target in both axes,
+in `action` when lit and `dim` when not, on the night page's own palette. A label's field is the
+prose field inside its card. The header line's policy words are `type.small` in `dim`, wrapping; its
+`⚙→`, `＋ Add choice` and `＋ Add line` are acts aligned to the title's left edge. An unwritten
+label's rule sits under the label's words, not under the icon row.
+Builder 5.2: a scene row's words are an exit's words (`type.small` `fg`, no small caps), a touch
+target tall, indented `space.md` per depth; its acts and the Add menu's kinds are acts on rows of
+their own, wrapping at 390 px, each indented `space.md` more; a refused act is a greyed row. A page
+caption, on the sheet and in ScenePage, is the field caption (`type.label` `dim`); the end mark is
+`type.label` `dim`. A selected act is Map's selected box: `action` filled, its words in `bg`, its
+touch target kept. A quest's outcome field is the Area field.
+Builder 5.3: a Rules block's branch picker is the generic sheet's branch buttons, the picked one a
+selected act, wrapping at 390 px. The later-rules divider: a `size.rule` dashed rule in `dim` (the
+ghost line's dashed `dim`, never `line`) across the item's indent, `space.sm` above and below it,
+`later rules` `type.label` in `dim` at the item's text edge. An object's `Add…` and its field names
+sit at the indent of that object's own fields, so a nested `Add…` stands `space.md` right of its
+parent's.
+Builder 5.5b: the Flow walk's rows are Room sheet rows with `space.md` sides. The trail is the
+header breadcrumb's look (`type.small` `dim`, wrapping), first under the title. `Filters…`, each
+filter toggle and every band node, `Sheet`, person, item and `Go there` are acts, wrapping at
+390 px; a filter that is on is a selected act. A band's heading (`Leads here`, `Unlocks`, `Set by`,
+`Read by`, `Two steps out`) is the field caption, `type.label` in `dim`. The centre stands between
+two `size.rule` rules in `line` across the sheet, `space.sm` inside each: its `<kind> <key>` in
+`type.control` `fg` (the sheet title's look, never an act), its acts in a row under it. At half
+height on a 390 px phone the centre's name shows without a scroll when `Leads here` holds one
+node. No raw sizes.
+Builder 5.1a and 5.4b add `Flow`, an act, to a choice's and a Story row's acts.
 Worst pair: `warning` on `card`,
 4.75 (light).
 

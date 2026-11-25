@@ -114,11 +114,12 @@ export function ghostSheet(g: Ghost) {
   return known.files[g.ref] && `def:${known.files[g.ref]}`;
 }
 
-/** A pencil labelled `label` after a page title, pressed by touch, click, Enter or Space. */
-export function pen(label: string, press: () => void) {
+/** A pencil labelled `label` after a page title, pressed by touch, click, Enter or Space; `glyph`
+ * and `lit` (else dim) draw the conversation's icons the same way (talk.tsx). */
+export function pen(label: string, press: () => void, glyph = '✎', lit = true) {
   return (
     <Text
-      key="pencil"
+      key={label}
       accessibilityRole="button"
       accessibilityLabel={label}
       onPress={(e) => (e.stopPropagation(), press())} // not the title's own look
@@ -127,9 +128,9 @@ export function pen(label: string, press: () => void) {
           (e.key === 'Enter' || e.key === ' ') &&
           (e.preventDefault(), e.stopPropagation(), press()),
       } as object)}
-      style={{ ...PENCIL, color: ink('action') }}
+      style={{ ...PENCIL, color: ink(lit ? 'action' : 'dim') }}
     >
-      ✎
+      {glyph}
     </Text>
   );
 }

@@ -3,14 +3,14 @@
 // is kernel/ts/play/generic.ts `shapeOf`; the server validates. Labels are placeholders.
 import type { ReactElement, ReactNode } from 'react';
 import { Text, TextInput, View } from 'react-native';
-import { branchOf, entered, plain } from '../../../../kernel/ts/play/card.ts';
-import { least, moved, picked, shapeOf, type Shape } from '../../../../kernel/ts/play/generic.ts';
+import { entered, plain } from '../../../../kernel/ts/play/card.ts';
+import { least, moved, shapeOf, type Shape } from '../../../../kernel/ts/play/generic.ts';
 import type { Blocked } from '../../../../kernel/ts/play/allowed.ts';
-import { titles } from '../../../../kernel/ts/play/ui_schema.ts';
 import { size, space, type } from '../../book/tokens.ts';
 import { ink } from './build.ts';
 import { reveal, reveals } from './reveal.ts';
 import { ed, inRow, row, run } from './roomedit.tsx';
+import { later, rules } from './rules.tsx';
 import {
   drafts,
   drop,
@@ -24,6 +24,7 @@ import {
   type Obj,
   type Step,
   type Write,
+  own,
 } from './formwrite.ts';
 import { act, greyed } from './sheet.tsx';
 
@@ -59,7 +60,7 @@ export function field(at: At, path: Step[], node: Obj | undefined, value: unknow
   };
   if (s.as === 'object') return object(inner, path, s, value);
   if (s.as === 'array') return array(inner, path, s.items, value);
-  if (s.as === 'union') return union(inner, path, s.branches, value);
+  if (s.as === 'union') return rules(inner, path, s.branches, value);
   if (s.as === 'enum') return picks(at, path, s.options, value);
   if (s.as === 'const') return <Text style={inRow}>{String(s.value)}</Text>;
   if (s.as === 'scalar' && s.type === 'boolean') return picks(at, path, [true, false], value);
@@ -113,7 +114,11 @@ function object(at: At, path: Step[], s: Extract<Shape, { as: 'object' }>, value
   const shown = (k: string) => Object.hasOwn(v, k) || reveals().includes(id(at, [...path, k]));
   const keys = [...new Set([...Object.keys(v), ...Object.keys(s.props)])].filter(shown);
   const m = at.mech; // the root only (field)
-  const theirs = new Set([...(m?.allowed ?? []), ...(m?.blocked ?? []).map((b) => b.field)]);
+  const theirs = new Set([
+    ...(m?.allowed ?? []),
+    ...(m?.hide ?? []),
+    ...(m?.blocked ?? []).map((b) => b.field),
+  ]);
   const start = (k: string) => at.seed?.(k) ?? least(s.props[k], at.defs);
   // Add mechanic… offers no field whose first write the gate would refuse (generic.tsx `gate`)
   const refused = (k: string) => start(k) !== undefined && !!at.gate?.(ops([...path, k], start(k)));
@@ -166,7 +171,7 @@ function mechanics(
   if (!yes.length && !no.length) return [];
   const turn = (k: string, on: Write) => () => {
     const value = start(k); // none: the field is revealed empty once the capability is on
-    const field: Write[] = value === undefined ? [] : [[at.file, at.was, ops([k], value)]];
+    const field: Write[] = value === undefined ? [] : [[at.file, at.was, own(at, ops([k], value))]];
     const empty = value === undefined && id(at, [k]); // revealed before the write: web reloads on it
     void run(async () => {
       const why = field.length ? at.gate?.(field[0]![2]) : undefined;
@@ -224,6 +229,7 @@ function array(at: At, path: Step[], items: Obj, value: unknown) {
   return [
     ...list.map((el, i) => (
       <View key={id(at, [...path, i])}>
+        {later(at, [...path, i], el)}
         {block(at, [...path, i], items, el, true)}
         <View style={row}>
           {i > 0 && path.length
@@ -241,26 +247,6 @@ function array(at: At, path: Step[], items: Obj, value: unknown) {
       undefined,
       `item ${id(at, path)}`,
     ),
-  ];
-}
-
-/** A union's branch picker (titled as the panel's), then the picked branch's own fields. */
-function union(at: At, path: Step[], branches: Obj[], value: unknown) {
-  const i = branchOf(branches, value);
-  const names = titles(branches, at.defs as never);
-  return [
-    <View key={`pick ${id(at, path)}`} style={row}>
-      {names.map((n, j) =>
-        act(
-          n,
-          () => set(at, path, picked(branches, j, value, at.defs)),
-          undefined,
-          `branch ${j}`,
-          j === i,
-        ),
-      )}
-    </View>,
-    i >= 0 ? field(at, path, branches[i], value) : null,
   ];
 }
 

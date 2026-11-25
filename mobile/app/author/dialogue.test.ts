@@ -5,7 +5,7 @@ import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
 import { nodes } from '../book/__tests__/combat-book.test.ts'; // also registers the .tsx loader
 
-const { story } = await import('./build/room.tsx');
+const { known, story } = await import('./build/room.tsx');
 const { sheets } = await import('./build/sheet.tsx');
 const { ed, refused } = await import('./build/roomedit.tsx');
 const store = { getItem: () => null, setItem() {} }; // Build's Undo chip keeps its state there
@@ -136,6 +136,18 @@ test('a refused key, link, remove or gated write sends nothing and shows why', a
     [posts.length, refused()],
     [0, 'a: a check choice is never in a dialogue with a quest'],
   );
+});
+
+// Breaks: a choice's Flow opening a walk on anything but its own dialogue's node, or drawn on a
+// dialogue /story names no node for.
+test("a choice's Flow opens the walk on its dialogue's node; an unnamed file draws none", async () => {
+  const s = await sheet(ONE, 'a');
+  const flow = `flow ${s.file}:["choices","a"]`;
+  assert.equal(s.shown().filter((x) => x.key === flow).length, 0);
+  known.files['c:dialogue/flowing'] = s.file;
+  await s.press(flow);
+  assert.equal(opens.at(-1), 'flow:c:dialogue/flowing');
+  delete known.files['c:dialogue/flowing'];
 });
 
 // Breaks: a picked target not written at the link's path, Clear writing anything but a delete, a

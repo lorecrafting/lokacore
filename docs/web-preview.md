@@ -35,7 +35,10 @@ mise exec -- bin/loka dev cartridges/toolbox_showcase && cd mobile/app && LOKA_W
 
 `expo-sqlite` 57.0.3's browser worker needs an asynchronous first open before synchronous
 session calls, plus the narrow install-time length, error-message and elapsed-time fixes in
-`mobile/app/patch-sqlite-web.cjs`.
+`mobile/app/patch-sqlite-web.cjs`. On WebKit the same patch gives each OPFS pool file 32 MB of
+write headroom during the async open (loka-hcnlh.19.2): Safari grants a file's growth through the
+page's main thread, which a sync save call blocks. `npm run author` and `npm run web:preview` run
+the patch before they start, so an existing install picks it up.
 Its web support is alpha. On an SDK update, review that guard and repeat real browser
 open, action, reload, tab reopen and Fast Refresh checks before using the preview.
 

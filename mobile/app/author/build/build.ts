@@ -47,6 +47,12 @@ export function opened(b: Builder, id: string): Builder {
   const s = (b.sheets ?? []).filter((x) => x !== id);
   return { ...b, sheets: [...(s.length < STACK ? s : s.slice(0, -1)), id], scroll: 0 };
 }
+/** The top sheet becomes `id` (the Flow walk re-centres or steps back): the stack keeps its order. */
+export const swapped = (b: Builder, id: string): Builder => ({
+  ...b,
+  sheets: [...(b.sheets ?? []).slice(0, -1), id],
+  scroll: 0,
+});
 /** Back: the top sheet (or sheet `id`) closes, the one under it shows again. */
 export function closed({ sheets, scroll: _, ...b }: Builder, id?: string): Builder {
   const rest = (id ? sheets?.filter((x) => x !== id) : sheets?.slice(0, -1)) ?? [];

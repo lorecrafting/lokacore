@@ -155,3 +155,19 @@ test('every union picker in the real schemas names its branches distinctly, by t
   });
   assert.deepEqual(bad, []);
 });
+
+// Breaks: a branch named `option N` though it carries its own tag (a reaction step's `wait` beside `Step`).
+test('no branch that has its own tag gets an option N name', () => {
+  const unions = Object.values(defs as Record<string, any>)
+    .flatMap((d) => [d, ...Object.values(d.properties ?? {})])
+    .flatMap((d: any) => [d, d.items ?? {}])
+    .map((d: any) => d.anyOf ?? d.oneOf)
+    .filter(Array.isArray);
+  const own = (b: any) =>
+    Object.values(b.properties ?? {}).some((p: any) => typeof p.const === 'string');
+  const bad = unions.flatMap((u) =>
+    titles(u, defs).filter((n, i) => own(u[i]) && /^option \d+$/.test(n)),
+  );
+  assert.deepEqual(bad, []);
+  assert.ok(unions.some((u) => titles(u, defs).includes('wait')));
+});

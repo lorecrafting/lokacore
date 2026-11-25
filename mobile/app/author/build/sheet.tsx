@@ -11,15 +11,27 @@ const WORDS = { close: 'Back', grow: 'Full height' };
  * ponytail: a placeholder; the designer names the breakpoint (ruling 7 gives none). */
 export const DOCK = { at: size.column + size.column / 2, width: size.column / 2 }; // mutate-skip: placeholder
 
-/** Sheet kinds by the id's head (`room:cellar` is `room` with `cellar`). */
+/** Sheet kinds by the id's head (`room:cellar` is `room` with `cellar`); `back`, the id Back shows
+ * in this sheet's place instead of closing it (the Flow walk's trail). */
 export const sheets: Record<
   string,
-  { title: (arg: string) => string; body: (arg: string) => ReactNode }
+  {
+    title: (arg: string) => string;
+    body: (arg: string) => ReactNode;
+    back?: (arg: string) => string | undefined;
+  }
 > = {};
 export const parts = (id: string) => {
   const [kind, arg = ''] = id.split(/:(.*)/);
   return [sheets[kind], arg] as const;
 };
+/** The id Back shows in place of the top sheet `id`, when its kind steps back. */
+export const stepBack = (id: string) => {
+  const [s, arg] = parts(id);
+  return s?.back?.(arg);
+};
+/** Build.tsx hands in `swap`: the top sheet becomes `id`, the stack does not grow (Flow re-centring). */
+export const stack = { swap: (_id: string) => {} };
 const titled = (id: string) => {
   const [s, arg] = parts(id);
   return s?.title(arg) ?? id;
@@ -30,6 +42,9 @@ export const CONTROL = {
   minHeight: size.touch,
   justifyContent: 'center',
 } as const;
+// the current pick: Map's selected box, the action fill with its words in the background colour
+const INSET = space.sm; // mutate-skip: layout only (the fill's inset)
+const PICKED = { ...CONTROL, backgroundColor: ink('action'), paddingHorizontal: INSET };
 export const act = (
   label: string,
   run: () => void,
@@ -49,9 +64,9 @@ export const act = (
           }
     }
     onPress={run}
-    style={CONTROL}
+    style={selected ? PICKED : CONTROL}
   >
-    <Text style={{ ...type.control, color: ink('action') }}>{label}</Text>
+    <Text style={{ ...type.control, color: ink(selected ? 'bg' : 'action') }}>{label}</Text>
   </Pressable>
 );
 

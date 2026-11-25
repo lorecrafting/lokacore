@@ -18,10 +18,9 @@ const draw = (failed: Failed, tried: string[]) => {
 };
 const labels = (shown: any[]) => shown.map((n) => n.props.accessibilityLabel);
 
-// Breaks (loka-x6t.25, loka-hcnlh.19.1): the other-tab lock screen is a dead end with no Try again (in
-// Chrome or Safari), or Try again is
-// offered for a cause a retry cannot clear (a damaged save).
-test('Try again retries the open on the other-tab lock and nowhere else', () => {
+// Breaks (loka-x6t.25, loka-hcnlh.19.1, .19.2): the other-tab lock (Chrome's or Safari's words) or Safari's worker timeout is a dead end
+// with no Try again, or Try again is offered for a cause a retry cannot clear (a damaged save).
+test('Try again retries the open on the other-tab lock and a worker timeout, nowhere else', () => {
   const tried: string[] = [];
   // The lock as useWebSession reports it: untyped, no Start over.
   const message = 'Access Handles cannot be created if there is another open Access Handle';
@@ -32,6 +31,8 @@ test('Try again retries the open on the other-tab lock and nowhere else', () => 
   // Safari's word for the same lock (WebKit's InvalidStateError on a second sync access handle)
   const safari = draw({ message: 'The object is in an invalid state.', startOver: false }, tried);
   assert.deepEqual(labels(safari), ['Try again']);
+  const timedOut = { message: 'Sync operation timeout', startOver: false };
+  assert.deepEqual(labels(draw(timedOut, tried)), ['Try again']);
   const corrupt = {
     kind: 'save_corrupt',
     message: 'row 4 failed its hash',

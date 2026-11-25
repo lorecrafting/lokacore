@@ -736,10 +736,11 @@ replacement remounts the book. Save-open errors expose only existing permitted r
 retry where a retry can clear the cause. The
 save-error screen has no GameView, so no phase; it shows a headline and at most
 one plain sentence under it, never a raw kind or code and never the headline repeated; the
-browser's save-file lock reads "Loka is already open in another tab." That lock alone, on web,
-adds a **Try again** Control that reloads the page to open the save again; while the other tab
-stays open the same sentence returns, with no count or extra words. Every other cause offers only
-the permitted Start over (loka-x6t.25).
+browser's save-file lock reads "Loka is already open in another tab." On web, that lock and the
+save worker's timeout (Safari; its sentence stays "The save could not be opened.") add a
+**Try again** Control that reloads the page to open the save again in a fresh worker; while the
+cause stays (the other tab open) the same sentence returns, with no count or extra words
+(loka-hcnlh.19.2). Every other cause offers only the permitted Start over (loka-x6t.25).
 [words](../../mobile/app/book/words.ts) owns the sentences. Those
 boundaries live in [session](../../mobile/packages/game-view/session.ts),
 [app](../../mobile/app/App.tsx) and [save error](../../mobile/app/SaveError.tsx).
@@ -985,7 +986,7 @@ reasons and limits: [prose in the Book rulings](../design/prose-in-the-book-ruli
     joined ` › `), and its title, a header that takes focus whenever a new sheet comes on top; its
     body scrolls, from its start when it comes on top. Sheets stack, at most four: opening a fifth
     replaces the top one, opening one already lower moves it to the top, and Back closes only the
-    top one. Closing the last returns focus to what opened the first. The stack and the top
+    top one (a Flow walk first steps back along its trail, Flow walk below). Closing the last returns focus to what opened the first. The stack and the top
     sheet's scroll survive a reload; leaving Build closes every sheet.
   - **Two layouts** (ruling 7). Where the window holds the full page column with a docked sheet
     beside it (the page column and half of it again), the sheet docks at the Book's right edge,
@@ -1050,7 +1051,8 @@ reasons and limits: [prose in the Book rulings](../design/prose-in-the-book-ruli
     selected only selects it. A definition row is selected without opening. Only the selected row
     shows its acts, in rows of their own under it. A definition offers `Go there` (the room a
     placement edge, `.room` or `.items`, joins it to; none, no Go there), `Sheet`, `Trace` (a fact's
-    setters, then its readers, each naming a definition opening its sheet) and `Consequences`. A
+    setters, then its readers, each naming a definition opening its sheet), `Consequences` and,
+    for a node the Flow draws, `Flow` (the walk centred on it). A
     beat offers a title field with `Retitle` (empty removes the title), `Remove` (no confirm: the
     Undo chip covers it), `Knowledge` (the facts set before it, as words) and `Bind…`, a fold of
     `Bind <short>` per short ref. Each edit is one gesture with one Undo. Facts, Pacing, Trace,
@@ -1060,6 +1062,24 @@ reasons and limits: [prose in the Book rulings](../design/prose-in-the-book-ruli
       With a story but no parts (no outline file, or none in it), it shows that plain line, then
       the number field and `Add beat`, which writes beat n into the first part. A sheet opened
       from it with no story says Nothing here.
+  - **Flow walk (5.5b, [builder mode decision 9 as amended](../rnd/in-game-builder-mode-2026-11-19.md)).**
+    `flow:<ref>`, one sheet titled `Flow <key>`; not the panel's canvas shrunk. In order: the
+    walk's trail, when it has more than one step (its keys joined ` › `, under the header); a
+    `Filters…` fold (expanded while open), followed while shut by each filter that is on, so a
+    filter hiding nodes always shows and one press turns it off; open, every Flow filter as a
+    toggle, on marked selected. A filter hides its lane's nodes from every band, never the centre.
+    The filters on are kept from walk to walk until the Book reloads. Then `Leads here` (the nodes
+    with an edge into the centre), the centre, `Unlocks` (the nodes it leads to); a band with no
+    nodes is not drawn. For a fact the bands are its thread, as Trace's: `Set by`, then `Read by`.
+    A band's node is `<kind> <key>`, a press re-centres the walk on it, with `Sheet` when /story
+    named its file. The centre offers `Sheet`, each person and item an edge joins it to (opening
+    their own sheets) and `Go there: <room>` for each room. A press on a node already on the trail
+    cuts the trail back to it (never a loop). Re-centring keeps the walk one sheet: the stack
+    neither grows nor reorders, and the body starts at its top. Back, and the grip's drag down
+    from half height (Back, Two layouts), step back one trail step; on the first they close it. With
+    the docked layout (Two layouts) the walk adds two hops: `Two steps out` above `Leads here`
+    (what leads to those nodes) and below `Unlocks` (what those nodes lead to), each node a band
+    node, the filters applied; the phone draws none. With no story the sheet says Nothing here.
   - **Unwritten links.** In Build a link whose words are unwritten draws as an unwritten line
     does (Build: in-place field): a blank ruled line with the caption `name`, never `~`, named
     `Unwritten name, open`. It keeps its own press. Out of Build every link draws as before.
@@ -1086,7 +1106,10 @@ reasons and limits: [prose in the Book rulings](../design/prose-in-the-book-ruli
     least valid item.
   - **Picks.** An enum or a boolean is one button per option, a union one button per branch
     (named as the panel names them), the present one picked; a press writes it, and a union then
-    shows the picked branch's own fields.
+    shows the picked branch's own fields. A union offers only the branches the compiler takes in
+    the file's kind, plus the one present (slice 5.3); a switch is one write that sets the new tag
+    and keeps the fields the two branches share. A union that only constrains (a missing or second
+    subject) draws nothing; the compiler reports it.
   - **Typed fields** (a string, a number, a text's words, a definition's key) show the present
     value on a ruled line and write when they lose focus, only when changed; a number field that
     does not read as a number writes nothing. Each fits the sheet's width, however deep its block.
@@ -1215,7 +1238,8 @@ reasons and limits: [prose in the Book rulings](../design/prose-in-the-book-ruli
     `Choice key` field and `Add choice`, which adds a least choice (its label and narration `~`)
     under the trimmed key and clears the field. An empty key adds nothing; a refused key (not
     lowercase letters, digits and `_`, or already present) shows why and keeps the typed key.
-  - **A choice** opens to `Rename` and `Remove choice`, then its fields present, then `Add…` with
+  - **A choice** opens to `Rename`, `Remove choice` and `Flow` (the walk centred on this dialogue, a
+    choice being no node of its own; only once /story has named the dialogue's file), then its fields present, then `Add…` with
     the absent fields the compiler takes for it. A key is the choice's id, so `Rename` changes
     nothing and only shows why. `Remove choice` removes it, but not
     a dialogue's last choice nor its riddle's answer, which show why instead. A field the compiler asks at play (`sitting`, `exchange`) is revealed
@@ -1231,6 +1255,77 @@ reasons and limits: [prose in the Book rulings](../design/prose-in-the-book-ruli
     then opens its sheet on top.
   - Not in 5.1a: the conversation in Build (§4.6's icon row and in-place words), `.scene`
     dialogues and their line rows.
+  - Labels here are placeholder words, the owner's to replace.
+- **Build: the conversation** (slice 5.1b, [builder mode §4.6](../rnd/in-game-builder-mode-2026-11-19.md)).
+  In Build, a waiting talk on the Book page gains three things; outside Build it draws as without
+  them. Looks: [author-mode marks](../BOOK-UI-COMPONENTS.md#component-catalogue).
+  - **Words.** The talk's prompt and each choice label edit in place, as a description does. A JSON
+    label saves through its line (`/line`, then `/edit`); a `.scene` label through one `/restructure`
+    reword of its `- ` line (decision 11: `/set` takes no label). A label whose key repeats in the
+    scene, or whose source is gone, opens no field; a label changed on disk shows the
+    changed-on-disk notice with their words, or `Open source` when the choice is gone.
+  - **The icon row.** Under each choice label, inside its card, one row: `✎ words`, `◇ when`,
+    `↦ does`, `→ goes`. An icon is lit when the choice has that field, dim when it does not; words
+    is always lit. words turns the label into its field in place (the row goes while it is open).
+    when, does and goes open the dialogue's sheet with that choice's fold open (every other choice
+    folded) at the field, or at its `Add…` when absent; goes opens the `then` fold, which is always
+    drawn (`then_failed` when only that is set). A `.scene` choice has words only.
+  - **The card still plays.** A tap on the card plays the choice; the label takes no press of its
+    own, and neither an icon nor the open field is the card's press.
+  - **The header line.** Under the person's title, while their talk waits: `Offered when: <the
+    policy in words, or always> · repeats` with `⚙→`, which opens the sheet at `policy`; then
+    `＋ Add choice` (JSON: the sheet at `choices`; `.scene`: a least choice after the last top-level
+    choice's block) and, for a `.scene`, `＋ Add line` (new words after the last line before the
+    first choice). A refused add shows its reason.
+  - **The reading page stays first.** Nothing here covers or reorders the conversation's lines:
+    the header sits between the title and the first line, and the icon row inside its own card.
+  - Not in 5.1b: an authored label key (not `choices.<key>.label`) gets no row; the sheet does not
+    scroll to the choice; `repeats` is constant.
+  - Labels here are placeholder words, the owner's to replace.
+- **Build: scene rows** (slice 5.2, [builder mode §4.6, §5](../rnd/in-game-builder-mode-2026-11-19.md),
+  [scene-structure rulings](../design/scene-structure-rulings.md)). On a `.scene`'s sheet, and on a
+  scene definition's sheet for its `.cut` twin, each line of words is a row. Looks:
+  [author-mode marks](../BOOK-UI-COMPONENTS.md#component-catalogue).
+  - **Rows.** A row shows the line's words as written (case and quotes kept), indented by its
+    depth. A tap, or Enter on the row, opens its acts beneath it; again closes them. On a scene's
+    sheet a `page P` caption sits above each page's first row; the `---` end mark is bare.
+  - **Acts.** A `.scene` line: `Add after line N` (opens the kinds that line may be followed by),
+    `Move up line N`, `Move down line N`, `Remove line N`. A page's first line: `Add page after page
+    P`, `Move up page P`, `Move down page P`, `Join page P`, `Remove page P`; each later line `Split
+    page P at line N`. An act the shown bytes refuse is greyed with its reason and sends nothing.
+    Each act is one `/restructure` and one Undo.
+  - **Keys** (rulings §5). With focus on a row or its acts, never inside an input: Alt-ArrowUp and
+    Alt-ArrowDown move the line (or page), Alt-Enter opens Add. After a move the row keeps focus
+    and its acts stay open at its new place; an added row takes focus at its `~` field.
+  - **A selected act.** Where acts are picks (a trigger's kind, value and outcome; an enum's
+    values; a link's target; the Notebook tabs), the current one is drawn selected and announced as
+    selected; the others stay acts.
+  - **A modal scene's trigger.** `on` draws as picks: kind, value and, for a story point, outcome.
+    A quest's outcome is typed and written on leaving the field; a refused one tells why. A switch
+    writes the whole new `on`; `~ <quest>` names the quest it left. A scene that is not modal keeps
+    `on` in the form; the treatment stays in the form.
+  - **ScenePage.** In Build a `.cut` line is captioned `page P` and edits through the seam's field.
+  - Not in 5.2: a current trigger value that is not offered is not drawn; a speaker line is always
+    greyed; a new cutscene makes no `.cut` and the Notebook lists no scene files; only a page's first
+    line edits in ScenePage; the scenes create row; Esc does not close the Add menu.
+  - Labels here are placeholder words, the owner's to replace.
+- **Build: the Rules block** (slice 5.3, [builder mode §4.6, §6.4](../rnd/in-game-builder-mode-2026-11-19.md)).
+  A reaction's, action's or quest's `def:<file>` sheet is [the generic sheet](#author-mode-dev-only);
+  its Policy, Steps, Trigger and Check fields are unions drawn as its Picks. Looks:
+  [author-mode marks](../BOOK-UI-COMPONENTS.md#component-catalogue).
+  - **Branch names.** Each branch is named by its tag (`op`, `event` or `kind`) or its definition's
+    name; never `option N` where the branch has a tag of its own (a `wait` step reads `wait`).
+  - **Later rules.** A `wait` step starts the steps that run later: above that step's whole item
+    (its name and Remove included), a dashed rule and `later rules`; the steps below it are the
+    later rule's. No other step draws it.
+  - **Check and failure.** On a scripted action a check and its failure outcome come and go
+    together: the write that adds `check` also writes the failure outcome (its words `~`), the one
+    that removes `check` removes it; one `/change`, one Undo. An action whose `extends` parent may
+    hold either is left as written.
+  - **One definition's fields.** Once an action has `command` or `outcomes`, its `Add…` and `Add
+    mechanic…` offer only that definition's fields; a new action, with neither, is offered both.
+  - Not in 5.3: a dialogue's `policy` (its row stays todo); a failure outcome added or removed by
+    hand against its check is rewritten silently to match, with no reason shown.
   - Labels here are placeholder words, the owner's to replace.
 - **No field.** A double-click on a line that is not words opens nothing; a note under it, in a
   row of its own (the lines below move down by its height while it shows and back when it goes,

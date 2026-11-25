@@ -4,6 +4,7 @@
 // an allOf or an if/then's addable field dropped, a branch's required field left unset.
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
+import { branchOf } from '../play/card.ts';
 import { least, moved, picked, shapeOf } from '../play/generic.ts';
 
 const ref = (name: string) => ({ $ref: `#/$defs/${name}` });
@@ -121,4 +122,13 @@ test("a picked branch's required fields start at their least; present ones are k
 test('a list element moves up, or is copied after itself', () => {
   assert.deepEqual(moved([1, 2, 3], 2, 1), [1, 3, 2]);
   assert.deepEqual(moved([1, 2, 3], 0), [1, 1, 2, 3]);
+});
+
+// Break: a fact condition's `equals: true` drawn as a Key (FactValue's untyped `$ref` branch taken first).
+test('a scalar takes the branch of its own type before an untyped one', () => {
+  const factValue = [ref('Key'), { type: 'integer' }, { type: 'boolean' }];
+  assert.deepEqual(
+    [true, 3, 'k'].map((v) => branchOf(factValue, v)),
+    [2, 1, 0],
+  );
 });
