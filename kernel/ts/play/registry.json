@@ -2084,7 +2084,7 @@
     "edit": "generic",
     "delete": "generic",
     "book": {
-      "create": "todo",
+      "create": "generic",
       "edit": "generic",
       "delete": "generic"
     }
@@ -2094,7 +2094,7 @@
     "edit": "generic",
     "delete": "generic",
     "book": {
-      "create": "todo",
+      "create": "generic",
       "edit": "generic",
       "delete": "generic"
     }
@@ -2105,7 +2105,7 @@
     "delete": "generic",
     "book": {
       "create": "generic",
-      "edit": "generic",
+      "edit": "scene.tsx",
       "delete": "generic"
     }
   },
@@ -2134,9 +2134,9 @@
     "edit": "cards/Scene.tsx",
     "delete": "cards/Scene.tsx",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "scene.tsx",
+      "edit": "scene.tsx",
+      "delete": "scene.tsx"
     }
   },
   "services.abstract": {

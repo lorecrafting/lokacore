@@ -10,6 +10,7 @@ const { story } = await import('./build/room.tsx');
 const { sheets } = await import('./build/sheet.tsx');
 await import('./build/Build.tsx'); // the app's registration of the def: sheet
 const { WORDS } = await import('./build/form.tsx');
+const rowsOpen = (await import('./build/formwrite.ts')).opened;
 const HOURS = (await import('./build/schedule.tsx')).WORDS;
 const COMBAT = (await import('./build/combat.tsx')).WORDS;
 
@@ -137,6 +138,11 @@ async function gesture(kind: string, f: string, op: string, doc: Record<string, 
     await settle();
     if (!button(s, f)) await s.press(`mechanic ${s.file}`); // a mechanic row: Add mechanic… opens it
     const b = button(s, f);
+    // a field only a union branch requires (a scene's name): picking that branch writes it
+    for (let j = 0; !b && (await s.press(`branch ${j}`)); j++) {
+      const mine = sent().filter((o) => o.path[0] === f);
+      if (mine.length) return mine;
+    }
     if (!b) return [];
     b.props.onPress();
     await settle();
@@ -465,4 +471,19 @@ test('Schedule: an hour moves within the day, a refusal writes nothing, Add hour
   const lost = await opened('npcs', { daily_schedule: {} });
   (await lost.press(`fold ${lost.file}:${JSON.stringify(['daily_schedule'])}`), await settle());
   assert.ok(lost.shown().some((x) => words(x) === HOURS.add && !x.props?.onPress));
+});
+
+// Breaks: a scene's sheet drawn without its `.cut` twin's pages above its fields, or a twin whose
+// .json carries steps offering page acts.
+test('a scene sheet draws its .cut twin’s pages; steps in the .json refuse their acts', async () => {
+  for (const doc of [{}, { steps: [] }]) {
+    const s = await opened('scenes', doc);
+    const cut = s.file.replace(/\.json$/, '.cut');
+    files.set(cut, 'Mist.'); // served as JSON: one line
+    (load(), await settle()); // a new /story: the sheet reads its twin again
+    (s.shown(), await settle());
+    rowsOpen.add(`${cut}:1`);
+    const why = 'the twin .json carries steps: edit its pages there';
+    assert.equal(s.shown().filter((x) => x.props?.children === why).length > 0, 'steps' in doc);
+  }
 });

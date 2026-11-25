@@ -469,11 +469,6 @@ rooms.zones.book.create
 rooms.zones.book.edit
 rooms.zones.book.delete
 scenes.abstract.book.create
-scenes.description.book.create
-scenes.name.book.create
-scenes.treatment.book.create
-scenes.treatment.book.edit
-scenes.treatment.book.delete
 services.benefit.book.edit
 skills.prerequisite.book.edit
 skills.qualification.book.edit
@@ -556,8 +551,6 @@ parity:words-field
 parity:room-card
 parity:entity-card
 parity:action-quest-reaction-cards
-parity:scene-text
-parity:modal-scene
 parity:world-card
 parity:combat-block
 parity:schedule-block

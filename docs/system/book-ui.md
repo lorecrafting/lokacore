@@ -1257,7 +1257,34 @@ reasons and limits: [prose in the Book rulings](../design/prose-in-the-book-ruli
   - **The reading page stays first.** Nothing here covers or reorders the conversation's lines:
     the header sits between the title and the first line, and the icon row inside its own card.
   - Not in 5.1b: an authored label key (not `choices.<key>.label`) gets no row; the sheet does not
-    scroll to the choice; `repeats` is constant; a `.scene` add makes no Undo entry.
+    scroll to the choice; `repeats` is constant.
+  - Labels here are placeholder words, the owner's to replace.
+- **Build: scene rows** (slice 5.2, [builder mode §4.6, §5](../rnd/in-game-builder-mode-2026-11-19.md),
+  [scene-structure rulings](../design/scene-structure-rulings.md)). On a `.scene`'s sheet, and on a
+  scene definition's sheet for its `.cut` twin, each line of words is a row. Looks:
+  [author-mode marks](../BOOK-UI-COMPONENTS.md#component-catalogue).
+  - **Rows.** A row shows the line's words as written (case and quotes kept), indented by its
+    depth. A tap, or Enter on the row, opens its acts beneath it; again closes them. On a scene's
+    sheet a `page P` caption sits above each page's first row; the `---` end mark is bare.
+  - **Acts.** A `.scene` line: `Add after line N` (opens the kinds that line may be followed by),
+    `Move up line N`, `Move down line N`, `Remove line N`. A page's first line: `Add page after page
+    P`, `Move up page P`, `Move down page P`, `Join page P`, `Remove page P`; each later line `Split
+    page P at line N`. An act the shown bytes refuse is greyed with its reason and sends nothing.
+    Each act is one `/restructure` and one Undo.
+  - **Keys** (rulings §5). With focus on a row or its acts, never inside an input: Alt-ArrowUp and
+    Alt-ArrowDown move the line (or page), Alt-Enter opens Add. After a move the row keeps focus
+    and its acts stay open at its new place; an added row takes focus at its `~` field.
+  - **A selected act.** Where acts are picks (a trigger's kind, value and outcome; an enum's
+    values; a link's target; the Notebook tabs), the current one is drawn selected and announced as
+    selected; the others stay acts.
+  - **A modal scene's trigger.** `on` draws as picks: kind, value and, for a story point, outcome.
+    A quest's outcome is typed and written on leaving the field; a refused one tells why. A switch
+    writes the whole new `on`; `~ <quest>` names the quest it left. A scene that is not modal keeps
+    `on` in the form; the treatment stays in the form.
+  - **ScenePage.** In Build a `.cut` line is captioned `page P` and edits through the seam's field.
+  - Not in 5.2: a current trigger value that is not offered is not drawn; a speaker line is always
+    greyed; a new cutscene makes no `.cut` and the Notebook lists no scene files; only a page's first
+    line edits in ScenePage; the scenes create row; Esc does not close the Add menu.
   - Labels here are placeholder words, the owner's to replace.
 - **No field.** A double-click on a line that is not words opens nothing; a note under it, in a
   row of its own (the lines below move down by its height while it shows and back when it goes,

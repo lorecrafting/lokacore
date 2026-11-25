@@ -30,6 +30,9 @@ export const CONTROL = {
   minHeight: size.touch,
   justifyContent: 'center',
 } as const;
+// the current pick: Map's selected box, the action fill with its words in the background colour
+const INSET = space.sm; // mutate-skip: layout only (the fill's inset)
+const PICKED = { ...CONTROL, backgroundColor: ink('action'), paddingHorizontal: INSET };
 export const act = (
   label: string,
   run: () => void,
@@ -49,9 +52,9 @@ export const act = (
           }
     }
     onPress={run}
-    style={CONTROL}
+    style={selected ? PICKED : CONTROL}
   >
-    <Text style={{ ...type.control, color: ink('action') }}>{label}</Text>
+    <Text style={{ ...type.control, color: ink(selected ? 'bg' : 'action') }}>{label}</Text>
   </Pressable>
 );
 
