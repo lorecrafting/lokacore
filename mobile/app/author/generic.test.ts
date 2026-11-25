@@ -608,7 +608,8 @@ test("an action's two Adds offer no field of the other action definition", async
   }
 });
 
-// Breaks: no divider before a wait's later steps, or one drawn before every step.
+// Breaks: no divider before a wait's later steps, one drawn before every step, or one under the
+// wait's own name and Remove instead of above the whole item.
 test('a wait step draws the later-rules divider and a narrate step does not', async () => {
   const s = await opened('reactions', {
     steps: [
@@ -624,4 +625,5 @@ test('a wait step draws the later-rules divider and a narrate step does not', as
     );
   assert.equal(later(1).length, 1);
   assert.equal(later(0).length, 0);
+  assert.ok(String(within(s, ['steps', 1])[0]?.key).startsWith('later '));
 });

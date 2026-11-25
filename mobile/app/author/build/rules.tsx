@@ -2,7 +2,7 @@
 // union picker told apart by their tag (`op`, `event`, `kind`), and every other union in the generic
 // form is drawn by it too (form.tsx `field`). It offers only the branches the compiler takes in the
 // sheet's kind (rules.ts `offered`), plus the one picked; a switch keeps the tag and the shared
-// fields (generic.ts `picked`); a `wait` step draws the divider before the rules that run later.
+// fields (generic.ts `picked`); a `wait` item gets the divider before the rules that run later (`later`).
 // Labels are placeholders.
 import { Text, View } from 'react-native';
 import { branchOf, constraintOnly } from '../../../../kernel/ts/play/card.ts';
@@ -19,11 +19,20 @@ import { act } from './sheet.tsx';
 export const WORDS = { later: 'later rules' };
 const LATER = {
   marginTop: space.sm, // mutate-skip: layout
+  marginLeft: space.md, // mutate-skip: layout; level with the item's name and picks (block's paddingLeft)
   paddingTop: space.sm, // mutate-skip: layout
   borderTopWidth: size.rule, // mutate-skip: layout
   borderStyle: 'dashed', // mutate-skip: layout
   borderColor: ink('dim'), // mutate-skip: layout
 } as const;
+
+/** The divider above a `wait` list item (form.tsx `array`): the steps after it run later. */
+export const later = (at: At, path: Step[], value: unknown) =>
+  (value as Obj | undefined)?.op === 'wait' ? (
+    <View key={`later ${id(at, path)}`} style={LATER}>
+      <Text style={{ ...type.label, color: ink('dim') }}>{WORDS.later}</Text>
+    </View>
+  ) : null;
 
 /** A union's branch picker (titled as the panel's), then the picked branch's own fields. */
 export function rules(at: At, path: Step[], branches: Obj[], value: unknown) {
@@ -31,13 +40,7 @@ export function rules(at: At, path: Step[], branches: Obj[], value: unknown) {
   const i = branchOf(branches, value);
   const names = titles(branches, at.defs as never);
   const kind = (at.kind ?? '').replace(/s$/, ''); // the file's dir is its node kind plural (`reactions`)
-  const later = (value as Obj | undefined)?.op === 'wait';
   return [
-    later ? (
-      <View key={`later ${id(at, path)}`} style={LATER}>
-        <Text style={{ ...type.label, color: ink('dim') }}>{WORDS.later}</Text>
-      </View>
-    ) : null,
     <View key={`pick ${id(at, path)}`} style={row}>
       {names.map((n, j) =>
         j === i || offered(branches[j] as never, kind)

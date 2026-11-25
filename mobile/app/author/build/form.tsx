@@ -10,7 +10,7 @@ import { size, space, type } from '../../book/tokens.ts';
 import { ink } from './build.ts';
 import { reveal, reveals } from './reveal.ts';
 import { ed, inRow, row, run } from './roomedit.tsx';
-import { rules } from './rules.tsx';
+import { later, rules } from './rules.tsx';
 import {
   drafts,
   drop,
@@ -229,6 +229,7 @@ function array(at: At, path: Step[], items: Obj, value: unknown) {
   return [
     ...list.map((el, i) => (
       <View key={id(at, [...path, i])}>
+        {later(at, [...path, i], el)}
         {block(at, [...path, i], items, el, true)}
         <View style={row}>
           {i > 0 && path.length
