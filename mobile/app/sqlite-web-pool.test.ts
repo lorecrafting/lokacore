@@ -121,7 +121,8 @@ test('on Safari the save and a new journal grow by sync writes, and the save kee
   const size = new DataView(new ArrayBuffer(8));
   vfs.jFileSize(1, size);
   assert.equal(size.getBigInt64(0, true), 4096n); // one page: no headroom left in the save
-  assert.equal(vfs.jWrite(1, new Uint8Array(1024 * 1024), 4096), 0);
+  // A write ending near 31 MB: the whole headroom, not a sliver of it, is granted at open.
+  assert.equal(vfs.jWrite(1, new Uint8Array(4096), 31 * 1024 * 1024), 0);
   assert.equal(vfs.jOpen('/loka.db-journal', 2, 0x800 | 0x4 | 0x2, flags), 0);
   assert.equal(vfs.jWrite(2, new Uint8Array(64 * 1024), 0), 0);
 });
