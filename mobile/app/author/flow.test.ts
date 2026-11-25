@@ -4,7 +4,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { nodes } from '../book/__tests__/combat-book.test.ts'; // the React Native stand-ins
-import { BUILD } from './build/build.ts';
+import { BUILD, swapped } from './build/build.ts';
 
 const kept = new Map([[BUILD, '{"on":true}']]);
 Object.assign(globalThis, {
@@ -103,6 +103,15 @@ test('a tap re-centres in place, Back steps back along the trail to the first re
   assert.equal(texts().includes('greet'), false, 'no breadcrumb at the first ref');
   back();
   assert.equal(stack().length, depth - 1, 'at the first ref, Back closes the walk');
+});
+
+// Breaks: a re-centred walk opening scrolled to where the last centre's sheet was.
+test('a re-centre opens the new centre at the top', () => {
+  assert.deepEqual(swapped({ on: true, sheets: ['a', 'flow:x'], scroll: 120 }, 'flow:x y'), {
+    on: true,
+    sheets: ['a', 'flow:x y'],
+    scroll: 0,
+  });
 });
 
 // Breaks: a toggle that hides nothing, never shows selected, or never turns off.
