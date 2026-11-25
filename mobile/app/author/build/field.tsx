@@ -114,9 +114,10 @@ function editable(h: Hooks, p: Props, key: string, shown: string, blank: boolean
   const marked = unconfirmed.has(key);
   const press = () => void edit(h, key);
   const own = {
-    style: [p.style, blank && BLANK, marked && MARKED],
+    style: [p.style, blank && !label && BLANK, marked && MARKED],
     children: [
-      blank ? hint(name) : p.children,
+      // a label's rule sits under its words, not under the icon row after them
+      blank ? hint(name, label) : p.children,
       field?.key === key && field.note && (
         <Text key="note" style={CAPTION}>{`\n${field.note}`}</Text>
       ),
@@ -135,8 +136,8 @@ function editable(h: Hooks, p: Props, key: string, shown: string, blank: boolean
 }
 const stop = (e: { stopPropagation: () => void }) => e.stopPropagation();
 /** An unwritten line's name in place of its `~` (ruling 9). */
-const hint = (name: string) => (
-  <Text key="blank" style={{ ...type.small, color: ink('dim') }}>
+const hint = (name: string, ruled = false) => (
+  <Text key="blank" style={[{ ...type.small, color: ink('dim') }, ruled && BLANK]}>
     {name}
   </Text>
 );

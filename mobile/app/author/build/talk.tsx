@@ -7,7 +7,9 @@ import { choiceLabel, rows } from '../../../../kernel/ts/play/scene_choice.ts';
 import type { Game } from './seeas.tsx';
 import { id, opened, type At as Form } from './formwrite.ts';
 import { known, pen } from './room.tsx';
-import { io, run } from './roomedit.tsx';
+import { ed, io, run } from './roomedit.tsx';
+import { ink } from './build.ts';
+import { type } from '../../book/tokens.ts';
 import { thingPen } from './thing.tsx';
 
 export const WORDS = {
@@ -15,7 +17,8 @@ export const WORDS = {
   when: 'when',
   does: 'does',
   goes: 'goes',
-  offered: (when: string) => `Offered when: ${when} · repeats`,
+  offered: (when: string) => `Offered when: ${when} · repeats `,
+  policy: 'when it is offered',
   always: 'always',
   choice: '＋ Add choice',
   line: '＋ Add line',
@@ -91,13 +94,19 @@ export function header(g: Game | undefined, open: Opens) {
   const scene = file.endsWith('.scene');
   return [
     <Text key="header">{'\n'}</Text>,
-    pen(WORDS.offered(when), () => sheetAt(file, open, ['policy']), `${WORDS.offered(when)} ⚙→`),
+    <Text key="when" style={{ ...type.small, color: ink('dim') }}>
+      {WORDS.offered(when)}
+    </Text>,
+    pen(WORDS.policy, () => sheetAt(file, open, ['policy']), '⚙→'),
+    <Text key="choice">{'\n'}</Text>, // the acts start at the title's left edge
     pen(
       WORDS.choice,
       () => (scene ? addTo(file, 'choice') : sheetAt(file, open, ['choices'])),
-      `  ${WORDS.choice}`,
+      WORDS.choice,
     ),
-    scene ? pen(WORDS.line, () => addTo(file, 'words'), `  ${WORDS.line}`) : null,
+    ...(scene
+      ? [<Text key="line">{'\n'}</Text>, pen(WORDS.line, () => addTo(file, 'words'), WORDS.line)]
+      : []),
   ];
 }
 
@@ -125,11 +134,11 @@ const addTo = (file: string, kind: 'choice' | 'words') =>
     const top = rs.findLastIndex((r) => r.key && r.indent === 0);
     const filled = (to: number) => rs.slice(0, to).findLastIndex((r) => r.text.trim()) + 1;
     const after = kind === 'choice' && top >= 0 ? top + 1 : filled(first < 0 ? rs.length : first);
-    const r = await io.post('restructure', {
+    // through the editor: one Undo entry, as the JSON sheet's writes (a refusal throws its reason)
+    await ed.call('restructure', {
       file,
       was: got.sha256,
       op: { add: { after, kind } },
       carry: [],
     });
-    if (!r.ok) return typeof r.told === 'string' ? r.told : `Not added (${kind}).`;
   });
