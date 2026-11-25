@@ -22,6 +22,7 @@ const story = {
     nodes: [
       { ref: R('dialogue', 'greet'), kind: 'dialogue' },
       { ref: R('dialogue', 'farewell'), kind: 'dialogue' },
+      { ref: R('dialogue', 'chat'), kind: 'dialogue' },
       { ref: R('fact', 'met_nell'), kind: 'fact' },
       { ref: R('npc', 'nell'), kind: 'npc' },
       { ref: R('item', 'lamp'), kind: 'item' },
@@ -34,6 +35,7 @@ const story = {
       { from: R('dialogue', 'greet'), to: R('room', 'hall'), path: '.room' },
       { from: R('dialogue', 'greet'), to: R('item', 'lamp'), path: '.gives' },
       { from: R('npc', 'nell'), to: R('dialogue', 'farewell'), path: '.dialogue' }, // into a centre
+      { from: R('dialogue', 'chat'), to: R('fact', 'met_nell'), path: '.when', op: 'fact_is' }, // farewell's sibling
     ],
   },
   report: { unreachable: {}, orphan_facts: { unused: [], write_only: [], read_only: [] } },
@@ -79,6 +81,7 @@ test('a fact centred draws its setter above it and its reader below', () => {
     'fact met_nell',
     'Read by',
     'dialogue farewell',
+    'dialogue chat',
   ]);
 });
 
@@ -114,15 +117,22 @@ test('a re-centre opens the new centre at the top', () => {
   });
 });
 
-// Breaks: a toggle that hides nothing, never shows selected, or never turns off.
-test('a lane filter on hides its nodes and shows selected; off, they are back', () => {
+const acts = () => sheet().flatMap((e) => (e.type === 'Pressable' ? [label(e)] : []));
+// Breaks: the toggles drawn while the fold is shut (pushing the centre down), a toggle that hides
+// nothing, never shows selected or never turns off, or a filter on hidden by the shut fold.
+test('Filters… opens the toggles; a filter on hides its lane, shows selected, and stays shown shut', () => {
   build.open(`flow:${R('dialogue', 'greet')}`);
   assert.deepEqual(drawn(), ['dialogue greet', 'Unlocks', 'fact met_nell']);
+  assert.equal(acts().includes('fact'), false, 'shut, no toggles');
+  press('Filters…');
   press('fact');
   const fact = sheet().find((e) => e.type === 'Pressable' && label(e) === 'fact');
   assert.equal(fact.props.accessibilityState.selected, true);
   assert.deepEqual(drawn(), ['dialogue greet']);
+  press('Filters…');
+  assert.deepEqual(acts().slice(0, 2), ['Filters…', 'fact'], 'shut, the filter on still shows');
   press('fact');
+  assert.equal(acts().includes('fact'), false);
   assert.deepEqual(drawn(), ['dialogue greet', 'Unlocks', 'fact met_nell']);
 });
 
@@ -144,17 +154,33 @@ test("the centre offers its file's Sheet, its person's sheet and its room's Go t
   assert.equal(stack().at(-1), 'def:dialogues/greet.json');
 });
 
-// Breaks: the second hop drawn on a phone, missing when wide, or reached through a filtered node.
-test('from DOCK.at the walk adds the second hop: greet reaches farewell through met_nell', () => {
-  build.open(`flow:${R('dialogue', 'greet')}`);
+// Breaks: the second hop drawn on a phone, missing when wide, on the wrong side, taking in a
+// sibling (chat also reads met_nell), or reached through a filtered node.
+test('from DOCK.at the walk adds the second hop by direction: above farewell, greet; below greet, farewell', () => {
+  build.open(`flow:${R('dialogue', 'farewell')}`);
   Object.assign(globalThis, { innerWidth: 1152 });
-  assert.deepEqual(drawn().slice(-2), ['Two steps out', 'dialogue farewell']);
+  assert.deepEqual(drawn(), [
+    'Two steps out',
+    'dialogue greet',
+    'Leads here',
+    'fact met_nell',
+    'dialogue farewell',
+  ]);
+  build.open(`flow:${R('dialogue', 'greet')}`);
+  assert.deepEqual(drawn().slice(-4), [
+    'fact met_nell',
+    'Two steps out',
+    'dialogue farewell',
+    'dialogue chat',
+  ]);
   Object.assign(globalThis, { innerWidth: 1151 });
   assert.equal(drawn().includes('Two steps out'), false);
   Object.assign(globalThis, { innerWidth: 1152 });
+  press('Filters…');
   press('fact');
   assert.equal(drawn().includes('Two steps out'), false, 'no second hop through a hidden node');
   press('fact');
+  press('Filters…');
   Object.assign(globalThis, { innerWidth: 390 });
 });
 

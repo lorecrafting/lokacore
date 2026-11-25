@@ -1,12 +1,11 @@
 // The Flow focus walk on the phone (design §7 5.5, slice 5.5b): a node centred, what leads to it above,
 // what it unlocks below (kernel/ts/play/flowwalk.ts `walk`); a tap re-centres, Back steps back along
 // the walk's trail, kept in the sheet id (`flow:<ref> <ref> …`) so the stack does not grow.
-import { Text, useWindowDimensions, View } from 'react-native';
-import { FILTERS, laneOf, shownOf } from '../../../../kernel/ts/play/flow.ts';
-import { focusInk } from '../../../../kernel/ts/play/flowread.ts';
+import { Text, type TextStyle, useWindowDimensions, View } from 'react-native';
+import { FILTERS } from '../../../../kernel/ts/play/flow.ts';
 import { walk } from '../../../../kernel/ts/play/flowwalk.ts';
 import { fromRef } from '../../../../kernel/ts/play/storylist.ts';
-import { size } from '../../book/tokens.ts';
+import { size, space, type } from '../../book/tokens.ts';
 import { ink } from './build.ts';
 import { known } from './room.tsx';
 import { inRow, row } from './roomedit.tsx';
@@ -15,6 +14,7 @@ import { goTo, sheetOf } from './story.tsx';
 
 const WORDS = {
   flow: 'Flow', // placeholder words: the owner writes the labels
+  filters: 'Filters…',
   above: 'Leads here',
   below: 'Unlocks',
   setters: 'Set by',
@@ -25,20 +25,24 @@ const WORDS = {
   nothing: 'Nothing here.',
 };
 let filters: string[] = []; // the Flow filters on (a lane's nodes hidden; flow.ts `shownOf`)
+let folded = true; // the Filters… fold
 
 const keyOf = (ref: string) => fromRef(ref)?.key ?? ref;
 const named = (ref: string) => `${fromRef(ref)?.kind} ${keyOf(ref)}`;
-const line = (words: string, key: string, color = ink('fg')) => (
+const line = (words: string, key: string, color = ink('fg'), look: TextStyle = inRow) => (
   <View key={key} style={row}>
-    <Text style={{ ...inRow, color }}>{words}</Text>
+    <Text style={{ ...look, color }}>{words}</Text>
   </View>
 );
-const column = {
-  ...row,
-  flexDirection: 'column',
-  alignItems: 'flex-start',
-  paddingHorizontal: 0, // mutate-skip: layout; the line inside pads itself
-} as const; // the centre: its name, then its acts under it
+const heading = { ...type.label, color: ink('dim') }; // a band's heading: the field caption
+// mutate-skip: layout; the centre stands between two rules across the sheet
+const ruled = {
+  borderTopWidth: size.rule,
+  borderBottomWidth: size.rule,
+  borderColor: ink('line'),
+  paddingVertical: space.sm,
+  rowGap: space.sm,
+} as const;
 
 /** The centre's people, items and rooms (not nodes: walk() leaves them out); a room is Go there. */
 function around(ref: string) {
@@ -76,32 +80,33 @@ const node = (trail: string[], ref: string) => {
 /** The trail on to `ref`; back to a ref already on it, cut there (no loop to step back through). */
 const trailTo = (trail: string[], ref: string) =>
   trail.includes(ref) ? trail.slice(0, trail.indexOf(ref) + 1) : [...trail, ref];
-const band = (title: string, trail: string[], refs: string[]) =>
-  refs.length ? [line(title, title, ink('dim')), ...refs.map((r) => node(trail, r))] : [];
+const band = (title: string, trail: string[], refs: string[], key = title) =>
+  refs.length ? [line(title, key, ink('dim'), heading), ...refs.map((r) => node(trail, r))] : [];
 
-/** The Flow filters as toggles (form.tsx `picks`), a filter on drawn selected. */
+const toggle = (f: string) =>
+  act(
+    f,
+    () => (
+      (filters = filters.includes(f) ? filters.filter((x) => x !== f) : [...filters, f]),
+      known.redraw()
+    ),
+    undefined,
+    `filter ${f}`,
+    filters.includes(f),
+  );
+/** The Filters… fold: shut, each filter on (one press turns it off); open, every filter as a toggle. */
 const toggles = () => (
   <View key="filters" style={row}>
-    {FILTERS.map((f) =>
-      act(
-        f,
-        () => (
-          (filters = filters.includes(f) ? filters.filter((x) => x !== f) : [...filters, f]),
-          known.redraw()
-        ),
-        undefined,
-        `filter ${f}`,
-        filters.includes(f),
-      ),
-    )}
+    {act(WORDS.filters, () => ((folded = !folded), known.redraw()), !folded, 'filters')}
+    {(folded ? filters : FILTERS).map(toggle)}
   </View>
 );
 /** The centred node: its Sheet, people, items and rooms. */
 const centre = (ref: string) => {
   const sheet = sheetOf(ref);
   return (
-    <View key="centre" style={column}>
-      {line(named(ref), 'centre')}
+    <View key="centre" style={ruled}>
+      {line(named(ref), 'centre', ink('fg'), type.control)}
       <View style={row}>
         {sheet ? act(WORDS.sheet, () => known.open(sheet), undefined, 'sheet') : null}
         {around(ref)}
@@ -118,23 +123,21 @@ function Walk({ arg }: { arg: string }) {
   if (!s) return line(WORDS.nothing, 'none');
   const w = walk(s, ref, filters);
   const fact = fromRef(ref)?.kind === 'fact';
-  const near = new Set([ref, ...w.above, ...w.below]); // the second hop runs through shown nodes only
-  const hop = [...near].flatMap((r) => [...focusInk(s, r, 1)]);
-  const far = wide
-    ? shownOf(
-        s,
-        { fold: [], filters },
-        [...new Set(hop)].filter((r) => !near.has(r) && laneOf(r)),
-      )
-    : [];
+  const near = new Set([ref, ...w.above, ...w.below]);
+  // the second hop by direction, through shown nodes only: what leads to the nodes above, and so on
+  const far = (side: 'above' | 'below') =>
+    wide
+      ? [...new Set(w[side].flatMap((r) => walk(s, r, filters)[side]))].filter((r) => !near.has(r))
+      : [];
   return (
     <View style={{ rowGap: size.rule }}>
-      {toggles()}
       {trail.length > 1 ? line(trail.map(keyOf).join(' › '), 'trail', ink('dim')) : null}
+      {toggles()}
+      {band(WORDS.far, trail, far('above'), 'far above')}
       {band(fact ? WORDS.setters : WORDS.above, trail, w.above)}
       {centre(ref)}
       {band(fact ? WORDS.readers : WORDS.below, trail, w.below)}
-      {band(WORDS.far, trail, far)}
+      {band(WORDS.far, trail, far('below'), 'far below')}
     </View>
   );
 }

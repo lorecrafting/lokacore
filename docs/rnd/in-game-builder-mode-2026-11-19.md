@@ -774,7 +774,7 @@ is the notebook. Where a cite is a range, it names the handler.
 | World button (cartridge.json) | `left.tsx:57-61` | NB World |
 | Project tabs | `project.tsx:28-60` | NB tabs |
 | World picker: list, switch, new (blank or copy) | `world.tsx:13-120` | NB Tools: Worlds |
-| Map, Story and Flow segment | `left.tsx:215-233` | Build map; NB Story; Flow is panel-only (decision 9) |
+| Map, Story and Flow segment | `left.tsx:215-233` | Build map; NB Story; Flow is panel-only (decision 9) (superseded by decision 9 as amended, §9: the Flow focus walk, slice 5.5b) |
 
 **Centre**
 | Panel function | Panel cite | Builder home |
@@ -796,7 +796,7 @@ is the notebook. Where a cite is a range, it names the handler.
 | Story list: select, uncovered only, keys | `storylist.tsx:195-287` | NB Story |
 | Trace, Consequences, Knowledge, Facts, Pacing | `storylist.tsx:113-184`, `storylower.tsx` | NB Story row sheets |
 | Add, bind, retitle, remove beat | `storylist.tsx:160-187` | NB Story |
-| Flow graph, search, filters, follow, hover card | `flow*.tsx` | panel-only (decision 9) |
+| Flow graph, search, filters, follow, hover card | `flow*.tsx` | panel-only (decision 9) (superseded by decision 9 as amended, §9: the Flow focus walk, slice 5.5b; search and hover card stay panel-only for now) |
 
 **Right column and console**
 | Panel function | Panel cite | Builder home |
