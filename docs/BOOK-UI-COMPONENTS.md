@@ -362,6 +362,12 @@ Sheet, Trace, Consequences, Retitle, Remove, Knowledge, `Bind…` and each `Bind
 wrapping at 390 px. The number field is Schedule's hour field (a fixed width for two digits), the
 title field the Area field; both placeholders `type.small` in `dim`. The no-story line and a
 sheet's rows that name no definition are `type.small` `fg`.
+Builder 5.1b: in the conversation, each icon (`✎ words`, `◇ when`, `↦ does`, `→ goes`) is the title
+pencil's look, inline on its own line under the label inside the card, a touch target in both axes,
+in `action` when lit and `dim` when not, on the night page's own palette. A label's field is the
+prose field inside its card. The header line's policy words are `type.small` in `dim`, wrapping; its
+`⚙→`, `＋ Add choice` and `＋ Add line` are acts aligned to the title's left edge. An unwritten
+label's rule sits under the label's words, not under the icon row.
 Worst pair: `warning` on `card`,
 4.75 (light).
 
