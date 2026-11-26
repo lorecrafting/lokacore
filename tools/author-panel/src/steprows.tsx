@@ -2,7 +2,7 @@
 // selecting one opens its card). Presentational only; the report and the two views come from step.ts.
 import type { Heard } from './book.ts';
 import { Heading } from './sections.tsx';
-import { lookedLine, type Report, type Views } from './step.ts';
+import { lookedLine, type Report, type Views } from '../../../kernel/ts/play/step.ts';
 
 const value = (v: unknown) => (v === null || v === undefined ? 'unset' : JSON.stringify(v));
 
@@ -24,7 +24,7 @@ export const List = ({ title, children }: { title: string; children: React.React
   </div>
 );
 
-export const Facts = ({ facts }: { facts: ReturnType<typeof import('./step.ts').changedFacts> }) => (
+export const Facts = ({ facts }: { facts: ReturnType<typeof import('../../../kernel/ts/play/step.ts').changedFacts> }) => (
   <List title={`Facts changed (${facts.length})`}>
     {facts.map((f) => (
       <Row key={f.key}>
@@ -38,7 +38,7 @@ export const Facts = ({ facts }: { facts: ReturnType<typeof import('./step.ts').
   </List>
 );
 
-export const Quests = ({ quests }: { quests: ReturnType<typeof import('./step.ts').changedQuests> }) => (
+export const Quests = ({ quests }: { quests: ReturnType<typeof import('../../../kernel/ts/play/step.ts').changedQuests> }) => (
   <List title={`Quests changed (${quests.length})`}>
     {quests.map((q) => (
       <Row key={q.quest}>

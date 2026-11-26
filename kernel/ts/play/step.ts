@@ -2,7 +2,7 @@
 // docs/design/story-tooling.md §D1. The facts and quests come from the two views the panel already
 // holds (its last two `state` messages, no engine work); the reaction rows are the explainer's
 // (kernel/ts/play/why.ts), and a failing leaf is worded by why_words.ts so the two cannot drift.
-import { sentences, type Row } from '../../../kernel/ts/play/why_words.ts';
+import { sentences, type Row } from './why_words.ts';
 
 /** The two views D1 compares: the Book's `state` before and after the step. */
 export type Views = {
@@ -75,6 +75,4 @@ export type Paired = { at?: string; before?: Views; after?: Views };
  * step is the same pair (a later render, not another step); a message at a new step moves after to before.
  */
 export const pairViews = (seen: Paired, at: string, state: Views): Paired =>
-  seen.at === at
-    ? { ...seen, after: state }
-    : { at, before: seen.after, after: state };
+  seen.at === at ? { ...seen, after: state } : { at, before: seen.after, after: state };

@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from 'react';
 import { ask } from './author.ts';
 import type { Heard, State } from './book.ts';
 import { Heading } from './sections.tsx';
-import { changedFacts, changedQuests, looked, pairViews, type Paired, type Report } from './step.ts';
+import { changedFacts, changedQuests, looked, pairViews, type Paired, type Report } from '../../../kernel/ts/play/step.ts';
 import { Facts, Quests, Rules } from './steprows.tsx';
 
 const BUDGET = 400; // steps: past this the replay's cost is the story, so the notice replaces the answer

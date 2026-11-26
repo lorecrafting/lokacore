@@ -2,7 +2,14 @@
 // reports between two views, which reactions it lists, and how a failing rule reads.
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { changedFacts, changedQuests, looked, lookedLine, pairViews, type Report } from '../src/step.ts';
+import {
+  changedFacts,
+  changedQuests,
+  looked,
+  lookedLine,
+  pairViews,
+  type Report,
+} from '../play/step.ts';
 
 // Breaks: a declared fact whose value is set for the first time reads as "unchanged" because the
 // before view already carries its default row, so the step that set it says nothing.
@@ -77,7 +84,10 @@ test('a reaction that matched no trigger is not listed', () => {
     ordinal: 3,
     command: 'look',
     outcome: 'accepted',
-    reactions: [rule({ causes: [] }), rule({ rule: 'lamp_lights', causes: [{ event: 'looked' }], fired: 1 })],
+    reactions: [
+      rule({ causes: [] }),
+      rule({ rule: 'lamp_lights', causes: [{ event: 'looked' }], fired: 1 }),
+    ],
   };
   assert.deepEqual(
     looked(report).map((x) => x.rule),
