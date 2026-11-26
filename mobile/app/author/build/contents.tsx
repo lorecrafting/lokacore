@@ -12,10 +12,11 @@ import { act, sheets } from './sheet.tsx';
 import { load } from './generic.tsx';
 import { storyRows } from './story.tsx';
 import { WORDS as WORLD, worldRows } from './world.tsx';
+import { WORDS as TOOLS, toolRows } from './tools.tsx';
 
 const WORDS = {
   contents: 'Notebook',
-  tabs: ['Contents', 'Story', WORLD.tab],
+  tabs: ['Contents', 'Story', WORLD.tab, TOOLS.tab],
   new: (kind: string) => `New ${kind}`,
 };
 let tab = WORDS.tabs[0]; // the open tab
@@ -44,7 +45,13 @@ sheets.contents = {
     <View key="tabs" style={row}>
       {WORDS.tabs.map((t) => act(t, () => ((tab = t), known.redraw()), undefined, t, tab === t))}
     </View>,
-    ...(tab === WORDS.tabs[1] ? storyRows() : tab === WORLD.tab ? worldRows(load) : kinds()),
+    ...(tab === WORDS.tabs[1]
+      ? storyRows()
+      : tab === WORLD.tab
+        ? worldRows(load)
+        : tab === TOOLS.tab
+          ? toolRows()
+          : kinds()),
   ],
 };
 const kinds = () => [

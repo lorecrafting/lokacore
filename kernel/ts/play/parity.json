@@ -42,12 +42,12 @@
   {
     "id": "last-edit-timing",
     "panel": "tools/author-panel/src/centre.tsx",
-    "book": "todo"
+    "book": "tools.tsx"
   },
   {
     "id": "hold",
     "panel": "tools/author-panel/src/centre.tsx",
-    "book": "todo"
+    "book": "tools.tsx"
   },
   {
     "id": "map-header",
@@ -147,7 +147,7 @@
   {
     "id": "failed-checkpoints",
     "panel": "tools/author-panel/src/sections.tsx",
-    "book": "todo"
+    "book": "tools.tsx"
   },
   {
     "id": "unconfirmed-words",
@@ -167,17 +167,17 @@
   {
     "id": "advance-time",
     "panel": "tools/author-panel/src/sections.tsx",
-    "book": "todo"
+    "book": "tools.tsx"
   },
   {
     "id": "checkpoints",
     "panel": "tools/author-panel/src/sections.tsx",
-    "book": "todo"
+    "book": "tools.tsx"
   },
   {
     "id": "cheats",
     "panel": "tools/author-panel/src/cheats.tsx",
-    "book": "todo"
+    "book": "tools.tsx"
   },
   {
     "id": "write-tab",

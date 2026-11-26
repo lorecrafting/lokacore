@@ -282,8 +282,6 @@ parity:play-from-here
 parity:project-tabs
 parity:world-picker
 parity:device-size
-parity:last-edit-timing
-parity:hold
 parity:map-pan-zoom-keys
 parity:map-wire
 parity:map-exit-edits
@@ -292,13 +290,9 @@ parity:inspector-header
 parity:card-picker
 parity:compile-status
 parity:drop-step
-parity:failed-checkpoints
 parity:unconfirmed-words
 parity:change-feed
 parity:source-footer
-parity:advance-time
-parity:checkpoints
-parity:cheats
 parity:write-tab
 parity:state-tab
 parity:why-tab

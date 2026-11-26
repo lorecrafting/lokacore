@@ -181,25 +181,6 @@ export function rank(
     .map(([, i]) => i);
 }
 
-export type Timings = {
-  at: number;
-  compile: number;
-  publish: number;
-  kind: 'prose' | 'structural' | 'refusal';
-  sha256?: string;
-};
-export const BUDGET = { prose: 300, structural: 1500, refusal: 1000, card: 100, flowOpen: 300, flowUpdate: 100 }; // mutate-skip: uncalibrated design value
-/** One edit's milliseconds: compile and publish, and for a structural edit the Book's load until `ready`. */
-export const total = (t: Timings, load: number) => t.compile + t.publish + load;
-export const within = (t: Timings, load = 0) => total(t, load) <= BUDGET[t.kind];
-
-export type Loaded = { sha256?: string; at: number };
-/** A structural edit's Book load: from its publish to the Book's `ready` naming its artifact. */
-export const loadOf = (t: Timings, loaded?: Loaded) =>
-  t.kind === 'structural' && loaded && loaded.sha256 === t.sha256 && loaded.at >= t.at
-    ? loaded.at - t.at
-    : 0;
-
 type Scheme = {
   matches: boolean;
   addEventListener(type: 'change', f: () => void): void;

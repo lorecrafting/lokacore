@@ -3,11 +3,16 @@
 // (kernel/ts/play/checkpoints.ts); this maps it onto the list the Play tab already draws.
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import type { Checked } from '../src/verdicts.ts';
-import { verdicts } from '../src/verdicts.ts';
+import type { Checked } from '../play/verdicts.ts';
+import { verdicts } from '../play/verdicts.ts';
 
 const ok = (name: string): Checked => ({ name, ok: true });
-const broke = (name: string, step: number, why: string): Checked => ({ name, ok: false, step, why });
+const broke = (name: string, step: number, why: string): Checked => ({
+  name,
+  ok: false,
+  step,
+  why,
+});
 
 test('a passing path reads ok', () => {
   // break: showing a passing checkpoint as broken, so the owner chases a good path

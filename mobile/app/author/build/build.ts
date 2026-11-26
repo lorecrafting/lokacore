@@ -99,10 +99,11 @@ export function autoHold(
   let held = false; // as the stream last said
   let mine = false;
   let focused = false;
+  let pinned = false; // the Tools tab's Hold
   const take = () => ((mine = true), post(true));
   return {
     heard(now?: boolean) {
-      if (held && !now) mine = false; // released, by anyone; a message before ours lands keeps `mine`
+      if (held && !now) mine = pinned = false; // released, by anyone; a message before ours lands keeps `mine`
       held = !!now;
       if (!held && focused && !mine) take(); // the panel let go while a field is still open
     },
@@ -113,11 +114,16 @@ export function autoHold(
     commit() {
       focused = false;
       later(() => {
-        if (focused || !mine) return;
-        mine = false;
-        post(false);
+        if (!focused && mine && !pinned) void ((mine = false), post(false)); // a pinned Hold outlives the field
       });
     },
+    /** The Tools tab's Hold: takes a free Hold, keeps a field's past its commit, never drops the panel's. */
+    toggle() {
+      pinned = !pinned;
+      if (pinned && !held && !mine) take();
+      else if (!pinned && mine && !focused) void ((mine = false), post(false));
+    },
+    pinned: () => pinned,
     /** pagehide: a request in flight would be cut off, so the release goes as a beacon */
     leave() {
       if (mine) beacon();

@@ -936,13 +936,15 @@ reasons and limits: [prose in the Book rulings](../design/prose-in-the-book-ruli
   opened it.`, their words, and Keep mine (writes the draft over their line, found again) or Take
   theirs; only Open source when their line is not found exactly once. It opens unasked when a
   pushed change alters the field's line.
-- **Hold** shows in the panel header (a toggle and `Held · N waiting`) and on the Build strip,
-  never in the Book; leaving the page releases a Hold it set.
+- **Hold** shows in the panel header (a toggle and `Held · N waiting`), on the Build strip and
+  (6.2a) on the Notebook's Tools tab, never in the Book; leaving the page releases a Hold it set.
 - **Build** (the in-game builder, [builder mode §4.1, §5](../rnd/in-game-builder-mode-2026-11-19.md)).
   A strip a touch target tall sits above the Book, outside its page and chrome row, in the Book's
   current palette. It carries the Build switch (a switch named `Build`, its on state shown by more
   than colour) and a polite live status: `Held · N waiting` while the server holds compiles, else
-  nothing. Turning Build on or off changes no game state; leaving Build closes every sheet. A
+  nothing. Last on the strip (6.2a), after its buttons, the last compile's timing: `<kind> <compile> +
+  <publish> [+ <load>] = <total> ms`, marked over budget by colour and by its spoken name (`Last edit
+  timing, within|over <budget> ms`); a Book opened with no compile since shows none. Turning Build on or off changes no game state; leaving Build closes every sheet. A
   builder field holds compiles from its focus to its commit (Enter, blur, a picker closing) and
   releases only a Hold it took; tabbing to the next field keeps it. With no field focused, a
   compile reloads the Book as usual: Build, the open sheet and its scroll are kept beside the place
@@ -1041,7 +1043,7 @@ reasons and limits: [prose in the Book rulings](../design/prose-in-the-book-ruli
     source files the latest story names, sorted by path; a file opens its `def:<file>` sheet
     (Build: the generic sheet) on top.
   - **Story (5.4b, [builder mode §4.8](../rnd/in-game-builder-mode-2026-11-19.md#48-the-story-on-a-phone)).**
-    The Notebook sheet has three tabs, `Contents`, `Story` and `World` (6.1a); the open tab is marked selected. Story
+    The Notebook sheet has four tabs, `Contents`, `Story`, `World` (6.1a) and `Tools` (6.2a); the open tab is marked selected. Story
     shows the refusal line, then `Facts` and `Pacing`, then each part (`Part n Title`) with a number
     field and `Add beat`, its beats (`n Title`, `· unwritten` where the panel marks it `~`, `· missing`
     when unbuilt), each beat's bound definitions, Seeds as plain lines that are not buttons, and
@@ -1074,6 +1076,23 @@ reasons and limits: [prose in the Book rulings](../design/prose-in-the-book-ruli
     a press writes it into `requires.capabilities` at its registry version, one write that one
     Undo takes back, no confirm; it leaves the row after the reread. A write sent from an old read
     is refused as the generic sheet's are, never overwritten.
+  - **Tools (6.2a, [builder mode §4.3 item 3, §5](../rnd/in-game-builder-mode-2026-11-19.md)).**
+    The refusal line, then in order:
+    - `Hold`, a toggle shown selected while on; it sets and releases only its own hold, never a
+      field's.
+    - A name field and `Save checkpoint`, which saves this play's steps under the name; it is
+      greyed until the name is valid and there is a step. An invalid name shows the name rule as a
+      plain line under it. While any checkpoint fails, the row ends `N checkpoint(s) fail`.
+    - One row per saved checkpoint, listed afresh each time the tab opens and after a save:
+      `Replay <name>`, `Pin` (selected for the pinned one) and its verdict. Replay replaces this
+      play with the checkpoint's steps; a refused read or a file with no steps changes nothing and
+      says so on the refusal line. Pin marks the checkpoint a fresh Book (no steps yet) replays
+      once on load, in the Book as in the panel; pressing the pinned one unpins it. With none saved,
+      one plain line says how to make one, never a blank.
+    - A minutes field (60 by default) and `Advance`; `Go to room` with a room key; `Set fact` with a
+      fact key and value; `Set level` with a level, an attribute key and points. Each act is greyed
+      until its fields are filled. Advance and each cheat is one recorded step; a refusal says why
+      on the refusal line, and an accepted one clears it (never repeating an older stop note).
   - **Flow walk (5.5b, [builder mode decision 9 as amended](../rnd/in-game-builder-mode-2026-11-19.md)).**
     `flow:<ref>`, one sheet titled `Flow <key>`; not the panel's canvas shrunk. In order: the
     walk's trail, when it has more than one step (its keys joined ` › `, under the header); a

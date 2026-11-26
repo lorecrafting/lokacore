@@ -138,30 +138,6 @@ test('Cmd-K finds a key, a text key`s words and a `~`, and lists the commands', 
   );
 });
 
-// Breaks: an edit over its budget shows as within (or the reverse); a structural edit's Book load
-// is left out of its total.
-test('timings are judged against the brief`s budgets', () => {
-  const at = 1;
-  assert.equal(shell.within({ at, compile: 200, publish: 100, kind: 'prose' }), true);
-  assert.equal(shell.within({ at, compile: 200, publish: 101, kind: 'prose' }), false);
-  assert.equal(shell.within({ at, compile: 900, publish: 100, kind: 'structural' }, 500), true);
-  assert.equal(shell.within({ at, compile: 900, publish: 100, kind: 'structural' }, 501), false);
-  assert.equal(shell.within({ at, compile: 999, publish: 2, kind: 'refusal' }), false);
-  const edit = { at: 1000, compile: 900, publish: 100, kind: 'structural', sha256: 'a' } as const;
-  assert.equal(shell.loadOf(edit, { sha256: 'a', at: 1400 }), 400);
-  assert.equal(
-    shell.loadOf(edit, { sha256: 'b', at: 1400 }),
-    0,
-    'another artifact is not this load',
-  );
-  assert.equal(
-    shell.loadOf(edit, { sha256: 'a', at: 999 }),
-    0,
-    'a load before the publish is the old Book',
-  );
-  assert.equal(shell.loadOf({ ...edit, kind: 'prose' }, { sha256: 'a', at: 1400 }), 0);
-});
-
 // Breaks: the panel stays light under a dark OS setting, or does not follow a change, or keeps
 // listening after it is gone.
 test('.dark and color-scheme follow a forced OS scheme and its changes', () => {

@@ -11,7 +11,8 @@ import { Graph, Header } from './flowframe.tsx';
 import { entry, focusInk, followed, footer, inked, search } from '../../../kernel/ts/play/flowread.ts';
 import { fit, keep, zoomAt } from '../../../kernel/ts/play/map.ts';
 import type { SetLayout } from './columns.tsx';
-import { BUDGET, fromRef, type Layout, type Selection } from './shell.ts';
+import { BUDGET } from '../../../kernel/ts/play/timings.ts';
+import { fromRef, type Layout, type Selection } from './shell.ts';
 import { LIST, toggle, type Story } from '../../../kernel/ts/play/storylist.ts';
 
 export type Props = {

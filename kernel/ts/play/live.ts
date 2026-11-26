@@ -34,6 +34,7 @@ import { openAt } from './prose.ts';
 import type { Changed } from './write.ts';
 import { sentences } from './why_words.ts';
 import { told } from './told.ts';
+import type { Timings } from './timings.ts';
 
 export type Canonical = { text: Record<string, string> } & Record<string, unknown>;
 export type Message = {
@@ -52,15 +53,6 @@ export type Message = {
   covered?: import('./covered_type.ts').Covered; // R2: what those replays reached by name
   timings?: Timings; // the last compile's, kept like the rest: the editor tells them apart by `at`
 };
-/** One compile's milliseconds: the compile, then its push or write (a refusal: its notice). */
-export type Timings = {
-  at: number;
-  compile: number;
-  publish: number;
-  kind: 'prose' | 'structural' | 'refusal';
-  sha256?: string; // a structural edit's artifact: the Book's `ready` names it when loaded
-};
-
 /** `mix loka.lint`'s findings (`rel: words` for a .json, .scene or .cut source, or `rel details.key: words`, on stderr; a compiler's `warning: ...` is not one) from its exit and stderr; a lint that did not run says so. */
 export function lintLines(code: number | null, stderr: string) {
   if (code === 0) return [];

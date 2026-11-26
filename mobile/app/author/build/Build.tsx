@@ -26,6 +26,7 @@ import { ghostSheet, pencil, story } from './room.tsx';
 import { chip, ghostLines, seeWith, unsee, type Game } from './seeas.tsx';
 import { icons, sceneLine, titled } from './talk.tsx';
 import { CONTENTS } from './contents.tsx';
+import { startPinned, timing, toolsWith, type Hooks as Tools, type Said } from './tools.tsx';
 import './generic.tsx'; // registers the def:<file> sheet
 import { MAP, mapSheet, measured, unborn } from './map.tsx';
 import { storySheet } from './story.tsx';
@@ -33,10 +34,8 @@ import './flow.tsx'; // registers the flow:<ref> sheet
 import { undo as putBackIds } from '../../../../kernel/ts/play/mapedit.ts';
 import { io, onSaved, refused, run, running } from './roomedit.tsx';
 import { act, CONTROL, Frame, parts, sheets, stack, stepBack } from './sheet.tsx';
-
 export { Sheet, sheets } from './sheet.tsx';
 export { drawn, unsee, updated } from './seeas.tsx';
-
 const WORDS = {
   build: 'Build',
   on: '✎ Build',
@@ -54,7 +53,7 @@ const UNDO_MS = 5000; // the chip's life after a write (docs/rnd/in-game-builder
 const KEPT = 'loka-build-undo'; // the chip and its end: a map gesture's compile reloads the Book
 type Gesture = { ids: number[] }; // a sheet's gesture: its journal ids, oldest first
 let builder: Builder = { on: false };
-let heard: Message = { text: {}, said: [] };
+let heard: Message & Said = { text: {}, said: [] };
 let api: Hooks['api'] | undefined;
 let undo: Wrote | Gesture | undefined; // the last write (a field's, or a sheet's gesture), while its chip shows
 let undoTimer: ReturnType<typeof setTimeout> | undefined;
@@ -69,9 +68,9 @@ export type Place = Game & {
   drop: () => void;
   back: () => void;
   startIn: (room: string) => void;
-};
+} & NonNullable<ReturnType<Tools['game']>>; // the Tools tab's paths
 let placed: Place | undefined;
-export const place = (given: Place) => void ((placed = given), seeWith(given, () => mapped()));
+export const place = (p: Place) => void ((placed = p), seeWith(p, () => mapped()), startPinned(p));
 mapSheet({ go: (room) => placed?.startIn(room), here: () => placed?.here() });
 storySheet((room) => placed?.startIn(room));
 onSaved((ids) => wrote({ ids }));
@@ -91,6 +90,7 @@ export const hold = autoHold(
   () => navigator.sendBeacon('/__author/hold', JSON.stringify({ on: false })),
   (release) => setTimeout(release),
 );
+toolsWith({ game: () => placed, hold, heard: () => heard });
 /** Opens a sheet on the stack (or brings it to the top); the first remembers the focus to return. */
 export function open(id: string) {
   if (!builder.sheets) opener = globalThis.document?.activeElement as typeof opener;
@@ -141,7 +141,7 @@ export function install(book: Pick<Hooks, 'seen' | 'said' | 'redraw' | 'api'>) {
   story(api, mapped, back, open);
   addEventListener('pagehide', hold.leave);
 }
-export function hear(message: Message) {
+export function hear(message: Message & Said) {
   heard = message;
   unsee(); // any live message ends it (fail safe)
   hold.heard(message.held);
@@ -262,8 +262,7 @@ const buildSwitch = (flip: () => void) => (
 /** A strip chip that opens sheet `id`, or closes it when it is the top sheet. */
 const pad = (label: string, id: string, top?: string) =>
   act(label, () => (top === id ? back(id) : open(id)), top === id);
-/** The strip at `size.touch` above the Book: the Build switch, the Hold status, the Undo chip, the
- * Checks badge, and the keep-my-place notice when a replay was refused. */
+/** The strip at `size.touch`: Build, Hold, the last edit's timing, Undo, Checks, a refused replay. */
 export function Strip({ children }: { children: ReactNode }) {
   const [, redraw] = useState({});
   redrawStrip = () => redraw({});
@@ -282,6 +281,7 @@ export function Strip({ children }: { children: ReactNode }) {
         {builder.on ? pad(CONTENTS.contents, 'contents', top) : null}
         {builder.on ? pad(MAP.map, 'map', top) : null}
         {builder.on ? pad(badge(heard), 'checks', top) : null}
+        {timing(heard.timings, placed?.loaded)}
       </View>
       <Notice />
       <View

@@ -20,7 +20,8 @@ import { tmpdir } from 'node:os';
 import { createInterface } from 'node:readline';
 import { dirname, join, resolve } from 'node:path';
 import { INSTALLED, loadCartridge } from '../src/index.ts';
-import { lintLines, serve, textOnly, type Canonical, type Timings } from './live.ts';
+import { lintLines, serve, textOnly, type Canonical } from './live.ts';
+import type { Timings } from './timings.ts';
 import { compiler, type Run } from './compile_run.ts';
 import { recheck } from './recheck.ts';
 

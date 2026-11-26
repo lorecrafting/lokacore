@@ -50,8 +50,7 @@ if (devClock) {
 const g = globalThis as { loka_dev_skew?: number }; // ms the dev clock has moved both host clocks
 export const skew = () => g.loka_dev_skew ?? 0;
 
-// The inputs the session saved, under the artifact hash, in localStorage; replayed once per page
-// load after a reload into a different artifact.
+// Inputs saved per artifact hash in localStorage; replayed once on a reload into another artifact.
 const PLACE = 'loka-place';
 function saved(): Place | undefined {
   try {
@@ -156,7 +155,8 @@ export function played(game: Opened | undefined) {
 // Moves both host clocks forward by game minutes at the cartridge's rate, so the kernel's own
 // elapsed path delivers the time (none before D11 selection).
 // Lazy: App.tsx imports this module in a release too, which must not parse the chapter for it.
-type Parsed = Canon & { manifest: { title: string; time_policy?: { rate: number } } };
+type Manifest = { id: string; version: string; title: string; time_policy?: { rate: number } };
+type Parsed = Canon & { manifest: Manifest };
 let parsed: Parsed | undefined;
 const canon = () => (parsed ??= JSON.parse(chapter.canonical) as Parsed);
 function advance(minutes: number, game: Opened) {
@@ -236,17 +236,17 @@ const onClick = (e: MouseEvent) => {
   tell({ line });
 };
 // Through `played`, so an accepted cheat is a recorded step `bin/loka check` replays.
-function askCheat(game: Opened, cheat: Cheat) {
-  const { manifest } = JSON.parse(chapter.canonical) as {
-    manifest: { id: string; version: string };
-  };
-  placeNote = sendCheat(played(game)!, cheat, manifest, place.stopped?.note);
-}
+const askCheat = (game: Opened, cheat: Cheat) =>
+  (placeNote = sendCheat(played(game)!, cheat, canon().manifest, place.stopped?.note));
 const heard = (message: Message) => (inBook?.heard(message), build?.hear(message));
+const loaded = { sha256: chapter.sha256, at: Date.now() }; // this Book's load (timings.ts loadOf)
 const NO_STEPS = 'Place: that checkpoint has no steps list; nothing changed.';
 const placeHooks = (game: Opened, latest: { current: Tools }) => ({
-  ...{ game, canon }, // the ghost lines' and See as's reads (build/seeas.tsx)
+  ...{ game, canon, loaded }, // the ghost lines', See as's (build/seeas.tsx) and Timing's reads
   place: () => ({ steps: place.steps, refused, checkpoint: place.checkpoint }),
+  jump: (steps: Step[]) => jumpTo(steps, latest.current, steps),
+  advance: (minutes: number) => ((placeNote = ''), advance(minutes, game), placeNote),
+  cheat: (cheat: Cheat) => (placeNote = sendCheat(played(game)!, cheat, canon().manifest)),
   here: () => roomKey(game.roomIds(), game.view().view.place.id),
   drop: () => refused !== undefined && jumpTo(dropStep(place.steps, refused), latest.current),
   back: () => jumpTo(place.checkpoint ?? [], latest.current),
