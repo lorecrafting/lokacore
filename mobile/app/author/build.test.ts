@@ -157,7 +157,8 @@ test('a field never releases a Hold it did not take', () => {
 });
 
 // Breaks: the Tools tab's Hold toggled off releasing the Hold a focused field took (one flag on the
-// server: the Book would reload under the field), or a pinned Hold dropped when the field commits.
+// server: the Book would reload under the field), a pinned Hold dropped when the field commits, the
+// panel's Hold released by the tab, or the tab reading pinned after the Hold was released elsewhere.
 test("the Tools tab's Hold leaves a field's own Hold alone, and outlives its commit", () => {
   const { hold, posts } = recorded();
   hold.focus();
@@ -170,6 +171,17 @@ test("the Tools tab's Hold leaves a field's own Hold alone, and outlives its com
   assert.deepEqual(posts, [true]);
   hold.toggle(); // off with no field: released
   assert.deepEqual(posts, [true, false]);
+  hold.heard(false);
+  hold.heard(true); // the panel's Hold
+  hold.toggle();
+  hold.toggle();
+  assert.deepEqual(posts, [true, false]); // neither taken nor released
+  hold.heard(false);
+  hold.toggle(); // a free Hold: taken
+  hold.heard(true);
+  hold.heard(false); // released elsewhere: the tab's toggle reads off
+  assert.equal(hold.pinned(), false);
+  assert.deepEqual(posts, [true, false, true]);
 });
 
 // Breaks: a page closed mid-edit leaving the server held, or a beacon after the field let go.

@@ -121,3 +121,81 @@ test('Advance 90 minutes at rate 1 moves the dev clock 5,400,000 ms', () => {
   press('Advance');
   assert.equal(context.loka_dev_skew, 5_400_000);
 });
+
+// Break: Save offered without steps or for a name live.ts refuses (or a digit 9 refused), a failed PUT
+// silent, a replay of a file with no steps list jumping, Pin not toggling, a failed count with no
+// checkpoints heard, a zero Advance or an empty room offered, Set level with no attribute withheld,
+// or a typed value parsed wrong ("5" a string, a bare word kept, 7 a number).
+test('the tools gate their acts on what they need and send what was typed', async () => {
+  const { wire } = await import('./build/roomedit.tsx');
+  wire(
+    async () => [200, {}],
+    () => {},
+    () => {},
+  );
+  const [cheats, jumps]: [unknown[], unknown[]] = [[], []];
+  let steps: unknown[] = [];
+  const game = {
+    place: () => ({ steps }),
+    loaded: { artifact: 'a', at: 0 },
+    jump: (s: unknown) => jumps.push(s),
+    advance: () => '',
+    cheat: (c: unknown) => (cheats.push(c), ''),
+  };
+  toolsWith({ game: () => game as any, hold, heard: () => ({}) });
+  const labels = () =>
+    drawn()
+      .filter((n) => n.props?.accessibilityRole === 'button')
+      .map(words);
+  const text = () => drawn().map(words).join('|');
+
+  typeIn('checkpoint name', 'gate9');
+  assert.ok(!labels().includes('Save checkpoint'), 'no steps, no Save');
+  steps = [{ intent: { action_key: 'look' } }];
+  assert.ok(labels().includes('Save checkpoint'), 'one step and gate9 save');
+  typeIn('checkpoint name', 'Gate');
+  assert.ok(!labels().includes('Save checkpoint'), 'a capital is refused');
+  assert.match(text(), /A name is up to 64/);
+  assert.doesNotMatch(text(), /fail/, 'no checkpoints heard, no failed count');
+
+  const real = globalThis.fetch;
+  globalThis.fetch = (async () => ({ ok: false, status: 409, json: async () => ({}) })) as any;
+  typeIn('checkpoint name', 'gate');
+  press('Save checkpoint');
+  await settle();
+  assert.match(text(), /Not saved: 409/);
+  globalThis.fetch = (async () => ({ ok: true, json: async () => ({}) })) as any;
+  press('Replay gate');
+  await settle();
+  assert.match(text(), /no steps list/);
+  assert.equal(jumps.length, 0);
+  globalThis.fetch = real;
+
+  press('Pin');
+  assert.equal(stored.get('loka.editor.start'), 'gate');
+  const pin = () =>
+    drawn().find((n) => n.props?.accessibilityRole === 'button' && words(n) === 'Pin');
+  assert.equal(pin().props.accessibilityState.selected, true);
+  press('Pin');
+  assert.equal(stored.has('loka.editor.start'), false);
+  assert.equal(pin().props.accessibilityState.selected, false);
+
+  typeIn('minutes', '0');
+  assert.ok(!labels().includes('Advance'), 'zero minutes');
+  typeIn('minutes', '1');
+  assert.ok(labels().includes('Advance'), 'one minute');
+  typeIn('room key', '');
+  assert.ok(!labels().includes('Go to room'), 'no room');
+
+  typeIn('level', '2');
+  press('Set level');
+  typeIn('fact key', 'door');
+  for (const v of ['"5"', 'open', '7']) (typeIn('value', v), press('Set fact'));
+  await settle();
+  assert.deepEqual(cheats, [
+    { op: 'set_level', level: 2, points: {} },
+    { op: 'set_fact', fact: 'door', value: '5' },
+    { op: 'set_fact', fact: 'door', value: 'open' },
+    { op: 'set_fact', fact: 'door', value: 7 },
+  ]);
+});

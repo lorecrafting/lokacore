@@ -118,8 +118,6 @@ const pin = (name: string) => {
   else localStorage.setItem(START, name);
   known.redraw();
 };
-/** A note from the game (a refusal, a stop) shows as the tab's refusal; none redraws. */
-const after = (note: string) => (note ? tell(note) : known.redraw());
 /** true, false, a number or a "quoted" string as typed; a bare word is an enum's or a string's (cheats.tsx). */
 function value(text: string) {
   try {
@@ -192,7 +190,7 @@ function checkpointRows(steps: Step[]) {
 }
 
 type Game = NonNullable<ReturnType<Hooks['game']>>;
-const cheatOf = (game: Game) => (c: Cheat) => () => after(game.cheat(c));
+const cheatOf = (game: Game) => (c: Cheat) => () => tell(game.cheat(c));
 function cheatRows(game: Game) {
   const [minutes, cheat] = [Number(typed.minutes), cheatOf(game)];
   const { room, fact, level, attribute, points } = typed;
@@ -201,7 +199,7 @@ function cheatRows(game: Game) {
       {field(WORDS.minutes, 'minutes', true)}
       {maybe(
         WORDS.advance,
-        Number.isSafeInteger(minutes) && minutes > 0 && (() => after(game.advance(minutes))),
+        Number.isSafeInteger(minutes) && minutes > 0 && (() => tell(game.advance(minutes))),
       )}
     </View>,
     <View key="go" style={row}>
@@ -234,15 +232,16 @@ function cheatRows(game: Game) {
   ];
 }
 
-/** The strip's last edit, as the panel's Timing (centre.tsx): `ok` ink within its budget, `warning` over. */
+/** The strip's last edit, as the panel's Timing (centre.tsx): dim ink within its budget (no `ok` token), `warning` over. */
 export function timing(t: Timings | undefined, loaded?: Loaded) {
   if (!t) return null;
   const load = loadOf(t, loaded);
+  const ok = within(t, load);
   const parts = [t.compile, t.publish, ...(load ? [load] : [])].join(' + ');
   return (
     <Text
-      accessibilityLabel={`Last edit timing, within ${BUDGET[t.kind]} ms`}
-      style={{ ...type.small, color: ink(within(t, load) ? 'dim' : 'warning') }}
+      accessibilityLabel={`Last edit timing, ${ok ? 'within' : 'over'} ${BUDGET[t.kind]} ms`}
+      style={{ ...type.small, color: ink(ok ? 'dim' : 'warning') }}
     >
       {`${t.kind} ${parts} = ${total(t, load)} ms`}
     </Text>
