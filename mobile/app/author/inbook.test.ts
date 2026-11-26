@@ -1,10 +1,11 @@
-// size: allow 695, one editor's keys, saves, conflicts, add-here, a refused /open and capitalised titles and Build's lines walked over one stubbed page
+// size: allow 745, one editor's keys, saves, conflicts, add-here, a refused /open and capitalised titles and Build's lines walked over one stubbed page
 // E5's in-Book editor (docs/design/prose-in-the-book-rulings.md) in headless Google Chrome, over a
 // page of plain lines and a stubbed /__author route; the Book itself is the walk's (web-preview.md).
 import assert from 'node:assert/strict';
 import { after, afterEach, before, beforeEach, test } from 'node:test';
 import { build } from 'esbuild';
 import { chromium, type Browser, type Page } from 'playwright';
+import { color } from '../book/tokens.ts';
 import { cap } from '../book/words.ts';
 import type { start } from './inbook.ts';
 
@@ -691,4 +692,54 @@ test('a line whose words changed since the compile says so instead of opening no
   await noteSays(
     'Changed since the last compile: this page is behind the cartridge. Wait for the compile, or press Cmd-E.',
   );
+});
+
+// Breaks: a phone shown "Enter saves · Esc cancels" with no keys to press, its Cancel writing the
+// draft (a blur saving before the tap lands), or its Save sending nothing (owner ruling 2026-11-25).
+test('a coarse pointer gets Save and Cancel in place of the key caption', async () => {
+  await page.evaluate(() => {
+    window.matchMedia = ((q: string) => ({ matches: q === '(pointer: coarse)' })) as never;
+  });
+  const tap = (name: string) => page.locator('.loka-note button', { hasText: name }).click();
+  await openFirst();
+  assert.equal(await note(), 'a.loka:3SaveCancel');
+  await page.keyboard.type('!');
+  await tap('Cancel');
+  await page.waitForFunction(() => !document.querySelector('[data-loka-field]'));
+  assert.deepEqual(posted('/edit'), [], 'Cancel wrote the draft');
+  await openFirst();
+  await page.keyboard.type('!');
+  await tap('Save');
+  await page.waitForFunction(() => !document.querySelector('[data-loka-field]'));
+  assert.deepEqual(
+    posted('/edit').map((b) => b.words),
+    ['Rain falls.!'],
+  );
+});
+
+// Breaks: Build's strip and sheets keep light inks at night (loka-hcnlh.46): the palette read from
+// a strip line before the Book's, or a night repaint that adds no node left unheard.
+test("the inks follow the Book's page paper, not the strip's, when it repaints", async () => {
+  const bg = (ink: string) =>
+    page.waitForFunction(
+      (ink) => getComputedStyle(document.documentElement).getPropertyValue('--loka-bg') === ink,
+      ink,
+    );
+  const { light, dark } = { light: color.light.bg, dark: color.dark.bg };
+  await page.evaluate((dark) => {
+    document.body.insertAdjacentHTML(
+      'afterbegin',
+      `<div style="background:${dark}"><p dir="auto">Rain falls.</p></div>`,
+    );
+  }, dark);
+  await bg(dark); // no Book wrapper: the paper under the first line
+  await page.evaluate((light) => {
+    document.body.insertAdjacentHTML(
+      'beforeend', // an unpainted box comes first under the wrapper
+      `<div data-testid="loka-book"><div><div id="page" style="background:${light}"></div></div></div>`,
+    );
+  }, light);
+  await bg(light);
+  await page.evaluate((dark) => (document.getElementById('page')!.style.background = dark), dark);
+  await bg(dark);
 });

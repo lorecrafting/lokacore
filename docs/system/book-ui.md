@@ -914,7 +914,10 @@ reasons and limits: [prose in the Book rulings](../design/prose-in-the-book-ruli
 
 - **Edit in place.** A click plays. A double-click on a line's words (not on a link or card in it)
   turns that line into a field in its place, nothing reflowing, the double-clicked word selected,
-  captioned `<file>:<line>  Enter saves · Esc cancels`. It holds the source words unbound (slots
+  captioned `<file>:<line>  Enter saves · Esc cancels`; on a coarse pointer (touch) two acts a
+  touch target tall, Save and Cancel, stand in that caption's place, and Return still saves (owner
+  2026-11-25, paraphrased). The field keeps the line's drawn height; the one caption or acts row
+  under it is the only thing that moves the content below. It holds the source words unbound (slots
   and `~` as written; a speaker-joined line only its quoted words). One line, soft-wrapped: Enter
   or leaving the field saves, Esc cancels and returns focus to the line, no break is ever
   inserted, a pasted break or tab is a space, unchanged words write nothing, an empty field stays
@@ -940,7 +943,7 @@ reasons and limits: [prose in the Book rulings](../design/prose-in-the-book-ruli
   (6.2a) on the Notebook's Tools tab, never in the Book; leaving the page releases a Hold it set.
 - **Build** (the in-game builder, [builder mode §4.1, §5](../rnd/in-game-builder-mode-2026-11-19.md)).
   A strip a touch target tall sits above the Book, outside its page and chrome row, in the Book's
-  current palette. It carries the Build switch (a switch named `Build`, its on state shown by more
+  current palette, night included, as do its sheets. It carries the Build switch (a switch named `Build`, its on state shown by more
   than colour) and a polite live status: `Held · N waiting` while the server holds compiles, else
   nothing. Last on the strip (6.2a), after its buttons, the last compile's timing: `<kind> <compile> +
   <publish> [+ <load>] = <total> ms`, marked over budget by colour and by its spoken name (`Last edit
@@ -949,6 +952,10 @@ reasons and limits: [prose in the Book rulings](../design/prose-in-the-book-ruli
   releases only a Hold it took; tabbing to the next field keeps it. With no field focused, a
   compile reloads the Book as usual: Build, the open sheet and its scroll are kept beside the place
   and come back after the reload. The plain dev preview and a release draw no strip.
+- **Safe areas** (phone). The page draws under the notch and home bar (`viewport-fit=cover`); the
+  document behind the Book is painted the Book's current paper, night included, so no light band
+  shows at an edge or in an overscroll. The Build strip pads its top and sides by the safe-area
+  insets; a sheet risen from below pads its bottom by the home-bar inset.
 - **Build: in-place field** (slice 1.3, [builder mode §4](../rnd/in-game-builder-mode-2026-11-19.md);
   the unwritten look is owner ruling 9 in its §10). In Build a line that draws one description
   whole is a button named `<words>, edit` (`Unwritten <field>, edit` when unwritten; either adds

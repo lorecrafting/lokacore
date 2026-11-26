@@ -208,4 +208,10 @@ const SLIDE = StyleSheet.create({ side: from('translateX(100%)'), up: from('tran
 const slide = (docked: boolean) =>
   !globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches &&
   SLIDE[docked ? 'side' : 'up'];
-const FLOAT = { position: 'absolute', left: 0, right: 0, bottom: 0 } as const; // mutate-skip: layout
+const FLOAT = {
+  position: 'absolute', // mutate-skip: layout
+  left: 0, // mutate-skip: layout
+  right: 0, // mutate-skip: layout
+  bottom: 0, // mutate-skip: layout
+  paddingBottom: 'env(safe-area-inset-bottom)' as never, // above the home bar (19.6)
+} as const;

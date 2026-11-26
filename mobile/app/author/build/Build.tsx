@@ -1,3 +1,4 @@
+// size: allow 305, the strip pads by the safe-area insets (19.6)
 // Build mode's chrome (docs/system/book-ui.md#author-mode; slice 1.2): the Build toggle and strip,
 // the sheet host, auto-hold. Only the author preview requires it (author/seam.test.ts: `BUILD`).
 import { useState, type ReactNode } from 'react';
@@ -223,9 +224,12 @@ const STRIP = {
   alignItems: 'center',
   gap: space.md,
   flexWrap: 'wrap',
-  paddingHorizontal: space.md,
+  // public/index.html's viewport-fit=cover draws under the notch; RN-web passes env() through
+  paddingLeft: `max(${space.md}px, env(safe-area-inset-left))` as never,
+  paddingRight: `max(${space.md}px, env(safe-area-inset-right))` as never,
   borderBottomWidth: size.rule,
 } as const;
+const TOP = { paddingTop: 'env(safe-area-inset-top)' as never }; // the top strip only, not the Notice under it
 const warn = (text: ReactNode) => (
   <Text aria-live="polite" style={{ ...type.small, color: ink('warning') }}>
     {text}
@@ -270,7 +274,7 @@ export function Strip({ children }: { children: ReactNode }) {
   const top = builder.sheets?.at(-1);
   return (
     <View style={{ flex: 1 }} /* mutate-skip: layout */>
-      <View style={{ ...STRIP, backgroundColor: ink('bg'), borderColor: ink('line') }}>
+      <View style={{ ...STRIP, ...TOP, backgroundColor: ink('bg'), borderColor: ink('line') }}>
         {buildSwitch(() => change(toggled(builder)))}
         {warn(heard.held ? WORDS.held(heard.pending ?? 0) : '')}
         {chip()}
@@ -290,6 +294,7 @@ export function Strip({ children }: { children: ReactNode }) {
       >
         <View
           style={{ flex: 1 }} /* mutate-skip: layout; the Book keeps its place as sheets open */
+          testID="loka-book" /* inbook.ts reads the page's palette under it */
         >
           {children}
         </View>

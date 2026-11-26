@@ -21,6 +21,9 @@ test('a confirmed move survives reload and Start over returns to the inn', async
 }) => {
   await app.clearState();
   await expect(screen.getByRole('button', 'Crossroads Inn, look')).toBeVisible();
+  // Breaks: the served page is Expo's own template, so a phone draws nothing under the notch (19.6).
+  const meta = () => document.querySelector('meta[name="viewport"]')?.getAttribute('content') ?? '';
+  expect(await browser.evaluate(meta)).toContain('viewport-fit=cover');
   await saved(screen, 'north', 'Fell Gate');
 
   await app.restart();
