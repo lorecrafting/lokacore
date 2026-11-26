@@ -126,8 +126,7 @@ test(
         ['ArrowUp', 'North Gate'],
       ])
         await go(p, key, to);
-      // Catches: the OPFS save (patch-sqlite-web.cjs) not persisting, or a reload left holding the
-      // lock its own last page took (#803's pagehide), so the second reload fails to open.
+      // Catches: the OPFS save (patch-sqlite-web.cjs) not persisting over a reload.
       for (const _ of [1, 2]) {
         await p.reload();
         await room(p, 'North Gate').waitFor(LONG);
@@ -221,19 +220,6 @@ test('the Room sheet rises over the Book at half height, full width, modal', LON
   assert.ok(await p.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
 });
 
-// Catches: + Add here not making the thing, not opening its sheet, or the reload its compile
-// brings losing that sheet. It goes before the other gestures so the reload lands inside it.
-test('+ Add here makes a person and opens its sheet', LONG, async () => {
-  await builder();
-  const reloaded = p.waitForEvent('load', LONG);
-  await sheet().getByRole('button', { name: 'Person' }).tap();
-  await sheet().getByText('npcs/npc_1.json').waitFor();
-  await reloaded; // a new person is a structural compile: the Book reloads, keeping its sheets
-  await sheet().getByText('npcs/npc_1.json').waitFor();
-  await sheet().getByRole('button', { name: LABEL.back }).tap();
-  await sheet().getByText('rooms/ferry_landing.json').waitFor();
-});
-
 // Catches: the grip reading a drag as a tap (a drag down from half would fill, not close), or
 // the page taking the drag as a scroll.
 test(
@@ -283,7 +269,22 @@ test('the Room sheet adds an exit, makes one one-way and deletes one', LONG, asy
   await until(() => exits('well_lane').south === undefined, 'one-way');
   assert.ok(exits('ferry_landing').north, 'the near face stays');
   const grown = exits('ferry_landing').south.to;
+  reloaded = p.waitForEvent('load', LONG);
   await sheet().getByRole('button', { name: 'Delete', exact: true }).nth(1).tap(); // south
+  await reloaded;
   await until(() => exits('ferry_landing').south === undefined, 'deleted');
   assert.equal(exits(grown).north, undefined, 'the far face goes too');
+});
+
+// Catches: + Add here not making the thing, not opening its sheet, or the reload its compile
+// brings losing that sheet.
+test('+ Add here makes a person and opens its sheet', LONG, async () => {
+  await builder();
+  const reloaded = p.waitForEvent('load', LONG);
+  await sheet().getByRole('button', { name: 'Person' }).tap();
+  await sheet().getByText('npcs/npc_1.json').waitFor();
+  await reloaded; // a new person is a structural compile: the Book reloads, keeping its sheets
+  await sheet().getByText('npcs/npc_1.json').waitFor();
+  await sheet().getByRole('button', { name: LABEL.back }).tap();
+  await sheet().getByText('rooms/ferry_landing.json').waitFor();
 });
