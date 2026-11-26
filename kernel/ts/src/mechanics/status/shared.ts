@@ -39,19 +39,19 @@ export function currentStatus(world: World, body: EntityId, status: DefinitionRe
   return row?.active ? (row as Active) : undefined;
 }
 
-// Built once per cartridge: sorting and keying per sight check was half a sim run (loka-hcnlh.70).
+// Built once per state: sorting and keying on every sight check was half a sim run (loka-hcnlh.70).
 type Plan = { status: DefinitionRef; spec: StatusDefinition; keys: Map<EntityId, string> }[];
-const plans = new WeakMap<object, Plan>();
+const plans = new WeakMap<object, [World['cartridge'], Plan]>();
 /** Every active status on `body` with its definition, in canonical definition order. */
 export function activeStatuses(world: World, body: EntityId, senses = false) {
-  let plan = plans.get(world.cartridge);
-  if (!plan) {
+  let [of, plan] = plans.get(world.state) ?? [];
+  if (!plan || of !== world.cartridge) {
     const { id: cartridge_id, version: cartridge_version } = world.cartridge.manifest;
     const ref = { cartridge_id, cartridge_version, kind: 'status' as const };
     plan = Object.entries(world.cartridge.statuses ?? {})
       .sort(([a], [b]) => cmp(a, b))
       .map(([, spec]) => ({ status: { ...ref, key: spec.key }, spec, keys: new Map() }));
-    plans.set(world.cartridge, plan);
+    plans.set(world.state, [world.cartridge, plan]);
   }
   return plan.flatMap(({ status, spec, keys }) => {
     if (senses && !spec.perception && !spec.concealment) return [];
