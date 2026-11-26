@@ -269,16 +269,16 @@ const strip = () => nodes(build.Strip({ children: 'book' }));
 const button = (label: string) =>
   strip().find((n) => n.type === 'Pressable' && n.props.children?.props?.children === label);
 const shows = (words: string) => strip().some((n) => n.props?.children === words);
-const flush = async () => {
-  for (let i = 0; i < 20; i++) await null;
-}; // the save's awaits, with setTimeout mocked
 async function write(id: number, before = async () => {}) {
   const input = await opened(LINKED, at(LINKED));
   await before();
   input.props.onChangeText('A high loft.');
   answers = [[200, { id }]];
   input.props.onSubmitEditing();
-  await flush();
+  // Until the save closes the field, right after its Undo chip (an earlier chip may still show); real
+  // setImmediate outlasts any hop, where a fixed count of turns fell short under CI load (loka-2z6b0).
+  for (let i = 0; i < 100 && field(page(LINKED)); i++) await new Promise((r) => setImmediate(r));
+  assert.equal(field(page(LINKED)), undefined, 'the save never settled');
 }
 
 // Breaks: no Undo after a write, the chip gone early or never, Undo putting back the new words or
