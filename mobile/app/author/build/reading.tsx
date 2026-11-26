@@ -73,7 +73,10 @@ export const danger = (text: string): Line => ({ text, tone: 'danger' });
 export const draw = (rows: (Line | ReactNode)[]) =>
   rows.map((r, i) =>
     r && typeof r === 'object' && 'text' in r ? (
-      <View key={`read ${i}`} style={{ ...row, paddingLeft: INDENT * (1 + (r.depth ?? 0)) }}>
+      <View
+        key={`read ${i}`}
+        style={{ ...row, paddingLeft: INDENT * (1 + (r.depth ?? 0)) /* mutate-skip: layout */ }}
+      >
         <Text
           style={
             r.head ? { ...type.label, color: ink('dim') } : { ...inRow, color: ink(r.tone ?? 'fg') }
