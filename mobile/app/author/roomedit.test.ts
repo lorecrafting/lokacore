@@ -30,10 +30,12 @@ const doc = {
 const settle = () => new Promise((r) => setTimeout(r));
 
 /** A builder api: /story's map, each file's source, `answer` for the posts; `posts` as sent. */
-async function opened(answer: (path: string) => [number, unknown] = () => [200, { id: 1 }]) {
+async function opened(
+  answer: (path: string, sent: any) => [number, unknown] = () => [200, { id: 1 }],
+) {
   const posts: [string, any][] = [];
   const api = async (path: string, sent?: object): Promise<[number, any]> => {
-    if (sent) return (posts.push([path, sent]), answer(path));
+    if (sent) return (posts.push([path, sent]), answer(path, sent));
     if (path === '/story')
       return [
         200,
@@ -104,6 +106,57 @@ test('＋ grows a new room on a free side only; One-way and Delete reach their o
   assert.deepEqual(changed(), ['/change rooms/loft.json']);
   await s.press('Delete');
   assert.deepEqual(changed(), ['/change rooms/hall.json', '/change rooms/loft.json']);
+});
+
+// Breaks: Door or Lock naming the barrier on one face only, Lock leaving the barrier closed, or either
+// offered on an exit with no way back (mapedit `barrier` refuses it).
+test('Door and Lock name a new barrier on both faces; Lock starts it locked; one-way greys both', async () => {
+  const made = (path: string, b: any): [number, unknown] =>
+    path === '/new' ? [200, { files: [`areas/yard/barriers/${b.name}.json`] }] : [200, { id: 1 }];
+  const s = await opened(made);
+  const sent = () => s.posts.splice(0).map(([path, b]) => [path, b.file ?? b.name, b.ops]);
+  await s.press('Door');
+  const faces = [
+    ['/change', 'rooms/hall.json', [{ path: ['exits', 'north', 'barrier'], value: 'barrier_1' }]],
+    ['/change', 'rooms/loft.json', [{ path: ['exits', 'south', 'barrier'], value: 'barrier_1' }]],
+  ];
+  assert.deepEqual(sent(), [['/new', 'barrier_1', undefined], ...faces]);
+  (doc as Record<string, object>)['areas/yard/barriers/barrier_2.json'] = {}; // the new barrier's source
+  await s.press('Lock');
+  const locked = [{ path: ['initial'], value: 'locked' }];
+  const two = (o: unknown) => (o as object[]).map((x) => ({ ...x, value: 'barrier_2' }));
+  assert.deepEqual(sent(), [
+    ['/new', 'barrier_2', undefined],
+    ['/change', 'areas/yard/barriers/barrier_2.json', locked],
+    ...faces.map(([p, f, o]) => [p, f, two(o)]),
+  ]);
+  hall.exits[0].to = 'nowhere'; // no way back
+  try {
+    const door = s
+      .shown()
+      .find((n) => n.props?.accessibilityRole === 'button' && words(n).startsWith('Door'));
+    assert.equal(door.props.accessibilityState?.disabled, true);
+  } finally {
+    hall.exits[0].to = 'loft';
+  }
+});
+
+// Breaks: the header dropping dark, counting a variant that is absent, or a dark word that opens no Fields.
+test('the header reads dark · 1 exit for a dark one-exit room; dark opens its Fields', async () => {
+  const was = doc['rooms/hall.json'];
+  (doc as Record<string, object>)['rooms/hall.json'] = { ...was, dark: true };
+  try {
+    const s = await opened();
+    s.shown(); // the first draw reads the source
+    await settle();
+    const head = s.shown().find((n) => n.key === 'summary');
+    assert.equal(words(head), 'dark · 1 exit');
+    await s.press('dark');
+    await s.press('Fields');
+    assert.deepEqual(s.opens, ['def:rooms/hall.json', 'def:rooms/hall.json']);
+  } finally {
+    doc['rooms/hall.json'] = was;
+  }
 });
 
 // Breaks: a placed room offering `＋` toward a cell another placed room holds (the server would set

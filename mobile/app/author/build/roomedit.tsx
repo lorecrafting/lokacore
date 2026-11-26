@@ -15,9 +15,14 @@ import { drop } from '../../../../kernel/ts/play/drop.ts';
 import { size, space, type } from '../../book/tokens.ts';
 import { ink } from './build.ts';
 import type { Hooks } from './field.tsx';
-import { act } from './sheet.tsx';
+import { act, greyed } from './sheet.tsx';
 
+// placeholders: the owner writes these words
 const WORDS = {
+  door: 'Door',
+  lock: 'Lock',
+  barred: (key: string) => `has ${key}`,
+  oneWayOnly: 'one-way: no way back to bar',
   oneWay: 'One-way',
   unlink: 'Delete',
   grow: (dir: string) => `＋ ${dir}`,
@@ -121,11 +126,30 @@ export const refusal = () =>
     </Text>
   ) : null;
 
-/** An exit's actions: One-way (drops the way back) and Delete (both legs). */
-export const exitActs = (r: MapRoom, dir: string, rooms: MapRoom[]) => [
-  act(WORDS.oneWay, () => void run(() => ed.oneWay(r, dir, rooms))),
-  act(WORDS.unlink, () => void run(() => ed.unlink(r, dir, rooms))),
-];
+/** An exit's actions: Door and Lock (a new closed or locked barrier on both faces; greyed where
+ * mapedit `barrier` refuses), One-way (drops the way back) and Delete (both legs). */
+export const exitActs = (r: MapRoom, dir: string, rooms: MapRoom[], nodes: Node[]) => {
+  const e = r.exits.find((x) => x.dir === dir);
+  const there = rooms.find((x) => x.key === e?.to);
+  const why = e?.barrier
+    ? WORDS.barred(e.barrier)
+    : there?.exits.some((x) => x.dir === BACK[dir] && x.to === r.key)
+      ? ''
+      : WORDS.oneWayOnly;
+  const bar = (label: string, locked: boolean) =>
+    why
+      ? greyed(label, why, label)
+      : act(label, () => {
+          const key = freeKey('barrier', 'barrier', nodes, []);
+          void run(() => ed.barrier(r, dir, rooms, key, locked));
+        });
+  return [
+    bar(WORDS.door, false),
+    bar(WORDS.lock, true),
+    act(WORDS.oneWay, () => void run(() => ed.oneWay(r, dir, rooms))),
+    act(WORDS.unlink, () => void run(() => ed.unlink(r, dir, rooms))),
+  ];
+};
 
 /** `＋` on each side with no exit and, when placed, no room on the cell: a new room that way,
  * its words `~`, in this room's area. */

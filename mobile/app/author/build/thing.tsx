@@ -22,7 +22,7 @@ type Dir = 'npcs' | 'items';
 type Doc = Record<string, unknown>;
 const docs = new Map<string, Doc>(); // each source file as last read
 const fresh = new Set<string>(); // the files read under the latest /story
-let of = known.files; // that /story: a new one reads each file again, showing the old until then
+let of: unknown; // that /story: a new one reads each file again, showing the old until then
 const chosen = new Map<string, string>(); // an item's holder kind picked (by `dir:key`), until it moves
 const drafts = new Map<string, string>(); // each holder field, as typed
 
@@ -33,7 +33,7 @@ export function thingPen(key: string | undefined, open: (id: string) => void) {
 }
 
 /** `file`'s JSON as last read; read again under a new /story, then the Book redraws. */
-function doc(file: string) {
+export function doc(file: string) {
   if (of !== known.files) (fresh.clear(), (of = known.files));
   if (!fresh.has(file)) {
     fresh.add(file);
