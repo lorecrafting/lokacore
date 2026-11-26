@@ -152,8 +152,6 @@ const release = `${create}    // loka-hcnlh.19.5 release
     });
 `;
 if (!moduleSource.includes(release)) {
-  if (moduleSource.includes('loka-hcnlh.19.5 release'))
-    throw new Error('Reinstall expo-sqlite: an older release is patched in');
   if (moduleSource.split(create).length - 1 !== 1)
     throw new Error('Review the SQLite web module upstream');
   fs.writeFileSync(webModule, moduleSource.replace(create, release));
