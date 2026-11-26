@@ -137,20 +137,23 @@ if (!poolSource.endsWith(warm)) {
 // handle until the worker ends (closing the database does not free them): the Book opened again
 // reads "already open in another tab" (loka-hcnlh.19.5). So the leaving page ends its worker, and a
 // page restored from the cache reloads rather than call a worker that is gone. Every save call is
-// synchronous, so pagehide never runs inside a transaction.
+// synchronous, so pagehide never runs inside a transaction (ending the worker mid-open, as a plain
+// navigation does too, cuts no save). A call after pagehide fails on the ended worker rather than
+// start one that takes the handles again.
 const webModule = path.join(moduleRoot, 'web/SQLiteModule.ts');
 const moduleSource = fs.readFileSync(webModule, 'utf8');
 const create = "    worker = new Worker(new URL('./worker', window.location.href));\n";
 const release = `${create}    // loka-hcnlh.19.5 release
     window.addEventListener('pagehide', () => {
       worker?.terminate();
-      worker = null;
     });
     window.addEventListener('pageshow', (event) => {
       if (event.persisted) window.location.reload();
     });
 `;
 if (!moduleSource.includes(release)) {
+  if (moduleSource.includes('loka-hcnlh.19.5 release'))
+    throw new Error('Reinstall expo-sqlite: an older release is patched in');
   if (moduleSource.split(create).length - 1 !== 1)
     throw new Error('Review the SQLite web module upstream');
   fs.writeFileSync(webModule, moduleSource.replace(create, release));

@@ -144,7 +144,8 @@ test('on Chromium the pool writes no headroom', async () => {
 
 // Breaks (loka-hcnlh.19.5): a page left for the back/forward cache keeps its worker, so the pool's
 // OPFS handles stay taken and the Book opened again reads "already open in another tab"; or a page
-// restored from the cache plays on with its worker gone (every save call then times out).
+// restored from the cache plays on with its worker gone (every save call then times out); or a save
+// call after pagehide starts a second worker that takes the handles again.
 test('the leaving page ends its save worker; a page restored from the cache reloads', () => {
   const source = ts.transpileModule(readFileSync(webModule, 'utf8'), {
     compilerOptions: { module: ts.ModuleKind.CommonJS },
@@ -184,6 +185,8 @@ test('the leaving page ends its save worker; a page restored from the cache relo
   assert.deepEqual([workers.length, workers[0].terminated, reloads], [1, false, 0]);
   page.dispatchEvent(new Event('pagehide'));
   assert.equal(workers[0].terminated, true);
+  db.initSync(); // a save call after pagehide starts no worker to take the handles again
+  assert.equal(workers.length, 1);
   show(true);
   assert.equal(reloads, 1);
 });
