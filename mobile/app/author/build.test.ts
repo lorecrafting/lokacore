@@ -197,16 +197,23 @@ test('leaving the page releases a Hold the field took, by beacon', () => {
   assert.deepEqual([posts, beacons()], [[true, false], 1]);
 });
 
-// Breaks: a reload losing the open sheet or its scroll, or reopening a sheet outside Build.
-test('a reload brings back the open sheet, scrolled where it was', async () => {
+// Breaks: a reload losing the open sheet or its scroll, or reopening a sheet outside Build; or the
+// sheet's foot not naming the file its source is in.
+test('a reload brings back the open sheet, scrolled where it was, its source file at its foot', async () => {
   const { Sheet, sheets } = await import('./build/Build.tsx');
-  sheets['stand-in'] = { title: () => 'Stand-in', body: () => 'stand-in sheet' };
+  sheets['stand-in'] = {
+    title: () => 'Stand-in',
+    body: () => 'stand-in sheet',
+    file: () => 'rooms/hall.yaml',
+  };
   const s = store();
   keep(s, { on: true, sheets: ['stand-in'], scroll: 120 });
   const open = restored(store({ [BUILD]: s.getItem(BUILD)! })); // a fresh page over the same storage
   assert.deepEqual(open, { on: true, sheets: ['stand-in'], scroll: 120 });
   const drawn = Sheet({ open, saved: () => {} }) as any;
-  assert.equal(drawn.props.children, 'stand-in sheet');
+  const [body, foot] = drawn.props.children.props.children;
+  assert.equal(body, 'stand-in sheet');
+  assert.equal(foot.props.children, 'rooms/hall.yaml');
   let to: unknown;
   drawn.props.ref.current = { scrollTo: (at: unknown) => (to = at) };
   drawn.props.onContentSizeChange();

@@ -292,12 +292,7 @@ parity:compile-status
 parity:drop-step
 parity:unconfirmed-words
 parity:change-feed
-parity:source-footer
 parity:write-tab
-parity:state-tab
-parity:why-tab
-parity:step-tab
-parity:numbers
 parity:find-referrers
 parity:generic-card
 parity:words-field

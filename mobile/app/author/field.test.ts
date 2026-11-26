@@ -447,7 +447,7 @@ test('the keep-my-place notice offers its three ways back', async () => {
 // name pencil keyed by the words drawn (two names in the same words: one gets the other's sheet).
 test("the room title's pencil opens its Room sheet: summary and exits", async () => {
   map = [
-    { key: 'loft', area: 'mill', title: 'Loft', exits: [{ dir: 'down', to: 'cellar' }] },
+    { key: 'loft', area: 'mill', title: 'Loft', file: 'L', exits: [{ dir: 'down', to: 'cellar' }] },
     { key: 'cellar', area: null, title: '~', exits: [] },
   ];
   let here = 'loft';
@@ -488,6 +488,7 @@ test("the room title's pencil opens its Room sheet: summary and exits", async ()
     .filter((c) => typeof c === 'string');
   const at = words.indexOf('mill · 1 exit') - 1; // the summary, above the sheet's edits
   assert.deepEqual(words.slice(at, at + 3), ['Loft', 'mill · 1 exit', 'down → cellar']);
+  assert.equal(words.includes('L'), true, "the sheet's foot names the room's file");
   here = 'cellar';
   const drawn = page('A low loft.', '~');
   assert.equal(pencil(drawn).props.accessibilityLabel, 'Edit cellar');

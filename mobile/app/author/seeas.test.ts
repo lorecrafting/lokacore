@@ -77,6 +77,7 @@ const CANON = {
 };
 const hooks = {
   place: () => ({ steps: [] }),
+  state: () => ({ hash: 'h', steps: [], facts: [], shown: { quests: [] } }), // the Step reader's fold
   here: () => 'ferry_landing',
   drop() {},
   back() {},

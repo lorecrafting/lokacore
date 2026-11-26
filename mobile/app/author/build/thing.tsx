@@ -45,10 +45,12 @@ function doc(file: string) {
 }
 
 /** A person's or item's sheet: where it starts and, unless a spawn places it, a holder to move it to. */
+const fileOf = (dir: Dir, key: string) =>
+  known.files[
+    known.nodes.find((n) => n.kind === nodeOf(dir) && n.ref.endsWith(`/${key}`))?.ref ?? ''
+  ];
 function body(dir: Dir, key: string) {
-  const kind = nodeOf(dir);
-  const ref = known.nodes.find((n) => n.kind === kind && n.ref.endsWith(`/${key}`))?.ref;
-  const file = known.files[ref ?? ''];
+  const file = fileOf(dir, key);
   const d = file && doc(file);
   if (!file || !d) return refusal();
   const text = { ...type.small, color: ink('dim'), paddingHorizontal: space.md };
@@ -113,5 +115,13 @@ function holderForm(dir: Dir, key: string, file: string, now: { kind: string; ke
   ];
 }
 
-sheets.npc = { title: (key) => key, body: (key) => body('npcs', key) };
-sheets.item = { title: (key) => key, body: (key) => body('items', key) };
+sheets.npc = {
+  title: (key) => key,
+  body: (key) => body('npcs', key),
+  file: (key) => fileOf('npcs', key),
+};
+sheets.item = {
+  title: (key) => key,
+  body: (key) => body('items', key),
+  file: (key) => fileOf('items', key),
+};
