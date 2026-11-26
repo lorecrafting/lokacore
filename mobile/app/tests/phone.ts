@@ -18,6 +18,7 @@ const repo = resolve(app, '../..');
 const tmp = mkdtempSync(join(tmpdir(), 'loka-phone-'));
 const cart = join(tmp, 'cart');
 const artifact = '.dev-cartridge/phone/current.json'; // under mobile/app: Metro serves only its own tree
+// ponytail: a probed port is free only until a server takes it; a clash fails before() as `exited`.
 const free = () =>
   new Promise<number>((found) => {
     const probe = createServer().listen(0, () => {
@@ -43,11 +44,15 @@ const serve = (cmd: string, args: string[], cwd: string) => {
 };
 // Polls `ok` until true; fails early when a server has exited, as nothing then would answer.
 async function wait(ok: () => boolean | Promise<boolean>, what: string) {
-  for (const start = Date.now(); !(await ok()); await new Promise((r) => setTimeout(r, 500))) {
+  for (
+    const start = performance.now();
+    !(await ok());
+    await new Promise((r) => setTimeout(r, 500))
+  ) {
     const dead = servers.find((s) => s.exitCode !== null || s.signalCode !== null);
     if (dead)
       throw new Error(`${dead.spawnargs.join(' ')} exited: ${dead.exitCode ?? dead.signalCode}`);
-    if (Date.now() - start > 120_000) throw new Error(`${what} not in 120 s`);
+    if (performance.now() - start > 120_000) throw new Error(`${what} not in 120 s`);
   }
 }
 // iPhone 15: 393 x 659, touch, iOS Safari UA. A persistent profile, as Safari's: an ephemeral
@@ -106,7 +111,7 @@ test(
       const p = ctx.pages()[0] ?? (await ctx.newPage());
       await p.goto(url, LONG);
       await room(p, 'Ferry Landing').tap(LONG);
-      // nine steps up and down a line of rooms: the last lands off the entry, so a lost save shows
+      // nine steps up and down a line of rooms; only the last reaches North Gate, so a save short of it shows
       for (const [key, to] of [
         ['ArrowUp', 'Well Lane'],
         ['ArrowUp', 'Village Green'],
@@ -115,15 +120,15 @@ test(
         ['ArrowUp', 'Well Lane'],
         ['ArrowUp', 'Village Green'],
         ['ArrowDown', 'Well Lane'],
-        ['ArrowDown', 'Ferry Landing'],
-        ['ArrowUp', 'Well Lane'],
+        ['ArrowUp', 'Village Green'],
+        ['ArrowUp', 'North Gate'],
       ])
         await go(p, key, to);
       // Catches: the OPFS save (patch-sqlite-web.cjs) not persisting, or a reload left holding the
       // lock its own last page took (#803's pagehide), so the second reload fails to open.
       for (const _ of [1, 2]) {
         await p.reload();
-        await room(p, 'Well Lane').waitFor(LONG);
+        await room(p, 'North Gate').waitFor(LONG);
       }
       // Catches: a second tab crashing or offering only Start over on the held save, not Try again
       // (loka-hcnlh.19.2/.19.3); and Try again not reopening once the first tab lets go.
@@ -132,7 +137,7 @@ test(
       await second.getByRole('button', { name: 'Try again' }).waitFor(LONG);
       await p.close();
       await second.getByRole('button', { name: 'Try again' }).tap();
-      await room(second, 'Well Lane').waitFor(LONG);
+      await room(second, 'North Gate').waitFor(LONG);
     } finally {
       await ctx.close();
     }
@@ -150,8 +155,8 @@ const share = () =>
     return d ? d.offsetHeight / (d.offsetParent as HTMLElement).offsetHeight : 0;
   });
 const until = async (ok: () => boolean | Promise<boolean>, what: string) => {
-  for (const start = Date.now(); !(await ok()); await new Promise((r) => setTimeout(r, 200)))
-    if (Date.now() - start > 20_000) throw new Error(`not ${what} in 20 s`);
+  for (const start = performance.now(); !(await ok()); await new Promise((r) => setTimeout(r, 200)))
+    if (performance.now() - start > 20_000) throw new Error(`not ${what} in 20 s`);
 };
 // A one-finger drag by `dy` px. Playwright's touchscreen only taps, and WebKit has no Touch
 // constructor, so the touches are made the iOS way (document.createTouch) and dispatched.
@@ -263,12 +268,16 @@ test('a line edits in place, and Undo puts it back', LONG, async () => {
 test('the Room sheet adds an exit, makes one one-way and deletes one', LONG, async () => {
   await builder();
   await p.getByRole('button', { name: 'Edit Ferry Landing' }).tap();
+  let reloaded = p.waitForEvent('load', LONG); // an exit edit is a structural compile: the Book reloads
   await sheet().getByRole('button', { name: '＋ south' }).tap();
+  await reloaded;
   await sheet()
     .getByText(/^south → /)
     .waitFor();
   assert.ok(exits('ferry_landing').south, 'the new exit is in the source');
+  reloaded = p.waitForEvent('load', LONG);
   await sheet().getByRole('button', { name: 'One-way' }).first().tap(); // north → Well Lane
+  await reloaded;
   await until(() => exits('well_lane').south === undefined, 'one-way');
   assert.ok(exits('ferry_landing').north, 'the near face stays');
   const grown = exits('ferry_landing').south.to;
