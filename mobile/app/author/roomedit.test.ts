@@ -150,18 +150,22 @@ test('Door and Lock name a new barrier on both faces; Lock starts it locked; one
     ['/change', 'areas/yard/barriers/barrier_2.json', locked],
     ...faces.map(([p, f, o]) => [p, f, two(o)]),
   ]);
-  hall.exits[0].to = 'nowhere'; // no way back
-  try {
-    const door = s
-      .shown()
-      .find((n) => n.props?.accessibilityRole === 'button' && words(n).startsWith('Door'));
-    assert.equal(door.props.accessibilityState?.disabled, true);
-  } finally {
-    hall.exits[0].to = 'loft';
+  const door = () =>
+    s.shown().find((n) => n.props?.accessibilityRole === 'button' && words(n).startsWith('Door'));
+  for (const [r, to] of [
+    [hall, 'nowhere'],
+    [loft, 'cellar'],
+  ] as const) {
+    r.exits[0].to = to; // no way back: no room there, or its south leads elsewhere
+    try {
+      assert.equal(door().props.accessibilityState?.disabled, true, to);
+    } finally {
+      r.exits[0].to = r === hall ? 'loft' : 'hall';
+    }
   }
 });
 
-// Breaks: the header dropping dark, counting a variant that is absent, or a dark word that opens no Fields.
+// Breaks: the header dropping dark, counting a variant that is absent or miscounting one, or a dark word that opens no Fields.
 test('the header reads dark · 1 exit for a dark one-exit room; dark opens its Fields', async () => {
   const was = doc['rooms/hall.json'];
   (doc as Record<string, object>)['rooms/hall.json'] = { ...was, dark: true };
@@ -174,6 +178,11 @@ test('the header reads dark · 1 exit for a dark one-exit room; dark opens its F
     await s.press('dark');
     await s.press('Fields');
     assert.deepEqual(s.opens, ['def:rooms/hall.json', 'def:rooms/hall.json']);
+    (doc as Record<string, object>)['rooms/hall.json'] = { ...was, dark: true, variants: [{}] };
+    const v = await opened();
+    v.shown();
+    await settle();
+    assert.equal(words(v.shown().find((n) => n.key === 'summary')), 'dark · 1 variant · 1 exit');
   } finally {
     doc['rooms/hall.json'] = was;
   }
