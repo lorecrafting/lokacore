@@ -22,6 +22,7 @@ const room = (key: string, exits: { dir: string; to: string }[], area: string | 
 });
 const hall = room('hall', [{ dir: 'north', to: 'loft' }]);
 const loft = room('loft', [{ dir: 'south', to: 'hall' }]);
+let finds = 0; // GET /find?q=hen asks
 const doc = {
   'rooms/hall.json': { exits: { north: { to: 'loft' } } },
   'rooms/loft.json': { exits: { south: { to: 'hall' } } },
@@ -61,7 +62,7 @@ async function opened(
           },
         },
       ];
-    if (path === '/find?q=hen')
+    if (path === '/find?q=hen' && ++finds)
       // two definitions name the person hen, one an item hen; hen's own ref and the layout row leave nothing dangling
       return [
         200,
@@ -306,7 +307,7 @@ test("Delete placement drops a person's room and an item's location; Fields open
 });
 
 // Breaks: the count taking every ref to the key (another kind's, its own, the layout row's) or none, a failed /find
-// showing a count, or a deleted person's sheet or its definition's left open.
+// showing a count, a count kept across a new /story, or a deleted person's sheet or its definition's left open.
 test("a person's Delete names its referrers; with /find failing it shows no count", async () => {
   const s = await opened(() => [200, {}]);
   s.on(() => sheets.npc.body('hen'));
@@ -318,6 +319,10 @@ test("a person's Delete names its referrers; with /find failing it shows no coun
     [['/delete', 'npcs/hen.json']],
   );
   assert.deepEqual(s.closed, ['npc:hen', 'def:npcs/hen.json']);
+  const asked = finds;
+  s.on(() => sheets.npc.body('hen')); // the delete's new /story asks again
+  s.shown();
+  assert.equal(finds, asked + 1);
   s.on(() => sheets.item.body('cup')); // /find answers 404 for cup
   s.shown();
   await settle();
