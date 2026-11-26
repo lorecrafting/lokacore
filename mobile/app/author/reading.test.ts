@@ -75,7 +75,7 @@ const pressed = async (...labels: string[]) => {
 };
 
 // Break: the answer's lines dropped or their verdict lost (a failed condition not reading "no"), or
-// the question sent without the game's trace or the action's key.
+// the question sent without the game's trace or the action's key, or the open tab not marked.
 test('Why on an action names the failed condition in its words; a failure says why', async () => {
   at(1, false);
   sent = [];
@@ -86,6 +86,17 @@ test('Why on an action names the failed condition in its words; a failure says w
   ]);
   assert.match(text(), /\|light_lamp\|no: item lamp is held/);
   assert.equal(tone('no: item lamp is held'), ink('danger'));
+  const shelf = nodes(toolRows()).filter((n) => /^tool /.test(n.key ?? ''));
+  assert.deepEqual(
+    shelf.map((n) => [words(n), n.props.accessibilityState.selected]),
+    [
+      ['Play', false],
+      ['State', false],
+      ['Why', true],
+      ['Step', false],
+      ['Numbers', false],
+    ],
+  );
   answer = replies(false, 'no such action');
   await pressed('light_lamp');
   assert.match(text(), /\|no such action/);
