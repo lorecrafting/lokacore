@@ -10,6 +10,7 @@ import { ink } from './build.ts';
 import { known, pen } from './room.tsx';
 import { ed, foot, inRow, io, refusal, row, run } from './roomedit.tsx';
 import { act, sheets } from './sheet.tsx';
+import { inspected } from './inspected.tsx'; // a cycle: read at render time only
 
 const WORDS = {
   edit: (key: string) => `Edit ${key}`,
@@ -147,11 +148,11 @@ function holderForm(dir: Dir, key: string, file: string, now: { kind: string; ke
 
 sheets.npc = {
   title: (key) => key,
-  body: (key) => body('npcs', key),
+  body: (key) => [inspected(fileOf('npcs', key)), body('npcs', key)],
   file: (key) => fileOf('npcs', key),
 };
 sheets.item = {
   title: (key) => key,
-  body: (key) => body('items', key),
+  body: (key) => [inspected(fileOf('items', key)), body('items', key)],
   file: (key) => fileOf('items', key),
 };

@@ -7,6 +7,7 @@ import { nodes, words } from '../book/__tests__/combat-book.test.ts'; // also re
 const { toolRows } = await import('./build/tools.tsx');
 const build = await import('./build/Build.tsx'); // its place() hands the game to the Tools tab
 const { ink } = await import('./build/build.ts');
+const { known } = await import('./build/room.tsx');
 const settle = () => new Promise((r) => setTimeout(r));
 let clock = 0; // performance.now, so a report's timing is the test's
 performance.now = () => clock;
@@ -152,6 +153,51 @@ test('Step after a move lists exactly the facts it changed and the rule that loo
   answer = refused;
   await pressed('Step');
   assert.match(text(), /Step 5\|watcher down/);
+});
+
+// Break: the answer's whole report dropped (only its lines kept), the fold drawn open before a press,
+// or the press not shutting it again (the panel's "Full report" <details>).
+test('Why folds the whole report under its lines, shut until pressed', async () => {
+  at(1, false);
+  const told = {
+    lines: [{ text: 'item lamp is held', ok: false, depth: 0 }],
+    action: 'light_lamp',
+  };
+  answer = replies(true, told);
+  await pressed('Why', 'light_lamp');
+  const json = JSON.stringify(told, null, 1);
+  assert.doesNotMatch(text(), /"action": "light_lamp"/);
+  await pressed('Full report');
+  assert.ok(text().endsWith(`|Full report|${json}`), text());
+  await pressed('Full report');
+  assert.doesNotMatch(text(), /"action": "light_lamp"/);
+});
+
+// Break: a rule that looked drawn as plain words when the last /story named its file (no way to its
+// sheet, the panel's select), the wrong rule's file opened, or its verdict losing its red.
+test('Step: a rule that looked opens its sheet; its verdict keeps its tone', async () => {
+  build.updated((at(7, true), { kind: 'pulse' }) as never);
+  known.files = {
+    'p@1:reaction/hush': 'reactions/hush.yaml',
+    'p@1:scene/glow': 'scenes/glow.yaml',
+  };
+  const opened: string[] = [];
+  const open = known.open;
+  known.open = (id: string) => void opened.push(id);
+  answer = replies(true, {
+    command: 'wait',
+    outcome: 'accepted',
+    reactions: [
+      { rule: 'glow', causes: [1], fired: 1 },
+      { rule: 'hush', causes: [1], fired: 0 },
+    ],
+  });
+  await pressed('Step');
+  await pressed('hush');
+  assert.deepEqual(opened, ['def:reactions/hush.yaml']);
+  assert.match(text(), /\|glow fired\|hush\|no when leaf held$/); // glow: a scene's file, not a rule's
+  assert.equal(tone('no when leaf held'), ink('danger'));
+  Object.assign(known, { files: {}, open });
 });
 
 // Break: a late /why reply for an older step overwriting the newer step's report (shown as nothing,

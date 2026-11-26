@@ -10,6 +10,7 @@ import type { Hooks } from './field.tsx';
 import type { Ghost } from '../../../../kernel/ts/play/ghosts.ts';
 import { ghostRows } from './seeas.tsx';
 import { act, sheets } from './sheet.tsx';
+import { inspected } from './inspected.tsx'; // a cycle: read at render time only
 import { doc, referrers } from './thing.tsx'; // a cycle: read at render time only
 import {
   exitActs,
@@ -191,6 +192,7 @@ sheets.room = {
     if (!r) return null;
     const text = { ...type.small, color: ink('fg'), paddingHorizontal: space.md };
     return [
+      inspected(r.file),
       refusal(),
       summary(r),
       ...r.exits.map((e) => {

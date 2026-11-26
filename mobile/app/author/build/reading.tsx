@@ -12,6 +12,7 @@ import {
   type Paired,
   type Report as Stepped,
 } from '../../../../kernel/ts/play/step.ts';
+import { fromRef } from '../../../../kernel/ts/play/storylist.ts';
 import type { Row as Told } from '../../../../kernel/ts/play/why_words.ts';
 import { space, type } from '../../book/tokens.ts';
 import { clockWords, type shown } from '../shown.ts';
@@ -19,6 +20,7 @@ import { ink } from './build.ts';
 import { known } from './room.tsx';
 import { inRow, row } from './roomedit.tsx';
 import { act } from './sheet.tsx';
+import { sheetOf } from './story.tsx';
 
 // Placeholders: the owner writes the words.
 export const WORDS = {
@@ -50,6 +52,7 @@ export const WORDS = {
   none: 'none',
   noneMatched: 'none matched',
   asking: 'asking…',
+  full: 'Full report',
 };
 const BUDGET = 400; // steps: past this the replay's cost is the story (the panel's steptab.tsx)
 const SLOW_MS = 2000; // a report slower than this says slow; it is not hidden
@@ -139,7 +142,15 @@ const toldLine = (l: Told) => ({
   tone: l.ok === false ? ('danger' as const) : undefined,
   depth: l.depth,
 });
-let why: { at: string; key: string; lines?: Told[]; error?: string } | undefined;
+let why: { at: string; key: string; lines?: Told[]; report?: unknown; error?: string } | undefined;
+let full = false; // the Full report fold, open or shut (the panel's <details>)
+/** The answer's whole report, folded under its lines (the panel's "Full report" <details>). */
+const fullRows = (report: unknown) => [
+  <View key="full" style={row}>
+    {act(WORDS.full, () => ((full = !full), known.redraw()), full)}
+  </View>,
+  ...(full ? [{ text: JSON.stringify(report, null, 1) }] : []),
+];
 /** Why an action or dialogue of this room is or is not on offer now (kernel/ts/play/why.ts). */
 function whyRows(g: Reader, state: State) {
   const at = JSON.stringify(state);
@@ -153,7 +164,7 @@ function whyRows(g: Reader, state: State) {
           .then(
             (r) =>
               r.ok
-                ? { at, key, lines: (r.told as { lines: Told[] }).lines }
+                ? { at, key, lines: (r.told as { lines: Told[] }).lines, report: r.told }
                 : { at, key, error: String(r.told) },
             (err: Error) => ({ at, key, error: err.message }),
           )
@@ -173,7 +184,7 @@ function whyRows(g: Reader, state: State) {
       dim(WORDS.noOffers)
     ),
     ...(told?.error ? [danger(told.error)] : []),
-    ...(told?.lines ? [head(told.key), ...told.lines.map(toldLine)] : []),
+    ...(told?.lines ? [head(told.key), ...told.lines.map(toldLine), ...fullRows(told.report)] : []),
   ];
 }
 
@@ -202,6 +213,24 @@ function askStep(g: Reader, at: string) {
     )
     .then((t) => t.at === asked && ((report = t), known.redraw())); // a late reply for an older step is dropped
 }
+/** A rule that looked: its name opens its sheet when the last /story named its file (the panel's
+ * select), its verdict beside it, red when it did not fire. */
+function ruleRow(x: Stepped['reactions'][number]) {
+  const line = lookedLine(x);
+  const tone = line.ok === false ? ('danger' as const) : undefined;
+  const ref = Object.keys(known.files).find((r) => {
+    const n = fromRef(r);
+    return n?.kind === 'reaction' && n.key === x.rule;
+  });
+  const sheet = sheetOf(ref);
+  if (!sheet) return { text: `${x.rule} ${line.text}`, tone };
+  return (
+    <View key={`rule ${x.rule}`} style={row}>
+      {act(x.rule, () => known.open(sheet), undefined, `rule ${x.rule}`)}
+      <Text style={{ ...inRow, color: ink(tone ?? 'fg') }}>{line.text}</Text>
+    </View>
+  );
+}
 /** What the last step changed, and every rule whose trigger matched it. */
 function stepRows(g: Reader, state: State) {
   const ordinal = state.steps.length;
@@ -225,13 +254,7 @@ function stepRows(g: Reader, state: State) {
     ...quests.map((q) => ({ text: `${q.quest} ${q.from} → ${q.to}` })),
     ...(quests.length ? [] : [dim(WORDS.none)]),
     head(WORDS.rulesLooked(rules.length)),
-    ...rules.map((x) => {
-      const line = lookedLine(x);
-      return {
-        text: `${x.rule} ${line.text}`,
-        tone: line.ok === false ? ('danger' as const) : undefined,
-      };
-    }),
+    ...rules.map(ruleRow),
     ...(rules.length ? [] : [dim(told?.told ? WORDS.noneMatched : WORDS.asking)]),
   ];
 }
