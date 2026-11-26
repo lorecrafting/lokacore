@@ -7,7 +7,7 @@
 - `/code-review medium`: reported in the PR body.
 - Verdict: **APPROVE WITH NOTES**.
 
-## Must be true (written before the diff)
+## Must be true
 
 1. Every read of a source exit's `to` in `mapedit.ts` accepts both shapes: a short key and a full ref `{cartridge_id, cartridge_version, kind, key}`.
 2. Delete removes the far face whatever shape either face uses. One-way and Barrier find the far room from a full ref.
@@ -29,7 +29,7 @@
 
 ## Findings
 
-1. **Nit**, `kernel/ts/play/mapedit.ts:103`: when One-way draws the far face back next to a full-ref near face, it writes a short `{to: a.key}`, so that pair mixes shapes. It compiles (`exits.ex:15` expands short refs), and Link (`:79`) already writes short keys. Accepted.
+1. **Nit**, `kernel/ts/play/mapedit.ts:103`: when One-way draws the far face back next to a full-ref near face, it writes a short `{to: a.key}`, so that pair mixes shapes. Short refs are expanded at load (`exits.ex:15`; not compiled here), and Link (`:79`) already writes short keys. Accepted.
 2. **Nit**, `mapedit.ts:99,:119`: a full-ref `barrier` prints `[object Object]` in two refusals. `:100`: an exit with no `to` gives "undefined is not on the map". Both deferred by the developer, and that is agreed under the owner rule that author-side edge cases are nits.
 3. **Nit**, `mapedit.ts:47`: `toKey` ignores `cartridge_id`, so a foreign ref would match a local room with the same key. Such a source cannot compile (`exits.ex:21`), so this is author error only. Accepted.
 
