@@ -43,9 +43,9 @@ const said = (told: unknown) =>
   typeof told === 'string'
     ? told
     : `${(told as { file?: string })?.file ?? 'a file'} changed since the map read it`;
-/** Sets one exit, making `exits` when the room has none. */
 /** The room an exit leads to: a short key, or a full ref's key (rooms_sampler writes those). */
 const toKey = (e?: Exit) => (typeof e?.to === 'object' ? e.to.key : e?.to);
+/** Sets one exit, making `exits` when the room has none. */
 const exit = (doc: Doc, dir: string, value: Exit): Op =>
   doc.exits ? { path: ['exits', dir], value } : { path: ['exits'], value: { [dir]: value } };
 const faceOf = async (s: Run, a: MapRoom, dir: string) =>

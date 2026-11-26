@@ -1,4 +1,4 @@
-// size: allow 560, one scaffolded cartridge the tests edit in turn and the last undoes; a split needs a second scaffold
+// size: allow 561, one scaffolded cartridge the tests edit in turn and the last undoes; a split needs a second scaffold
 // The editor map's edits (kernel/ts/play/mapedit.ts) through the real write routes
 // (play/write.ts) and the real `mix loka.new`, on one scaffolded cartridge the tests edit in turn;
 // the last one undoes every gesture. Expected files are written by hand.
@@ -548,7 +548,8 @@ test('delete, one-way and barrier read an exit written as a full ref', async () 
   await ed.oneWay(d, 'north', [d, e]);
   await ed.barrier(d, 'up', [d, e], 'trapdoor', false);
   assert.deepEqual(Object.keys(json('rooms/d.json').exits), ['north', 'up']);
-  assert.deepEqual(json('rooms/e.json').exits.down.barrier, 'trapdoor');
+  assert.equal(json('rooms/d.json').exits.up.barrier, 'trapdoor');
+  assert.equal(json('rooms/e.json').exits.down.barrier, 'trapdoor');
   assert.deepEqual(Object.keys(json('rooms/e.json').exits), ['down']);
 });
 
