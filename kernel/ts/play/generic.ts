@@ -79,15 +79,24 @@ export function shapeOf(
 }
 
 /** An if/then/else's object with the fields its `if` tests (`abstract`, `extends`, `command`) addable,
- * each as the `then` branch declares it: adding one moves the definition to that branch. */
+ * each as the `then` branch declares it: adding one moves the definition to that branch. A union of
+ * shapes (a scene's modal or dream) offers them in each inline branch. */
 function keyed(n: Obj, [sh, s]: [Shape, string[]], value: unknown, defs: Defs): [Shape, string[]] {
-  if (sh.as !== 'object') return [sh, s];
-  const props = { ...sh.props };
-  for (const k of ((n.if as Obj).required ?? []) as string[]) {
-    const [t] = props[k] ? [sh] : shapeOf(n.then as Obj, { ...(value as Obj), [k]: true }, defs, s);
-    if (t.as === 'object' && t.props[k]) props[k] = t.props[k];
-  }
-  return [{ ...sh, props }, s];
+  const add = (own: Record<string, Obj>) => {
+    const props = { ...own };
+    for (const k of ((n.if as Obj).required ?? []) as string[]) {
+      if (props[k]) continue;
+      const [t] = shapeOf(n.then as Obj, { ...(value as Obj), [k]: true }, defs, s);
+      if (t.as === 'object' && t.props[k]) props[k] = t.props[k];
+    }
+    return props;
+  };
+  if (sh.as === 'object') return [{ ...sh, props: add(sh.props) }, s];
+  if (sh.as !== 'union') return [sh, s];
+  const branches = sh.branches.map((b) =>
+    b.properties ? { ...b, properties: add(b.properties as Record<string, Obj>) } : b,
+  ); // ponytail: a `$ref` branch is left as it is (no definition has one yet)
+  return [{ ...sh, branches }, s];
 }
 
 /** An object node: its own properties plus an if/then/else's branch's (a nested definition). */

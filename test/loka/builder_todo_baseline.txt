@@ -5,13 +5,9 @@ cartridge.requires.book.delete
 cartridge.supported_profiles.book.delete
 cartridge.title.book.delete
 cartridge.version.book.delete
-dialogues.policy.book.create
-dialogues.policy.book.edit
-dialogues.policy.book.delete
 outline.parts.book.create
 outline.parts.book.edit
 outline.parts.book.delete
-scenes.abstract.book.create
 parity:project-tabs
 parity:world-picker
 parity:device-size

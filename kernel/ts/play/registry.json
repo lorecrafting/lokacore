@@ -524,9 +524,9 @@
     "edit": "blocks/Rules.tsx",
     "delete": "cards/Dialogue.tsx",
     "book": {
-      "create": "todo",
-      "edit": "todo",
-      "delete": "todo"
+      "create": "generic.tsx",
+      "edit": "rules.tsx",
+      "delete": "generic.tsx"
     }
   },
   "dialogues.prompt": {
@@ -2064,7 +2064,7 @@
     "edit": "generic",
     "delete": "generic",
     "book": {
-      "create": "todo",
+      "create": "generic",
       "edit": "generic",
       "delete": "generic"
     }
