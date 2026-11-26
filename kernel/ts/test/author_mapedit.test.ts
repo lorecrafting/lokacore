@@ -567,16 +567,18 @@ test('delete, one-way and barrier read an exit written as a full ref', async () 
 
 test("delete, one-way and barrier edit a bundled room's own exits, not the bundle's top level", async () => {
   // Breaks: a room in areas/<a>.json read and written at the file's top-level `exits`, so the
-  // gestures refuse "f has no exit east" or write beside `rooms`.
-  // area null: `mix loka.new` refuses a barrier in an area with no rooms/ folder (loka-hcnlh.77 note)
-  const [f, g] = [room('f', 'areas/pen.json'), room('g', 'areas/pen.json')];
+  // gestures refuse "f has no exit east" or write beside `rooms`; a barrier between them sent to
+  // areas/pen, which has no rooms/ folder, so `mix loka.new` refuses it.
+  const [f, g] = [room('f', 'areas/pen.json', 'pen'), room('g', 'areas/pen.json', 'pen')];
   await ed.unlink(f, 'east', [f, g]);
+  await assert.rejects(ed.link(f, 'north', g), /f already has an exit north/);
   await ed.oneWay(f, 'north', [f, g]);
   await ed.barrier(f, 'up', [f, g], 'stile', false);
   const { rooms, ...rest } = json('areas/pen.json');
   assert.deepEqual(rest, {});
   assert.deepEqual(rooms.f.exits, { north: { to: 'g' }, up: { to: 'g', barrier: 'stile' } });
   assert.deepEqual(rooms.g.exits, { down: { to: 'f', barrier: 'stile' } });
+  assert.ok(existsSync(join(src, 'barriers/stile.json')));
 });
 
 test('undo puts every gesture back: the files are byte-identical to the start', async () => {

@@ -46,7 +46,7 @@ const said = (told: unknown) =>
 /** The room an exit leads to: a short key, or a full ref's key (rooms_sampler writes those). */
 const toKey = (e?: Exit) => (typeof e?.to === 'object' ? e.to.key : e?.to);
 /** Where `r`'s exits sit in its file: a room in an area bundle (areas/<a>.json) under `rooms.<key>`. */
-const bundled = (r: MapRoom) => /^areas\/[a-z0-9_]+\.json$/.test(fileOf(r));
+const bundled = (r: MapRoom) => /^areas\/[^/]+\.json$/.test(fileOf(r));
 const exitsAt = (r: MapRoom) => (bundled(r) ? ['rooms', r.key, 'exits'] : ['exits']);
 const exitsOf = (r: MapRoom, doc: Doc) => (bundled(r) ? doc.rooms?.[r.key] : doc)?.exits;
 /** Sets one exit of `r`, making `exits` when the room has none. */
@@ -131,8 +131,8 @@ async function barrier(
   const b = roomOf(rooms, toKey(face)!);
   const reverse = exitsOf(b, (await s.read<Doc>(fileOf(b))).doc)?.[back(dir)];
   if (toKey(reverse) !== a.key) no('a barrier needs the exit both ways: a one-way exit has none');
-  // a barrier is owned: in the rooms' area when they share one, else at the root (border rule)
-  const area = a.area === b.area ? a.area : null;
+  // owned in the rooms' area when they share one, else at the root (border rule; a bundle's rooms are root's)
+  const area = a.area === b.area && !bundled(a) ? a.area : null;
   const made = await s.call('new', { kind: 'barriers', name: key, ...(area ? { area } : {}) });
   const file = made.files?.find((f) => f.endsWith(`barriers/${key}.json`));
   if (locked)
