@@ -154,4 +154,4 @@ function body(file: string) {
   return [refusal(), cut, field(at, [], g.root, g.doc)];
 }
 
-sheets.def = { title: (file) => file, body };
+sheets.def = { title: (file) => file, body, file: (file) => file };

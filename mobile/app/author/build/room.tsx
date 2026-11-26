@@ -146,6 +146,7 @@ const PENCIL = {
 
 /** The Room sheet: a refusal, its summary, its exits with their actions, `＋`, Move and Delete. */
 sheets.room = {
+  file: (key) => find(key)?.file,
   title: (key) => {
     const r = find(key);
     return r ? named(r) : key;

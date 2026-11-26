@@ -16,11 +16,15 @@ import type { Cheat, Step } from '../place.ts';
 import { ink } from './build.ts';
 import { known } from './room.tsx';
 import { inRow, refusal, row, run, tell } from './roomedit.tsx';
+import { numberRows, WORDS as NUMBERS } from './numbers.tsx';
+import { readRows, stepped, WORDS as READING, type Reader } from './reading.tsx';
+import { updated as seeUpdated } from './seeas.tsx';
 import { act, CONTROL } from './sheet.tsx';
 
 // Placeholders: the owner writes the words.
 export const WORDS = {
   tab: 'Tools',
+  play: 'Play', // the 6.2a rows' own tab, beside the readers'
   hold: 'Hold',
   name: 'checkpoint name',
   save: 'Save checkpoint',
@@ -51,13 +55,13 @@ const START = 'loka.editor.start'; // the panel's pinned start (tools/author-pan
 /** panel.tsx's paths for this game (placeHooks), the Hold and the stream's last message (Build.tsx). */
 export type Hooks = {
   game: () =>
-    | {
+    | ({
         place: () => { steps: Step[] };
         loaded: Loaded; // this Book's artifact and load time, for a structural edit's timing
         jump: (steps: Step[]) => void;
         advance: (minutes: number) => string;
         cheat: (cheat: Cheat) => string;
-      }
+      } & Reader)
     | undefined;
   hold: { toggle: () => void; pinned: () => boolean };
   heard: () => Said;
@@ -66,6 +70,9 @@ export type Hooks = {
 export type Said = { checkpoints?: Checked[]; timings?: Timings };
 let hooks: Hooks | undefined;
 export const toolsWith = (given: Hooks) => void (hooks = given);
+/** Build's game update: the Step reader folds this state into its before and after, so a step taken
+ * with the notebook shut still pairs with the one before it; then See as may end (seeas.tsx). */
+export const updated: typeof seeUpdated = (u) => (stepped(hooks?.game()), seeUpdated(u));
 
 const typed: Record<string, string> = { minutes: '60' };
 let names: string[] | undefined; // GET /__author/checkpoints, asked when the tab first draws
@@ -149,8 +156,27 @@ function value(text: string) {
   }
 }
 
-/** The Tools tab's rows: the Hold, the checkpoints, then time and the cheats. */
+const shelf = [WORDS.play, ...READING.tabs, NUMBERS.tab];
+let open = WORDS.play; // the Tools tab's open reader
+/** The Tools tab's rows: its own tabs, then the open one's. */
 export function toolRows() {
+  const game = hooks?.game();
+  return [
+    <View key="tools" style={row}>
+      {shelf.map((t) =>
+        act(t, () => ((open = t), known.redraw()), undefined, `tool ${t}`, open === t),
+      )}
+    </View>,
+    ...(open === WORDS.play
+      ? playRows()
+      : open === NUMBERS.tab
+        ? numberRows(game?.state().hash)
+        : readRows(open, game)),
+  ];
+}
+
+/** The Play rows: the Hold, the checkpoints, then time and the cheats. */
+function playRows() {
   if (!names) void ((names = []), list().catch(() => {})); // asked once; unreachable reads as none
   const game = hooks?.game();
   return [
