@@ -1,4 +1,4 @@
-// size: allow 540, one scaffolded cartridge the tests edit in turn and the last undoes; a split needs a second scaffold
+// size: allow 560, one scaffolded cartridge the tests edit in turn and the last undoes; a split needs a second scaffold
 // The editor map's edits (kernel/ts/play/mapedit.ts) through the real write routes
 // (play/write.ts) and the real `mix loka.new`, on one scaffolded cartridge the tests edit in turn;
 // the last one undoes every gesture. Expected files are written by hand.
@@ -74,6 +74,14 @@ before(async () => {
   const blank = read('rooms/start.json');
   writeFileSync(join(src, 'rooms/b.json'), blank);
   writeFileSync(join(src, 'rooms/c.json'), blank);
+  // d and e: exits by full ref, as rooms_sampler writes them (loka-hcnlh.74)
+  const { id, version } = json('cartridge.json');
+  const to = (key: string) => ({
+    to: { cartridge_id: id, cartridge_version: version, kind: 'room', key },
+  });
+  const at = (exits: object) => JSON.stringify({ ...JSON.parse(blank), exits }, null, 2) + '\n';
+  writeFileSync(join(src, 'rooms/d.json'), at({ east: to('e'), north: to('e'), up: to('e') }));
+  writeFileSync(join(src, 'rooms/e.json'), at({ west: to('d'), south: to('d'), down: to('d') }));
   writeFileSync(
     join(src, 'outline.json'),
     '{ "parts": [{ "beats": [{ "n": 1 }, { "n": 2, "nodes": ["rooms/b"] }] }] }\n',
@@ -530,6 +538,18 @@ test('a key a file or an area bundle already holds is refused, compiled or not',
   } finally {
     for (const f of Object.keys(planted)) rmSync(join(src, f));
   }
+});
+
+test('delete, one-way and barrier read an exit written as a full ref', async () => {
+  // Breaks: an exit's `to` read only as a short key, so Delete leaves the far face behind and
+  // One-way and Barrier refuse "[object Object] is not on the map".
+  const [d, e] = [room('d'), room('e')];
+  await ed.unlink(d, 'east', [d, e]);
+  await ed.oneWay(d, 'north', [d, e]);
+  await ed.barrier(d, 'up', [d, e], 'trapdoor', false);
+  assert.deepEqual(Object.keys(json('rooms/d.json').exits), ['north', 'up']);
+  assert.deepEqual(json('rooms/e.json').exits.down.barrier, 'trapdoor');
+  assert.deepEqual(Object.keys(json('rooms/e.json').exits), ['down']);
 });
 
 test('undo puts every gesture back: the files are byte-identical to the start', async () => {

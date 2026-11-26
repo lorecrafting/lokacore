@@ -13,7 +13,7 @@ export type Io = {
   source: (file: string) => Promise<{ bytes: string; sha256: string; kind?: string }>;
 };
 type Op = { path: (string | number)[]; value?: unknown; delete?: true };
-type Exit = { to: string; barrier?: string };
+type Exit = { to: string | { key: string }; barrier?: string };
 type Doc = { exits?: Record<string, Exit> };
 type Row = { room: string } & At;
 /** One gesture's write calls: each journals an entry the gesture's undo puts back. */
@@ -44,6 +44,8 @@ const said = (told: unknown) =>
     ? told
     : `${(told as { file?: string })?.file ?? 'a file'} changed since the map read it`;
 /** Sets one exit, making `exits` when the room has none. */
+/** The room an exit leads to: a short key, or a full ref's key (rooms_sampler writes those). */
+const toKey = (e?: Exit) => (typeof e?.to === 'object' ? e.to.key : e?.to);
 const exit = (doc: Doc, dir: string, value: Exit): Op =>
   doc.exits ? { path: ['exits', dir], value } : { path: ['exits'], value: { [dir]: value } };
 const faceOf = async (s: Run, a: MapRoom, dir: string) =>
@@ -82,12 +84,12 @@ async function link(s: Run, a: MapRoom, dir: string, b: MapRoom, oneWay: boolean
 
 /** Deletes `a`'s exit `dir` and its reciprocal face, if the room it leads to has one. */
 async function unlink(s: Run, a: MapRoom, dir: string, rooms: MapRoom[]) {
-  const to = (await faceOf(s, a, dir)).to;
+  const to = toKey(await faceOf(s, a, dir));
   await s.change(fileOf(a), () => [{ path: ['exits', dir], delete: true }]);
   const b = rooms.find((r) => r.key === to);
   if (b)
     await s.change<Doc>(fileOf(b), (doc) =>
-      doc.exits?.[back(dir)]?.to === a.key ? [{ path: ['exits', back(dir)], delete: true }] : [],
+      toKey(doc.exits?.[back(dir)]) === a.key ? [{ path: ['exits', back(dir)], delete: true }] : [],
     );
 }
 
@@ -95,11 +97,11 @@ async function unlink(s: Run, a: MapRoom, dir: string, rooms: MapRoom[]) {
 async function oneWay(s: Run, a: MapRoom, dir: string, rooms: MapRoom[]) {
   const face = await faceOf(s, a, dir);
   if (face.barrier) no(`${face.barrier} needs both faces: take the barrier off first`);
-  const b = roomOf(rooms, face.to);
+  const b = roomOf(rooms, toKey(face)!);
   await s.change<Doc>(fileOf(b), (doc) => {
     const was = doc.exits?.[back(dir)];
     if (!was) return [exit(doc, back(dir), { to: a.key })];
-    if (was.to !== a.key) no(`${b.key}'s exit ${back(dir)} leads to ${was.to}`);
+    if (toKey(was) !== a.key) no(`${b.key}'s exit ${back(dir)} leads to ${toKey(was)}`);
     return [{ path: ['exits', back(dir)], delete: true }];
   });
 }
@@ -115,9 +117,9 @@ async function barrier(
 ) {
   const face = await faceOf(s, a, dir);
   if (face.barrier) no(`${a.key}'s exit ${dir} already has ${face.barrier}`);
-  const b = roomOf(rooms, face.to);
+  const b = roomOf(rooms, toKey(face)!);
   const reverse = (await s.read<Doc>(fileOf(b))).doc.exits?.[back(dir)];
-  if (reverse?.to !== a.key) no('a barrier needs the exit both ways: a one-way exit has none');
+  if (toKey(reverse) !== a.key) no('a barrier needs the exit both ways: a one-way exit has none');
   // a barrier is owned: in the rooms' area when they share one, else at the root (border rule)
   const area = a.area === b.area ? a.area : null;
   const made = await s.call('new', { kind: 'barriers', name: key, ...(area ? { area } : {}) });
