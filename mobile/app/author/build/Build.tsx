@@ -1,3 +1,4 @@
+// size: allow 306, the strip pads by the safe-area insets (19.6)
 // Build mode's chrome (docs/system/book-ui.md#author-mode; slice 1.2): the Build toggle and its strip
 // above the Book, the sheet host, and auto-hold. panel.tsx requires this only in the author preview,
 // so a release never holds it (author/seam.test.ts looks for `BUILD`).
@@ -223,7 +224,10 @@ const STRIP = {
   alignItems: 'center',
   gap: space.md,
   flexWrap: 'wrap',
-  paddingHorizontal: space.md,
+  // public/index.html's viewport-fit=cover draws under the notch; RN-web passes env() through
+  paddingTop: 'env(safe-area-inset-top)' as never,
+  paddingLeft: `max(${space.md}px, env(safe-area-inset-left))` as never,
+  paddingRight: `max(${space.md}px, env(safe-area-inset-right))` as never,
   borderBottomWidth: size.rule,
 } as const;
 const warn = (text: ReactNode) => (
@@ -290,6 +294,7 @@ export function Strip({ children }: { children: ReactNode }) {
       >
         <View
           style={{ flex: 1 }} /* mutate-skip: layout; the Book keeps its place as sheets open */
+          testID="loka-book" /* inbook.ts reads the page's palette under it */
         >
           {children}
         </View>

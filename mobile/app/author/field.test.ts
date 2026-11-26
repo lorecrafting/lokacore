@@ -1,4 +1,4 @@
-// size: allow 510, a cut page's caption test joins the field seam's harness
+// size: allow 550, a cut page’s caption and the phone field tests join the field seam’s harness
 // Build's in-place field (docs/system/book-ui.md#author-mode; slice 1.3): a room description's
 // line opens its field through the Book seam. The server's /line and /edit: kernel/ts/test/author.test.ts.
 import assert from 'node:assert/strict';
@@ -506,4 +506,40 @@ test('a cut page’s line is captioned with its page number', () => {
   const p = seamLine({ children: 'Mist rises.' } as any);
   said.delete('scene.dawn.steps.1.text');
   assert.equal(p.children[0].props.children, 'page 2\n');
+});
+
+// Breaks: the field drawn at its own two rows, so a five-line description shrinks and the page
+// below jumps up while it is open (19.4); a phone shown "Enter saves · Esc cancels" with no keys to
+// press, or its Cancel writing the draft (owner ruling 2026-11-25).
+test("the field takes its line's height; a coarse pointer shows Save and Cancel acts", async () => {
+  line(page(LINKED)).props.onLayout({ nativeEvent: { layout: { height: 168 } } });
+  const input = await opened(LINKED, at(LINKED));
+  assert.equal(Object.assign({}, ...input.props.style.flat()).height, 168);
+  assert.match(JSON.stringify(page(LINKED)), /Enter saves/, 'a fine pointer lost its caption');
+  shut();
+  const coarse = (q: string) => ({ matches: q === '(pointer: coarse)' });
+  Object.assign(globalThis, { matchMedia: coarse });
+  try {
+    const typed = await opened(LINKED, at(LINKED));
+    typed.props.onChangeText('A cold loft.');
+    const acts = page(LINKED).filter((n) => n.props?.accessibilityRole === 'button');
+    const act = (name: string) => acts.find((n) => n.props.children === name);
+    assert.doesNotMatch(JSON.stringify(page(LINKED)), /Enter saves/, 'the phone kept the caption');
+    act('Cancel').props.onPress();
+    typed.props.onBlur(); // a tap away blurs the field after Cancel closed it
+    await tick();
+    assert.equal(field(page(LINKED)), undefined, 'Cancel left the field open');
+    assert.deepEqual(edits(), [], 'Cancel wrote the draft');
+    const again = await opened(LINKED, at(LINKED));
+    again.props.onChangeText('A cold loft.');
+    answers = [[200, { id: 4 }]];
+    page(LINKED)
+      .find((n) => n.props?.children === 'Save')
+      .props.onPress();
+    await tick();
+    assert.equal(edits().at(-1)?.words, 'A cold loft.', 'Save sent nothing');
+  } finally {
+    delete (globalThis as { matchMedia?: unknown }).matchMedia;
+    sent.length = 0;
+  }
 });

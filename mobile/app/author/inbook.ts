@@ -1,9 +1,9 @@
-// size: allow 335, the field's open, save, put-back (with a palette Delete's), walk keys and add-here menu share its state; a refused /open names its reason
+// size: allow 338, the field's open, save, put-back (with a palette Delete's), walk keys and add-here menu share its state; a refused /open names its reason
 // E5, prose in the Book (docs/design/prose-in-the-book-rulings.md): a double-click turns a line
 // into its field, Cmd-Z puts back, `]`/`[` walk the `~` lines. Drawn over the Book from here:
 // panel.tsx requires this only in the author preview, so a player build never holds it.
 import type { Message } from './live.ts';
-import { noFieldNote, oneLine, CSS, paletteNear, paper, saving, step } from './prose_rules.ts';
+import { noFieldNote, oneLine, CSS, paletteNear, pagePaper, saving, step } from './prose_rules.ts';
 import { drawnWords, textField, unwritten, walk, selects, shortcut } from './prose_rules.ts';
 
 export { tagged } from './prose_rules.ts';
@@ -39,7 +39,10 @@ let note: HTMLDivElement, spaced: HTMLElement | undefined; // spaced: the line t
 const observer =
   typeof MutationObserver === 'undefined' ? undefined : new MutationObserver(reapply);
 const watch = () =>
-  observer?.observe(document.body, { childList: true, subtree: true, characterData: true });
+  observer?.observe(document.body, {
+    ...{ childList: true, subtree: true, characterData: true },
+    attributeFilter: ['style', 'class'], // the Book turning to night repaints, adding no node
+  });
 const drawn = (el: Node) => drawnWords(hooks.seen, el.textContent ?? ''); // as text() gave them
 const keyOf = (el: Node) => hooks.seen.get(drawn(el)!);
 const lines = () =>
@@ -90,7 +93,7 @@ const open = (key: string, words: string) =>
 /** The marks, after every Book render: `~` bars, unconfirmed lines, the palette, the counts. */
 function reapply() {
   const all = lines();
-  const p = paletteNear(paper(all[0] ?? document.body));
+  const p = paletteNear(pagePaper(all[0] ?? document.body));
   for (const [role, ink] of Object.entries(p))
     document.documentElement.style.setProperty(`--loka-${role}`, ink);
   const todo = all.filter((el) => unwritten(el.textContent!));

@@ -138,11 +138,24 @@ export const CSS = `
 .loka-note[data-warn]{color:var(--loka-warning)}
 .loka-note button{font:inherit;color:var(--loka-action);background:none;border:0;padding:0 0 0 ${space.md}px;cursor:pointer}`;
 
+/** `el`'s own computed background, when it paints one. */
+export function painted(el: Element) {
+  const bg = getComputedStyle(el).backgroundColor;
+  return bg && bg !== 'transparent' && !bg.endsWith(', 0)') ? bg : undefined;
+}
+
 /** The computed paper under `el`: its first ancestor with a background. */
 export function paper(el: Element | null): string {
   for (; el; el = el.parentElement) {
-    const bg = getComputedStyle(el).backgroundColor;
-    if (bg && bg !== 'transparent' && !bg.endsWith(', 0)')) return bg;
+    const bg = painted(el);
+    if (bg) return bg;
   }
   return 'rgb(235, 230, 215)';
+}
+
+/** The page's paper: the first painted element under Build's Book wrapper (lines sit in bubbles
+ * and cards, and a line drawn with links or a ✎ binds no words), else the paper under `el`. */
+export function pagePaper(el: Element | null) {
+  const page = [...document.querySelectorAll('[data-testid="loka-book"] *')].find(painted);
+  return page ? painted(page)! : paper(el);
 }

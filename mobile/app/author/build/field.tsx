@@ -4,7 +4,7 @@
 // calls and the edit rules are E5's (inbook.ts, prose_rules.ts). A release never holds this module
 // (author/seam.test.ts looks for its `Unwritten: ` hint).
 import type { ComponentProps, ReactNode } from 'react';
-import { Text, TextInput } from 'react-native';
+import { type LayoutChangeEvent, Text, TextInput } from 'react-native';
 import { plain } from '../../book/model.ts';
 import { size, space, type } from '../../book/tokens.ts';
 import type { api } from '../inbook.ts';
@@ -116,6 +116,7 @@ function editable(h: Hooks, p: Props, key: string, shown: string, blank: boolean
   const marked = unconfirmed.has(key);
   const press = () => void edit(h, key);
   const own = {
+    onLayout: (e: LayoutChangeEvent) => tall.set(key, e.nativeEvent.layout.height), // 19.4
     style: [p.style, blank && !label && BLANK, marked && MARKED],
     children: [
       PAGE.test(key) && (
@@ -140,6 +141,7 @@ function editable(h: Hooks, p: Props, key: string, shown: string, blank: boolean
   };
 }
 const stop = (e: { stopPropagation: () => void }) => e.stopPropagation();
+const keep = (e: { preventDefault: () => void }) => e.preventDefault();
 /** An unwritten line's name in place of its `~` (ruling 9). */
 const hint = (name: string, ruled = false) => (
   <Text key="blank" style={[{ ...type.small, color: ink('dim') }, ruled && BLANK]}>
@@ -159,6 +161,12 @@ const MARKED = {
 } as const;
 const NOTE = { ...type.label, color: ink('warning') };
 const CAPTION = { ...type.label, color: ink('dim') };
+const FIELD = { width: '100%', borderBottomWidth: size.rule, borderColor: ink('action') } as const;
+/** Each line's drawn height: its field takes it, so nothing below moves when it opens (19.4). */
+const tall = new Map<string, number>();
+/** A phone has no Enter or Esc to read about: it shows these acts in place of the caption. */
+const coarse = () => globalThis.matchMedia?.('(pointer: coarse)').matches;
+const WORDS = { save: 'Save', cancel: 'Cancel' }; // placeholders: the owner writes these
 const CHOICE = {
   ...type.control,
   color: ink('action'),
@@ -255,15 +263,33 @@ function open(h: Hooks, f: Field, at: At, name: string, p: Props) {
         if (k.key === 'Escape') close(h);
         if (k.key === 'Enter' && k.shiftKey) e.preventDefault(); // one line
       }}
-      style={[p.style, { width: '100%', borderBottomWidth: size.rule, borderColor: ink('action') }]}
+      style={[p.style, FIELD, { height: tall.get(f.key) }]}
     />,
-    <Text key="note" style={f.choices ? NOTE : CAPTION}>
-      {`${f.note ?? `${at.file}:${at.line}  Enter saves · Esc cancels`}`}
-    </Text>,
-    ...(f.choices ?? []).map(([label, run]) => (
-      <Text key={label} accessibilityRole="button" onPress={run} style={CHOICE}>
+    (f.note || !coarse()) && (
+      <Text key="note" style={f.choices ? NOTE : CAPTION}>
+        {`${f.note ?? `${at.file}:${at.line}  Enter saves · Esc cancels`}`}
+      </Text>
+    ),
+    ...acts(h, f).map(([label, run]) => (
+      // a press that keeps the focus: the field's blur would save before Cancel
+      <Text
+        key={label}
+        accessibilityRole="button"
+        onPress={run}
+        {...({ onMouseDown: keep } as object)}
+        style={CHOICE}
+      >
         {label}
       </Text>
     )),
   ];
 }
+/** The presses under the field: a notice's choices, or a phone's Save and Cancel. */
+const acts = (h: Hooks, f: Field): NonNullable<Field['choices']> =>
+  f.choices ??
+  (coarse()
+    ? [
+        [WORDS.save, () => void save(h, f)],
+        [WORDS.cancel, () => close(h)],
+      ]
+    : []);

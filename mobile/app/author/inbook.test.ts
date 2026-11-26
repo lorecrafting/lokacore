@@ -1,10 +1,11 @@
-// size: allow 695, one editor's keys, saves, conflicts, add-here, a refused /open and capitalised titles and Build's lines walked over one stubbed page
+// size: allow 716, one editor's keys, saves, conflicts, add-here, a refused /open and capitalised titles and Build's lines walked over one stubbed page
 // E5's in-Book editor (docs/design/prose-in-the-book-rulings.md) in headless Google Chrome, over a
 // page of plain lines and a stubbed /__author route; the Book itself is the walk's (web-preview.md).
 import assert from 'node:assert/strict';
 import { after, afterEach, before, beforeEach, test } from 'node:test';
 import { build } from 'esbuild';
 import { chromium, type Browser, type Page } from 'playwright';
+import { color } from '../book/tokens.ts';
 import { cap } from '../book/words.ts';
 import type { start } from './inbook.ts';
 
@@ -690,5 +691,26 @@ test('a line whose words changed since the compile says so instead of opening no
   await settle();
   await noteSays(
     'Changed since the last compile: this page is behind the cartridge. Wait for the compile, or press Cmd-E.',
+  );
+});
+
+// Breaks: Build's strip and sheets keep light inks at night (loka-hcnlh.46): the palette read from
+// a strip line before the Book's, or a night repaint that adds no node left unheard.
+test("the inks follow the Book's page paper, not the strip's, when it repaints", async () => {
+  await page.evaluate((light) => {
+    document.body.insertAdjacentHTML(
+      'afterbegin',
+      `<div style="background:${light}"><p dir="auto">Rain falls.</p></div>` +
+        `<div data-testid="loka-book"><div id="page" style="background:${light}"></div></div>`,
+    );
+  }, color.light.bg);
+  await page.waitForTimeout(100); // the insert's reapply, before the repaint alone
+  await page.evaluate(
+    (dark) => (document.getElementById('page')!.style.background = dark),
+    color.dark.bg,
+  );
+  await page.waitForFunction(
+    (dark) => getComputedStyle(document.documentElement).getPropertyValue('--loka-bg') === dark,
+    color.dark.bg,
   );
 });
