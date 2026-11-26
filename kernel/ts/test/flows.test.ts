@@ -10,6 +10,7 @@ import { basename, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { after, test } from 'node:test';
 import { flows, worker, type Policy } from '../play/flows.ts';
+import { pools } from '../play/sim.ts';
 import { encode, type Json } from '../src/foundation/canonical.ts';
 import { INSTALLED, loadCartridge, newWorld, step, type Cartridge } from '../src/index.ts';
 import { gameView } from '../src/runtime/world.ts';
@@ -72,6 +73,24 @@ test('a command already played this game hour is skipped until the next hour', (
   const r = flows(content, { seeds: 1, days: 1, policy: idle });
   assert.equal(r.coin.supply.at(-1)!.hour, 24);
   assert.equal(calls, 48);
+});
+
+// Breaks (loka-hcnlh.70): a step building the player's GameView more than once (the policy's, the
+// invariant check's and the pools' watch each did: a third of a showcase run). gameView reads
+// `chapters` once per view (view/quest_journal.ts chapter), so its reads count the views; the idle
+// policy above plays 48 steps in the day.
+test('flows and pools build one GameView per step', () => {
+  for (const run of [flows, pools]) {
+    let [views, calls] = [0, 0];
+    const c = { ...content } as Cartridge;
+    Object.defineProperty(c, 'chapters', { get: () => (views++, content.chapters) });
+    const idle: Policy = (w) => {
+      calls++;
+      return [{ type: 'scan' }, { type: 'wait', until: w.state.clock + 3600 }];
+    };
+    run(c, { seeds: 1, days: 1, policy: idle });
+    assert.deepEqual([views, calls], [48, 48], run.name);
+  }
 });
 
 // Breaks: the worker's rank dropped or reordered, so a talk or a take is tried before a sale.
