@@ -13,7 +13,7 @@ import {
   type Report as Stepped,
 } from '../../../../kernel/ts/play/step.ts';
 import type { Row as Told } from '../../../../kernel/ts/play/why_words.ts';
-import { type } from '../../book/tokens.ts';
+import { space, type } from '../../book/tokens.ts';
 import { clockWords, type shown } from '../shown.ts';
 import { ink } from './build.ts';
 import { known } from './room.tsx';
@@ -64,7 +64,6 @@ export type State = {
 /** What placeHooks hands in for the readers: the panel's state message and the game's trace. */
 export type Reader = { state: () => State; game: { trace: () => string[] } };
 
-const INDENT = 16; // mutate-skip: layout, a line's indent per depth
 type Tone = 'fg' | 'dim' | 'danger';
 type Line = { text: string; tone?: Tone; head?: boolean; depth?: number };
 export const head = (text: string): Line => ({ text, head: true });
@@ -75,7 +74,7 @@ export const draw = (rows: (Line | ReactNode)[]) =>
     r && typeof r === 'object' && 'text' in r ? (
       <View
         key={`read ${i}`}
-        style={{ ...row, paddingLeft: INDENT * (1 + (r.depth ?? 0)) /* mutate-skip: layout */ }}
+        style={{ ...row, paddingLeft: space.md * (1 + (r.depth ?? 0)) /* mutate-skip: layout */ }}
       >
         <Text
           style={
@@ -92,9 +91,10 @@ export const draw = (rows: (Line | ReactNode)[]) =>
 const listed = (title: string, items: string[]) => [
   head(title),
   ...items.map((t) => ({ text: t })),
+  ...(items.length ? [] : [dim(WORDS.none)]),
 ];
 export const cols = (rows: string[][]) =>
-  rows.map((r, i) => (i ? { text: r.join('  ') } : dim(r.join('  '))));
+  rows.map((r, i) => (i ? { text: r.join(' · ') } : dim(r.join(' · '))));
 
 const ask = (sent: object) =>
   fetch('/__author/why', { method: 'POST', body: JSON.stringify(sent) }).then(async (r) => ({
@@ -160,6 +160,7 @@ function whyRows(g: Reader, state: State) {
           .then((t) => ((why = t), known.redraw())),
       undefined,
       `${on} ${key}`,
+      told?.key === key,
     );
   const { action, dialogue } = state.shown.offers;
   return [

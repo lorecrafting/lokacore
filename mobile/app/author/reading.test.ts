@@ -75,7 +75,8 @@ const pressed = async (...labels: string[]) => {
 };
 
 // Break: the answer's lines dropped or their verdict lost (a failed condition not reading "no"), or
-// the question sent without the game's trace or the action's key, or the open tab not marked.
+// the question sent without the game's trace or the action's key, or the open tab or the asked
+// button not marked.
 test('Why on an action names the failed condition in its words; a failure says why', async () => {
   at(1, false);
   sent = [];
@@ -97,6 +98,8 @@ test('Why on an action names the failed condition in its words; a failure says w
       ['Numbers', false],
     ],
   );
+  const asked = nodes(toolRows()).find((n) => n.key === 'action light_lamp');
+  assert.equal(asked.props.accessibilityState.selected, true); // the pressed button marked
   answer = replies(false, 'no such action');
   await pressed('light_lamp');
   assert.match(text(), /\|no such action/);
@@ -188,10 +191,10 @@ test('Numbers draws one row per level under its header; a failure and a stale re
   assert.equal(sent.at(-1)!.url, '/__author/numbers');
   const levels = text().split('|Levels|')[1].split('|Fights|')[0].split('|');
   assert.deepEqual(levels, [
-    'level  XP  step  points  kills for the step',
-    '1  0  10  1  no kill pays XP',
-    '2  10  20  1  no kill pays XP',
-    '3  30  30  2  no kill pays XP',
+    'level · XP · step · points · kills for the step',
+    '1 · 0 · 10 · 1 · no kill pays XP',
+    '2 · 10 · 20 · 1 · no kill pays XP',
+    '3 · 30 · 30 · 2 · no kill pays XP',
   ]);
   assert.match(text(), /\|Fights\|no fight sim here$/);
   assert.doesNotMatch(text(), /Older than/);
@@ -205,13 +208,14 @@ test('Numbers draws one row per level under its header; a failure and a stale re
   assert.match(text(), /Numbers failed: watcher down/);
 });
 
-// Break: a fact at its declared default read as set by play, or the room or a section lost.
+// Break: a fact at its declared default read as set by play, the room or a section lost, or an
+// empty section left a bare heading.
 test('State reads the room and each fact, marking one at its default', async () => {
   at(1, false);
   await pressed('State');
   assert.match(
     text(),
-    /\|Room\|Hall\|People\|Held\|Pools\|Statuses\|Clock\|.+\|Quests\|Facts\|lamp_lit: false\|door_open: false \(default\)$/,
+    /\|Room\|Hall\|People\|none\|Held\|none\|Pools\|none\|Statuses\|none\|Clock\|.+\|Quests\|none\|Facts\|lamp_lit: false\|door_open: false \(default\)$/,
   );
 });
 
