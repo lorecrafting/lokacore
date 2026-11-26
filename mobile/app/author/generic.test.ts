@@ -657,7 +657,7 @@ test('a wait step draws the later-rules divider and a narrate step does not', as
   assert.ok(String(within(s, ['steps', 1])[0]?.key).startsWith('later '));
 });
 
-// Breaks: a definition's sheet with no Delete, or counting refs of another kind than its own (the
+// Breaks: a definition's sheet with no Delete, a root file's with one, or counting refs of another kind than its own (the
 // section `npcs` for the node kind `npc`).
 test("a definition's sheet ends in Delete <key> with its own kind's referrers", async () => {
   const s = await opened('npcs', {});
@@ -665,4 +665,6 @@ test("a definition's sheet ends in Delete <key> with its own kind's referrers", 
   s.shown(); // asks /find
   await settle();
   assert.ok(s.shown().some((x) => words(x) === `Delete ${key} · 1 referrers`));
+  const root = await opened('layout', {}); // write.ts refuses a root file's delete: it offers none
+  assert.ok(!root.shown().some((x) => words(x).startsWith('Delete')));
 });

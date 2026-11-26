@@ -51,13 +51,14 @@ export function checked(heard: Message & Said, api: Api, close: () => void, redr
 }
 type Todo = { file: string; words: number; placeholders: string[] };
 let todos: { of: unknown; rows: Todo[] } = { of: undefined, rows: [] };
-/** GET /todo's files, asked again after each compile; a failed ask lists none. */
+/** GET /todo's files, asked again after each message (the last rows stay until it answers); a failed ask lists none. */
 function todo(heard: Message, api: Api, redraw: () => void) {
   if (todos.of !== heard) {
-    const mine = (todos = { of: heard, rows: [] as Todo[] });
+    const mine = (todos = { of: heard, rows: todos.rows });
+    const answer = (rows: Todo[]) => todos === mine && ((mine.rows = rows), redraw());
     api('/todo')
-      .then(([status, rows]) => status === 200 && ((mine.rows = rows as Todo[]), redraw()))
-      .catch(() => {});
+      .then(([status, rows]) => answer(status === 200 ? (rows as Todo[]) : []))
+      .catch(() => answer([]));
   }
   return todos.rows;
 }

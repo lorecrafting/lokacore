@@ -221,7 +221,7 @@ export const moveTo = (r: MapRoom) => (
 );
 
 /** A sheet's foot: Delete `key` (`refs` definitions name it, when known), then the other files it
- * takes, asked in the sheet; once it is gone, sheet `shut` closes. */
+ * takes, asked in the sheet; once it is gone, sheet `shut` and the key's other sheets close. */
 export function foot(key: string, file: string | undefined, shut: string, refs?: number) {
   if (asking?.key === shut) {
     const { files, answer } = asking;
@@ -245,7 +245,9 @@ export function foot(key: string, file: string | undefined, shut: string, refs?:
             if (!file) return WORDS.noFile(key);
             let yes = true;
             const why = await drop(io, key, file, (files) => ask(files).then((y) => (yes = y)));
-            if (why === '' && yes) close(shut); // it is gone: its sheet goes too, wherever it sits
+            // it is gone: its sheets go too (kind and definition), wherever they sit
+            const sheets = new Set([shut, `${nodeOf(file.split('/')[0])}:${key}`, `def:${file}`]);
+            if (why === '' && yes) sheets.forEach((id) => close(id));
             return why;
           }),
       )}

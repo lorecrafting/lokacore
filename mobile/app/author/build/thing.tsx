@@ -49,9 +49,10 @@ export function doc(file: string) {
 
 const counts = new Map<string, number>(); // each `kind/key`'s referrers, under the latest /story
 let counted: unknown; // that /story
-/** How many definitions name `kind` `key` (GET /find's refs, of the last good compile); undefined
+/** How many other definitions name `kind` `key` (GET /find's refs, of the last good compile), less
+ * its own refs from `file` and the layout row, as the delete's gate (find.ts users()) counts; undefined
  * until read, or when /find fails. Read again under a new /story, then the Book redraws. */
-export function referrers(kind: string, key: string) {
+export function referrers(kind: string, key: string, file: string | undefined) {
   if (counted !== known.files) (counts.clear(), (counted = known.files));
   const id = `${kind}/${key}`;
   if (!counts.has(id)) {
@@ -59,8 +60,13 @@ export function referrers(kind: string, key: string) {
     known.api!(`/find?q=${encodeURIComponent(key)}`)
       .then(([status, found]) => {
         if (status !== 200) return;
-        const refs = (found as { refs: { kind: string }[] }).refs;
-        counts.set(id, refs.filter((r) => r.kind === kind).length);
+        const refs = (found as { refs: { kind: string; by?: string }[] }).refs;
+        const own = file?.replace(/\.[^.]+$/, '');
+        const by = (r: { by?: string }) => r.by?.replace(/^scripted_actions\//, 'actions/');
+        counts.set(
+          id,
+          refs.filter((r) => r.kind === kind && r.by !== 'layout' && by(r) !== own).length,
+        );
         known.redraw();
       })
       .catch(() => {}); // unknown: Delete shows no count
@@ -102,7 +108,7 @@ function body(dir: Dir, key: string) {
       {dir === 'npcs' ? act(WORDS.dialogue, () => talk(key), undefined, `dialogue ${key}`) : null}
       {act(WORDS.fields, () => known.open(`def:${file}`))}
     </View>,
-    foot(key, file, `${nodeOf(dir)}:${key}`, referrers(nodeOf(dir), key)),
+    foot(key, file, `${nodeOf(dir)}:${key}`, referrers(nodeOf(dir), key, file)),
   ];
 }
 

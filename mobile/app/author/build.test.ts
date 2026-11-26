@@ -363,7 +363,7 @@ test('Checks lists refusals, unconfirmed and unwritten lines; the badge counts e
 });
 
 // Breaks: Checks not listing /todo's files (or not asking again after a compile), a file row
-// opening another file, or a failed /todo listing a stale file.
+// opening another file, the rows emptying while it asks again, or a failed /todo listing a stale file.
 test("Checks lists /todo's files with their placeholders; a file opens; a failed /todo lists none", async () => {
   const { hear, install, sheets } = await import('./build/Build.tsx');
   const sent: unknown[] = [];
@@ -376,7 +376,11 @@ test("Checks lists /todo's files with their placeholders; a file opens; a failed
     said: new Map(),
     redraw() {},
     api: async (path, body) =>
-      path === '/todo' ? todo : (body && sent.push([path, body]), [200, { map: [] }]),
+      path === '/todo'
+        ? todo[0]
+          ? todo
+          : Promise.reject(new Error('offline'))
+        : (body && sent.push([path, body]), [200, { map: [] }]),
   });
   hear({ text: {}, said: [] });
   const shown = () => nodes(sheets.checks.body(''));
@@ -391,16 +395,21 @@ test("Checks lists /todo's files with their placeholders; a file opens; a failed
   );
   row.props.onPress();
   assert.deepEqual(sent, [['/open', { file: 'world/cellar.md' }]]);
-  todo = [500, null];
-  hear({ text: {}, said: [] }); // a new compile asks again
-  shown();
-  await new Promise((r) => setTimeout(r));
-  assert.deepEqual(
-    shown()
-      .map((n) => n.key)
-      .filter((k) => String(k).startsWith('todo')),
-    [],
-  );
+  const listed = () => shown().filter((n) => String(n.key).startsWith('todo')).length;
+  for (const failed of [
+    [500, null],
+    [0, null],
+  ] as [number, unknown][]) {
+    todo = failed; // a 500, then a rejected ask
+    hear({ text: {}, said: [] }); // a new compile asks again
+    assert.equal(listed(), 1); // the last rows stay until it answers
+    await new Promise((r) => setTimeout(r));
+    assert.equal(listed(), 0);
+    todo = [200, [{ file: 'world/cellar.md', words: 3, placeholders: [] }]];
+    hear({ text: {}, said: [] });
+    shown();
+    await new Promise((r) => setTimeout(r));
+  }
 });
 
 // Breaks: the notice naming the step before or after the refused one (an off-by-one between the

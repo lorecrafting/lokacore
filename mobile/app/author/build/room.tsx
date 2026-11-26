@@ -212,7 +212,7 @@ sheets.room = {
           {act(WORDS.fields, () => known.open(`def:${r.file}`))}
         </View>
       ) : null,
-      foot(r.key, r.file, `room:${r.key}`, referrers('room', r.key)),
+      foot(r.key, r.file, `room:${r.key}`, referrers('room', r.key, r.file)),
     ];
   },
 };

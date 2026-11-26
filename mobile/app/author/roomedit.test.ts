@@ -62,8 +62,19 @@ async function opened(
         },
       ];
     if (path === '/find?q=hen')
-      // two definitions name the person hen, one an item hen
-      return [200, { refs: [{ kind: 'npc' }, { kind: 'item' }, { kind: 'npc' }] }];
+      // two definitions name the person hen, one an item hen; hen's own ref and the layout row leave nothing dangling
+      return [
+        200,
+        {
+          refs: [
+            { kind: 'npc' },
+            { kind: 'item' },
+            { kind: 'npc' },
+            { kind: 'npc', by: 'npcs/hen' },
+            { kind: 'npc', by: 'layout' },
+          ],
+        },
+      ];
     if (path === '/templates')
       return [
         200,
@@ -294,8 +305,8 @@ test("Delete placement drops a person's room and an item's location; Fields open
   Object.assign(doc, was);
 });
 
-// Breaks: the count taking every ref to the key (another kind's too) or none, a failed /find
-// showing a count, or a deleted person's sheet left open.
+// Breaks: the count taking every ref to the key (another kind's, its own, the layout row's) or none, a failed /find
+// showing a count, or a deleted person's sheet or its definition's left open.
 test("a person's Delete names its referrers; with /find failing it shows no count", async () => {
   const s = await opened(() => [200, {}]);
   s.on(() => sheets.npc.body('hen'));
@@ -306,7 +317,7 @@ test("a person's Delete names its referrers; with /find failing it shows no coun
     s.posts.map(([path, sent]) => [path, sent.file]),
     [['/delete', 'npcs/hen.json']],
   );
-  assert.deepEqual(s.closed, ['npc:hen']);
+  assert.deepEqual(s.closed, ['npc:hen', 'def:npcs/hen.json']);
   s.on(() => sheets.item.body('cup')); // /find answers 404 for cup
   s.shown();
   await settle();
@@ -420,7 +431,7 @@ test('Delete room asks in the sheet about the files it also takes; refusals show
 });
 
 // Breaks: a Delete question left unanswered locking every later press (the code-review lock), the
-// press that answers it Keep being spent, a deleted room's sheet left open (or another closed),
+// press that answers it Keep being spent, a deleted room's sheet or its definition's left open (or another closed),
 // or a Keep closing it.
 test('a confirmed delete closes its own sheet; another press answers a pending question Keep and goes on', async () => {
   let deletes = 0;
@@ -439,7 +450,7 @@ test('a confirmed delete closes its own sheet; another press answers a pending q
   assert.deepEqual(s.closed, []);
   await s.press('Delete hall');
   await s.press('Delete all');
-  assert.deepEqual(s.closed, ['room:hall']);
+  assert.deepEqual(s.closed, ['room:hall', 'def:rooms/hall.json']);
 });
 
 // Breaks: a /story that does not answer 200 (a compile error) leaving a refusal or a Delete
