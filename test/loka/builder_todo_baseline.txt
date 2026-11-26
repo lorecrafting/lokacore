@@ -5,17 +5,17 @@ cartridge.requires.book.delete
 cartridge.supported_profiles.book.delete
 cartridge.title.book.delete
 cartridge.version.book.delete
-dialogues.policy.book.create
-dialogues.policy.book.edit
-dialogues.policy.book.delete
-outline.parts.book.create
-outline.parts.book.edit
-outline.parts.book.delete
-scenes.abstract.book.create
-parity:device-size  # ruling 6, panel-only
+dialogues.policy.book.create  # loka-hcnlh.56
+dialogues.policy.book.edit  # loka-hcnlh.56
+dialogues.policy.book.delete  # loka-hcnlh.56
+outline.parts.book.create  # loka-hcnlh.45
+outline.parts.book.edit  # loka-hcnlh.45
+outline.parts.book.delete  # loka-hcnlh.45
+scenes.abstract.book.create  # loka-hcnlh.52
+parity:device-size  # ruling 6, panel-only, refused
 parity:map-pan-zoom-keys  # 6.5
 parity:story-row-sheets
-parity:inspector-header
+parity:inspector-header  # loka-hcnlh.71
 parity:palette  # 6.5
 parity:open-source-key  # 6.5
 parity:column-folds  # 6.5
