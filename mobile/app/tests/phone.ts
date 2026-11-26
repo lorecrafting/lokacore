@@ -3,7 +3,7 @@
 // on, so this drives Playwright directly, as .storybook/live.ts does. It compiles a copy of
 // cellar_sampler with `bin/loka dev --watch`, serves the author preview (`npm run author`) on free
 // ports, and stops both. Out of reach of emulation: the real keyboard and the notch.
-import { spawn, spawnSync, type ChildProcess } from 'node:child_process';
+import { spawn, type ChildProcess } from 'node:child_process';
 import { cpSync, existsSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { createServer } from 'node:net';
 import { tmpdir } from 'node:os';
@@ -36,10 +36,20 @@ const env = {
 };
 const url = `http://localhost:${preview}/`;
 const servers: ChildProcess[] = [];
-const serve = (cmd: string, args: string[], cwd: string) =>
-  servers.push(
-    spawn(cmd, args, { cwd, env, stdio: ['ignore', 'ignore', 'inherit'], detached: true }),
-  );
+const serve = (cmd: string, args: string[], cwd: string) => {
+  const s = spawn(cmd, args, { cwd, env, stdio: ['ignore', 'pipe', 'inherit'], detached: true });
+  servers.push(s);
+  return (s.stdout.resume(), s); // drained: a full pipe would stall the server
+};
+// Polls `ok` until true; fails early when a server has exited, as nothing then would answer.
+async function wait(ok: () => boolean | Promise<boolean>, what: string) {
+  for (const start = Date.now(); !(await ok()); await new Promise((r) => setTimeout(r, 500))) {
+    const dead = servers.find((s) => s.exitCode !== null || s.signalCode !== null);
+    if (dead)
+      throw new Error(`${dead.spawnargs.join(' ')} exited: ${dead.exitCode ?? dead.signalCode}`);
+    if (Date.now() - start > 120_000) throw new Error(`${what} not in 120 s`);
+  }
+}
 // iPhone 15: 393 x 659, touch, iOS Safari UA. A persistent profile, as Safari's: an ephemeral
 // WebKit context opens no OPFS, so the save could not be opened at all.
 const phone = (name: string) =>
@@ -51,24 +61,30 @@ const LONG = { timeout: 300_000 }; // the first page waits out Metro's cold bund
 
 before(async () => {
   cpSync(join(repo, 'cartridges/cellar_sampler'), cart, { recursive: true });
-  const built = spawnSync('bin/loka', ['dev', cart], { cwd: repo, env, stdio: 'inherit' });
-  assert.equal(built.status, 0, 'bin/loka dev compiled the copy');
-  serve('bin/loka', ['dev', cart, '--watch'], repo);
+  let watching = false; // the watcher's line once its first compile wrote the artifact
+  serve('bin/loka', ['dev', cart, '--watch'], repo).stdout.on(
+    'data',
+    (b) => (watching ||= `${b}`.includes('Watching ')),
+  );
+  await wait(() => watching, 'the watcher');
+  assert.ok(existsSync(join(app, artifact)), 'bin/loka dev compiled the copy');
   serve('node', ['preview-server.cjs'], app);
-  for (
-    const start = Date.now();
-    !(await fetch(url).then(
-      (r) => r.ok,
-      () => false,
-    ));
-  ) {
-    if (Date.now() - start > 120_000) throw new Error('the preview did not start in 120 s');
-    await new Promise((r) => setTimeout(r, 500));
-  }
+  await wait(
+    () =>
+      fetch(url).then(
+        (r) => r.ok,
+        () => false,
+      ),
+    'the preview',
+  );
 });
 
-after(() => {
-  for (const s of servers) if (s.exitCode === null) process.kill(-s.pid!, 'SIGTERM');
+after(async () => {
+  await ctx?.close(); // the builder's profile lives in tmp
+  for (const s of servers)
+    try {
+      process.kill(-s.pid!, 'SIGTERM');
+    } catch {} // already gone
   rmSync(tmp, { recursive: true, force: true });
   rmSync(join(app, artifact, '..'), { recursive: true, force: true });
 });
@@ -146,7 +162,7 @@ async function drag(l: Locator, dy: number) {
     (el, { x, y, dy }) => {
       const d = document as Document & {
         createTouch(...a: unknown[]): Touch;
-        createTouchList(...t: Touch[]): TouchList;
+        createTouchList(...t: Touch[]): Touch[]; // typed as the init's array: WebKit refuses a real one
       };
       const list = (yy?: number) =>
         yy === undefined
@@ -188,7 +204,6 @@ const builder = () =>
     await p.getByRole('switch', { name: 'Build' }).tap(LONG);
     await p.getByRole('button', { name: 'Edit Ferry Landing' }).tap();
   })());
-after(() => ctx?.close());
 
 // Catches: the sheet docking beside the Book at phone width (DOCK.at), or a row overflowing it.
 test('the Room sheet rises over the Book at half height, full width, modal', LONG, async () => {
@@ -233,7 +248,7 @@ test(
 test('a line edits in place, and Undo puts it back', LONG, async () => {
   await builder();
   const line = p.getByRole('button', { name: /^Reeds crowd .*, edit$/ });
-  const was = (await line.textContent())!;
+  const was = said();
   await line.tap();
   await p.getByRole('textbox').fill('A wet landing.');
   await p.getByRole('button', { name: 'Save' }).tap();
