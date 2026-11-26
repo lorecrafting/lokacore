@@ -13,11 +13,11 @@ parity = JSON.decode!(File.read!(Path.join(root, parity_table)))
 todo = File.read!(Path.join(root, todo_baseline))
 notyet_list = "test/loka/builder_generic_notyet.txt"
 notyet = File.read!(Path.join(root, notyet_list))
-# rooms.name with its book create set to v (nil drops the key)
+# dialogues.policy (book create still todo) with its book create set to v (nil drops the key)
 book = fn v ->
-  b = editor["rooms.name"]["book"]
+  b = editor["dialogues.policy"]["book"]
   b = if v, do: Map.put(b, "create", v), else: Map.delete(b, "create")
-  Map.put(editor, "rooms.name", Map.put(editor["rooms.name"], "book", b))
+  Map.put(editor, "dialogues.policy", Map.put(editor["dialogues.policy"], "book", b))
 end
 
 panel = &[Map.put(hd(parity), "panel", &1) | tl(parity)]
@@ -74,7 +74,7 @@ editor_controls =
          "services.name.edit: no longer generic"},
         {"grown", %{main: String.replace(base, "services.name.edit\n", "")},
          "services.name.edit: not in main's baseline"},
-        {"book-dropped", %{registry: book.(nil)}, "rooms.name: book create missing"},
+        {"book-dropped", %{registry: book.(nil)}, "dialogues.policy: book create missing"},
         {"notyet-generic",
          %{registry: put_in(editor, ["outline.parts", "book", "delete"], "generic")},
          "outline.parts.book.delete: no longer not yet generic, delete the line"},
@@ -85,15 +85,15 @@ editor_controls =
          %{notyet_main: String.replace(notyet, ~r/^outline\.parts\.book\.delete .*\n/m, "")},
          "outline.parts.book.delete: not in main's baseline"},
         {"book-missing", %{registry: book.("Nope.tsx")},
-         "rooms.name: book create Nope.tsx: no such file"},
+         "dialogues.policy: book create Nope.tsx: no such file"},
         {"book-escape", %{registry: book.("../panel.tsx")},
-         "rooms.name: book create ../panel.tsx: no such file"},
+         "dialogues.policy: book create ../panel.tsx: no such file"},
         {"book-accepted", %{registry: book.("RedSheet.tsx"), sheet: ""},
-         "rooms.name.book.create: no longer todo"},
-        {"todo-unlisted", %{todo: String.replace(todo, "rooms.name.book.create\n", "")},
-         "rooms.name.book.create: todo but not in the baseline"},
-        {"todo-grown", %{todo_main: String.replace(todo, "rooms.name.book.create\n", "")},
-         "rooms.name.book.create: not in main's baseline"},
+         "dialogues.policy.book.create: no longer todo"},
+        {"todo-unlisted", %{todo: String.replace(todo, "dialogues.policy.book.create\n", "")},
+         "dialogues.policy.book.create: todo but not in the baseline"},
+        {"todo-grown", %{todo_main: String.replace(todo, "dialogues.policy.book.create\n", "")},
+         "dialogues.policy.book.create: not in main's baseline"},
         {"parity-panel", %{parity: panel.("tools/author-panel/src/nope.tsx")},
          "\"hierarchy\": no panel file"},
         {"parity-escape", %{parity: panel.("../outside.tsx")}, "\"hierarchy\": no panel file"},
@@ -101,8 +101,8 @@ editor_controls =
          "\"hierarchy\": book generic: refused"},
         {"parity-duplicate", %{parity: parity ++ [hd(parity)]},
          "\"hierarchy\": ids are unique strings"},
-        {"parity-unlisted", %{todo: String.replace(todo, "parity:hierarchy\n", "")},
-         "parity:hierarchy: todo but not in the baseline"}
+        {"parity-unlisted", %{todo: String.replace(todo, "parity:project-tabs\n", "")},
+         "parity:project-tabs: todo but not in the baseline"}
       ] do
     files =
       for {k, v} <- planted,

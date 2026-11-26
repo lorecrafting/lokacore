@@ -417,6 +417,14 @@ the header row `dim`, no columns. The sheet foot: the path `type.small` `dim` wi
 padding, after the body. No raw sizes. No new ink pair: every tone above is already on `card`.
 Worst pair: `warning` on `card`,
 4.75 (light).
+Builder 6.3a: the Room sheet's summary is one Room sheet row: its parts (`dark` and the variants
+acts, the exits `type.small` `dim`) and the ` · ` dots (`type.small` `dim`) are row items with no
+padding of their own (`inRow`), so the first part sits at the sheet's text edge and the row's gap
+alone spaces them. `Door`, `Lock`, `One-way`, `Delete placement`, `Fields`, `Go to <room>` and the
+Delete foot are acts in Room sheet rows; Door and Lock when refused are greyed rows, the reason shown
+once. Delete with referrers is a pressable greyed row, its reason the count. A Checks `/todo` row is a link
+(`type.small` `action`) as tall as one touch target, its placeholder lines `type.small` `dim`
+under it, not pressable. No raw sizes; no new ink pair.
 
 Not adopted from the mock (no live consumer): the text drawer and its command chips, topic
 chips and scene pick cards. The mock's shop price rows are not adopted either: a stock, sale or service row is an

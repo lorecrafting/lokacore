@@ -15,15 +15,22 @@ import { drop } from '../../../../kernel/ts/play/drop.ts';
 import { size, space, type } from '../../book/tokens.ts';
 import { ink } from './build.ts';
 import type { Hooks } from './field.tsx';
-import { act } from './sheet.tsx';
+import { act, greyed } from './sheet.tsx';
 
+// placeholders: the owner writes these words
 const WORDS = {
+  door: 'Door',
+  lock: 'Lock',
+  barred: (key: string) => `has ${key}`,
+  oneWayOnly: 'one-way: no way back to bar',
   oneWay: 'One-way',
   unlink: 'Delete',
   grow: (dir: string) => `＋ ${dir}`,
   area: 'Area',
   move: 'Move to area',
-  drop: (key: string) => `Delete ${key}`,
+  drop: (key: string, refs?: number) =>
+    refs === undefined ? `Delete ${key}` : `Delete ${key} · ${WORDS.refs(refs)}`,
+  refs: (n: number) => `${n} referrers`,
   also: (files: string[]) => `Also deletes ${files.join(', ')}`,
   yes: 'Delete all',
   no: 'Keep',
@@ -121,11 +128,30 @@ export const refusal = () =>
     </Text>
   ) : null;
 
-/** An exit's actions: One-way (drops the way back) and Delete (both legs). */
-export const exitActs = (r: MapRoom, dir: string, rooms: MapRoom[]) => [
-  act(WORDS.oneWay, () => void run(() => ed.oneWay(r, dir, rooms))),
-  act(WORDS.unlink, () => void run(() => ed.unlink(r, dir, rooms))),
-];
+/** An exit's actions: Door and Lock (a new closed or locked barrier on both faces; greyed where
+ * mapedit `barrier` refuses), One-way (drops the way back) and Delete (both legs). */
+export const exitActs = (r: MapRoom, dir: string, rooms: MapRoom[], nodes: Node[]) => {
+  const e = r.exits.find((x) => x.dir === dir);
+  const there = rooms.find((x) => x.key === e?.to);
+  const why = e?.barrier
+    ? WORDS.barred(e.barrier)
+    : there?.exits.some((x) => x.dir === BACK[dir] && x.to === r.key)
+      ? ''
+      : WORDS.oneWayOnly;
+  const bar = (label: string, locked: boolean) =>
+    why
+      ? greyed(label, locked ? '' : why, label) // the reason once, on Door
+      : act(label, () => {
+          const key = freeKey('barrier', 'barrier', nodes, []);
+          void run(() => ed.barrier(r, dir, rooms, key, locked));
+        });
+  return [
+    bar(WORDS.door, false),
+    bar(WORDS.lock, true),
+    act(WORDS.oneWay, () => void run(() => ed.oneWay(r, dir, rooms))),
+    act(WORDS.unlink, () => void run(() => ed.unlink(r, dir, rooms))),
+  ];
+};
 
 /** `＋` on each side with no exit and, when placed, no room on the cell: a new room that way,
  * its words `~`, in this room's area. */
@@ -195,9 +221,10 @@ export const moveTo = (r: MapRoom) => (
   </View>
 );
 
-/** The sheet's foot: Delete, then the other files it takes, asked in the sheet. */
-export function foot(r: MapRoom) {
-  if (asking?.key === r.key) {
+/** A sheet's foot: Delete `key` (`refs` definitions name it, when known), then the other files it
+ * takes, asked in the sheet; once it is gone, sheet `shut` and the key's other sheets close. */
+export function foot(key: string, file: string | undefined, shut: string, refs?: number) {
+  if (asking?.key === shut) {
     const { files, answer } = asking;
     const say = (yes: boolean) => () => ((asking = undefined), answer(yes));
     return (
@@ -209,20 +236,27 @@ export function foot(r: MapRoom) {
     );
   }
   const ask = (files: string[]) =>
-    new Promise<boolean>((answer) => ((asking = { key: r.key, files, answer }), after()));
+    new Promise<boolean>((answer) => ((asking = { key: shut, files, answer }), after()));
+  const press = () =>
+    void run(async () => {
+      if (!file) return WORDS.noFile(key);
+      let yes = true;
+      const why = await drop(io, key, file, (files) => ask(files).then((y) => (yes = y)));
+      // it is gone: its sheets go too (kind and definition), wherever they sit
+      const sheets = new Set([
+        shut,
+        `${nodeOf(file.split('/').at(-2) ?? '')}:${key}`,
+        `def:${file}`,
+      ]);
+      if (why === '' && yes) sheets.forEach((id) => close(id));
+      return why;
+    });
+  // named elsewhere: greyed, still pressable so the server's refusal names the referrers
   return (
     <View key="foot" style={row}>
-      {act(
-        WORDS.drop(r.key),
-        () =>
-          void run(async () => {
-            if (!r.file) return WORDS.noFile(r.key);
-            let yes = true;
-            const why = await drop(io, r.key, r.file, (files) => ask(files).then((y) => (yes = y)));
-            if (why === '' && yes) close(`room:${r.key}`); // the room is gone: its sheet goes too, wherever it sits
-            return why;
-          }),
-      )}
+      {refs
+        ? greyed(WORDS.drop(key), WORDS.refs(refs), 'drop', press)
+        : act(WORDS.drop(key, refs), press)}
     </View>
   );
 }

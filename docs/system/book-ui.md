@@ -981,7 +981,10 @@ reasons and limits: [prose in the Book rulings](../design/prose-in-the-book-ruli
     confirmed`, `<key>: unwritten`. A row whose key this page draws as a field closes every open
     sheet (on a phone one left open would cover the line) and opens that field; any other key opens its source, a refusal its file, both leaving the sheet
     open; a refusal with no file is plain text, not a control. No rows: one line, `Nothing to
-    check.` (placeholder words, the owner's to replace).
+    check.` (placeholder words, the owner's to replace). Below them (6.3a, the panel's Still to
+    write), one row per source file still holding `~` (GET `/todo`, asked again per compile),
+    naming the file, its count of `~` lines still to write, and its placeholder lines in dim under it;
+    the file opens its source. `Nothing to check.` shows only when both lists are empty.
   - **Keep-my-place notice.** While the replay of the recorded path stands refused, a second strip
     row reads, politely, `Couldn't keep your place: step N, <step>, was refused.` (`step N was
     refused.` when the step has no name), with Build on or off, and offers `Drop it and go on`;
@@ -999,7 +1002,9 @@ reasons and limits: [prose in the Book rulings](../design/prose-in-the-book-ruli
     sheet's scroll survive a reload; leaving Build closes every sheet.
   - **Sheet foot** (6.2b, the panel's source footer). A sheet that draws one source file (a Room,
     Person or Item sheet) ends its body with that file's path; a sheet titled by its path (the
-    generic sheet) or drawing no single file has none.
+    generic sheet) or drawing no single file has none. Above it (6.3a, §4.9) every sheet of one
+    deletable definition (Room, Person, Item, and the generic sheet of a file under a folder; never
+    a root file) ends with `Delete <key>`, as Room sheet edits run it.
   - **Two layouts** (ruling 7). Where the window holds the full page column with a docked sheet
     beside it (the page column and half of it again), the sheet docks at the Book's right edge,
     half a page column wide, not modal, and the Book beside it keeps its full column and stays
@@ -1011,21 +1016,28 @@ reasons and limits: [prose in the Book rulings](../design/prose-in-the-book-ruli
   - **Title pencil.** In Build the room page's own title is followed by a pencil button named
     `Edit <title>`, which opens that room's sheet (2.2 adds the name pencil). An unwritten title shows its field
     name `title`, as Build's in-place field draws an unwritten line.
-  - **Room sheet.** Titled by the room's title. At its top, a summary line: `<area> · N exits`
-    (`No area` at the root, `1 exit`). Then a row per exit, `<dir> → <room>`, with `One-way` (drops
-    the way back) and `Delete` (removes both ways). Then `＋ <dir>` for each side with no exit (for
+  - **Room sheet.** Titled by the room's title. At its top, a summary line (6.3a, §4.3 item 2):
+    `dark · N variants · N exits` (`1 variant`, `1 exit`), each absent part left out (its look
+    in the catalogue); the dark and variants parts are actions opening the room's `def:` sheet, the
+    exits plain (their rows are below). The area is not in it: the `Area` field holds it. Then a row
+    per exit, `<dir> → <room>`, with `Door` and `Lock` (a new closed or locked barrier on both faces,
+    under a generated `barrier_N` key), `One-way` (drops the way back) and `Delete` (removes both
+    ways); Door and Lock are greyed, with one reason shown once, on an exit that already has a
+    barrier or has no way back. Then `＋ <dir>` for each side with no exit (for
     a room on the map grid, also none toward a cell another room holds): it makes a new room
     there, keyed `room_N`, in this room's area, linked both ways, every word unwritten. Then an
     `Area` field, shown holding the room's area, and `Move to area`, which moves the room to the
-    typed area (empty: the root). Last, `Delete <key>`. A room with an unwritten title shows its
+    typed area (empty: the root). Then `Fields`, opening the room's `def:` sheet. Last, `Delete <key>`. A room with an unwritten title shows its
     key wherever the sheet names it (title, breadcrumb, exit rows, `Edit <key>`; ruling 9), never
     `~`.
   - **Room sheet edits.** One runs at a time; a press while one runs does nothing. A refusal (the
     server's words, or `<key>: no source file` for a room with none) shows, as an alert, at the
     sheet's top until the next press. When Delete would take other files, the foot reads `Also
     deletes <files>` with `Delete all` and `Keep`; any other press on a sheet answers Keep first,
-    then does its own edit. The server's refusal names a deleted room's referrers; no count is
-    shown before. A deleted room's sheet closes wherever it sits in the stack. Labels here are
+    then does its own edit. The server's refusal names a deleted room's referrers. Once read (6.3a, §4.9), Delete reads
+    `Delete <key> · N referrers`, N counted by the same rule as the server's delete gate (find.ts
+    `users()`, `extends` included); while N > 0 it is greyed, its reason the count, and still pressable,
+    so the server's refusal names the referrers. A deleted room's sheet closes wherever it sits in the stack. Labels here are
     placeholder words, the owner's to replace.
 - **Build: Add here, the Person and Item sheets, Contents, unwritten links** (slice 2.2,
   [builder mode §4.4, §4.9, ruling 9](../rnd/in-game-builder-mode-2026-11-19.md)). Every edit here
@@ -1044,6 +1056,8 @@ reasons and limits: [prose in the Book rulings](../design/prose-in-the-book-ruli
     and `Move`. The field shows the current holder while its kind is the current one, else empty.
     Move with the field empty does nothing; a key no definition of that kind holds is refused
     without a write. A thing a spawn places shows `Spawned by <template>` instead, with no field.
+    A placed thing also offers `Delete placement` (6.3a; removes where it starts), then `Fields`
+    (its `def:` sheet), then the Delete foot.
   - **Contents (minimal).** While Build is on the strip carries a button `Notebook` before
     `Checks`; it opens the Notebook sheet, or closes it when that is the top sheet. One row per
     kind a starter exists for, each with `New <kind>`; a kind whose key is the author's (text,
@@ -1051,7 +1065,8 @@ reasons and limits: [prose in the Book rulings](../design/prose-in-the-book-ruli
     makes the kind's starter under a free key (or the typed one); a person or item opens its
     sheet, any other kind stays on Contents. Under each kind's row, in a row of its own, its JSON
     source files the latest story names, sorted by path; a file opens its `def:<file>` sheet
-    (Build: the generic sheet) on top.
+    (Build: the generic sheet) on top. A file that defines rooms is followed by `Go to <room>` per
+    room (6.3a), which plays from that room.
   - **Story (5.4b, [builder mode §4.8](../rnd/in-game-builder-mode-2026-11-19.md#48-the-story-on-a-phone)).**
     The Notebook sheet has four tabs, `Contents`, `Story`, `World` (6.1a) and `Tools` (6.2a); the open tab is marked selected. Story
     shows the refusal line, then `Facts` and `Pacing`, then each part (`Part n Title`) with a number
