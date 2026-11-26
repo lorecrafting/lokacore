@@ -122,7 +122,7 @@ export function matches(keys: string[], text: string) {
     ...by((k) => k !== t && k.startsWith(t)),
     ...by((k) => !k.startsWith(t) && k.includes(t)),
   ];
-  return { shown: all.slice(0, SHORT), more: all.length - SHORT };
+  return { shown: all.slice(0, SHORT), more: Math.max(0, all.length - SHORT) };
 }
 
 const typing = new Map<string, string>(); // a long-list field's text since its last keystroke, until a write or a blur on its key
@@ -180,9 +180,9 @@ function input(
 ) {
   return (
     <TextInput
-      key={`${key} ${value}`} // a write mounts the field again, showing the key
+      key={key}
       accessibilityLabel={label}
-      defaultValue={text ?? value}
+      value={text ?? value}
       style={INPUT}
       onFocus={(e) => {
         raise.full();
@@ -196,7 +196,8 @@ function input(
       onBlur={() => {
         const t = typing.get(key);
         if (pressing || t === undefined) return;
-        if (keys.includes(t)) write(t);
+        if (t === '' || keys.includes(t))
+          write(t || value); // emptied: the key shows again
         else (told.add(key), known.redraw());
       }}
     />

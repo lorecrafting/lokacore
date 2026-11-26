@@ -272,7 +272,7 @@ test('matches: the equal key, then those starting with the text, then those cont
   const keys = ['xa', 'a2', 'A', 'ba', 'a1', 'ca', 'da', 'ea', 'b'];
   assert.deepEqual(matches(keys, 'a'), { shown: ['A', 'a2', 'a1', 'xa', 'ba', 'ca'], more: 2 });
   assert.deepEqual(matches(keys, ''), { shown: keys.slice(0, 6), more: 3 }); // an emptied field matches every key
-  assert.deepEqual(matches(keys, 'b'), { shown: ['b', 'ba'], more: -4 });
+  assert.deepEqual(matches(keys, 'b'), { shown: ['b', 'ba'], more: 0 });
 });
 
 /** Story nodes `n` (with files and bundles) read again; the sheet of `file`, its field `label`. */
@@ -335,7 +335,8 @@ test('a population corpse picks the keys the panel offers; nope stays at the fie
 });
 
 // break: matches show before a keystroke, the typed key is sent before the pressed one, a non-key
-// leaves the field, the refusal is read per keystroke or at the sheet's top, or +N more is off
+// leaves the field, the refusal is read per keystroke or at the sheet's top, +N more is off, or a press
+// on the held key or an emptied field's blur leaves the typed text showing
 test('a cartridge entry with 11 rooms: room_1 then a press on room_12 writes only room_12; zz refuses at the field', async (t) => {
   const cart = structuredClone(files.get('cartridge.json'));
   t.after(() => ((storyNodes = [{ ref: 'r1', kind: 'room' }]), files.set('cartridge.json', cart)));
@@ -366,6 +367,14 @@ test('a cartridge entry with 11 rooms: room_1 then a press on room_12 writes onl
   assert.deepEqual(sent(), []);
   assert.deepEqual(g.said(), [['no room zz', 'polite']]); // read once it leaves the field
   assert.equal(refused(), '');
+  await g.typed('room_1', false);
+  g.s.find('room_12').props.onPress(); // the key it already holds
+  await settle();
+  assert.deepEqual([sent(), g.input().props.value], [[], 'room_12']);
+  await g.typed('', false);
+  g.input().props.onBlur(); // emptied, then left: the key shows again, nothing told or sent
+  await settle();
+  assert.deepEqual([sent(), g.input().props.value, g.said()], [[], 'room_12', []]);
   await g.typed('room', false);
   assert.deepEqual(shown(), ['room_1', 'room_2', 'room_3', 'room_4', 'room_5', 'room_6']);
   assert.ok(g.s.shown().some((x) => words(x) === WORLD.more(4)));

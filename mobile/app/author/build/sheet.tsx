@@ -103,7 +103,6 @@ export function Sheet({ open, saved }: Stack) {
   return (
     <ScrollView
       ref={scroller}
-      keyboardShouldPersistTaps="handled" // a match pressed with the keyboard up acts on the first tap
       // A sheet is card paper (§5).
       style={[StyleSheet.absoluteFill, { backgroundColor: ink('card') }]}
       onContentSizeChange={() => {
