@@ -32,3 +32,16 @@
 2. **Should-fix**: the PR body "Runs" claims `bin/mutate_diff.sh origin/main: 0 mutants`. The rerun at this head gives 3 mutants with 1 SURVIVED (Finding 1). Correct the table.
 3. **Nit**: `lib/loka/content/starters.ex:326` (`Parts.pretty_over`). A one-room patch rewrites the whole bundle in 2-space style. In `speech_sampler` every inline `{ "prose": … }` in rooms, NPCs and dialogues expands (+79/−21 lines). Key order and values are kept, Undo restores the bytes, and `play/write.ts` `json()` already formats #807's bundle edits the same way. Not byte-for-byte as the brief asked; the cost is diff noise only.
 4. **Nit (author-side)**: `lib/loka/content/starters/area.ex:87` `Map.put`. Bundle `marsh` holds `alpha`, `marsh`, `ferry_far` (all placeholder), then `new transports ferry --area marsh` returns `{:ok, …}`. `alpha`'s detail patch is silently dropped and the compile fails. The PR's "the clash refusal still fires" holds only when `ferry_far` has words. Cheap fix: `Map.update(files, bundle, new, &Merge.merge(&1, new))`.
+
+## Re-check: fix round at `e0b6ba73e`
+
+Commits reviewed: the fix round only, up to `e0b6ba73e`. CI on that head: graph-diff, book-e2e and ci are all green.
+
+- **Finding 1, closed.** The bundled test now adds root NPC `keeper` and `dialogues greet --area marsh`, and asserts `npc == "keeper"`. Red control: the `starters.ex:244` `and → or` mutant turns that test red.
+- **Finding 2, closed.** The PR body's mutate table now matches the rerun.
+- **Finding 3, open (nit).** The bundle is still reformatted. The cost is diff noise only.
+- **Finding 4, closed.** `area.ex:87` is now `Map.update(…, &Merge.merge(&1, new))`, and a new test sends two room patches into one bundle. Red control: reverting to `Map.put` turns that test red.
+- **Size allowance.** `content_starters_test.exs` went to 740 lines (the file is 739). The allowance is tight, and the only growth is the two tests the findings asked for. Accepted.
+- `mix test test/loka/content_starters_test.exs`: 29 passed.
+
+**Verdict: APPROVE WITH NOTES** (Finding 3 stays open as a nit).

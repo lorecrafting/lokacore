@@ -11,7 +11,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 (commit `997a7a8`, `docs/rewrite-v3/reviews/`).
 
 - [Review: Phone checks in WebKit with an iPhone profile (PR #804, loka-hcnlh.61)](2026-11-26-phone-webkit-review.md): **APPROVE WITH NOTES**
-- [Review: New room, NPC and item from a bundled room (PR #809, loka-hcnlh.78)](2026-11-26-new-from-bundled-room-review.md): **CHANGES REQUIRED**
+- [Review: New room, NPC and item from a bundled room (PR #809, loka-hcnlh.78)](2026-11-26-new-from-bundled-room-review.md): **APPROVE WITH NOTES**
 - [Review: Map edits on full-ref exits (PR #806, loka-hcnlh.74)](2026-11-26-mapedit-object-exits-review.md): **APPROVE WITH NOTES**
 - [Review: Map edits on area-bundle rooms (PR #807, loka-hcnlh.77)](2026-11-26-mapedit-bundled-rooms-review.md): **APPROVE WITH NOTES**
 - [Review: Safari save lock after leaving the Book, end the save worker on pagehide (PR #803, loka-hcnlh.19.5)](2026-11-25-safari-bfcache-lock-review.md): **APPROVE WITH NOTES**
