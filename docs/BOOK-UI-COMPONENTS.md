@@ -355,7 +355,7 @@ Builder 5.1a: the Dialogue sheet is the generic sheet; a choice is a fold. `Rena
 `Choice key` field is the map's Key field, its placeholder `type.small` in `dim`. A link and its
 nested set are each indented `space.md` more; the set's prompt and labels `type.small` in `dim`,
 one per line, wrapping. `＋ Add dialogue` on the Person sheet is an act.
-Builder 5.4b: the Notebook's `Contents`, `Story` and (6.1a) `World` tabs are acts. Story rows are Room sheet rows,
+Builder 5.4b: the Notebook's `Contents`, `Story`, (6.1a) `World` and (6.2a) `Tools` tabs are acts. Story rows are Room sheet rows,
 each level indented half a touch target more; a part's, beat's or definition's name with its marks
 (joined by ` · `) is an act, a Seed's name `type.small` `fg`; Facts, Pacing, Add beat, Go there,
 Sheet, Trace, Consequences, Retitle, Remove, Knowledge, `Bind…` and each `Bind <short>` are acts,
@@ -395,6 +395,14 @@ wrapping at 390 px and in the 384 px docked sheet; 6.1b's world files are the sa
 full path, on a row of their own. A reference field's picks are the generic
 sheet's option buttons under its typed field, the present one a selected act, wrapping the same.
 No raw sizes.
+Builder 6.2a: the Tools tab's rows are Room sheet rows, wrapping at 390 px. `Hold`, `Replay <name>`,
+`Pin`, `Save checkpoint`, `Advance`, `Go to room`, `Set fact` and `Set level` are acts; Hold while on
+and the pinned Pin are selected acts; a greyed act is the refused greyed row's look, still a touch
+target tall and named disabled. Fields are the Area field, their placeholders `type.small` in `dim`,
+the minutes field Schedule's fixed width. A checkpoint's verdict is `type.small`, `dim` when it
+passes, `danger` when it fails; the failed count `type.small` `danger`; the empty and name-rule lines
+`type.small` `dim`. The strip's timing is `type.small`, `dim` within budget and `warning` over, the
+strip's last item so a changing width never moves its buttons.
 Worst pair: `warning` on `card`,
 4.75 (light).
 
