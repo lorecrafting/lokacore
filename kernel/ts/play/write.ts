@@ -17,7 +17,7 @@ import { files } from './todo.ts';
 import { type Bytes, current, DIRS, guarded, named, placed, refuse, Refused } from './guard.ts';
 import { newRefused, ROOTS, SCHEMAS, rootFile, sha256, stale, there } from './guard.ts';
 import { apply } from './edit_model.ts';
-import { others, still, taken, users } from './find.ts';
+import { gate, others, still, users } from './find.ts';
 import { edit, located } from './prose.ts';
 import { compiledCartridge, ids, restructure, set } from './scene_card.ts';
 import { loka, opened, worlds } from './worlds.ts';
@@ -112,10 +112,7 @@ function remove(t: Tree, { file, was, key, also }: Sent, artifact = '') {
     return unrow(t, path, section, key, was, artifact);
   if (!file.includes('/') || rootFile(file))
     refuse(400, `${file} is a root file: delete its rows, not the file`);
-  const at = placed(file);
-  const kind = file.endsWith('.scene') ? 'dialogues' : at?.dir; // .scene: a dialogue (source.ex)
-  const { set, left } =
-    at && kind ? taken(t.root, artifact, file, { dir: kind, key: at.key }) : { set: [], left: [] };
+  const { set, left } = gate(t.root, artifact, file);
   if (left.length) refuse(400, `${set.map((m) => m.key).join(', ')} ${still(set, left)}`);
   const before = fresh(path, was);
   return done(t, `delete ${file}`, [

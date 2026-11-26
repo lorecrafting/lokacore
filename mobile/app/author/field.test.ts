@@ -24,6 +24,7 @@ Object.assign(globalThis, {
   addEventListener() {},
   fetch: async (path: string, init?: { body: string }) => {
     if (path === '/__author/story') return { status: 200, json: async () => ({ map }) };
+    if (path === '/__author/todo') return { status: 200, json: async () => [] }; // Checks' files
     sent.push([path.split('?')[0], init && JSON.parse(init.body)]);
     const [status, body] = path.startsWith('/__author/hold') ? [200, null] : answers.shift()!;
     return { status, json: async () => body };
@@ -486,8 +487,8 @@ test("the room title's pencil opens its Room sheet: summary and exits", async ()
   const words = nodes(dialog())
     .map((n) => n.props?.children)
     .filter((c) => typeof c === 'string');
-  const at = words.indexOf('mill · 1 exit') - 1; // the summary, above the sheet's edits
-  assert.deepEqual(words.slice(at, at + 3), ['Loft', 'mill · 1 exit', 'down → cellar']);
+  const at = words.indexOf('1 exit') - 1; // the summary (design inspector-header), above the sheet's edits
+  assert.deepEqual(words.slice(at, at + 3), ['Loft', '1 exit', 'down → cellar']);
   assert.equal(words.includes('L'), true, "the sheet's foot names the room's file");
   here = 'cellar';
   const drawn = page('A low loft.', '~');

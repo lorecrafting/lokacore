@@ -147,6 +147,15 @@ export function taken(
   const left = set.flatMap((m) => users(source, artifact, m.dir, m.key)).filter((r) => !has(r.by));
   return { set, left };
 }
+/** A file delete's gate (write.ts remove, GET /users): the set it takes and what outside it still
+ * names a member; a .scene is a dialogue (source.ex), a file no dir places takes nothing. */
+export function gate(source: string, artifact: string, file: string) {
+  const at = placed(file);
+  const kind = file.endsWith('.scene') ? 'dialogues' : at?.dir;
+  return at && kind
+    ? taken(source, artifact, file, { dir: kind, key: at.key })
+    : { set: [], left: [] };
+}
 export const still = (set: Member[], left: Referrer[]) =>
   `${set[1] ? 'are' : 'is'} still named by ${left.map((r) => r.at ?? r.by).join(', ')}: change those first`;
 /** The other files a delete takes, each checked like the first (refused 409 with their shas unless

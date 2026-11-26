@@ -362,6 +362,75 @@ test('Checks lists refusals, unconfirmed and unwritten lines; the badge counts e
   assert.equal(badge({}), 'Checks');
 });
 
+// Breaks: Checks not listing /todo's files (or not asking again after a compile), a file row counting the words
+// written rather than the `~` lines left, its lines inside its touch target, a file row opening another file,
+// `Nothing to check.` beside the files or missing with both lists empty, the rows emptying while it asks again,
+// or a failed /todo listing a stale file.
+test("Checks lists /todo's files, each a link with its `~` lines under it; a failed /todo lists none", async () => {
+  const { hear, install, sheets } = await import('./build/Build.tsx');
+  const sent: unknown[] = [];
+  let todo: [number, unknown] = [
+    200,
+    [
+      {
+        file: 'world/cellar.md',
+        words: 3,
+        placeholders: ['world/cellar.md:4', 'world/cellar.md:9'],
+      },
+    ],
+  ];
+  install({
+    seen: new Map(),
+    said: new Map(),
+    redraw() {},
+    api: async (path, body) =>
+      path === '/todo'
+        ? todo[0]
+          ? todo
+          : Promise.reject(new Error('offline'))
+        : (body && sent.push([path, body]), [200, { map: [] }]),
+  });
+  hear({ text: {}, said: [] });
+  const shown = () => nodes(sheets.checks.body(''));
+  const said = () => shown().filter((n) => typeof n?.props?.children === 'string');
+  assert.deepEqual(
+    said().map((n) => n.props.children),
+    ['Nothing to check.'],
+  );
+  await new Promise((r) => setTimeout(r));
+  assert.deepEqual(
+    said().map((n) => [n.props.children, !!n.props.onPress]),
+    [
+      ['world/cellar.md · 2 words still to write', false],
+      ['world/cellar.md:4', false],
+      ['world/cellar.md:9', false],
+    ],
+  );
+  const row = shown().find((n) => n.key === 'todo world/cellar.md');
+  assert.equal(
+    nodes(row).filter((n) => typeof n?.props?.children === 'string').length,
+    1,
+    'the link holds its own line only',
+  );
+  row.props.onPress();
+  assert.deepEqual(sent, [['/open', { file: 'world/cellar.md' }]]);
+  const listed = () => shown().filter((n) => n.props?.accessibilityRole === 'link').length;
+  for (const failed of [
+    [500, null],
+    [0, null],
+  ] as [number, unknown][]) {
+    todo = failed; // a 500, then a rejected ask
+    hear({ text: {}, said: [] }); // a new compile asks again
+    assert.equal(listed(), 1); // the last rows stay until it answers
+    await new Promise((r) => setTimeout(r));
+    assert.equal(listed(), 0);
+    todo = [200, [{ file: 'world/cellar.md', words: 3, placeholders: [] }]];
+    hear({ text: {}, said: [] });
+    shown();
+    await new Promise((r) => setTimeout(r));
+  }
+});
+
 // Breaks: the notice naming the step before or after the refused one (an off-by-one between the
 // replay's index and the count the author reads).
 test('the keep-my-place notice names the refused step', () => {

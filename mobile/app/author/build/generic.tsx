@@ -13,10 +13,11 @@ import { combat } from './combat.tsx';
 import { block, field } from './form.tsx';
 import type { Block, Mechanics, Ops, Write } from './formwrite.ts';
 import { known } from './room.tsx';
-import { io, refusal } from './roomedit.tsx';
+import { foot, io, refusal } from './roomedit.tsx';
 import { lines, pages, scenic } from './scene.tsx';
 import { schedule } from './schedule.tsx';
 import { sheets } from './sheet.tsx';
+import { referrers } from './thing.tsx';
 import { world } from './world.tsx';
 
 type Got = { doc: unknown; was: string; kind: string; defs: Defs; root: Record<string, unknown> };
@@ -151,7 +152,12 @@ function body(file: string) {
   };
   // a scene's `.cut` twin, when it has one: its pages above its fields
   const cut = g.kind === 'scenes' && pages(file.replace(/\.json$/, '.cut'), 'steps' in doc);
-  return [refusal(), cut, field(at, [], g.root, g.doc)];
+  const key = file.replace(/^.*\//, '').replace(/\.\w+$/, '');
+  // a root file (cartridge.json, an areas/<a>.json bundle) is never deleted whole (write.ts remove(),
+  // guard.ts rootFile, which needs node:fs): no foot
+  const root = !file.includes('/') || /^areas\/[a-z0-9_]+\.json$/.test(file);
+  const drop = !root && foot(key, file, `def:${file}`, referrers(file));
+  return [refusal(), cut, field(at, [], g.root, g.doc), drop];
 }
 
-sheets.def = { title: (file) => file, body }; // its title is its file: no foot
+sheets.def = { title: (file) => file, body };

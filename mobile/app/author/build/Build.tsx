@@ -1,4 +1,3 @@
-// size: allow 305, the strip pads by the safe-area insets (19.6)
 // Build mode's chrome (docs/system/book-ui.md#author-mode; slice 1.2): the Build toggle and strip,
 // the sheet host, auto-hold. Only the author preview requires it (author/seam.test.ts: `BUILD`).
 import { useState, type ReactNode } from 'react';
@@ -7,11 +6,10 @@ import { size, space, type } from '../../book/tokens.ts';
 import type { Message } from '../live.ts';
 import type { Step } from '../place.ts';
 import { install as seam } from './seam.ts';
-import { go, heard as told, shut, type Hooks, type Wrote } from './field.tsx';
+import { heard as told, shut, type Hooks, type Wrote } from './field.tsx';
 import {
   autoHold,
   badge,
-  checks,
   closed,
   ink,
   keep,
@@ -33,6 +31,7 @@ import { storySheet } from './story.tsx';
 import './flow.tsx'; // registers the flow:<ref> sheet
 import { undo as putBackIds } from '../../../../kernel/ts/play/mapedit.ts';
 import { io, onSaved, refused, run, running } from './roomedit.tsx';
+import { checked } from './checks.tsx';
 import { act, CONTROL, Frame, parts, sheets, stack, stepBack } from './sheet.tsx';
 export { Sheet, sheets } from './sheet.tsx';
 export { drawn, unsee } from './seeas.tsx';
@@ -44,7 +43,6 @@ const WORDS = {
   undo: 'Undo',
   notUndone: (file: string) => `${file} changed since; not put back.`,
   source: 'Open source',
-  nothing: 'Nothing to check.',
   drop: 'Drop it and go on',
   back: 'Back to checkpoint',
   room: 'Start in this room',
@@ -190,34 +188,10 @@ async function putBack(w: Wrote | Gesture) {
 }
 const openBack = () => void api!('/open', { key: notBack!.key, words: notBack!.words });
 /** Checks: each row goes to its line; one on this page closes the sheet to show its field. */
-sheets.checks = { title: () => WORDS.checks, body: checked };
-function checked() {
-  const rows = checks(heard);
-  if (!rows.length)
-    return (
-      <Text style={{ ...type.small, color: ink('fg'), padding: space.md }}>{WORDS.nothing}</Text>
-    );
-  return rows.map((c, i) =>
-    c.key || c.file ? (
-      <Pressable
-        key={i}
-        accessibilityRole="link"
-        onPress={() => {
-          if (c.key ? go(c.key) : void api!('/open', { file: c.file }))
-            set({ ...builder, sheets: undefined });
-          redrawStrip();
-        }}
-        style={{ minHeight: size.touch, justifyContent: 'center', paddingHorizontal: space.md }}
-      >
-        <Text style={{ ...type.small, color: ink('action') }}>{c.label}</Text>
-      </Pressable>
-    ) : (
-      <Text key={i} style={{ ...type.small, color: ink('fg'), padding: space.md }}>
-        {c.label}
-      </Text>
-    ),
-  );
-}
+sheets.checks = {
+  title: () => WORDS.checks,
+  body: () => checked(heard, api!, () => set({ ...builder, sheets: undefined }), redrawStrip),
+};
 const STRIP = {
   minHeight: size.touch,
   flexDirection: 'row',
