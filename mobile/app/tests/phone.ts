@@ -291,7 +291,8 @@ test('+ Add here makes a person and opens its sheet', LONG, async () => {
 });
 
 // Catches: a match tap after typing letting the field's blur (which a browser sends before the
-// press) read its refusal aloud or write first, or Undo needing more than one step.
+// press) read its refusal aloud, or the tap writing other than once. No sampler room key is a prefix
+// of another, so a blur writing a typed key first is world.test.ts's CLICK case.
 test('a long-list field: lantern, then a tap on lantern_cellar writes only it', LONG, async () => {
   await builder();
   const entry = () => JSON.parse(readFileSync(join(cart, 'cartridge.json'), 'utf8')).entry;
@@ -314,10 +315,13 @@ test('a long-list field: lantern, then a tap on lantern_cellar writes only it', 
       });
   });
   const changes: string[] = [];
-  p.on('request', (r) => void (r.url().includes('/change') && changes.push(r.url())));
+  const count = (r: { url(): string }) =>
+    void (r.url().includes('/change') && changes.push(r.url()));
+  p.on('request', count);
   await sheet().getByRole('button', { name: 'lantern_cellar' }).tap();
   assert.deepEqual(await p.evaluate(() => (window as Window & { told?: string[] }).told), []);
   await until(() => entry() === 'lantern_cellar', 'picked');
+  p.off('request', count);
   assert.equal(changes.length, 1, 'one write');
   await p.getByRole('button', { name: 'Undo' }).tap();
   await until(() => entry() === was, 'one Undo');

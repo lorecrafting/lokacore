@@ -306,13 +306,14 @@ async function compiled(n: typeof storyNodes, file: string, label: string) {
 }
 
 // break: the Book offers another area's item or one its area bundles (not the panel's reachable list),
-// a non-key leaves the field or refuses at the sheet's top, or a field with no keys of its kind refuses
+// a non-key leaves the field or refuses at the sheet's top, a press on another field's match drops
+// this field's blur write, or a field with no keys of its kind refuses
 test('a population corpse picks the keys the panel offers; nope stays at the field; with no items, free text', async (t) => {
   t.after(
     () => ((storyFiles = {}), (storyBundled = {}), (storyNodes = [{ ref: 'r1', kind: 'room' }])),
   );
   const file = 'areas/a/populations/p.json';
-  files.set(file, { cap: 1, corpse: 'i_a' });
+  files.set(file, { cap: 1, corpse: 'i_a', item: 'i_a' });
   storyFiles = { i_a: 'areas/a/items/i.json', i_b: 'areas/b/items/i.json', i_top: 'items/x.json' };
   storyBundled = { i_in_b: 'areas/b.json' };
   const n = ['r1', 'i_a', 'i_b', 'i_in_b', 'i_top'].map((ref) => ({
@@ -329,6 +330,20 @@ test('a population corpse picks the keys the panel offers; nope stays at the fie
   assert.equal(refused(), '');
   await f.typed('i_top');
   assert.deepEqual(sent(), [['corpse', 'i_top']]);
+  // a click on another field's match: this field's blur still writes
+  f.input().props.onChangeText('i_top');
+  const other = f.s.shown().find((x) => x.key === `picks ${file}:${JSON.stringify(['item'])}`);
+  other.props.onPointerDown();
+  f.input().props.onBlur();
+  await settle();
+  nodes(other.props.children)
+    .find((x) => words(x) === 'i_top')
+    .props.onPress();
+  await settle();
+  assert.deepEqual(sent(), [
+    ['corpse', 'i_top'],
+    ['item', 'i_top'],
+  ]);
   const free = await compiled([{ ref: 'r1', kind: 'room' }], file, 'corpse');
   await free.typed('anything');
   assert.deepEqual(sent(), [['corpse', 'anything']]);
