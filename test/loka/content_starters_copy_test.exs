@@ -83,11 +83,13 @@ defmodule Loka.ContentStartersCopyTest do
     end
   end
 
-  # Break: a new item without the mass world.carry requires (the builder's Add here item).
-  test "a new item in a world under world.carry compiles", %{tmp_dir: tmp} do
-    new(~w(--cwd #{tmp} cartridge copy --from #{Path.expand("cartridges/toolbox_showcase")}))
+  # Break: a new item (the builder's Add here item) or a population's loot item without the mass
+  # world.carry requires.
+  test "a new item and a new population in a world under world.carry compile", %{tmp_dir: tmp} do
+    new(~w(--cwd #{tmp} cartridge copy --from #{Path.expand("cartridges/affects_sampler")}))
     copy = Path.join(tmp, "copy")
     {:ok, _} = Loka.Content.Starters.write(copy, "items", "pebble")
+    {:ok, _} = Loka.Content.Starters.write(copy, "populations", "voles")
     assert {:ok, _, _} = Loka.Content.compile(copy)
   end
 
