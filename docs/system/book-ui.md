@@ -1222,10 +1222,34 @@ reasons and limits: [prose in the Book rulings](../design/prose-in-the-book-ruli
     for that key instead of the least value. Elsewhere, a field that names a resource or an
     attribute gets one pick per key of the read root file under its typed field, the present one
     picked; a press writes it. A typed value naming no key is refused without a write
-    (`no <kind> <key>`). While that root file is unread the field is free text. A field naming a
-    room, an item, a person or a transport is free text and refuses nothing: the panel offers and
-    checks those keys as a type-ahead list, and the Book has no form for a list that long (open
-    item, for a new design).
+    (`no <kind> <key>`). While that root file is unread the field is free text.
+    - **Long-list pick** (loka-hcnlh.66; the panel's type-ahead picker, `Pick` in
+      [World.tsx](../../tools/author-panel/src/edit/cards/World.tsx)). A field naming a room, an
+      item, a person or a transport (`pickable` in `world_card.ts`; in a list such as `rooms` or
+      `allies`, each item's field) offers the keys the latest good compile holds of that kind that
+      this file may name: any room, and no other area's item, person or transport (`reachable`,
+      the panel's list). With none known (no compile yet) the field is free text and refuses
+      nothing. A list of six keys or fewer draws every key as a pick, as a resource's does. A
+      longer one draws no picks until a keystroke in the field; from then until a write, the row
+      under the field holds, first, while the typed text is not empty and no key equals it, the
+      refusal `no <kind> <text>` (the panel's words, shown as it shows them, at the field); then
+      the keys containing the text, case ignored, those starting with it first, each group in the
+      list's order, at most six; then, when more match, one plain line `+N more` (placeholder
+      words). An emptied field matches every key.
+    - A match press writes that key at once, one write that one Undo takes back: the field shows
+      it and the row goes. Leaving the field writes the typed text only when a key equals it; any
+      other text sends nothing and stays in the field with its refusal, so leaving again refuses
+      again, until the next keystroke or a match press. A match pressed after typing (the press
+      that takes the focus from the field) writes only that key: the typed text is not sent first
+      and no refusal for it shows.
+    - On a phone, focusing a long-list field raises the sheet to full height (the grip's) and
+      scrolls the field to the top of the body, so the field, the refusal and the matches sit
+      above the keyboard on a phone; the docked sheet only scrolls. Each match is named by
+      its key. The refusal line is a polite region, read once when it appears.
+    - Open items: the panel marks a picker's name `stale` while the last compile is refused (its
+      keys are the last good compile's); the Book does not yet. A refusal at a sheet's top scrolls
+      away with the body on any long sheet (a sheet-wide question; the long-list pick refuses at
+      the field).
   - Labels here are placeholder words, the owner's to replace.
 - **Build: ghost lines and See as…** (slice 2.5, [builder mode §4.5](../rnd/in-game-builder-mode-2026-11-19.md)).
   Looks: [author-mode marks](../BOOK-UI-COMPONENTS.md#component-catalogue).
