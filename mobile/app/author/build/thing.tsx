@@ -8,7 +8,7 @@ import { choices, refusePick } from '../../../../kernel/ts/play/world_card.ts';
 import { size, space, type } from '../../book/tokens.ts';
 import { ink } from './build.ts';
 import { known, pen } from './room.tsx';
-import { ed, inRow, io, refusal, row, run } from './roomedit.tsx';
+import { ed, foot, inRow, io, refusal, row, run } from './roomedit.tsx';
 import { act, sheets } from './sheet.tsx';
 
 const WORDS = {
@@ -17,12 +17,15 @@ const WORDS = {
   move: 'Move',
   spawned: (by: string) => `Spawned by ${by}`,
   dialogue: '＋ Add dialogue',
+  // placeholders: the owner writes these words
+  unput: 'Delete placement',
+  fields: 'Fields',
 };
 type Dir = 'npcs' | 'items';
 type Doc = Record<string, unknown>;
 const docs = new Map<string, Doc>(); // each source file as last read
 const fresh = new Set<string>(); // the files read under the latest /story
-let of = known.files; // that /story: a new one reads each file again, showing the old until then
+let of: unknown; // that /story: a new one reads each file again, showing the old until then
 const chosen = new Map<string, string>(); // an item's holder kind picked (by `dir:key`), until it moves
 const drafts = new Map<string, string>(); // each holder field, as typed
 
@@ -33,7 +36,7 @@ export function thingPen(key: string | undefined, open: (id: string) => void) {
 }
 
 /** `file`'s JSON as last read; read again under a new /story, then the Book redraws. */
-function doc(file: string) {
+export function doc(file: string) {
   if (of !== known.files) (fresh.clear(), (of = known.files));
   if (!fresh.has(file)) {
     fresh.add(file);
@@ -42,6 +45,25 @@ function doc(file: string) {
       .catch(() => {}); // gone or half-written since the /story: the next one reads it again
   }
   return docs.get(file);
+}
+
+const counts = new Map<string, number | undefined>(); // each file's referrers, under the latest /story
+let counted: unknown; // that /story
+/** How many definitions a delete of `file` would leave dangling (GET /users, the server's delete gate
+ * find.ts `gate`, `extends` included); undefined until read, or when /users fails. Read again under a
+ * new /story, then the Book redraws. */
+export function referrers(file: string) {
+  if (counted !== known.files) (counts.clear(), (counted = known.files));
+  if (!counts.has(file)) {
+    counts.set(file, undefined);
+    known.api!(`/users?file=${encodeURIComponent(file)}`)
+      .then(
+        ([ok, left]) =>
+          ok === 200 && (counts.set(file, (left as unknown[]).length), known.redraw()),
+      )
+      .catch(() => {}); // a failed /users (no list): unknown, Delete shows no count
+  }
+  return counts.get(file);
 }
 
 /** A person's or item's sheet: where it starts and, unless a spawn places it, a holder to move it to. */
@@ -60,6 +82,9 @@ function body(dir: Dir, key: string) {
       <Text key="spawned" style={text}>
         {WORDS.spawned(String(d.spawn_template))}
       </Text>,
+      <View key="fields" style={row}>
+        {act(WORDS.fields, () => known.open(`def:${file}`))}
+      </View>,
     ];
   const now = placement(d, dir);
   return [
@@ -69,7 +94,12 @@ function body(dir: Dir, key: string) {
       style={text}
     >{`${WORDS.holder[now.kind] ?? now.kind} · ${String(now.key ?? '')}`}</Text>,
     now.kind === 'template' ? null : holderForm(dir, key, file, now),
-    dir === 'npcs' ? act(WORDS.dialogue, () => talk(key), undefined, `dialogue ${key}`) : null,
+    <View key="acts" style={row}>
+      {now.key === undefined ? null : act(WORDS.unput, () => void run(() => ed.unput(file, dir)))}
+      {dir === 'npcs' ? act(WORDS.dialogue, () => talk(key), undefined, `dialogue ${key}`) : null}
+      {act(WORDS.fields, () => known.open(`def:${file}`))}
+    </View>,
+    foot(key, file, `${nodeOf(dir)}:${key}`, file ? referrers(file) : undefined),
   ];
 }
 

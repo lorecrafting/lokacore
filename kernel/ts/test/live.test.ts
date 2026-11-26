@@ -264,6 +264,26 @@ test('find is served from the source and artifact the watcher was given', async 
   });
 });
 
+// Break: the route unwired, counting by /find's refs (blind to `extends`), or answering for a file no
+// dir places. The delete gate (write.ts remove) reads the same find.ts gate.
+test('GET /users names what a delete would refuse on, a key named only through extends included', async (t) => {
+  const dir = mkdtempSync(join(tmpdir(), 'loka-users-route-'));
+  t.after(() => rmSync(dir, { recursive: true, force: true }));
+  mkdirSync(join(dir, 'npcs'));
+  writeFileSync(join(dir, 'npcs/hen.json'), '{}\n');
+  writeFileSync(join(dir, 'npcs/chick.json'), '{"extends": "hen"}\n');
+  const server = serve(0, dir, join(dir, 'none.json'));
+  const port = await server.port;
+  t.after(() => server.close());
+  const left = async (file: string) =>
+    (await fetch(`http://127.0.0.1:${port}/users?file=${encodeURIComponent(file)}`)).json();
+  assert.deepEqual(await left('npcs/hen.json'), [
+    { kind: 'extends', by: 'npcs/chick', at: 'npcs/chick.json:1' },
+  ]);
+  assert.deepEqual(await left('npcs/chick.json'), []);
+  assert.deepEqual(await left('../npcs/hen.json'), []);
+});
+
 test('GET /numbers: reports on the dev artifact', async (t) => {
   // Break: handing the dev {canonical, sha256} form to the reports, which refuse it.
   const dir = mkdtempSync(join(tmpdir(), 'loka-live-'));

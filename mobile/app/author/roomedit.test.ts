@@ -1,8 +1,10 @@
+// size: allow 540, one mocked /story and /write harness serves the Room, Person and Item sheets' edits
 // The Room sheet's edits (author/build/roomedit.tsx; design §7, slice 2.1): which press sends which
 // write-route calls over the builder's api. The gestures' own rules are mapedit's
 // (kernel/ts/test/author_mapedit.test.ts) and drop's (author_drop.test.ts).
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
+import { ink } from './build/build.ts';
 import { nodes, words } from '../book/__tests__/combat-book.test.ts'; // also registers the .tsx loader
 
 const { story } = await import('./build/room.tsx');
@@ -10,6 +12,7 @@ const { sheets } = await import('./build/sheet.tsx');
 const { foot, io, wire } = await import('./build/roomedit.tsx');
 const { thingPen } = await import('./build/thing.tsx');
 await import('./build/contents.tsx');
+const { storySheet } = await import('./build/story.tsx');
 
 const room = (key: string, exits: { dir: string; to: string }[], area: string | null = 'yard') => ({
   ref: key,
@@ -21,19 +24,24 @@ const room = (key: string, exits: { dir: string; to: string }[], area: string | 
 });
 const hall = room('hall', [{ dir: 'north', to: 'loft' }]);
 const loft = room('loft', [{ dir: 'south', to: 'hall' }]);
+let finds = 0; // GET /find?q=hen asks
 const doc = {
   'rooms/hall.json': { exits: { north: { to: 'loft' } } },
   'rooms/loft.json': { exits: { south: { to: 'hall' } } },
   'npcs/hen.json': { room: 'hall' },
   'npcs/npc_1.json': {},
+  'areas/yard/npcs/goat.json': {},
+  'items/cup.json': { location: { in: 'room', room: 'hall' } },
 };
 const settle = () => new Promise((r) => setTimeout(r));
 
 /** A builder api: /story's map, each file's source, `answer` for the posts; `posts` as sent. */
-async function opened(answer: (path: string) => [number, unknown] = () => [200, { id: 1 }]) {
+async function opened(
+  answer: (path: string, sent: any) => [number, unknown] = () => [200, { id: 1 }],
+) {
   const posts: [string, any][] = [];
   const api = async (path: string, sent?: object): Promise<[number, any]> => {
-    if (sent) return (posts.push([path, sent]), answer(path));
+    if (sent) return (posts.push([path, sent]), answer(path, sent));
     if (path === '/story')
       return [
         200,
@@ -45,15 +53,24 @@ async function opened(answer: (path: string) => [number, unknown] = () => [200, 
               { kind: 'room', ref: 's:room/loft' },
               { kind: 'npc', ref: 's:npc/cat' }, // no file: a sheet must find hen's own node
               { kind: 'npc', ref: 's:npc/hen' },
+              { kind: 'item', ref: 's:item/cup' },
+              { kind: 'npc', ref: 's:npc/goat' },
             ],
           },
           files: {
+            's:room/hall': 'rooms/hall.json',
             's:npc/hen': 'npcs/hen.json',
+            's:item/cup': 'items/cup.json',
             's:npc/goat': 'areas/yard/npcs/goat.json',
             's:dialogue/hen': 'dialogues/hen.scene',
           },
         },
       ];
+    if (path === `/users?file=${encodeURIComponent('npcs/hen.json')}` && ++finds)
+      // the server's delete gate: one extends, one ref left outside the set
+      return [200, [{ kind: 'extends' }, { kind: 'npc' }]];
+    if (path === `/users?file=${encodeURIComponent('items/cup.json')}`)
+      return [500, [{ kind: 'npc' }]]; // a failed gate: its body is no count
     if (path === '/templates')
       return [
         200,
@@ -104,6 +121,85 @@ test('＋ grows a new room on a free side only; One-way and Delete reach their o
   assert.deepEqual(changed(), ['/change rooms/loft.json']);
   await s.press('Delete');
   assert.deepEqual(changed(), ['/change rooms/hall.json', '/change rooms/loft.json']);
+});
+
+// Breaks: Door or Lock naming the barrier on one face only, Lock leaving the barrier closed, or either
+// offered on an exit with no way back (mapedit `barrier` refuses it).
+test('Door and Lock name a new barrier on both faces; Lock starts it locked; one-way greys both', async () => {
+  const made = (path: string, b: any): [number, unknown] =>
+    path === '/new' ? [200, { files: [`areas/yard/barriers/${b.name}.json`] }] : [200, { id: 1 }];
+  const s = await opened(made);
+  const sent = () => s.posts.splice(0).map(([path, b]) => [path, b.file ?? b.name, b.ops]);
+  await s.press('Door');
+  const faces = [
+    ['/change', 'rooms/hall.json', [{ path: ['exits', 'north', 'barrier'], value: 'barrier_1' }]],
+    ['/change', 'rooms/loft.json', [{ path: ['exits', 'south', 'barrier'], value: 'barrier_1' }]],
+  ];
+  assert.deepEqual(sent(), [['/new', 'barrier_1', undefined], ...faces]);
+  (doc as Record<string, object>)['areas/yard/barriers/barrier_2.json'] = {}; // the new barrier's source
+  await s.press('Lock');
+  const locked = [{ path: ['initial'], value: 'locked' }];
+  const two = (o: unknown) => (o as object[]).map((x) => ({ ...x, value: 'barrier_2' }));
+  assert.deepEqual(sent(), [
+    ['/new', 'barrier_2', undefined],
+    ['/change', 'areas/yard/barriers/barrier_2.json', locked],
+    ...faces.map(([p, f, o]) => [p, f, two(o)]),
+  ]);
+  const door = () =>
+    s.shown().find((n) => n.props?.accessibilityRole === 'button' && words(n).startsWith('Door'));
+  for (const [r, to] of [
+    [hall, 'nowhere'],
+    [loft, 'cellar'],
+  ] as const) {
+    r.exits[0].to = to; // no way back: no room there, or its south leads elsewhere
+    try {
+      assert.equal(door().props.accessibilityState?.disabled, true, to);
+      const why = nodes(door()).at(-1).props.children; // the reason, under Door only
+      assert.equal(
+        s.shown().filter((n) => n.type === 'Text' && n.props.children === why).length,
+        1,
+        to,
+      );
+    } finally {
+      r.exits[0].to = r === hall ? 'loft' : 'hall';
+    }
+  }
+});
+
+// Breaks: the header dropping dark, counting a variant that is absent or miscounting one, a dark word that opens no Fields,
+// or its plain words and dots padded inside the row's own padding (an indent, uneven gaps) or not dim.
+test('the header reads dark · 1 exit for a dark one-exit room; dark opens its Fields', async () => {
+  const was = doc['rooms/hall.json'];
+  (doc as Record<string, object>)['rooms/hall.json'] = { ...was, dark: true };
+  try {
+    const s = await opened();
+    s.shown(); // the first draw reads the source
+    await settle();
+    const head = s.shown().find((n) => n.key === 'summary');
+    assert.equal(words(head), 'dark · 1 exit');
+    const plain = nodes(head).filter(
+      (n) => n.type === 'Text' && typeof n.props.children === 'string',
+    );
+    assert.deepEqual(
+      plain
+        .filter((n) => n.props.style.color === ink('dim'))
+        .map((n) => [n.props.children, n.props.style.paddingHorizontal]),
+      [
+        [' · ', 0],
+        ['1 exit', 0],
+      ],
+    );
+    await s.press('dark');
+    await s.press('Fields');
+    assert.deepEqual(s.opens, ['def:rooms/hall.json', 'def:rooms/hall.json']);
+    (doc as Record<string, object>)['rooms/hall.json'] = { ...was, dark: true, variants: [{}] };
+    const v = await opened();
+    v.shown();
+    await settle();
+    assert.equal(words(v.shown().find((n) => n.key === 'summary')), 'dark · 1 variant · 1 exit');
+  } finally {
+    doc['rooms/hall.json'] = was;
+  }
 });
 
 // Breaks: a placed room offering `＋` toward a cell another placed room holds (the server would set
@@ -201,6 +297,76 @@ test("a person's sheet refuses a room no node holds without writing, and moves t
   doc['npcs/hen.json'] = hen;
 });
 
+// Breaks: Delete placement deleting the wrong field (a person's `location`, an item's `room`) or
+// still offered once nothing places it; Fields opening a file other than the sheet's own.
+test("Delete placement drops a person's room and an item's location; Fields opens the sheet's file", async () => {
+  const was = { ...doc };
+  const s = await opened(
+    (path, sent: any) => ((doc[sent.file as 'npcs/hen.json'] = {}), [200, { id: path }]),
+  );
+  const unput = () => s.shown().some((n) => words(n) === 'Delete placement');
+  for (const [kind, key] of [
+    ['npc', 'hen'],
+    ['item', 'cup'],
+  ] as const) {
+    s.on(() => sheets[kind].body(key));
+    s.shown();
+    await settle();
+    await s.press('Delete placement');
+    await s.press('Fields');
+    s.shown(); // read again under the delete's /story
+    await settle();
+    assert.ok(!unput(), `${key} placed nowhere offers no Delete placement`);
+  }
+  assert.deepEqual(
+    s.posts.map(([path, sent]) => [path, sent.file, sent.ops]),
+    [
+      ['/change', 'npcs/hen.json', [{ path: ['room'], delete: true }]],
+      ['/change', 'items/cup.json', [{ path: ['location'], delete: true }]],
+    ],
+  );
+  assert.deepEqual(s.opens, ['def:npcs/hen.json', 'def:items/cup.json']);
+  Object.assign(doc, was);
+});
+
+// Breaks: the count not the server's gate's (/users), Delete with referrers plain or not pressable (the refusal must
+// name them), a failed /users showing a count, a count kept across a new /story, or a deleted sheet left open
+// (a nested file's too).
+test("a person's Delete is greyed with its referrer count and still sends; with /users failing it shows no count", async () => {
+  const s = await opened(() => [200, {}]);
+  s.on(() => sheets.npc.body('hen'));
+  s.shown();
+  await settle();
+  const drop = s
+    .shown()
+    .find((n) => n.props?.accessibilityRole === 'button' && words(n).startsWith('Delete hen'))!;
+  assert.equal(words(drop), 'Delete hen2 referrers');
+  assert.equal(drop.props.accessibilityState.disabled, false, 'greyed but pressable');
+  await s.press(words(drop));
+  assert.deepEqual(
+    s.posts.map(([path, sent]) => [path, sent.file]),
+    [['/delete', 'npcs/hen.json']],
+  );
+  assert.deepEqual(s.closed, ['npc:hen', 'def:npcs/hen.json']);
+  const asked = finds;
+  s.on(() => sheets.npc.body('hen')); // the delete's new /story asks again
+  s.shown();
+  assert.equal(finds, asked + 1);
+  s.on(() => sheets.item.body('cup')); // /users answers 500 for cup
+  s.shown();
+  await settle();
+  const cup = s
+    .shown()
+    .find((n) => n.props?.accessibilityRole === 'button' && words(n).startsWith('Delete cup'));
+  assert.equal(words(cup), 'Delete cup');
+  s.on(() => sheets.npc.body('goat')); // nested under an area: its kind is its own dir's
+  s.shown();
+  await settle();
+  s.closed.length = 0;
+  await s.press('Delete goat');
+  assert.deepEqual(s.closed, ['npc:goat', 'def:areas/yard/npcs/goat.json']);
+});
+
 // Breaks: the pencil after a person's or item's name opening another sheet, or one after a room's
 // own title (the Room pencil's) or another field of the person opening a person's.
 test("the pencil after a person's name opens that person's sheet; no other key gets one", () => {
@@ -262,6 +428,24 @@ test("Contents lists each kind's JSON files after its New; a file opens its shee
   assert.deepEqual(s.opens.at(-1), 'def:npcs/hen.json');
 });
 
+// Breaks: a room file's Go to missing, naming a room the file does not define, or not starting there.
+test("Contents' room file offers Go to each room it defines", async () => {
+  const gone: string[] = [];
+  storySheet((room) => void gone.push(room));
+  const s = await opened();
+  s.on(() => sheets.contents.body(''));
+  const labels = s
+    .shown()
+    .filter((n) => n.props?.accessibilityRole === 'button')
+    .map(words);
+  assert.deepEqual(
+    labels.filter((w) => w.startsWith('Go to ')),
+    ['Go to hall'], // rooms/hall.json holds hall; loft's file is not a node's
+  );
+  await s.press('Go to hall');
+  assert.deepEqual(gone, ['hall']);
+});
+
 // Breaks: the other files a delete takes sent without asking, a Keep still deleting, or a refusal
 // (the route's, or a source that cannot be read) not shown in the sheet.
 test('Delete room asks in the sheet about the files it also takes; refusals show', async () => {
@@ -281,7 +465,7 @@ test('Delete room asks in the sheet about the files it also takes; refusals show
   delete (doc as Record<string, unknown>)['rooms/hall.json'];
   await s.press('Delete hall');
   assert.equal(words(alert()), 'rooms/hall.json: not found');
-  const bare = nodes(foot({ ...hall, file: undefined })).find(
+  const bare = nodes(foot('hall', undefined, 'room:hall')).find(
     (n) => n.props?.accessibilityRole === 'button' && words(n) === 'Delete hall',
   );
   bare!.props.onPress();
@@ -290,7 +474,7 @@ test('Delete room asks in the sheet about the files it also takes; refusals show
 });
 
 // Breaks: a Delete question left unanswered locking every later press (the code-review lock), the
-// press that answers it Keep being spent, a deleted room's sheet left open (or another closed),
+// press that answers it Keep being spent, a deleted room's sheet or its definition's left open (or another closed),
 // or a Keep closing it.
 test('a confirmed delete closes its own sheet; another press answers a pending question Keep and goes on', async () => {
   let deletes = 0;
@@ -309,7 +493,7 @@ test('a confirmed delete closes its own sheet; another press answers a pending q
   assert.deepEqual(s.closed, []);
   await s.press('Delete hall');
   await s.press('Delete all');
-  assert.deepEqual(s.closed, ['room:hall']);
+  assert.deepEqual(s.closed, ['room:hall', 'def:rooms/hall.json']);
 });
 
 // Breaks: a /story that does not answer 200 (a compile error) leaving a refusal or a Delete

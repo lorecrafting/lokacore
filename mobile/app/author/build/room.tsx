@@ -9,7 +9,8 @@ import { ink } from './build.ts';
 import type { Hooks } from './field.tsx';
 import type { Ghost } from '../../../../kernel/ts/play/ghosts.ts';
 import { ghostRows } from './seeas.tsx';
-import { sheets } from './sheet.tsx';
+import { act, sheets } from './sheet.tsx';
+import { doc, referrers } from './thing.tsx'; // a cycle: read at render time only
 import {
   exitActs,
   foot,
@@ -24,12 +25,46 @@ import {
   type Template,
 } from './roomedit.tsx';
 
+// placeholders: the owner writes these words
 const WORDS = {
   edit: (title: string) => `Edit ${title}`,
   exits: (n: number) => (n === 1 ? '1 exit' : `${n} exits`),
-  root: 'No area',
+  dark: 'dark',
+  variants: (n: number) => (n === 1 ? '1 variant' : `${n} variants`),
+  dot: ' · ',
+  fields: 'Fields',
 };
 type Room = MapRoom; // /story's `map` (kernel/ts/play/story.ts `rooms`)
+/** The header line (§4.3 item 2; the panel header, inspector-header, stays todo): `dark · N variants · N exits`, each absent part left
+ * out; dark and the variants open the room's Fields, where their blocks are. */
+function summary(r: Room) {
+  const text = { ...inRow, color: ink('dim') }; // the row pads the edge; parts and dots dim
+  const d = r.file ? doc(r.file) : undefined;
+  const def = () => known.open(`def:${r.file}`);
+  const n = Array.isArray(d?.variants) ? d.variants.length : 0;
+  const parts = [
+    d?.dark === true && act(WORDS.dark, def),
+    n > 0 && act(WORDS.variants(n), def, undefined, 'variants'),
+    <Text key="exits" style={text}>
+      {WORDS.exits(r.exits.length)}
+    </Text>,
+  ].filter(Boolean);
+  return (
+    <View key="summary" style={row}>
+      {parts.flatMap((p, i) =>
+        i
+          ? [
+              <Text key={`dot ${i}`} style={text}>
+                {WORDS.dot}
+              </Text>,
+              p,
+            ]
+          : [p],
+      )}
+    </View>
+  );
+}
+
 /** The last /story (the notebook's Story tab reads it whole), its rooms, graph nodes (the keys a new definition must not take) and source file
  * per node ref; /templates' abstract NPCs and items; the Book's redraw, a sheet's open and the api. */
 export const known = {
@@ -157,9 +192,7 @@ sheets.room = {
     const text = { ...type.small, color: ink('fg'), paddingHorizontal: space.md };
     return [
       refusal(),
-      <Text key="summary" style={{ ...text, color: ink('dim') }}>
-        {`${r.area ?? WORDS.root} · ${WORDS.exits(r.exits.length)}`}
-      </Text>,
+      summary(r),
       ...r.exits.map((e) => {
         const to = find(e.to);
         return (
@@ -167,7 +200,7 @@ sheets.room = {
             <Text style={{ ...inRow, minHeight: size.touch }}>
               {`${e.dir} → ${to ? named(to) : e.to}`}
             </Text>
-            {exitActs(r, e.dir, known.rooms)}
+            {exitActs(r, e.dir, known.rooms, known.nodes)}
           </View>
         );
       }),
@@ -175,7 +208,12 @@ sheets.room = {
       grows(r, known.nodes, known.rooms),
       addHere(r, known.nodes, held(), known.open),
       moveTo(r),
-      foot(r),
+      r.file ? (
+        <View key="fields" style={row}>
+          {act(WORDS.fields, () => known.open(`def:${r.file}`))}
+        </View>
+      ) : null,
+      foot(r.key, r.file, `room:${r.key}`, r.file ? referrers(r.file) : undefined),
     ];
   },
 };
