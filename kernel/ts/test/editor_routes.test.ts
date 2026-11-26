@@ -31,6 +31,7 @@ const ROUTES: Record<string, string[]> = {
   '/numbers': ['GET'],
   '/fights': ['GET'],
   '/find': ['GET'],
+  '/users': ['GET'],
   '/open': ['POST'],
   '/restructure': ['POST'],
   '/why': ['POST'],
@@ -99,7 +100,7 @@ test('every server route has a client caller or an exemption', () => {
   ])
     visit(parsed(f), (n) => {
       if (!ts.isCallExpression(n) && !ts.isNewExpression(n)) return;
-      const name = n.expression.getText().split('.').at(-1);
+      const name = n.expression.getText().replace(/!$/, '').split('.').at(-1); // known.api!(...) too
       const [first, second] = n.arguments ?? [];
       const path = pathOf(first);
       if (path === undefined) return;
