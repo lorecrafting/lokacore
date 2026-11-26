@@ -53,9 +53,12 @@ defmodule Loka.Content.Starters.Area do
   @doc "The first room file in `areas/<area>/rooms/`, else the first room of `areas/<area>.json`, or nil."
   def first_room(dir, area) do
     case Path.wildcard(Path.join([dir, "areas", area, "rooms/*.json"])) do
-      [first | _] -> Path.basename(first, ".json")
+      [first | _] ->
+        Path.basename(first, ".json")
+
       # The compiler counts a bundle's rooms as its area's (Loka.Content.Areas.check/1).
-      [] -> bundled(dir, area) |> Map.keys() |> Enum.min(fn -> nil end)
+      [] ->
+        for({k, r} <- bundled(dir, area), r["abstract"] != true, do: k) |> Enum.min(fn -> nil end)
     end
   end
 

@@ -1,4 +1,4 @@
-# size: allow 715, one case per starter kind and refusal; the area and bundle placement, companion, provider start and key order and shape cases join them
+# size: allow 720, one case per starter kind and refusal; the area and bundle placement, companion, provider start and key order and shape cases join them
 defmodule Loka.ContentStartersTest do
   use ExUnit.Case, async: true
   @moduletag :tmp_dir
@@ -354,7 +354,6 @@ defmodule Loka.ContentStartersTest do
     {:ok, _} = Starters.write(dir, "rooms", "loft", {"start", "up"})
     assert read(dir, "rooms/start.json")["exits"] == %{"up" => %{"to" => "loft"}}
     assert read(dir, "rooms/loft.json")["exits"] == %{"down" => %{"to" => "start"}}
-    bundle(dir, "marsh")
     before = snapshot(dir)
 
     assert {:error, "rooms/start.json: exits up to already has" <> _} =
@@ -380,11 +379,17 @@ defmodule Loka.ContentStartersTest do
     assert snapshot(dir) == before
   end
 
-  # Breaks: --from or an item refusing a room only areas/<a>.json holds, or the back exit written
-  # to a new rooms/<from>.json beside the bundle (a duplicate definition).
+  # Breaks: --from, an item or an action refusing a room only areas/<a>.json holds, placing them
+  # in a root room, an abstract or other bundled room, or a patch written to a new
+  # rooms/<from>.json beside the bundle (a duplicate definition).
   test "a bundled room takes --from, --area and an item placed in it", %{tmp_dir: tmp} do
     dir = cartridge(tmp)
     bundle(dir, "marsh")
+
+    edit(dir, "areas/marsh.json", fn b ->
+      put_in(b["rooms"]["_base"], %{"abstract" => true})
+      |> put_in(["rooms", "zed"], b["rooms"]["marsh"])
+    end)
 
     in_marsh = fn kind, name, from ->
       Starters.write(dir, kind, name, from, fn _, _ -> :ok end, {"marsh", nil})
@@ -392,6 +397,7 @@ defmodule Loka.ContentStartersTest do
 
     {:ok, _} = Starters.write(dir, "rooms", "reeds", {"marsh", "east"})
     {:ok, _} = in_marsh.("items", "rope", nil)
+    {:ok, _} = in_marsh.("actions", "pull", nil)
     {:ok, _} = in_marsh.("rooms", "bog", {"marsh", "north"})
 
     assert read(dir, "areas/marsh.json")["rooms"]["marsh"]["exits"] == %{
@@ -402,6 +408,7 @@ defmodule Loka.ContentStartersTest do
     assert read(dir, "rooms/reeds.json")["exits"] == %{"west" => %{"to" => "marsh"}}
     assert read(dir, "areas/marsh/rooms/bog.json")["exits"] == %{"south" => %{"to" => "marsh"}}
     assert read(dir, "areas/marsh/items/rope.json")["location"]["room"] == "marsh"
+    assert Map.has_key?(read(dir, "areas/marsh.json")["rooms"]["marsh"]["details"], "pull")
     refute File.exists?(Path.join(dir, "rooms/marsh.json"))
     refute File.exists?(Path.join(dir, "areas/marsh/rooms/marsh.json"))
     assert {:ok, _, _} = Loka.Content.compile(dir)
