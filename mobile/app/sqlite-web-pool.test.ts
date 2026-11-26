@@ -232,3 +232,30 @@ test('a page restored from the cache reloads before the Book resumes', () => {
   p.show(true);
   assert.equal(p.reloads(), 2);
 });
+
+test('a tab switched away and back keeps its save worker', () => {
+  const p = page();
+  p.visibility('hidden');
+  p.visibility('visible');
+  assert.deepEqual(
+    [p.calls, p.workers[0].terminated, p.reloads()],
+    [[false, false, false], false, 0],
+  );
+});
+
+test('an install with an older release patched in refuses', () => {
+  const patched = readFileSync(webModule, 'utf8');
+  const create = "    worker = new Worker(new URL('./worker', window.location.href));\n";
+  writeFileSync(
+    webModule,
+    upstreamModule.replace(create, `${create}    // loka-hcnlh.19.5 release\n`),
+  );
+  try {
+    assert.throws(
+      () => execFileSync(process.execPath, [join(fixture, 'patch.cjs')], { stdio: 'pipe' }),
+      /an older release is patched in/,
+    );
+  } finally {
+    writeFileSync(webModule, patched);
+  }
+});
