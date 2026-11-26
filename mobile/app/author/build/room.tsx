@@ -36,7 +36,7 @@ const WORDS = {
   fields: 'Fields',
 };
 type Room = MapRoom; // /story's `map` (kernel/ts/play/story.ts `rooms`)
-/** The header line (§4.3 item 2; the panel header, inspector-header, stays todo): `dark · N variants · N exits`, each absent part left
+/** The header line (§4.3 item 2; the panel header is inspected.tsx's, above it): `dark · N variants · N exits`, each absent part left
  * out; dark and the variants open the room's Fields, where their blocks are. */
 function summary(r: Room) {
   const text = { ...inRow, color: ink('dim') }; // the row pads the edge; parts and dots dim
@@ -192,7 +192,7 @@ sheets.room = {
     if (!r) return null;
     const text = { ...type.small, color: ink('fg'), paddingHorizontal: space.md };
     return [
-      inspected(r.file),
+      inspected(r.file, r.ref),
       refusal(),
       summary(r),
       ...r.exits.map((e) => {

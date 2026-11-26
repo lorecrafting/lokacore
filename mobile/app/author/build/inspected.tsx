@@ -14,9 +14,11 @@ const WORDS = {
 
 /** A sheet's head, as the panel inspector's: the ref its file defines (a World file, the file), how
  * many unwritten and diagnostics the last /story counted there, and unreached from the start. */
-export function inspected(file?: string) {
+export function inspected(
+  file?: string,
+  ref = file && Object.keys(known.files).find((r) => known.files[r] === file), // a bundle member's: its caller's
+) {
   const s = known.story;
-  const ref = file && Object.keys(known.files).find((r) => known.files[r] === file);
   if (!s || !file) return null;
   // unwritten counts placeholders, as the Story rows do (storylist.ts), not the panel's todo entries
   const todo = (ref && s.todo?.[ref]?.reduce((n, t) => n + t.placeholders.length, 0)) || 0;
@@ -27,7 +29,7 @@ export function inspected(file?: string) {
   return (
     <View key="inspected" style={{ paddingHorizontal: space.md /* mutate-skip: layout */ }}>
       <Text style={dim}>{ref || file}</Text>
-      <Text style={dim}>{WORDS.counts(todo, diagnostics)}</Text>
+      {ref ? <Text style={dim}>{WORDS.counts(todo, diagnostics)}</Text> : null}
       {off ? <Text style={{ ...inRow, color: ink('danger') }}>{WORDS.unreached}</Text> : null}
     </View>
   );

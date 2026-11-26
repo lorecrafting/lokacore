@@ -127,7 +127,7 @@
   {
     "id": "inspector-header",
     "panel": "tools/author-panel/src/right.tsx",
-    "book": "story.tsx"
+    "book": "inspected.tsx"
   },
   {
     "id": "card-picker",

@@ -168,7 +168,7 @@ function whyRows(g: Reader, state: State) {
                 : { at, key, error: String(r.told) },
             (err: Error) => ({ at, key, error: err.message }),
           )
-          .then((t) => ((why = t), known.redraw())),
+          .then((t) => ((why = t), (full = false), known.redraw())), // a new answer, its report shut
       undefined,
       `${on} ${key}`,
       told?.key === key,

@@ -157,7 +157,7 @@ test('Step after a move lists exactly the facts it changed and the rule that loo
 
 // Break: the answer's whole report dropped (only its lines kept), the fold drawn open before a press,
 // or the press not shutting it again (the panel's "Full report" <details>).
-test('Why folds the whole report under its lines, shut until pressed', async () => {
+test('Why folds the whole report under its lines, shut until pressed and on each answer', async () => {
   at(1, false);
   const told = {
     lines: [{ text: 'item lamp is held', ok: false, depth: 0 }],
@@ -171,6 +171,9 @@ test('Why folds the whole report under its lines, shut until pressed', async () 
   assert.ok(text().endsWith(`|Full report|${json}`), text());
   await pressed('Full report');
   assert.doesNotMatch(text(), /"action": "light_lamp"/);
+  await pressed('Full report');
+  await pressed('light_lamp');
+  assert.doesNotMatch(text(), /"action": "light_lamp"/, 'a new answer starts shut');
 });
 
 // Break: a rule that looked drawn as plain words when the last /story named its file (no way to its

@@ -115,13 +115,13 @@ const CARDS = new Set(['room', 'npc', 'item']); // the kinds with their own shee
 function nodeActs(r: L.Row) {
   const room = roomOf(r.ref!);
   const source = sheetOf(r.ref);
-  const card = source && CARDS.has(r.node!) ? `${r.node}:${keyOf(r.ref!)}` : undefined;
+  const card = CARDS.has(r.node!) ? `${r.node}:${keyOf(r.ref!)}` : undefined;
   const sheet = card ?? source;
   return [
     <View key="acts" style={row}>
       {room ? act(WORDS.go, () => go(room)) : null}
       {sheet ? act(WORDS.sheet, () => known.open(sheet)) : null}
-      {card ? act(WORDS.source, () => known.open(source!)) : null}
+      {card && source ? act(WORDS.source, () => known.open(source)) : null}
       {L.TRACED.has(r.node!) ? act(WORDS.trace, () => known.open(`trace:${r.ref}`)) : null}
       {L.CONSEQUENCES.has(r.node!)
         ? act(WORDS.consequences, () => known.open(`consequences:${r.ref}`))

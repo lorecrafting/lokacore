@@ -84,7 +84,7 @@ const story = {
       area: null,
       title: 'Hall',
       exits: [],
-      file: 'rooms/hall.json',
+      file: 'areas/castle.json', // a bundle member: not in files
     },
     { ref: R('room', 'cellar'), key: 'cellar', area: null, title: 'Cellar', exits: [] },
   ],
@@ -260,11 +260,27 @@ test("each node sheet's head names its ref, unwritten and diagnostics counts, an
   ]);
   assert.notEqual(head('def', 'dialogues/greet.json')[2], 'unreached from the start');
   assert.deepEqual(head('def', 'cartridge.json')[0], 'cartridge.json');
+  assert.equal(
+    head('def', 'cartridge.json').join().includes('diagnostics'),
+    false,
+    'no ref, no counts',
+  );
   assert.deepEqual(head('npc', 'nell').slice(0, 2), [
     R('npc', 'nell'),
     '0 unwritten · 0 diagnostics',
   ]);
-  assert.deepEqual(head('room', 'hall')[0], R('room', 'hall'));
+  assert.deepEqual(head('room', 'hall').slice(0, 2), [
+    R('room', 'hall'),
+    '0 unwritten · 0 diagnostics',
+  ]);
+  const s = known.story;
+  known.story = undefined;
+  assert.notEqual(
+    head('def', 'dialogues/farewell.json')[0],
+    R('dialogue', 'farewell'),
+    'no /story, no head',
+  );
+  known.story = s;
 });
 
 test('Go there starts in the room a story edge joins the node to, either way: nell to the hall, the cellar to its lamp', async () => {
