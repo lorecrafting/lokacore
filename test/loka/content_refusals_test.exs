@@ -251,10 +251,11 @@ defmodule Loka.ContentRefusalsTest do
       assert at == [{"OUTCOME_MISMATCH", data}]
     end
 
-    {:error, [d | _]} =
+    {:error, diagnostics} =
       Source.compile(dir, exchange ++ [{"items/ore_01.json", &Map.delete(&1, "mass_grams")}])
 
-    assert {d["path"], d["data"]} == {"quests/herbs.exchange", weightless}
+    d = Enum.find(diagnostics, &(&1["path"] == "quests/herbs.exchange"))
+    assert d["data"] == weightless
     assert [line] = Loka.Content.Explain.lines([d], dir)
     assert line =~ "`ore_01` weighs nothing" and line =~ "`mass_grams` above 0"
 
