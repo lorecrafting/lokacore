@@ -84,7 +84,8 @@ defmodule Loka.Content.Starters.Area do
 
     Enum.reduce(held, files, fn {room, bundle}, files ->
       {patch, files} = Map.pop(files, "rooms/#{room}.json")
-      Map.put(files, bundle, %{"rooms" => %{room => patch}})
+      new = %{"rooms" => %{room => patch}}
+      Map.update(files, bundle, new, &Loka.Content.Starters.Merge.merge(&1, new))
     end)
   end
 
