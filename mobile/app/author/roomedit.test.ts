@@ -10,6 +10,7 @@ const { sheets } = await import('./build/sheet.tsx');
 const { foot, io, wire } = await import('./build/roomedit.tsx');
 const { thingPen } = await import('./build/thing.tsx');
 await import('./build/contents.tsx');
+const { storySheet } = await import('./build/story.tsx');
 
 const room = (key: string, exits: { dir: string; to: string }[], area: string | null = 'yard') => ({
   ref: key,
@@ -52,6 +53,7 @@ async function opened(
             ],
           },
           files: {
+            's:room/hall': 'rooms/hall.json',
             's:npc/hen': 'npcs/hen.json',
             's:item/cup': 'items/cup.json',
             's:npc/goat': 'areas/yard/npcs/goat.json',
@@ -370,6 +372,24 @@ test("Contents lists each kind's JSON files after its New; a file opens its shee
   );
   await s.press('npcs/hen.json');
   assert.deepEqual(s.opens.at(-1), 'def:npcs/hen.json');
+});
+
+// Breaks: a room file's Go to missing, naming a room the file does not define, or not starting there.
+test("Contents' room file offers Go to each room it defines", async () => {
+  const gone: string[] = [];
+  storySheet((room) => void gone.push(room));
+  const s = await opened();
+  s.on(() => sheets.contents.body(''));
+  const labels = s
+    .shown()
+    .filter((n) => n.props?.accessibilityRole === 'button')
+    .map(words);
+  assert.deepEqual(
+    labels.filter((w) => w.startsWith('Go to ')),
+    ['Go to hall'], // rooms/hall.json holds hall; loft's file is not a node's
+  );
+  await s.press('Go to hall');
+  assert.deepEqual(gone, ['hall']);
 });
 
 // Breaks: the other files a delete takes sent without asking, a Keep still deleting, or a refusal

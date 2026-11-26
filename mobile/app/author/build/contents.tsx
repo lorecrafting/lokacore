@@ -10,7 +10,7 @@ import { known } from './room.tsx';
 import { inRow, io, refusal, row, run } from './roomedit.tsx';
 import { act, sheets } from './sheet.tsx';
 import { load } from './generic.tsx';
-import { storyRows } from './story.tsx';
+import { goTo, storyRows } from './story.tsx';
 import { WORDS as WORLD, worldRows } from './world.tsx';
 import { WORDS as TOOLS, toolRows } from './tools.tsx';
 
@@ -18,6 +18,8 @@ const WORDS = {
   contents: 'Notebook',
   tabs: ['Contents', 'Story', WORLD.tab, TOOLS.tab],
   new: (kind: string) => `New ${kind}`,
+  // placeholder: the owner writes these words
+  go: (room: string) => `Go to ${room}`,
 };
 let tab = WORDS.tabs[0]; // the open tab
 const names = new Map<string, string>(); // a NAMED kind's key, as typed
@@ -70,7 +72,12 @@ const kinds = () => [
       {act(WORDS.new(kind), () => void made(kind))}
     </View>,
     <View key={`${kind}/`} style={row}>
-      {filesOf(kind).map((f) => act(f, () => known.open(`def:${f}`)))}
+      {filesOf(kind).flatMap((f) => [
+        act(f, () => known.open(`def:${f}`)),
+        ...known.rooms
+          .filter((r) => r.file === f) // play from here: the rooms this file defines
+          .map((r) => act(WORDS.go(r.key), () => goTo(r.key), undefined, `go ${r.key}`)),
+      ])}
     </View>,
   ]),
 ];
