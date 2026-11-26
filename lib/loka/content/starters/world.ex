@@ -67,6 +67,9 @@ defmodule Loka.Content.Starters.World do
 
   # A template NPC, its corpse and a second reciprocal room, as encounter_sampler does, with the
   # combat, death and calendar settings a population needs.
+  # world.carry requires the loot item's mass too (Entities.carry), as the corpses' 0.
+  # mutate-skip: any mass >= 0 compiles; the default is a choice, not logic
+  @mass 0
   def population(name, c) do
     [home, camp] = [c["rooms"], "#{name}_camp"]
 
@@ -115,7 +118,10 @@ defmodule Loka.Content.Starters.World do
       "items/#{name}_corpse.json" => corpse.("#{name}_corpse"),
       "items/#{name}_player_corpse.json" => corpse.("#{name}_player_corpse"),
       "items/#{name}_item.json" =>
-        Map.put(thing("#{name}_item"), "location", %{"in" => "template"})
+        Map.merge(thing("#{name}_item"), %{
+          "location" => %{"in" => "template"},
+          "mass_grams" => @mass
+        })
     }
   end
 
