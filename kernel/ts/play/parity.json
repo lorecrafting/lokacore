@@ -162,7 +162,7 @@
   {
     "id": "source-footer",
     "panel": "tools/author-panel/src/sections.tsx",
-    "book": "todo"
+    "book": "sheet.tsx"
   },
   {
     "id": "advance-time",
@@ -187,22 +187,22 @@
   {
     "id": "state-tab",
     "panel": "tools/author-panel/src/reading.tsx",
-    "book": "todo"
+    "book": "reading.tsx"
   },
   {
     "id": "why-tab",
     "panel": "tools/author-panel/src/reading.tsx",
-    "book": "todo"
+    "book": "reading.tsx"
   },
   {
     "id": "step-tab",
     "panel": "tools/author-panel/src/steptab.tsx",
-    "book": "todo"
+    "book": "reading.tsx"
   },
   {
     "id": "numbers",
     "panel": "tools/author-panel/src/numbers.tsx",
-    "book": "todo"
+    "book": "numbers.tsx"
   },
   {
     "id": "find-referrers",

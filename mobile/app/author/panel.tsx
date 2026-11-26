@@ -242,7 +242,7 @@ const heard = (message: Message) => (inBook?.heard(message), build?.hear(message
 const loaded = { sha256: chapter.sha256, at: Date.now() }; // this Book's load (timings.ts loadOf)
 const NO_STEPS = 'Place: that checkpoint has no steps list; nothing changed.';
 const placeHooks = (game: Opened, latest: { current: Tools }) => ({
-  ...{ game, canon, loaded }, // the ghost lines', See as's (build/seeas.tsx) and Timing's reads
+  ...{ game, canon, loaded, state: () => stateOf(game) }, // ghost lines', See as's, Timing's, readers'
   place: () => ({ steps: place.steps, refused, checkpoint: place.checkpoint }),
   jump: (steps: Step[]) => jumpTo(steps, latest.current, steps),
   advance: (minutes: number) => ((placeNote = ''), advance(minutes, game), placeNote),

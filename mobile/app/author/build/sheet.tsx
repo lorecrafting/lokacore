@@ -12,13 +12,15 @@ const WORDS = { close: 'Back', grow: 'Full height' };
 export const DOCK = { at: size.column + size.column / 2, width: size.column / 2 }; // mutate-skip: placeholder
 
 /** Sheet kinds by the id's head (`room:cellar` is `room` with `cellar`); `back`, the id Back shows
- * in this sheet's place instead of closing it (the Flow walk's trail). */
+ * in this sheet's place instead of closing it (the Flow walk's trail); `file`, the source file its
+ * foot names (the panel's source footer). */
 export const sheets: Record<
   string,
   {
     title: (arg: string) => string;
     body: (arg: string) => ReactNode;
     back?: (arg: string) => string | undefined;
+    file?: (arg: string) => string | undefined;
   }
 > = {};
 export const parts = (id: string) => {
@@ -86,6 +88,12 @@ export const greyed = (label: string, why: string, key: string, run?: () => void
 );
 
 type Stack = { open: Builder; saved: (next: Builder) => void };
+const foot = (file: string | undefined) =>
+  file ? (
+    <Text key="source" style={{ ...type.small, color: ink('dim'), padding: space.md }}>
+      {file}
+    </Text>
+  ) : null;
 /** The open sheet, scrolled back to where it was when it is drawn again after a reload. */
 export function Sheet({ open, saved }: Stack) {
   const scroller: { current: ScrollView | null } = { current: null };
@@ -101,7 +109,12 @@ export function Sheet({ open, saved }: Stack) {
       }}
       onScroll={(e) => saved({ ...open, scroll: e.nativeEvent.contentOffset.y })}
     >
-      {(([s, arg]) => s?.body(arg))(parts(open.sheets!.at(-1)!))}
+      {(([s, arg]) => (
+        <>
+          {s?.body(arg)}
+          {foot(s?.file?.(arg))}
+        </>
+      ))(parts(open.sheets!.at(-1)!))}
     </ScrollView>
   );
 }

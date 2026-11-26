@@ -1,7 +1,6 @@
-// size: allow 306, the strip pads by the safe-area insets (19.6)
-// Build mode's chrome (docs/system/book-ui.md#author-mode; slice 1.2): the Build toggle and its strip
-// above the Book, the sheet host, and auto-hold. panel.tsx requires this only in the author preview,
-// so a release never holds it (author/seam.test.ts looks for `BUILD`).
+// size: allow 305, the strip pads by the safe-area insets (19.6)
+// Build mode's chrome (docs/system/book-ui.md#author-mode; slice 1.2): the Build toggle and strip,
+// the sheet host, auto-hold. Only the author preview requires it (author/seam.test.ts: `BUILD`).
 import { useState, type ReactNode } from 'react';
 import { Pressable, Text, View } from 'react-native';
 import { size, space, type } from '../../book/tokens.ts';
@@ -36,7 +35,8 @@ import { undo as putBackIds } from '../../../../kernel/ts/play/mapedit.ts';
 import { io, onSaved, refused, run, running } from './roomedit.tsx';
 import { act, CONTROL, Frame, parts, sheets, stack, stepBack } from './sheet.tsx';
 export { Sheet, sheets } from './sheet.tsx';
-export { drawn, unsee, updated } from './seeas.tsx';
+export { drawn, unsee } from './seeas.tsx';
+export { updated } from './tools.tsx';
 const WORDS = {
   build: 'Build',
   on: '✎ Build',

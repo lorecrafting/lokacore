@@ -997,6 +997,9 @@ reasons and limits: [prose in the Book rulings](../design/prose-in-the-book-ruli
     replaces the top one, opening one already lower moves it to the top, and Back closes only the
     top one (a Flow walk first steps back along its trail, Flow walk below). Closing the last returns focus to what opened the first. The stack and the top
     sheet's scroll survive a reload; leaving Build closes every sheet.
+  - **Sheet foot** (6.2b, the panel's source footer). A sheet that draws one source file (a Room,
+    Person or Item sheet) ends its body with that file's path; a sheet titled by its path (the
+    generic sheet) or drawing no single file has none.
   - **Two layouts** (ruling 7). Where the window holds the full page column with a docked sheet
     beside it (the page column and half of it again), the sheet docks at the Book's right edge,
     half a page column wide, not modal, and the Book beside it keeps its full column and stays
@@ -1083,8 +1086,11 @@ reasons and limits: [prose in the Book rulings](../design/prose-in-the-book-ruli
     a press writes it into `requires.capabilities` at its registry version, one write that one
     Undo takes back, no confirm; it leaves the row after the reread. A write sent from an old read
     is refused as the generic sheet's are, never overwritten.
-  - **Tools (6.2a, [builder mode §4.3 item 3, §5](../rnd/in-game-builder-mode-2026-11-19.md)).**
-    The refusal line, then in order:
+  - **Tools (6.2a-b, [builder mode §4.3 item 3, §5](../rnd/in-game-builder-mode-2026-11-19.md)).**
+    First a row of the tab's readers, `Play`, `State`, `Why`, `Step` and `Numbers` (6.2b); the open
+    one is marked selected, `Play` at first. Then the open reader's rows. None but Play changes the
+    game. With no game or no state yet, State, Why and Step show one plain line saying so.
+    **Play** (6.2a): the refusal line, then in order:
     - `Hold`, a toggle shown selected while on; it sets and releases only its own hold, never a
       field's.
     - A name field and `Save checkpoint`, which saves this play's steps under the name; it is
@@ -1100,6 +1106,31 @@ reasons and limits: [prose in the Book rulings](../design/prose-in-the-book-ruli
       fact key and value; `Set level` with a level, an attribute key and points. Each act is greyed
       until its fields are filled. Advance and each cheat is one recorded step; a refusal says why
       on the refusal line, and an accepted one clears it (never repeating an older stop note).
+    - **State** (6.2b): the game as the view shows it now, each a heading over its lines: the room,
+      people, held things, pools (`<key> <current>/<maximum> <band>`), statuses, the clock, a
+      pending choice's prompt over its options, quests (`<quest> <state>`) and facts
+      (`<key>: <value>`, `unset` when it has none, a value still at its default marked so). A
+      heading with nothing under it shows `none`, never a bare heading.
+    - **Why** (6.2b): under a heading, each action and dialogue this room offers, as a button; none
+      offered is one plain line. A press asks why that one is or is not on offer now and shows the
+      answer under the buttons, its key as the heading, the pressed button marked selected: one
+      line per condition, `yes`, `no` or `depends on the target`, then its words, a nested
+      condition indented one step; a `no` line in the danger tone. A refused ask says why in the
+      danger tone. The answer holds only for the state it was asked on; any change drops it.
+    - **Step** (6.2b): what the last step did. Before the first step one plain line says to take
+      one; past 400 steps one plain line says Step is off and to jump to a checkpoint, with no ask.
+      Otherwise a heading `Step N` (with the step's command and outcome once told), the time the
+      ask took (marked slow past 2 s, never hidden), then three headed lists, each with its count:
+      the facts it changed (`<key> <from> → <to>`), the quests it changed, and every rule whose
+      trigger matched (one that did not fire in the danger tone). An empty list shows `none`; the
+      rules show `asking…` until the answer comes, then `none matched`. It asks once per step; a
+      step taken with the notebook shut still pairs with the state before it. A refused ask says
+      why in the danger tone.
+    - **Numbers** (6.2b): `Run`, which asks the watcher's balancing reports; while they run a plain
+      line stands in its place. A failure, and a report older than the cartridge in the Book, each
+      say so in the danger tone. Then the reports under `Pools`, `Levels` and `Fights` headings,
+      each table row one line ([looks](../BOOK-UI-COMPONENTS.md#component-catalogue)); a section
+      with nothing to measure says so in one plain line.
   - **Flow walk (5.5b, [builder mode decision 9 as amended](../rnd/in-game-builder-mode-2026-11-19.md)).**
     `flow:<ref>`, one sheet titled `Flow <key>`; not the panel's canvas shrunk. In order: the
     walk's trail, when it has more than one step (its keys joined ` › `, under the header); a
