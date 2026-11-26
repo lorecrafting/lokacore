@@ -10,7 +10,7 @@ import type { Hooks } from './field.tsx';
 import type { Ghost } from '../../../../kernel/ts/play/ghosts.ts';
 import { ghostRows } from './seeas.tsx';
 import { act, sheets } from './sheet.tsx';
-import { doc } from './thing.tsx'; // a cycle: read at render time only
+import { doc, referrers } from './thing.tsx'; // a cycle: read at render time only
 import {
   exitActs,
   foot,
@@ -208,7 +208,7 @@ sheets.room = {
       addHere(r, known.nodes, held(), known.open),
       moveTo(r),
       r.file ? act(WORDS.fields, () => known.open(`def:${r.file}`)) : null,
-      foot(r),
+      foot(r.key, r.file, `room:${r.key}`, referrers('room', r.key)),
     ];
   },
 };

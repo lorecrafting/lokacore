@@ -8,7 +8,7 @@ import { choices, refusePick } from '../../../../kernel/ts/play/world_card.ts';
 import { size, space, type } from '../../book/tokens.ts';
 import { ink } from './build.ts';
 import { known, pen } from './room.tsx';
-import { ed, inRow, io, refusal, row, run } from './roomedit.tsx';
+import { ed, foot, inRow, io, refusal, row, run } from './roomedit.tsx';
 import { act, sheets } from './sheet.tsx';
 
 const WORDS = {
@@ -47,6 +47,28 @@ export function doc(file: string) {
   return docs.get(file);
 }
 
+const counts = new Map<string, number>(); // each `kind/key`'s referrers, under the latest /story
+let counted: unknown; // that /story
+/** How many definitions name `kind` `key` (GET /find's refs, of the last good compile); undefined
+ * until read, or when /find fails. Read again under a new /story, then the Book redraws. */
+export function referrers(kind: string, key: string) {
+  if (counted !== known.files) (counts.clear(), (counted = known.files));
+  const id = `${kind}/${key}`;
+  if (!counts.has(id)) {
+    counts.set(id, -1);
+    known.api!(`/find?q=${encodeURIComponent(key)}`)
+      .then(([status, found]) => {
+        if (status !== 200) return;
+        const refs = (found as { refs: { kind: string }[] }).refs;
+        counts.set(id, refs.filter((r) => r.kind === kind).length);
+        known.redraw();
+      })
+      .catch(() => {}); // unknown: Delete shows no count
+  }
+  const n = counts.get(id)!;
+  return n < 0 ? undefined : n;
+}
+
 /** A person's or item's sheet: where it starts and, unless a spawn places it, a holder to move it to. */
 const fileOf = (dir: Dir, key: string) =>
   known.files[
@@ -76,6 +98,7 @@ function body(dir: Dir, key: string) {
     now.key === undefined ? null : act(WORDS.unput, () => void run(() => ed.unput(file, dir))),
     dir === 'npcs' ? act(WORDS.dialogue, () => talk(key), undefined, `dialogue ${key}`) : null,
     act(WORDS.fields, () => known.open(`def:${file}`)),
+    foot(key, file, `${nodeOf(dir)}:${key}`, referrers(nodeOf(dir), key)),
   ];
 }
 

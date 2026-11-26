@@ -52,6 +52,7 @@ async function api(path: string, sent?: any): Promise<[number, any]> {
     if (held) await new Promise<void>((r) => held!.push(r));
     return [200, { hash, fights }];
   }
+  if (path.startsWith('/find?q=')) return [200, { refs: [{ kind: 'npc' }, { kind: 'room' }] }];
   if (path === '/story') return [200, { map: [], graph: { nodes: [] }, files: {} }];
   if (path === '/templates') return [200, []];
   const dir = /^\/schema\/(\w+)$/.exec(path)?.[1];
@@ -654,4 +655,14 @@ test('a wait step draws the later-rules divider and a narrate step does not', as
   assert.equal(later(1).length, 1);
   assert.equal(later(0).length, 0);
   assert.ok(String(within(s, ['steps', 1])[0]?.key).startsWith('later '));
+});
+
+// Breaks: a definition's sheet with no Delete, or counting refs of another kind than its own (the
+// section `npcs` for the node kind `npc`).
+test("a definition's sheet ends in Delete <key> with its own kind's referrers", async () => {
+  const s = await opened('npcs', {});
+  const key = s.file.slice('npcs/'.length, -'.json'.length);
+  s.shown(); // asks /find
+  await settle();
+  assert.ok(s.shown().some((x) => words(x) === `Delete ${key} · 1 referrers`));
 });

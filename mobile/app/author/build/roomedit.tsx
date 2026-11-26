@@ -28,7 +28,8 @@ const WORDS = {
   grow: (dir: string) => `＋ ${dir}`,
   area: 'Area',
   move: 'Move to area',
-  drop: (key: string) => `Delete ${key}`,
+  drop: (key: string, refs?: number) =>
+    refs === undefined ? `Delete ${key}` : `Delete ${key} · ${refs} referrers`,
   also: (files: string[]) => `Also deletes ${files.join(', ')}`,
   yes: 'Delete all',
   no: 'Keep',
@@ -219,9 +220,10 @@ export const moveTo = (r: MapRoom) => (
   </View>
 );
 
-/** The sheet's foot: Delete, then the other files it takes, asked in the sheet. */
-export function foot(r: MapRoom) {
-  if (asking?.key === r.key) {
+/** A sheet's foot: Delete `key` (`refs` definitions name it, when known), then the other files it
+ * takes, asked in the sheet; once it is gone, sheet `shut` closes. */
+export function foot(key: string, file: string | undefined, shut: string, refs?: number) {
+  if (asking?.key === shut) {
     const { files, answer } = asking;
     const say = (yes: boolean) => () => ((asking = undefined), answer(yes));
     return (
@@ -233,17 +235,17 @@ export function foot(r: MapRoom) {
     );
   }
   const ask = (files: string[]) =>
-    new Promise<boolean>((answer) => ((asking = { key: r.key, files, answer }), after()));
+    new Promise<boolean>((answer) => ((asking = { key: shut, files, answer }), after()));
   return (
     <View key="foot" style={row}>
       {act(
-        WORDS.drop(r.key),
+        WORDS.drop(key, refs),
         () =>
           void run(async () => {
-            if (!r.file) return WORDS.noFile(r.key);
+            if (!file) return WORDS.noFile(key);
             let yes = true;
-            const why = await drop(io, r.key, r.file, (files) => ask(files).then((y) => (yes = y)));
-            if (why === '' && yes) close(`room:${r.key}`); // the room is gone: its sheet goes too, wherever it sits
+            const why = await drop(io, key, file, (files) => ask(files).then((y) => (yes = y)));
+            if (why === '' && yes) close(shut); // it is gone: its sheet goes too, wherever it sits
             return why;
           }),
       )}

@@ -59,6 +59,9 @@ async function opened(
           },
         },
       ];
+    if (path === '/find?q=hen')
+      // two definitions name the person hen, one an item hen
+      return [200, { refs: [{ kind: 'npc' }, { kind: 'item' }, { kind: 'npc' }] }];
     if (path === '/templates')
       return [
         200,
@@ -289,6 +292,25 @@ test("Delete placement drops a person's room and an item's location; Fields open
   Object.assign(doc, was);
 });
 
+// Breaks: the count taking every ref to the key (another kind's too) or none, a failed /find
+// showing a count, or a deleted person's sheet left open.
+test("a person's Delete names its referrers; with /find failing it shows no count", async () => {
+  const s = await opened(() => [200, {}]);
+  s.on(() => sheets.npc.body('hen'));
+  s.shown();
+  await settle();
+  await s.press('Delete hen · 2 referrers');
+  assert.deepEqual(
+    s.posts.map(([path, sent]) => [path, sent.file]),
+    [['/delete', 'npcs/hen.json']],
+  );
+  assert.deepEqual(s.closed, ['npc:hen']);
+  s.on(() => sheets.item.body('cup')); // /find answers 404 for cup
+  s.shown();
+  await settle();
+  assert.ok(s.shown().some((n) => words(n) === 'Delete cup'));
+});
+
 // Breaks: the pencil after a person's or item's name opening another sheet, or one after a room's
 // own title (the Room pencil's) or another field of the person opening a person's.
 test("the pencil after a person's name opens that person's sheet; no other key gets one", () => {
@@ -369,7 +391,7 @@ test('Delete room asks in the sheet about the files it also takes; refusals show
   delete (doc as Record<string, unknown>)['rooms/hall.json'];
   await s.press('Delete hall');
   assert.equal(words(alert()), 'rooms/hall.json: not found');
-  const bare = nodes(foot({ ...hall, file: undefined })).find(
+  const bare = nodes(foot('hall', undefined, 'room:hall')).find(
     (n) => n.props?.accessibilityRole === 'button' && words(n) === 'Delete hall',
   );
   bare!.props.onPress();

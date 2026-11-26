@@ -6,6 +6,7 @@ import { cardMenuWith, turnOn } from '../../../../kernel/ts/play/allowed.ts';
 import { added, addable, definitionOf } from '../../../../kernel/ts/play/card.ts';
 import { refuseNew } from '../../../../kernel/ts/play/choice.ts';
 import { change } from '../../../../kernel/ts/play/edit_model.ts';
+import { nodeOf } from '../../../../kernel/ts/play/mapedit.ts';
 import type { Defs } from '../../../../kernel/ts/play/generic.ts';
 import REGISTRY from '../../../../kernel/ts/play/registry.json' with { type: 'json' };
 import { choices } from './choices.tsx';
@@ -13,10 +14,11 @@ import { combat } from './combat.tsx';
 import { block, field } from './form.tsx';
 import type { Block, Mechanics, Ops, Write } from './formwrite.ts';
 import { known } from './room.tsx';
-import { io, refusal } from './roomedit.tsx';
+import { foot, io, refusal } from './roomedit.tsx';
 import { lines, pages, scenic } from './scene.tsx';
 import { schedule } from './schedule.tsx';
 import { sheets } from './sheet.tsx';
+import { referrers } from './thing.tsx';
 import { world } from './world.tsx';
 
 type Got = { doc: unknown; was: string; kind: string; defs: Defs; root: Record<string, unknown> };
@@ -151,7 +153,9 @@ function body(file: string) {
   };
   // a scene's `.cut` twin, when it has one: its pages above its fields
   const cut = g.kind === 'scenes' && pages(file.replace(/\.json$/, '.cut'), 'steps' in doc);
-  return [refusal(), cut, field(at, [], g.root, g.doc)];
+  const key = file.replace(/^.*\//, '').replace(/\.\w+$/, '');
+  const drop = foot(key, file, `def:${file}`, referrers(nodeOf(g.kind), key));
+  return [refusal(), cut, field(at, [], g.root, g.doc), drop];
 }
 
-sheets.def = { title: (file) => file, body }; // its title is its file: no foot
+sheets.def = { title: (file) => file, body };
