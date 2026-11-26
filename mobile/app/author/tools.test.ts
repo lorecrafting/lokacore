@@ -87,7 +87,7 @@ function panel() {
   context.window.parent = context.window;
   runInNewContext(js, context);
   const sent: { action_key: string }[] = [];
-  const game = {
+  const opened = () => ({
     view: () => ({ view: {}, token: 't' }),
     invoke: (i: { action_key: string }) => (
       sent.push(i),
@@ -97,9 +97,11 @@ function panel() {
     pending: () => false,
     subscribe: () => () => {},
     pulse: () => ({ kind: 'ready' }),
-  };
+  });
+  let game = opened();
   const session = { game: () => game };
-  (context.exports as any).useAuthorPanel({ redraw: () => {}, session, startOver() {} }, game);
+  const startOver = () => void (game = opened()); // a fresh game, as App.tsx's start over
+  (context.exports as any).useAuthorPanel({ redraw: () => {}, session, startOver }, game);
   toolsWith({ game: () => hooks, hold, heard: () => ({}) });
   return { context, hooks, sent };
 }
@@ -116,6 +118,42 @@ test('Set fact lit true is sent once and recorded as one dev_set_fact step', () 
   assert.equal(steps.length, 1);
   assert.equal(steps[0].intent.action_key, 'dev_set_fact');
   assert.equal(steps[0].intent.input.value, true);
+});
+
+// Break: Save PUTs other steps than the Book's (one dropped), or Replay jumps to other steps than
+// the file's (none, or one dropped in tools.tsx or panel.tsx's jump).
+test('Save PUTs the Book steps and Replay gate puts the file steps in the Book', async () => {
+  const { wire } = await import('./build/roomedit.tsx');
+  wire(
+    async () => [200, {}],
+    () => {},
+    () => {},
+  ); // run() acts only once wired
+  const { hooks } = panel();
+  typeIn('fact key', 'lit');
+  typeIn('value', 'true');
+  press('Set fact');
+  await settle();
+  const saved = JSON.parse(JSON.stringify(hooks.place().steps)); // out of panel.tsx's realm
+  const look = { intent: { action_key: 'look', input: {} } };
+  const file = [look, look];
+  const real = globalThis.fetch;
+  const puts: unknown[] = [];
+  globalThis.fetch = (async (_url: string, init?: { method?: string; body: string }) =>
+    init?.method === 'PUT'
+      ? (puts.push(JSON.parse(init.body)), { ok: true, json: async () => ({}) })
+      : {
+          ok: true,
+          json: async () => (_url.endsWith('/gate') ? { steps: file } : ['gate']),
+        }) as any;
+  typeIn('checkpoint name', 'gate');
+  press('Save checkpoint');
+  await settle();
+  assert.deepEqual(puts, [{ steps: saved }]);
+  press('Replay gate');
+  await settle();
+  globalThis.fetch = real;
+  assert.deepEqual(JSON.parse(JSON.stringify(hooks.place().steps)), file);
 });
 
 // Break: a pin only the panel reads (Build's place never starts it, so the Book ignores it), a pin
