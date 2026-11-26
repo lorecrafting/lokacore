@@ -66,7 +66,6 @@ function panel() {
     './shown.ts': shown,
     '../book/words.ts': { worded: {} },
     './prose_rules.ts': proseRules,
-    './inbook.ts': { api: {}, start: () => () => {}, heard: () => {} },
     './build/Build.tsx': { install: () => {}, place: (h: unknown) => (hooks = h) },
   };
   const context: { loka_dev_skew?: number } & Record<string, unknown> = {
@@ -76,7 +75,11 @@ function panel() {
     URLSearchParams,
     localStorage: globalThis.localStorage,
     document: { addEventListener: () => {} },
-    require: (name: string) => modules[name],
+    // the gated in-Book editor, matched by file name: prose_rules.test.ts allows panel.tsx's require only
+    require: (name: string) =>
+      name.endsWith('/inbook.ts')
+        ? { api: {}, start: () => () => {}, heard: () => {} }
+        : modules[name],
   };
   context.globalThis = context;
   context.window = Object.assign(context, { addEventListener: () => {} });
