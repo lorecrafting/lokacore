@@ -22,12 +22,12 @@
   {
     "id": "project-tabs",
     "panel": "tools/author-panel/src/project.tsx",
-    "book": "todo"
+    "book": "contents.tsx"
   },
   {
     "id": "world-picker",
     "panel": "tools/author-panel/src/world.tsx",
-    "book": "todo"
+    "book": "worlds.tsx"
   },
   {
     "id": "map-story-flow-segment",
@@ -157,7 +157,7 @@
   {
     "id": "change-feed",
     "panel": "tools/author-panel/src/right.tsx",
-    "book": "todo"
+    "book": "recent.tsx"
   },
   {
     "id": "source-footer",
@@ -207,7 +207,7 @@
   {
     "id": "find-referrers",
     "panel": "tools/author-panel/src/reading.tsx",
-    "book": "todo"
+    "book": "find.tsx"
   },
   {
     "id": "generic-card",
@@ -277,7 +277,7 @@
   {
     "id": "undo",
     "panel": "tools/author-panel/src/author.ts",
-    "book": "todo"
+    "book": "recent.tsx"
   },
   {
     "id": "new-kind",
