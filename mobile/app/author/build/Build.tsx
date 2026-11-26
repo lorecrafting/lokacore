@@ -26,7 +26,7 @@ import { ghostSheet, pencil, story } from './room.tsx';
 import { chip, ghostLines, seeWith, unsee, type Game } from './seeas.tsx';
 import { icons, sceneLine, titled } from './talk.tsx';
 import { CONTENTS } from './contents.tsx';
-import { timing, toolsWith, type Hooks as Tools, type Said } from './tools.tsx';
+import { startPinned, timing, toolsWith, type Hooks as Tools, type Said } from './tools.tsx';
 import './generic.tsx'; // registers the def:<file> sheet
 import { MAP, mapSheet, measured, unborn } from './map.tsx';
 import { storySheet } from './story.tsx';
@@ -70,7 +70,7 @@ export type Place = Game & {
   startIn: (room: string) => void;
 } & NonNullable<ReturnType<Tools['game']>>; // the Tools tab's paths
 let placed: Place | undefined;
-export const place = (given: Place) => void ((placed = given), seeWith(given, () => mapped()));
+export const place = (p: Place) => void ((placed = p), seeWith(p, () => mapped()), startPinned(p));
 mapSheet({ go: (room) => placed?.startIn(room), here: () => placed?.here() });
 storySheet((room) => placed?.startIn(room));
 onSaved((ids) => wrote({ ids }));
@@ -273,7 +273,6 @@ export function Strip({ children }: { children: ReactNode }) {
       <View style={{ ...STRIP, backgroundColor: ink('bg'), borderColor: ink('line') }}>
         {buildSwitch(() => change(toggled(builder)))}
         {warn(heard.held ? WORDS.held(heard.pending ?? 0) : '')}
-        {timing(heard.timings, placed?.loaded)}
         {chip()}
         {undo ? act(WORDS.undo, () => void putBack(undo!)) : null}
         {notBack ? warn(WORDS.notUndone(notBack.file)) : null}
@@ -282,6 +281,7 @@ export function Strip({ children }: { children: ReactNode }) {
         {builder.on ? pad(CONTENTS.contents, 'contents', top) : null}
         {builder.on ? pad(MAP.map, 'map', top) : null}
         {builder.on ? pad(badge(heard), 'checks', top) : null}
+        {timing(heard.timings, placed?.loaded)}
       </View>
       <Notice />
       <View

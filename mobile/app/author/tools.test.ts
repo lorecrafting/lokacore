@@ -74,6 +74,7 @@ function panel() {
     location: { search: '?dev=1' },
     URLSearchParams,
     localStorage: globalThis.localStorage,
+    fetch: (...a: Parameters<typeof fetch>) => globalThis.fetch(...a), // each test's own
     document: { addEventListener: () => {} },
     // the gated in-Book editor, matched by file name: prose_rules.test.ts allows panel.tsx's require only
     require: (name: string) =>
@@ -117,6 +118,44 @@ test('Set fact lit true is sent once and recorded as one dev_set_fact step', () 
   assert.equal(steps[0].intent.input.value, true);
 });
 
+// Break: a pin only the panel reads (Build's place never starts it, so the Book ignores it), a pin
+// replayed over a Book that already has steps, or replayed again on the same load.
+test('a Book pinned to gate replays it once, only while it has no steps', async () => {
+  const { place } = await import('./build/Build.tsx');
+  stored.set('loka.editor.start', 'gate');
+  const asked: string[] = [];
+  const jumps: unknown[] = [];
+  const real = globalThis.fetch;
+  globalThis.fetch = (async (url: string) => (
+    asked.push(url),
+    { ok: true, json: async () => ({ steps: ['look'] }) }
+  )) as any;
+  const game = (steps: unknown[]) => ({
+    place: () => ({ steps }),
+    jump: (s: unknown) => jumps.push([steps.length, s]),
+  });
+  place(game(['go north']) as any);
+  place(game([]) as any);
+  place(game([]) as any);
+  await settle();
+  globalThis.fetch = real;
+  stored.delete('loka.editor.start');
+  assert.deepEqual(asked, ['/__author/checkpoints/gate']);
+  assert.deepEqual(jumps, [[0, ['look']]]); // the fresh Book, not the one with steps
+});
+
+// Break: an accepted cheat from the Tools tab returns the Book's old stop note, which the tab then
+// shows as the cheat's refusal.
+test('an accepted cheat under an old stop note says nothing', () => {
+  stored.clear();
+  const stopped = { hash: 'h', at: 0, note: 'Place: old stop' };
+  stored.set('loka-place', JSON.stringify({ hash: 'h', steps: [], stopped }));
+  const { hooks, sent } = panel();
+  assert.equal(hooks.cheat({ op: 'set_fact', fact: 'lit', value: true }), '');
+  assert.equal(sent.length, 1);
+  stored.clear();
+});
+
 // Break: the tab's minutes reach the clock as ms, as hours, or unscaled by the cartridge's rate.
 test('Advance 90 minutes at rate 1 moves the dev clock 5,400,000 ms', () => {
   const { context } = panel();
@@ -148,7 +187,7 @@ test('the tools gate their acts on what they need and send what was typed', asyn
   toolsWith({ game: () => game as any, hold, heard: () => ({}) });
   const labels = () =>
     drawn()
-      .filter((n) => n.props?.accessibilityRole === 'button')
+      .filter((n) => n.props?.accessibilityRole === 'button' && !n.props.disabled)
       .map(words);
   const text = () => drawn().map(words).join('|');
 
@@ -156,6 +195,12 @@ test('the tools gate their acts on what they need and send what was typed', asyn
   assert.doesNotMatch(text(), /A name is up to 64/, 'no name typed, no complaint');
   typeIn('checkpoint name', '9gate9');
   assert.ok(!labels().includes('Save checkpoint'), 'no steps, no Save');
+  const greyed = drawn().find((n) => n.props?.disabled && words(n) === 'Save checkpoint');
+  assert.deepEqual(
+    greyed.props.accessibilityState,
+    { disabled: true },
+    'greyed is a disabled control',
+  );
   steps = [{ intent: { action_key: 'look' } }];
   assert.ok(labels().includes('Save checkpoint'), 'one step and 9gate9 save');
   typeIn('checkpoint name', 'Gate');
@@ -169,6 +214,10 @@ test('the tools gate their acts on what they need and send what was typed', asyn
   press('Save checkpoint');
   await settle();
   assert.match(text(), /Not saved: 409/);
+  globalThis.fetch = (async () => ({ ok: false, status: 404, json: async () => ({}) })) as any;
+  press('Replay gate');
+  await settle();
+  assert.match(text(), /Not replayed: 404/);
   globalThis.fetch = (async () => ({ ok: true, json: async () => ({}) })) as any;
   press('Replay gate');
   await settle();

@@ -1,7 +1,7 @@
 // The notebook's Tools tab (slice 6.2a, the panel's Play column): the Hold, named checkpoints with
 // their replayed verdicts, Advance time and the cheats, all through panel.tsx's own paths (placeHooks):
 // a cheat is a recorded step, a replay starts the game over. The strip's last-edit timing is here too.
-import { Text, TextInput, View } from 'react-native';
+import { Pressable, Text, TextInput, View } from 'react-native';
 import {
   BUDGET,
   loadOf,
@@ -16,7 +16,7 @@ import type { Cheat, Step } from '../place.ts';
 import { ink } from './build.ts';
 import { known } from './room.tsx';
 import { inRow, refusal, row, run, tell } from './roomedit.tsx';
-import { act } from './sheet.tsx';
+import { act, CONTROL } from './sheet.tsx';
 
 // Placeholders: the owner writes the words.
 export const WORDS = {
@@ -25,6 +25,7 @@ export const WORDS = {
   name: 'checkpoint name',
   save: 'Save checkpoint',
   notSaved: (status: number) => `Not saved: ${status}`,
+  notReplayed: (status: number) => `Not replayed: ${status}`,
   badName:
     'A name is up to 64 lower-case letters, digits, - and _, starting with a letter or digit.',
   noSteps: 'That checkpoint has no steps list; nothing changed.',
@@ -73,6 +74,7 @@ const field = (label: string, key: string, numeric = false) => (
     key={key}
     accessibilityLabel={label}
     placeholder={label}
+    placeholderTextColor={ink('dim')}
     defaultValue={typed[key]}
     inputMode={numeric ? 'numeric' : undefined}
     onChangeText={(v) => void ((typed[key] = v), known.redraw())}
@@ -80,14 +82,20 @@ const field = (label: string, key: string, numeric = false) => (
   />
 );
 const said = (text: string) => <Text style={{ ...inRow, color: ink('dim') }}>{text}</Text>;
-/** A tool's act, or its label in dim ink while what it needs is missing. */
+/** A tool's act, or the same control disabled in dim ink while what it needs is missing. */
 const maybe = (label: string, go: (() => void) | false) =>
   go ? (
     act(label, go)
   ) : (
-    <Text key={label} style={{ ...type.control, color: ink('dim') }}>
-      {label}
-    </Text>
+    <Pressable
+      key={label}
+      accessibilityRole="button"
+      accessibilityState={{ disabled: true }}
+      disabled
+      style={CONTROL}
+    >
+      <Text style={{ ...type.control, color: ink('dim') }}>{label}</Text>
+    </Pressable>
   );
 
 // not through run: save awaits it inside its own run, which a nested run would skip as busy
@@ -107,9 +115,9 @@ const save = (steps: Step[]) =>
   });
 const replay = (name: string) =>
   run(async () => {
-    const { steps } = (await (await fetch(`/__author/checkpoints/${name}`)).json()) as {
-      steps?: Step[];
-    };
+    const r = await fetch(`/__author/checkpoints/${name}`);
+    if (!r.ok) return WORDS.notReplayed(r.status);
+    const { steps } = (await r.json()) as { steps?: Step[] };
     if (!Array.isArray(steps)) return WORDS.noSteps;
     hooks?.game()?.jump(steps);
   });
@@ -118,6 +126,17 @@ const pin = (name: string) => {
   else localStorage.setItem(START, name);
   known.redraw();
 };
+let started = false; // the pinned start is replayed once per load
+/** A fresh Book (no steps yet) replays the pinned start checkpoint, as the panel's useStart (App.tsx). */
+export function startPinned(game: Game) {
+  const name = localStorage.getItem(START);
+  if (started || !name || game.place().steps.length) return;
+  started = true;
+  void fetch(`/__author/checkpoints/${name}`)
+    .then((r) => r.json())
+    .then(({ steps }: { steps?: Step[] }) => Array.isArray(steps) && game.jump(steps))
+    .catch(() => {}); // a missing pin starts as unpinned
+}
 /** true, false, a number or a "quoted" string as typed; a bare word is an enum's or a string's (cheats.tsx). */
 function value(text: string) {
   try {

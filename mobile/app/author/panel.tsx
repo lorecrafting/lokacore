@@ -246,7 +246,7 @@ const placeHooks = (game: Opened, latest: { current: Tools }) => ({
   place: () => ({ steps: place.steps, refused, checkpoint: place.checkpoint }),
   jump: (steps: Step[]) => jumpTo(steps, latest.current, steps),
   advance: (minutes: number) => ((placeNote = ''), advance(minutes, game), placeNote),
-  cheat: (cheat: Cheat) => (askCheat(game, cheat), placeNote),
+  cheat: (cheat: Cheat) => (placeNote = sendCheat(played(game)!, cheat, canon().manifest)),
   here: () => roomKey(game.roomIds(), game.view().view.place.id),
   drop: () => refused !== undefined && jumpTo(dropStep(place.steps, refused), latest.current),
   back: () => jumpTo(place.checkpoint ?? [], latest.current),
