@@ -1,4 +1,4 @@
-// size: allow 590, one scaffolded cartridge the tests edit in turn and the last undoes; a split needs a second scaffold
+// size: allow 595, one scaffolded cartridge the tests edit in turn and the last undoes; a split needs a second scaffold
 // The editor map's edits (kernel/ts/play/mapedit.ts) through the real write routes
 // (play/write.ts) and the real `mix loka.new`, on one scaffolded cartridge the tests edit in turn;
 // the last one undoes every gesture. Expected files are written by hand.
@@ -572,11 +572,13 @@ test("delete, one-way and barrier edit a bundled room's own exits, not the bundl
   const [f, g] = [room('f', 'areas/pen.json', 'pen'), room('g', 'areas/pen.json', 'pen')];
   await ed.unlink(f, 'east', [f, g]);
   await assert.rejects(ed.link(f, 'north', g), /f already has an exit north/);
+  await ed.link(f, 'west', g, true);
   await ed.oneWay(f, 'north', [f, g]);
   await ed.barrier(f, 'up', [f, g], 'stile', false);
   const { rooms, ...rest } = json('areas/pen.json');
   assert.deepEqual(rest, {});
-  assert.deepEqual(rooms.f.exits, { north: { to: 'g' }, up: { to: 'g', barrier: 'stile' } });
+  const up = { to: 'g', barrier: 'stile' };
+  assert.deepEqual(rooms.f.exits, { north: { to: 'g' }, up, west: { to: 'g' } });
   assert.deepEqual(rooms.g.exits, { down: { to: 'f', barrier: 'stile' } });
   assert.ok(existsSync(join(src, 'barriers/stile.json')));
 });
