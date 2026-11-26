@@ -123,7 +123,7 @@ test('Advance 90 minutes at rate 1 moves the dev clock 5,400,000 ms', () => {
 });
 
 // Break: Save offered without steps or for a name live.ts refuses (or a digit 9 refused), a failed PUT
-// silent, a replay of a file with no steps list jumping, Pin not toggling, a failed count with no
+// silent, a bad-name line before any name, a replay of a file with no steps list jumping, Pin not toggling, a failed count with no
 // checkpoints heard, a zero Advance or an empty room offered, Set level with no attribute withheld,
 // or a typed value parsed wrong ("5" a string, a bare word kept, 7 a number).
 test('the tools gate their acts on what they need and send what was typed', async () => {
@@ -149,10 +149,12 @@ test('the tools gate their acts on what they need and send what was typed', asyn
       .map(words);
   const text = () => drawn().map(words).join('|');
 
-  typeIn('checkpoint name', 'gate9');
+  typeIn('checkpoint name', '');
+  assert.doesNotMatch(text(), /A name is up to 64/, 'no name typed, no complaint');
+  typeIn('checkpoint name', '9gate9');
   assert.ok(!labels().includes('Save checkpoint'), 'no steps, no Save');
   steps = [{ intent: { action_key: 'look' } }];
-  assert.ok(labels().includes('Save checkpoint'), 'one step and gate9 save');
+  assert.ok(labels().includes('Save checkpoint'), 'one step and 9gate9 save');
   typeIn('checkpoint name', 'Gate');
   assert.ok(!labels().includes('Save checkpoint'), 'a capital is refused');
   assert.match(text(), /A name is up to 64/);

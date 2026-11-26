@@ -13,9 +13,9 @@ export const BUDGET = {
   prose: 300,
   structural: 1500,
   refusal: 1000,
-  card: 100,
-  flowOpen: 300,
-  flowUpdate: 100,
+  card: 100, // mutate-skip: the panel's flow budget (flow.tsx), uncalibrated
+  flowOpen: 300, // mutate-skip: the panel's flow budget (flow.tsx), uncalibrated
+  flowUpdate: 100, // mutate-skip: the panel's flow budget (flow.tsx), uncalibrated
 }; // mutate-skip: uncalibrated design value
 /** One edit's milliseconds: compile and publish, and for a structural edit the Book's load until `ready`. */
 export const total = (t: Timings, load: number) => t.compile + t.publish + load;
