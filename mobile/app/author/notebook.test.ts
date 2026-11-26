@@ -65,7 +65,7 @@ test('a put-back of a changed file shows `<file> changed since; not put back.`',
 });
 
 // Breaks: Find asking for other words than typed, dropping a referrer, or a referrer not opening its
-// definition's sheet.
+// definition's sheet (a .loka one through POST /open at its key).
 test('Find `cellar` lists the two referrers; each opens its sheet', async () => {
   const s = await opened({
     '/find?q=cellar': () => [
@@ -75,7 +75,7 @@ test('Find `cellar` lists the two referrers; each opens its sheet', async () => 
         total: 1,
         refs: [
           { kind: 'room', by: 'hall', at: 'rooms/hall.json:4' },
-          { kind: 'npc', by: 'rat', at: 'npcs/rat.json:2' },
+          { kind: 'npc', by: 'rat', at: 'areas/cellar/rat.loka:2' },
         ],
       },
     ],
@@ -85,28 +85,34 @@ test('Find `cellar` lists the two referrers; each opens its sheet', async () => 
   await s.press(findRows, 'Find');
   await s.press(findRows, 'hall (room)');
   await s.press(findRows, 'rat (npc)');
-  assert.deepEqual(s.opens, ['def:rooms/hall.json', 'def:npcs/rat.json']);
+  assert.deepEqual(s.opens, ['def:rooms/hall.json']);
+  assert.deepEqual(s.posts, [['/open', { file: 'areas/cellar/rat.loka', key: 'rat' }]]);
 });
 
 // Breaks: a world press posting the current world's key or none, or the Book reloading before
-// /world names the picked world, or keeping the world left's place.
+// /world names the picked world, or keeping the world left's place, or a refused GET never asked again.
 test('switching worlds posts the picked key, then reloads once /world names it', async () => {
   let current = 'farm';
+  let gets = 0;
   const s = await opened({
     '/world': (sent) =>
       sent
         ? ((current = sent.name), [200, { ok: true }])
-        : [
-            200,
-            {
-              current,
-              worlds: [
-                { name: 'farm', title: 'Farm' },
-                { name: 'mill', title: 'Mill' },
-              ],
-            },
-          ],
+        : gets++ === 0
+          ? [503, null] // a refusal is asked again on the next draw
+          : [
+              200,
+              {
+                current,
+                worlds: [
+                  { name: 'farm', title: 'Farm' },
+                  { name: 'mill', title: 'Mill' },
+                ],
+              },
+            ],
   });
+  worldRows();
+  await settle();
   worldRows();
   await settle();
   await s.press(worldRows, 'Mill');
