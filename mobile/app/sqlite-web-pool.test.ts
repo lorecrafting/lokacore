@@ -143,19 +143,25 @@ test('on Chromium the pool writes no headroom', async () => {
 });
 
 // Breaks (loka-hcnlh.19.5): a page left for the back/forward cache keeps its worker, so the pool's
-// OPFS handles stay taken and the Book opened again reads "already open in another tab"; or a page
-// restored from the cache plays on with its worker gone (every save call then times out); or a save
-// call after pagehide starts a second worker that takes the handles again.
-test('the leaving page ends its save worker; a page restored from the cache reloads', () => {
+// OPFS handles stay taken and the Book opened again reads "already open in another tab"; the worker
+// ends at pagehide, before the Book's hide handler saves its pause point (that save then spins 5 s
+// on the ended worker); or a restored page lets the Book resume on the ended worker before reloading.
+function page() {
   const source = ts.transpileModule(readFileSync(webModule, 'utf8'), {
     compilerOptions: { module: ts.ModuleKind.CommonJS },
   }).outputText;
-  const page = new EventTarget();
+  // An event reaches window's capturing listeners, then document's, then window's bubbling ones.
+  const capture = new EventTarget();
+  const document = Object.assign(new EventTarget(), { visibilityState: 'visible' });
+  const bubble = new EventTarget();
   const workers: { terminated: boolean }[] = [];
+  const calls: boolean[] = []; // per save call: whether its worker had ended
   let reloads = 0;
-  const window = Object.assign(page, {
+  const window = {
     location: { href: 'https://loka.test/', reload: () => reloads++ },
-  });
+    addEventListener: (type: string, listener: EventListener, captured?: boolean) =>
+      (captured ? capture : bubble).addEventListener(type, listener),
+  };
   class Worker {
     terminated = false;
     constructor() {
@@ -168,25 +174,61 @@ test('the leaving page ends its save worker; a page restored from the cache relo
   }
   const stubs: Record<string, unknown> = {
     expo: { NativeModule: class {}, registerWebModule: (Module: new () => object) => new Module() },
-    './WorkerChannel': { invokeWorkerSync() {}, invokeWorkerAsync: async () => {} },
+    './WorkerChannel': {
+      invokeWorkerSync: (worker: Worker) => calls.push(worker.terminated),
+      invokeWorkerAsync: async () => {},
+    },
   };
   const exports: { default?: { NativeDatabase: new (path: string) => { initSync(): void } } } = {};
-  new Function('require', 'exports', 'window', 'Worker', source)(
+  new Function('require', 'exports', 'window', 'document', 'Worker', source)(
     (name: string) => stubs[name],
     exports,
     window,
+    document,
     Worker,
   );
   const db = new exports.default!.NativeDatabase('loka.db');
   db.initSync();
-  const show = (persisted: boolean) =>
-    page.dispatchEvent(Object.assign(new Event('pageshow'), { persisted }));
-  show(false); // a first load
-  assert.deepEqual([workers.length, workers[0].terminated, reloads], [1, false, 0]);
-  page.dispatchEvent(new Event('pagehide'));
-  assert.equal(workers[0].terminated, true);
-  db.initSync(); // a save call after pagehide starts no worker to take the handles again
-  assert.equal(workers.length, 1);
-  show(true);
-  assert.equal(reloads, 1);
+  // The Book's AppState handler saves on hide and resumes on show, both through the worker.
+  document.addEventListener('visibilitychange', () => db.initSync());
+  const fire = (event: Event) => [capture, document, bubble].forEach((t) => t.dispatchEvent(event));
+  return {
+    workers,
+    calls,
+    reloads: () => reloads,
+    fire,
+    visibility(state: string) {
+      document.visibilityState = state;
+      fire(new Event('visibilitychange'));
+    },
+    show: (persisted: boolean) => fire(Object.assign(new Event('pageshow'), { persisted })),
+    save: () => db.initSync(),
+  };
+}
+
+test('the leaving page ends its save worker after the hide save', () => {
+  const p = page();
+  p.show(false); // a first load
+  p.fire(new Event('pagehide'));
+  p.visibility('hidden');
+  assert.deepEqual([p.calls, p.workers[0].terminated], [[false, false], true]);
+  p.save(); // a save call after leaving starts no worker to take the handles again
+  assert.deepEqual([p.workers.length, p.reloads()], [1, 0]);
+});
+
+test('a page hidden before it leaves ends its worker at pagehide', () => {
+  const p = page();
+  p.visibility('hidden');
+  p.fire(new Event('pagehide'));
+  assert.deepEqual([p.calls, p.workers[0].terminated], [[false, false], true]);
+});
+
+test('a page restored from the cache reloads before the Book resumes', () => {
+  const p = page();
+  p.fire(new Event('pagehide'));
+  p.visibility('hidden');
+  p.visibility('visible'); // restored, visible before pageshow
+  assert.deepEqual([p.calls.length, p.reloads()], [2, 1]);
+  p.show(true);
+  assert.equal(p.reloads(), 2);
 });
