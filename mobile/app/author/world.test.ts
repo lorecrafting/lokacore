@@ -1,4 +1,4 @@
-// The World tab and the World card's block (author/build/world.tsx, slice 6.1a): a resource's new
+// The World tab and the World card's block (author/build/world.tsx, slices 6.1a-b): a resource's new
 // entry as newEntry makes it, a cartridge field picking a root file's key, and a capability's Turn
 // on, after which Add mechanic… offers its field.
 import assert from 'node:assert/strict';
@@ -6,7 +6,7 @@ import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
 import { nodes, words } from '../book/__tests__/combat-book.test.ts'; // also registers the .tsx loader
 
-const { story } = await import('./build/room.tsx');
+const { story, known } = await import('./build/room.tsx');
 const { sheets } = await import('./build/sheet.tsx');
 Object.assign(globalThis, { localStorage: { getItem: () => null, setItem() {} } }); // Build's Undo chip
 await import('./build/Build.tsx'); // the app's registration of the def: and contents sheets
@@ -37,6 +37,7 @@ const files = new Map<string, any>([
   ['facts.json', { facts: {} }],
   ['resources.json', { resources: { gold: {} } }],
 ]);
+let storyFiles: Record<string, string> = {}; // the /story's node files (the world files test names its own)
 const posts: { file: string; ops: { path: string[]; value?: unknown; delete?: true }[] }[] = [];
 /** The builder api: a /change lands in `files` (as write.ts writes it), so the next /story rereads it. */
 async function api(path: string, sent?: any): Promise<[number, any]> {
@@ -55,7 +56,7 @@ async function api(path: string, sent?: any): Promise<[number, any]> {
       {
         map: [],
         graph: { nodes: [{ ref: 'r1', kind: 'room' }] },
-        files: {}, // the /story names no root file (it maps ids to files)
+        files: { ...storyFiles }, // a fresh map per /story (load rereads on a new one); no root file
       },
     ];
   if (path === '/templates' || path.startsWith('/fights')) return [200, []];
@@ -200,4 +201,58 @@ test('a cartridge resource field picks hp, ma, mv and resources.json keys; a roo
     s.shown().some((x) => words(x) === 'no resource nope'),
     'the refusal shown',
   );
+});
+
+// break: the World tab lists no population, transport or barrier (or opens no sheet), or a world file's sheet writes
+// the wrong path or value (a number as text, opens_when not the least Policy)
+test('the World tab lists the world files; each sheet writes cap 3, fare 5 and opens_when (Add mechanic…)', async (t) => {
+  const was = known.open;
+  t.after(() => ((storyFiles = {}), (known.open = was))); // the next /story names none again, even on a failure
+  files
+    .set('populations/p.json', { cap: 1 })
+    .set('transports/t.json', { fare: 0 })
+    .set('barriers/b.json', { keywords: ['gate'], name: 'x', initial: 'locked' });
+  storyFiles = {
+    'x@1/population/p': 'populations/p.json',
+    'x@1/transport/t': 'transports/t.json',
+    'x@1/barrier/b': 'barriers/b.json',
+    'x@1/npc/n': 'npcs/n.json',
+  };
+  const opens: string[] = [];
+  story(
+    api,
+    () => {},
+    () => {},
+    (id) => void opens.push(id),
+  );
+  await settle();
+  const c = await opened('contents');
+  if (!c.find('on ')) await c.press(WORLD.tab);
+  assert.deepEqual(
+    c
+      .shown()
+      .filter((x) => /\//.test(words(x)) && x.props?.onPress)
+      .map(words),
+    ['barriers/b.json', 'populations/p.json', 'transports/t.json'], // not npcs/n.json
+  );
+  await c.press('populations/p.json');
+  assert.deepEqual(opens, ['def:populations/p.json']);
+  sent();
+  const type = async (file: string, was: string, t: string) => {
+    const s = await opened(`def:${file}`);
+    const input = s.shown().find((x) => x.props?.defaultValue === was && x.props.onBlur);
+    input.props.onChangeText(t);
+    input.props.onBlur();
+    await settle();
+  };
+  await type('populations/p.json', '1', '3');
+  await type('transports/t.json', '0', '5');
+  const b = await opened('def:barriers/b.json');
+  await b.press('mechanic barriers/b.json');
+  await b.press('mechanic opens_when ');
+  assert.deepEqual(sent(), [
+    ['cap', 3], // PopulationPlan.cap: an integer, not the words '3'
+    ['fare', 5],
+    ['opens_when', { op: 'all', items: [] }], // the least Policy (anyOf's first: all of nothing)
+  ]);
 });

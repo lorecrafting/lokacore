@@ -31,7 +31,7 @@ const every = Object.fromEntries(
 );
 const CART = {
   requires: { capabilities: every },
-  world: { combat: {} },
+  world: { combat: {}, trails: {} }, // trails: a population's trail and hunts
   calendar: { hours_per_day: 20 }, // schedule.tsx's hours stop below it, not at the default 24
 }; // every gate open: rows sit in Add mechanic…
 files.set('cartridge.json', CART);
@@ -105,6 +105,7 @@ const FIRST: Record<string, object | object[]> = {
   skills: { prerequisite: 'x', growth: [1] },
   npcs: { hp: 10, room: 'r' }, // attack; Add hour sends the NPC to its room
   items: { slot: 'wield' }, // weapon
+  populations: [{ day_target: 1 }, { member_role: 'prey' }], // floor; sight
   quests: [
     { objective: { evidence: 'expedition' } },
     { objective: { evidence: 'patrol' } },
@@ -178,11 +179,11 @@ async function edit(s: { file: string; shown: () => any[] }, path: unknown[], th
   if (then) return then();
   const typed = inside().find((x) => x.props?.onBlur);
   const t = typed?.props.defaultValue === '7' ? '8' : '7'; // a change: the same words write nothing
+  if (await press(hit((x) => x.props.accessibilityState?.selected === false))) return; // a pick before typed words (a world file's currency)
   if (typed) return (typed.props.onChangeText(t), typed.props.onBlur(), await settle());
   const named = inside().find((x) => x.props?.accessibilityLabel === 'Key');
   if (named) named.props.onChangeText('k');
   if (named && (await press(hit((x) => String(x.key).startsWith('entry '))))) return;
-  if (await press(hit((x) => x.props.accessibilityState?.selected === false))) return;
   if (await press(hit((x) => words(x) === WORDS.item))) return;
   if (await press(hit((x) => words(x) === HOURS.add))) return;
   if (!(await press(hit((x) => words(x) === WORDS.add)))) return;
@@ -318,8 +319,7 @@ test('each gesture writes the exact value at the exact path', async () => {
   );
 });
 
-// Breaks: a refused write (write.ts's 409 for a file changed behind the sheet) silent once the
-// sheet has read its file.
+// Breaks: a refused write (write.ts's 409: its file changed behind the sheet) silent once read.
 test('a write refused after the file is read shows in the sheet', async () => {
   const s = await opened('statuses', { tick_every: 5 });
   hash = 'T'; // the file changed on disk since the sheet read it

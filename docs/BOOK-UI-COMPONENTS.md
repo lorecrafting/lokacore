@@ -391,7 +391,8 @@ height on a 390 px phone the centre's name shows without a scroll when `Leads he
 node. No raw sizes.
 Builder 5.1a and 5.4b add `Flow`, an act, to a choice's and a Story row's acts.
 Builder 6.1a: the World tab's file names and each `Turn on <key>` are acts in Room sheet rows,
-wrapping at 390 px and in the 384 px docked sheet. A reference field's picks are the generic
+wrapping at 390 px and in the 384 px docked sheet; 6.1b's world files are the same acts, each its
+full path, on a row of their own. A reference field's picks are the generic
 sheet's option buttons under its typed field, the present one a selected act, wrapping the same.
 No raw sizes.
 Worst pair: `warning` on `card`,

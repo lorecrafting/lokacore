@@ -252,7 +252,7 @@
   {
     "id": "world-card",
     "panel": "tools/author-panel/src/edit/cards/World.tsx",
-    "book": "todo"
+    "book": "world.tsx"
   },
   {
     "id": "combat-block",
