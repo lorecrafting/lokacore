@@ -1,6 +1,6 @@
 defmodule Loka.Content.Exchanges do
   @moduledoc "Finite authored stock and equal-count exchanges."
-  import Loka.Content.Source, only: [diag: 2, at: 2, ref: 3]
+  import Loka.Content.Source, only: [diag: 2, diag: 3, at: 2, ref: 3]
   alias Loka.Content.Refs
 
   def check(nil, _), do: []
@@ -70,19 +70,30 @@ defmodule Loka.Content.Exchanges do
     refills = if harvest?, do: Loka.Content.Replenish.refilled(defs, holder), else: []
 
     duplicates ++
-      for i <- items,
-          not stocked?(m, defs, i, if(i in refills, do: :any, else: holder)),
-          do: diag("OUTCOME_MISMATCH", path)
+      Enum.flat_map(
+        items,
+        &unstocked(m, defs, &1, if(&1 in refills, do: :any, else: holder), path)
+      )
   end
 
-  # A harvest item a replenish entry refills into the room may start in any authored holder.
-  defp stocked?(m, defs, item, holder) do
+  # A harvest item a replenish entry refills into the room may start in any authored holder. One
+  # held but weightless says so, naming the item (a builder-made item starts weightless).
+  defp unstocked(m, defs, item, holder, path) do
     case Refs.resolve(item, "item", m, defs) do
       {_, _, i} ->
-        held?(i["location"], holder) and is_integer(i["mass_grams"]) and i["mass_grams"] > 0
+        cond do
+          not held?(i["location"], holder) ->
+            [diag("OUTCOME_MISMATCH", path)]
+
+          is_integer(i["mass_grams"]) and i["mass_grams"] > 0 ->
+            []
+
+          true ->
+            [diag("OUTCOME_MISMATCH", path, %{"why" => "stock_weight", "target" => item["key"]})]
+        end
 
       _ ->
-        false
+        [diag("OUTCOME_MISMATCH", path)]
     end
   end
 

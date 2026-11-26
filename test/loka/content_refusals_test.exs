@@ -230,25 +230,33 @@ defmodule Loka.ContentRefusalsTest do
            )
 
     # Breaks: an exchange loads with a repeated outgoing item, a reward not held by its NPC, a
-    # massless stock item, no harvest detail stocking its outgoing items, or an unknown fact.
+    # massless stock item, no harvest detail stocking its outgoing items, or an unknown fact. Only
+    # a held but weightless item is named as needing a weight (an unheld one is not blamed on it).
     assert {"DUPLICATE_DEFINITION", "quests/herbs.exchange"} in codes(
              dir,
              quest.(&put_in(&1, ["exchange", "outgoing", Access.at(1)], "ore_01"))
            )
 
-    for {file, change} <- [
+    weightless = %{"why" => "stock_weight", "target" => "ore_01"}
+
+    for {file, change, data} <- [
           {"items/bandage_01.json",
-           &Map.put(&1, "location", %{"in" => "room", "room" => "mine"})},
-          {"items/ore_01.json", &Map.put(&1, "mass_grams", 0)},
-          {"rooms/mine.json", &update_in(&1, ["details"], fn d -> Map.delete(d, "seam") end)}
-        ],
-        do:
-          assert(
-            {"OUTCOME_MISMATCH", "quests/herbs.exchange"} in codes(
-              dir,
-              exchange ++ [{file, change}]
-            )
-          )
+           &Map.merge(&1, %{"mass_grams" => 0, "location" => %{"in" => "room", "room" => "mine"}}),
+           %{}},
+          {"items/ore_01.json", &Map.put(&1, "mass_grams", 0), weightless},
+          {"rooms/mine.json", &update_in(&1, ["details"], fn d -> Map.delete(d, "seam") end), %{}}
+        ] do
+      {:error, diagnostics} = Source.compile(dir, exchange ++ [{file, change}])
+      at = for d <- diagnostics, d["path"] == "quests/herbs.exchange", do: {d["code"], d["data"]}
+      assert at == [{"OUTCOME_MISMATCH", data}]
+    end
+
+    {:error, [d | _]} =
+      Source.compile(dir, exchange ++ [{"items/ore_01.json", &Map.delete(&1, "mass_grams")}])
+
+    assert {d["path"], d["data"]} == {"quests/herbs.exchange", weightless}
+    assert [line] = Loka.Content.Explain.lines([d], dir)
+    assert line =~ "`ore_01` weighs nothing" and line =~ "`mass_grams` above 0"
 
     assert {"UNRESOLVED_REFERENCE", "quests/herbs.exchange.contribution"} in codes(
              dir,
