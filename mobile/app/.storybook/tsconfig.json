@@ -9,7 +9,8 @@
     "picker/*.tsx",
     "../vitest.config.mts",
     "../stories",
-    "../book/sksl.d.ts"
+    "../book/sksl.d.ts",
+    "../tests/phone.ts" // node:test + Playwright: the app's config has no Node types
   ],
   "exclude": [] // the app's excludes 'stories'
 }
