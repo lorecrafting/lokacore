@@ -29,6 +29,8 @@ const free = () =>
 const [author, preview, metro, ca] = [await free(), await free(), await free(), await free()];
 const env = {
   ...process.env,
+  CI: undefined, // Metro does not watch files under CI (ci-info), so an edit would never reload the Book
+  GITHUB_ACTIONS: undefined,
   LOKA_DEV_CARTRIDGE: artifact,
   LOKA_AUTHOR_PORT: `${author}`,
   LOKA_PREVIEW_PORT: `${preview}`,
