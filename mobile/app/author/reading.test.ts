@@ -221,6 +221,7 @@ test('with no game or no state yet, the readers say so and an update is harmless
   build.updated({ kind: 'pulse' } as never);
   assert.match(text(), /\|No Book yet$/);
   build.place({ ...game, state: () => undefined } as never);
+  build.updated({ kind: 'pulse' } as never);
   assert.match(text(), /\|No Book yet$/);
   build.place(game as never);
 });

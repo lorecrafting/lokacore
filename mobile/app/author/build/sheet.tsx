@@ -109,7 +109,12 @@ export function Sheet({ open, saved }: Stack) {
       }}
       onScroll={(e) => saved({ ...open, scroll: e.nativeEvent.contentOffset.y })}
     >
-      {(([s, arg]) => [s?.body(arg), foot(s?.file?.(arg))])(parts(open.sheets!.at(-1)!))}
+      {(([s, arg]) => (
+        <>
+          {s?.body(arg)}
+          {foot(s?.file?.(arg))}
+        </>
+      ))(parts(open.sheets!.at(-1)!))}
     </ScrollView>
   );
 }

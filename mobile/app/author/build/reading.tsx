@@ -155,6 +155,8 @@ function whyRows(g: Reader, state: State) {
             (err: Error) => ({ at, key, error: err.message }),
           )
           .then((t) => ((why = t), known.redraw())),
+      undefined,
+      `${on} ${key}`,
     );
   const { action, dialogue } = state.shown.offers;
   return [
@@ -177,8 +179,8 @@ let asked = ''; // the step the report was asked for, once each
 const atOf = (s: State) => `${s.hash}:${s.steps.length}`;
 /** Folds the game's state into the before/after pair; tools.tsx `updated` calls it on every update. */
 export function stepped(g: Reader | undefined) {
-  if (!g) return;
-  const s = g.state();
+  const s = g?.state();
+  if (!s) return;
   views = pairViews(views, atOf(s), { facts: s.facts, quests: s.shown.quests });
 }
 function askStep(g: Reader, at: string) {

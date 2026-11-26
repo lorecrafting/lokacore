@@ -211,7 +211,7 @@ test('a reload brings back the open sheet, scrolled where it was, its source fil
   const open = restored(store({ [BUILD]: s.getItem(BUILD)! })); // a fresh page over the same storage
   assert.deepEqual(open, { on: true, sheets: ['stand-in'], scroll: 120 });
   const drawn = Sheet({ open, saved: () => {} }) as any;
-  const [body, foot] = drawn.props.children;
+  const [body, foot] = drawn.props.children.props.children;
   assert.equal(body, 'stand-in sheet');
   assert.equal(foot.props.children, 'rooms/hall.yaml');
   let to: unknown;
