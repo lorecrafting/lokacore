@@ -1,4 +1,4 @@
-// size: allow 640, one mocked /story and /change harness serves the registry rows and the Rules block cases
+// size: allow 670, one mocked /story and /change harness serves the registry rows (treatment:reverie too) and the Rules block cases
 // The generic sheet (author/build/generic.tsx, form.tsx; design §7, slice 2.3): every registry row
 // whose book verb is `generic` (kernel/ts/play/registry.json, held by bin/editor_gate.exs) is
 // added, edited or removed by the sheet, each a `/change` op at the row's own path.
@@ -31,7 +31,7 @@ const every = Object.fromEntries(
 );
 const CART = {
   requires: { capabilities: every },
-  world: { combat: {}, trails: {} }, // trails: a population's trail and hunts
+  world: { combat: { narration: { block: 'x' } }, trails: {} }, // trails: a population's trail and hunts; block: items.block_chance
   calendar: { hours_per_day: 20 }, // schedule.tsx's hours stop below it, not at the default 24
 }; // every gate open: rows sit in Add mechanic…
 files.set('cartridge.json', CART);
@@ -104,7 +104,12 @@ const FIRST: Record<string, object | object[]> = {
   liquids: { resource: 'hp' },
   skills: { prerequisite: 'x', growth: [1] },
   npcs: { hp: 10, room: 'r' }, // attack; Add hour sends the NPC to its room
-  items: { slot: 'wield' }, // weapon
+  items: [
+    { slot: 'wield' },
+    { slot: 'wield', affects: {} },
+    { slot: 'off_hand' },
+    { container: true },
+  ], // weapon; intended_level, block_chance, capacity (allowed.ts NEEDS)
   populations: [{ day_target: 1 }, { member_role: 'prey' }], // floor; sight
   quests: [
     { objective: { evidence: 'expedition' } },
@@ -196,7 +201,9 @@ async function edit(s: { file: string; shown: () => any[] }, path: unknown[], th
 const rows = Object.entries(read('kernel/ts/play/registry.json') as Record<string, any>).flatMap(
   ([p, r]) =>
     Object.keys(r.book ?? {})
-      .filter((op) => /^(generic|(generic|combat|schedule|rules|world)\.tsx)$/.test(r.book[op])) // the blocks claim a root field (generic.tsx)
+      .filter((op) =>
+        /^(generic|(generic|combat|schedule|rules|world|field)\.tsx)$/.test(r.book[op]),
+      ) // the blocks claim a root field (generic.tsx)
       .map((op) => [p, op]),
 );
 assert.ok(rows.length > 0);
@@ -218,6 +225,16 @@ for (const [p, op] of rows) {
     if (kind === 'cartridge') (files.set('cartridge.json', CART), load(), await settle()); // the later rows' capabilities
   });
 }
+
+// Breaks: a modal scene's Add offering no treatment, or adding it with a value other than its one enum
+// (registry treatment:reverie, book scene.tsx).
+test('treatment:reverie: Add on a modal scene writes treatment reverie', async () => {
+  const ops = await gesture('scenes', 'treatment', 'create', { control: 'modal' });
+  assert.deepEqual(
+    ops.map((o) => [o.path, o.value]),
+    [[['treatment'], 'reverie']],
+  );
+});
 
 /** `op` on a root map's entry `k` (the text catalog): the paths it writes. */
 async function catalog(kind: string, op: string) {

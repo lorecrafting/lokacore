@@ -2,12 +2,12 @@
   {
     "id": "hierarchy",
     "panel": "tools/author-panel/src/App.tsx",
-    "book": "todo"
+    "book": "contents.tsx"
   },
   {
     "id": "play-from-here",
     "panel": "tools/author-panel/src/left.tsx",
-    "book": "todo"
+    "book": "contents.tsx"
   },
   {
     "id": "new-menu",
@@ -92,12 +92,12 @@
   {
     "id": "map-wire",
     "panel": "tools/author-panel/src/mapwire.ts",
-    "book": "todo"
+    "book": "roomedit.tsx"
   },
   {
     "id": "map-exit-edits",
     "panel": "kernel/ts/play/mapedit.ts",
-    "book": "todo"
+    "book": "roomedit.tsx"
   },
   {
     "id": "map-undo",
@@ -127,22 +127,22 @@
   {
     "id": "inspector-header",
     "panel": "tools/author-panel/src/right.tsx",
-    "book": "todo"
+    "book": "room.tsx"
   },
   {
     "id": "card-picker",
     "panel": "tools/author-panel/src/right.tsx",
-    "book": "todo"
+    "book": "sheet.tsx"
   },
   {
     "id": "compile-status",
     "panel": "tools/author-panel/src/sections.tsx",
-    "book": "todo"
+    "book": "Build.tsx"
   },
   {
     "id": "drop-step",
     "panel": "tools/author-panel/src/sections.tsx",
-    "book": "todo"
+    "book": "Build.tsx"
   },
   {
     "id": "failed-checkpoints",
@@ -152,7 +152,7 @@
   {
     "id": "unconfirmed-words",
     "panel": "tools/author-panel/src/prose.tsx",
-    "book": "todo"
+    "book": "Build.tsx"
   },
   {
     "id": "change-feed",
@@ -182,7 +182,7 @@
   {
     "id": "write-tab",
     "panel": "tools/author-panel/src/sections.tsx",
-    "book": "todo"
+    "book": "Build.tsx"
   },
   {
     "id": "state-tab",
@@ -212,22 +212,22 @@
   {
     "id": "generic-card",
     "panel": "tools/author-panel/src/edit/Generic.tsx",
-    "book": "todo"
+    "book": "generic.tsx"
   },
   {
     "id": "words-field",
     "panel": "tools/author-panel/src/edit/fields.tsx",
-    "book": "todo"
+    "book": "field.tsx"
   },
   {
     "id": "room-card",
     "panel": "tools/author-panel/src/edit/cards/Room.tsx",
-    "book": "todo"
+    "book": "room.tsx"
   },
   {
     "id": "entity-card",
     "panel": "tools/author-panel/src/edit/cards/Entity.tsx",
-    "book": "todo"
+    "book": "thing.tsx"
   },
   {
     "id": "action-quest-reaction-cards",
@@ -257,12 +257,12 @@
   {
     "id": "combat-block",
     "panel": "tools/author-panel/src/edit/blocks/Combat.tsx",
-    "book": "todo"
+    "book": "combat.tsx"
   },
   {
     "id": "schedule-block",
     "panel": "tools/author-panel/src/edit/blocks/Schedule.tsx",
-    "book": "todo"
+    "book": "schedule.tsx"
   },
   {
     "id": "palette",
@@ -272,7 +272,7 @@
   {
     "id": "delete-definition",
     "panel": "tools/author-panel/src/shell.ts",
-    "book": "todo"
+    "book": "thing.tsx"
   },
   {
     "id": "undo",
