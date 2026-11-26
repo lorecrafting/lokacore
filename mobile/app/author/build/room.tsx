@@ -35,16 +35,17 @@ const WORDS = {
   fields: 'Fields',
 };
 type Room = MapRoom; // /story's `map` (kernel/ts/play/story.ts `rooms`)
-/** The header line (design inspector-header): `dark · N variants · N exits`, each absent part left
+/** The header line (§4.3 item 2; the panel header, inspector-header, stays todo): `dark · N variants · N exits`, each absent part left
  * out; dark and the variants open the room's Fields, where their blocks are. */
-function summary(r: Room, text: object) {
+function summary(r: Room) {
+  const text = { ...inRow, color: ink('dim') }; // the row pads the edge; parts and dots dim
   const d = r.file ? doc(r.file) : undefined;
   const def = () => known.open(`def:${r.file}`);
   const n = Array.isArray(d?.variants) ? d.variants.length : 0;
   const parts = [
     d?.dark === true && act(WORDS.dark, def),
     n > 0 && act(WORDS.variants(n), def, undefined, 'variants'),
-    <Text key="exits" style={{ ...text, color: ink('dim') }}>
+    <Text key="exits" style={text}>
       {WORDS.exits(r.exits.length)}
     </Text>,
   ].filter(Boolean);
@@ -191,7 +192,7 @@ sheets.room = {
     const text = { ...type.small, color: ink('fg'), paddingHorizontal: space.md };
     return [
       refusal(),
-      summary(r, text),
+      summary(r),
       ...r.exits.map((e) => {
         const to = find(e.to);
         return (

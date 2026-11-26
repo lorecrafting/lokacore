@@ -140,7 +140,7 @@ export const exitActs = (r: MapRoom, dir: string, rooms: MapRoom[], nodes: Node[
       : WORDS.oneWayOnly;
   const bar = (label: string, locked: boolean) =>
     why
-      ? greyed(label, why, label)
+      ? greyed(label, locked ? '' : why, label) // the reason once, on Door
       : act(label, () => {
           const key = freeKey('barrier', 'barrier', nodes, []);
           void run(() => ed.barrier(r, dir, rooms, key, locked));

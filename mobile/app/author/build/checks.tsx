@@ -22,32 +22,33 @@ const LINK = {
 /** `close` shuts the sheet after a check's link went somewhere; `redraw` redraws the strip. */
 export function checked(heard: Message & Said, api: Api, close: () => void, redraw: () => void) {
   const rows = checks(heard);
-  const said = !rows.length ? (
-    <Text key="nothing" style={{ ...type.small, color: ink('fg'), padding: space.md }}>
-      {WORDS.nothing}
-    </Text>
-  ) : (
-    rows.map((c, i) =>
-      c.key || c.file ? (
-        <Pressable
-          key={i}
-          accessibilityRole="link"
-          onPress={() => {
-            if (c.key ? go(c.key) : void api('/open', { file: c.file })) close();
-            redraw();
-          }}
-          style={LINK}
-        >
-          <Text style={{ ...type.small, color: ink('action') }}>{c.label}</Text>
-        </Pressable>
-      ) : (
-        <Text key={i} style={{ ...type.small, color: ink('fg'), padding: space.md }}>
-          {c.label}
+  const files = todo(heard, api, redraw);
+  const said = !rows.length
+    ? !files.length && (
+        <Text key="nothing" style={{ ...type.small, color: ink('fg'), padding: space.md }}>
+          {WORDS.nothing}
         </Text>
-      ),
-    )
-  );
-  return [said, ...todo(heard, api, redraw).map((t) => fileRow(t, api))];
+      )
+    : rows.map((c, i) =>
+        c.key || c.file ? (
+          <Pressable
+            key={i}
+            accessibilityRole="link"
+            onPress={() => {
+              if (c.key ? go(c.key) : void api('/open', { file: c.file })) close();
+              redraw();
+            }}
+            style={LINK}
+          >
+            <Text style={{ ...type.small, color: ink('action') }}>{c.label}</Text>
+          </Pressable>
+        ) : (
+          <Text key={i} style={{ ...type.small, color: ink('fg'), padding: space.md }}>
+            {c.label}
+          </Text>
+        ),
+      );
+  return [said, ...files.flatMap((t) => fileRows(t, api))];
 }
 type Todo = { file: string; words: number; placeholders: string[] };
 let todos: { of: unknown; rows: Todo[] } = { of: undefined, rows: [] };
@@ -62,18 +63,24 @@ function todo(heard: Message, api: Api, redraw: () => void) {
   }
   return todos.rows;
 }
-const fileRow = (t: Todo, api: Api) => (
+/** A file's link (its count of `~` lines still to write), then those lines in dim, not pressable: one touch target each. */
+const fileRows = (t: Todo, api: Api) => [
   <Pressable
     key={`todo ${t.file}`}
     accessibilityRole="link"
     onPress={() => void api('/open', { file: t.file })}
     style={LINK}
   >
-    <Text style={{ ...type.small, color: ink('action') }}>{WORDS.todo(t.file, t.words)}</Text>
-    {t.placeholders.map((at) => (
-      <Text key={at} style={{ ...type.small, color: ink('dim') }}>
-        {at}
-      </Text>
-    ))}
-  </Pressable>
-);
+    <Text style={{ ...type.small, color: ink('action') }}>
+      {WORDS.todo(t.file, t.placeholders.length)}
+    </Text>
+  </Pressable>,
+  ...t.placeholders.map((at) => (
+    <Text
+      key={`todo ${at}`}
+      style={{ ...type.small, color: ink('dim'), paddingHorizontal: space.md }}
+    >
+      {at}
+    </Text>
+  )),
+];

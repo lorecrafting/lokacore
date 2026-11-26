@@ -17,6 +17,7 @@ parity:world-picker
 parity:device-size
 parity:map-pan-zoom-keys
 parity:story-row-sheets
+parity:inspector-header
 parity:change-feed
 parity:find-referrers
 parity:palette

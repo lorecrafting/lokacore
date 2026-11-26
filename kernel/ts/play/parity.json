@@ -127,7 +127,7 @@
   {
     "id": "inspector-header",
     "panel": "tools/author-panel/src/right.tsx",
-    "book": "room.tsx"
+    "book": "todo"
   },
   {
     "id": "card-picker",

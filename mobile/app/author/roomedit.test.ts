@@ -1,8 +1,10 @@
+// size: allow 540, one mocked /story and /write harness serves the Room, Person and Item sheets' edits
 // The Room sheet's edits (author/build/roomedit.tsx; design §7, slice 2.1): which press sends which
 // write-route calls over the builder's api. The gestures' own rules are mapedit's
 // (kernel/ts/test/author_mapedit.test.ts) and drop's (author_drop.test.ts).
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
+import { ink } from './build/build.ts';
 import { nodes, words } from '../book/__tests__/combat-book.test.ts'; // also registers the .tsx loader
 
 const { story } = await import('./build/room.tsx');
@@ -148,13 +150,20 @@ test('Door and Lock name a new barrier on both faces; Lock starts it locked; one
     r.exits[0].to = to; // no way back: no room there, or its south leads elsewhere
     try {
       assert.equal(door().props.accessibilityState?.disabled, true, to);
+      const why = nodes(door()).at(-1).props.children; // the reason, under Door only
+      assert.equal(
+        s.shown().filter((n) => n.type === 'Text' && n.props.children === why).length,
+        1,
+        to,
+      );
     } finally {
       r.exits[0].to = r === hall ? 'loft' : 'hall';
     }
   }
 });
 
-// Breaks: the header dropping dark, counting a variant that is absent or miscounting one, or a dark word that opens no Fields.
+// Breaks: the header dropping dark, counting a variant that is absent or miscounting one, a dark word that opens no Fields,
+// or its plain words and dots padded inside the row's own padding (an indent, uneven gaps) or not dim.
 test('the header reads dark · 1 exit for a dark one-exit room; dark opens its Fields', async () => {
   const was = doc['rooms/hall.json'];
   (doc as Record<string, object>)['rooms/hall.json'] = { ...was, dark: true };
@@ -164,6 +173,18 @@ test('the header reads dark · 1 exit for a dark one-exit room; dark opens its F
     await settle();
     const head = s.shown().find((n) => n.key === 'summary');
     assert.equal(words(head), 'dark · 1 exit');
+    const plain = nodes(head).filter(
+      (n) => n.type === 'Text' && typeof n.props.children === 'string',
+    );
+    assert.deepEqual(
+      plain
+        .filter((n) => n.props.style.color === ink('dim'))
+        .map((n) => [n.props.children, n.props.style.paddingHorizontal]),
+      [
+        [' · ', 0],
+        ['1 exit', 0],
+      ],
+    );
     await s.press('dark');
     await s.press('Fields');
     assert.deepEqual(s.opens, ['def:rooms/hall.json', 'def:rooms/hall.json']);
