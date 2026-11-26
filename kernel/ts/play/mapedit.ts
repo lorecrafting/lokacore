@@ -131,7 +131,7 @@ async function barrier(
   const b = roomOf(rooms, toKey(face)!);
   const reverse = exitsOf(b, (await s.read<Doc>(fileOf(b))).doc)?.[back(dir)];
   if (toKey(reverse) !== a.key) no('a barrier needs the exit both ways: a one-way exit has none');
-  // owned in the rooms' area when they share one, else at the root (border rule; a bundle's rooms are root's)
+  // in the rooms' shared area folder, else at the root (border rule); a bundled pair's at the root too
   const area = a.area === b.area && !bundled(a) ? a.area : null;
   const made = await s.call('new', { kind: 'barriers', name: key, ...(area ? { area } : {}) });
   const file = made.files?.find((f) => f.endsWith(`barriers/${key}.json`));

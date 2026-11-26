@@ -1,4 +1,4 @@
-# size: allow 690, one case per starter kind and refusal; the area placement, companion, provider start and key order and shape cases join them
+# size: allow 740, one case per starter kind and refusal; the area and bundle placement, companion, provider start and key order and shape cases join them, and a bundle's merged patches
 defmodule Loka.ContentStartersTest do
   use ExUnit.Case, async: true
   @moduletag :tmp_dir
@@ -347,14 +347,13 @@ defmodule Loka.ContentStartersTest do
     assert ["marsh"] == for(r <- read(dir, "layout.json"), do: r["room"])
   end
 
-  # Breaks: --from replacing a written exit, or joining a room that is not there, not a file, or
+  # Breaks: --from replacing a written exit, or joining a room that is not there, or
   # by a word that is no direction, with a dangling or one-way exit as the result.
   test "--from writes the opposite exit and refuses a bad join, writing nothing", %{tmp_dir: tmp} do
     dir = cartridge(tmp)
     {:ok, _} = Starters.write(dir, "rooms", "loft", {"start", "up"})
     assert read(dir, "rooms/start.json")["exits"] == %{"up" => %{"to" => "loft"}}
     assert read(dir, "rooms/loft.json")["exits"] == %{"down" => %{"to" => "start"}}
-    bundle(dir, "marsh")
     before = snapshot(dir)
 
     assert {:error, "rooms/start.json: exits up to already has" <> _} =
@@ -370,9 +369,6 @@ defmodule Loka.ContentStartersTest do
     assert Starters.write(dir, "rooms", "x", {"nowhere", "east"}) ==
              {:error, "--from: no rooms/nowhere.json"}
 
-    assert Starters.write(dir, "rooms", "x", {"marsh", "east"}) ==
-             {:error, "--from: no rooms/marsh.json"}
-
     outside = Path.join(tmp, "victim.json")
     File.write!(outside, "{}")
 
@@ -381,6 +377,60 @@ defmodule Loka.ContentStartersTest do
 
     assert File.read!(outside) == "{}"
     assert snapshot(dir) == before
+  end
+
+  # Breaks: --from, an item or an action refusing a room only areas/<a>.json holds, placing them
+  # in a root room, an abstract or other bundled room, or a patch written to a new
+  # rooms/<from>.json beside the bundle (a duplicate definition); a bundled room's name taken
+  # for another kind (a dialogue's NPC).
+  test "a bundled room takes --from, --area and an item placed in it", %{tmp_dir: tmp} do
+    dir = cartridge(tmp)
+    bundle(dir, "marsh")
+
+    edit(dir, "areas/marsh.json", fn b ->
+      put_in(b["rooms"]["_base"], %{"abstract" => true})
+      |> put_in(["rooms", "zed"], b["rooms"]["marsh"])
+    end)
+
+    in_marsh = fn kind, name, from ->
+      Starters.write(dir, kind, name, from, fn _, _ -> :ok end, {"marsh", nil})
+    end
+
+    {:ok, _} = Starters.write(dir, "rooms", "reeds", {"marsh", "east"})
+    {:ok, _} = in_marsh.("items", "rope", nil)
+    # Before bog: a bundle-only area's entry is the bundled marsh.
+    {:ok, _} = Starters.write(dir, "npcs", "keeper")
+    {:ok, _} = in_marsh.("dialogues", "greet", nil)
+    {:ok, _} = in_marsh.("actions", "pull", nil)
+    {:ok, _} = in_marsh.("rooms", "bog", {"marsh", "north"})
+
+    assert read(dir, "areas/marsh.json")["rooms"]["marsh"]["exits"] == %{
+             "east" => %{"to" => "reeds"},
+             "north" => %{"to" => "bog"}
+           }
+
+    assert read(dir, "rooms/reeds.json")["exits"] == %{"west" => %{"to" => "marsh"}}
+    assert read(dir, "areas/marsh/rooms/bog.json")["exits"] == %{"south" => %{"to" => "marsh"}}
+    assert read(dir, "areas/marsh/items/rope.json")["location"]["room"] == "marsh"
+    assert Map.has_key?(read(dir, "areas/marsh.json")["rooms"]["marsh"]["details"], "pull")
+    # Only a room is taken from the bundle: the dialogue's NPC is the root's keeper, not "marsh".
+    assert read(dir, "areas/marsh/dialogues/greet.json")["npc"] == "keeper"
+    refute File.exists?(Path.join(dir, "rooms/marsh.json"))
+    refute File.exists?(Path.join(dir, "areas/marsh/rooms/marsh.json"))
+    assert {:ok, _, _} = Loka.Content.compile(dir)
+  end
+
+  # Break: two patches to one bundle, the second dropping the first (Map.put).
+  test "patches to two rooms of one bundle both go into it", %{tmp_dir: tmp} do
+    dir = cartridge(tmp)
+    bundle(dir, "marsh")
+    edit(dir, "areas/marsh.json", &put_in(&1["rooms"]["zed"], &1["rooms"]["marsh"]))
+    east = %{"exits" => %{"east" => %{"to" => "reeds"}}}
+    files = %{"rooms/marsh.json" => east, "rooms/zed.json" => east}
+
+    assert Loka.Content.Starters.Area.into_bundles(files, dir) == %{
+             "areas/marsh.json" => %{"rooms" => %{"marsh" => east, "zed" => east}}
+           }
   end
 
   # Breaks: a hand-placed row flattened by the automatic rows, a layout.json appearing in a

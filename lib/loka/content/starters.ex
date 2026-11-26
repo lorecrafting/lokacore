@@ -1,4 +1,4 @@
-# size: allow 330, the area folder lookups (a room or starter file in any areas/<area>/) and --extends join the starter writer
+# size: allow 333, the area folder lookups (a room or starter file in any areas/<area>/) and --extends join the starter writer
 defmodule Loka.Content.Starters do
   @moduledoc """
   `bin/loka new <kind> <name>`: writes a compiling starter for one source kind with every line a
@@ -75,7 +75,8 @@ defmodule Loka.Content.Starters do
     end
   end
 
-  defp owned(files, dir, own, up), do: files |> Area.moved(dir, own) |> Child.extending(own, up)
+  defp owned(files, dir, own, up),
+    do: files |> Area.into_bundles(dir) |> Area.moved(dir, own) |> Child.extending(own, up)
 
   defp with_capabilities(files, caps) do
     declared = capabilities(caps)
@@ -146,7 +147,7 @@ defmodule Loka.Content.Starters do
   defp places(rooms), do: for({k, r} <- rooms, !match?(%{"abstract" => true}, r), do: k)
 
   defp placed(context, dir, kind, name, from, own) do
-    with :ok <- new_room(dir, kind, name, context, own), do: joined(context, dir, name, from)
+    with :ok <- new_room(dir, kind, name, context, own), do: joined(context, name, from)
   end
 
   # A rerun finds its own file; another file holding the room would be a duplicate definition.
@@ -156,9 +157,9 @@ defmodule Loka.Content.Starters do
       else: :ok
   end
 
-  defp joined(context, _, _, nil), do: {:ok, context}
+  defp joined(context, _, nil), do: {:ok, context}
 
-  defp joined(context, dir, name, {room, way}) do
+  defp joined(context, name, {room, way}) do
     back = Barriers.opposite(way)
 
     cond do
@@ -172,7 +173,7 @@ defmodule Loka.Content.Starters do
       room == name ->
         {:error, "--from: a room cannot join itself"}
 
-      !File.exists?(Path.join(dir, home(dir, "rooms/#{room}.json"))) ->
+      room not in context["room_list"] ->
         {:error, "--from: no rooms/#{room}.json"}
 
       true ->
@@ -238,7 +239,9 @@ defmodule Loka.Content.Starters do
   # An area file may name only the root's and its own area's definitions (area_crossing).
   defp first(dir, kind, entry, area) do
     keys = for p <- own_files(dir, kind, area || "*"), do: Path.basename(p, ".json")
-    if kind == "rooms" and entry in keys, do: entry, else: List.first(keys)
+    # A bundled entry's patch goes into its bundle (Area.into_bundles).
+    held = if area, do: Map.keys(Area.bundled(dir, area)), else: []
+    if kind == "rooms" and entry in (keys ++ held), do: entry, else: List.first(keys)
   end
 
   # One file per definition, at the root or in an area folder (`area`, or any); sorted by key.
