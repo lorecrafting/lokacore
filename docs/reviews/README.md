@@ -10,6 +10,7 @@ of closed work are deleted once their lesson is folded, and linked by permalink
 Reviews before R2 live in the [legacy repository](https://github.com/lorecrafting/lokacore-v2-legacy)
 (commit `997a7a8`, `docs/rewrite-v3/reviews/`).
 
+- [Review: Builder 6.2a, the Tools tab (PR #799, loka-hcnlh.29.1)](2026-11-25-builder-6.2a-tools-review.md): **CHANGES REQUIRED**
 - [Review: Builder 6.1b, the World tab's world files (populations, transports, barriers) (PR #796, loka-hcnlh.28.2)](2026-11-25-builder-6.1b-world-files-review.md): **APPROVE WITH NOTES**
 - [Review: Builder 5.3, the Rules block on the Reaction, Action and Quest sheets (PR #793, loka-hcnlh.25)](2026-11-25-builder-5.3-rules-blocks-review.md): **APPROVE WITH NOTES**
 - [Builder 3.2 phone walk (loka-hcnlh.19), partial](2026-11-25-builder-3.2-phone-walk.md)
