@@ -12,7 +12,7 @@ outline.parts.book.create  # loka-hcnlh.45
 outline.parts.book.edit  # loka-hcnlh.45
 outline.parts.book.delete  # loka-hcnlh.45
 scenes.abstract.book.create  # loka-hcnlh.52
-parity:device-size  # ruling 6, panel-only, refused
+parity:device-size  # 6.5, loka-hcnlh.32
 parity:map-pan-zoom-keys  # 6.5
 parity:story-row-sheets
 parity:inspector-header  # loka-hcnlh.71

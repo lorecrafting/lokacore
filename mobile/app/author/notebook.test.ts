@@ -93,7 +93,8 @@ test('Find `cellar` lists the two referrers; each opens its sheet', async () => 
 });
 
 // Breaks: a world press posting the current world's key or none, or the Book reloading before
-// /world names the picked world, or keeping the world left's place, or a refused GET never asked again.
+// /world names the picked world, or keeping the world left's place, or a refused GET never asked again,
+// or the keys cleared before the POST, or a switch polling with no line or swallowing a press.
 test('switching worlds posts the picked key, then reloads once /world names it', async () => {
   let current = 'farm';
   let gets = 0;
@@ -125,7 +126,13 @@ test('switching worlds posts the picked key, then reloads once /world names it',
   await s.press(worldRows, 'Mill');
   assert.ok(nodes(worldRows()).map(words).includes('busy'));
   assert.equal(reloads, 0);
+  assert.deepEqual(removed, []); // the world left's keys go only right before the reload
   await s.press(worldRows, 'Mill');
+  assert.ok(nodes(worldRows()).map(words).includes('Opening mill…'));
+  await s.press(worldRows, 'Mill'); // a press while it polls is told to wait, not sent
+  assert.ok(
+    nodes(worldRows()).map(words).includes('One world at a time: wait for this one to open'),
+  );
   for (let i = 0; i < 50 && !reloads; i++) await settle(100); // go polls every 300 ms
   assert.deepEqual(s.posts, [
     ['/world', { name: 'mill' }],
@@ -170,4 +177,25 @@ test("the edges: a clean put-back, an outside entry, a refused Find, a sheet's r
   assert.ok(nodes(foot()).map(words).includes('loft (room)'));
   known.files = {}; // a new /story: asked again
   assert.ok(nodes(foot()).map(words).includes('Referred to by'));
+});
+
+// Breaks: the Checks tab drawing another tab's rows (contents.tsx picking it by the wrong index).
+test('the Checks tab shows the Checks sheet', async () => {
+  const { sheets } = await import('./build/sheet.tsx');
+  await import('./build/contents.tsx');
+  let drawn = 0;
+  sheets.checks = { title: () => '', body: () => void drawn++ };
+  await opened({});
+  nodes(sheets.contents.body(''))
+    .find((n) => n.props?.accessibilityRole === 'button' && words(n) === 'Checks')!
+    .props.onPress();
+  sheets.contents.body('');
+  assert.equal(drawn, 1);
+});
+
+// Breaks: a definition sheet with no source footer.
+test("a definition sheet's foot names its file", async () => {
+  const { sheets } = await import('./build/sheet.tsx');
+  await import('./build/generic.tsx');
+  assert.equal(sheets.def.file?.('rooms/hall.json'), 'rooms/hall.json');
 });
