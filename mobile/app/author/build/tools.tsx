@@ -164,7 +164,11 @@ function checkpointRows(steps: Step[]) {
       )}
       {broke ? <Text style={{ ...inRow, color: ink('danger') }}>{WORDS.failed(broke)}</Text> : null}
     </View>,
-    typed.name && !NAME.test(typed.name) ? <View key="bad">{said(WORDS.badName)}</View> : null,
+    typed.name && !NAME.test(typed.name) ? (
+      <View key="bad" style={row}>
+        {said(WORDS.badName)}
+      </View>
+    ) : null,
     ...(names?.length
       ? verdicts(names, checked).map((v) => (
           <View key={`cp ${v.name}`} style={row}>
@@ -179,7 +183,11 @@ function checkpointRows(steps: Step[]) {
             <Text style={{ ...inRow, color: ink(v.ok ? 'dim' : 'danger') }}>{v.said}</Text>
           </View>
         ))
-      : [<View key="empty">{said(WORDS.empty)}</View>]),
+      : [
+          <View key="empty" style={row}>
+            {said(WORDS.empty)}
+          </View>,
+        ]),
   ];
 }
 
