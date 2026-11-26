@@ -50,12 +50,39 @@ defmodule Loka.Content.Starters.Area do
     end
   end
 
-  @doc "The first room file in `areas/<area>/rooms/`, or nil."
+  @doc "The first room file in `areas/<area>/rooms/`, else the first room of `areas/<area>.json`, or nil."
   def first_room(dir, area) do
     case Path.wildcard(Path.join([dir, "areas", area, "rooms/*.json"])) do
       [first | _] -> Path.basename(first, ".json")
-      [] -> nil
+      # The compiler counts a bundle's rooms as its area's (Loka.Content.Areas.check/1).
+      [] -> bundled(dir, area) |> Map.keys() |> Enum.min(fn -> nil end)
     end
+  end
+
+  @doc "The rooms object of the bundle `areas/<area>.json`, `%{}` when it has none."
+  def bundled(dir, area) do
+    case read(Path.join([dir, "areas", area <> ".json"])) do
+      %{"rooms" => %{} = rooms} -> rooms
+      _ -> %{}
+    end
+  end
+
+  @doc """
+  A patch to a room only a bundle holds (`--from`'s back exit) goes into that bundle at
+  `rooms.<room>`; a `rooms/<room>.json` beside it would be a second definition.
+  """
+  def into_bundles(files, dir) do
+    held =
+      for bundle <- Path.wildcard(Path.join(dir, "areas/*.json")),
+          area = Path.basename(bundle, ".json"),
+          {room, _} <- bundled(dir, area),
+          Map.has_key?(files, "rooms/#{room}.json"),
+          do: {room, "areas/#{area}.json"}
+
+    Enum.reduce(held, files, fn {room, bundle}, files ->
+      {patch, files} = Map.pop(files, "rooms/#{room}.json")
+      Map.put(files, bundle, %{"rooms" => %{room => patch}})
+    end)
   end
 
   @doc """
