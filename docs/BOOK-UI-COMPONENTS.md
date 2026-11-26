@@ -396,7 +396,8 @@ full path, on a row of their own. A reference field's picks are the generic
 sheet's option buttons under its typed field, the present one a selected act, wrapping the same.
 The long-list pick's row (loka-hcnlh.66) is that same row: each match an act, wrapping at 390 px
 and in the 384 px docked sheet; its refusal the Room sheet's refusal look (`type.small` `danger`)
-on a line of its own above the matches; `+N more` `type.small` `dim`. No new component or token.
+on a line of its own above the matches; `+N more` `type.small` `dim`. At full height on a 390 px
+phone with the keyboard up, the field, its refusal and the first matches show. No new component or token.
 No raw sizes.
 Builder 6.2a: the Tools tab's rows are Room sheet rows, wrapping at 390 px. `Hold`, `Replay <name>`,
 `Pin`, `Save checkpoint`, `Advance`, `Go to room`, `Set fact` and `Set level` are acts; Hold while on

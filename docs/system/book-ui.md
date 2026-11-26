@@ -1229,23 +1229,27 @@ reasons and limits: [prose in the Book rulings](../design/prose-in-the-book-ruli
       `allies`, each item's field) offers the keys the latest good compile holds of that kind that
       this file may name: any room, and no other area's item, person or transport (`reachable`,
       the panel's list). With none known (no compile yet) the field is free text and refuses
-      nothing. A list of six keys or fewer draws every key as a pick, as a resource's does. A
-      longer one draws no picks until a keystroke in the field; from then until a write, the row
-      under the field holds, first, while the typed text is not empty and no key equals it, the
-      refusal `no <kind> <text>` (the panel's words, shown as it shows them, at the field); then
-      the keys containing the text, case ignored, those starting with it first, each group in the
-      list's order, at most six; then, when more match, one plain line `+N more` (placeholder
-      words). An emptied field matches every key.
+      nothing. Whatever the count, such a field refuses at the field, as below, never at the
+      sheet's top; only its picks differ. Six keys or fewer: every key is a pick, as a resource's
+      is. More: no picks until a keystroke in the field; from then until a write, or until the
+      field loses focus holding its present key, the row under the field holds, first, while the
+      typed text is not empty and no key equals it, the refusal `no <kind> <text>` (the panel's
+      words, `npc` for a person); then the matches, case ignored: the key equal to the text, then
+      the keys starting with it, then the others containing it, each group in the list's order,
+      at most six; then, when more match, one plain line `+N more`, N the matches not shown
+      (placeholder words). An emptied field matches every key.
     - A match press writes that key at once, one write that one Undo takes back: the field shows
       it and the row goes. Leaving the field writes the typed text only when a key equals it; any
       other text sends nothing and stays in the field with its refusal, so leaving again refuses
       again, until the next keystroke or a match press. A match pressed after typing (the press
-      that takes the focus from the field) writes only that key: the typed text is not sent first
-      and no refusal for it shows.
+      that takes the focus from the field) writes only that key: the typed text is not sent
+      first, even when it is a key itself (`room_1`, then a press on `room_12`), and no refusal
+      for it shows.
     - On a phone, focusing a long-list field raises the sheet to full height (the grip's) and
-      scrolls the field to the top of the body, so the field, the refusal and the matches sit
-      above the keyboard on a phone; the docked sheet only scrolls. Each match is named by
-      its key. The refusal line is a polite region, read once when it appears.
+      scrolls the field to the top of the body, so the field, the refusal and the first matches
+      sit above the keyboard; the docked sheet only scrolls. Each match is named by its key. The
+      refusal is read (politely) when the field loses focus holding that text, never per
+      keystroke.
     - Open items: the panel marks a picker's name `stale` while the last compile is refused (its
       keys are the last good compile's); the Book does not yet. A refusal at a sheet's top scrolls
       away with the body on any long sheet (a sheet-wide question; the long-list pick refuses at
