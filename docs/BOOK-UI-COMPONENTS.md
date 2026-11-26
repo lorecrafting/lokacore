@@ -403,6 +403,14 @@ the minutes field Schedule's fixed width. A checkpoint's verdict is `type.small`
 passes, `danger` when it fails; the failed count `type.small` `danger`; the empty and name-rule lines
 `type.small` `dim`. The strip's timing is `type.small`, `dim` within budget and `warning` over, the
 strip's last item so a changing width never moves its buttons.
+Builder 6.2b: the Tools readers' row (`Play`, `State`, `Why`, `Step`, `Numbers`) is acts, the open
+one a selected act, wrapping at 390 px; Why's offered keys and Numbers' `Run` are acts, the asked
+key a selected act. A reader's heading is the field caption (`type.label` `dim`); its lines are
+`type.small`, `fg`, `dim` for plain and empty lines, `danger` for a `no`, a refusal or a stale
+report, wrapping whole. Headings and lines start at the sheet's text edge (a row's `space.md`), a
+nested line `space.md` more per depth. A table row is Combat's (Builder 2.4): cells joined by ` · `,
+the header row `dim`, no columns. The sheet foot: the path `type.small` `dim` with `space.md`
+padding, after the body. No raw sizes. No new ink pair: every tone above is already on `card`.
 Worst pair: `warning` on `card`,
 4.75 (light).
 
