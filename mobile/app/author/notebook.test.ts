@@ -5,7 +5,9 @@ import { test } from 'node:test';
 import { nodes, words } from '../book/__tests__/combat-book.test.ts'; // also registers the .tsx loader
 
 const { story } = await import('./build/room.tsx');
-const { findRows } = await import('./build/find.tsx');
+const { known } = await import('./build/room.tsx');
+const { ink } = await import('./build/build.ts');
+const { findRows, referredBy } = await import('./build/find.tsx');
 const { recentRows } = await import('./build/recent.tsx');
 const { worldRows } = await import('./build/worlds.tsx');
 
@@ -85,6 +87,7 @@ test('Find `cellar` lists the two referrers; each opens its sheet', async () => 
   await s.press(findRows, 'Find');
   await s.press(findRows, 'hall (room)');
   await s.press(findRows, 'rat (npc)');
+  assert.ok(nodes(findRows()).map(words).includes('Lines: 1'));
   assert.deepEqual(s.opens, ['def:rooms/hall.json']);
   assert.deepEqual(s.posts, [['/open', { file: 'areas/cellar/rat.loka', key: 'rat' }]]);
 });
@@ -97,7 +100,9 @@ test('switching worlds posts the picked key, then reloads once /world names it',
   const s = await opened({
     '/world': (sent) =>
       sent
-        ? ((current = sent.name), [200, { ok: true }])
+        ? s.posts.length === 1
+          ? [409, 'busy']
+          : ((current = sent.name), [200, { ok: true }])
         : gets++ === 0
           ? [503, null] // a refusal is asked again on the next draw
           : [
@@ -115,9 +120,54 @@ test('switching worlds posts the picked key, then reloads once /world names it',
   await settle();
   worldRows();
   await settle();
+  const marked = nodes(worldRows()).filter((n) => n.props?.accessibilityState?.selected);
+  assert.deepEqual(marked.map(words), ['Farm']);
+  await s.press(worldRows, 'Mill');
+  assert.ok(nodes(worldRows()).map(words).includes('busy'));
+  assert.equal(reloads, 0);
   await s.press(worldRows, 'Mill');
   for (let i = 0; i < 50 && !reloads; i++) await settle(100); // go polls every 300 ms
-  assert.deepEqual(s.posts, [['/world', { name: 'mill' }]]);
+  assert.deepEqual(s.posts, [
+    ['/world', { name: 'mill' }],
+    ['/world', { name: 'mill' }],
+  ]);
   assert.equal(reloads, 1);
   assert.ok(removed.includes('loka-place'));
+});
+
+// Breaks: a put-back that worked still showing a refusal, the outside writer read as you, a Find
+// refusal shown as nothing, or a sheet's referrers not asked, not listed, or kept past a new /story.
+test("the edges: a clean put-back, an outside entry, a refused Find, a sheet's referrers", async () => {
+  const s = await opened({
+    '/journal': () => [
+      200,
+      [
+        { id: 9, at: 0, by: 'outside', files: ['rooms/hall.json'] },
+        { id: 8, at: 0, by: 'editor', files: ['rooms/hall.json'] },
+      ],
+    ],
+    '/undo': () => [200, { file: 'rooms/hall.json' }],
+    '/find?q=nope': () => [500, null],
+    '/users?file=rooms%2Fhall.json': () => [200, [{ kind: 'room', by: 'loft' }]],
+  });
+  recentRows();
+  await settle();
+  await s.press(recentRows, 'Put back');
+  const said = nodes(recentRows()).map(words);
+  assert.ok(!said.some((w) => w.includes('not put back')), said.join('|'));
+  const first = nodes(recentRows()).find((n) => n.type === 'Text' && words(n).includes(' · '))!;
+  assert.match(words(first), / outside · rooms\/hall\.json$/); // entry 9, the outside one
+  assert.equal(first.props.style.color, ink('warning'));
+
+  nodes(findRows())
+    .find((n) => n.props?.accessibilityLabel === 'key or words')!
+    .props.onChangeText('nope');
+  await s.press(findRows, 'Find');
+  assert.ok(nodes(findRows()).map(words).includes('Find failed: 500'));
+
+  const foot = () => referredBy('rooms/hall.json');
+  await s.press(foot, 'Referred to by');
+  assert.ok(nodes(foot()).map(words).includes('loft (room)'));
+  known.files = {}; // a new /story: asked again
+  assert.ok(nodes(foot()).map(words).includes('Referred to by'));
 });
