@@ -225,11 +225,11 @@ const STRIP = {
   gap: space.md,
   flexWrap: 'wrap',
   // public/index.html's viewport-fit=cover draws under the notch; RN-web passes env() through
-  paddingTop: 'env(safe-area-inset-top)' as never,
   paddingLeft: `max(${space.md}px, env(safe-area-inset-left))` as never,
   paddingRight: `max(${space.md}px, env(safe-area-inset-right))` as never,
   borderBottomWidth: size.rule,
 } as const;
+const TOP = { paddingTop: 'env(safe-area-inset-top)' as never }; // the top strip only, not the Notice under it
 const warn = (text: ReactNode) => (
   <Text aria-live="polite" style={{ ...type.small, color: ink('warning') }}>
     {text}
@@ -274,7 +274,7 @@ export function Strip({ children }: { children: ReactNode }) {
   const top = builder.sheets?.at(-1);
   return (
     <View style={{ flex: 1 }} /* mutate-skip: layout */>
-      <View style={{ ...STRIP, backgroundColor: ink('bg'), borderColor: ink('line') }}>
+      <View style={{ ...STRIP, ...TOP, backgroundColor: ink('bg'), borderColor: ink('line') }}>
         {buildSwitch(() => change(toggled(builder)))}
         {warn(heard.held ? WORDS.held(heard.pending ?? 0) : '')}
         {chip()}
