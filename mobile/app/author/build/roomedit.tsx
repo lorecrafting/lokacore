@@ -15,6 +15,7 @@ import { drop } from '../../../../kernel/ts/play/drop.ts';
 import { size, space, type } from '../../book/tokens.ts';
 import { ink } from './build.ts';
 import type { Hooks } from './field.tsx';
+import { referredBy } from './find.tsx';
 import { act, greyed } from './sheet.tsx';
 
 // placeholders: the owner writes these words
@@ -257,6 +258,7 @@ export function foot(key: string, file: string | undefined, shut: string, refs?:
       {refs
         ? greyed(WORDS.drop(key), WORDS.refs(refs), 'drop', press)
         : act(WORDS.drop(key, refs), press)}
+      {refs && file ? referredBy(file) : null}
     </View>
   );
 }

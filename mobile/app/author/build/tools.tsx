@@ -19,6 +19,7 @@ import { inRow, refusal, row, run, tell } from './roomedit.tsx';
 import { numberRows, WORDS as NUMBERS } from './numbers.tsx';
 import { readRows, stepped, WORDS as READING, type Reader } from './reading.tsx';
 import { updated as seeUpdated } from './seeas.tsx';
+import { worldRows, WORDS as WORLDS } from './worlds.tsx';
 import { act, CONTROL } from './sheet.tsx';
 
 // Placeholders: the owner writes the words.
@@ -156,7 +157,7 @@ function value(text: string) {
   }
 }
 
-const shelf = [WORDS.play, ...READING.tabs, NUMBERS.tab];
+const shelf = [WORDS.play, ...READING.tabs, NUMBERS.tab, WORLDS.tab];
 let open = WORDS.play; // the Tools tab's open reader
 /** The Tools tab's rows: its own tabs, then the open one's. */
 export function toolRows() {
@@ -171,7 +172,9 @@ export function toolRows() {
       ? playRows()
       : open === NUMBERS.tab
         ? numberRows(game?.state().hash)
-        : readRows(open, game)),
+        : open === WORLDS.tab
+          ? worldRows()
+          : readRows(open, game)),
   ];
 }
 
