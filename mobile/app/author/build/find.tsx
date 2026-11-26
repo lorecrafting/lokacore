@@ -76,7 +76,9 @@ export function findRows() {
             {dim(WORDS.referredBy, 'refs title')}
             {answer.refs.map(referrer)}
           </View>,
-          dim(WORDS.lines(answer.hits.length, answer.total), 'lines title'),
+          <View key="lines" style={row}>
+            {dim(WORDS.lines(answer.hits.length, answer.total), 'lines title')}
+          </View>,
           ...answer.hits.map((h) => (
             <View key={`hit ${h.at}`} style={row}>
               {act(h.at, () => opens(h.at))}
