@@ -64,6 +64,7 @@ export type State = {
 /** What placeHooks hands in for the readers: the panel's state message and the game's trace. */
 export type Reader = { state: () => State; game: { trace: () => string[] } };
 
+const INDENT = 16; // mutate-skip: layout, a line's indent per depth
 type Tone = 'fg' | 'dim' | 'danger';
 type Line = { text: string; tone?: Tone; head?: boolean; depth?: number };
 export const head = (text: string): Line => ({ text, head: true });
@@ -72,7 +73,7 @@ export const danger = (text: string): Line => ({ text, tone: 'danger' });
 export const draw = (rows: (Line | ReactNode)[]) =>
   rows.map((r, i) =>
     r && typeof r === 'object' && 'text' in r ? (
-      <View key={`read ${i}`} style={{ ...row, paddingLeft: 16 * (1 + (r.depth ?? 0)) }}>
+      <View key={`read ${i}`} style={{ ...row, paddingLeft: INDENT * (1 + (r.depth ?? 0)) }}>
         <Text
           style={
             r.head ? { ...type.label, color: ink('dim') } : { ...inRow, color: ink(r.tone ?? 'fg') }
