@@ -334,10 +334,31 @@ test('a population corpse picks the keys the panel offers; nope stays at the fie
   assert.deepEqual(sent(), [['corpse', 'anything']]);
 });
 
-// break: focus leaves the sheet half height, matches or +N more show before a keystroke or +0 more
-// shows, the held key is not marked, the typed key is sent before the pressed one, a non-key
-// leaves the field, the refusal is read per keystroke or at the sheet's top, +N more is off, or a press
-// on the held key or an emptied field's blur leaves the typed text showing
+// break: focus leaves the sheet half height or the field unscrolled, matches or +N more show before a
+// keystroke or +0 more shows, the held key is not marked, the typed key is sent before the pressed one
+// in a click's or a tap's event order, a non-key leaves the field, the refusal is read per keystroke
+// (also after a refused leave) or at the sheet's top, +N more is off, or a press on the held key or an
+// emptied field's blur leaves the typed text showing
+/** A press on field `g`'s match `k`, its events in `steps` order; any polite line after each step. */
+async function picked(g: Awaited<ReturnType<typeof compiled>>, k: string, steps: string) {
+  const row = g.s.shown().find((x) => String(x.key).startsWith('picks '));
+  const press = g.s.find(k);
+  const on: Record<string, () => void> = {
+    down: () => row.props.onPointerDown(),
+    in: () => press.props.onPressIn(),
+    out: () => press.props.onPressOut?.(),
+    blur: () => g.input().props.onBlur(),
+    press: () => press.props.onPress(),
+  };
+  const told: string[] = [];
+  for (const step of steps.split(' '))
+    (on[step](), told.push(...g.said().flatMap(([w, l]) => (l ? [w] : []))));
+  await settle();
+  return told;
+}
+const CLICK = 'down blur in out press'; // a browser click: the blur on mousedown, RN-web's press-in 50 ms later
+const TAP = 'down in out blur press'; // a touch tap: pointerup and touchend before the compat mousedown's blur
+
 test('a cartridge entry with 11 rooms: room_1 then a press on room_12 writes only room_12; zz refuses at the field', async (t) => {
   const cart = structuredClone(files.get('cartridge.json'));
   t.after(() => ((storyNodes = [{ ref: 'r1', kind: 'room' }]), files.set('cartridge.json', cart)));
@@ -351,18 +372,18 @@ test('a cartridge entry with 11 rooms: room_1 then a press on room_12 writes onl
   const more = () => g.s.shown().filter((x) => /^\+\d+ more$/.test(words(x))).length;
   assert.deepEqual([shown(), more()], [[], 0]); // no picks before a keystroke
   let raised = 0;
+  const scrolled: unknown[] = [];
   raise.full = () => raised++;
-  g.input().props.onFocus({ target: null });
-  assert.equal(raised, 1, 'focus raises the sheet to full height');
+  g.input().props.onFocus({ target: { scrollIntoView: (o: unknown) => scrolled.push(o) } });
+  assert.deepEqual(
+    [raised, scrolled],
+    [1, [{ block: 'start' }]],
+    'focus raises the sheet, the field to its top',
+  );
   sent();
   await g.typed('room_1', false);
   assert.deepEqual([shown(), more()], [['room_1', 'room_12'], 0]);
-  const press = g.s.find('room_12');
-  press.props.onPressIn();
-  g.input().props.onBlur(); // the press takes the focus
-  press.props.onPressOut();
-  press.props.onPress();
-  await settle();
+  await picked(g, 'room_12', CLICK); // the typed key is not sent before the press's
   assert.deepEqual(sent(), [['entry', 'room_12']]);
   assert.deepEqual(shown(), []);
   await g.typed('zz', false);
@@ -373,11 +394,12 @@ test('a cartridge entry with 11 rooms: room_1 then a press on room_12 writes onl
   assert.deepEqual(sent(), []);
   assert.deepEqual(g.said(), [['no room zz', 'polite']]); // read once it leaves the field
   assert.equal(refused(), '');
+  await g.typed('zzz', false);
+  assert.deepEqual(g.said(), [['no room zzz', undefined]]); // typing again: shown, not read per keystroke
   await g.typed('room_1', false);
   const held = (k: string) => g.s.find(k).props.accessibilityState?.selected;
   assert.deepEqual([held('room_1'), held('room_12')], [false, true]);
-  g.s.find('room_12').props.onPress(); // the key it already holds
-  await settle();
+  await picked(g, 'room_12', TAP); // the key it already holds: the typed room_1 is not sent either
   assert.deepEqual([sent(), g.input().props.value], [[], 'room_12']);
   await g.typed('', false);
   g.input().props.onBlur(); // emptied, then left: the key shows again, nothing told or sent
@@ -390,7 +412,8 @@ test('a cartridge entry with 11 rooms: room_1 then a press on room_12 writes onl
   assert.deepEqual(sent(), [['entry', 'room_3']]);
 });
 
-// break: a field of exactly six keys hides them until a keystroke, or one match past six shows no +1 more
+// break: a field of exactly six keys hides them until a keystroke, a click on one after zz reads the
+// refusal as the blur comes first, or one match past six shows no +1 more
 test('a cartridge entry with 6 rooms offers all six; with 7, r shows six and +1 more', async (t) => {
   t.after(() => (storyNodes = [{ ref: 'r1', kind: 'room' }]));
   const rooms = (n: number) =>
@@ -400,6 +423,14 @@ test('a cartridge entry with 6 rooms offers all six; with 7, r shows six and +1 
     }));
   const six = await compiled(rooms(6), 'cartridge.json', 'entry');
   assert.equal(six.picks(['entry']).length, 6);
+  sent();
+  await six.typed('zz', false);
+  assert.deepEqual(
+    await picked(six, 'room_1', CLICK),
+    [],
+    'zz is not read as the press takes the focus',
+  );
+  assert.deepEqual(sent(), [['entry', 'room_1']]);
   const seven = await compiled(rooms(7), 'cartridge.json', 'entry');
   await seven.typed('r', false);
   assert.equal(seven.picks(['entry']).length, 6);

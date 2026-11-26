@@ -127,8 +127,11 @@ export function matches(keys: string[], text: string) {
 
 const typing = new Map<string, string>(); // a long-list field's text since its last keystroke, until a write or a blur on its key
 const told = new Set<string>(); // the fields left holding a refused text: their polite line reads it
-type Press = { onPressIn?: () => void; onPressOut?: () => void };
-let pressing = false; // a match press is taking the focus: that blur writes nothing
+type Press = { onPressIn?: () => void };
+// a match press is taking the focus: that blur writes nothing. Set on pointerdown, which a browser
+// sends before the blur (press-in comes 50 ms later); cleared by the write or the next focus, as a
+// touch tap's pointerup and press-out also come before its blur.
+let pressing = false;
 
 /** A room, item, person or transport field: free typing that writes only a key, refusing at the field. */
 function field(at: At, path: Step[], value: string, pick: { kind: string; keys: string[] }) {
@@ -136,6 +139,7 @@ function field(at: At, path: Step[], value: string, pick: { kind: string; keys: 
   const text = typing.get(key);
   const no = text ? refusePick(pick, text) : undefined;
   const write = (k: string) => {
+    pressing = false;
     typing.delete(key);
     told.delete(key);
     if (k === value) known.redraw();
@@ -153,11 +157,10 @@ function field(at: At, path: Step[], value: string, pick: { kind: string; keys: 
     <Text key={`told ${key}`} aria-live="polite" style={small('danger')}>
       {told.has(key) ? no : ''}
     </Text>,
-    <View key={`picks ${key}`} style={row}>
+    <View key={`picks ${key}`} style={row} onPointerDown={() => void (pressing = true)}>
       {(pick.keys.length <= SHORT ? pick.keys : shown).map((k) =>
         cloneElement(act(k, () => write(k), undefined, k, k === value) as ReactElement<Press>, {
-          onPressIn: () => void (pressing = true),
-          onPressOut: () => void (pressing = false),
+          onPressIn: () => void (pressing = true), // native: no pointerdown
         }),
       )}
     </View>,
@@ -185,6 +188,7 @@ function input(
       value={text ?? value}
       style={INPUT}
       onFocus={(e) => {
+        pressing = false;
         raise.full();
         (e.target as unknown as Element | null)?.scrollIntoView?.({ block: 'start' });
       }}
