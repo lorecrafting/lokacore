@@ -34,21 +34,23 @@ let name = '';
 async function go(sent: { name: string; new?: true; from?: string }) {
   const [status, told] = await known.api!('/world', sent);
   if (status !== 200) return String(told ?? status);
-  LEFT.forEach((k) => localStorage.removeItem(k));
-  keep(localStorage, { on: true });
   for (let i = 0; i < 200; i++) {
     await new Promise((r) => setTimeout(r, 300));
     const [, now] = await known.api!('/world').catch(() => []);
-    if (now?.current === sent.name) return void location.reload();
+    if (now?.current !== sent.name) continue;
+    // cleared last: a step or a draw while the watcher restarts writes them again
+    LEFT.forEach((k) => localStorage.removeItem(k));
+    keep(localStorage, { on: true });
+    return void location.reload();
   }
   return WORDS.stuck(sent.name);
 }
 
-/** GET /world, once; the server down, asked again on the next draw. */
+/** GET /world, once; the server down or refusing, asked again on the next draw. */
 function ask() {
   asked = true;
   void known.api?.('/world').then(
-    ([status, w]) => status === 200 && ((all = w), known.redraw()),
+    ([status, w]) => (status === 200 ? ((all = w), known.redraw()) : (asked = false)),
     () => (asked = false),
   );
 }

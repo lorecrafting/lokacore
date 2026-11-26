@@ -109,7 +109,8 @@ test('switching worlds posts the picked key, then reloads once /world names it',
   });
   worldRows();
   await settle();
-  await s.press(worldRows, 'Mill', 400);
+  await s.press(worldRows, 'Mill');
+  for (let i = 0; i < 50 && !reloads; i++) await settle(100); // go polls every 300 ms
   assert.deepEqual(s.posts, [['/world', { name: 'mill' }]]);
   assert.equal(reloads, 1);
   assert.ok(removed.includes('loka-place'));

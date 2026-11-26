@@ -25,15 +25,18 @@ type Found = { hits: { at: string; text: string }[]; total: number; refs: Referr
 let q = '';
 let found: Found | string | undefined; // the last answer, or why there is none
 
-/** Opens `at` (`<file>:<line>`): a JSON file's sheet, else the file where Checks opens one. */
-const opens = (at: string) => {
+/** Opens `at` (`<file>:<line>`): a JSON file's sheet, else the file where Checks opens one, at
+ * `key`'s line there (POST /open takes no line). */
+const opens = (at: string, key: string) => {
   const file = at.slice(0, at.lastIndexOf(':'));
-  return file.endsWith('.json') ? known.open(`def:${file}`) : void known.api?.('/open', { file });
+  return file.endsWith('.json')
+    ? known.open(`def:${file}`)
+    : void known.api?.('/open', { file, key }).catch(() => {});
 };
 /** A referrer: its definition's link when the server placed it, else its name, dim. */
 const referrer = (r: Referrer) =>
   r.at ? (
-    act(WORDS.by(r), () => opens(r.at!), undefined, `by ${r.by} ${r.kind}`)
+    act(WORDS.by(r), () => opens(r.at!, r.by), undefined, `by ${r.by} ${r.kind}`)
   ) : (
     <Text key={`by ${r.by} ${r.kind}`} style={{ ...inRow, color: ink('dim') }}>
       {WORDS.by(r)}
@@ -81,7 +84,7 @@ export function findRows() {
           </View>,
           ...answer.hits.map((h) => (
             <View key={`hit ${h.at}`} style={row}>
-              {act(h.at, () => opens(h.at))}
+              {act(h.at, () => opens(h.at, q))}
               {dim(h.text, 'text')}
             </View>
           )),
