@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import type { Story, Todo } from '../../../kernel/ts/play/storylist.ts';
 export type { Edge, Beat, Outline, Story, Todo } from '../../../kernel/ts/play/storylist.ts';
-import type { Timings } from './shell.ts';
+import type { Timings } from '../../../kernel/ts/play/timings.ts';
 import type { useBook } from './book.ts';
 import type { Fights, Numbers } from '../../../kernel/ts/play/numbers.ts';
 import { drop as remove } from '../../../kernel/ts/play/drop.ts';
@@ -46,7 +46,7 @@ export async function undoDelete(book: Pick<ReturnType<typeof useBook>, 'send'>)
   refused(await ask('undo', { id: last.id }));
 }
 
-import type { Checked } from './verdicts.ts';
+import type { Checked } from '../../../kernel/ts/play/verdicts.ts';
 import type { Covered } from '../../../kernel/ts/play/covered_type.ts';
 export type { Checked };
 export const checkpoints = {

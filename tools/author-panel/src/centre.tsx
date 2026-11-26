@@ -4,7 +4,8 @@ import type { RefObject } from 'react';
 import { BOOK } from './book.ts';
 import type { SetLayout } from './columns.tsx';
 import { Hold } from './prose.tsx';
-import { BUDGET, loadOf, total, within, type Layout, type Loaded, type Timings } from './shell.ts';
+import { BUDGET, loadOf, total, within, type Loaded, type Timings } from '../../../kernel/ts/play/timings.ts';
+import type { Layout } from './shell.ts';
 import { World } from './world.tsx';
 
 /** The last edit: compile + publish (+ the Book's load), `ok` within its budget, `warning` over. */

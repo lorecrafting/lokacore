@@ -2,7 +2,7 @@
 import { Bookmark, Clock, FileCode2, PenLine, Pin } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { ask, checkpoints, type Checked, type Todo as TodoRow, todo } from './author.ts';
-import { verdicts } from './verdicts.ts';
+import { verdicts } from '../../../kernel/ts/play/verdicts.ts';
 import type { Line, State, Step } from './book.ts';
 import { steps } from '../../../mobile/app/author/place.ts';
 import { Badge } from './components/ui/badge.tsx';
