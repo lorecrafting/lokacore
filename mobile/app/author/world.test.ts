@@ -11,7 +11,8 @@ const { sheets } = await import('./build/sheet.tsx');
 Object.assign(globalThis, { localStorage: { getItem: () => null, setItem() {} } }); // Build's Undo chip
 await import('./build/Build.tsx'); // the app's registration of the def: and contents sheets
 const { WORDS } = await import('./build/form.tsx');
-const WORLD = (await import('./build/world.tsx')).WORDS;
+const { WORDS: WORLD, matches } = await import('./build/world.tsx');
+const { refused } = await import('./build/roomedit.tsx');
 
 const root = new URL('../../../', import.meta.url);
 const read = (rel: string) => JSON.parse(readFileSync(new URL(rel, root), 'utf8'));
@@ -38,6 +39,8 @@ const files = new Map<string, any>([
   ['resources.json', { resources: { gold: {} } }],
 ]);
 let storyFiles: Record<string, string> = {}; // the /story's node files (the world files test names its own)
+let storyBundled: Record<string, string> = {}; // the /story's area-bundled node files
+let storyNodes = [{ ref: 'r1', kind: 'room' }]; // the last good compile's nodes
 const posts: { file: string; ops: { path: string[]; value?: unknown; delete?: true }[] }[] = [];
 /** The builder api: a /change lands in `files` (as write.ts writes it), so the next /story rereads it. */
 async function api(path: string, sent?: any): Promise<[number, any]> {
@@ -55,8 +58,9 @@ async function api(path: string, sent?: any): Promise<[number, any]> {
       200,
       {
         map: [],
-        graph: { nodes: [{ ref: 'r1', kind: 'room' }] },
-        files: { ...storyFiles }, // a fresh map per /story (load rereads on a new one); no root file
+        graph: { nodes: storyNodes },
+        files: { ...storyFiles },
+        bundled: storyBundled, // a fresh map per /story (load rereads on a new one); no root file
       },
     ];
   if (path === '/templates' || path.startsWith('/fights')) return [200, []];
@@ -67,7 +71,14 @@ async function api(path: string, sent?: any): Promise<[number, any]> {
   }
   const file = decodeURIComponent(path.split('file=')[1]);
   return files.has(file)
-    ? [200, { bytes: JSON.stringify(files.get(file)), sha256: 'S', kind: file.split(/[/.]/)[0] }]
+    ? [
+        200,
+        {
+          bytes: JSON.stringify(files.get(file)),
+          sha256: 'S',
+          kind: /^areas\/\w+\/(\w+)/.exec(file)?.[1] ?? file.split(/[/.]/)[0],
+        },
+      ]
     : [404, null];
 }
 story(
@@ -181,7 +192,7 @@ test('Turn on commerce: one op at requires.capabilities.commerce, then npcs.shop
 });
 
 // break: a resource field offers no keys, offers a room's, or takes a key no resources.json entry has
-test('a cartridge resource field picks hp, ma, mv and resources.json keys; a room stays free text', async () => {
+test('a cartridge resource field picks hp, ma, mv and resources.json keys', async () => {
   files.get('resources.json').resources.focus ??= {}; // its own, so it runs alone
   const s = await cartridge();
   const at = (path: string[]) =>
@@ -190,7 +201,6 @@ test('a cartridge resource field picks hp, ma, mv and resources.json keys; a roo
     (x) => x.props?.onPress,
   );
   assert.deepEqual(picks.map(words), ['hp', 'ma', 'mv', 'gold', 'focus']); // the pools, then resources.json
-  assert.equal(at(['entry']), undefined);
   sent();
   const input = s.shown().find((x) => x.props?.defaultValue === 'mv' && x.props.onBlur);
   input.props.onChangeText('nope');
@@ -255,4 +265,110 @@ test('the World tab lists the world files; each sheet writes cap 3, fare 5 and o
     ['fare', 5],
     ['opens_when', { op: 'all', items: [] }], // the least Policy (anyOf's first: all of nothing)
   ]);
+});
+
+// break: a group out of order (prefix before the equal key), case not ignored, the cap not six, or N off by the cap
+test('matches: the equal key, then those starting with the text, then those containing it; six, then how many more', () => {
+  const keys = ['xa', 'a2', 'A', 'ba', 'a1', 'ca', 'da', 'ea', 'b'];
+  assert.deepEqual(matches(keys, 'a'), { shown: ['A', 'a2', 'a1', 'xa', 'ba', 'ca'], more: 2 });
+  assert.deepEqual(matches(keys, ''), { shown: keys.slice(0, 6), more: 3 }); // an emptied field matches every key
+  assert.deepEqual(matches(keys, 'b'), { shown: ['b', 'ba'], more: -4 });
+});
+
+/** Story nodes `n` (with files and bundles) read again; the sheet of `file`, its field `label`. */
+async function compiled(n: typeof storyNodes, file: string, label: string) {
+  storyNodes = n;
+  story(
+    api,
+    () => {},
+    () => {},
+    () => {},
+  );
+  await settle();
+  const s = await opened(`def:${file}`);
+  const input = () =>
+    s.shown().find((x) => x.props?.accessibilityLabel === label && x.props.onBlur);
+  const typed = async (t: string, blur = true) => {
+    input().props.onChangeText(t);
+    if (blur) input().props.onBlur();
+    await settle();
+  };
+  const picks = (path: string[]) =>
+    nodes(s.shown().find((x) => x.key === `picks ${file}:${JSON.stringify(path)}`)?.props.children)
+      .filter((x) => x.props?.onPress)
+      .map(words);
+  const said = () =>
+    s
+      .shown()
+      .filter((x) => typeof x.props?.children === 'string' && x.props.children.startsWith('no '))
+      .map((x) => [x.props.children, x.props['aria-live']]);
+  return { s, input, typed, picks, said };
+}
+
+// break: the Book offers another area's item or one its area bundles (not the panel's reachable list),
+// a non-key leaves the field or refuses at the sheet's top, or a field with no keys of its kind refuses
+test('a population corpse picks the keys the panel offers; nope stays at the field; with no items, free text', async (t) => {
+  t.after(
+    () => ((storyFiles = {}), (storyBundled = {}), (storyNodes = [{ ref: 'r1', kind: 'room' }])),
+  );
+  const file = 'areas/a/populations/p.json';
+  files.set(file, { cap: 1, corpse: 'i_a' });
+  storyFiles = { i_a: 'areas/a/items/i.json', i_b: 'areas/b/items/i.json', i_top: 'items/x.json' };
+  storyBundled = { i_in_b: 'areas/b.json' };
+  const n = ['r1', 'i_a', 'i_b', 'i_in_b', 'i_top'].map((ref) => ({
+    ref,
+    kind: ref[0] === 'r' ? 'room' : 'item',
+  }));
+  const f = await compiled(n, file, 'corpse');
+  // the panel's right.tsx:37 list for these files: reachable() in kernel/ts/play/world_card.ts, which world.tsx calls too
+  assert.deepEqual(f.picks(['corpse']), ['i_a', 'i_top']);
+  sent();
+  await f.typed('nope');
+  assert.deepEqual(sent(), []);
+  assert.deepEqual(f.said(), [['no item nope', 'polite']]);
+  assert.equal(refused(), '');
+  await f.typed('i_top');
+  assert.deepEqual(sent(), [['corpse', 'i_top']]);
+  const free = await compiled([{ ref: 'r1', kind: 'room' }], file, 'corpse');
+  await free.typed('anything');
+  assert.deepEqual(sent(), [['corpse', 'anything']]);
+});
+
+// break: matches show before a keystroke, the typed key is sent before the pressed one, a non-key
+// leaves the field, the refusal is read per keystroke or at the sheet's top, or +N more is off
+test('a cartridge entry with 11 rooms: room_1 then a press on room_12 writes only room_12; zz refuses at the field', async (t) => {
+  const cart = structuredClone(files.get('cartridge.json'));
+  t.after(() => ((storyNodes = [{ ref: 'r1', kind: 'room' }]), files.set('cartridge.json', cart)));
+  const rooms = ['r1', ...[1, 2, 3, 4, 5, 6, 7, 8, 9, 12].map((i) => `room_${i}`)];
+  const g = await compiled(
+    rooms.map((ref) => ({ ref, kind: 'room' })),
+    'cartridge.json',
+    'entry',
+  );
+  const shown = () => g.picks(['entry']);
+  assert.deepEqual(shown(), []); // no picks before a keystroke
+  sent();
+  await g.typed('room_1', false);
+  assert.deepEqual(shown(), ['room_1', 'room_12']);
+  const press = g.s.find('room_12');
+  press.props.onPressIn();
+  g.input().props.onBlur(); // the press takes the focus
+  press.props.onPressOut();
+  press.props.onPress();
+  await settle();
+  assert.deepEqual(sent(), [['entry', 'room_12']]);
+  assert.deepEqual(shown(), []);
+  await g.typed('zz', false);
+  assert.deepEqual(g.said(), [['no room zz', undefined]]); // shown while typing, not read
+  assert.deepEqual(shown(), []);
+  g.input().props.onBlur();
+  await settle();
+  assert.deepEqual(sent(), []);
+  assert.deepEqual(g.said(), [['no room zz', 'polite']]); // read once it leaves the field
+  assert.equal(refused(), '');
+  await g.typed('room', false);
+  assert.deepEqual(shown(), ['room_1', 'room_2', 'room_3', 'room_4', 'room_5', 'room_6']);
+  assert.ok(g.s.shown().some((x) => words(x) === WORLD.more(4)));
+  await g.typed('room_3');
+  assert.deepEqual(sent(), [['entry', 'room_3']]);
 });
