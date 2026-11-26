@@ -47,30 +47,20 @@ export function doc(file: string) {
   return docs.get(file);
 }
 
-const counts = new Map<string, number | undefined>(); // each `kind/key`'s referrers, under the latest /story
+const counts = new Map<string, number | undefined>(); // each file's referrers, under the latest /story
 let counted: unknown; // that /story
-/** How many other definitions name `kind` `key` (GET /find's refs, of the last good compile), less
- * its own refs from `file` and the layout row, as the delete's gate (find.ts users()) counts; undefined
- * until read, or when /find fails. Read again under a new /story, then the Book redraws. */
-export function referrers(kind: string, key: string, file: string | undefined) {
+/** How many definitions a delete of `file` would leave dangling (GET /users, the server's delete gate
+ * find.ts `gate`, `extends` included); undefined until read, or when /users fails. Read again under a
+ * new /story, then the Book redraws. */
+export function referrers(file: string) {
   if (counted !== known.files) (counts.clear(), (counted = known.files));
-  const id = `${kind}/${key}`;
-  if (!counts.has(id)) {
-    counts.set(id, undefined);
-    known.api!(`/find?q=${encodeURIComponent(key)}`)
-      .then(([, found]) => {
-        const refs = (found as { refs: { kind: string; by?: string }[] }).refs;
-        const own = file?.replace(/\.[^.]+$/, '');
-        const by = (r: { by?: string }) => r.by?.replace(/^scripted_actions\//, 'actions/');
-        counts.set(
-          id,
-          refs.filter((r) => r.kind === kind && r.by !== 'layout' && by(r) !== own).length,
-        );
-        known.redraw();
-      })
-      .catch(() => {}); // a failed /find (no refs): unknown, Delete shows no count
+  if (!counts.has(file)) {
+    counts.set(file, undefined);
+    known.api!(`/users?file=${encodeURIComponent(file)}`)
+      .then(([, left]) => (counts.set(file, (left as unknown[]).length), known.redraw()))
+      .catch(() => {}); // a failed /users (no list): unknown, Delete shows no count
   }
-  return counts.get(id);
+  return counts.get(file);
 }
 
 /** A person's or item's sheet: where it starts and, unless a spawn places it, a holder to move it to. */
@@ -106,7 +96,7 @@ function body(dir: Dir, key: string) {
       {dir === 'npcs' ? act(WORDS.dialogue, () => talk(key), undefined, `dialogue ${key}`) : null}
       {act(WORDS.fields, () => known.open(`def:${file}`))}
     </View>,
-    foot(key, file, `${nodeOf(dir)}:${key}`, referrers(nodeOf(dir), key, file)),
+    foot(key, file, `${nodeOf(dir)}:${key}`, file ? referrers(file) : undefined),
   ];
 }
 

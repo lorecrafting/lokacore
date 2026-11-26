@@ -26,7 +26,7 @@ import { limited, numbers } from './reports.ts';
 export { limited };
 import { replayRecords } from './replay.ts';
 import { todo } from './todo.ts';
-import { find } from './find.ts';
+import { find, gate } from './find.ts';
 import { why } from './why.ts';
 import { storyRoute } from './story.ts';
 import { body, editing, foreign, type Hooks, json } from './editing.ts';
@@ -203,6 +203,10 @@ function column(
       true,
       new URL(request.url, 'http://x').searchParams.get('wield') ?? undefined,
     );
+  if (request.url?.startsWith('/users?')) {
+    const file = new URL(request.url, 'http://x').searchParams.get('file') ?? '';
+    return json(response, 200, gate(source, artifact, file).left); // what a delete of `file` would refuse on
+  }
   if (request.url?.startsWith('/find?'))
     return json(response, 200, find(source, artifact, asked(request.url)));
   if (request.method === 'POST' && (request.url === '/open' || request.url === '/why'))
@@ -219,7 +223,7 @@ const bound = (server: Server) => ({
 });
 
 /** Serves `GET /events` (each client gets the current message on connect and every push after),
- * the checkpoint routes over `source`, `GET /todo` (todo.ts), `GET /find?q=` (find.ts), `GET /numbers`, `GET /fights` (the fight rows alone), the column's `POST /open` and
+ * the checkpoint routes over `source`, `GET /todo` (todo.ts), `GET /find?q=` (find.ts), `GET /users?file=` (find.ts gate), `GET /numbers`, `GET /fights` (the fight rows alone), the column's `POST /open` and
  * `POST /why`, `GET /story` (story.ts), and the editor's routes (editing.ts) after its Host and Origin checks. */
 export function serve(port: number, source: string, artifact: string, on: Hooks = {}) {
   const clients = new Set<ServerResponse>();

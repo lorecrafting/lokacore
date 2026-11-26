@@ -29,7 +29,8 @@ const WORDS = {
   area: 'Area',
   move: 'Move to area',
   drop: (key: string, refs?: number) =>
-    refs === undefined ? `Delete ${key}` : `Delete ${key} · ${refs} referrers`,
+    refs === undefined ? `Delete ${key}` : `Delete ${key} · ${WORDS.refs(refs)}`,
+  refs: (n: number) => `${n} referrers`,
   also: (files: string[]) => `Also deletes ${files.join(', ')}`,
   yes: 'Delete all',
   no: 'Keep',
@@ -236,21 +237,22 @@ export function foot(key: string, file: string | undefined, shut: string, refs?:
   }
   const ask = (files: string[]) =>
     new Promise<boolean>((answer) => ((asking = { key: shut, files, answer }), after()));
+  const press = () =>
+    void run(async () => {
+      if (!file) return WORDS.noFile(key);
+      let yes = true;
+      const why = await drop(io, key, file, (files) => ask(files).then((y) => (yes = y)));
+      // it is gone: its sheets go too (kind and definition), wherever they sit
+      const sheets = new Set([shut, `${nodeOf(file.split('/')[0])}:${key}`, `def:${file}`]);
+      if (why === '' && yes) sheets.forEach((id) => close(id));
+      return why;
+    });
+  // named elsewhere: greyed, still pressable so the server's refusal names the referrers
   return (
     <View key="foot" style={row}>
-      {act(
-        WORDS.drop(key, refs),
-        () =>
-          void run(async () => {
-            if (!file) return WORDS.noFile(key);
-            let yes = true;
-            const why = await drop(io, key, file, (files) => ask(files).then((y) => (yes = y)));
-            // it is gone: its sheets go too (kind and definition), wherever they sit
-            const sheets = new Set([shut, `${nodeOf(file.split('/')[0])}:${key}`, `def:${file}`]);
-            if (why === '' && yes) sheets.forEach((id) => close(id));
-            return why;
-          }),
-      )}
+      {refs
+        ? greyed(WORDS.drop(key), WORDS.refs(refs), 'drop', press)
+        : act(WORDS.drop(key, refs), press)}
     </View>
   );
 }

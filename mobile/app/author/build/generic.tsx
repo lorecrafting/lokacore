@@ -6,7 +6,6 @@ import { cardMenuWith, turnOn } from '../../../../kernel/ts/play/allowed.ts';
 import { added, addable, definitionOf } from '../../../../kernel/ts/play/card.ts';
 import { refuseNew } from '../../../../kernel/ts/play/choice.ts';
 import { change } from '../../../../kernel/ts/play/edit_model.ts';
-import { nodeOf } from '../../../../kernel/ts/play/mapedit.ts';
 import type { Defs } from '../../../../kernel/ts/play/generic.ts';
 import REGISTRY from '../../../../kernel/ts/play/registry.json' with { type: 'json' };
 import { choices } from './choices.tsx';
@@ -155,8 +154,7 @@ function body(file: string) {
   const cut = g.kind === 'scenes' && pages(file.replace(/\.json$/, '.cut'), 'steps' in doc);
   const key = file.replace(/^.*\//, '').replace(/\.\w+$/, '');
   // a root file (cartridge.json, layout.json) is never deleted whole (write.ts remove()): no foot
-  const drop =
-    file.includes('/') && foot(key, file, `def:${file}`, referrers(nodeOf(g.kind), key, file));
+  const drop = file.includes('/') && foot(key, file, `def:${file}`, referrers(file));
   return [refusal(), cut, field(at, [], g.root, g.doc), drop];
 }
 

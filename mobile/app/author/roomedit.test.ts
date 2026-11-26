@@ -62,20 +62,9 @@ async function opened(
           },
         },
       ];
-    if (path === '/find?q=hen' && ++finds)
-      // two definitions name the person hen, one an item hen; hen's own ref and the layout row leave nothing dangling
-      return [
-        200,
-        {
-          refs: [
-            { kind: 'npc' },
-            { kind: 'item' },
-            { kind: 'npc' },
-            { kind: 'npc', by: 'npcs/hen' },
-            { kind: 'npc', by: 'layout' },
-          ],
-        },
-      ];
+    if (path === `/users?file=${encodeURIComponent('npcs/hen.json')}` && ++finds)
+      // the server's delete gate: one extends, one ref left outside the set
+      return [200, [{ kind: 'extends' }, { kind: 'npc' }]];
     if (path === '/templates')
       return [
         200,
@@ -315,14 +304,19 @@ test("Delete placement drops a person's room and an item's location; Fields open
   Object.assign(doc, was);
 });
 
-// Breaks: the count taking every ref to the key (another kind's, its own, the layout row's) or none, a failed /find
-// showing a count, a count kept across a new /story, or a deleted person's sheet or its definition's left open.
-test("a person's Delete names its referrers; with /find failing it shows no count", async () => {
+// Breaks: the count not the server's gate's (/users), Delete with referrers plain or not pressable (the refusal must
+// name them), a failed /users showing a count, a count kept across a new /story, or a deleted sheet left open.
+test("a person's Delete is greyed with its referrer count and still sends; with /users failing it shows no count", async () => {
   const s = await opened(() => [200, {}]);
   s.on(() => sheets.npc.body('hen'));
   s.shown();
   await settle();
-  await s.press('Delete hen · 2 referrers');
+  const drop = s
+    .shown()
+    .find((n) => n.props?.accessibilityRole === 'button' && words(n).startsWith('Delete hen'))!;
+  assert.equal(words(drop), 'Delete hen2 referrers');
+  assert.equal(drop.props.accessibilityState.disabled, false, 'greyed but pressable');
+  await s.press(words(drop));
   assert.deepEqual(
     s.posts.map(([path, sent]) => [path, sent.file]),
     [['/delete', 'npcs/hen.json']],
@@ -332,7 +326,7 @@ test("a person's Delete names its referrers; with /find failing it shows no coun
   s.on(() => sheets.npc.body('hen')); // the delete's new /story asks again
   s.shown();
   assert.equal(finds, asked + 1);
-  s.on(() => sheets.item.body('cup')); // /find answers 404 for cup
+  s.on(() => sheets.item.body('cup')); // /users answers 404 for cup
   s.shown();
   await settle();
   assert.ok(s.shown().some((n) => words(n) === 'Delete cup'));
