@@ -156,6 +156,22 @@ test('a field never releases a Hold it did not take', () => {
   assert.deepEqual([posts, beacons()], [[], 0]);
 });
 
+// Breaks: the Tools tab's Hold toggled off releasing the Hold a focused field took (one flag on the
+// server: the Book would reload under the field), or a pinned Hold dropped when the field commits.
+test("the Tools tab's Hold leaves a field's own Hold alone, and outlives its commit", () => {
+  const { hold, posts } = recorded();
+  hold.focus();
+  hold.heard(true);
+  hold.toggle(); // on, under the field's Hold
+  hold.toggle(); // off: still the field's
+  assert.deepEqual(posts, [true]);
+  hold.toggle();
+  hold.commit(); // the field lets go; the pinned Hold stays
+  assert.deepEqual(posts, [true]);
+  hold.toggle(); // off with no field: released
+  assert.deepEqual(posts, [true, false]);
+});
+
 // Breaks: a page closed mid-edit leaving the server held, or a beacon after the field let go.
 test('leaving the page releases a Hold the field took, by beacon', () => {
   const { hold, posts, beacons } = recorded();

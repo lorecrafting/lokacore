@@ -99,6 +99,7 @@ export function autoHold(
   let held = false; // as the stream last said
   let mine = false;
   let focused = false;
+  let pinned = false; // the Tools tab's Hold
   const take = () => ((mine = true), post(true));
   return {
     heard(now?: boolean) {
@@ -115,9 +116,15 @@ export function autoHold(
       later(() => {
         if (focused || !mine) return;
         mine = false;
-        post(false);
+        if (!pinned) post(false); // a pinned Hold outlives the field
       });
     },
+    /** The Tools tab's Hold: under a field's own Hold it only marks it to stay after the commit. */
+    toggle() {
+      pinned = !pinned;
+      if (!mine) post(pinned);
+    },
+    pinned: () => pinned,
     /** pagehide: a request in flight would be cut off, so the release goes as a beacon */
     leave() {
       if (mine) beacon();

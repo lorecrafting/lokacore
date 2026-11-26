@@ -1,0 +1,242 @@
+// The notebook's Tools tab (slice 6.2a, the panel's Play column): the Hold, named checkpoints with
+// their replayed verdicts, Advance time and the cheats, all through panel.tsx's own paths (placeHooks):
+// a cheat is a recorded step, a replay starts the game over. The strip's last-edit timing is here too.
+import { Text, TextInput, View } from 'react-native';
+import {
+  BUDGET,
+  loadOf,
+  total,
+  within,
+  type Loaded,
+  type Timings,
+} from '../../../../kernel/ts/play/timings.ts';
+import { verdicts, type Checked } from '../../../../kernel/ts/play/verdicts.ts';
+import { type } from '../../book/tokens.ts';
+import type { Cheat, Step } from '../place.ts';
+import { ink } from './build.ts';
+import { known } from './room.tsx';
+import { inRow, refusal, row, run, tell } from './roomedit.tsx';
+import { act } from './sheet.tsx';
+
+// Placeholders: the owner writes the words.
+export const WORDS = {
+  tab: 'Tools',
+  hold: 'Hold',
+  name: 'checkpoint name',
+  save: 'Save checkpoint',
+  notSaved: (status: number) => `Not saved: ${status}`,
+  badName:
+    'A name is up to 64 lower-case letters, digits, - and _, starting with a letter or digit.',
+  noSteps: 'That checkpoint has no steps list; nothing changed.',
+  replay: (name: string) => `Replay ${name}`,
+  pin: 'Pin',
+  empty: 'Play to a beat, name it, Save; later, pick it to replay there.',
+  failed: (n: number) => `${n} checkpoint ${n === 1 ? 'fails' : 'fail'}`,
+  minutes: 'minutes',
+  advance: 'Advance',
+  room: 'room key',
+  go: 'Go to room',
+  fact: 'fact key',
+  value: 'value',
+  setFact: 'Set fact',
+  level: 'level',
+  attribute: 'attribute key',
+  points: 'points',
+  setLevel: 'Set level',
+};
+const NAME = /^[a-z0-9][a-z0-9_-]{0,63}$/; // kernel/ts/play/live.ts NAME
+const START = 'loka.editor.start'; // the panel's pinned start (tools/author-panel/src/shell.ts START)
+
+/** panel.tsx's paths for this game (placeHooks), the Hold and the stream's last message (Build.tsx). */
+export type Hooks = {
+  game: () =>
+    | {
+        place: () => { steps: Step[] };
+        loaded: Loaded; // this Book's artifact and load time, for a structural edit's timing
+        jump: (steps: Step[]) => void;
+        advance: (minutes: number) => string;
+        cheat: (cheat: Cheat) => string;
+      }
+    | undefined;
+  hold: { toggle: () => void; pinned: () => boolean };
+  heard: () => Said;
+};
+/** The stream's fields this tab reads (kernel/ts/play/live.ts), beside live.ts's Message. */
+export type Said = { checkpoints?: Checked[]; timings?: Timings };
+let hooks: Hooks | undefined;
+export const toolsWith = (given: Hooks) => void (hooks = given);
+
+const typed: Record<string, string> = { minutes: '60' };
+let names: string[] | undefined; // GET /__author/checkpoints, asked when the tab first draws
+const field = (label: string, key: string, numeric = false) => (
+  <TextInput
+    key={key}
+    accessibilityLabel={label}
+    placeholder={label}
+    defaultValue={typed[key]}
+    inputMode={numeric ? 'numeric' : undefined}
+    onChangeText={(v) => void ((typed[key] = v), known.redraw())}
+    style={{ ...inRow, minWidth: 80, borderBottomWidth: 1, borderColor: ink('action') }} // mutate-skip: layout; ruled as Contents' name field
+  />
+);
+const said = (text: string) => <Text style={{ ...inRow, color: ink('dim') }}>{text}</Text>;
+/** A tool's act, or its label in dim ink while what it needs is missing. */
+const maybe = (label: string, go: (() => void) | false) =>
+  go ? (
+    act(label, go)
+  ) : (
+    <Text key={label} style={{ ...type.control, color: ink('dim') }}>
+      {label}
+    </Text>
+  );
+
+// not through run: save awaits it inside its own run, which a nested run would skip as busy
+const list = async () => {
+  const r = await fetch('/__author/checkpoints');
+  names = r.ok ? ((await r.json()) as string[]) : [];
+  known.redraw();
+};
+const save = (steps: Step[]) =>
+  run(async () => {
+    const r = await fetch(`/__author/checkpoints/${typed.name}`, {
+      method: 'PUT',
+      body: JSON.stringify({ steps }),
+    });
+    if (!r.ok) return WORDS.notSaved(r.status);
+    await list();
+  });
+const replay = (name: string) =>
+  run(async () => {
+    const { steps } = (await (await fetch(`/__author/checkpoints/${name}`)).json()) as {
+      steps?: Step[];
+    };
+    if (!Array.isArray(steps)) return WORDS.noSteps;
+    hooks?.game()?.jump(steps);
+  });
+const pin = (name: string) => {
+  if (localStorage.getItem(START) === name) localStorage.removeItem(START);
+  else localStorage.setItem(START, name);
+  known.redraw();
+};
+/** A note from the game (a refusal, a stop) shows as the tab's refusal; none redraws. */
+const after = (note: string) => (note ? tell(note) : known.redraw());
+/** true, false, a number or a "quoted" string as typed; a bare word is an enum's or a string's (cheats.tsx). */
+function value(text: string) {
+  try {
+    const v: unknown = JSON.parse(text);
+    return typeof v === 'boolean' || typeof v === 'string' || Number.isFinite(v)
+      ? (v as boolean | number | string)
+      : text;
+  } catch {
+    return text;
+  }
+}
+
+/** The Tools tab's rows: the Hold, the checkpoints, then time and the cheats. */
+export function toolRows() {
+  if (!names) void ((names = []), list().catch(() => {})); // asked once; unreachable reads as none
+  const game = hooks?.game();
+  return [
+    refusal(),
+    <View key="hold" style={row}>
+      {act(
+        WORDS.hold,
+        () => (hooks!.hold.toggle(), known.redraw()),
+        undefined,
+        'hold',
+        hooks?.hold.pinned() ?? false,
+      )}
+    </View>,
+    ...checkpointRows(game?.place().steps ?? []),
+    ...(game ? cheatRows(game) : []),
+  ];
+}
+
+function checkpointRows(steps: Step[]) {
+  const checked = hooks?.heard().checkpoints;
+  const broke = checked?.filter((c) => !c.ok).length ?? 0;
+  return [
+    <View key="save" style={row}>
+      {field(WORDS.name, 'name')}
+      {maybe(
+        WORDS.save,
+        NAME.test(typed.name ?? '') && steps.length > 0 && (() => void save(steps)),
+      )}
+      {broke ? <Text style={{ ...inRow, color: ink('danger') }}>{WORDS.failed(broke)}</Text> : null}
+    </View>,
+    typed.name && !NAME.test(typed.name) ? <View key="bad">{said(WORDS.badName)}</View> : null,
+    ...(names?.length
+      ? verdicts(names, checked).map((v) => (
+          <View key={`cp ${v.name}`} style={row}>
+            {act(WORDS.replay(v.name), () => void replay(v.name))}
+            {act(
+              WORDS.pin,
+              () => pin(v.name),
+              undefined,
+              `pin ${v.name}`,
+              localStorage.getItem(START) === v.name,
+            )}
+            <Text style={{ ...inRow, color: ink(v.ok ? 'dim' : 'danger') }}>{v.said}</Text>
+          </View>
+        ))
+      : [<View key="empty">{said(WORDS.empty)}</View>]),
+  ];
+}
+
+type Game = NonNullable<ReturnType<Hooks['game']>>;
+const cheatOf = (game: Game) => (c: Cheat) => () => after(game.cheat(c));
+function cheatRows(game: Game) {
+  const [minutes, cheat] = [Number(typed.minutes), cheatOf(game)];
+  const { room, fact, level, attribute, points } = typed;
+  return [
+    <View key="advance" style={row}>
+      {field(WORDS.minutes, 'minutes', true)}
+      {maybe(
+        WORDS.advance,
+        Number.isSafeInteger(minutes) && minutes > 0 && (() => after(game.advance(minutes))),
+      )}
+    </View>,
+    <View key="go" style={row}>
+      {field(WORDS.room, 'room')}
+      {maybe(WORDS.go, !!room && cheat({ op: 'go_to_room', room }))}
+    </View>,
+    <View key="fact" style={row}>
+      {field(WORDS.fact, 'fact')}
+      {field(WORDS.value, 'value')}
+      {maybe(
+        WORDS.setFact,
+        !!fact && !!typed.value && cheat({ op: 'set_fact', fact, value: value(typed.value) }),
+      )}
+    </View>,
+    <View key="level" style={row}>
+      {field(WORDS.level, 'level', true)}
+      {field(WORDS.attribute, 'attribute')}
+      {field(WORDS.points, 'points', true)}
+      {maybe(
+        WORDS.setLevel,
+        !!level &&
+          (!attribute || !!points) &&
+          cheat({
+            op: 'set_level',
+            level: Number(level),
+            points: attribute ? { [attribute]: Number(points) } : {},
+          }),
+      )}
+    </View>,
+  ];
+}
+
+/** The strip's last edit, as the panel's Timing (centre.tsx): `ok` ink within its budget, `warning` over. */
+export function timing(t: Timings | undefined, loaded?: Loaded) {
+  if (!t) return null;
+  const load = loadOf(t, loaded);
+  const parts = [t.compile, t.publish, ...(load ? [load] : [])].join(' + ');
+  return (
+    <Text
+      accessibilityLabel={`Last edit timing, within ${BUDGET[t.kind]} ms`}
+      style={{ ...type.small, color: ink(within(t, load) ? 'dim' : 'warning') }}
+    >
+      {`${t.kind} ${parts} = ${total(t, load)} ms`}
+    </Text>
+  );
+}
