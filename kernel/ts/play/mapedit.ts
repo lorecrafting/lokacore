@@ -1,3 +1,4 @@
+// size: allow 310, every map gesture the builder's sheets run, incl. the Person and Item sheets' put and unput
 // The map's edits (editor-map-and-story-rulings.md, Left to E3b; gui-editor-design §3): each gesture
 // as write-route calls (§5.1) in order, undone together. No React or fetch here: the panel passes its
 // routes in; tested from kernel/ts/test/author_mapedit.test.ts.
@@ -13,8 +14,8 @@ export type Io = {
   source: (file: string) => Promise<{ bytes: string; sha256: string; kind?: string }>;
 };
 type Op = { path: (string | number)[]; value?: unknown; delete?: true };
-type Exit = { to: string; barrier?: string };
-type Doc = { exits?: Record<string, Exit> };
+type Exit = { to: string | { key: string }; barrier?: string };
+type Doc = { exits?: Record<string, Exit>; rooms?: Record<string, Doc> };
 type Row = { room: string } & At;
 /** One gesture's write calls: each journals an entry the gesture's undo puts back. */
 export type Run = {
@@ -43,11 +44,19 @@ const said = (told: unknown) =>
   typeof told === 'string'
     ? told
     : `${(told as { file?: string })?.file ?? 'a file'} changed since the map read it`;
-/** Sets one exit, making `exits` when the room has none. */
-const exit = (doc: Doc, dir: string, value: Exit): Op =>
-  doc.exits ? { path: ['exits', dir], value } : { path: ['exits'], value: { [dir]: value } };
+/** The room an exit leads to: a short key, or a full ref's key (rooms_sampler writes those). */
+const toKey = (e?: Exit) => (typeof e?.to === 'object' ? e.to.key : e?.to);
+/** Where `r`'s exits sit in its file: a room in an area bundle (areas/<a>.json) under `rooms.<key>`. */
+const bundled = (r: MapRoom) => /^areas\/[^/]+\.json$/.test(fileOf(r));
+const exitsAt = (r: MapRoom) => (bundled(r) ? ['rooms', r.key, 'exits'] : ['exits']);
+const exitsOf = (r: MapRoom, doc: Doc) => (bundled(r) ? doc.rooms?.[r.key] : doc)?.exits;
+/** Sets one exit of `r`, making `exits` when the room has none. */
+const exit = (r: MapRoom, doc: Doc, dir: string, value: Exit): Op =>
+  exitsOf(r, doc)
+    ? { path: [...exitsAt(r), dir], value }
+    : { path: exitsAt(r), value: { [dir]: value } };
 const faceOf = async (s: Run, a: MapRoom, dir: string) =>
-  (await s.read<Doc>(fileOf(a))).doc.exits?.[dir] ?? no(`${a.key} has no exit ${dir}`);
+  exitsOf(a, (await s.read<Doc>(fileOf(a))).doc)?.[dir] ?? no(`${a.key} has no exit ${dir}`);
 const roomOf = (rooms: MapRoom[], key: string) =>
   rooms.find((r) => r.key === key) ?? no(`${key} is not on the map`);
 
@@ -74,7 +83,9 @@ async function link(s: Run, a: MapRoom, dir: string, b: MapRoom, oneWay: boolean
   if (a.key === b.key) no('an exit leads to another room');
   const add = (from: MapRoom, way: string, to: string) =>
     s.change<Doc>(fileOf(from), (doc) =>
-      doc.exits?.[way] ? no(`${from.key} already has an exit ${way}`) : [exit(doc, way, { to })],
+      exitsOf(from, doc)?.[way]
+        ? no(`${from.key} already has an exit ${way}`)
+        : [exit(from, doc, way, { to })],
     );
   await add(a, dir, b.key);
   if (!oneWay) await add(b, home, a.key);
@@ -82,12 +93,14 @@ async function link(s: Run, a: MapRoom, dir: string, b: MapRoom, oneWay: boolean
 
 /** Deletes `a`'s exit `dir` and its reciprocal face, if the room it leads to has one. */
 async function unlink(s: Run, a: MapRoom, dir: string, rooms: MapRoom[]) {
-  const to = (await faceOf(s, a, dir)).to;
-  await s.change(fileOf(a), () => [{ path: ['exits', dir], delete: true }]);
+  const to = toKey(await faceOf(s, a, dir));
+  await s.change(fileOf(a), () => [{ path: [...exitsAt(a), dir], delete: true }]);
   const b = rooms.find((r) => r.key === to);
   if (b)
     await s.change<Doc>(fileOf(b), (doc) =>
-      doc.exits?.[back(dir)]?.to === a.key ? [{ path: ['exits', back(dir)], delete: true }] : [],
+      toKey(exitsOf(b, doc)?.[back(dir)]) === a.key
+        ? [{ path: [...exitsAt(b), back(dir)], delete: true }]
+        : [],
     );
 }
 
@@ -95,12 +108,13 @@ async function unlink(s: Run, a: MapRoom, dir: string, rooms: MapRoom[]) {
 async function oneWay(s: Run, a: MapRoom, dir: string, rooms: MapRoom[]) {
   const face = await faceOf(s, a, dir);
   if (face.barrier) no(`${face.barrier} needs both faces: take the barrier off first`);
-  const b = roomOf(rooms, face.to);
+  const b = roomOf(rooms, toKey(face)!);
   await s.change<Doc>(fileOf(b), (doc) => {
-    const was = doc.exits?.[back(dir)];
-    if (!was) return [exit(doc, back(dir), { to: a.key })];
-    if (was.to !== a.key) no(`${b.key}'s exit ${back(dir)} leads to ${was.to}`);
-    return [{ path: ['exits', back(dir)], delete: true }];
+    const was = exitsOf(b, doc)?.[back(dir)];
+    const to = typeof face.to === 'object' ? { ...face.to, key: a.key } : a.key;
+    if (!was) return [exit(b, doc, back(dir), { to })];
+    if (toKey(was) !== a.key) no(`${b.key}'s exit ${back(dir)} leads to ${toKey(was)}`);
+    return [{ path: [...exitsAt(b), back(dir)], delete: true }];
   });
 }
 
@@ -115,25 +129,26 @@ async function barrier(
 ) {
   const face = await faceOf(s, a, dir);
   if (face.barrier) no(`${a.key}'s exit ${dir} already has ${face.barrier}`);
-  const b = roomOf(rooms, face.to);
-  const reverse = (await s.read<Doc>(fileOf(b))).doc.exits?.[back(dir)];
-  if (reverse?.to !== a.key) no('a barrier needs the exit both ways: a one-way exit has none');
-  // a barrier is owned: in the rooms' area when they share one, else at the root (border rule)
-  const area = a.area === b.area ? a.area : null;
+  const b = roomOf(rooms, toKey(face)!);
+  const reverse = exitsOf(b, (await s.read<Doc>(fileOf(b))).doc)?.[back(dir)];
+  if (toKey(reverse) !== a.key) no('a barrier needs the exit both ways: a one-way exit has none');
+  // owned in the rooms' area when they share one, else at the root (border rule; a bundle's rooms are root's)
+  const area = a.area === b.area && !bundled(a) ? a.area : null;
   const made = await s.call('new', { kind: 'barriers', name: key, ...(area ? { area } : {}) });
   const file = made.files?.find((f) => f.endsWith(`barriers/${key}.json`));
   if (locked)
     await s.change(file ?? no(`no barriers/${key}.json was made`), () => [
       { path: ['initial'], value: 'locked' },
     ]);
-  await s.change(fileOf(a), () => [{ path: ['exits', dir, 'barrier'], value: key }]);
-  await s.change(fileOf(b), () => [{ path: ['exits', back(dir), 'barrier'], value: key }]);
+  await s.change(fileOf(a), () => [{ path: [...exitsAt(a), dir, 'barrier'], value: key }]);
+  await s.change(fileOf(b), () => [{ path: [...exitsAt(b), back(dir), 'barrier'], value: key }]);
 }
 
 /** New room from here: `bin/loka new rooms <key> --from <a> <dir>` (its words `~`), in `a`'s area. */
 async function grow(s: Run, a: MapRoom, dir: string, key: string) {
   back(dir);
-  if ((await s.read<Doc>(fileOf(a))).doc.exits?.[dir]) no(`${a.key} already has an exit ${dir}`);
+  if (exitsOf(a, (await s.read<Doc>(fileOf(a))).doc)?.[dir])
+    no(`${a.key} already has an exit ${dir}`);
   const from = { room: a.key, direction: dir };
   await s.call('new', { kind: 'rooms', name: key, from, ...(a.area ? { area: a.area } : {}) });
 }

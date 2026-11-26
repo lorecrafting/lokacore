@@ -6,8 +6,10 @@ import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { after, test } from 'node:test';
 import { pathToFileURL } from 'node:url';
+import ts from 'typescript';
 
-// The patch run on upstream's pool (the install is already patched, so the warm-up is taken out first).
+// The patch run on upstream's pool and module (the install is already patched, so the warm-up and
+// the release are taken out first).
 const fixture = mkdtempSync(join(tmpdir(), 'loka-sqlite-pool-'));
 after(() => rmSync(fixture, { recursive: true, force: true }));
 const installed = dirname(createRequire(import.meta.url).resolve('expo-sqlite/package.json'));
@@ -15,6 +17,13 @@ const moduleRoot = join(fixture, 'node_modules/expo-sqlite');
 mkdirSync(join(moduleRoot, 'web/wa-sqlite'), { recursive: true });
 cpSync(join(installed, 'package.json'), join(moduleRoot, 'package.json'));
 cpSync(join(installed, 'web/WorkerChannel.ts'), join(moduleRoot, 'web/WorkerChannel.ts'));
+const webModule = join(moduleRoot, 'web/SQLiteModule.ts');
+const upstreamModule = readFileSync(join(installed, 'web/SQLiteModule.ts'), 'utf8').replace(
+  /    \/\/ loka-hcnlh\.19\.5 release\n[\s\S]*?reload\(\);\n    \}\);\n/,
+  '',
+);
+assert.ok(!upstreamModule.includes('pagehide'));
+writeFileSync(webModule, upstreamModule);
 for (const name of ['FacadeVFS', 'VFS', 'sqlite-constants']) {
   cpSync(
     join(installed, 'web/wa-sqlite', `${name}.js`),
@@ -131,4 +140,122 @@ test('on Safari the save and a new journal grow by sync writes, and the save kee
 test('on Chromium the pool writes no headroom', async () => {
   const { files } = await opened(CHROME);
   assert.ok(files.every((f) => f.capacity < 1024 * 1024));
+});
+
+// Breaks (loka-hcnlh.19.5): a page left for the back/forward cache keeps its worker, so the pool's
+// OPFS handles stay taken and the Book opened again reads "already open in another tab"; the worker
+// ends at pagehide, before the Book's hide handler saves its pause point (that save then spins 5 s
+// on the ended worker); or a restored page lets the Book resume on the ended worker before reloading.
+function page() {
+  const source = ts.transpileModule(readFileSync(webModule, 'utf8'), {
+    compilerOptions: { module: ts.ModuleKind.CommonJS },
+  }).outputText;
+  // An event reaches window's capturing listeners, then document's, then window's bubbling ones.
+  const capture = new EventTarget();
+  const document = Object.assign(new EventTarget(), { visibilityState: 'visible' });
+  const bubble = new EventTarget();
+  const workers: { terminated: boolean }[] = [];
+  const calls: boolean[] = []; // per save call: whether its worker had ended
+  let reloads = 0;
+  const window = {
+    location: { href: 'https://loka.test/', reload: () => reloads++ },
+    addEventListener: (type: string, listener: EventListener, captured?: boolean) =>
+      (captured ? capture : bubble).addEventListener(type, listener),
+  };
+  class Worker {
+    terminated = false;
+    constructor() {
+      workers.push(this);
+    }
+    addEventListener() {}
+    terminate() {
+      this.terminated = true;
+    }
+  }
+  const stubs: Record<string, unknown> = {
+    expo: { NativeModule: class {}, registerWebModule: (Module: new () => object) => new Module() },
+    './WorkerChannel': {
+      invokeWorkerSync: (worker: Worker) => calls.push(worker.terminated),
+      invokeWorkerAsync: async () => {},
+    },
+  };
+  const exports: { default?: { NativeDatabase: new (path: string) => { initSync(): void } } } = {};
+  new Function('require', 'exports', 'window', 'document', 'Worker', source)(
+    (name: string) => stubs[name],
+    exports,
+    window,
+    document,
+    Worker,
+  );
+  const db = new exports.default!.NativeDatabase('loka.db');
+  db.initSync();
+  // The Book's AppState handler saves on hide and resumes on show, both through the worker.
+  document.addEventListener('visibilitychange', () => db.initSync());
+  const fire = (event: Event) => [capture, document, bubble].forEach((t) => t.dispatchEvent(event));
+  return {
+    workers,
+    calls,
+    reloads: () => reloads,
+    fire,
+    visibility(state: string) {
+      document.visibilityState = state;
+      fire(new Event('visibilitychange'));
+    },
+    show: (persisted: boolean) => fire(Object.assign(new Event('pageshow'), { persisted })),
+    save: () => db.initSync(),
+  };
+}
+
+test('the leaving page ends its save worker after the hide save', () => {
+  const p = page();
+  p.show(false); // a first load
+  p.fire(new Event('pagehide'));
+  p.visibility('hidden');
+  assert.deepEqual([p.calls, p.workers[0].terminated], [[false, false], true]);
+  p.save(); // a save call after leaving starts no worker to take the handles again
+  assert.deepEqual([p.workers.length, p.reloads()], [1, 0]);
+});
+
+test('a page hidden before it leaves ends its worker at pagehide', () => {
+  const p = page();
+  p.visibility('hidden');
+  p.fire(new Event('pagehide'));
+  assert.deepEqual([p.calls, p.workers[0].terminated], [[false, false], true]);
+});
+
+test('a page restored from the cache reloads before the Book resumes', () => {
+  const p = page();
+  p.fire(new Event('pagehide'));
+  p.visibility('hidden');
+  p.visibility('visible'); // restored, visible before pageshow
+  assert.deepEqual([p.calls.length, p.reloads()], [2, 1]);
+  p.show(true);
+  assert.equal(p.reloads(), 2);
+});
+
+test('a tab switched away and back keeps its save worker', () => {
+  const p = page();
+  p.visibility('hidden');
+  p.visibility('visible');
+  assert.deepEqual(
+    [p.calls, p.workers[0].terminated, p.reloads()],
+    [[false, false, false], false, 0],
+  );
+});
+
+test('an install with an older release patched in refuses', () => {
+  const patched = readFileSync(webModule, 'utf8');
+  const create = "    worker = new Worker(new URL('./worker', window.location.href));\n";
+  writeFileSync(
+    webModule,
+    upstreamModule.replace(create, `${create}    // loka-hcnlh.19.5 release\n`),
+  );
+  try {
+    assert.throws(
+      () => execFileSync(process.execPath, [join(fixture, 'patch.cjs')], { stdio: 'pipe' }),
+      /an older release is patched in/,
+    );
+  } finally {
+    writeFileSync(webModule, patched);
+  }
 });

@@ -13,11 +13,12 @@ after(() => rmSync(fixture, { recursive: true, force: true }));
 const installed = dirname(createRequire(import.meta.url).resolve('expo-sqlite/package.json'));
 const moduleRoot = join(fixture, 'node_modules/expo-sqlite');
 mkdirSync(join(moduleRoot, 'web/wa-sqlite'), { recursive: true });
-for (const name of ['WorkerChannel', 'Deferred', 'SyncSerializer']) {
+for (const name of ['WorkerChannel', 'Deferred', 'SyncSerializer', 'SQLiteModule']) {
   cpSync(join(installed, 'web', `${name}.ts`), join(moduleRoot, 'web', `${name}.ts`));
 }
 cpSync(join(installed, 'package.json'), join(moduleRoot, 'package.json'));
-// The patch also warms the OPFS pool (sqlite-web-pool.test.ts covers it); it needs the file here.
+// The patch also warms the OPFS pool and releases it on pagehide (sqlite-web-pool.test.ts covers
+// both); it needs those files here.
 cpSync(
   join(installed, 'web/wa-sqlite/AccessHandlePoolVFS.js'),
   join(moduleRoot, 'web/wa-sqlite/AccessHandlePoolVFS.js'),

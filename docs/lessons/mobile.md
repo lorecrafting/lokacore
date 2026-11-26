@@ -25,6 +25,8 @@ shared client. Neither closes deferred native proof or the known UI blur carry.
   the workaround only after browser action/reopen and
   corrupt-save recovery proofs on an updated SDK. The local page needs COOP/COEP headers
   for SharedArrayBuffer.
+- expo-sqlite 57.0.3 on web: closing the database does not free Safari's OPFS save files; only ending
+  the worker does (#789, #803).
 - expo-sqlite 57.0.3 on Android: opening the same database file twice gives both JS
   handles one native database, and garbage collection of either closes it. Symptom:
   `NativeDatabase.execSync` rejected, `NullPointerException`. Open each database once

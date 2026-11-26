@@ -1,4 +1,4 @@
-// size: allow 540, one scaffolded cartridge the tests edit in turn and the last undoes; a split needs a second scaffold
+// size: allow 595, one scaffolded cartridge the tests edit in turn and the last undoes; a split needs a second scaffold
 // The editor map's edits (kernel/ts/play/mapedit.ts) through the real write routes
 // (play/write.ts) and the real `mix loka.new`, on one scaffolded cartridge the tests edit in turn;
 // the last one undoes every gesture. Expected files are written by hand.
@@ -74,6 +74,20 @@ before(async () => {
   const blank = read('rooms/start.json');
   writeFileSync(join(src, 'rooms/b.json'), blank);
   writeFileSync(join(src, 'rooms/c.json'), blank);
+  // d and e: exits by full ref, as rooms_sampler writes them (loka-hcnlh.74)
+  const { id, version } = json('cartridge.json');
+  const to = (key: string) => ({
+    to: { cartridge_id: id, cartridge_version: version, kind: 'room', key },
+  });
+  const at = (exits: object) => JSON.stringify({ ...JSON.parse(blank), exits }, null, 2) + '\n';
+  writeFileSync(join(src, 'rooms/d.json'), at({ east: to('e'), north: to('e'), up: to('e') }));
+  writeFileSync(join(src, 'rooms/e.json'), at({ west: to('d'), south: to('d'), down: to('d') }));
+  // f and g: rooms of the area bundle areas/pen.json (loka-hcnlh.77)
+  const pen = (exits: object) => ({ ...JSON.parse(blank), exits });
+  const f = pen({ east: { to: 'g' }, north: { to: 'g' }, up: { to: 'g' } });
+  const g = pen({ west: { to: 'f' }, south: { to: 'f' }, down: { to: 'f' } });
+  mkdirSync(join(src, 'areas'), { recursive: true });
+  writeFileSync(join(src, 'areas/pen.json'), JSON.stringify({ rooms: { f, g } }, null, 2) + '\n');
   writeFileSync(
     join(src, 'outline.json'),
     '{ "parts": [{ "beats": [{ "n": 1 }, { "n": 2, "nodes": ["rooms/b"] }] }] }\n',
@@ -530,6 +544,43 @@ test('a key a file or an area bundle already holds is refused, compiled or not',
   } finally {
     for (const f of Object.keys(planted)) rmSync(join(src, f));
   }
+});
+
+test('delete, one-way and barrier read an exit written as a full ref', async () => {
+  // Breaks: an exit's `to` read only as a short key, so Delete leaves the far face behind and
+  // One-way and Barrier refuse "[object Object] is not on the map".
+  const [d, e] = [room('d'), room('e')];
+  await ed.unlink(d, 'east', [d, e]);
+  await ed.oneWay(d, 'north', [d, e]);
+  await ed.barrier(d, 'up', [d, e], 'trapdoor', false);
+  assert.deepEqual(Object.keys(json('rooms/d.json').exits), ['north', 'up']);
+  assert.equal(json('rooms/d.json').exits.up.barrier, 'trapdoor');
+  assert.equal(json('rooms/e.json').exits.down.barrier, 'trapdoor');
+  assert.deepEqual(Object.keys(json('rooms/e.json').exits), ['down']);
+  // Breaks: One-way's draw-back writes a short key beside the full-ref near face.
+  await ed.oneWay(d, 'north', [d, e]);
+  assert.deepEqual(json('rooms/e.json').exits.south.to, {
+    ...json('rooms/d.json').exits.north.to,
+    key: 'd',
+  });
+});
+
+test("delete, one-way and barrier edit a bundled room's own exits, not the bundle's top level", async () => {
+  // Breaks: a room in areas/<a>.json read and written at the file's top-level `exits`, so the
+  // gestures refuse "f has no exit east" or write beside `rooms`; a barrier between them sent to
+  // areas/pen, which has no rooms/ folder, so `mix loka.new` refuses it.
+  const [f, g] = [room('f', 'areas/pen.json', 'pen'), room('g', 'areas/pen.json', 'pen')];
+  await ed.unlink(f, 'east', [f, g]);
+  await assert.rejects(ed.link(f, 'north', g), /f already has an exit north/);
+  await ed.link(f, 'west', g, true);
+  await ed.oneWay(f, 'north', [f, g]);
+  await ed.barrier(f, 'up', [f, g], 'stile', false);
+  const { rooms, ...rest } = json('areas/pen.json');
+  assert.deepEqual(rest, {});
+  const up = { to: 'g', barrier: 'stile' };
+  assert.deepEqual(rooms.f.exits, { north: { to: 'g' }, up, west: { to: 'g' } });
+  assert.deepEqual(rooms.g.exits, { down: { to: 'f', barrier: 'stile' } });
+  assert.ok(existsSync(join(src, 'barriers/stile.json')));
 });
 
 test('undo puts every gesture back: the files are byte-identical to the start', async () => {
