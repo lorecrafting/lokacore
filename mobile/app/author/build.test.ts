@@ -362,6 +362,47 @@ test('Checks lists refusals, unconfirmed and unwritten lines; the badge counts e
   assert.equal(badge({}), 'Checks');
 });
 
+// Breaks: Checks not listing /todo's files (or not asking again after a compile), a file row
+// opening another file, or a failed /todo listing a stale file.
+test("Checks lists /todo's files with their placeholders; a file opens; a failed /todo lists none", async () => {
+  const { hear, install, sheets } = await import('./build/Build.tsx');
+  const sent: unknown[] = [];
+  let todo: [number, unknown] = [
+    200,
+    [{ file: 'world/cellar.md', words: 3, placeholders: ['world/cellar.md:4'] }],
+  ];
+  install({
+    seen: new Map(),
+    said: new Map(),
+    redraw() {},
+    api: async (path, body) =>
+      path === '/todo' ? todo : (body && sent.push([path, body]), [200, { map: [] }]),
+  });
+  hear({ text: {}, said: [] });
+  const shown = () => nodes(sheets.checks.body(''));
+  shown();
+  await new Promise((r) => setTimeout(r));
+  const row = shown().find((n) => n.key === 'todo world/cellar.md');
+  assert.deepEqual(
+    nodes(row)
+      .filter((n) => typeof n?.props?.children === 'string')
+      .map((n) => n.props.children),
+    ['world/cellar.md · 3 words still to write', 'world/cellar.md:4'],
+  );
+  row.props.onPress();
+  assert.deepEqual(sent, [['/open', { file: 'world/cellar.md' }]]);
+  todo = [500, null];
+  hear({ text: {}, said: [] }); // a new compile asks again
+  shown();
+  await new Promise((r) => setTimeout(r));
+  assert.deepEqual(
+    shown()
+      .map((n) => n.key)
+      .filter((k) => String(k).startsWith('todo')),
+    [],
+  );
+});
+
 // Breaks: the notice naming the step before or after the refused one (an off-by-one between the
 // replay's index and the count the author reads).
 test('the keep-my-place notice names the refused step', () => {
