@@ -26,6 +26,7 @@ const doc = {
   'rooms/loft.json': { exits: { south: { to: 'hall' } } },
   'npcs/hen.json': { room: 'hall' },
   'npcs/npc_1.json': {},
+  'items/cup.json': { location: { in: 'room', room: 'hall' } },
 };
 const settle = () => new Promise((r) => setTimeout(r));
 
@@ -47,10 +48,12 @@ async function opened(
               { kind: 'room', ref: 's:room/loft' },
               { kind: 'npc', ref: 's:npc/cat' }, // no file: a sheet must find hen's own node
               { kind: 'npc', ref: 's:npc/hen' },
+              { kind: 'item', ref: 's:item/cup' },
             ],
           },
           files: {
             's:npc/hen': 'npcs/hen.json',
+            's:item/cup': 'items/cup.json',
             's:npc/goat': 'areas/yard/npcs/goat.json',
             's:dialogue/hen': 'dialogues/hen.scene',
           },
@@ -252,6 +255,38 @@ test("a person's sheet refuses a room no node holds without writing, and moves t
   await settle();
   assert.ok(s.shown().some((n) => words(n) === 'Room · loft'));
   doc['npcs/hen.json'] = hen;
+});
+
+// Breaks: Delete placement deleting the wrong field (a person's `location`, an item's `room`) or
+// still offered once nothing places it; Fields opening a file other than the sheet's own.
+test("Delete placement drops a person's room and an item's location; Fields opens the sheet's file", async () => {
+  const was = { ...doc };
+  const s = await opened(
+    (path, sent: any) => ((doc[sent.file as 'npcs/hen.json'] = {}), [200, { id: path }]),
+  );
+  const unput = () => s.shown().some((n) => words(n) === 'Delete placement');
+  for (const [kind, key] of [
+    ['npc', 'hen'],
+    ['item', 'cup'],
+  ] as const) {
+    s.on(() => sheets[kind].body(key));
+    s.shown();
+    await settle();
+    await s.press('Delete placement');
+    await s.press('Fields');
+    s.shown(); // read again under the delete's /story
+    await settle();
+    assert.ok(!unput(), `${key} placed nowhere offers no Delete placement`);
+  }
+  assert.deepEqual(
+    s.posts.map(([path, sent]) => [path, sent.file, sent.ops]),
+    [
+      ['/change', 'npcs/hen.json', [{ path: ['room'], delete: true }]],
+      ['/change', 'items/cup.json', [{ path: ['location'], delete: true }]],
+    ],
+  );
+  assert.deepEqual(s.opens, ['def:npcs/hen.json', 'def:items/cup.json']);
+  Object.assign(doc, was);
 });
 
 // Breaks: the pencil after a person's or item's name opening another sheet, or one after a room's

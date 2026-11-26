@@ -239,7 +239,7 @@ async function gesture<T>(io: Io, done: Done[], steps: (s: Run) => Promise<T>) {
 }
 
 /** The map's gestures over the panel's routes, and an undo of the last whole gesture. */
-// size: allow 45, a flat table: one line per gesture the builder's sheets run
+// size: allow 48, a flat table: one line per gesture the builder's sheets run
 export function editor(io: Io) {
   const done: Done[] = []; // each gesture's journal ids and files, oldest first
   const run = <T>(steps: (s: Run) => Promise<T>) => gesture(io, done, steps);
@@ -267,6 +267,11 @@ export function editor(io: Io) {
     /** Placement (the Person and Item sheets): `file`'s NPC or item now starts in holder `kind` `key`. */
     put: (file: string, dir: 'npcs' | 'items', kind: string, key: string) =>
       run((s) => s.change(file, () => [spot(dir, kind, key)])),
+    /** No placement (the sheets' Delete): `file`'s NPC or item starts nowhere until placed again. */
+    unput: (file: string, dir: 'npcs' | 'items') =>
+      run((s) =>
+        s.change(file, () => [{ path: [dir === 'npcs' ? 'room' : 'location'], delete: true }]),
+      ),
     move: (r: MapRoom, area: string | null) => run((s) => move(s, r, area)),
     /** Add dialogue (the Person sheet): a new dialogue `npc` speaks; resolves its file. */
     talk: (npc: string, nodes: { kind: string; ref: string }[]) => run((s) => talk(s, npc, nodes)),
