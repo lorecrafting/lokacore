@@ -269,23 +269,24 @@ const strip = () => nodes(build.Strip({ children: 'book' }));
 const button = (label: string) =>
   strip().find((n) => n.type === 'Pressable' && n.props.children?.props?.children === label);
 const shows = (words: string) => strip().some((n) => n.props?.children === words);
-const flush = async () => {
-  for (let i = 0; i < 20; i++) await null;
-}; // the save's awaits, with setTimeout mocked
 async function write(id: number, before = async () => {}) {
   const input = await opened(LINKED, at(LINKED));
   await before();
   input.props.onChangeText('A high loft.');
   answers = [[200, { id }]];
   input.props.onSubmitEditing();
-  await flush();
+  // Until the save closes the field, right after its Undo chip (an earlier chip may still show): a fixed
+  // count of turns fell short under CI load (loka-2z6b0). Real setImmediate; a mocked-timer hop never ends.
+  const end = performance.now() + 2000;
+  while (field(page(LINKED)) && performance.now() < end) await new Promise((r) => setImmediate(r));
+  assert.equal(field(page(LINKED)), undefined, 'the save never settled');
 }
 
 // Breaks: no Undo after a write, the chip gone early or never, Undo putting back the new words or
 // another write's (its journal id), or a refused or unsent put-back passing silently.
 test('a write offers Undo for five seconds; Undo puts the old words back or says why not', async () => {
   try {
-    await write(7, async () => mock.timers.enable({ apis: ['setTimeout'] }));
+    await write(7, async () => mock.timers.enable({ apis: ['setTimeout', 'Date'] }));
     mock.timers.tick(4999);
     assert.ok(button('Undo'), 'the chip left before five seconds');
     mock.timers.tick(1);
