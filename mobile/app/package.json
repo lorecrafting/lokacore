@@ -17,6 +17,7 @@
     "storybook:lan": "storybook dev -p 6006 --host 0.0.0.0 --no-open",
     "storybook:build": "storybook build",
     "storybook:live": "node .storybook/live.ts",
+    "test:phone": "node patch-sqlite-web.cjs && node tests/phone.ts",
     "storybook:picker": "node .storybook/picker/test.ts",
     "stories:sheet": "node .storybook/sheet.ts",
     "storybook:smoke": "tsc -p .storybook && storybook build --quiet && vitest run"

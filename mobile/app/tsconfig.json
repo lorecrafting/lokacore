@@ -9,6 +9,7 @@
     "book/*.test.ts",
     "author/*.test.ts",
     "*.test.ts",
+    "tests/phone.ts",
     "stories"
   ]
 }
