@@ -161,3 +161,13 @@ test('Numbers draws one row per level under its header; a failure and a stale re
   await pressed('Run');
   assert.match(text(), /Numbers failed: watcher down/);
 });
+
+// Break: a fact at its declared default read as set by play, or the room or a section lost.
+test('State reads the room and each fact, marking one at its default', async () => {
+  at(1, false);
+  await pressed('State');
+  assert.match(
+    text(),
+    /\|Room\|Hall\|People\|Held\|Pools\|Statuses\|Clock\|.+\|Quests\|Facts\|lamp_lit: false\|door_open: false \(default\)$/,
+  );
+});
