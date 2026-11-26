@@ -7,7 +7,7 @@ import { test } from 'node:test';
 import { nodes, words } from '../book/__tests__/combat-book.test.ts'; // also registers the .tsx loader
 
 const { story, known } = await import('./build/room.tsx');
-const { sheets } = await import('./build/sheet.tsx');
+const { sheets, raise } = await import('./build/sheet.tsx');
 Object.assign(globalThis, { localStorage: { getItem: () => null, setItem() {} } }); // Build's Undo chip
 await import('./build/Build.tsx'); // the app's registration of the def: and contents sheets
 const { WORDS } = await import('./build/form.tsx');
@@ -334,7 +334,8 @@ test('a population corpse picks the keys the panel offers; nope stays at the fie
   assert.deepEqual(sent(), [['corpse', 'anything']]);
 });
 
-// break: matches show before a keystroke, the typed key is sent before the pressed one, a non-key
+// break: focus leaves the sheet half height, matches or +N more show before a keystroke or +0 more
+// shows, the held key is not marked, the typed key is sent before the pressed one, a non-key
 // leaves the field, the refusal is read per keystroke or at the sheet's top, +N more is off, or a press
 // on the held key or an emptied field's blur leaves the typed text showing
 test('a cartridge entry with 11 rooms: room_1 then a press on room_12 writes only room_12; zz refuses at the field', async (t) => {
@@ -347,10 +348,15 @@ test('a cartridge entry with 11 rooms: room_1 then a press on room_12 writes onl
     'entry',
   );
   const shown = () => g.picks(['entry']);
-  assert.deepEqual(shown(), []); // no picks before a keystroke
+  const more = () => g.s.shown().filter((x) => /^\+\d+ more$/.test(words(x))).length;
+  assert.deepEqual([shown(), more()], [[], 0]); // no picks before a keystroke
+  let raised = 0;
+  raise.full = () => raised++;
+  g.input().props.onFocus({ target: null });
+  assert.equal(raised, 1, 'focus raises the sheet to full height');
   sent();
   await g.typed('room_1', false);
-  assert.deepEqual(shown(), ['room_1', 'room_12']);
+  assert.deepEqual([shown(), more()], [['room_1', 'room_12'], 0]);
   const press = g.s.find('room_12');
   press.props.onPressIn();
   g.input().props.onBlur(); // the press takes the focus
@@ -368,6 +374,8 @@ test('a cartridge entry with 11 rooms: room_1 then a press on room_12 writes onl
   assert.deepEqual(g.said(), [['no room zz', 'polite']]); // read once it leaves the field
   assert.equal(refused(), '');
   await g.typed('room_1', false);
+  const held = (k: string) => g.s.find(k).props.accessibilityState?.selected;
+  assert.deepEqual([held('room_1'), held('room_12')], [false, true]);
   g.s.find('room_12').props.onPress(); // the key it already holds
   await settle();
   assert.deepEqual([sent(), g.input().props.value], [[], 'room_12']);
@@ -380,4 +388,20 @@ test('a cartridge entry with 11 rooms: room_1 then a press on room_12 writes onl
   assert.ok(g.s.shown().some((x) => words(x) === WORLD.more(4)));
   await g.typed('room_3');
   assert.deepEqual(sent(), [['entry', 'room_3']]);
+});
+
+// break: a field of exactly six keys hides them until a keystroke, or one match past six shows no +1 more
+test('a cartridge entry with 6 rooms offers all six; with 7, r shows six and +1 more', async (t) => {
+  t.after(() => (storyNodes = [{ ref: 'r1', kind: 'room' }]));
+  const rooms = (n: number) =>
+    ['r1', ...Array.from({ length: n - 1 }, (_, i) => `room_${i + 1}`)].map((ref) => ({
+      ref,
+      kind: 'room',
+    }));
+  const six = await compiled(rooms(6), 'cartridge.json', 'entry');
+  assert.equal(six.picks(['entry']).length, 6);
+  const seven = await compiled(rooms(7), 'cartridge.json', 'entry');
+  await seven.typed('r', false);
+  assert.equal(seven.picks(['entry']).length, 6);
+  assert.ok(seven.s.shown().some((x) => words(x) === WORLD.more(1)));
 });

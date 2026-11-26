@@ -142,7 +142,7 @@ function field(at: At, path: Step[], value: string, pick: { kind: string; keys: 
     else set(at, path, k);
   };
   const { shown, more } = text === undefined ? { shown: [], more: 0 } : matches(pick.keys, text);
-  const small = (tone: Parameters<typeof ink>[0]) => ({ ...type.small, color: ink(tone) });
+  const small = (tone: 'danger' | 'dim') => ({ ...type.small, color: ink(tone) });
   return [
     input(key, String(path.at(-1)), value, text, pick.keys, write),
     no && !told.has(key) ? (

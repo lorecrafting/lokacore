@@ -162,7 +162,7 @@ export function Grip({
 export function Frame({ open, saved, back }: Stack & { back: () => void }) {
   const docked = useWindowDimensions().width >= DOCK.at;
   const [full, grow] = useState(false);
-  raise.full = () => docked || grow(true);
+  raise.full = () => grow(true); // docked, the sheet ignores full
   const [ids, titles] = [open.sheets!, open.sheets!.map(titled)];
   return (
     <View
