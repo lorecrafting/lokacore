@@ -4,7 +4,7 @@
 // calls and the edit rules are E5's (inbook.ts, prose_rules.ts). A release never holds this module
 // (author/seam.test.ts looks for its `Unwritten: ` hint).
 import type { ComponentProps, ReactNode } from 'react';
-import { type LayoutChangeEvent, Text, TextInput } from 'react-native';
+import { Text, TextInput } from 'react-native';
 import { plain } from '../../book/model.ts';
 import { size, space, type } from '../../book/tokens.ts';
 import type { api } from '../inbook.ts';
@@ -18,6 +18,7 @@ type Field = {
   at?: At;
   draft: string;
   note?: string;
+  tall?: number; // the line's drawn height when the field opened
   choices?: [string, () => void][];
 };
 export type Hooks = {
@@ -116,7 +117,7 @@ function editable(h: Hooks, p: Props, key: string, shown: string, blank: boolean
   const marked = unconfirmed.has(key);
   const press = () => void edit(h, key);
   const own = {
-    onLayout: (e: LayoutChangeEvent) => tall.set(key, e.nativeEvent.layout.height), // 19.4
+    ref: (n: Box | null) => void (n ? boxes.set(key, n) : boxes.delete(key)), // 19.4
     style: [p.style, blank && !label && BLANK, marked && MARKED],
     children: [
       PAGE.test(key) && (
@@ -162,8 +163,11 @@ const MARKED = {
 const NOTE = { ...type.label, color: ink('warning') };
 const CAPTION = { ...type.label, color: ink('dim') };
 const FIELD = { width: '100%', borderBottomWidth: size.rule, borderColor: ink('action') } as const;
-/** Each line's drawn height: its field takes it, so nothing below moves when it opens (19.4). */
-const tall = new Map<string, number>();
+/** Each line's drawn box, read when its field opens: the field takes its height, so nothing below
+ * moves (19.4). Not onLayout: RN-web fires it on first layout only, often before Build is on.
+ * ponytail: native Text has no getBoundingClientRect, so its field keeps its own rows. */
+type Box = { getBoundingClientRect?: () => { height: number } };
+const boxes = new Map<string, Box>();
 /** A phone has no Enter or Esc to read about: it shows these acts in place of the caption. */
 const coarse = () => globalThis.matchMedia?.('(pointer: coarse)').matches;
 const WORDS = { save: 'Save', cancel: 'Cancel' }; // placeholders: the owner writes these
@@ -178,6 +182,7 @@ async function edit(h: Hooks, key: string) {
   if (h.unsee?.()) return; // the words See as shows are not the key's: a tap first shows them again
   if (busy) return; // a tap elsewhere replaces a field left open (a notice, another page)
   busy = true;
+  const tall = boxes.get(key)?.getBoundingClientRect?.().height;
   const [status, at] = await Promise.resolve(h.scene?.(key))
     .then((s): [number, any] | Promise<[number, any]> =>
       s ? [200, s] : h.api(`/line?key=${enc(key)}&words=${enc(h.said.get(key) ?? '')}`),
@@ -185,7 +190,7 @@ async function edit(h: Hooks, key: string) {
     .finally(() => (busy = false));
   field =
     status === 200
-      ? { key, at, draft: unwritten(at.words) ? '' : at.words }
+      ? { key, at, draft: unwritten(at.words) ? '' : at.words, tall }
       : { key, draft: '', note: noFieldNote(key, typeof at === 'string' ? at : undefined) };
   h.redraw();
 }
@@ -263,7 +268,7 @@ function open(h: Hooks, f: Field, at: At, name: string, p: Props) {
         if (k.key === 'Escape') close(h);
         if (k.key === 'Enter' && k.shiftKey) e.preventDefault(); // one line
       }}
-      style={[p.style, FIELD, { height: tall.get(f.key) }]}
+      style={[p.style, FIELD, { height: f.tall }]}
     />,
     (f.note || !coarse()) && (
       <Text key="note" style={f.choices ? NOTE : CAPTION}>

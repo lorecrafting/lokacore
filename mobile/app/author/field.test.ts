@@ -509,10 +509,12 @@ test('a cut page’s line is captioned with its page number', () => {
 });
 
 // Breaks: the field drawn at its own two rows, so a five-line description shrinks and the page
-// below jumps up while it is open (19.4); a phone shown "Enter saves · Esc cancels" with no keys to
+// below jumps up while it is open (19.4), or its height taken from onLayout, which RN-web fires on
+// first layout only: Build turned on after the Book loaded never hears it; a phone shown "Enter saves · Esc cancels" with no keys to
 // press, or its Cancel writing the draft (owner ruling 2026-11-25).
 test("the field takes its line's height; a coarse pointer shows Save and Cancel acts", async () => {
-  line(page(LINKED)).props.onLayout({ nativeEvent: { layout: { height: 168 } } });
+  // Build turned on after load: the drawn line mounts its box, no layout event follows
+  line(page(LINKED)).props.ref({ getBoundingClientRect: () => ({ height: 168 }) });
   const input = await opened(LINKED, at(LINKED));
   assert.equal(Object.assign({}, ...input.props.style.flat()).height, 168);
   assert.match(JSON.stringify(page(LINKED)), /Enter saves/, 'a fine pointer lost its caption');

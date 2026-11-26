@@ -1,4 +1,4 @@
-// size: allow 722, one editor's keys, saves, conflicts, add-here, a refused /open and capitalised titles and Build's lines walked over one stubbed page
+// size: allow 745, one editor's keys, saves, conflicts, add-here, a refused /open and capitalised titles and Build's lines walked over one stubbed page
 // E5's in-Book editor (docs/design/prose-in-the-book-rulings.md) in headless Google Chrome, over a
 // page of plain lines and a stubbed /__author route; the Book itself is the walk's (web-preview.md).
 import assert from 'node:assert/strict';
@@ -691,6 +691,29 @@ test('a line whose words changed since the compile says so instead of opening no
   await settle();
   await noteSays(
     'Changed since the last compile: this page is behind the cartridge. Wait for the compile, or press Cmd-E.',
+  );
+});
+
+// Breaks: a phone shown "Enter saves · Esc cancels" with no keys to press, its Cancel writing the
+// draft (a blur saving before the tap lands), or its Save sending nothing (owner ruling 2026-11-25).
+test('a coarse pointer gets Save and Cancel in place of the key caption', async () => {
+  await page.evaluate(() => {
+    window.matchMedia = ((q: string) => ({ matches: q === '(pointer: coarse)' })) as never;
+  });
+  const tap = (name: string) => page.locator('.loka-note button', { hasText: name }).click();
+  await openFirst();
+  assert.equal(await note(), 'a.loka:3SaveCancel');
+  await page.keyboard.type('!');
+  await tap('Cancel');
+  await page.waitForFunction(() => !document.querySelector('[data-loka-field]'));
+  assert.deepEqual(posted('/edit'), [], 'Cancel wrote the draft');
+  await openFirst();
+  await page.keyboard.type('!');
+  await tap('Save');
+  await page.waitForFunction(() => !document.querySelector('[data-loka-field]'));
+  assert.deepEqual(
+    posted('/edit').map((b) => b.words),
+    ['Rain falls.!'],
   );
 });
 

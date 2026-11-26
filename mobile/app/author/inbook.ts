@@ -1,4 +1,4 @@
-// size: allow 340, the field's open, save, put-back (with a palette Delete's), walk keys and add-here menu share its state; a refused /open names its reason
+// size: allow 352, the field's open, save, put-back (with a palette Delete's), walk keys and add-here menu share its state; a refused /open names its reason; a phone's Save and Cancel
 // E5, prose in the Book (docs/design/prose-in-the-book-rulings.md): a double-click turns a line
 // into its field, Cmd-Z puts back, `]`/`[` walk the `~` lines. Drawn over the Book from here:
 // panel.tsx requires this only in the author preview, so a player build never holds it.
@@ -137,8 +137,21 @@ async function openField(el: HTMLElement) {
   el.addEventListener('blur', onBlur);
   caption();
 }
-const caption = () =>
-  field && say(field.el, `${field.at.file}:${field.at.line}  Enter saves · Esc cancels`);
+/** A phone has no Enter or Esc to read about: it gets Save and Cancel (owner ruling 2026-11-25;
+ * the words are placeholders the owner writes). */
+const caption = (phone = matchMedia('(pointer: coarse)').matches) =>
+  field &&
+  say(
+    field.el,
+    `${field.at.file}:${field.at.line}${phone ? '' : '  Enter saves · Esc cancels'}`,
+    false,
+    phone
+      ? [
+          ['Save', () => void save()],
+          ['Cancel', close],
+        ]
+      : [],
+  );
 function close() {
   const { el, kept } = field!; // every caller holds the open field
   const had = document.activeElement === el; // not when a blur saved: focus stays where it went
