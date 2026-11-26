@@ -200,7 +200,7 @@ function askStep(g: Reader, at: string) {
           : { at, error: String(r.told) },
       (err: Error) => ({ at, error: err.message }),
     )
-    .then((t) => ((report = t), known.redraw()));
+    .then((t) => t.at === asked && ((report = t), known.redraw())); // a late reply for an older step is dropped
 }
 /** What the last step changed, and every rule whose trigger matched it. */
 function stepRows(g: Reader, state: State) {

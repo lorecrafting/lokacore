@@ -153,6 +153,28 @@ test('Step after a move lists exactly the facts it changed and the rule that loo
   assert.match(text(), /Step 5\|watcher down/);
 });
 
+// Break: a late /why reply for an older step overwriting the newer step's report (shown as nothing,
+// and never asked again).
+test('Step keeps the newer report when an older reply lands after it', async () => {
+  let late!: () => void;
+  answer = () =>
+    new Promise(
+      (r) =>
+        (late = () =>
+          r(replies(true, { ordinal: 6, command: 'n', outcome: 'accepted', reactions: [] })())),
+    );
+  build.updated((at(6, true), { kind: 'pulse' }) as never);
+  await pressed('Step');
+  build.updated((at(7, true), { kind: 'pulse' }) as never);
+  answer = replies(true, { ordinal: 7, command: 'look', outcome: 'accepted', reactions: [] });
+  await pressed('Step');
+  late();
+  await settle();
+  await settle();
+  assert.match(text(), /\|Step 7 · look accepted\|/);
+  answer = refused; // as the test before left it
+});
+
 // Break: Step asking the watcher before the first step, or past its 400-step replay budget (or
 // refusing at 400).
 test('Step before the first step and past 400 steps says so without asking', async () => {
