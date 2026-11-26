@@ -77,7 +77,7 @@ defmodule Loka.Content.Exchanges do
   end
 
   # A harvest item a replenish entry refills into the room may start in any authored holder. One
-  # held but weightless says so, naming the item (a builder-made item starts weightless).
+  # held but weightless says so, naming the item.
   defp unstocked(m, defs, item, holder, path) do
     case Refs.resolve(item, "item", m, defs) do
       {_, _, i} ->
