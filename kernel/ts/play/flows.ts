@@ -141,8 +141,9 @@ function run(
   let hourly = new Set<string>(); // the commands played this game hour, each played once
   for (let n = 1; n <= CAP && w.state.clock < end; n++) {
     const before = w;
-    const fresh = policy(w, gameView(w), g, visits).filter((p) => !hourly.has(same(p)));
-    const [played, after] = first(w, fresh, seed, n, observe) ?? [];
+    const view = gameView(w);
+    const fresh = policy(w, view, g, visits).filter((p) => !hourly.has(same(p)));
+    const [played, after] = first(w, view, fresh, seed, n, observe) ?? [];
     if (!played || !after) break;
     w = after;
     if (Math.floor(w.state.clock / hour) !== Math.floor(before.state.clock / hour))
@@ -164,14 +165,21 @@ const same = (p: Payload) => JSON.stringify({ ...p, continuation_id: undefined }
 
 // The first candidate the kernel accepts, with its world. Refused candidates take the plain
 // step; the accepted one is replayed through the simulator's `checked`, so every played step keeps
-// every invariant (checking each candidate was 85% of a run).
-function first(w: World, candidates: Payload[], seed: number, n: number, observe?: Observe) {
+// every invariant (checking each candidate was 85% of a run), reusing the policy's view of `w`.
+function first(
+  w: World,
+  view: GameView,
+  candidates: Payload[],
+  seed: number,
+  n: number,
+  observe?: Observe,
+) {
   for (const p of candidates) {
     const [kernel, command] = delivered(w, p, seed, n);
     const result = kernel.step(w, command, n);
     observe?.(w, p, result, { command, seed, step: n });
     if (result.decision.kind !== 'accepted') continue;
-    const r = checked(kernel, w, command, n);
+    const r = checked({ ...kernel, gameView: () => view }, w, command, n);
     if (r.failure) throw new Error(`seed ${seed} step ${n}: ${r.failure.id} ${r.failure.detail}`);
     return [p, r.world] as const;
   }
