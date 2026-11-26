@@ -38,3 +38,24 @@
 Checked and fine: every app save call is synchronous (`store.ts:28-34`, `sqlite-web.ts`). The only async calls are `openDatabaseAsync` (`App.tsx:231`) and Storybook. A pagehide during the open leaves the promise pending, then the page is either gone or reloads. The listeners register once per page (`worker` is never reset). The elapsed catch-up commits once per tick task, so pagehide falls between transactions.
 
 Open for the owner's iPhone (agents may not use it): (a) leave in the same tab and come back, then Back: no lock screen; (b) app switch and tab switch: no reload and no lost open field or sheet (that would be a pagehide on a switch); (c) the WebKit handle release after terminate: the Book opens on the first try, not after Try again; (d) after Finding 1's fix, reload a playing Book: no 5 s freeze.
+
+## Re-check: fix round (2026-11-26, head `6aefb38d8`, commits `f5bc1a057`, `6aefb38d8`)
+
+- CI at `6aefb38d8`: graph-diff, book-e2e and ci all success.
+- Finding 1, **resolved**. The worker now ends in the window's bubbling `visibilitychange` listener once `pagehide` has fired (`patch-sqlite-web.cjs:146-154`). It also ends at `pagehide` if the page is already hidden. React Native Web's AppState listens on `document` (`react-native-web/dist/exports/AppState/index.js:47`), so the hide save runs first. Chromium `page.reload()` committed in 41 ms and 43 ms, with `pagehide` and `vis hidden` 29-32 ms apart (it was 5021 ms).
+- Question 2, **resolved in code**. A window capture listener reloads a page that left and turns visible again, before the Book's resume handler (`stopImmediatePropagation`, `:156-164`). `pageshow(persisted)` still reloads, so either restore order is covered. The real Safari order is left for the iPhone.
+- Nit 3, **resolved**. An older marker refuses (`:170-171`), and the test at `sqlite-web-pool.test.ts:246` pins it.
+- A plain tab switch with no pagehide: the worker stays and nothing reloads.
+  - Test: `sqlite-web-pool.test.ts:236`.
+  - Preview, Chromium: the synthetic hidden save took 31 ms and the visible save 33 ms, so both reached a live worker. There was no navigation and the in-page marker survived.
+  - Headless WebKit gave "The save could not be opened" on first load, the environmental fault noted in the #789 review. So WebKit shows only no reload.
+- Tests: `sqlite-web-pool.test.ts` and `sqlite-web-worker.test.ts` pass 11, fail 0.
+- Red controls on `patch-sqlite-web.cjs`. Each fails a named test, and the clean file passes:
+  - `left &&` dropped: the tab-switch test fails.
+  - `stopImmediatePropagation` dropped: the restore test fails.
+  - The capture flag set to `false`: the restore test fails.
+  - `persisted` inverted: the leave test and the restore test fail.
+- Verdict: **APPROVE WITH NOTES**. Notes for the owner's iPhone:
+  - (a) Leave in the same tab and come back, or press Back: no lock screen, and the Book opens on the first try, not after Try again (WebKit releasing the handles in time).
+  - (b) Switch apps and tabs: no reload, and an open field or sheet stays.
+  - (c) Reload a playing Book: no freeze.
