@@ -132,3 +132,26 @@ if (!poolSource.endsWith(warm)) {
     throw new Error('Review the SQLite web pool upstream');
   fs.writeFileSync(pool, poolSource.replaceAll(open, `warmed(${open})`) + warm);
 }
+
+// A page kept in the back/forward cache keeps its worker, and the pool keeps every save file's OPFS
+// handle until the worker ends (closing the database does not free them): the Book opened again
+// reads "already open in another tab" (loka-hcnlh.19.5). So the leaving page ends its worker, and a
+// page restored from the cache reloads rather than call a worker that is gone. Every save call is
+// synchronous, so pagehide never runs inside a transaction.
+const webModule = path.join(moduleRoot, 'web/SQLiteModule.ts');
+const moduleSource = fs.readFileSync(webModule, 'utf8');
+const create = "    worker = new Worker(new URL('./worker', window.location.href));\n";
+const release = `${create}    // loka-hcnlh.19.5 release
+    window.addEventListener('pagehide', () => {
+      worker?.terminate();
+      worker = null;
+    });
+    window.addEventListener('pageshow', (event) => {
+      if (event.persisted) window.location.reload();
+    });
+`;
+if (!moduleSource.includes(release)) {
+  if (moduleSource.split(create).length - 1 !== 1)
+    throw new Error('Review the SQLite web module upstream');
+  fs.writeFileSync(webModule, moduleSource.replace(create, release));
+}

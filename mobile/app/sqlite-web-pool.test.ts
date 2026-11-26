@@ -6,8 +6,10 @@ import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { after, test } from 'node:test';
 import { pathToFileURL } from 'node:url';
+import ts from 'typescript';
 
-// The patch run on upstream's pool (the install is already patched, so the warm-up is taken out first).
+// The patch run on upstream's pool and module (the install is already patched, so the warm-up and
+// the release are taken out first).
 const fixture = mkdtempSync(join(tmpdir(), 'loka-sqlite-pool-'));
 after(() => rmSync(fixture, { recursive: true, force: true }));
 const installed = dirname(createRequire(import.meta.url).resolve('expo-sqlite/package.json'));
@@ -15,6 +17,13 @@ const moduleRoot = join(fixture, 'node_modules/expo-sqlite');
 mkdirSync(join(moduleRoot, 'web/wa-sqlite'), { recursive: true });
 cpSync(join(installed, 'package.json'), join(moduleRoot, 'package.json'));
 cpSync(join(installed, 'web/WorkerChannel.ts'), join(moduleRoot, 'web/WorkerChannel.ts'));
+const webModule = join(moduleRoot, 'web/SQLiteModule.ts');
+const upstreamModule = readFileSync(join(installed, 'web/SQLiteModule.ts'), 'utf8').replace(
+  /    \/\/ loka-hcnlh\.19\.5 release\n[\s\S]*?reload\(\);\n    \}\);\n/,
+  '',
+);
+assert.ok(!upstreamModule.includes('pagehide'));
+writeFileSync(webModule, upstreamModule);
 for (const name of ['FacadeVFS', 'VFS', 'sqlite-constants']) {
   cpSync(
     join(installed, 'web/wa-sqlite', `${name}.js`),
@@ -131,4 +140,50 @@ test('on Safari the save and a new journal grow by sync writes, and the save kee
 test('on Chromium the pool writes no headroom', async () => {
   const { files } = await opened(CHROME);
   assert.ok(files.every((f) => f.capacity < 1024 * 1024));
+});
+
+// Breaks (loka-hcnlh.19.5): a page left for the back/forward cache keeps its worker, so the pool's
+// OPFS handles stay taken and the Book opened again reads "already open in another tab"; or a page
+// restored from the cache plays on with its worker gone (every save call then times out).
+test('the leaving page ends its save worker; a page restored from the cache reloads', () => {
+  const source = ts.transpileModule(readFileSync(webModule, 'utf8'), {
+    compilerOptions: { module: ts.ModuleKind.CommonJS },
+  }).outputText;
+  const page = new EventTarget();
+  const workers: { terminated: boolean }[] = [];
+  let reloads = 0;
+  const window = Object.assign(page, {
+    location: { href: 'https://loka.test/', reload: () => reloads++ },
+  });
+  class Worker {
+    terminated = false;
+    constructor() {
+      workers.push(this);
+    }
+    addEventListener() {}
+    terminate() {
+      this.terminated = true;
+    }
+  }
+  const stubs: Record<string, unknown> = {
+    expo: { NativeModule: class {}, registerWebModule: (Module: new () => object) => new Module() },
+    './WorkerChannel': { invokeWorkerSync() {}, invokeWorkerAsync: async () => {} },
+  };
+  const exports: { default?: { NativeDatabase: new (path: string) => { initSync(): void } } } = {};
+  new Function('require', 'exports', 'window', 'Worker', source)(
+    (name: string) => stubs[name],
+    exports,
+    window,
+    Worker,
+  );
+  const db = new exports.default!.NativeDatabase('loka.db');
+  db.initSync();
+  const show = (persisted: boolean) =>
+    page.dispatchEvent(Object.assign(new Event('pageshow'), { persisted }));
+  show(false); // a first load
+  assert.deepEqual([workers.length, workers[0].terminated, reloads], [1, false, 0]);
+  page.dispatchEvent(new Event('pagehide'));
+  assert.equal(workers[0].terminated, true);
+  show(true);
+  assert.equal(reloads, 1);
 });
