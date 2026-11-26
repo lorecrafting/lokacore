@@ -207,7 +207,11 @@ sheets.room = {
       grows(r, known.nodes, known.rooms),
       addHere(r, known.nodes, held(), known.open),
       moveTo(r),
-      r.file ? act(WORDS.fields, () => known.open(`def:${r.file}`)) : null,
+      r.file ? (
+        <View key="fields" style={row}>
+          {act(WORDS.fields, () => known.open(`def:${r.file}`))}
+        </View>
+      ) : null,
       foot(r.key, r.file, `room:${r.key}`, referrers('room', r.key)),
     ];
   },

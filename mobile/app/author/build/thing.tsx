@@ -85,7 +85,9 @@ function body(dir: Dir, key: string) {
       <Text key="spawned" style={text}>
         {WORDS.spawned(String(d.spawn_template))}
       </Text>,
-      act(WORDS.fields, () => known.open(`def:${file}`)),
+      <View key="fields" style={row}>
+        {act(WORDS.fields, () => known.open(`def:${file}`))}
+      </View>,
     ];
   const now = placement(d, dir);
   return [
@@ -95,9 +97,11 @@ function body(dir: Dir, key: string) {
       style={text}
     >{`${WORDS.holder[now.kind] ?? now.kind} · ${String(now.key ?? '')}`}</Text>,
     now.kind === 'template' ? null : holderForm(dir, key, file, now),
-    now.key === undefined ? null : act(WORDS.unput, () => void run(() => ed.unput(file, dir))),
-    dir === 'npcs' ? act(WORDS.dialogue, () => talk(key), undefined, `dialogue ${key}`) : null,
-    act(WORDS.fields, () => known.open(`def:${file}`)),
+    <View key="acts" style={row}>
+      {now.key === undefined ? null : act(WORDS.unput, () => void run(() => ed.unput(file, dir)))}
+      {dir === 'npcs' ? act(WORDS.dialogue, () => talk(key), undefined, `dialogue ${key}`) : null}
+      {act(WORDS.fields, () => known.open(`def:${file}`))}
+    </View>,
     foot(key, file, `${nodeOf(dir)}:${key}`, referrers(nodeOf(dir), key)),
   ];
 }
