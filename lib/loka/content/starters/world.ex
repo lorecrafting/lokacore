@@ -67,9 +67,10 @@ defmodule Loka.Content.Starters.World do
 
   # A template NPC, its corpse and a second reciprocal room, as encounter_sampler does, with the
   # combat, death and calendar settings a population needs.
-  # world.carry requires the loot item's mass too (Entities.carry), as the corpses' 0.
-  # mutate-skip: any mass >= 0 compiles; the default is a choice, not logic
-  @mass 0
+  # world.carry requires the loot item's mass too (Entities.carry); 1 gram as a new item, so it can
+  # be stock (corpses stay 0).
+  # mutate-skip: loot is no stock in the starter; 1 matches templates.ex's tested new item
+  @mass 1
   def population(name, c) do
     [home, camp] = [c["rooms"], "#{name}_camp"]
 

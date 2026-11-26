@@ -100,9 +100,9 @@ defmodule Loka.Content.Starters.Templates do
 
   defp new_room(name, _), do: %{"rooms/#{name}.json" => room()}
 
-  # world.carry requires every item's mass (Entities.carry); 0 never makes a new item too heavy.
-  # mutate-skip: any mass >= 0 compiles; the default is a choice, not logic
-  @mass 0
+  # world.carry requires every item's mass (Entities.carry), and exchange or harvest stock a mass
+  # above 0 (Exchanges.stock); 1 gram never makes a new item too heavy.
+  @mass 1
   defp item(name, c),
     do: %{
       "items/#{name}.json" =>

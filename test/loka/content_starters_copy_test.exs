@@ -93,6 +93,19 @@ defmodule Loka.ContentStartersCopyTest do
     assert {:ok, _, _} = Loka.Content.compile(copy)
   end
 
+  # Break: a new item weighs 0, which exchange and harvest stock refuse (npc shop offers carry no
+  # mass check, so harvest stock stands in for "shop stock").
+  test "a new item can be harvest stock", %{tmp_dir: tmp} do
+    new(~w(--cwd #{tmp} cartridge copy --from #{Path.expand("cartridges/harvest_sampler")}))
+    copy = Path.join(tmp, "copy")
+    {:ok, _} = Loka.Content.Starters.write(copy, "items", "pebble")
+    mine = Path.join(copy, "rooms/mine.json")
+    room = mine |> File.read!() |> Jason.decode!()
+    room = update_in(room, ~w(details seam harvest items), &(&1 ++ ["pebble"]))
+    File.write!(mine, Jason.encode!(room))
+    assert {:ok, _, _} = Loka.Content.compile(copy)
+  end
+
   # Break: a link copied (it could point out of cartridges/), a refused copy left half written, or a
   # source with no cartridge.json copied.
   test "a source holding a link is refused and nothing is written", %{tmp_dir: tmp} do
