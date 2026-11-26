@@ -144,7 +144,7 @@ test("a nested choice moves within its own parent's set, past a blank, and never
   const src = [
     'npc: guard',
     '- Ask',
-    '  * Sure.',
+    '* Sure.',
     '  - Why',
     '  - How',
     '- Go',
@@ -154,12 +154,19 @@ test("a nested choice moves within its own parent's set, past a blank, and never
     '',
     '  - Back',
   ].join('\n');
+  // the parent's own reply sits shallower than its set, before it: it opens nothing and closes nothing
+  const first = src.replace('  - Why\n  - How', '  - How\n  - Why');
+  assert.deepEqual(scene(src, { move: 4, by: 1 }), { after: first });
   const swapped = src.replace('  - Left\n  - Right', '  - Right\n  - Left');
   assert.deepEqual(scene(src, { move: 8, by: 1 }), { after: swapped });
   assert.deepEqual(scene(src, { move: 8, by: -1 }), { refused: 'no choice above' });
   assert.deepEqual(scene(src, { move: 5, by: 1 }), { refused: 'no choice below' });
   const past = src.replace('  - Right\n\n  - Back', '  - Back\n\n  - Right');
   assert.deepEqual(scene(src, { move: 9, by: 1 }), { after: past });
+  // a stray shallower line mid-edit cuts a choice off its set: refused, never a throw
+  assert.deepEqual(scene('npc: g\n- Ask\n  - Why\nx\n  - How', { move: 5, by: 1 }), {
+    refused: 'no choice below',
+  });
 });
 
 // Break: an add that offers a sub-line the block already holds (a second `then:` cannot lower), a

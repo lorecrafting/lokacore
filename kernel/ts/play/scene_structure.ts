@@ -118,13 +118,14 @@ const block = (rs: Row[], at: number): Block => {
 };
 
 /** The sibling choices at `at`'s depth in file order, within its parent's block: the set opens after
- * the parent and a shallower non-blank line closes it (a blank row has indent 0 and closes nothing). */
+ * the parent (its shallower sub-lines first are skipped) and a later shallower non-blank line closes
+ * it (a blank row has indent 0 and closes nothing). */
 function siblings(rs: Row[], at: number) {
   const { indent } = rs[at];
   const out: number[] = [];
   for (let j = parent(rs, at) + 1; j < rs.length; j++) {
     const r = rs[j];
-    if (r.indent < indent && r.text.trim() !== '') break;
+    if (r.indent < indent && r.text.trim() !== '' && out.length) break;
     if (r.indent === indent && r.key !== undefined) out.push(j);
   }
   return out;
@@ -239,7 +240,8 @@ function shifted(
     const sibs = siblings(rs, at);
     const here = sibs.indexOf(at);
     const dest = here + o.by;
-    if (dest < 0 || dest >= sibs.length)
+    // here < 0: a stray shallower line cut `at` off its set mid-edit; refuse rather than throw
+    if (here < 0 || dest < 0 || dest >= sibs.length)
       return { refused: `no choice ${o.by < 0 ? 'above' : 'below'}` };
     x = block(rs, Math.min(sibs[here], sibs[dest]));
     y = block(rs, Math.max(sibs[here], sibs[dest]));
