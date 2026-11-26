@@ -30,6 +30,7 @@ const doc = {
   'rooms/loft.json': { exits: { south: { to: 'hall' } } },
   'npcs/hen.json': { room: 'hall' },
   'npcs/npc_1.json': {},
+  'areas/yard/npcs/goat.json': {},
   'items/cup.json': { location: { in: 'room', room: 'hall' } },
 };
 const settle = () => new Promise((r) => setTimeout(r));
@@ -53,6 +54,7 @@ async function opened(
               { kind: 'npc', ref: 's:npc/cat' }, // no file: a sheet must find hen's own node
               { kind: 'npc', ref: 's:npc/hen' },
               { kind: 'item', ref: 's:item/cup' },
+              { kind: 'npc', ref: 's:npc/goat' },
             ],
           },
           files: {
@@ -326,7 +328,8 @@ test("Delete placement drops a person's room and an item's location; Fields open
 });
 
 // Breaks: the count not the server's gate's (/users), Delete with referrers plain or not pressable (the refusal must
-// name them), a failed /users showing a count, a count kept across a new /story, or a deleted sheet left open.
+// name them), a failed /users showing a count, a count kept across a new /story, or a deleted sheet left open
+// (a nested file's too).
 test("a person's Delete is greyed with its referrer count and still sends; with /users failing it shows no count", async () => {
   const s = await opened(() => [200, {}]);
   s.on(() => sheets.npc.body('hen'));
@@ -351,6 +354,12 @@ test("a person's Delete is greyed with its referrer count and still sends; with 
   s.shown();
   await settle();
   assert.ok(s.shown().some((n) => words(n) === 'Delete cup'));
+  s.on(() => sheets.npc.body('goat')); // nested under an area: its kind is its own dir's
+  s.shown();
+  await settle();
+  s.closed.length = 0;
+  await s.press('Delete goat');
+  assert.deepEqual(s.closed, ['npc:goat', 'def:areas/yard/npcs/goat.json']);
 });
 
 // Breaks: the pencil after a person's or item's name opening another sheet, or one after a room's

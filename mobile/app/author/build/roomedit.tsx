@@ -243,7 +243,11 @@ export function foot(key: string, file: string | undefined, shut: string, refs?:
       let yes = true;
       const why = await drop(io, key, file, (files) => ask(files).then((y) => (yes = y)));
       // it is gone: its sheets go too (kind and definition), wherever they sit
-      const sheets = new Set([shut, `${nodeOf(file.split('/')[0])}:${key}`, `def:${file}`]);
+      const sheets = new Set([
+        shut,
+        `${nodeOf(file.split('/').at(-2) ?? '')}:${key}`,
+        `def:${file}`,
+      ]);
       if (why === '' && yes) sheets.forEach((id) => close(id));
       return why;
     });
