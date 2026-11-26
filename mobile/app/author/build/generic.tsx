@@ -153,8 +153,10 @@ function body(file: string) {
   // a scene's `.cut` twin, when it has one: its pages above its fields
   const cut = g.kind === 'scenes' && pages(file.replace(/\.json$/, '.cut'), 'steps' in doc);
   const key = file.replace(/^.*\//, '').replace(/\.\w+$/, '');
-  // a root file (cartridge.json, layout.json) is never deleted whole (write.ts remove()): no foot
-  const drop = file.includes('/') && foot(key, file, `def:${file}`, referrers(file));
+  // a root file (cartridge.json, an areas/<a>.json bundle) is never deleted whole (write.ts remove(),
+  // guard.ts rootFile, which needs node:fs): no foot
+  const root = !file.includes('/') || /^areas\/[a-z0-9_]+\.json$/.test(file);
+  const drop = !root && foot(key, file, `def:${file}`, referrers(file));
   return [refusal(), cut, field(at, [], g.root, g.doc), drop];
 }
 

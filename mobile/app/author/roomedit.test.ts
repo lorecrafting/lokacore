@@ -69,6 +69,8 @@ async function opened(
     if (path === `/users?file=${encodeURIComponent('npcs/hen.json')}` && ++finds)
       // the server's delete gate: one extends, one ref left outside the set
       return [200, [{ kind: 'extends' }, { kind: 'npc' }]];
+    if (path === `/users?file=${encodeURIComponent('items/cup.json')}`)
+      return [500, [{ kind: 'npc' }]]; // a failed gate: its body is no count
     if (path === '/templates')
       return [
         200,
@@ -350,10 +352,13 @@ test("a person's Delete is greyed with its referrer count and still sends; with 
   s.on(() => sheets.npc.body('hen')); // the delete's new /story asks again
   s.shown();
   assert.equal(finds, asked + 1);
-  s.on(() => sheets.item.body('cup')); // /users answers 404 for cup
+  s.on(() => sheets.item.body('cup')); // /users answers 500 for cup
   s.shown();
   await settle();
-  assert.ok(s.shown().some((n) => words(n) === 'Delete cup'));
+  const cup = s
+    .shown()
+    .find((n) => n.props?.accessibilityRole === 'button' && words(n).startsWith('Delete cup'));
+  assert.equal(words(cup), 'Delete cup');
   s.on(() => sheets.npc.body('goat')); // nested under an area: its kind is its own dir's
   s.shown();
   await settle();

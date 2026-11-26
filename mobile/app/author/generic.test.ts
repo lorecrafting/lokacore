@@ -1,4 +1,4 @@
-// size: allow 670, one mocked /story and /change harness serves the registry rows (treatment:reverie too) and the Rules block cases
+// size: allow 675, one mocked /story and /change harness serves the registry rows (treatment:reverie too) and the Rules block cases
 // The generic sheet (author/build/generic.tsx, form.tsx; design §7, slice 2.3): every registry row
 // whose book verb is `generic` (kernel/ts/play/registry.json, held by bin/editor_gate.exs) is
 // added, edited or removed by the sheet, each a `/change` op at the row's own path.
@@ -657,7 +657,7 @@ test('a wait step draws the later-rules divider and a narrate step does not', as
   assert.ok(String(within(s, ['steps', 1])[0]?.key).startsWith('later '));
 });
 
-// Breaks: a definition's sheet with no Delete or no count from the server's gate (/users), or a root file's with one.
+// Breaks: a definition's sheet with no Delete or no count from the server's gate (/users), or a root file's (a bundle's too) with one.
 test("a definition's sheet ends in Delete <key> with the server's referrer count", async () => {
   const s = await opened('npcs', {});
   const key = s.file.slice('npcs/'.length, -'.json'.length);
@@ -666,4 +666,6 @@ test("a definition's sheet ends in Delete <key> with the server's referrer count
   assert.ok(s.shown().some((x) => words(x) === `Delete ${key}1 referrers`));
   const root = await opened('layout', {}); // write.ts refuses a root file's delete: it offers none
   assert.ok(!root.shown().some((x) => words(x).startsWith('Delete')));
+  const bundle = await opened('areas', {}); // areas/<a>.json, a root file too (guard.ts rootFile)
+  assert.ok(bundle.shown().length && !bundle.shown().some((x) => words(x).startsWith('Delete')));
 });

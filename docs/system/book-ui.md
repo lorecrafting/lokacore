@@ -983,7 +983,7 @@ reasons and limits: [prose in the Book rulings](../design/prose-in-the-book-ruli
     open; a refusal with no file is plain text, not a control. No rows: one line, `Nothing to
     check.` (placeholder words, the owner's to replace). Below them (6.3a, the panel's Still to
     write), one row per source file still holding `~` (GET `/todo`, asked again per compile),
-    naming the file, its count of words already written, and its placeholder lines in dim under it;
+    naming the file, its count of `~` lines still to write, and its placeholder lines in dim under it;
     the file opens its source. `Nothing to check.` shows only when both lists are empty.
   - **Keep-my-place notice.** While the replay of the recorded path stands refused, a second strip
     row reads, politely, `Couldn't keep your place: step N, <step>, was refused.` (`step N was

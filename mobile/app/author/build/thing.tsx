@@ -57,7 +57,10 @@ export function referrers(file: string) {
   if (!counts.has(file)) {
     counts.set(file, undefined);
     known.api!(`/users?file=${encodeURIComponent(file)}`)
-      .then(([, left]) => (counts.set(file, (left as unknown[]).length), known.redraw()))
+      .then(
+        ([ok, left]) =>
+          ok === 200 && (counts.set(file, (left as unknown[]).length), known.redraw()),
+      )
       .catch(() => {}); // a failed /users (no list): unknown, Delete shows no count
   }
   return counts.get(file);
