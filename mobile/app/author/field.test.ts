@@ -275,9 +275,10 @@ async function write(id: number, before = async () => {}) {
   input.props.onChangeText('A high loft.');
   answers = [[200, { id }]];
   input.props.onSubmitEditing();
-  // Until the save closes the field, right after its Undo chip (an earlier chip may still show); real
-  // setImmediate outlasts any hop, where a fixed count of turns fell short under CI load (loka-2z6b0).
-  for (let i = 0; i < 100 && field(page(LINKED)); i++) await new Promise((r) => setImmediate(r));
+  // Until the save closes the field, right after its Undo chip (an earlier chip may still show): a fixed
+  // count of turns fell short under CI load (loka-2z6b0). Real setImmediate; a mocked-timer hop never ends.
+  const end = performance.now() + 2000;
+  while (field(page(LINKED)) && performance.now() < end) await new Promise((r) => setImmediate(r));
   assert.equal(field(page(LINKED)), undefined, 'the save never settled');
 }
 
@@ -285,7 +286,7 @@ async function write(id: number, before = async () => {}) {
 // another write's (its journal id), or a refused or unsent put-back passing silently.
 test('a write offers Undo for five seconds; Undo puts the old words back or says why not', async () => {
   try {
-    await write(7, async () => mock.timers.enable({ apis: ['setTimeout'] }));
+    await write(7, async () => mock.timers.enable({ apis: ['setTimeout', 'Date'] }));
     mock.timers.tick(4999);
     assert.ok(button('Undo'), 'the chip left before five seconds');
     mock.timers.tick(1);
