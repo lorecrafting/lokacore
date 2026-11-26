@@ -1,4 +1,4 @@
-// size: allow 716, one editor's keys, saves, conflicts, add-here, a refused /open and capitalised titles and Build's lines walked over one stubbed page
+// size: allow 722, one editor's keys, saves, conflicts, add-here, a refused /open and capitalised titles and Build's lines walked over one stubbed page
 // E5's in-Book editor (docs/design/prose-in-the-book-rulings.md) in headless Google Chrome, over a
 // page of plain lines and a stubbed /__author route; the Book itself is the walk's (web-preview.md).
 import assert from 'node:assert/strict';
@@ -697,20 +697,26 @@ test('a line whose words changed since the compile says so instead of opening no
 // Breaks: Build's strip and sheets keep light inks at night (loka-hcnlh.46): the palette read from
 // a strip line before the Book's, or a night repaint that adds no node left unheard.
 test("the inks follow the Book's page paper, not the strip's, when it repaints", async () => {
-  await page.evaluate((light) => {
+  const bg = (ink: string) =>
+    page.waitForFunction(
+      (ink) => getComputedStyle(document.documentElement).getPropertyValue('--loka-bg') === ink,
+      ink,
+    );
+  const { light, dark } = { light: color.light.bg, dark: color.dark.bg };
+  await page.evaluate((dark) => {
     document.body.insertAdjacentHTML(
       'afterbegin',
-      `<div style="background:${light}"><p dir="auto">Rain falls.</p></div>` +
-        `<div data-testid="loka-book"><div id="page" style="background:${light}"></div></div>`,
+      `<div style="background:${dark}"><p dir="auto">Rain falls.</p></div>`,
     );
-  }, color.light.bg);
-  await page.waitForTimeout(100); // the insert's reapply, before the repaint alone
-  await page.evaluate(
-    (dark) => (document.getElementById('page')!.style.background = dark),
-    color.dark.bg,
-  );
-  await page.waitForFunction(
-    (dark) => getComputedStyle(document.documentElement).getPropertyValue('--loka-bg') === dark,
-    color.dark.bg,
-  );
+  }, dark);
+  await bg(dark); // no Book wrapper: the paper under the first line
+  await page.evaluate((light) => {
+    document.body.insertAdjacentHTML(
+      'beforeend', // an unpainted box comes first under the wrapper
+      `<div data-testid="loka-book"><div><div id="page" style="background:${light}"></div></div></div>`,
+    );
+  }, light);
+  await bg(light);
+  await page.evaluate((dark) => (document.getElementById('page')!.style.background = dark), dark);
+  await bg(dark);
 });
