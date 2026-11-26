@@ -1,4 +1,4 @@
-// size: allow 561, one scaffolded cartridge the tests edit in turn and the last undoes; a split needs a second scaffold
+// size: allow 590, one scaffolded cartridge the tests edit in turn and the last undoes; a split needs a second scaffold
 // The editor map's edits (kernel/ts/play/mapedit.ts) through the real write routes
 // (play/write.ts) and the real `mix loka.new`, on one scaffolded cartridge the tests edit in turn;
 // the last one undoes every gesture. Expected files are written by hand.
@@ -82,6 +82,12 @@ before(async () => {
   const at = (exits: object) => JSON.stringify({ ...JSON.parse(blank), exits }, null, 2) + '\n';
   writeFileSync(join(src, 'rooms/d.json'), at({ east: to('e'), north: to('e'), up: to('e') }));
   writeFileSync(join(src, 'rooms/e.json'), at({ west: to('d'), south: to('d'), down: to('d') }));
+  // f and g: rooms of the area bundle areas/pen.json (loka-hcnlh.77)
+  const pen = (exits: object) => ({ ...JSON.parse(blank), exits });
+  const f = pen({ east: { to: 'g' }, north: { to: 'g' }, up: { to: 'g' } });
+  const g = pen({ west: { to: 'f' }, south: { to: 'f' }, down: { to: 'f' } });
+  mkdirSync(join(src, 'areas'), { recursive: true });
+  writeFileSync(join(src, 'areas/pen.json'), JSON.stringify({ rooms: { f, g } }, null, 2) + '\n');
   writeFileSync(
     join(src, 'outline.json'),
     '{ "parts": [{ "beats": [{ "n": 1 }, { "n": 2, "nodes": ["rooms/b"] }] }] }\n',
@@ -551,6 +557,26 @@ test('delete, one-way and barrier read an exit written as a full ref', async () 
   assert.equal(json('rooms/d.json').exits.up.barrier, 'trapdoor');
   assert.equal(json('rooms/e.json').exits.down.barrier, 'trapdoor');
   assert.deepEqual(Object.keys(json('rooms/e.json').exits), ['down']);
+  // Breaks: One-way's draw-back writes a short key beside the full-ref near face.
+  await ed.oneWay(d, 'north', [d, e]);
+  assert.deepEqual(json('rooms/e.json').exits.south.to, {
+    ...json('rooms/d.json').exits.north.to,
+    key: 'd',
+  });
+});
+
+test("delete, one-way and barrier edit a bundled room's own exits, not the bundle's top level", async () => {
+  // Breaks: a room in areas/<a>.json read and written at the file's top-level `exits`, so the
+  // gestures refuse "f has no exit east" or write beside `rooms`.
+  // area null: `mix loka.new` refuses a barrier in an area with no rooms/ folder (loka-hcnlh.77 note)
+  const [f, g] = [room('f', 'areas/pen.json'), room('g', 'areas/pen.json')];
+  await ed.unlink(f, 'east', [f, g]);
+  await ed.oneWay(f, 'north', [f, g]);
+  await ed.barrier(f, 'up', [f, g], 'stile', false);
+  const { rooms, ...rest } = json('areas/pen.json');
+  assert.deepEqual(rest, {});
+  assert.deepEqual(rooms.f.exits, { north: { to: 'g' }, up: { to: 'g', barrier: 'stile' } });
+  assert.deepEqual(rooms.g.exits, { down: { to: 'f', barrier: 'stile' } });
 });
 
 test('undo puts every gesture back: the files are byte-identical to the start', async () => {
