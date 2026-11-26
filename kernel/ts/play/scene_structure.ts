@@ -117,13 +117,14 @@ const block = (rs: Row[], at: number): Block => {
   return [at, end];
 };
 
-/** The sibling choices at `at`'s depth in file order; a shallower line closes the set. */
+/** The sibling choices at `at`'s depth in file order, within its parent's block: the set opens after
+ * the parent and a shallower non-blank line closes it (a blank row has indent 0 and closes nothing). */
 function siblings(rs: Row[], at: number) {
   const { indent } = rs[at];
   const out: number[] = [];
-  for (let j = 0; j < rs.length; j++) {
+  for (let j = parent(rs, at) + 1; j < rs.length; j++) {
     const r = rs[j];
-    if (r.indent < indent && out.length) break;
+    if (r.indent < indent && r.text.trim() !== '') break;
     if (r.indent === indent && r.key !== undefined) out.push(j);
   }
   return out;

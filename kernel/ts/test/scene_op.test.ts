@@ -137,6 +137,31 @@ test('/restructure on a .scene: each op changes only its lines; one /undo restor
   }
 });
 
+// Break (loka-hcnlh.47): a nested choice's siblings are read from line 1, so the second parent's set
+// is cut off at the second parent (or at a blank between its choices), the move indexes past the set
+// and throws, and the sheet that checks every row's Move up/down blanks. After-bytes by hand.
+test("a nested choice moves within its own parent's set, past a blank, and never into another's", () => {
+  const src = [
+    'npc: guard',
+    '- Ask',
+    '  * Sure.',
+    '  - Why',
+    '  - How',
+    '- Go',
+    '  * Fine.',
+    '  - Left',
+    '  - Right',
+    '',
+    '  - Back',
+  ].join('\n');
+  const swapped = src.replace('  - Left\n  - Right', '  - Right\n  - Left');
+  assert.deepEqual(scene(src, { move: 8, by: 1 }), { after: swapped });
+  assert.deepEqual(scene(src, { move: 8, by: -1 }), { refused: 'no choice above' });
+  assert.deepEqual(scene(src, { move: 5, by: 1 }), { refused: 'no choice below' });
+  const past = src.replace('  - Right\n\n  - Back', '  - Back\n\n  - Right');
+  assert.deepEqual(scene(src, { move: 9, by: 1 }), { after: past });
+});
+
 // Break: an add that offers a sub-line the block already holds (a second `then:` cannot lower), a
 // speaker line with no role, a remove of a key line, or a move that crosses a depth or a block edge.
 // Break: focus after an op lands on the wrong line, or on a `~` field the card does not render, so
