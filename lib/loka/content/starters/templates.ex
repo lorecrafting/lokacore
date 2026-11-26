@@ -100,9 +100,11 @@ defmodule Loka.Content.Starters.Templates do
 
   defp new_room(name, _), do: %{"rooms/#{name}.json" => room()}
 
+  # world.carry requires every item's mass (Entities.carry); 0 never makes a new item too heavy.
   defp item(name, c),
     do: %{
-      "items/#{name}.json" => Map.put(thing(name), "location", in_room(c["entry"]))
+      "items/#{name}.json" =>
+        Map.merge(thing(name), %{"location" => in_room(c["entry"]), "mass_grams" => 0})
     }
 
   defp npc(name, c),

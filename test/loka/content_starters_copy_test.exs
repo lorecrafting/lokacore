@@ -83,6 +83,14 @@ defmodule Loka.ContentStartersCopyTest do
     end
   end
 
+  # Break: a new item without the mass world.carry requires (the builder's Add here item).
+  test "a new item in a world under world.carry compiles", %{tmp_dir: tmp} do
+    new(~w(--cwd #{tmp} cartridge copy --from #{Path.expand("cartridges/toolbox_showcase")}))
+    copy = Path.join(tmp, "copy")
+    {:ok, _} = Loka.Content.Starters.write(copy, "items", "pebble")
+    assert {:ok, _, _} = Loka.Content.compile(copy)
+  end
+
   # Break: a link copied (it could point out of cartridges/), a refused copy left half written, or a
   # source with no cartridge.json copied.
   test "a source holding a link is refused and nothing is written", %{tmp_dir: tmp} do
