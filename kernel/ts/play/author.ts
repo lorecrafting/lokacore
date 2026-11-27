@@ -24,6 +24,7 @@ import { lintLines, serve, textOnly, type Canonical } from './live.ts';
 import type { Timings } from './timings.ts';
 import { compiler, type Run } from './compile_run.ts';
 import { recheck } from './recheck.ts';
+import { watchDirs } from './watchdirs.ts';
 
 const root = resolve(import.meta.dirname, '../../..');
 const out = resolve(
@@ -240,21 +241,25 @@ function enqueue() {
     .catch((e) => console.error(`Not updated: ${(e as Error).message}`)); // a thrown build must not end the watch
 }
 let timer: ReturnType<typeof setTimeout> | undefined;
+function saved(file: string) {
+  if (file.startsWith('checkpoints/')) return; // the page's own save, not content
+  saves++;
+  clearTimeout(timer);
+  // one build for an editor's burst of writes
+  timer = setTimeout(() => {
+    live!.seen(); // what changed outside the editor, before its compile
+    lints++;
+    quick();
+    enqueue();
+  }, 100);
+}
 // before the first compile: a save the moment its artifact lands is not lost while FSEvents starts
+// (Linux: Node's recursive watch misses a file's second atomic write; watchdirs.ts)
 const watcher =
   flag === '--watch' &&
-  watch(source, { recursive: true }, (_, file) => {
-    if (file?.startsWith('checkpoints/')) return; // the page's own save, not content
-    saves++;
-    clearTimeout(timer);
-    // one build for an editor's burst of writes
-    timer = setTimeout(() => {
-      live!.seen(); // what changed outside the editor, before its compile
-      lints++;
-      quick();
-      enqueue();
-    }, 100);
-  });
+  (process.platform === 'linux'
+    ? watchDirs(source, saved)
+    : watch(source, { recursive: true }, (_, file) => saved(file ?? '')));
 const first = build();
 queue = first.catch(() => {}); // a save during the first compile compiles after it
 const ok = await first;
