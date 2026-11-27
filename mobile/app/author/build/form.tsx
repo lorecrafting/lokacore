@@ -5,11 +5,11 @@ import type { ReactElement, ReactNode } from 'react';
 import { Text, TextInput, View } from 'react-native';
 import { entered, plain } from '../../../../kernel/ts/play/card.ts';
 import { least, moved, shapeOf, type Shape } from '../../../../kernel/ts/play/generic.ts';
-import type { Blocked } from '../../../../kernel/ts/play/allowed.ts';
 import { size, space, type } from '../../book/tokens.ts';
 import { ink } from './build.ts';
-import { reveal, reveals } from './reveal.ts';
-import { ed, inRow, row, run } from './roomedit.tsx';
+import { reveals } from './reveal.ts';
+import { inRow, row } from './roomedit.tsx';
+import { mechanics } from './mechanic.tsx';
 import { later, rules } from './rules.tsx';
 import {
   drafts,
@@ -21,14 +21,12 @@ import {
   set,
   toggle,
   type At,
-  type Mechanics,
   type Obj,
   type Step,
-  type Write,
-  own,
   BUSY,
+  about,
 } from './formwrite.ts';
-import { act, greyed } from './sheet.tsx';
+import { act, note } from './sheet.tsx';
 
 export const WORDS = {
   add: 'Add…',
@@ -105,6 +103,7 @@ export function block(
             )
           : null}
       </View>
+      {note(about(at, node))}
       {flag ? null : !folds || opened.has(key) ? drawn() : null}
     </View>
   );
@@ -127,6 +126,7 @@ function object(at: At, path: Step[], s: Extract<Shape, { as: 'object' }>, value
   const absent = Object.keys(s.props).filter((k) => !shown(k) && !theirs.has(k));
   const menu = id(at, [...path, '+']);
   const add = (k: string) => set(at, [...path, k], start(k));
+  const said = (k: string) => about(at, s.props[k]); // each option's description
   const more = act(WORDS.add, () => toggle(menu), opened.has(menu), `add ${menu}`);
   return [
     ...keys.map((k) =>
@@ -140,17 +140,17 @@ function object(at: At, path: Step[], s: Extract<Shape, { as: 'object' }>, value
     ),
     absent.length ? side(path, more) : null,
     ...(opened.has(menu)
-      ? absent.map((k) => act(k, () => add(k), undefined, `add ${k} ${menu}`))
+      ? absent.map((k) => act(k, () => add(k), undefined, `add ${k} ${menu}`, undefined, said(k)))
       : []),
     ...(m
-      ? mechanics(at, m, (k) => shown(k) || !Object.hasOwn(s.props, k) || refused(k), start)
+      ? mechanics(at, m, (k) => shown(k) || !Object.hasOwn(s.props, k) || refused(k), start, said)
       : []), // this branch's fields
     s.each ? entry(at, path, s.each, v) : null,
   ];
 }
 
 /** A root menu's opener, inset like the sheet's text; a nested one sits in its block already. */
-const side = (path: Step[], el: ReactElement) =>
+export const side = (path: Step[], el: ReactElement) =>
   path.length ? (
     el
   ) : (
@@ -158,50 +158,6 @@ const side = (path: Step[], el: ReactElement) =>
       {el}
     </View>
   ); // mutate-skip: layout
-const why = (b: Blocked) => (b.caps.length ? WORDS.needs(b.caps) : WORDS.first);
-/** Add mechanic…: the fields the cartridge takes, then the refused ones greyed with why; a greyed one
- * `on` can turn on writes cartridge.json and then the field, one gesture (a refusal undoes both). */
-function mechanics(
-  at: At,
-  m: Mechanics,
-  hidden: (k: string) => boolean,
-  start: (k: string) => unknown,
-) {
-  const menu = id(at, ['+mechanic']);
-  const yes = m.allowed.filter((k) => !hidden(k));
-  const no = m.blocked.filter((b) => !hidden(b.field));
-  if (!yes.length && !no.length) return [];
-  const turn = (k: string, on: Write) => () => {
-    const value = start(k); // none: the field is revealed empty once the capability is on
-    const field: Write[] = value === undefined ? [] : [[at.file, at.was, own(at, ops([k], value))]];
-    const empty = value === undefined && id(at, [k]); // revealed before the write: web reloads on it
-    void run(async () => {
-      const why = field.length ? at.gate?.(field[0]![2]) : undefined;
-      if (why) return why; // the field's write refused: the capability is not turned on either
-      if (empty) reveal(empty, true);
-      return ed
-        .change(on, ...field)
-        .catch((e) => (empty && reveal(empty, false), Promise.reject(e)));
-    });
-  };
-  return [
-    side(
-      [],
-      act(WORDS.mechanic, () => toggle(menu), opened.has(menu), `mechanic ${menu}`),
-    ),
-    ...(opened.has(menu)
-      ? [
-          ...yes.map((k) =>
-            act(k, () => set(at, [k], start(k)), undefined, `mechanic ${k} ${menu}`),
-          ),
-          ...no.map((b) =>
-            greyed(b.field, why(b), `mechanic ${b.field} ${menu}`, b.on && turn(b.field, b.on)),
-          ),
-        ]
-      : []),
-  ];
-}
-
 /** A map's new entry: its key typed, then Add writes the entry's least value (an existing key: nothing). */
 function entry(at: At, path: Step[], each: Obj, map: Obj) {
   const key = id(at, [...path, '+key']);

@@ -2,7 +2,7 @@
 // each typed draft, and each gesture's `/change` ops (mapedit.ts `change`).
 import type { ReactNode } from 'react';
 import type { Blocked } from '../../../../kernel/ts/play/allowed.ts';
-import type { Defs } from '../../../../kernel/ts/play/generic.ts';
+import { resolve, type Defs } from '../../../../kernel/ts/play/generic.ts';
 import { reveal } from './reveal.ts';
 import { known } from './room.tsx';
 import { ed, run } from './roomedit.tsx';
@@ -84,3 +84,8 @@ export type Block = (
   value: unknown,
   removable: boolean,
 ) => ReactNode;
+/** A field's schema description: beside its `$ref`, else on the definition it names (an Alias item). */
+export function about(at: At, node: Obj | undefined) {
+  const d = node?.description ?? resolve(node, at.defs, at.seen)?.[0].description;
+  return typeof d === 'string' ? d : undefined;
+}
