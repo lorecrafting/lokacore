@@ -104,8 +104,8 @@ function useLine(k: string, words: string, wrote?: (id: string) => void) {
 }
 
 /**
- * A words line edited on the card as the Book's field edits it (mobile/app/author/inbook.ts save,
- * conflict): GET /line reads the file's line, Enter or leaving saves it once through POST /edit's
+ * A words line edited on the card as the Book's field edits it (Build's field,
+ * mobile/app/author/build/field.tsx save): GET /line reads the file's line, Enter or leaving saves it once through POST /edit's
  * `was` guard, Esc puts it back; a refusal or a conflict keeps the draft. `words` finds the line
  * (a scene's or an inline marker's words; a `"key":` line needs none).
  */

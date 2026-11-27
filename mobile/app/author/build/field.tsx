@@ -1,13 +1,14 @@
+// size: allow 330, the walk's lines and the double-click's field share the field's module state
 // Build's in-place field (docs/system/book-ui.md#author-mode; slice 1.3 of
 // docs/rnd/in-game-builder-mode-2026-11-19.md §7): in Build a tap on a description's plain words
-// opens a field on that line, through the Book seam. A link inside keeps its own press. The server
-// calls and the edit rules are E5's (inbook.ts, prose_rules.ts). A release never holds this module
-// (author/seam.test.ts looks for its `Unwritten: ` hint).
+// opens a field on that line, through the Book seam; outside Build a double-click does (page.ts). A
+// link inside keeps its own press. The edit rules are prose_rules.ts's. A release never holds this
+// module (author/seam.test.ts looks for its `Unwritten: ` hint).
 import type { ComponentProps, ReactNode } from 'react';
 import { Text, TextInput } from 'react-native';
 import { plain } from '../../book/model.ts';
 import { size, space, type } from '../../book/tokens.ts';
-import type { api } from '../inbook.ts';
+import type { api } from './page.ts';
 import { drawnWords, noFieldNote, oneLine, saving, unwritten } from '../prose_rules.ts';
 import { ink } from './build.ts';
 
@@ -28,7 +29,7 @@ export type Hooks = {
   redraw: () => void; // the Book's
   focus: () => void; // auto-hold (Build.tsx `hold`)
   commit: () => void;
-  api: typeof api; // E5's, handed in by panel.tsx behind its require gate
+  api: typeof api; // page.ts's, handed in by panel.tsx behind its require gate
   wrote: (w: Wrote) => void; // a saved write, for the strip's Undo chip
   unsee?: () => boolean; // ends See as (seeas.tsx); true when it was on
   pencil?: (shown: string, key?: string) => ReactNode; // the title pencil: a room page's own title, a person's or item's name
@@ -78,11 +79,16 @@ function nameKey(h: Hooks, shown: string) {
   return keys.length === 1 ? keys[0][0] : undefined;
 }
 
-/** The seam's line: Build off or no key leaves it as drawn; a link keeps its own press, an unwritten
- * one drawn blank with its caption (ruling 9). */
+/** The seam's line: Build off or no key leaves it as drawn (but for a double-clicked line's field);
+ * a link keeps its own press, an unwritten one drawn blank with its caption (ruling 9). */
 export function line(p: Props): Props {
   const h = hooks;
-  if (!h?.on()) return p;
+  if (!h) return p;
+  if (!h.on()) {
+    if (!field) return p;
+    const shown = flat(p.children);
+    return keyOf(h, shown) === field.key ? editable(h, p, field.key, shown, unwritten(shown)) : p;
+  }
   const shown = flat(p.children);
   const blank = unwritten(shown);
   if (p.onPress)
@@ -117,7 +123,7 @@ function editable(h: Hooks, p: Props, key: string, shown: string, blank: boolean
   const marked = unconfirmed.has(key);
   const press = () => void edit(h, key);
   const own = {
-    ref: (n: Box | null) => void (n ? boxes.set(key, n) : boxes.delete(key)), // 19.4
+    ref: (n: Box | null) => void (n ? boxes.set(key, { n, blank, label }) : boxes.delete(key)), // 19.4
     style: [p.style, blank && !label && BLANK, marked && MARKED],
     children: [
       PAGE.test(key) && (
@@ -166,8 +172,15 @@ const FIELD = { width: '100%', borderBottomWidth: size.rule, borderColor: ink('a
 /** Each line's drawn box, read when its field opens: the field takes its height, so nothing below
  * moves (19.4). Not onLayout: RN-web fires it on first layout only, often before Build is on.
  * ponytail: native Text has no getBoundingClientRect, so its field keeps its own rows. */
-type Box = { getBoundingClientRect?: () => { height: number } };
-const boxes = new Map<string, Box>();
+type Box = Partial<HTMLElement>;
+const boxes = new Map<string, { n: Box; blank: boolean; label: boolean }>();
+/** The lines a walk key steps through (page.ts), in page order: the unwritten ones, or every one
+ * but a choice's label (its card's press is the card's). */
+export const walkable = (todoOnly: boolean) =>
+  [...boxes.values()]
+    .filter((b) => !b.label && (!todoOnly || b.blank))
+    .map((b) => b.n as HTMLElement)
+    .sort((a, b) => (a.compareDocumentPosition(b) & 4 ? -1 : 1)); // 4: b follows a
 /** A phone has no Enter or Esc to read about: it shows these acts in place of the caption. */
 const coarse = () => globalThis.matchMedia?.('(pointer: coarse)').matches;
 const WORDS = { save: 'Save', cancel: 'Cancel' }; // placeholders: the owner writes these
@@ -182,7 +195,7 @@ async function edit(h: Hooks, key: string) {
   if (h.unsee?.()) return; // the words See as shows are not the key's: a tap first shows them again
   if (busy) return; // a tap elsewhere replaces a field left open (a notice, another page)
   busy = true;
-  const tall = boxes.get(key)?.getBoundingClientRect?.().height;
+  const tall = boxes.get(key)?.n.getBoundingClientRect?.().height;
   const [status, at] = await Promise.resolve(h.scene?.(key))
     .then((s): [number, any] | Promise<[number, any]> =>
       s ? [200, s] : h.api(`/line?key=${enc(key)}&words=${enc(h.said.get(key) ?? '')}`),
@@ -194,8 +207,15 @@ async function edit(h: Hooks, key: string) {
       : { key, draft: '', note: noFieldNote(key, typeof at === 'string' ? at : undefined) };
   h.redraw();
 }
+/** A double-click outside Build (page.ts) on the line drawing `shown`: its field. False: no key. */
+export function opens(shown: string) {
+  const h = hooks;
+  const key = h && !h.on() && keyOf(h, shown);
+  if (key) void edit(h, key);
+  return !!key;
+}
 /** A Checks row's line: its field when this page draws the key, else the source in the owner's
- * editor, as E5 does (inbook.ts `edit`). False: not on this page. */
+ * editor. False: not on this page. */
 export function go(key: string) {
   const h = hooks!; // install attaches it before Build can open the Checks sheet
   const here = EDITS.test(key) && [...h.seen.values()].includes(key); // as keyOf draws

@@ -108,7 +108,7 @@ test('every server route has a client caller or an exemption', () => {
       if (['ask', 'post', 'call'].includes(name!) && !path.startsWith('/'))
         called.add(`POST /${path}`);
       if (name === 'report' && !path.startsWith('/')) called.add(`GET /${path}`); // author.ts reports
-      if (name === 'api') called.add(`${second ? 'POST' : 'GET'} ${path}`); // inbook.ts
+      if (name === 'api') called.add(`${second ? 'POST' : 'GET'} ${path}`); // Build's (author/build/page.ts)
       if (name === 'sendBeacon') called.add(`POST ${path}`);
       if (name === 'EventSource') called.add(`GET ${path}`);
       if (name === 'fetch') {
@@ -128,7 +128,7 @@ test('every server route has a client caller or an exemption', () => {
                 ? pathOf(method.initializer)
                 : undefined;
         if (m) called.add(`${m} ${path}`);
-        // a wrapper's own fetch (path `*`): its callers are read above (inbook.ts api)
+        // a wrapper's own fetch (path `*`): its callers are read above (page.ts api)
         else if (path !== '*')
           unread.push(
             `${f.slice(REPO.length + 1)}:${n.getSourceFile().getLineAndCharacterOfPosition(n.getStart()).line + 1} fetch ${path}`,

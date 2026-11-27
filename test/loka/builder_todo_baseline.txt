@@ -19,4 +19,3 @@ parity:inspector-header  # loka-hcnlh.71
 parity:palette  # 6.5
 parity:open-source-key  # 6.5
 parity:column-folds  # 6.5
-parity:prose-walk-keys  # 6.4

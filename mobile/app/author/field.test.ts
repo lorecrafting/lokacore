@@ -36,7 +36,7 @@ const { line: seamLine, shut } = await import('./build/field.tsx');
 const api = async (path: string, body?: object): Promise<[number, any]> => {
   const r = await fetch(`/__author${path}`, body && { method: 'POST', body: JSON.stringify(body) });
   return [r.status, await r.json()];
-}; // inbook.ts's, which panel.tsx hands in
+}; // page.ts's, which panel.tsx hands in
 build.install({ seen, said, redraw() {}, api });
 
 /** The room page as the author preview draws it: panel.tsx's played().text binds each line. */

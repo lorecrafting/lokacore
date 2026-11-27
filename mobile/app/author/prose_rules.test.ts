@@ -1,4 +1,4 @@
-// E5's editing rules (docs/design/prose-in-the-book-rulings.md), apart from the DOM.
+// Build's editing rules (docs/design/prose-in-the-book-rulings.md), apart from the DOM.
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { join } from 'node:path';
@@ -9,7 +9,6 @@ import {
   clicked,
   lost,
   nextPage,
-  selects,
   shortcut,
   noFieldNote,
   oneLine,
@@ -100,32 +99,27 @@ test('the marks take the palette nearest the page paper', () => {
   }
 });
 
-// Breaks: an import of inbook.ts that is not the author-preview require, so a player build holds it
-// (the export proof is in the PR: a static require put its sentinel in the web bundle).
-test('only the gated require reaches the in-Book editor', () => {
+// Breaks: an import of Build's modules (its field, page hooks and sheets) that is not the
+// author-preview require, so a player build holds them.
+test('only the gated require reaches the builder', () => {
   const hits = execFileSync(
     'git',
-    ['grep', '-n', 'inbook', '--', '*.ts', '*.tsx', ':!author/prose_rules.test.ts'],
-    {
-      cwd: join(import.meta.dirname, '..'),
-      encoding: 'utf8',
-    },
+    ['grep', '-nE', String.raw`['"](\.{1,2}/)+(author/)?build/`, '--', '*.ts', '*.tsx'],
+    { cwd: join(import.meta.dirname, '..'), encoding: 'utf8' },
   )
     .split('\n')
-    .filter(
-      (l) => /['"]\.{1,2}\/(author\/)?inbook/.test(l) && !/typeof import\(|import type /.test(l),
-    );
+    .filter((l) => l && !/^author\/build\/|\.test\.tsx?:|typeof import\(|import type /.test(l));
   assert.deepEqual(
     hits.map((l) => l.replace(/:\d+:\s*/, ': ')),
     [
-      "author/panel.tsx: process.env.EXPO_PUBLIC_LOKA_DEV_CARTRIDGE === '1' ? require('./inbook.ts') : undefined;",
+      "author/panel.tsx: process.env.EXPO_PUBLIC_LOKA_DEV_CARTRIDGE === '1' ? require('./build/Build.tsx') : undefined;",
     ],
   );
 });
 
 // Breaks: a Book Cmd-Z or walk key goes to the panel (two undos), a panel shortcut stays in the
-// Book; a selection marks another definition's lines, or one whose key only starts the same.
-test('the Book hands the panel its shortcuts, and marks only the selection`s lines', () => {
+// Book.
+test('the Book hands the panel its shortcuts', () => {
   const key = (k: string, mod = {}) => ({
     key: k,
     metaKey: false,
@@ -145,11 +139,6 @@ test('the Book hands the panel its shortcuts, and marks only the selection`s lin
     key('k', { metaKey: true, altKey: true }),
   ])
     assert.equal(shortcut(asked), undefined);
-  assert.ok(selects('room.hut.title', 'room', 'hut'));
-  assert.ok(
-    !selects('room.hutch.title', 'room', 'hut') && !selects('item.hut.short', 'room', 'hut'),
-  );
-  assert.ok(!selects(undefined, 'room', 'hut'));
 });
 
 // Breaks: a click on a title cap() drew selects nothing (exact words only); Alt-click opens the

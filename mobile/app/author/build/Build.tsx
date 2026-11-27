@@ -37,6 +37,8 @@ import { act, CONTROL, Frame, parts, sheets, stack, stepBack } from './sheet.tsx
 export { Sheet, sheets } from './sheet.tsx';
 export { drawn, unsee } from './seeas.tsx';
 export { updated } from './tools.tsx';
+export { api, recount, start } from './page.ts';
+export { tagged } from '../prose_rules.ts';
 const WORDS = {
   build: 'Build',
   on: '✎ Build',
@@ -106,7 +108,7 @@ function back(id?: string) {
   redrawStrip();
   if (!builder.sheets) opener?.focus?.();
 }
-/** `book`: the Book's word bindings, redraw and E5's api (panel.tsx), for the field. */
+/** `book`: the Book's word bindings, redraw and page.ts's api (panel.tsx), for the field. */
 export function install(book: Pick<Hooks, 'seen' | 'said' | 'redraw' | 'api'>) {
   api = book.api;
   seam({
@@ -268,7 +270,7 @@ export function Strip({ children }: { children: ReactNode }) {
       >
         <View
           style={{ flex: 1 }} /* mutate-skip: layout; the Book keeps its place as sheets open */
-          testID="loka-book" /* inbook.ts reads the page's palette under it */
+          testID="loka-book" /* page.ts reads the page's palette under it */
         >
           {children}
         </View>

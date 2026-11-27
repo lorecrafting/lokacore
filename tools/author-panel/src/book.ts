@@ -21,7 +21,7 @@ export type State = {
   shown: ReturnType<typeof shown>;
 };
 export type Line = { key?: string; words: string };
-/** What the Book's editor tells (mobile/app/author/inbook.ts): its `~` counts and its last note. */
+/** What the Book's editor tells (Build's field, mobile/app/author/build/page.ts): its `~` counts and its last note. */
 export type Prose = {
   todoHere?: { here: number; at: number };
   note?: string;
