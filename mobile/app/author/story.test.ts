@@ -24,6 +24,7 @@ const story = {
       { ref: R('dialogue', 'farewell'), kind: 'dialogue' },
       { ref: R('fact', 'met_nell'), kind: 'fact' },
       { ref: R('npc', 'nell'), kind: 'npc' },
+      { ref: R('item', 'lamp'), kind: 'item' },
     ],
     edges: [
       // the reader first: Trace lists the setters before the readers whatever the edges' order
@@ -73,10 +74,18 @@ const story = {
   files: {
     [R('dialogue', 'greet')]: 'dialogues/greet.json',
     [R('dialogue', 'farewell')]: 'dialogues/farewell.json',
+    [R('npc', 'nell')]: 'npcs/nell.json',
   },
-  bundled: {},
+  bundled: { [R('item', 'lamp')]: 'areas/castle.json' },
   map: [
-    { ref: R('room', 'hall'), key: 'hall', area: null, title: 'Hall', exits: [] },
+    {
+      ref: R('room', 'hall'),
+      key: 'hall',
+      area: null,
+      title: 'Hall',
+      exits: [],
+      file: 'areas/castle.json', // a bundle member: not in files
+    },
     { ref: R('room', 'cellar'), key: 'cellar', area: null, title: 'Cellar', exits: [] },
   ],
   words: { [R('dialogue', 'greet')]: 120 },
@@ -216,6 +225,64 @@ test("Trace of met_nell lists its setter then its reader; a listed row opens tha
   ]);
   await press('set at greet (Beat 1)', 0, listed);
   assert.equal(top(), 'def:dialogues/greet.json');
+});
+
+// Break: Sheet on a person opening her fields instead of her own sheet, no Source beside it, or a
+// Source on a dialogue, whose fields are its only sheet (the panel's click and Alt-click).
+test("a person's row opens her own sheet and her source; a dialogue's, its fields only", async () => {
+  await press('nell');
+  await press('Sheet');
+  assert.equal(top(), 'npc:nell');
+  await press('Source');
+  assert.equal(top(), 'def:npcs/nell.json');
+  await press('greet · 1 refusal');
+  assert.equal(all('Source').length, 0);
+  await press('Sheet');
+  assert.equal(top(), 'def:dialogues/greet.json');
+});
+
+// Break: a sheet's head losing its ref, counting another node's unwritten or diagnostics, marking a
+// reached node unreached, or a World file (no ref) showing nothing; each sheet kind draws it.
+test("each node sheet's head names its ref, unwritten and diagnostics counts, and unreached", (t) => {
+  const head = (kind: string, arg: string) =>
+    nodes(build.sheets[kind].body(arg))
+      .filter((e) => e.type === 'Text' && typeof e.props.children === 'string')
+      .map((e) => e.props.children)
+      .slice(0, 3);
+  assert.deepEqual(head('def', 'dialogues/farewell.json'), [
+    R('dialogue', 'farewell'),
+    '2 unwritten · 0 diagnostics',
+    'unreached from the start',
+  ]);
+  assert.deepEqual(head('def', 'dialogues/greet.json').slice(0, 2), [
+    R('dialogue', 'greet'),
+    '0 unwritten · 1 diagnostics',
+  ]);
+  assert.notEqual(head('def', 'dialogues/greet.json')[2], 'unreached from the start');
+  assert.deepEqual(head('def', 'cartridge.json')[0], 'cartridge.json');
+  assert.equal(
+    head('def', 'cartridge.json').join().includes('diagnostics'),
+    false,
+    'no ref, no counts',
+  );
+  assert.deepEqual(head('npc', 'nell').slice(0, 2), [
+    R('npc', 'nell'),
+    '0 unwritten · 0 diagnostics',
+  ]);
+  assert.deepEqual(head('npc', 'nobody'), [], "another person's head is not hers");
+  assert.deepEqual(head('item', 'lamp')[0], R('item', 'lamp'), 'a bundle member: a ref, no file');
+  assert.deepEqual(head('room', 'hall').slice(0, 2), [
+    R('room', 'hall'),
+    '0 unwritten · 0 diagnostics',
+  ]);
+  const s = known.story;
+  t.after(() => (known.story = s)); // a failed assert would leave every later test with no /story
+  known.story = undefined;
+  assert.notEqual(
+    head('def', 'dialogues/farewell.json')[0],
+    R('dialogue', 'farewell'),
+    'no /story, no head',
+  );
 });
 
 test('Go there starts in the room a story edge joins the node to, either way: nell to the hall, the cellar to its lamp', async () => {

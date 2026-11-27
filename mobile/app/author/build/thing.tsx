@@ -10,6 +10,7 @@ import { ink } from './build.ts';
 import { known, pen } from './room.tsx';
 import { ed, foot, inRow, io, refusal, row, run } from './roomedit.tsx';
 import { act, sheets } from './sheet.tsx';
+import { inspected } from './inspected.tsx'; // a cycle: read at render time only
 
 const WORDS = {
   edit: (key: string) => `Edit ${key}`,
@@ -67,10 +68,9 @@ export function referrers(file: string) {
 }
 
 /** A person's or item's sheet: where it starts and, unless a spawn places it, a holder to move it to. */
-const fileOf = (dir: Dir, key: string) =>
-  known.files[
-    known.nodes.find((n) => n.kind === nodeOf(dir) && n.ref.endsWith(`/${key}`))?.ref ?? ''
-  ];
+const refOf = (dir: Dir, key: string) =>
+  known.nodes.find((n) => n.kind === nodeOf(dir) && n.ref.endsWith(`/${key}`))?.ref;
+const fileOf = (dir: Dir, key: string) => known.files[refOf(dir, key) ?? ''];
 function body(dir: Dir, key: string) {
   const file = fileOf(dir, key);
   const d = file && doc(file);
@@ -147,11 +147,11 @@ function holderForm(dir: Dir, key: string, file: string, now: { kind: string; ke
 
 sheets.npc = {
   title: (key) => key,
-  body: (key) => body('npcs', key),
+  body: (key) => [inspected(fileOf('npcs', key), refOf('npcs', key)), body('npcs', key)],
   file: (key) => fileOf('npcs', key),
 };
 sheets.item = {
   title: (key) => key,
-  body: (key) => body('items', key),
+  body: (key) => [inspected(fileOf('items', key), refOf('items', key)), body('items', key)],
   file: (key) => fileOf('items', key),
 };

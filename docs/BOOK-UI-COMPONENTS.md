@@ -358,7 +358,7 @@ one per line, wrapping. `＋ Add dialogue` on the Person sheet is an act.
 Builder 5.4b: the Notebook's `Contents`, `Story`, (6.1a) `World` and (6.2a) `Tools` tabs are acts. Story rows are Room sheet rows,
 each level indented half a touch target more; a part's, beat's or definition's name with its marks
 (joined by ` · `) is an act, a Seed's name `type.small` `fg`; Facts, Pacing, Add beat, Go there,
-Sheet, Trace, Consequences, Retitle, Remove, Knowledge, `Bind…` and each `Bind <short>` are acts,
+Sheet, Source, Trace, Consequences, Retitle, Remove, Knowledge, `Bind…` and each `Bind <short>` are acts,
 wrapping at 390 px. The number field is Schedule's hour field (a fixed width for two digits), the
 title field the Area field; both placeholders `type.small` in `dim`. The no-story line and a
 sheet's rows that name no definition are `type.small` `fg`.
@@ -414,7 +414,11 @@ key a selected act. A reader's heading is the field caption (`type.label` `dim`)
 report, wrapping whole. Headings and lines start at the sheet's text edge (a row's `space.md`), a
 nested line `space.md` more per depth. A table row is Combat's (Builder 2.4): cells joined by ` · `,
 the header row `dim`, no columns. The sheet foot: the path `type.small` `dim` with `space.md`
-padding, after the body. No raw sizes. No new ink pair: every tone above is already on `card`.
+padding, after the body. Why's `Full report` is a selected act while open, its JSON one `type.small`
+`fg` line wrapping whole. A Step rule row is a Room sheet row: its ref an act, its verdict `type.small`,
+`fg`, or `danger` when the rule did not fire (with no sheet, one reader line). The sheet head (loka-hcnlh.71)
+is Room sheet rows: the ref (or path) and the counts `type.small` `dim` at every count, the unreached line `type.small`
+`warning` (to look at, not barred). No raw sizes. No new ink pair: every tone above is already on `card`.
 Worst pair: `warning` on `card`,
 4.75 (light).
 Builder 6.3a: the Room sheet's summary is one Room sheet row: its parts (`dark` and the variants

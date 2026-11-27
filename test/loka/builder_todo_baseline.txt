@@ -11,8 +11,6 @@ dialogues.policy.book.delete  # loka-hcnlh.56
 scenes.abstract.book.create  # loka-hcnlh.52
 parity:device-size  # 6.5, loka-hcnlh.32
 parity:map-pan-zoom-keys  # 6.5
-parity:story-row-sheets
-parity:inspector-header  # loka-hcnlh.71
 parity:palette  # 6.5
 parity:open-source-key  # 6.5
 parity:column-folds  # 6.5

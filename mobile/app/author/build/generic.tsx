@@ -16,6 +16,7 @@ import { known } from './room.tsx';
 import { foot, io, refusal } from './roomedit.tsx';
 import { lines, pages, scenic } from './scene.tsx';
 import { schedule } from './schedule.tsx';
+import { inspected } from './inspected.tsx'; // a cycle: read at render time only
 import { sheets } from './sheet.tsx';
 import { referrers } from './thing.tsx';
 import { world } from './world.tsx';
@@ -160,4 +161,8 @@ function body(file: string) {
   return [refusal(), cut, field(at, [], g.root, g.doc), drop];
 }
 
-sheets.def = { title: (file) => file, body, file: (file) => file };
+sheets.def = {
+  title: (file) => file,
+  body: (file) => [inspected(file), body(file)],
+  file: (file) => file,
+};

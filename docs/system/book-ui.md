@@ -1005,6 +1005,16 @@ reasons and limits: [prose in the Book rulings](../design/prose-in-the-book-ruli
     generic sheet) or drawing no single file has none. Above it (6.3a, §4.9) every sheet of one
     deletable definition (Room, Person, Item, and the generic sheet of a file under a folder; never
     a root file) ends with `Delete <key>`, as Room sheet edits run it.
+  - **Sheet head** (parity gaps, loka-hcnlh.71; the panel's inspector header). Once a story has arrived, a sheet of one
+    definition (Room, Person, Item, and the generic sheet of a file that defines one; a bundle
+    member by its ref, as it has no file of its own) starts its body, above the refusal line, with
+    the definition's ref, then one line of its counts from the last story, `N unwritten · N
+    diagnostics` (placeholder words; both always shown, zero included), then, only when the story
+    finds it unreachable from the start, an unreached line (placeholder words). Unwritten counts the
+    `~` lines still to write that the definition's own file and the `text.json` keys it names hold,
+    as Checks counts a file's (6.3a), not the panel's rows of them; never `~` (ruling 9). A sheet of
+    no definition (a root file's) heads with its file's path alone, as the panel does. The head is
+    read only, nothing in it pressable.
   - **Two layouts** (ruling 7). Where the window holds the full page column with a docked sheet
     beside it (the page column and half of it again), the sheet docks at the Book's right edge,
     half a page column wide, not modal, and the Book beside it keeps its full column and stays
@@ -1016,7 +1026,7 @@ reasons and limits: [prose in the Book rulings](../design/prose-in-the-book-ruli
   - **Title pencil.** In Build the room page's own title is followed by a pencil button named
     `Edit <title>`, which opens that room's sheet (2.2 adds the name pencil). An unwritten title shows its field
     name `title`, as Build's in-place field draws an unwritten line.
-  - **Room sheet.** Titled by the room's title. At its top, a summary line (6.3a, §4.3 item 2):
+  - **Room sheet.** Titled by the room's title. At its top, under the sheet head and the refusal line, a summary line (6.3a, §4.3 item 2):
     `dark · N variants · N exits` (`1 variant`, `1 exit`), each absent part left out (its look
     in the catalogue); the dark and variants parts are actions opening the room's `def:` sheet, the
     exits plain (their rows are below). The area is not in it: the `Area` field holds it. Then a row
@@ -1077,7 +1087,9 @@ reasons and limits: [prose in the Book rulings](../design/prose-in-the-book-ruli
     press on the selected row shuts and deselects it, and a press on an open row that is not
     selected only selects it. A definition row is selected without opening. Only the selected row
     shows its acts, in rows of their own under it. A definition offers `Go there` (the room a
-    placement edge, `.room` or `.items`, joins it to; none, no Go there), `Sheet`, `Trace` (a fact's
+    placement edge, `.room` or `.items`, joins it to; none, no Go there), `Sheet` (a room's, person's
+    or item's own sheet, else its file's generic sheet), `Source` (only beside a room's, person's or
+    item's own sheet: its file's generic sheet, the panel's Alt-click), `Trace` (a fact's
     setters, then its readers, each naming a definition opening its sheet), `Consequences` and,
     for a node the Flow draws, `Flow` (the walk centred on it). A
     beat offers a title field with `Retitle` (empty removes the title), `Remove` (no confirm: the
@@ -1130,14 +1142,18 @@ reasons and limits: [prose in the Book rulings](../design/prose-in-the-book-ruli
       offered is one plain line. A press asks why that one is or is not on offer now and shows the
       answer under the buttons, its key as the heading, the pressed button marked selected: one
       line per condition, `yes`, `no` or `depends on the target`, then its words, a nested
-      condition indented one step; a `no` line in the danger tone. A refused ask says why in the
+      condition indented one step; a `no` line in the danger tone. Under the lines, `Full report`, a
+      toggle shown selected while open, folds the answer's whole report as indented JSON (the panel's
+      Full report); a new answer comes with it shut. A refused ask says why in the
       danger tone. The answer holds only for the state it was asked on; any change drops it.
     - **Step** (6.2b): what the last step did. Before the first step one plain line says to take
       one; past 400 steps one plain line says Step is off and to jump to a checkpoint, with no ask.
       Otherwise a heading `Step N` (with the step's command and outcome once told), the time the
       ask took (marked slow past 2 s, never hidden), then three headed lists, each with its count:
       the facts it changed (`<key> <from> → <to>`), the quests it changed, and every rule whose
-      trigger matched (one that did not fire in the danger tone). An empty list shows `none`; the
+      trigger matched: its ref, a button opening its sheet when the last story names its file (the
+      panel's select), then its verdict, the verdict alone in the danger tone when the rule did not
+      fire; with no sheet, one plain line of both, wholly in the danger tone when it did not fire. An empty list shows `none`; the
       rules show `asking…` until the answer comes, then `none matched`. It asks once per step; a
       step taken with the notebook shut still pairs with the state before it. A refused ask says
       why in the danger tone.
