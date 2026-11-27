@@ -112,7 +112,7 @@
   {
     "id": "story-row-sheets",
     "panel": "tools/author-panel/src/storylist.tsx",
-    "book": "todo"
+    "book": "story.tsx"
   },
   {
     "id": "story-beats",
@@ -127,7 +127,7 @@
   {
     "id": "inspector-header",
     "panel": "tools/author-panel/src/right.tsx",
-    "book": "todo"
+    "book": "inspected.tsx"
   },
   {
     "id": "card-picker",
