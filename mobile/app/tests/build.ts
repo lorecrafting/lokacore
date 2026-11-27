@@ -9,7 +9,11 @@ import { join } from 'node:path';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import axe from 'axe-core';
+import type { Page } from 'playwright';
 import { book, cart, file, LONG, palette, sheet, undo, until } from './builder.ts';
+
+// The Build strip's lines, for a failure message (whether a compile is held or checked).
+const strip = async (p: Page) => (await p.innerText('body')).match(/.*(Held|Checks).*/g);
 
 // Breaks (panel :301): a Build control or sheet losing its accessible name, label or contrast (axe
 // serious or critical), at the phone width or the wide one (the notebook a column there).
@@ -76,8 +80,10 @@ test(
       }
       await set('-1');
       const refused = p.getByText(/Checks · 1 refused/);
-      await refused.waitFor();
-      assert.equal(mass(), -1);
+      await until(() => mass() === -1, 'mass -1 written');
+      await refused
+        .waitFor()
+        .catch(async (e: Error) => assert.fail(`${e.message}; ${await strip(p)}`));
       await undo(p).click();
       await until(() => mass() === 600, 'Undo put back 600');
       await refused.waitFor({ state: 'detached' });
