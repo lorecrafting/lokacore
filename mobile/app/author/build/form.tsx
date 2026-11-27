@@ -209,7 +209,7 @@ function entry(at: At, path: Step[], each: Obj, map: Obj) {
     drafts.delete(key);
     if (k && !Object.hasOwn(map, k))
       void set(at, [...path, k], at.fresh?.(path, k) ?? least(each, at.defs) ?? '', BUSY)?.then(
-        (ok) => ok || void drafts.set(key, k), // not written: the typed key waits for another Add
+        (ok) => ok || drafts.has(key) || void drafts.set(key, k), // not written: the typed key waits for another Add
       );
   };
   return (
@@ -276,7 +276,7 @@ function typed(at: At, path: Step[], s: Shape, value: unknown) {
     drafts.delete(key);
     if (v !== undefined && !Number.isNaN(v) && String(v) !== shown)
       void set(at, path, prose ? { prose: v } : v, BUSY)?.then(
-        (ok) => ok || void drafts.set(key, t!), // not written: leaving the field again writes it
+        (ok) => ok || drafts.has(key) || void drafts.set(key, t!), // not written: leaving the field again writes it
       );
   };
   const keys = at.pick?.(path, value);

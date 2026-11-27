@@ -14,7 +14,7 @@ import {
 import { space, type } from '../../book/tokens.ts';
 import { ink } from './build.ts';
 import { INPUT } from './form.tsx';
-import { drafts, id, ops, send, type At, type Step } from './formwrite.ts';
+import { BUSY, drafts, id, ops, send, type At, type Step } from './formwrite.ts';
 import { known } from './room.tsx';
 import { row, tell } from './roomedit.tsx';
 import { act } from './sheet.tsx';
@@ -84,7 +84,7 @@ export function trigger(at: At, path: Step[], on: On = {}) {
           (o: string) => ({ story_point: on.story_point, outcome: o }),
           on.outcome,
         )}
-      {kind === 'quest' && questOutcome(at, path, t, key, on, put)}
+      {kind === 'quest' && questOutcome(at, path, t, key, on)}
       {gone && <Text style={LABEL}>{`~ ${gone}`}</Text>}
     </View>
   );
@@ -97,7 +97,6 @@ function questOutcome(
   t: Parameters<typeof leftover>[0], // mutate-skip: a type
   key: string,
   on: On,
-  put: (o: On) => void,
 ) {
   const k = `outcome ${id(at, path)} ${on.quest} ${on.outcome}`;
   const write = () => {
@@ -105,7 +104,10 @@ function questOutcome(
     drafts.delete(k);
     if (o === undefined || o === on.outcome) return; // untyped or unchanged
     if (outcomeRefused(t, key, on, o)) tell(WORDS.badOutcome);
-    else put({ quest: on.quest, outcome: o });
+    else
+      void send(at, ops(path, { quest: on.quest, outcome: o }), undefined, BUSY).then(
+        (ok) => ok || drafts.has(k) || void drafts.set(k, o), // not written: leaving again writes it
+      );
   };
   return (
     <TextInput

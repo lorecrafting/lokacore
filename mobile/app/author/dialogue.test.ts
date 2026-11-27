@@ -34,6 +34,7 @@ const FILES = {
   'c:dialogue/side_set': 'dialogues/side_set.json',
 };
 let held: Promise<void> | undefined;
+let refuseOnce = false; // the next write is refused as stale, after held
 const posts: { route: string; sent: any }[] = [];
 const opens: string[] = [];
 async function api(path: string, sent?: any): Promise<[number, any]> {
@@ -46,6 +47,7 @@ async function api(path: string, sent?: any): Promise<[number, any]> {
   if (sent) {
     posts.push({ route: path.slice(1), sent });
     await held; // a save still out while the test presses again
+    if (refuseOnce) return ((refuseOnce = false), [409, 'stale']);
     return [200, { id: 1 }];
   }
   if (path === '/story')
@@ -272,5 +274,27 @@ test('an Add choice pressed while a save is out keeps its key; Add again writes 
     posts.map((p) => p.sent.ops[0].path),
     [['choices', 'no']],
     'the typed key was forgotten',
+  );
+});
+
+// Breaks: a refusal arriving after newer typing puts the old key back over it, so the next Add writes
+// the refused key while the field shows the new one (loka-x1frg review finding 2).
+test('an Add refused after newer typing keeps the newer key; Add again writes it', async () => {
+  const s = await sheet(ONE, 'a', 'a.then');
+  let release = () => {};
+  held = new Promise((r) => (release = r));
+  refuseOnce = true;
+  typeKey(s, 'no');
+  await s.press(`add choice ${s.file}:["choices","+"]`);
+  typeKey(s, 'maybe');
+  release();
+  held = undefined;
+  await settle();
+  posts.length = 0;
+  await s.press(`add choice ${s.file}:["choices","+"]`);
+  assert.deepEqual(
+    posts.map((p) => p.sent.ops[0].path),
+    [['choices', 'maybe']],
+    'the refused key overwrote the newer one',
   );
 });

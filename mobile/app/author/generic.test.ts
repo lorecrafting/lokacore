@@ -1,4 +1,4 @@
-// size: allow 722, one mocked /story and /change harness serves the registry rows (treatment:reverie too) and the Rules block cases
+// size: allow 740, one mocked /story and /change harness serves the registry rows (treatment:reverie too) and the Rules block cases
 // The generic sheet (author/build/generic.tsx, form.tsx; design §7, slice 2.3): every registry row
 // whose book verb is `generic` (kernel/ts/play/registry.json, held by bin/editor_gate.exs) is
 // added, edited or removed by the sheet, each a `/change` op at the row's own path.
@@ -11,10 +11,10 @@ const { story } = await import('./build/room.tsx');
 const { sheets } = await import('./build/sheet.tsx');
 await import('./build/Build.tsx'); // the app's registration of the def: sheet
 const { WORDS } = await import('./build/form.tsx');
-const { opened: rowsOpen, send } = await import('./build/formwrite.ts');
+const { BUSY, opened: rowsOpen, send } = await import('./build/formwrite.ts');
 const HOURS = (await import('./build/schedule.tsx')).WORDS;
 const COMBAT = (await import('./build/combat.tsx')).WORDS;
-const { run } = await import('./build/roomedit.tsx');
+const { refused, run } = await import('./build/roomedit.tsx');
 
 const root = new URL('../../../', import.meta.url);
 const read = (rel: string) => JSON.parse(readFileSync(new URL(rel, root), 'utf8'));
@@ -353,9 +353,10 @@ test('a write refused after the file is read shows in the sheet', async () => {
 // dropped with nothing said and its typed words (or a map's typed key) forgotten, so leaving it
 // again (or a second Add) writes nothing; a double-tap told something; or a write sent under the
 // hash the Undo replaced before the sheet reads the file again.
-test('a field left while an Undo writes says it was not written; leaving it again writes it', async () => {
+test('a field left while an Undo writes says it was not written; leaving it again writes it', async (ctx) => {
   const s = await opened('statuses', { tick_every: 5 });
   let release = () => {};
+  ctx.after(() => release()); // a failed assert leaves no gesture held for the next test
   void run(() => new Promise<void>((r) => (release = r))); // an Undo still putting back
   const alert = () => words(s.shown().find((x) => x.props?.accessibilityRole === 'alert'));
   const before = alert();
@@ -568,6 +569,23 @@ test('Schedule: an hour moves within the day, a refusal writes nothing, Add hour
   const lost = await opened('npcs', { daily_schedule: {} });
   (await lost.press(`fold ${lost.file}:${JSON.stringify(['daily_schedule'])}`), await settle());
   assert.ok(lost.shown().some((x) => words(x) === HOURS.add && !x.props?.onPress));
+});
+
+// Breaks (loka-x1frg review finding 3): an hour left while another gesture writes kept but unsaid,
+// so the field shows an hour never written.
+test('Schedule: an hour left while another gesture writes says so; leaving it again writes it', async (t) => {
+  const s = await opened('npcs', { room: 'inn', daily_schedule: { 0: 'inn', 3: 'yard' } });
+  (await s.press(`fold ${s.file}:${JSON.stringify(['daily_schedule'])}`), await settle());
+  const hour = () => s.shown().find((x) => x.props?.accessibilityLabel === HOURS.hour('3'));
+  sent();
+  let release = () => {};
+  t.after(() => release());
+  void run(() => new Promise<void>((r) => (release = r)));
+  (hour().props.onChangeText('5'), hour().props.onBlur(), await settle());
+  assert.deepEqual([sent(), refused()], [[], BUSY], 'written mid-gesture, or kept unsaid');
+  (release(), await settle());
+  (hour().props.onBlur(), await settle());
+  assert.deepEqual(sent(), [{ path: ['daily_schedule'], value: { 0: 'inn', 5: 'yard' } }]);
 });
 
 // Breaks: a scene's sheet drawn without its `.cut` twin's pages above its fields, or a twin whose

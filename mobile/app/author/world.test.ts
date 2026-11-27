@@ -454,7 +454,7 @@ test('a cartridge entry with 6 rooms offers all six; with 7, r shows six and +1 
 });
 
 // Breaks (loka-x1frg): a room key typed and left while another gesture writes is forgotten, so
-// leaving the field again writes nothing.
+// leaving the field again writes nothing; a pick pressed mid-gesture told something or left typed.
 test('a room key left while another gesture writes stays typed; leaving it again writes it', async (t) => {
   const cart = structuredClone(files.get('cartridge.json'));
   t.after(() => ((storyNodes = [{ ref: 'r1', kind: 'room' }]), files.set('cartridge.json', cart)));
@@ -463,6 +463,13 @@ test('a room key left while another gesture writes stays typed; leaving it again
   sent();
   let release = () => {};
   void run(() => new Promise<void>((r) => (release = r)));
+  const before = refused();
+  nodes(g.s.shown().find((x) => x.key === 'picks cartridge.json:["entry"]').props.children)
+    .find((x) => words(x) === 'room_2')
+    .props.onPress();
+  await settle();
+  assert.deepEqual([sent(), refused()], [[], before], 'a press mid-gesture told something');
+  assert.notEqual(g.input().props.value, 'room_2', 'a press mid-gesture left the key typed');
   g.input().props.onFocus({ target: null });
   await g.typed('room_2');
   assert.deepEqual(sent(), [], 'written mid-gesture');

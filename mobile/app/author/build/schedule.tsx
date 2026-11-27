@@ -8,6 +8,7 @@ import { plain } from '../../../../kernel/ts/play/card.ts';
 import { shapeOf } from '../../../../kernel/ts/play/generic.ts';
 import { block, field, INPUT, WORDS as FORM } from './form.tsx';
 import {
+  BUSY,
   drafts,
   drop,
   id,
@@ -35,7 +36,7 @@ function hour(at: At, path: Step[], sched: Obj, h: string, each: Obj | undefined
       if (typeof moved === 'string') return moved; // the draft stays, as shown: leaving again refuses again
       if (t !== h) await ed.change([at.file, at.was, ops(path, moved)]);
       drafts.delete(key);
-    });
+    }, BUSY);
   };
   return (
     <View key={key} style={row}>
