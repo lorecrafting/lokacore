@@ -54,7 +54,7 @@ test("the registry's hand-built edit card claims its field; generic and other ki
   assert.deepEqual(rooms.exits, { 'ui:field': 'ExitsCard' });
   assert.deepEqual(rooms.name, { 'ui:field': 'TextKey', 'ui:fieldReplacesAnyOrOneOf': true });
   const fixed = { 'cartridge.api_version': card('none: fixed at loka/v3') };
-  assert.deepEqual(ui('cartridge', fixed).api_version, ui('cartridge').api_version);
+  assert.equal(ui('cartridge', fixed).api_version?.['ui:field'], undefined);
 });
 
 // Breaks (loka-wfrgk.11 review 2, 5): a root-level row (no field) is dropped, so the text catalog

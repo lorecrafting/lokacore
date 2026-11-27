@@ -74,7 +74,8 @@ function walk(node: unknown, defs: Record<string, Node>, seen: string[]): Ui {
 /**
  * The uiSchema of one source kind: `schema` is its `schemas/source/<kind>.schema.json`, `defs` the
  * `$defs` of defs.schema.json, `registry` kernel/ts/play/registry.json, whose surfaces are
- * `generic` or a component path under tools/author-panel/src/edit/. A hand-built
+ * `generic`, `none: <reason>` (neither tool offers it) or a component path under
+ * tools/author-panel/src/edit/. A hand-built
  * row claims the whole card (`<kind>`), a field (`<kind>.<field>`, under `items` when the file is
  * an array) or, for `treatment:<name>`, the kind's `treatment` field; `ui:field` names the card.
  */

@@ -1,8 +1,8 @@
 # The editor gate (gui-editor-design §7, §11), evaluated by bin/toolbox_page.exs with its root,
 # json, read, defs and treatment enum bound; it returns {problems, registry}. Every top-level
 # field of each source kind (a kind with none, the text catalog, is its own path) and every
-# treatment has a create, edit and delete surface, a component under tools/author-panel/src/edit/
-# or `generic`. areas/ bundles the other kinds, so their paths cover it. Generic surfaces are
+# treatment has a create, edit and delete surface, a component under tools/author-panel/src/edit/,
+# `generic` or `none: <reason>` (below). areas/ bundles the other kinds, so their paths cover it. Generic surfaces are
 # exactly the baseline, which only shrinks against main's copy, so a new path ships hand-built.
 # The Book builder's parity (in-game-builder-mode §6.7): each row also has `book` create, edit
 # and delete, and each kernel/ts/play/parity.json row (a panel feature outside the schema) names
@@ -118,7 +118,7 @@ none? = &(is_binary(&1) and String.match?(&1, ~r/^none: \S/))
 # a surface is "generic", none, or a component file in the edit folder
 surface? = fn
   "generic" -> true
-  "none" <> _ = s -> none?.(s)
+  "none" <> r = s when r == "" or binary_part(r, 0, 1) == ":" -> none?.(s)
   s when is_binary(s) -> String.ends_with?(s, ".tsx") and file?.("tools/author-panel/src/edit", s)
   _ -> false
 end
@@ -130,7 +130,7 @@ book = fn
   v when v in ["todo", "generic"] ->
     nil
 
-  "none" <> _ = s ->
+  "none" <> r = s when r == "" or binary_part(r, 0, 1) == ":" ->
     if(!none?.(s), do: "#{inspect(s)}: none needs a reason, none: <why>")
 
   s when is_binary(s) ->
