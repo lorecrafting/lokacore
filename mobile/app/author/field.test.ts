@@ -119,16 +119,19 @@ test('a tap opens the source words in place, Enter sends them, links still play'
 });
 
 // Breaks: a field left open (a notice, then a page change) refusing every later tap, or keeping
-// the Hold after it lost focus; Build turned off leaving the field open.
+// the Hold after it lost focus; Build turned off leaving the field open; an emptied field writing a
+// blank line instead of its notice (ported from tools/author-panel/test/words.test.ts:115).
 test('a field left open blocks nothing and holds only while focused', async () => {
   const press = line(page(LINKED)).props.onPress;
   const input = await opened(LINKED, at(LINKED));
   input.props.onFocus();
   input.props.onChangeText('');
   input.props.onSubmitEditing(); // the "Empty." notice keeps it open
+  assert.match(JSON.stringify(page(LINKED)), /Empty\./, 'an emptied field shut without its notice');
   input.props.onBlur();
   await tick();
   assert.deepEqual(holds(), [true, false], 'the Hold outlived the focus');
+  assert.deepEqual(edits(), [], 'an emptied field wrote a blank line');
   sent.length = 0;
   answers = [[200, at('A cold loft.')]];
   press(); // the same line drawn again, as on a page that no longer shows the field

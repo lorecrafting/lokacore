@@ -16,7 +16,6 @@ import {
   exitActs,
   foot,
   grows,
-  moveTo,
   inRow,
   refusal,
   row,
@@ -25,6 +24,7 @@ import {
   type Node,
   type Template,
 } from './roomedit.tsx';
+import { joinTo, moveTo } from './roomfields.tsx';
 
 // placeholders: the owner writes these words
 const WORDS = {
@@ -208,6 +208,7 @@ sheets.room = {
       }),
       ...ghostRows(r.key, known.open, ghostSheet),
       grows(r, known.nodes, known.rooms),
+      joinTo(r, known.rooms),
       addHere(r, known.nodes, held(), known.open),
       moveTo(r),
       r.file ? (
