@@ -16,6 +16,7 @@ import {
   exitActs,
   foot,
   grows,
+  joinTo,
   moveTo,
   inRow,
   refusal,
@@ -208,6 +209,7 @@ sheets.room = {
       }),
       ...ghostRows(r.key, known.open, ghostSheet),
       grows(r, known.nodes, known.rooms),
+      joinTo(r, known.rooms),
       addHere(r, known.nodes, held(), known.open),
       moveTo(r),
       r.file ? (

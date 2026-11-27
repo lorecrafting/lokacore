@@ -3,7 +3,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import type { Story } from '../play/storylist.ts';
-import { rank } from '../../../tools/author-panel/src/shell.ts';
+import { rank } from '../play/palette.ts';
 import * as list from '../play/storylist.ts';
 import { knowledge, pacing } from '../play/storyknow.ts';
 import { choicesOf, consequenceRows } from '../play/storyconseq.ts';

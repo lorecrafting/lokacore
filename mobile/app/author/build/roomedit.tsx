@@ -29,6 +29,9 @@ const WORDS = {
   grow: (dir: string) => `＋ ${dir}`,
   area: 'Area',
   move: 'Move to area',
+  to: 'Exit to',
+  join: (dir: string) => `Join ${dir}`,
+  noRoom: (key: string) => `No room ${key}`,
   drop: (key: string, refs?: number) =>
     refs === undefined ? `Delete ${key}` : `Delete ${key} · ${WORDS.refs(refs)}`,
   refs: (n: number) => `${n} referrers`,
@@ -50,7 +53,7 @@ let busy = false; // one gesture at a time: a press while one runs does nothing
 let ran: Promise<void> = Promise.resolve(); // the gesture running now
 let said = ''; // the last refusal, shown at the sheet's top until the next press
 let asking: { key: string; files: string[]; answer: (yes: boolean) => void } | undefined;
-const drafts = new Map<string, string>(); // each room's Move field, as typed
+const drafts = new Map<string, string>(); // each room's Move field (and `join:` Join field), as typed
 let saved = (_ids: number[]) => {}; // Build.tsx's Undo chip
 
 /** mapedit's Io over the builder's /__author calls: a missing source rejects, as the panel's does. */
@@ -208,6 +211,13 @@ export const addTo = (
     open(`${nodeOf(dir)}:${key}`);
   });
 
+const field = {
+  ...inRow,
+  flex: 1, // mutate-skip: layout; the field fills the row's free width, ruled as Build's tap field
+  minWidth: 0, // mutate-skip: layout; it may shrink
+  borderBottomWidth: size.rule,
+  borderColor: ink('action'),
+};
 /** Move to area: the field's area, or the root when it is empty. */
 export const moveTo = (r: MapRoom) => (
   <View key={`move:${r.key}`} style={row}>
@@ -216,19 +226,34 @@ export const moveTo = (r: MapRoom) => (
       placeholder={WORDS.area}
       accessibilityLabel={WORDS.area}
       onChangeText={(d) => void drafts.set(r.key, d)}
-      style={{
-        ...text,
-        paddingHorizontal: 0,
-        flex: 1,
-        minWidth: 0, // mutate-skip: layout; the field may shrink below its own width in a narrow row
-        borderBottomWidth: size.rule,
-        borderColor: ink('action'),
-      }} // mutate-skip: layout; the field takes the row's free width, ruled as Build's tap field
+      style={field}
     />
     {act(
       WORDS.move,
       () => void run(() => ed.move(r, (drafts.get(r.key) ?? r.area ?? '').trim() || null)),
     )}
+  </View>
+);
+
+/** Join: an exit each free way to the typed room and back, any level, no layout (panel linkTo). */
+export const joinTo = (r: MapRoom, rooms: MapRoom[]) => (
+  <View key={`join:${r.key}`} style={row}>
+    <TextInput
+      defaultValue={drafts.get(`join:${r.key}`)}
+      placeholder={WORDS.to}
+      accessibilityLabel={WORDS.to}
+      onChangeText={(d) => void drafts.set(`join:${r.key}`, d)}
+      style={field}
+    />
+    {Object.keys(BACK)
+      .filter((dir) => !r.exits.some((e) => e.dir === dir))
+      .map((dir) =>
+        act(WORDS.join(dir), () => {
+          const to = drafts.get(`join:${r.key}`)?.trim();
+          const b = rooms.find((o) => o.key === to);
+          void run(async () => to && (b ? ed.link(r, dir, b) : WORDS.noRoom(to)));
+        }),
+      )}
   </View>
 );
 
