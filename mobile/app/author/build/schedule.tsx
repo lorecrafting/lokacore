@@ -42,7 +42,7 @@ function hour(at: At, path: Step[], sched: Obj, h: string, each: Obj | undefined
     <View key={key} style={row}>
       <TextInput
         accessibilityLabel={WORDS.hour(h)}
-        defaultValue={h}
+        defaultValue={drafts.get(key) ?? h}
         inputMode="numeric"
         style={HOUR}
         onChangeText={(t) => void drafts.set(key, t)}

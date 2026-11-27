@@ -391,6 +391,7 @@ test('a quest outcome left while another gesture writes is kept and said; leavin
     release();
     await other;
   }
+  assert.equal(input().props.defaultValue, 'failed', 'drawn again, the kept draft was hidden');
   input().props.onBlur();
   while (running()) await tick();
   assert.deepEqual(

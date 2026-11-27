@@ -113,7 +113,7 @@ function questOutcome(
     <TextInput
       key={k}
       accessibilityLabel={WORDS.outcome}
-      defaultValue={String(on.outcome ?? '')}
+      defaultValue={drafts.get(k) ?? String(on.outcome ?? '')}
       style={INPUT}
       onChangeText={(v) => void drafts.set(k, v)}
       onBlur={write}

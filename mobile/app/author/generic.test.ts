@@ -1,4 +1,4 @@
-// size: allow 740, one mocked /story and /change harness serves the registry rows (treatment:reverie too) and the Rules block cases
+// size: allow 750, one mocked /story and /change harness serves the registry rows (treatment:reverie too) and the Rules block cases
 // The generic sheet (author/build/generic.tsx, form.tsx; design §7, slice 2.3): every registry row
 // whose book verb is `generic` (kernel/ts/play/registry.json, held by bin/editor_gate.exs) is
 // added, edited or removed by the sheet, each a `/change` op at the row's own path.
@@ -372,6 +372,8 @@ test('a field left while an Undo writes says it was not written; leaving it agai
     within(s, ['tick_every'])
       .find((x) => x.props?.onBlur)
       .props.onBlur();
+  const field = within(s, ['tick_every']).find((x) => x.props?.onBlur);
+  assert.equal(field.props.defaultValue, '6', 'drawn again, the kept draft was hidden');
   blur();
   await settle();
   assert.deepEqual(sent(), [], 'a stale write went out');
@@ -584,6 +586,7 @@ test('Schedule: an hour left while another gesture writes says so; leaving it ag
   (hour().props.onChangeText('5'), hour().props.onBlur(), await settle());
   assert.deepEqual([sent(), refused()], [[], BUSY], 'written mid-gesture, or kept unsaid');
   (release(), await settle());
+  assert.equal(hour().props.defaultValue, '5', 'drawn again, the kept hour was hidden');
   (hour().props.onBlur(), await settle());
   assert.deepEqual(sent(), [{ path: ['daily_schedule'], value: { 0: 'inn', 5: 'yard' } }]);
 });

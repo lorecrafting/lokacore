@@ -285,7 +285,7 @@ function typed(at: At, path: Step[], s: Shape, value: unknown) {
     <TextInput
       key={key}
       accessibilityLabel={String(path.at(-1))}
-      defaultValue={shown}
+      defaultValue={drafts.get(key) ?? shown} // reopened, it shows a draft not yet written
       style={INPUT}
       onChangeText={(t) => void drafts.set(key, t)}
       onBlur={write}
