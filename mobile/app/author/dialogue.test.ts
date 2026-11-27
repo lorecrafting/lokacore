@@ -279,10 +279,11 @@ test('an Add choice pressed while a save is out keeps its key; Add again writes 
 
 // Breaks: a refusal arriving after newer typing puts the old key back over it, so the next Add writes
 // the refused key while the field shows the new one (loka-x1frg review finding 2).
-test('an Add refused after newer typing keeps the newer key; Add again writes it', async () => {
+test('an Add refused after newer typing keeps the newer key; Add again writes it', async (t) => {
   const s = await sheet(ONE, 'a', 'a.then');
   let release = () => {};
   held = new Promise((r) => (release = r));
+  t.after(() => (release(), (held = undefined), (refuseOnce = false))); // a failed assert leaks neither
   refuseOnce = true;
   typeKey(s, 'no');
   await s.press(`add choice ${s.file}:["choices","+"]`);

@@ -462,10 +462,10 @@ test('a room key left while another gesture writes stays typed; leaving it again
   t.after(() => ((storyNodes = [{ ref: 'r1', kind: 'room' }]), files.set('cartridge.json', cart)));
   const rooms = ['r1', 'room_2'].map((ref) => ({ ref, kind: 'room' }));
   const g = await compiled(rooms, 'cartridge.json', 'entry');
-  sent();
   let release = () => {};
+  t.after(() => release());
   void run(() => new Promise<void>((r) => (release = r)));
-  const before = refused();
+  const before = (sent(), refused());
   nodes(g.s.shown().find((x) => x.key === 'picks cartridge.json:["entry"]').props.children)
     .find((x) => words(x) === 'room_2')
     .props.onPress();
