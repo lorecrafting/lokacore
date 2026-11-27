@@ -40,3 +40,14 @@
 3. **Nit** (native only), `story.tsx:173-179`. A draft typed after Remove and before Undo lands on the shifted part. A stale uncontrolled number input (`number:part:1`) can show a number whose draft is gone, so Add beat is refused with NaN. That is a misleading refusal; nothing wrong is written.
 4. **Nit** (dev-listed, author-side): an untouched Retitle rewrites the same title; a whitespace-only title is saved; Add part on a hand-broken outline.json shows a raw TypeError.
 5. **Nit**, handback: the mutate_diff table (1 mutant) does not match a clean run (0).
+
+## Re-check at `b522afae7` (fix round)
+
+- Scope: `b522afae7` only (one test, `mobile/app/author/story.test.ts:364-377`). CI at the head (`gh run list --commit b522afae7…`): graph-diff, ci and book-e2e all success.
+- Finding 1 (blocker): **resolved**.
+  - The new test opens titled part 1. It asserts the field's `defaultValue` is `Arrival`, and that an untouched `Retitle` posts `{path: ['parts', 0, 'title'], value: 'Arrival'}`. The expected values are fixture literals, not computed by the code under test.
+  - `bin/mutate.sh` with `const shown = undefined` (`story.tsx:172`) against `author/story.test.ts`: **red-narrow**. Clean: 21 pass, 0 fail.
+- Finding 5 (nit): resolved. The PR body now reports 0 mutants from `mutate_diff`.
+- Findings 2-4 (nits): left open as accepted.
+- Screenshot (390 px, local copy viewed): it matches `book-ui.md:1133-1137`. `Add part` follows `Pacing`. The picked part shows its title in the field, with `Retitle` and `Remove` on a row of their own. Unpicked parts show only the number field and `Add beat`.
+- Verdict: **APPROVE WITH NOTES** (nits 2-4 open).
