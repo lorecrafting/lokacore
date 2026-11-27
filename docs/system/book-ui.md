@@ -928,7 +928,8 @@ reasons and limits: [prose in the Book rulings](../design/prose-in-the-book-ruli
   compile, and the console badge reads `The Book shows unconfirmed words (N)`, listing each
   line's `file:line` and refusal.
 - **Put it back.** No key puts a write back: Build's Undo and the notebook's Recent do (below).
-  Cmd-Z (Ctrl-Z) returns with slice 6.5b (ruling 7). Inside a field it is the field's own undo.
+  Cmd-Z (Ctrl-Z) presses the strip's Undo while it shows (slice 6.5b, ruling 7); with no Undo
+  showing it does nothing. Inside a field it is the field's own undo.
 - **Walk keys** (Build, a hardware keyboard; [builder mode §5](../rnd/in-game-builder-mode-2026-11-19.md)).
   `]` and `[` walk the page's unwritten lines (wrapping), `}` and `{` every line Build draws as a
   field but a choice's label (titles are their pencils'); the landed line scrolls into view and
@@ -1005,7 +1006,7 @@ reasons and limits: [prose in the Book rulings](../design/prose-in-the-book-ruli
   - **Sheets.** A sheet has a Back button, the breadcrumb of the sheets under it (their titles
     joined ` › `), and its title, a header that takes focus whenever a new sheet comes on top; its
     body scrolls, from its start when it comes on top. Sheets stack, at most four: opening a fifth
-    replaces the top one, opening one already lower moves it to the top, and Back closes only the
+    replaces the top one (the palette excepted, below), opening one already lower moves it to the top, and Back closes only the
     top one (a Flow walk first steps back along its trail, Flow walk below). Closing the last returns focus to what opened the first. The stack and the top
     sheet's scroll survive a reload; leaving Build closes every sheet.
   - **Sheet foot** (6.2b, the panel's source footer). A sheet that draws one source file (a Room,
@@ -1402,7 +1403,13 @@ reasons and limits: [prose in the Book rulings](../design/prose-in-the-book-ruli
     - A moved room's exits keep their directions: a line runs centre to centre even when the
       layout contradicts its direction ([E3a Exits](../design/editor-map-and-story-rulings.md)),
       so it may slant; a line is never hidden by a box that is not one of its two rooms.
-  - Not in 4.3: a long-press drag (`Move…` stands in), the minimap's open gesture and map keys.
+  - **Keys** (6.5b, the panel's map keys). While focus is on the ground or a room in it and no mode is
+    armed: an arrow selects the nearest room that way on the level shown (from the
+    selection, else the current room, else the first), Enter selects, Shift-Enter is `Go here`,
+    PageUp and PageDown step a level up or down (none past the last), `+` (`=`) and `-` zoom by one
+    step, `0` fits. On a focused room Enter and Space are its press. A key with Cmd, Ctrl or Alt is
+    the browser's. A click on the ground focuses it, drawing no ring (the focus rule); Tab draws it.
+  - Not in 4.3: a long-press drag (`Move…` stands in) and the minimap's open gesture.
   - Labels here are placeholder words, the owner's to replace.
 - **Build: the Dialogue sheet** (slice 5.1a, [builder mode §4.6, §6.4](../rnd/in-game-builder-mode-2026-11-19.md)).
   A JSON dialogue's `def:<file>` sheet is [the generic sheet](#author-mode-dev-only) with its
@@ -1504,6 +1511,29 @@ reasons and limits: [prose in the Book rulings](../design/prose-in-the-book-ruli
     mechanic…` offer only that definition's fields; a new action, with neither, is offered both.
   - Not in 5.3: a dialogue's `policy` (its row stays todo); a failure outcome added or removed by
     hand against its check is rewritten silently to match, with no reason shown.
+  - Labels here are placeholder words, the owner's to replace.
+- **Build: the palette and keys** (slice 6.5b, [builder mode §5, ruling 7](../rnd/in-game-builder-mode-2026-11-19.md);
+  the panel's Cmd-K palette, whose rows are `kernel/ts/play/palette.ts`'s). Looks:
+  [author-mode marks](../BOOK-UI-COMPONENTS.md#component-catalogue).
+  - **Opening.** While Build is on, Cmd-K (Ctrl-K) opens the palette as a sheet on top, titled
+    `Commands`; its query field, not its title, takes the focus (the one exception to the header
+    rule). With four sheets open it drops the lowest, never the sheet it was opened over. Esc,
+    Back or a row closes it; focus then follows the stack rule (the sheet under it, else what had
+    focus before the first sheet).
+  - **Rows.** At most 50, ranked as the panel's: every command, the definitions (`<key> · <name> ·
+    <kind>`), `/find`'s text keys (`<words> · <key>`, asked once per typing pause) and the lines
+    still to write, read as Checks reads them (`<key>: unwritten · <file>`, never `~`, ruling 9);
+    a query starting `~` narrows to those; then the Story's rows. A row runs as the Builder gesture it names: a command
+    its act, a definition its sheet, a line its source, a
+    beat the Story in Contents, a Story row its sheet. A command with nothing to act on is not
+    listed: Delete only while the sheet the palette was opened over draws a deletable definition
+    (never a root file), Undo and `Undo the last map edit` only while the strip's Undo shows. A room
+    command with no room selected opens the Map to pick one.
+  - **Keys in it.** Up and Down move the active row (the first when the list changes), shown with
+    the selected act's fill and `aria-selected`; Enter runs it; Tab reaches each row as a button.
+  - **Cmd-E** (Ctrl-E) opens the source of the top sheet's definition (POST `/open`); a sheet with
+    no file does nothing. Cmd-K, Cmd-Z and Cmd-E are Build's only while Build is on; off, the Book's
+    and the browser's.
   - Labels here are placeholder words, the owner's to replace.
 - **No field.** A double-click on a line that is not words, or on words two keys draw alike
   (either key's field would write the other's line), opens nothing; a note under it, in a

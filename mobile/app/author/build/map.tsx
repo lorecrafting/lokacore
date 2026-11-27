@@ -9,6 +9,7 @@ import { Pressable, Text, useWindowDimensions, View } from 'react-native';
 import * as map from '../../../../kernel/ts/play/map.ts';
 import { M } from '../../../../kernel/ts/play/map.ts';
 import { freeKey } from '../../../../kernel/ts/play/mapedit.ts';
+import { glyph, mapKey } from './mapcontrols.tsx';
 import { size, space, type } from '../../book/tokens.ts';
 import { ink } from './build.ts';
 import { known } from './room.tsx';
@@ -61,7 +62,7 @@ let paint = () => {}; // the drawing's own redraw: a drag or pinch redraws the m
 let hooks = { go: (_room: string) => {}, here: (): string | undefined => undefined };
 
 const rooms = () => known.rooms;
-const chosen = () => rooms().find((r) => r.key === selected);
+export const chosen = () => rooms().find((r) => r.key === selected);
 /** The level shown: the one stepped to while it still has rooms, else the current room's, else the lowest.
  * Not stored: a call before the Book knows its room must not pin the lowest level. */
 function level() {
@@ -149,40 +150,19 @@ const wheel = (e: WheelEvent) => {
   e.preventDefault();
   zoom(Math.exp(-e.deltaY / 100), pointer(e, e.currentTarget as HTMLElement));
 };
-/** The ground's ref: the wheel on mount; on unmount, drop a gesture whose pointers never lifted. */
+/** The ground's ref: the wheel and keys on mount; on unmount, drop a gesture whose pointers never lifted. */
 function wheeled(node: HTMLElement | null) {
   if (node)
     return (
       node.addEventListener('wheel', wheel, { passive: false }),
+      node.addEventListener('keydown', keyed),
+      (node.tabIndex = 0), // a click on the ground focuses it: its keys are the map's
       addEventListener('keydown', esc)
     );
   removeEventListener('keydown', esc);
   down.clear();
   grab = mode = undefined; // a mode left open ends with the sheet
 }
-
-/** A control glyph; without `run` it is disabled, in `dim`. */
-const glyph = (g: { glyph: string; name: string; drop?: number }, run?: () => void) => (
-  <Pressable
-    key={g.name}
-    accessibilityRole="button"
-    accessibilityLabel={g.name}
-    accessibilityState={{ disabled: !run }}
-    disabled={!run}
-    onPress={run}
-    style={CONTROL}
-  >
-    <Text
-      style={{
-        ...type.control,
-        color: ink(run ? 'action' : 'dim'),
-        transform: [{ translateY: g.drop ?? 0 }],
-      }}
-    >
-      {g.glyph}
-    </Text>
-  </Pressable>
-);
 
 /** The level's exits as rotated bars (MapDrawing.tsx's Line), box edge to box edge, drawn over the
  * boxes: a room between two joined rooms hides no line. */
@@ -216,6 +196,14 @@ const pick = (key: string) => ((selected = key), (mode = undefined), known.redra
 const cancel = () => ((mode = undefined), known.redraw());
 /** Esc leaves Join…, Move… or Area… writing nothing, as Cancel does. */
 const esc = (e: KeyboardEvent) => e.key === 'Escape' && mode && cancel();
+const goTo = (key: string) => ((z = undefined), hooks.go(key));
+const fit = () => set(fitted());
+// the ground's keys, from it or a room in it: a focused room's Enter and Space are its press, and an
+// open Join… or Move… takes taps
+const keyed = (e: KeyboardEvent) =>
+  !mode &&
+  (e.target === e.currentTarget || (e.key !== 'Enter' && e.key !== ' ')) &&
+  mapKey(e, rooms(), level(), selected, hooks.here(), { pick, goTo, step, zoom, fit });
 /** Join… then a tap on `b`: an exit from the selection toward it and the way back (the panel's Shift-drag). */
 function join(b: map.MapRoom) {
   const a = chosen()!;
@@ -395,7 +383,7 @@ function bar(r: map.MapRoom | undefined) {
         {mode
           ? act(WORDS.cancel, cancel)
           : [
-              act(WORDS.go, () => ((z = undefined), hooks.go(selected!))),
+              act(WORDS.go, () => goTo(selected!)),
               act(WORDS.sheet, () => known.open(`room:${selected}`)),
               r?.at?.z === level() && act(WORDS.join, () => ((mode = 'join'), known.redraw())),
               r?.at && act(WORDS.move, () => ((mode = 'move'), known.redraw())),
@@ -423,7 +411,7 @@ function body() {
       ]}
       {glyph(WORDS.out, () => zoom(1 / M.step))}
       {glyph(WORDS.in, () => zoom(M.step))}
-      {glyph(WORDS.fit, () => set(fitted()))}
+      {glyph(WORDS.fit, fit)}
     </View>,
     <Drawing key="ground" drawn={map.onLevel(rooms(), level())} />,
     selected ? bar(chosen()) : null,

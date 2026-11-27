@@ -176,15 +176,7 @@ export function addHere(r: MapRoom, nodes: Node[], held: Template[], open: (id: 
   const add = (dir: Template['dir'], up?: string) =>
     act(
       up ?? WORDS[dir],
-      () =>
-        void run(async () => {
-          const taken = held.filter((t) => t.dir === dir).map((t) => t.key);
-          const key = up
-            ? childKey(dir, up, nodes, taken)
-            : freeKey(nodeOf(dir), nodeOf(dir), nodes, taken);
-          await ed.made(r, dir, key, up);
-          open(`${nodeOf(dir)}:${key}`);
-        }),
+      () => void addTo(r, dir, nodes, held, open, up),
       undefined,
       `${dir}:${up ?? ''}`, // a template named in both kinds, or `Person`, keeps its own button
     );
@@ -197,6 +189,24 @@ export function addHere(r: MapRoom, nodes: Node[], held: Template[], open: (id: 
     </View>
   );
 }
+
+/** Adds to room `r` a new `dir` (or a child of template `up`), its words `~`; then its sheet opens. */
+export const addTo = (
+  r: MapRoom,
+  dir: Template['dir'],
+  nodes: Node[],
+  held: Template[],
+  open: (id: string) => void,
+  up?: string,
+) =>
+  run(async () => {
+    const taken = held.filter((t) => t.dir === dir).map((t) => t.key);
+    const key = up
+      ? childKey(dir, up, nodes, taken)
+      : freeKey(nodeOf(dir), nodeOf(dir), nodes, taken);
+    await ed.made(r, dir, key, up);
+    open(`${nodeOf(dir)}:${key}`);
+  });
 
 /** Move to area: the field's area, or the root when it is empty. */
 export const moveTo = (r: MapRoom) => (
@@ -222,6 +232,21 @@ export const moveTo = (r: MapRoom) => (
   </View>
 );
 
+/** Deletes `key` from `file`, asking in sheet `shut` for the other files it takes; once it is
+ * gone, `shut` and the key's other sheets close (the foot's Delete, and the palette's). */
+export const dropIn = (key: string, file: string | undefined, shut: string) =>
+  run(async () => {
+    if (!file) return WORDS.noFile(key);
+    const ask = (files: string[]) =>
+      new Promise<boolean>((answer) => ((asking = { key: shut, files, answer }), after()));
+    let yes = true;
+    const why = await drop(io, key, file, (files) => ask(files).then((y) => (yes = y)));
+    // it is gone: its sheets go too (kind and definition), wherever they sit
+    const sheets = new Set([shut, `${nodeOf(file.split('/').at(-2) ?? '')}:${key}`, `def:${file}`]);
+    if (why === '' && yes) sheets.forEach((id) => close(id));
+    return why;
+  });
+
 /** A sheet's foot: Delete `key` (`refs` definitions name it, when known), then the other files it
  * takes, asked in the sheet; once it is gone, sheet `shut` and the key's other sheets close. */
 export function foot(key: string, file: string | undefined, shut: string, refs?: number) {
@@ -236,22 +261,7 @@ export function foot(key: string, file: string | undefined, shut: string, refs?:
       </View>
     );
   }
-  const ask = (files: string[]) =>
-    new Promise<boolean>((answer) => ((asking = { key: shut, files, answer }), after()));
-  const press = () =>
-    void run(async () => {
-      if (!file) return WORDS.noFile(key);
-      let yes = true;
-      const why = await drop(io, key, file, (files) => ask(files).then((y) => (yes = y)));
-      // it is gone: its sheets go too (kind and definition), wherever they sit
-      const sheets = new Set([
-        shut,
-        `${nodeOf(file.split('/').at(-2) ?? '')}:${key}`,
-        `def:${file}`,
-      ]);
-      if (why === '' && yes) sheets.forEach((id) => close(id));
-      return why;
-    });
+  const press = () => void dropIn(key, file, shut);
   // named elsewhere: greyed, still pressable so the server's refusal names the referrers
   return (
     <View key="foot" style={row}>

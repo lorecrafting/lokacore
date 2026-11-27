@@ -125,8 +125,9 @@ editor_controls =
          "\"hierarchy\": book generic: refused"},
         {"parity-duplicate", %{parity: parity ++ [hd(parity)]},
          "\"hierarchy\": ids are unique strings"},
-        {"parity-unlisted", %{todo: String.replace(todo, "parity:palette  # 6.5\n", "")},
-         "parity:palette: todo but not in the baseline"}
+        # a row planted todo, so the plant outlives the last slice that ships one
+        {"parity-unlisted", %{parity: [Map.put(hd(parity), "book", "todo") | tl(parity)]},
+         "parity:hierarchy: todo but not in the baseline"}
       ] do
     files =
       for {k, v} <- planted,
