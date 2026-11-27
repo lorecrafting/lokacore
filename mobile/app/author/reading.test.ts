@@ -178,7 +178,7 @@ test('Why folds the whole report under its lines, shut until pressed and on each
 
 // Break: a rule that looked drawn as plain words when the last /story named its file (no way to its
 // sheet, the panel's select), the wrong rule's file opened, or its verdict losing its red.
-test('Step: a rule that looked opens its sheet; its verdict keeps its tone', async () => {
+test('Step: a rule that looked opens its sheet; its verdict keeps its tone', async (t) => {
   build.updated((at(7, true), { kind: 'pulse' }) as never);
   known.files = {
     'p@1:reaction/hush': 'reactions/hush.yaml',
@@ -187,6 +187,7 @@ test('Step: a rule that looked opens its sheet; its verdict keeps its tone', asy
   const opened: string[] = [];
   const open = known.open;
   known.open = (id: string) => void opened.push(id);
+  t.after(() => Object.assign(known, { files: {}, open })); // a failed assert leaves no stub behind
   answer = replies(true, {
     command: 'wait',
     outcome: 'accepted',
@@ -200,7 +201,6 @@ test('Step: a rule that looked opens its sheet; its verdict keeps its tone', asy
   assert.deepEqual(opened, ['def:reactions/hush.yaml']);
   assert.match(text(), /\|glow fired\|hush\|no when leaf held$/); // glow: a scene's file, not a rule's
   assert.equal(tone('no when leaf held'), ink('danger'));
-  Object.assign(known, { files: {}, open });
 });
 
 // Break: a late /why reply for an older step overwriting the newer step's report (shown as nothing,

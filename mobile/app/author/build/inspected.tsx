@@ -19,7 +19,7 @@ export function inspected(
   ref = file && Object.keys(known.files).find((r) => known.files[r] === file), // a bundle member's: its caller's
 ) {
   const s = known.story;
-  if (!s || !file) return null;
+  if (!s || !(file || ref)) return null; // a bundle member has a ref and no file of its own
   // unwritten counts placeholders, as the Story rows do (storylist.ts), not the panel's todo entries
   const todo = (ref && s.todo?.[ref]?.reduce((n, t) => n + t.placeholders.length, 0)) || 0;
   const diagnostics = (ref && s.diagnostics?.[ref]?.length) || 0;

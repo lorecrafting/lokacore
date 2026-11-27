@@ -24,6 +24,7 @@ const story = {
       { ref: R('dialogue', 'farewell'), kind: 'dialogue' },
       { ref: R('fact', 'met_nell'), kind: 'fact' },
       { ref: R('npc', 'nell'), kind: 'npc' },
+      { ref: R('item', 'lamp'), kind: 'item' },
     ],
     edges: [
       // the reader first: Trace lists the setters before the readers whatever the edges' order
@@ -74,9 +75,8 @@ const story = {
     [R('dialogue', 'greet')]: 'dialogues/greet.json',
     [R('dialogue', 'farewell')]: 'dialogues/farewell.json',
     [R('npc', 'nell')]: 'npcs/nell.json',
-    [R('room', 'hall')]: 'rooms/hall.json',
   },
-  bundled: {},
+  bundled: { [R('item', 'lamp')]: 'areas/castle.json' },
   map: [
     {
       ref: R('room', 'hall'),
@@ -269,6 +269,8 @@ test("each node sheet's head names its ref, unwritten and diagnostics counts, an
     R('npc', 'nell'),
     '0 unwritten · 0 diagnostics',
   ]);
+  assert.deepEqual(head('npc', 'nobody'), [], "another person's head is not hers");
+  assert.deepEqual(head('item', 'lamp')[0], R('item', 'lamp'), 'a bundle member: a ref, no file');
   assert.deepEqual(head('room', 'hall').slice(0, 2), [
     R('room', 'hall'),
     '0 unwritten · 0 diagnostics',
