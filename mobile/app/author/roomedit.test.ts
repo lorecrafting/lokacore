@@ -9,7 +9,7 @@ import { nodes, words } from '../book/__tests__/combat-book.test.ts'; // also re
 
 const { story } = await import('./build/room.tsx');
 const { sheets } = await import('./build/sheet.tsx');
-const { foot, io, wire } = await import('./build/roomedit.tsx');
+const { foot, io, run, wire } = await import('./build/roomedit.tsx');
 const { thingPen } = await import('./build/thing.tsx');
 await import('./build/contents.tsx');
 const { storySheet } = await import('./build/story.tsx');
@@ -523,4 +523,15 @@ test('io: only a 2xx answer is ok', async () => {
     [(await at(299)).ok, (await at(300)).ok, (await at(200)).ok, (await at(199)).ok],
     [true, false, true, false],
   );
+});
+
+// Breaks: a gesture with no server to write to reported as written, so a field forgets its words.
+test('a gesture with no api never runs and is not written', async () => {
+  let ran = false;
+  wire(
+    undefined,
+    () => {},
+    () => {},
+  );
+  assert.deepEqual([await run(async () => void (ran = true)), ran], [false, false]);
 });
