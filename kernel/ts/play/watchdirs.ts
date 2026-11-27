@@ -1,8 +1,8 @@
-// The dev watcher's file events on Linux (loka-hcnlh.92). Node's recursive fs.watch there watches
-// each file's inode, so after the author server's atomic write (write.ts `put`: a .tmp renamed over
-// the file) that watch sits on the replaced inode and the file's next write is never seen. A
-// directory's watch names every child created or renamed into it, so each directory is watched;
-// one that appears is watched (again) when its parent names it.
+// The dev watcher's file events (loka-hcnlh.92). Node's recursive fs.watch on Linux watches each
+// file's inode, so after the author server's atomic write (write.ts `put`: a .tmp renamed over the
+// file) that watch sits on the replaced inode and the file's next write is never seen. A
+// directory's watch names every child created or renamed into it, so each directory is watched (on
+// every platform, so macOS runs the path CI runs); one that appears is watched when its parent names it.
 import { readdirSync, statSync, watch, type FSWatcher } from 'node:fs';
 import { join, relative } from 'node:path';
 

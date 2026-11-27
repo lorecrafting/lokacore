@@ -1,6 +1,15 @@
 // The dev watcher's events (loka-hcnlh.92), on a controlled tree written as the author server writes.
 import assert from 'node:assert/strict';
-import { mkdirSync, mkdtempSync, realpathSync, renameSync, rmSync, writeFileSync } from 'node:fs';
+import {
+  mkdirSync,
+  mkdtempSync,
+  realpathSync,
+  renameSync,
+  rmSync,
+  watch,
+  writeFileSync,
+  type FSWatcher,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { test } from 'node:test';
@@ -51,4 +60,24 @@ test('a directory it cannot watch is warned of, one already gone is not', (t) =>
   assert.equal(warn.mock.callCount(), 0);
   watchDirs(join(root, 'file'), () => {}).close();
   assert.match(String(warn.mock.calls[0]?.arguments[0]), /not watched: .*file: .*ENOTDIR/);
+});
+
+// Breaks: an event with no file name (Linux may send one) throws in the listener and ends the server.
+test('an event naming no file is passed over', (t) => {
+  const root = realpathSync(mkdtempSync(join(tmpdir(), 'loka-watch-')));
+  const watchers: FSWatcher[] = [];
+  const probe = watch(root);
+  const proto = Object.getPrototypeOf(probe) as FSWatcher; // FSWatcher is no named ESM export
+  probe.close();
+  const on = proto.on;
+  t.mock.method(proto, 'on', function (this: FSWatcher, ...a: Parameters<typeof on>) {
+    watchers.push(this);
+    return on.apply(this, a);
+  });
+  const seen: string[] = [];
+  const w = watchDirs(root, (file) => seen.push(file));
+  t.after(() => (w.close(), rmSync(root, { recursive: true })));
+  assert.ok(watchers.length);
+  watchers[0].emit('change', 'rename', null);
+  assert.deepEqual(seen, []);
 });
