@@ -1,4 +1,4 @@
-// size: allow 675, one mocked /story and /change harness serves the registry rows (treatment:reverie too) and the Rules block cases
+// size: allow 711, one mocked /story and /change harness serves the registry rows (treatment:reverie too) and the Rules block cases
 // The generic sheet (author/build/generic.tsx, form.tsx; design §7, slice 2.3): every registry row
 // whose book verb is `generic` (kernel/ts/play/registry.json, held by bin/editor_gate.exs) is
 // added, edited or removed by the sheet, each a `/change` op at the row's own path.
@@ -14,6 +14,7 @@ const { WORDS } = await import('./build/form.tsx');
 const rowsOpen = (await import('./build/formwrite.ts')).opened;
 const HOURS = (await import('./build/schedule.tsx')).WORDS;
 const COMBAT = (await import('./build/combat.tsx')).WORDS;
+const { run } = await import('./build/roomedit.tsx');
 
 const root = new URL('../../../', import.meta.url);
 const read = (rel: string) => JSON.parse(readFileSync(new URL(rel, root), 'utf8'));
@@ -346,6 +347,44 @@ test('a write refused after the file is read shows in the sheet', async () => {
   const alert = s.shown().find((x) => x.props?.accessibilityRole === 'alert');
   assert.equal(words(alert), 'a file changed since the map read it');
   hash = 'S';
+});
+
+// Breaks (loka-x1frg): a field left while another gesture (the strip's Undo, Build.tsx) writes is
+// dropped with nothing said and its typed words (or a map's typed key) forgotten, so leaving it
+// again (or a second Add) writes nothing.
+test('a field left while an Undo writes says it was not written; leaving it again writes it', async () => {
+  const s = await opened('statuses', { tick_every: 5 });
+  let release = () => {};
+  void run(() => new Promise<void>((r) => (release = r))); // an Undo still putting back
+  assert.deepEqual(await typeIn(s, ['tick_every'], '6'), [], 'a write went out mid-gesture');
+  const alert = s.shown().find((x) => x.props?.accessibilityRole === 'alert');
+  assert.match(words(alert), /Not written/, 'the dropped write said nothing');
+  hash = 'U'; // the Undo rewrote the file
+  release();
+  await settle(); // the Undo's new /story
+  s.shown(); // the sheet reads the file again under it
+  await settle();
+  within(s, ['tick_every'])
+    .find((x) => x.props?.onBlur)
+    .props.onBlur();
+  await settle();
+  assert.deepEqual(sent(), [{ path: ['tick_every'], value: 6 }], 'the typed words were forgotten');
+  hash = 'S';
+  const t = await opened('text', {}); // a map's typed key, pressed Add mid-gesture, the same
+  void run(() => new Promise<void>((r) => (release = r)));
+  t.shown()
+    .find((x) => x.props?.accessibilityLabel === WORDS.key)
+    .props.onChangeText('k');
+  await t.press('entry ');
+  release();
+  await settle();
+  assert.deepEqual(sent(), [], 'an Add went out mid-gesture');
+  await t.press('entry ');
+  assert.deepEqual(
+    sent().map((o) => o.path),
+    [['k']],
+    'the typed key was forgotten',
+  );
 });
 
 /** `doc` of `kind` opened under a cartridge whose capabilities are only speech, Add mechanic… open. */

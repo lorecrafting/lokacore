@@ -42,16 +42,17 @@ export const toggle = (key: string) => (
   opened.has(key) ? opened.delete(key) : opened.add(key),
   known.redraw()
 );
-export const set = (at: At, path: Step[], value: unknown) =>
+/** Resolves false when the write never ran (roomedit `run`); undefined when it only reveals. */
+export const set = (at: At, path: Step[], value: unknown): Promise<boolean> | undefined =>
   value === undefined
-    ? (reveal(id(at, path), true), known.redraw())
+    ? void (reveal(id(at, path), true), known.redraw())
     : send(at, ops(path, value), () => reveal(id(at, path), false));
 /** `o` with the ops it brings along (`At.pair`). */
 export const own = (at: At, o: Ops) => at.pair?.(o) ?? o;
 /** One `/change` of `o` to the file, unless the gate refuses it: then the refusal shows, nothing sent. */
 export const send = (at: At, o: Ops, then = () => {}) => {
   const w = own(at, o);
-  void run(async () => at.gate?.(w) ?? ed.change([at.file, at.was, w]).then(then));
+  return run(async () => at.gate?.(w) ?? ed.change([at.file, at.was, w]).then(then));
 };
 /** A write at `path`; at the root (a picked branch, a whole list) one op per top-level field. */
 export const ops = (path: Step[], value: unknown) =>

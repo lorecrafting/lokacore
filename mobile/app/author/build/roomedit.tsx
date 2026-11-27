@@ -39,6 +39,7 @@ const WORDS = {
   add: '＋ Add here',
   npcs: 'Person',
   items: 'Item',
+  busy: 'Not written: another change was still saving. Try again.',
 };
 export type Node = { kind: string; ref: string };
 export type Template = { dir: 'npcs' | 'items'; key: string }; // /templates' abstract NPC or item
@@ -46,7 +47,7 @@ export type Template = { dir: 'npcs' | 'items'; key: string }; // /templates' ab
 let api: Hooks['api'] | undefined;
 let after = () => {}; // reads the map again and redraws (room.tsx `story`)
 let close = (_id: string) => {}; // closes a sheet by id (Build.tsx `back`)
-let busy = false; // one gesture at a time: a press while one runs does nothing
+let busy = false; // one gesture at a time: a press while one runs is refused, and says so
 let ran: Promise<void> = Promise.resolve(); // the gesture running now
 let said = ''; // the last refusal, shown at the sheet's top until the next press
 let asking: { key: string; files: string[]; answer: (yes: boolean) => void } | undefined;
@@ -83,15 +84,17 @@ export const refused = () => said;
 export const tell = (why: string) =>
   busy ? void ((said = why), after()) : void run(async () => why);
 
-/** Runs one gesture; a refusal (a thrown or returned reason) shows in the sheet. */
-export async function run(go: () => Promise<unknown>) {
+/** Runs one gesture; a refusal (a thrown or returned reason) shows in the sheet. Resolves false when
+ * it never ran: another gesture was writing (said, not silent; loka-x1frg) or no api is wired. */
+export async function run(go: () => Promise<unknown>): Promise<boolean> {
   if (asking) {
     const { answer } = asking; // another press answers a pending Delete question Keep, then goes on
     asking = undefined;
     answer(false);
     await ran;
   }
-  if (busy || !api) return;
+  if (!api) return false;
+  if (busy) return (tell(WORDS.busy), false);
   busy = true;
   said = '';
   ran = (async () => {
@@ -107,7 +110,7 @@ export async function run(go: () => Promise<unknown>) {
       after();
     }
   })();
-  return ran;
+  return ran.then(() => true);
 }
 
 const text = { ...type.small, color: ink('fg'), paddingHorizontal: space.md };
