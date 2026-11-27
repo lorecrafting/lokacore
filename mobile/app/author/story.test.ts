@@ -268,14 +268,45 @@ test('Bind… folds the binds: shut, none; open, only the shorts beat 1 binds no
   assert.deepEqual(binds().map(label), ['Bind dialogues/farewell']);
 });
 
-test('a story with no outline shows the plain no-story line and no Add beat', () => {
+test('a story with no outline shows the plain no-story line and no Add beat; Add part asks /new for the outline starter', async () => {
+  // Breaks: Add beat offered on a part that does not exist, or Add part over no outline.json
+  // writing a /change to a file that is not there instead of creating it.
   const s = known.story;
   known.story = { ...story, outline: null } as never;
   try {
     assert.deepEqual([texts().includes('No story yet.'), all('Add beat').length], [true, 0]);
+    posts = [];
+    await press('Add part');
+    assert.deepEqual(posts, [['/new', { kind: 'outline', name: 'outline' }]]);
   } finally {
     known.story = s;
   }
+});
+
+test('an outline.json the last /story refused offers no Add part', () => {
+  // Breaks: Add part offered over the author's broken outline.json, writing on a file play cannot read.
+  const s = known.story;
+  known.story = { ...story, outline: { refused: 'outline.json: x' } } as never;
+  try {
+    assert.deepEqual([texts().includes('outline.json: x'), all('Add part').length], [true, 0]);
+  } finally {
+    known.story = s;
+  }
+});
+
+test('Add part appends an empty part; on part 1, Retitle writes the typed title and Remove deletes the part', async () => {
+  // Breaks: an add that replaces the parts, or a part's edits landing on another part or a beat.
+  posts = [];
+  await press('Add part');
+  await press('Part 1  Arrival'); // open: now picked
+  type('title', 'Placeholder one');
+  await press('Retitle');
+  await press('Remove');
+  assert.deepEqual(posts, [
+    change([{ path: ['parts'], value: [...outline.parts, { beats: [] }] }]),
+    change([{ path: ['parts', 0, 'title'], value: 'Placeholder one' }]),
+    change([{ path: ['parts', 0], delete: true }]),
+  ]);
 });
 
 test('a sheet restored before /story arrives says Nothing here, the tab the refusal then the no-story line', async () => {

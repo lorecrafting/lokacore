@@ -13,12 +13,16 @@ parity = JSON.decode!(File.read!(Path.join(root, parity_table)))
 todo = File.read!(Path.join(root, todo_baseline))
 notyet_list = "test/loka/builder_generic_notyet.txt"
 notyet = File.read!(Path.join(root, notyet_list))
-# dialogues.policy (book create still todo) with its book create set to v (nil drops the key)
+
+# outline.parts with its book create set to v (nil drops the key); a todo or not-yet control plants
+# that row back as todo and lists it itself, as no schema row is meant to stay todo
 book = fn v ->
-  b = editor["dialogues.policy"]["book"]
+  b = editor["outline.parts"]["book"]
   b = if v, do: Map.put(b, "create", v), else: Map.delete(b, "create")
-  Map.put(editor, "dialogues.policy", Map.put(editor["dialogues.policy"], "book", b))
+  Map.put(editor, "outline.parts", Map.put(editor["outline.parts"], "book", b))
 end
+
+listed = &(&1 <> "outline.parts.book.create  # red control\n")
 
 panel = &[Map.put(hd(parity), "panel", &1) | tl(parity)]
 card = &Map.put(editor, "services.name", Map.put(editor["services.name"], "edit", &1))
@@ -74,28 +78,36 @@ editor_controls =
          "services.name.edit: no longer generic"},
         {"grown", %{main: String.replace(base, "services.name.edit\n", "")},
          "services.name.edit: not in main's baseline"},
-        {"book-dropped", %{registry: book.(nil)}, "dialogues.policy: book create missing"},
+        {"book-dropped", %{registry: book.(nil)}, "outline.parts: book create missing"},
         {"notyet-generic",
-         %{registry: put_in(editor, ["outline.parts", "book", "delete"], "generic")},
-         "outline.parts.book.delete: no longer not yet generic, delete the line"},
+         %{registry: book.("generic"), notyet: listed.(notyet), notyet_main: listed.(notyet)},
+         "outline.parts.book.create: no longer not yet generic, delete the line"},
         {"generic-off-panel",
          %{registry: put_in(editor, ["actions.cooldown", "book", "create"], "generic")},
          "actions.cooldown: book create generic: refused"},
         {"notyet-grown",
-         %{notyet_main: String.replace(notyet, ~r/^outline\.parts\.book\.delete .*\n/m, "")},
-         "outline.parts.book.delete: not in main's baseline"},
+         %{
+           registry: book.("todo"),
+           todo: listed.(todo),
+           todo_main: listed.(todo),
+           notyet: listed.(notyet),
+           notyet_main: notyet
+         }, "outline.parts.book.create: not in main's baseline"},
         {"book-missing", %{registry: book.("Nope.tsx")},
-         "dialogues.policy: book create Nope.tsx: no such file"},
+         "outline.parts: book create Nope.tsx: no such file"},
         {"book-escape", %{registry: book.("../panel.tsx")},
-         "dialogues.policy: book create ../panel.tsx: no such file"},
-        {"book-accepted", %{registry: book.("RedSheet.tsx"), sheet: ""},
-         "dialogues.policy.book.create: no longer todo"},
-        {"todo-unlisted",
-         %{todo: Regex.replace(~r/^dialogues\.policy\.book\.create\b.*\n/m, todo, "")},
-         "dialogues.policy.book.create: todo but not in the baseline"},
-        {"todo-grown",
-         %{todo_main: Regex.replace(~r/^dialogues\.policy\.book\.create\b.*\n/m, todo, "")},
-         "dialogues.policy.book.create: not in main's baseline"},
+         "outline.parts: book create ../panel.tsx: no such file"},
+        {"book-accepted",
+         %{
+           registry: book.("RedSheet.tsx"),
+           sheet: "",
+           todo: listed.(todo),
+           todo_main: listed.(todo)
+         }, "outline.parts.book.create: no longer todo"},
+        {"todo-unlisted", %{registry: book.("todo"), todo: todo, todo_main: todo},
+         "outline.parts.book.create: todo but not in the baseline"},
+        {"todo-grown", %{registry: book.("todo"), todo: listed.(todo), todo_main: todo},
+         "outline.parts.book.create: not in main's baseline"},
         {"parity-panel", %{parity: panel.("tools/author-panel/src/nope.tsx")},
          "\"hierarchy\": no panel file"},
         {"parity-escape", %{parity: panel.("../outside.tsx")}, "\"hierarchy\": no panel file"},

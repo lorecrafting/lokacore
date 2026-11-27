@@ -4,7 +4,7 @@ import type { Run } from './mapedit.ts';
 const no = (why: string): never => {
   throw new Error(why);
 };
-type Outline = { parts: { beats: { n: number; nodes?: string[] }[] }[] };
+type Outline = { parts: { title?: string; beats: { n: number; nodes?: string[] }[] }[] };
 /** Bind (design 5c): `short`, one of `known` (Story.shorts), joins beat `n` of part `part` in outline.json. */
 export const bind = (s: Run, part: number, n: number, short: string, known: string[]) =>
   s.change<Outline>('outline.json', (doc) => {
@@ -41,3 +41,24 @@ export const titleBeat = (s: Run, part: number, n: number, title: string) =>
   });
 export const dropBeat = (s: Run, part: number, n: number) =>
   s.change<Outline>('outline.json', (doc) => [{ path: beatOf(doc, part, n), delete: true }]);
+
+// Part edits (the Story tab's part rows); outline.json itself comes from /new's outline starter.
+export const addPart = (s: Run) =>
+  s.change<Outline>('outline.json', (doc) => [
+    { path: ['parts'], value: [...doc.parts, { beats: [] }] },
+  ]);
+export const titlePart = (s: Run, part: number, title: string) =>
+  s.change<Outline>('outline.json', (doc) => {
+    partOf(doc, part);
+    const path = ['parts', part, 'title'];
+    return title
+      ? [{ path, value: title }]
+      : 'title' in doc.parts[part]
+        ? [{ path, delete: true }]
+        : [];
+  });
+export const dropPart = (s: Run, part: number) =>
+  s.change<Outline>(
+    'outline.json',
+    (doc) => (partOf(doc, part), [{ path: ['parts', part], delete: true }]),
+  );

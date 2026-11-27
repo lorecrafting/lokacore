@@ -8,9 +8,6 @@ cartridge.version.book.delete
 dialogues.policy.book.create  # loka-hcnlh.56
 dialogues.policy.book.edit  # loka-hcnlh.56
 dialogues.policy.book.delete  # loka-hcnlh.56
-outline.parts.book.create  # loka-hcnlh.45
-outline.parts.book.edit  # loka-hcnlh.45
-outline.parts.book.delete  # loka-hcnlh.45
 scenes.abstract.book.create  # loka-hcnlh.52
 parity:device-size  # 6.5, loka-hcnlh.32
 parity:map-pan-zoom-keys  # 6.5

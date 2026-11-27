@@ -1,6 +1,7 @@
+// size: allow 330, the rows, their part and beat edits and the sheets share the tab's drafts and pick
 // The notebook's Story tab (design §4.8, slice 5.4b): the panel's Story list (kernel/ts/play/storylist.ts `rows`)
-// as rows. A node row has Go there, Sheet, Trace, Consequences and Flow (flow.tsx); a part adds a beat; a beat binds, retitles,
-// is removed and shows Knowledge. Trace, Consequences, Knowledge, Facts and Pacing are sheets.
+// as rows. A node row has Go there, Sheet, Trace, Consequences and Flow (flow.tsx); Add part starts the outline or adds a
+// part; a part adds a beat, is retitled and removed; a beat binds, retitles, is removed and shows Knowledge. Trace, Consequences, Knowledge, Facts and Pacing are sheets.
 import { Text, TextInput, View } from 'react-native';
 import * as L from '../../../../kernel/ts/play/storylist.ts';
 import { laneOf } from '../../../../kernel/ts/play/flow.ts';
@@ -26,6 +27,7 @@ const WORDS = {
   facts: 'Facts',
   pacing: 'Pacing',
   add: 'Add beat',
+  addPart: 'Add part', // placeholder words: the owner writes the line
   number: 'number',
   title: 'title',
   retitle: 'Retitle',
@@ -157,6 +159,27 @@ function beatActs(r: L.Row, s: L.Story) {
   ];
 }
 
+/** A part's edits, each one gesture: Retitle ('' removes the title) and Remove, its beats with it. */
+function partActs(r: L.Row, s: L.Story) {
+  const part = partNo(r.id);
+  const shown = L.outlineOf(s)?.parts[part] ?? undefined;
+  const drop = () => {
+    picked = undefined; // the next part takes this one's id
+    titles.delete(r.id);
+    return ed.dropPart(part);
+  };
+  return [
+    <View key="edit" style={row}>
+      {field(WORDS.title, titles, r.id, shown)}
+      {act(
+        WORDS.retitle,
+        () => void run(() => ed.titlePart(part, titles.get(r.id) ?? shown ?? '')),
+      )}
+      {act(WORDS.remove, () => void run(drop))}
+    </View>,
+  ];
+}
+
 /** One list row: a part or beat opens or shuts and shows its edits, a node shows its actions. */
 function storyRow(r: L.Row, s: L.Story) {
   const label = [
@@ -186,7 +209,7 @@ function storyRow(r: L.Row, s: L.Story) {
         ? nodeActs(r)
         : r.kind === 'beat'
           ? beatActs(r, s)
-          : [];
+          : partActs(r, s);
   const indent = ((r.level - 1) * size.touch) / 2; // mutate-skip: layout; half a touch target per level
   return (
     <View key={r.id} style={{ paddingLeft: indent }}>
@@ -199,8 +222,12 @@ function storyRow(r: L.Row, s: L.Story) {
   );
 }
 
-/** The Story tab's body: the refusal, Facts and Pacing, why there are no beats, then the rows; no
- * story or no parts, the plain line (no Add beat: outlineedit adds a beat only to a part that exists). */
+const addPart = (s: L.Story) =>
+  s.outline ? ed.addPart() : ed.call('new', { kind: 'outline', name: 'outline' });
+
+/** The Story tab's body: the refusal, Facts, Pacing and Add part, why there are no beats, then the rows;
+ * no story or no parts, the plain line. Add part starts outline.json (/new's outline starter, one part)
+ * when there is none, and is not offered over an outline.json the last /story refused. */
 export function storyRows() {
   const s = known.story;
   if (!s) return [refusal(), line(WORDS.none, 'none')];
@@ -211,6 +238,7 @@ export function storyRows() {
     <View key="sheets" style={row}>
       {act(WORDS.facts, () => known.open('facts:'))}
       {act(WORDS.pacing, () => known.open('pacing:'))}
+      {why ? null : act(WORDS.addPart, () => void run(() => addPart(s)))}
     </View>,
     why || bare ? (
       <View key="why" style={column}>
