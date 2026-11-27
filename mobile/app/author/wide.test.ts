@@ -119,6 +119,8 @@ test('from 1152 Notebook opens a column beside the Book and the docked sheet; na
     scroll: 40,
     notebook: 0,
   });
+  const selected = nodes(column()).find((n) => n.props?.accessibilityState?.selected);
+  assert.equal(label(selected), 'World', 'the tab left open comes back');
   const held = sheet(); // drawn before the column scrolls
   scrolled(nodes(column()), 7);
   scrolled(held, 50);
@@ -141,8 +143,6 @@ test('from 1152 Notebook opens a column beside the Book and the docked sheet; na
   const slid = column().props.style.at(-1).animationKeyframes[0].from.transform;
   assert.equal(slid, 'translateX(-100%)', 'the column slides in from the left');
   assert.deepEqual(chip(), { expanded: true, selected: true });
-  const selected = nodes(column()).find((n) => n.props?.accessibilityState?.selected);
-  assert.equal(label(selected), 'World', 'the tab left open comes back');
   press(nodes(column()), 'Recent');
   assert.equal(stored.get('loka-build-tab'), 'Recent');
   open('map');
