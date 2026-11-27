@@ -53,7 +53,7 @@ export function mapKey(
   here: string | undefined,
   a: Acts,
 ) {
-  if (e.metaKey || e.ctrlKey || e.altKey) return; // Cmd-+ and Cmd-0 stay the browser's zoom
+  if (e.metaKey || e.ctrlKey || e.altKey) return; // the browser's zoom chords stay the browser's
   const level = map.onLevel(rooms, z);
   const from = map.entry(level, selected, here);
   const all = map.levels(rooms);

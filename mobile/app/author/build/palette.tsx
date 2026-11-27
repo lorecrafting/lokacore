@@ -80,7 +80,7 @@ export const RUN: Record<string, () => unknown> = {
 };
 
 /** A row's gesture: a command, a definition's sheet, a line's file, a Story row's sheet. */
-function pick(i: Item) {
+export function pick(i: Item) {
   const ref = fromRef(i.id);
   if (i.kind === 'command') return RUN[i.id]?.();
   if (i.kind === 'todo') return opens(i.detail ?? '', i.id);
@@ -103,7 +103,7 @@ function useFound(q: string) {
         ([status, f]) => live && status === 200 && setText(words(f?.hits ?? [])),
         () => {},
       );
-    const typing = q.trim() ? setTimeout(ask, 150) : undefined;
+    const typing = q.trim() ? setTimeout(ask, 150) : undefined; // mutate-skip: a pause, no boundary to test
     return () => ((live = false), clearTimeout(typing));
   }, [q]);
   return q.trim() ? text : {};

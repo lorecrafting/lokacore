@@ -387,9 +387,9 @@ test("the ground's keys: a focused room keeps its own keys, and an open Join… 
   const selectedNow = () => drawn().filter((k) => room(k).accessibilityState.selected);
   const node = {};
   let keyed: (e: object) => void = () => {};
-  ground().props.ref({
-    addEventListener: (t: string, f: typeof keyed) => t === 'keydown' && (keyed = f),
-  });
+  const el = { addEventListener: (t: string, f: typeof keyed) => t === 'keydown' && (keyed = f) };
+  ground().props.ref(el);
+  assert.equal((el as { tabIndex?: number }).tabIndex, 0, 'a click on the ground focuses it');
   const arrow = (target: object) =>
     keyed({
       key: 'ArrowRight',

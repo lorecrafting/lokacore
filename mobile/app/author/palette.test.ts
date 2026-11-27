@@ -24,7 +24,9 @@ Object.assign(globalThis, {
   addEventListener() {},
 });
 const build = await import('./build/Build.tsx');
-const { COMMANDS, RUN, keys } = await import('./build/palette.tsx');
+const { COMMANDS, RUN, keys, pick } = await import('./build/palette.tsx');
+const { nodes } = await import('../book/__tests__/combat-book.test.ts');
+const { sheets } = await import('./build/sheet.tsx');
 const { mapKey } = await import('./build/mapcontrols.tsx');
 const { known } = await import('./build/room.tsx');
 const sent: [string, unknown][] = [];
@@ -35,15 +37,18 @@ const api = async (path: string, body?: unknown): Promise<[number, any]> => (
 build.install({ seen: new Map(), said: new Map(), redraw() {}, api } as never);
 
 const key = (k: string, mods: Partial<KeyboardEvent> = {}) => {
+  let taken = false;
   const e = {
     key: k,
     target: { tagName: 'DIV' },
-    preventDefault() {},
+    preventDefault: () => void (taken = true),
     stopPropagation() {},
     ...mods,
   };
   keys(e as never);
+  return taken;
 };
+const top = () => JSON.parse(kept.get(BUILD)!).sheets?.at(-1);
 
 test('every palette command runs one Builder gesture: one handler per COMMANDS id, none else', () => {
   assert.deepEqual(Object.keys(RUN).sort(), COMMANDS.map((c) => c.id).sort());
@@ -72,8 +77,8 @@ test("Delete from the palette drops the top sheet's definition, never a root fil
   assert.notEqual(asked('rooms/hall.json').length, 0);
 });
 
-const room = (key: string, x: number, y: number) =>
-  ({ ref: key, key, area: null, title: key, exits: [], at: { x, y, z: 0 } }) as const;
+const room = (key: string, x: number, y: number, z = 0) =>
+  ({ ref: key, key, area: null, title: key, exits: [], at: { x, y, z } }) as const;
 const rooms = [room('hall', 0, 0), room('east', 2, 0), room('west', -1, 0), room('north', 0, -1)];
 const acts = () => {
   const did: unknown[] = [];
@@ -86,11 +91,28 @@ const acts = () => {
   };
   return { did, a };
 };
-const press = (k: string, mods: object = {}) => {
+const press = (k: string, mods: object = {}, z = 0) => {
   const { did, a } = acts();
-  const e = { key: k, preventDefault() {}, stopPropagation() {}, ...mods };
-  mapKey(e as never, rooms as never, 0, 'hall', undefined, a);
-  return did;
+  const e = {
+    key: k,
+    preventDefault: () => void did.push(['taken']),
+    stopPropagation() {},
+    ...mods,
+  };
+  mapKey(e as never, [...rooms, room('cellar', 0, 0, -1)] as never, z, 'hall', undefined, a);
+  return did.filter((d) => (d as string[])[0] !== 'taken');
+};
+const takes = (k: string) => {
+  const { did, a } = acts();
+  mapKey(
+    { key: k, preventDefault: () => void did.push('taken'), stopPropagation() {} } as never,
+    rooms as never,
+    0,
+    'hall',
+    undefined,
+    a,
+  );
+  return did.includes('taken');
 };
 
 test('map keys: ArrowRight selects the east neighbour, Enter selects, Shift-Enter goes', () => {
@@ -105,4 +127,125 @@ test("map keys: + and - zoom by M.step (1.25), 0 fits; Cmd-0 and Cmd-+ stay the 
     [['zoom', 1.25], ['zoom', 1 / 1.25], ['fit']],
   );
   assert.deepEqual([...press('0', { metaKey: true }), ...press('+', { ctrlKey: true })], []);
+});
+
+test('map keys: PageDown steps down to the cellar and no further, PageUp back up and no further; other keys pass', () => {
+  assert.deepEqual([...press('PageDown'), ...press('PageUp')], [['step', -1]]);
+  assert.deepEqual([...press('PageUp', {}, -1), ...press('PageDown', {}, -1)], [['step', 1]]);
+  assert.equal(takes('x'), false);
+  assert.equal(takes('+'), true);
+});
+
+test('Cmd-K opens the palette, Esc closes it; Cmd-E posts /open for the top sheet; other keys pass', async () => {
+  assert.equal(key('k', { metaKey: true }), true);
+  assert.equal(top(), 'palette');
+  const typed = (q: string) =>
+    nodes(sheets.palette!.body('')).find((n) => n.props?.onSubmitEditing);
+  assert.ok(typed(''), 'the palette draws its field');
+  assert.equal(key('Escape'), true);
+  assert.notEqual(top(), 'palette');
+  assert.equal(key('Escape'), false, "Esc with no palette is the Book's");
+  assert.equal(key('k'), false, 'a plain k is typing');
+  known.open('def:rooms/hall.json');
+  assert.equal(key('e'), false);
+  assert.equal(key('e', { metaKey: true, altKey: true }), false);
+  assert.equal(key('e', { ctrlKey: true }), true);
+  await new Promise((r) => setTimeout(r));
+  assert.deepEqual(
+    sent.filter(([p]) => p === '/open'),
+    [['/open', { file: 'rooms/hall.json', key: 'hall' }]],
+  );
+});
+
+test("Cmd-Z in a text field is the field's own undo", () => {
+  kept.set(
+    'loka-build-undo',
+    JSON.stringify({
+      w: { id: 8, key: 'g', words: 'x', file: 'text.json' },
+      end: Date.now() + 60_000,
+    }),
+  );
+  assert.equal(key('z', { metaKey: true, target: { tagName: 'INPUT' } as never }), false);
+  assert.equal(key('z', { metaKey: true, shiftKey: true }), false, 'Shift-Cmd-Z is redo, not ours');
+});
+
+test('a palette row opens what it names, by kind', () => {
+  known.files = { 'c@1:dialogue/d1': 'dialogue/d1.json' };
+  const opened = (i: object) => (pick(i as never), top());
+  assert.equal(opened({ kind: 'command', id: 'map-grow' }), 'map');
+  assert.equal(
+    opened({ kind: 'todo', id: 'gate', detail: 'npcs/ann.json:3' }),
+    'def:npcs/ann.json',
+  );
+  assert.equal(opened({ kind: 'text', id: 'gate' }), 'def:text.json');
+  assert.equal(opened({ kind: 'key', id: 'c@1:room/hall' }), 'room:hall');
+  assert.equal(opened({ kind: 'key', id: 'c@1:dialogue/d1' }), 'def:dialogue/d1.json');
+  assert.equal(opened({ kind: 'key', id: 'c@1:dialogue/none' }), 'contents');
+  assert.equal(opened({ kind: 'line', id: 'story:c@1:dialogue/d1' }), 'def:dialogue/d1.json');
+  assert.equal(opened({ kind: 'line', id: 'trace:gate' }), 'trace:gate');
+  assert.equal(opened({ kind: 'line', id: 'beat:1' }), 'contents');
+  const tabs = nodes(sheets.contents!.body(''));
+  assert.ok(
+    tabs.some((n) => n.key === 'Story' && n.props.accessibilityState?.selected),
+    'on its Story tab',
+  );
+});
+
+test('the room commands wait for a selected room on the map', () => {
+  const posts = sent.length;
+  RUN['map-npc']!();
+  assert.equal(top(), 'map');
+  assert.equal(sent.length, posts, 'no room selected: no write');
+});
+test('New npcs makes an NPC', async () => {
+  const posts = sent.length;
+  RUN['new-npcs']!();
+  await new Promise((r) => setTimeout(r, 10));
+  assert.deepEqual(
+    sent.slice(posts).find(([p]) => p === '/new'),
+    ['/new', { kind: 'npcs', name: 'npc_1' }],
+  );
+});
+
+test('the palette: Enter runs the top row; the command rows read as their label', async () => {
+  const drawn = nodes(sheets.palette!.body(''));
+  assert.equal(
+    drawn.find((n) => n.key === 'command new-actions')?.props.children.props.children,
+    'New actions',
+  );
+  const posts = sent.length;
+  drawn.find((n) => n.props?.onSubmitEditing).props.onSubmitEditing();
+  await new Promise((r) => setTimeout(r, 10));
+  assert.equal(sent.slice(posts).find(([p]) => p === '/new')?.[1]?.kind, 'actions');
+});
+
+test('typing asks /find once, after a pause; a closed palette asks nothing', async () => {
+  const shim = Symbol.for('combat-state');
+  const was = (globalThis as any)[shim];
+  const set: unknown[] = [];
+  let calls = 0;
+  (globalThis as any)[shim] = (v: unknown) => [
+    calls++ % 2 ? v : 'gate',
+    (n: unknown) => void set.push(n),
+  ];
+  const stops: (() => void)[] = [];
+  (globalThis as any)[Symbol.for('combat-effect')] = (f: () => () => void) => void stops.push(f());
+  const finds = () => sent.filter(([p]) => p.startsWith('/find')).length;
+  const before = finds();
+  nodes(sheets.palette!.body(''));
+  stops.pop()!(); // closed before the pause
+  await new Promise((r) => setTimeout(r, 200));
+  assert.equal(finds(), before);
+  nodes(sheets.palette!.body(''));
+  await new Promise((r) => setTimeout(r, 200));
+  assert.deepEqual(sent.filter(([p]) => p.startsWith('/find')).at(-1), ['/find?q=gate', undefined]);
+  assert.deepEqual(set, [{}], 'its reply, kept');
+  (globalThis as any)[shim] = was;
+});
+
+test("off Build, the keys are the Book's", () => {
+  nodes(build.Strip({ children: 'book' }))
+    .find((n) => n.type === 'Pressable')
+    .props.onPress(); // Build off
+  assert.equal(key('k', { metaKey: true }), false);
 });
