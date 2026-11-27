@@ -7,10 +7,11 @@
 import type { ComponentProps, ReactNode } from 'react';
 import { Text, TextInput } from 'react-native';
 import { plain } from '../../book/model.ts';
-import { size, space, type } from '../../book/tokens.ts';
+import { type } from '../../book/tokens.ts';
 import type { api } from './page.ts';
 import { drawnWords, noFieldNote, oneLine, saving, unwritten } from '../prose_rules.ts';
 import { ink } from './build.ts';
+import { BLANK, CAPTION, CHOICE, FIELD, MARKED, NOTE, WORDS } from './fieldstyle.ts';
 
 type Props = ComponentProps<typeof Text>;
 type At = { file: string; line: number; was: string; words: string; scene?: true }; // scene: a `.scene` choice line
@@ -168,15 +169,6 @@ const keyed = (press: () => void) => (e: KeyboardEvent) =>
   e.target === e.currentTarget &&
   (e.key === 'Enter' || e.key === ' ') &&
   (e.preventDefault(), press());
-const BLANK = { borderBottomWidth: size.rule, borderColor: ink('line') };
-const MARKED = {
-  textDecorationLine: 'underline',
-  textDecorationStyle: 'wavy' as 'dashed', // web draws wavy; RN's types stop at dashed
-  textDecorationColor: ink('warning'),
-} as const;
-const NOTE = { ...type.label, color: ink('warning') };
-const CAPTION = { ...type.label, color: ink('dim') };
-const FIELD = { width: '100%', borderBottomWidth: size.rule, borderColor: ink('action') } as const;
 /** Each line's drawn box, read when its field opens: the field takes its height, so nothing below
  * moves (19.4). Not onLayout: RN-web fires it on first layout only, often before Build is on.
  * ponytail: native Text has no getBoundingClientRect, so its field keeps its own rows. */
@@ -196,13 +188,9 @@ export const walkable = (todoOnly: boolean) =>
     .sort((a, b) => (a.compareDocumentPosition(b) & 4 ? -1 : 1)); // 4: b follows a
 /** A phone has no Enter or Esc to read about: it shows these acts in place of the caption. */
 const coarse = () => globalThis.matchMedia?.('(pointer: coarse)').matches;
-const WORDS = { save: 'Save', cancel: 'Cancel' }; // placeholders: the owner writes these
-const CHOICE = {
-  ...type.control,
-  color: ink('action'),
-  lineHeight: size.touch,
-  paddingHorizontal: space.md,
-};
+// placeholder words (the owner writes the final): a fetch that never reached the server
+const DOWN = 'The server did not answer. Try again.';
+const down = (): [number, string] => [0, DOWN];
 
 async function edit(h: Hooks, key: string) {
   if (h.unsee?.()) return; // the words See as shows are not the key's: a tap first shows them again
@@ -213,11 +201,16 @@ async function edit(h: Hooks, key: string) {
     .then((s): [number, any] | Promise<[number, any]> =>
       s ? [200, s] : h.api(`/line?key=${enc(key)}&words=${enc(h.said.get(key) ?? '')}`),
     )
+    .catch(down)
     .finally(() => (busy = false));
   field =
     status === 200
       ? { key, at, draft: unwritten(at.words) ? '' : at.words, tall }
-      : { key, draft: '', note: noFieldNote(key, typeof at === 'string' ? at : undefined) };
+      : {
+          key,
+          draft: '',
+          note: status ? noFieldNote(key, typeof at === 'string' ? at : undefined) : at,
+        };
   h.redraw();
 }
 /** A double-click outside Build (page.ts) on the line drawing `shown`: its field. False: no key. */
@@ -276,6 +269,7 @@ async function save(h: Hooks, f: Field) {
   if (choice === 'unchanged') return close(h);
   if (choice === 'empty') return say(h, f, 'Empty. Esc keeps the words.');
   busy = true;
+  h.redraw(); // read-only while it saves: words typed now would be lost when the save closes it
   const { file, line, was } = at;
   const [status, answer] = await h
     .api(
@@ -283,6 +277,7 @@ async function save(h: Hooks, f: Field) {
         ? ['/restructure', { file, was, op: { reword: { line, words: draft } }, carry: [] }]
         : ['/edit', { file, line, was, words: draft, key: f.key }]) as [string, object]),
     )
+    .catch(down)
     .finally(() => (busy = false));
   if (status === 200) h.wrote({ id: answer.id, key: f.key, words: at.words, file });
   if (field !== f) return; // closed (Esc) while it saved
@@ -317,6 +312,7 @@ function open(h: Hooks, f: Field, at: At, name: string, p: Props) {
       multiline // the line wraps as the Book drew it; Enter still saves (blurOnSubmit)
       blurOnSubmit
       defaultValue={f.draft}
+      editable={!busy}
       placeholder={`Unwritten: ${name}`}
       accessibilityLabel={name}
       onFocus={h.focus}
@@ -336,12 +332,11 @@ function open(h: Hooks, f: Field, at: At, name: string, p: Props) {
       </Text>
     ),
     ...acts(h, f).map(([label, run]) => (
-      // a press that keeps the focus: the field's blur would save before Cancel
       <Text
         key={label}
         accessibilityRole="button"
         onPress={run}
-        {...({ onMouseDown: keep } as object)}
+        {...({ onMouseDown: keep } as object)} // keeps the focus: a blur would save before Cancel
         style={CHOICE}
       >
         {label}

@@ -1,6 +1,6 @@
 // The Flow graph's planted models (kernel/ts/test/author_flow*.test.ts): q and d1 in beat 1, d2 and d3
 // in beat 2, r1, thera_greets and the fact f unplaced; V adds the edges the line and card cases need.
-import type { Flow } from '../play/flow.ts';
+import type { Flow, Layout } from '../play/flow.ts';
 import type { Edge, Story } from '../play/storylist.ts';
 
 export const ref = (kind: string, key: string) => `demo@1:${kind}/${key}`;
@@ -80,3 +80,15 @@ export const V = model(
   outline,
 );
 export const xy = (fl: Flow) => [...fl.chips, ...fl.stubs].map((c) => [c.id, c.x, c.y, c.col]);
+
+// The panel's default layout (its shell.ts LAYOUT), held here so no test imports the panel (6.6b).
+export const LAYOUT: Layout = {
+  left: 280,
+  right: 360,
+  slot: 240,
+  leftOpen: true,
+  rightOpen: true,
+  tablet: false,
+  tab: 'hierarchy',
+  map: 'map',
+};
