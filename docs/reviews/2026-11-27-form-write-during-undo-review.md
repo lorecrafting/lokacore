@@ -40,3 +40,23 @@
    - `generic.test.ts:359`: the held run is not released in a `finally`, so one failure cascades into later tests.
 
 Agreed as is: `formwrite.ts:64`, keeping the draft on a gate or server refusal (requirement 2 depends on it). `Build.tsx:185` is pre-existing and not changed here. The BUSY copy is a placeholder until the owner writes it.
+
+## Re-check at `1aa66a5231f10daa548722c3dd7f27392761cd61` (fix commits 2b8d76eee, b30e59f13, 1aa66a523)
+
+CI (`gh run list --commit 1aa66a52…`): ci and book-e2e succeeded. The four touched test files pass: 842 pass, 0 fail.
+
+Dispositions:
+
+1. Blocker, fixed. `trigger.tsx:108` now sends with `BUSY` and `keep(k, o)`. Red: dropping the `keep` fails `scene.test.ts:377`.
+2. Should-fix, fixed. The shared `keep()` (`formwrite.ts:44`) does not overwrite a newer draft. It is used at `form.tsx:213`, `:280`, `choices.tsx:64` and `trigger.tsx:109`; `world.tsx:149` does the same check with `typing.has`.
+   - Red: `keep` without `drafts.has` fails `dialogue.test.ts:282`.
+   - Red: `world.tsx` without `typing.has(key)` fails `world.test.ts:487`.
+3. Should-fix, fixed. The hour's `run` gets `BUSY` (`schedule.tsx:39`). Red: removing it fails `generic.test.ts:576`.
+4. Nit, fixed. A press passes `busy=''` (`world.tsx:166`), so it is neither said nor kept. Red: removing `!busy` fails `world.test.ts`.
+5. Nit 5 (a kept draft not shown after a remount, at `form.tsx:288`, `schedule.tsx:45` and `trigger.tsx:116`): ruled **should-fix, not a blocker**.
+   - Failure: type X, blur during an Undo (BUSY), close and reopen the sheet. The field shows the disk value Y. Focus and blur without typing writes X over Y with no word.
+   - Why not a blocker: the author was told "Not written", the text is their own, and one Undo restores Y. It needs a reopen plus an empty focus and blur. The hour field already behaved this way on refusal before this PR.
+   - Fix: one line per site in the house pattern, `defaultValue={drafts.get(key) ?? shown}`, as `story.tsx:99`, `thing.tsx:137` and `roomedit.tsx:222` already do. Best done in this PR; a follow-up bead is acceptable if the PM merges first.
+6. Nits: `generic.test.ts` held runs are now released in `finally` and after-hooks. `roomedit.tsx:105` is left as is, which is acceptable.
+
+Re-check verdict: **APPROVE WITH NOTES** (nit 5 open as a should-fix).
