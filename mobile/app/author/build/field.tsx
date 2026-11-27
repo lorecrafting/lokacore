@@ -94,8 +94,9 @@ export function line(p: Props): Props {
     const key = keyOf(h, shown);
     if (!key) return p;
     // only the open field draws; every other line is just counted (page.ts's `~ here`)
+    if (LABEL.test(key) && key !== field?.key) return p; // a label is neither walked nor counted
     if (key !== field?.key)
-      return { ...p, ...({ ref: box(key, unwritten(shown), LABEL.test(key)) } as object) };
+      return { ...p, ...({ ref: box(key, unwritten(shown), false) } as object) };
     return editable(h, p, key, shown, unwritten(shown));
   }
   const shown = flat(p.children);
@@ -184,10 +185,10 @@ const boxes = new Map<string, { n: Box; blank: boolean; label: boolean }>();
 const box = (key: string, blank: boolean, label: boolean) => (n: Box | null) =>
   void (n ? boxes.set(key, { n, blank, label }) : boxes.delete(key));
 const under = (note: string) => <Text key="note" style={CAPTION}>{`\n${note}`}</Text>;
-/** The lines a walk key steps through (page.ts), in page order: the unwritten ones, or every one
- * but a choice's label (its card's press is the card's). */
 /** Build is on: off it the lines are counted, not walked (their Text takes no focus). */
 export const building = () => !!hooks?.on();
+/** The lines a walk key steps through (page.ts), in page order: the unwritten ones, or every one
+ * but a choice's label (its card's press is the card's). */
 export const walkable = (todoOnly: boolean) =>
   [...boxes.values()]
     .filter((b) => !b.label && (!todoOnly || b.blank))
