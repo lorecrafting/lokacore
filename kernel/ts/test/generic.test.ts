@@ -1,7 +1,7 @@
 // The generic sheet's pure logic (play/generic.ts, builder slice 2.3) on hand-built schemas: what a
 // node draws as, a new field's least value, a picked branch's value, a moved list.
 // Breaks: a recursive definition drawn past DEPTH, a claimed field or a map drawn as nothing,
-// an allOf or an if/then's addable field dropped, a branch's required field left unset.
+// an allOf or an if/then's addable field dropped (also in a union's branches), a branch's required field left unset.
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { branchOf } from '../play/card.ts';
@@ -89,6 +89,13 @@ test("an if/then/else draws the branch the value takes, the if's field addable a
     props: {},
     each: undefined,
     required: [],
+  });
+  // a union of shapes (a scene's modal or dream): each inline branch offers the if's field
+  const modal = { type: 'object', properties: { control: { const: 'modal' } } };
+  const shapes = { ...def, else: { anyOf: [modal, ref('A')] } };
+  assert.deepEqual(shapeOf(shapes, {}, defs)[0], {
+    as: 'union',
+    branches: [{ ...modal, properties: { control: { const: 'modal' }, abstract: flag } }, ref('A')],
   });
 });
 

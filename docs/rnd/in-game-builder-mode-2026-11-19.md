@@ -491,10 +491,12 @@ require `build/` unconditionally and watch the test fail, then install the seam 
   generic row. The panel's generic rows still `todo` in the Book equal
   `test/loka/builder_generic_notyet.txt` (each with its home slice), which only shrinks, so a
   not-yet row turned generic is refused until its line goes.
+  `none: <reason>` on both the panel and the `book` side says neither tool offers that verb (a
+  required cartridge field's delete); the gate refuses it on one side only or without a reason.
   `bin/editor_gate.exs` checks each path exists and holds the `todo` set equal to
   `test/loka/builder_todo_baseline.txt`, which only shrinks (the same mechanism as
   `editor_generic_baseline.txt`). Red controls go into
-  `bin/editor_red_controls.exs`: drop a `book` key, name a missing file, add an unlisted `todo`.
+  `bin/editor_red_controls.exs`: drop a `book` key, name a missing file, add an unlisted `todo`, `none` on one side, a bare `none`.
 - **`parity.json`, everything that is not a schema path.** Appendix A's rows, each holding `id`, the panel
   home (a file) and the book home (a file or `todo`; `panel-only` is refused, ruling 6). The same exs checks that
   files exist and that `todo` only shrinks. "Parity reached" (ruling 3) means both `todo` sets are
