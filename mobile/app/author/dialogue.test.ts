@@ -8,6 +8,7 @@ import { nodes } from '../book/__tests__/combat-book.test.ts'; // also registers
 const { known, story } = await import('./build/room.tsx');
 const { sheets } = await import('./build/sheet.tsx');
 const { ed, refused } = await import('./build/roomedit.tsx');
+const { BUSY } = await import('./build/formwrite.ts');
 const store = { getItem: () => null, setItem() {} }; // Build's Undo chip keeps its state there
 Object.assign(globalThis, { localStorage: store });
 await import('./build/Build.tsx'); // the app's registration of the def: and npc: sheets
@@ -261,6 +262,7 @@ test('an Add choice pressed while a save is out keeps its key; Add again writes 
   await s.press(`link side_set ${s.file}:["choices","a","then"]`);
   typeKey(s, 'no');
   await s.press(`add choice ${s.file}:["choices","+"]`);
+  assert.equal(refused(), BUSY, 'the dropped Add said nothing');
   release();
   held = undefined;
   await settle();

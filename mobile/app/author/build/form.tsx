@@ -25,6 +25,7 @@ import {
   type Step,
   type Write,
   own,
+  BUSY,
 } from './formwrite.ts';
 import { act, greyed } from './sheet.tsx';
 
@@ -207,7 +208,7 @@ function entry(at: At, path: Step[], each: Obj, map: Obj) {
     const k = (drafts.get(key) ?? '').trim();
     drafts.delete(key);
     if (k && !Object.hasOwn(map, k))
-      void set(at, [...path, k], at.fresh?.(path, k) ?? least(each, at.defs) ?? '')?.then(
+      void set(at, [...path, k], at.fresh?.(path, k) ?? least(each, at.defs) ?? '', BUSY)?.then(
         (ok) => ok || void drafts.set(key, k), // not written: the typed key waits for another Add
       );
   };
@@ -274,7 +275,7 @@ function typed(at: At, path: Step[], s: Shape, value: unknown) {
     const v = t === undefined ? undefined : entered(t, number);
     drafts.delete(key);
     if (v !== undefined && !Number.isNaN(v) && String(v) !== shown)
-      void set(at, path, prose ? { prose: v } : v)?.then(
+      void set(at, path, prose ? { prose: v } : v, BUSY)?.then(
         (ok) => ok || void drafts.set(key, t!), // not written: leaving the field again writes it
       );
   };

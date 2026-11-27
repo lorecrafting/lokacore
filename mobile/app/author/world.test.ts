@@ -13,6 +13,7 @@ await import('./build/Build.tsx'); // the app's registration of the def: and con
 const { WORDS } = await import('./build/form.tsx');
 const { WORDS: WORLD, matches } = await import('./build/world.tsx');
 const { refused, run } = await import('./build/roomedit.tsx');
+const { BUSY } = await import('./build/formwrite.ts');
 
 const root = new URL('../../../', import.meta.url);
 const read = (rel: string) => JSON.parse(readFileSync(new URL(rel, root), 'utf8'));
@@ -465,6 +466,7 @@ test('a room key left while another gesture writes stays typed; leaving it again
   g.input().props.onFocus({ target: null });
   await g.typed('room_2');
   assert.deepEqual(sent(), [], 'written mid-gesture');
+  assert.deepEqual([refused(), g.input().props.value], [BUSY, 'room_2'], 'not kept and said');
   release();
   await settle();
   g.input().props.onBlur();

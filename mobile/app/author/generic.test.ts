@@ -1,4 +1,4 @@
-// size: allow 720, one mocked /story and /change harness serves the registry rows (treatment:reverie too) and the Rules block cases
+// size: allow 722, one mocked /story and /change harness serves the registry rows (treatment:reverie too) and the Rules block cases
 // The generic sheet (author/build/generic.tsx, form.tsx; design §7, slice 2.3): every registry row
 // whose book verb is `generic` (kernel/ts/play/registry.json, held by bin/editor_gate.exs) is
 // added, edited or removed by the sheet, each a `/change` op at the row's own path.
@@ -11,7 +11,7 @@ const { story } = await import('./build/room.tsx');
 const { sheets } = await import('./build/sheet.tsx');
 await import('./build/Build.tsx'); // the app's registration of the def: sheet
 const { WORDS } = await import('./build/form.tsx');
-const rowsOpen = (await import('./build/formwrite.ts')).opened;
+const { opened: rowsOpen, send } = await import('./build/formwrite.ts');
 const HOURS = (await import('./build/schedule.tsx')).WORDS;
 const COMBAT = (await import('./build/combat.tsx')).WORDS;
 const { run } = await import('./build/roomedit.tsx');
@@ -359,7 +359,8 @@ test('a field left while an Undo writes says it was not written; leaving it agai
   void run(() => new Promise<void>((r) => (release = r))); // an Undo still putting back
   const alert = () => words(s.shown().find((x) => x.props?.accessibilityRole === 'alert'));
   const before = alert();
-  assert.equal(await run(async () => {}), false, 'a press ran mid-gesture');
+  const at = { file: 'statuses.json', was: 'S', defs: {}, seen: [] };
+  assert.equal(await send(at, [{ path: ['x'], value: 1 }]), false, 'a press ran mid-gesture');
   assert.equal(alert(), before, 'a double-tap was told something');
   assert.deepEqual(await typeIn(s, ['tick_every'], '6'), [], 'a write went out mid-gesture');
   assert.match(alert(), /Not written/, 'the dropped write said nothing');
@@ -385,6 +386,7 @@ test('a field left while an Undo writes says it was not written; leaving it agai
     .find((x) => x.props?.accessibilityLabel === WORDS.key)
     .props.onChangeText('k');
   await t.press('entry ');
+  assert.match(alert(), /Not written/, 'the dropped Add said nothing');
   release();
   await settle();
   assert.deepEqual(sent(), [], 'an Add went out mid-gesture');

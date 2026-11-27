@@ -22,6 +22,7 @@ import {
   type At,
   type Block,
   type Obj,
+  BUSY,
 } from './formwrite.ts';
 import { reveals } from './reveal.ts';
 import { known } from './room.tsx';
@@ -58,7 +59,7 @@ export const choices =
         if (why) return tell(why);
         drafts.delete(typed);
         if (k)
-          void set(at, [...path, k], minimal(at.defs[CHOICE]!, at.defs))?.then(
+          void set(at, [...path, k], minimal(at.defs[CHOICE]!, at.defs), BUSY)?.then(
             (ok) => ok || void drafts.set(typed, k), // not written: the typed key waits for another Add
           );
       };
