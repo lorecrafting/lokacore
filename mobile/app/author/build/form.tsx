@@ -13,6 +13,7 @@ import { ed, inRow, row, run } from './roomedit.tsx';
 import { later, rules } from './rules.tsx';
 import {
   drafts,
+  keep,
   drop,
   id,
   opened,
@@ -25,6 +26,7 @@ import {
   type Step,
   type Write,
   own,
+  BUSY,
 } from './formwrite.ts';
 import { act, greyed } from './sheet.tsx';
 
@@ -207,7 +209,9 @@ function entry(at: At, path: Step[], each: Obj, map: Obj) {
     const k = (drafts.get(key) ?? '').trim();
     drafts.delete(key);
     if (k && !Object.hasOwn(map, k))
-      set(at, [...path, k], at.fresh?.(path, k) ?? least(each, at.defs) ?? '');
+      void set(at, [...path, k], at.fresh?.(path, k) ?? least(each, at.defs) ?? '', BUSY)?.then(
+        (ok) => ok || keep(key, k), // not written: the typed key waits for another Add
+      );
   };
   return (
     <View key={key} style={row}>
@@ -272,14 +276,16 @@ function typed(at: At, path: Step[], s: Shape, value: unknown) {
     const v = t === undefined ? undefined : entered(t, number);
     drafts.delete(key);
     if (v !== undefined && !Number.isNaN(v) && String(v) !== shown)
-      set(at, path, prose ? { prose: v } : v);
+      void set(at, path, prose ? { prose: v } : v, BUSY)?.then(
+        (ok) => ok || keep(key, t!), // not written: leaving the field again writes it
+      );
   };
   const keys = at.pick?.(path, value);
   const input = (
     <TextInput
       key={key}
       accessibilityLabel={String(path.at(-1))}
-      defaultValue={shown}
+      defaultValue={drafts.get(key) ?? shown} // reopened, it shows a draft not yet written
       style={INPUT}
       onChangeText={(t) => void drafts.set(key, t)}
       onBlur={write}

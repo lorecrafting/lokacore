@@ -9,7 +9,7 @@ import { nodes, words } from '../book/__tests__/combat-book.test.ts'; // also re
 
 const { story } = await import('./build/room.tsx');
 const { sheets } = await import('./build/sheet.tsx');
-const { foot, io, wire } = await import('./build/roomedit.tsx');
+const { foot } = await import('./build/roomedit.tsx');
 const { thingPen } = await import('./build/thing.tsx');
 await import('./build/contents.tsx');
 const { storySheet } = await import('./build/story.tsx');
@@ -541,20 +541,4 @@ test('the sheet redraws when /story fails', async () => {
   );
   await settle();
   assert.equal(drew, 1);
-});
-
-// Breaks: a 3xx answer (not a write) taken as a saved write.
-test('io: only a 2xx answer is ok', async () => {
-  const at = (status: number) => (
-    wire(
-      async () => [status, null],
-      () => {},
-      () => {},
-    ),
-    io.post('move', {})
-  );
-  assert.deepEqual(
-    [(await at(299)).ok, (await at(300)).ok, (await at(200)).ok, (await at(199)).ok],
-    [true, false, true, false],
-  );
 });

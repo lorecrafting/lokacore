@@ -8,6 +8,7 @@ import { nodes } from '../book/__tests__/combat-book.test.ts'; // also registers
 const { known, story } = await import('./build/room.tsx');
 const { sheets } = await import('./build/sheet.tsx');
 const { ed, refused } = await import('./build/roomedit.tsx');
+const { BUSY } = await import('./build/formwrite.ts');
 const store = { getItem: () => null, setItem() {} }; // Build's Undo chip keeps its state there
 Object.assign(globalThis, { localStorage: store });
 await import('./build/Build.tsx'); // the app's registration of the def: and npc: sheets
@@ -33,6 +34,7 @@ const FILES = {
   'c:dialogue/side_set': 'dialogues/side_set.json',
 };
 let held: Promise<void> | undefined;
+let refuseOnce = false; // the next write is refused as stale, after held
 const posts: { route: string; sent: any }[] = [];
 const opens: string[] = [];
 async function api(path: string, sent?: any): Promise<[number, any]> {
@@ -45,6 +47,7 @@ async function api(path: string, sent?: any): Promise<[number, any]> {
   if (sent) {
     posts.push({ route: path.slice(1), sent });
     await held; // a save still out while the test presses again
+    if (refuseOnce) return ((refuseOnce = false), [409, 'stale']);
     return [200, { id: 1 }];
   }
   if (path === '/story')
@@ -251,4 +254,48 @@ test("a choice's Add… writes the picked field, and reveals an asked one unwrit
   const sitting = s.shown().some((b) => b.key === `${s.file}:["choices","a","sitting"]`);
   assert.deepEqual(posts, [{ route: 'change', sent: { file: s.file, was: 'S', ops: [op] } }]);
   assert.equal(sitting, true);
+});
+
+// Breaks: an Add choice pressed while another save is out losing its typed key (loka-x1frg).
+test('an Add choice pressed while a save is out keeps its key; Add again writes it', async () => {
+  const s = await sheet(ONE, 'a', 'a.then');
+  let release = () => {};
+  held = new Promise((r) => (release = r));
+  await s.press(`link side_set ${s.file}:["choices","a","then"]`);
+  typeKey(s, 'no');
+  await s.press(`add choice ${s.file}:["choices","+"]`);
+  assert.equal(refused(), BUSY, 'the dropped Add said nothing');
+  release();
+  held = undefined;
+  await settle();
+  posts.length = 0;
+  await s.press(`add choice ${s.file}:["choices","+"]`);
+  assert.deepEqual(
+    posts.map((p) => p.sent.ops[0].path),
+    [['choices', 'no']],
+    'the typed key was forgotten',
+  );
+});
+
+// Breaks: a refusal arriving after newer typing puts the old key back over it, so the next Add writes
+// the refused key while the field shows the new one (loka-x1frg review finding 2).
+test('an Add refused after newer typing keeps the newer key; Add again writes it', async (t) => {
+  const s = await sheet(ONE, 'a', 'a.then');
+  let release = () => {};
+  held = new Promise((r) => (release = r));
+  t.after(() => (release(), (held = undefined), (refuseOnce = false))); // a failed assert leaks neither
+  refuseOnce = true;
+  typeKey(s, 'no');
+  await s.press(`add choice ${s.file}:["choices","+"]`);
+  typeKey(s, 'maybe');
+  release();
+  held = undefined;
+  await settle();
+  posts.length = 0;
+  await s.press(`add choice ${s.file}:["choices","+"]`);
+  assert.deepEqual(
+    posts.map((p) => p.sent.ops[0].path),
+    [['choices', 'maybe']],
+    'the refused key overwrote the newer one',
+  );
 });
