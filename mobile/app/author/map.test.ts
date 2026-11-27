@@ -93,7 +93,8 @@ test('Map opens from the Build strip on the current room level; every room there
   assert.equal(drawn().sort().join(' '), LEVEL0);
 });
 
-test('a tap selects and plays nothing; Go here starts in that room, Sheet opens its sheet', () => {
+// Breaks (last lines): the palette's exit commands opening the Map again instead of the selected room's sheet.
+test('a tap selects and plays nothing; Go here starts in that room, Sheet opens its sheet', async () => {
   room('smithy').onPress();
   assert.deepEqual(went, []);
   assert.deepEqual(
@@ -105,6 +106,13 @@ test('a tap selects and plays nothing; Go here starts in that room, Sheet opens 
   assert.deepEqual(went, ['smithy']);
   press('Sheet');
   assert.equal(JSON.parse(kept.get(BUILD)!).sheets.at(-1), 'room:smithy');
+  build.open('map');
+  (await import('./build/palette.tsx')).RUN['map-unlink']!();
+  assert.equal(
+    JSON.parse(kept.get(BUILD)!).sheets.at(-1),
+    'room:smithy',
+    'an exit command: its sheet',
+  );
 });
 
 test('the least zoom makes a cell a touch target; a level too big for it centres on the current room', () => {
@@ -203,7 +211,7 @@ test('zoom, pinch and wheel act about their point; a room press within slop taps
   g.onPointerUp(ev(2, c.x + 20));
   near(mid('crossroads_inn'), { ...c, w: c.w * 2 }, 'a pinch apart doubles about its midpoint');
   let wheel: (e: object) => void = () => {};
-  g.ref({ addEventListener: (_: string, f: typeof wheel) => (wheel = f) });
+  g.ref({ addEventListener: (t: string, f: typeof wheel) => t === 'wheel' && (wheel = f) });
   wheel({
     preventDefault() {},
     deltaY: -50,
@@ -362,5 +370,56 @@ test('an exit runs box edge to box edge over a room between its two rooms', asyn
     at > n.findIndex((e) => e.props?.accessibilityLabel?.startsWith('m, ')),
     'drawn after the middle box',
   );
+  known.rooms = all;
+});
+
+// Breaks: a focused room taking no map keys (a click on a room leaves the arrows dead), Enter on a
+// focused room also running the ground's select, or Join… left open taking arrows.
+test("the ground's keys: a focused room keeps Enter, takes arrows; an open Join… takes no arrow", async () => {
+  const { known } = await import('./build/room.tsx');
+  const all = known.rooms;
+  known.rooms = [0, 1].map((x) => ({
+    ...all[0]!,
+    key: `r${x}`,
+    ref: `r${x}`,
+    at: { x, y: 0, z: 0 },
+    exits: [],
+  }));
+  const t = { setPointerCapture() {}, getBoundingClientRect: () => ({ left: 0, top: 0 }) };
+  const held = {
+    nativeEvent: { pointerId: 1, clientX: 0, clientY: 0 },
+    target: {},
+    currentTarget: t,
+  };
+  ground().props.onPointerDown(held); // a fresh press: an earlier test's pan is over
+  ground().props.onPointerCancel(held);
+  room('r0').onPress();
+  const selectedNow = () => drawn().filter((k) => room(k).accessibilityState.selected);
+  const node = {};
+  let keyed: (e: object) => void = () => {};
+  const el = { addEventListener: (t: string, f: typeof keyed) => t === 'keydown' && (keyed = f) };
+  ground().props.ref(el);
+  assert.equal((el as { tabIndex?: number }).tabIndex, 0, 'a click on the ground focuses it');
+  let taken = false;
+  const arrow = (target: object, key = 'ArrowRight') =>
+    keyed({
+      key,
+      target,
+      currentTarget: node,
+      preventDefault: () => void (taken = true),
+      stopPropagation() {},
+    });
+  arrow({}); // on a focused room
+  assert.deepEqual(selectedNow(), ['r1'], 'an arrow on a focused room moves the selection');
+  taken = false;
+  arrow({}, 'Enter');
+  arrow({}, ' ');
+  assert.equal(taken, false, "a focused room's Enter and Space are its own press");
+  press('Join…');
+  arrow(node, 'ArrowLeft');
+  assert.deepEqual(selectedNow(), ['r1'], 'Join… stays on the selection');
+  press('Cancel');
+  arrow(node, 'ArrowLeft');
+  assert.deepEqual(selectedNow(), ['r0'], 'the ground itself moves it');
   known.rooms = all;
 });

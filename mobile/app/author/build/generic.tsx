@@ -130,6 +130,11 @@ const pair = (doc: unknown, defs: Defs) => (o: Ops) => {
 };
 
 /** A source file's sheet: its definition's fields, each written as it is entered. */
+/** A root file (cartridge.json, an areas/<a>.json bundle) is never deleted whole (write.ts remove(),
+ * guard.ts rootFile, which needs node:fs): its sheet has no Delete, the palette's Delete passes it by. */
+export const rootFile = (file: string) =>
+  !file.includes('/') || /^areas\/[a-z0-9_]+\.json$/.test(file);
+
 function body(file: string) {
   if (file.endsWith('.scene')) return [refusal(), lines(file)]; // no JSON: its lines (scene.tsx)
   const g = load(file);
@@ -154,10 +159,7 @@ function body(file: string) {
   // a scene's `.cut` twin, when it has one: its pages above its fields
   const cut = g.kind === 'scenes' && pages(file.replace(/\.json$/, '.cut'), 'steps' in doc);
   const key = file.replace(/^.*\//, '').replace(/\.\w+$/, '');
-  // a root file (cartridge.json, an areas/<a>.json bundle) is never deleted whole (write.ts remove(),
-  // guard.ts rootFile, which needs node:fs): no foot
-  const root = !file.includes('/') || /^areas\/[a-z0-9_]+\.json$/.test(file);
-  const drop = !root && foot(key, file, `def:${file}`, referrers(file));
+  const drop = !rootFile(file) && foot(key, file, `def:${file}`, referrers(file));
   return [refusal(), cut, field(at, [], g.root, g.doc), drop];
 }
 

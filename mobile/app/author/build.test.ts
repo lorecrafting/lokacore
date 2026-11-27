@@ -320,6 +320,14 @@ test('a lower sheet opened again rises to the top; the top reopened keeps its pl
   assert.deepEqual(closed(b, 'checks'), { on: true, sheets: ['room:loft'], scroll: 0 });
 });
 
+// Breaks: a fifth sheet keeping the top (the stack grows past four), or the palette, opened on a
+// full stack, replacing the sheet it acts on (its Delete would hit the sheet underneath).
+test('a full stack: a fifth sheet replaces the top; the palette lands over it, the lowest dropped', () => {
+  const b = { on: true, sheets: ['a', 'b', 'c', 'd'] };
+  assert.deepEqual(opened(b, 'e').sheets, ['a', 'b', 'c', 'e']);
+  assert.deepEqual(opened(b, 'palette').sheets, ['b', 'c', 'd', 'palette']);
+});
+
 // Breaks: a drag on the phone sheet's grip setting the wrong height (up is full, down is half), a
 // drag down from half not closing the sheet as Back does (§5), a short drag (a quarter of the touch size) read as a tap, or a drag also toggling as a tap.
 test('the grip: a drag sets the height by its direction or closes from half, a tap toggles', async () => {

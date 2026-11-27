@@ -27,7 +27,7 @@ let found: Found | string | undefined; // the last answer, or why there is none
 
 /** Opens `at` (`<file>:<line>`): a JSON file's sheet, else the file where Checks opens one, at
  * `key`'s line there (POST /open takes no line). */
-const opens = (at: string, key: string) => {
+export const opens = (at: string, key: string) => {
   const file = at.slice(0, at.lastIndexOf(':'));
   return file.endsWith('.json')
     ? known.open(`def:${file}`)

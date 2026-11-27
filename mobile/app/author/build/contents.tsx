@@ -26,6 +26,8 @@ const WORDS = {
 };
 const TAB = 'loka-build-tab'; // the open tab survives a reload, as the stack does
 let tab = WORDS.tabs.find((t) => t === globalThis.localStorage?.getItem(TAB)) ?? WORDS.tabs[0];
+/** The palette's beat row: Contents opens on its Story tab. */
+export const toStory = () => void (tab = WORDS.tabs[1]);
 const names = new Map<string, string>(); // a NAMED kind's key, as typed
 /** `kind`'s JSON source files the last /story named (a `.scene` has no schema sheet): `<kind>.json`,
  * `<kind>/<key>.json` or `areas/<area>/<kind>/<key>.json` (guard.ts `placed`). */
@@ -35,7 +37,7 @@ const filesOf = (kind: string) =>
     .sort();
 
 /** New `kind`: its starter under a free key (or the typed one); a person or item opens its sheet. */
-const made = (kind: string) =>
+export const made = (kind: string) =>
   run(async () => {
     const [, all] = (await known.api?.('/templates')) ?? []; // the templates' keys are taken too
     const temps: { dir: string; key: string }[] = Array.isArray(all) ? all : []; // a refusal is words
