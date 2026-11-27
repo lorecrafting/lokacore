@@ -1,6 +1,3 @@
-outline.parts.book.create  # loka-hcnlh.45
-outline.parts.book.edit  # loka-hcnlh.45
-outline.parts.book.delete  # loka-hcnlh.45
 parity:device-size  # 6.5, loka-hcnlh.32
 parity:map-pan-zoom-keys  # 6.5
 parity:palette  # 6.5

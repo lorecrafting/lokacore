@@ -1,4 +1,4 @@
-// size: allow 605, one scaffolded cartridge the tests edit in turn and the last undoes; a split needs a second scaffold
+// size: allow 630, one scaffolded cartridge the tests edit in turn and the last undoes; a split needs a second scaffold
 // The editor map's edits (kernel/ts/play/mapedit.ts) through the real write routes
 // (play/write.ts) and the real `mix loka.new`, on one scaffolded cartridge the tests edit in turn;
 // the last one undoes every gesture. Expected files are written by hand.
@@ -468,6 +468,31 @@ test('a beat is added in number order, retitled and removed; a repeated or a bel
   await assert.rejects(ed.dropBeat(1, 1), /outline.json has no part 2/);
   await ed.addBeat(0, 1); // 1 is the least number, and goes first
   assert.deepEqual(beats()[0], [1, undefined]);
+});
+
+test('a part is added last with no beats, retitled and removed with its beats; a missing part is refused', async () => {
+  // Breaks: an add that replaces the parts or puts the new part first, a retitle or remove that lands
+  // on another part, an empty title written instead of removed, or a remove past the last part
+  // that writes nothing yet reports done.
+  await ed.addPart();
+  await ed.titlePart(1, 'Placeholder two');
+  const parts = () =>
+    json('outline.json').parts.map((p: { title?: string; beats: { n: number }[] }) => [
+      p.title,
+      p.beats.map((b) => b.n),
+    ]);
+  assert.deepEqual(parts(), [
+    [undefined, [1, 2, 4, 5]],
+    ['Placeholder two', []],
+  ]);
+  await ed.titlePart(1, '');
+  const steps = ed.undoable();
+  await ed.titlePart(0, ''); // untitled already: no write, no Undo step
+  assert.equal(ed.undoable(), steps);
+  await ed.dropPart(0);
+  assert.deepEqual(parts(), [[undefined, []]]);
+  await assert.rejects(ed.dropPart(1), /outline.json has no part 2/);
+  await assert.rejects(ed.titlePart(1, 'x'), /outline.json has no part 2/);
 });
 
 test('a refused put-back is told with the refusal that stopped the gesture', async () => {

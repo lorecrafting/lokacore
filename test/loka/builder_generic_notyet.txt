@@ -1,3 +1,0 @@
-outline.parts.book.create  # home: 5.4, the Story tab (no /schema/outline)
-outline.parts.book.delete  # home: 5.4, the Story tab (no /schema/outline)
-outline.parts.book.edit  # home: 5.4, the Story tab (no /schema/outline)
