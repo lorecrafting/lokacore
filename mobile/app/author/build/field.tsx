@@ -269,6 +269,7 @@ async function save(h: Hooks, f: Field) {
   if (choice === 'unchanged') return close(h);
   if (choice === 'empty') return say(h, f, 'Empty. Esc keeps the words.');
   busy = true;
+  h.redraw(); // read-only while it saves: words typed now would be lost when the save closes it
   const { file, line, was } = at;
   const [status, answer] = await h
     .api(
@@ -311,6 +312,7 @@ function open(h: Hooks, f: Field, at: At, name: string, p: Props) {
       multiline // the line wraps as the Book drew it; Enter still saves (blurOnSubmit)
       blurOnSubmit
       defaultValue={f.draft}
+      editable={!busy}
       placeholder={`Unwritten: ${name}`}
       accessibilityLabel={name}
       onFocus={h.focus}
@@ -330,12 +332,11 @@ function open(h: Hooks, f: Field, at: At, name: string, p: Props) {
       </Text>
     ),
     ...acts(h, f).map(([label, run]) => (
-      // a press that keeps the focus: the field's blur would save before Cancel
       <Text
         key={label}
         accessibilityRole="button"
         onPress={run}
-        {...({ onMouseDown: keep } as object)}
+        {...({ onMouseDown: keep } as object)} // keeps the focus: a blur would save before Cancel
         style={CHOICE}
       >
         {label}

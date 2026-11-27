@@ -17,6 +17,7 @@ let on = false;
 let coarse = false;
 let reply: (path: string) => [number, object] | undefined = () => undefined; // else 200
 let down = false; // the dev server rebooting: every fetch rejects
+let held: Promise<void> | undefined; // an /edit answered only when released
 const body = { parentElement: null };
 Object.assign(globalThis, {
   HTMLElement: class {},
@@ -36,6 +37,7 @@ Object.assign(globalThis, {
   requestAnimationFrame: (run: () => void) => setTimeout(run),
   cancelAnimationFrame: clearTimeout,
   fetch: async (path: string, init?: { body: string }) => {
+    if (path.includes('/edit')) await held;
     if (down) throw new TypeError('Failed to fetch');
     sent.push([path.split('?')[0], init && JSON.parse(init.body)]);
     const [status, given] = reply(path) ?? [200];
@@ -104,10 +106,11 @@ test('a double-click outside Build opens the line, and its Enter sends one /edit
   shut();
 });
 
-// Breaks (ported from tools/author-panel/test/words.test.ts:229): a fetch that never answers taken
-// as a line (an unhandled rejection, the field left shut with nothing said, or a tap that cannot
-// read it again), or a save that never answers closing the field with nothing said.
-test('a read or save the server never answered says so', async () => {
+// Breaks (ported from tools/author-panel/test/words.test.ts:229, :132): a fetch that never answers
+// taken as a line (an unhandled rejection, the field left shut with nothing said, or a tap that
+// cannot read it again); a save that never answers closing the field with nothing said; or words
+// typed while a save is out lost (the field not read-only while it saves).
+test('a read or save the server never answered says so; the field is read-only while it saves', async () => {
   on = true;
   const drawn = () => line({ children: 'A low loft.' });
   down = true;
@@ -119,12 +122,21 @@ test('a read or save the server never answered says so', async () => {
   await tick();
   const input = () => nodes(drawn().children).find((n) => n.type === 'TextInput');
   assert.ok(input(), 'a second tap did not read the line again');
+  assert.notEqual(input().props.editable, false, 'read-only before any save');
   input().props.onChangeText('A high loft.');
-  down = true;
+  let release!: () => void;
+  held = new Promise((r) => (release = r));
+  const shown = redrawn;
   input().props.onSubmitEditing();
   await tick();
+  assert.equal(input().props.editable, false, 'the field took words while its save was out');
+  assert.equal(redrawn, shown + 1, 'the read-only field was never redrawn');
+  down = true; // the server goes down before the held save answers
+  release();
+  await tick();
+  held = undefined;
   assert.match(text(drawn()), /did not answer/, 'a save that never answered said nothing');
-  assert.ok(input(), 'a save that never answered shut the field');
+  assert.notEqual(input()?.props.editable, false, 'the field shut, or stayed read-only, after it');
   down = false;
   shut();
   on = false;
