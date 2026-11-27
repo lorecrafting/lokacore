@@ -88,7 +88,7 @@ export function uiSchema(
   const root = schema.$ref ? defs[named(schema.$ref)] : schema;
   const at: Ui = root?.type === 'array' ? (ui.items ??= {}) : ui;
   for (const [path, { edit }] of Object.entries(registry)) {
-    if (edit === 'generic') continue;
+    if (edit === 'generic' || edit.startsWith('none:')) continue; // none: neither tool offers it
     const card = { 'ui:field': edit.replace(/\.tsx$/, '') };
     const [k, field] = path.split('.');
     if (path === kind) Object.assign(ui, card);

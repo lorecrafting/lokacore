@@ -43,7 +43,8 @@ test('a real kind claims its text keys, definition references, policies and step
 });
 
 // Breaks: a hand-built card in the registry is not drawn, `generic` replaces rjsf's own field, the
-// card keeps its `.tsx` (rjsf's fields map has no such name), or another kind's row lands here.
+// card keeps its `.tsx` (rjsf's fields map has no such name), another kind's row lands here, or a
+// `none: <reason>` edit (neither tool offers it) becomes a ui:field rjsf has no such field for.
 test("the registry's hand-built edit card claims its field; generic and other kinds do not", () => {
   const rooms = ui('rooms', {
     'rooms.exits': card('ExitsCard.tsx'),
@@ -52,6 +53,8 @@ test("the registry's hand-built edit card claims its field; generic and other ki
   });
   assert.deepEqual(rooms.exits, { 'ui:field': 'ExitsCard' });
   assert.deepEqual(rooms.name, { 'ui:field': 'TextKey', 'ui:fieldReplacesAnyOrOneOf': true });
+  const fixed = { 'cartridge.api_version': card('none: fixed at loka/v3') };
+  assert.deepEqual(ui('cartridge', fixed).api_version, ui('cartridge').api_version);
 });
 
 // Breaks (loka-wfrgk.11 review 2, 5): a root-level row (no field) is dropped, so the text catalog

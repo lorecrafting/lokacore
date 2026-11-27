@@ -341,12 +341,12 @@
   },
   "cartridge.api_version": {
     "create": "cards/World.tsx",
-    "edit": "cards/World.tsx",
-    "delete": "cards/World.tsx",
+    "edit": "none: fixed at loka/v3, the one source format",
+    "delete": "none: required by source.cartridge; deleting it breaks the compile",
     "book": {
       "create": "world.tsx",
-      "edit": "todo",
-      "delete": "todo"
+      "edit": "none: fixed at loka/v3, the one source format",
+      "delete": "none: required by source.cartridge; deleting it breaks the compile"
     }
   },
   "cartridge.calendar": {
@@ -382,21 +382,21 @@
   "cartridge.id": {
     "create": "cards/World.tsx",
     "edit": "cards/World.tsx",
-    "delete": "cards/World.tsx",
+    "delete": "none: required by source.cartridge; deleting it breaks the compile",
     "book": {
       "create": "world.tsx",
       "edit": "world.tsx",
-      "delete": "todo"
+      "delete": "none: required by source.cartridge; deleting it breaks the compile"
     }
   },
   "cartridge.requires": {
     "create": "cards/World.tsx",
     "edit": "cards/World.tsx",
-    "delete": "cards/World.tsx",
+    "delete": "none: required by source.cartridge; deleting it breaks the compile",
     "book": {
       "create": "world.tsx",
       "edit": "world.tsx",
-      "delete": "todo"
+      "delete": "none: required by source.cartridge; deleting it breaks the compile"
     }
   },
   "cartridge.speech": {
@@ -412,11 +412,11 @@
   "cartridge.supported_profiles": {
     "create": "cards/World.tsx",
     "edit": "cards/World.tsx",
-    "delete": "cards/World.tsx",
+    "delete": "none: required by source.cartridge; deleting it breaks the compile",
     "book": {
       "create": "world.tsx",
       "edit": "world.tsx",
-      "delete": "todo"
+      "delete": "none: required by source.cartridge; deleting it breaks the compile"
     }
   },
   "cartridge.time_policy": {
@@ -432,21 +432,21 @@
   "cartridge.title": {
     "create": "cards/World.tsx",
     "edit": "cards/World.tsx",
-    "delete": "cards/World.tsx",
+    "delete": "none: required by source.cartridge; deleting it breaks the compile",
     "book": {
       "create": "world.tsx",
       "edit": "world.tsx",
-      "delete": "todo"
+      "delete": "none: required by source.cartridge; deleting it breaks the compile"
     }
   },
   "cartridge.version": {
     "create": "cards/World.tsx",
     "edit": "cards/World.tsx",
-    "delete": "cards/World.tsx",
+    "delete": "none: required by source.cartridge; deleting it breaks the compile",
     "book": {
       "create": "world.tsx",
       "edit": "world.tsx",
-      "delete": "todo"
+      "delete": "none: required by source.cartridge; deleting it breaks the compile"
     }
   },
   "cartridge.world": {
