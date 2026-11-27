@@ -1,7 +1,7 @@
 // The framed Book preview, over postMessage (mobile/app/author/panel.tsx is the other end): the
 // Book says `ready` when its bridge mounts, the panel says hello, the Book posts `state` on every
-// session update, answers `trace`, posts `line` for an Alt-clicked Book line, `select` for a
-// clicked one and `shortcut` for an editor key pressed in the Book (all postMessage, not protocol).
+// session update, answers `trace`, posts `select` for a
+// clicked line and `shortcut` for an editor key pressed in the Book (all postMessage, not protocol).
 import { useCallback, useEffect, useRef, useState, type RefObject } from 'react';
 import type { Step as PlaceStep } from '../../../mobile/app/author/place.ts';
 import { relays } from '../../../mobile/app/author/prose_rules.ts';
@@ -20,7 +20,6 @@ export type State = {
   facts: ReturnType<typeof factRows>;
   shown: ReturnType<typeof shown>;
 };
-export type Line = { key?: string; words: string };
 /** What the Book's editor tells (Build's field, mobile/app/author/build/page.ts): its `~` counts and its last note. */
 export type Prose = {
   todoHere?: { here: number; at: number };
@@ -36,7 +35,6 @@ type Told = {
   state?: State;
   trace?: string[];
   id?: number;
-  line?: Line;
   add?: AddHere;
 } & Prose;
 type Asked =
@@ -61,7 +59,6 @@ export const addHere = { run: (_: AddHere) => {} };
 export function useBook(frame: RefObject<HTMLIFrameElement | null>, heard: RefObject<Heard>) {
   const [state, setState] = useState<State>();
   const [loaded, setLoaded] = useState<{ sha256?: string; at: number }>();
-  const [line, setLine] = useState<Line>();
   const [prose, setProse] = useState<Prose>({});
   const waiting = useRef(new Map<number, (rows: string[]) => void>());
   const asked = useRef(0);
@@ -79,7 +76,6 @@ export function useBook(frame: RefObject<HTMLIFrameElement | null>, heard: RefOb
       if (e.data.add) addHere.run(e.data.add);
       if (e.data.state) setState(e.data.state);
       if (e.data.trace && e.data.id !== undefined) waiting.current.get(e.data.id)?.(e.data.trace);
-      if (e.data.line) setLine(e.data.line);
       if (e.data.todoHere) setProse((p) => ({ ...p, todoHere: e.data.todoHere }));
       if (e.data.note) setProse((p) => ({ ...p, note: e.data.note, open: e.data.open }));
     };
@@ -96,5 +92,5 @@ export function useBook(frame: RefObject<HTMLIFrameElement | null>, heard: RefOb
     };
   }, [send, heard]);
   const trace = () => askTrace(waiting.current, (id) => send({ op: 'trace', id }), ++asked.current);
-  return { state, line, prose, loaded, send, trace };
+  return { state, prose, loaded, send, trace };
 }

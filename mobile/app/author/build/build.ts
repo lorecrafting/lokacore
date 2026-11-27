@@ -12,8 +12,15 @@ export const ink = (role: keyof typeof color.light) => `var(--loka-${role}, ${co
 export const BUILD = 'loka-build';
 /** Build on or off, and the open sheets (bottom first, ids like `checks` or `room:<key>`) with the
  * top one's scroll offset; sheets are open only in Build.
- * `room`: the room of the last write, which Start in this room goes back to. */
-export type Builder = { on: boolean; sheets?: string[]; scroll?: number; room?: string };
+ * `room`: the room of the last write, which Start in this room goes back to.
+ * `notebook`: the notebook column's scroll, there while it is open (Wide layout). */
+export type Builder = {
+  on: boolean;
+  sheets?: string[];
+  scroll?: number;
+  room?: string;
+  notebook?: number;
+};
 /** At most four sheets stack; a fifth replaces the top (design §5). */
 const STACK = 4;
 type Store = Pick<Storage, 'getItem' | 'setItem'>;
@@ -23,13 +30,15 @@ export function restored(store: Store): Builder {
     const b = JSON.parse(store.getItem(BUILD) ?? 'null') as Partial<Builder> | null;
     const room = typeof b?.room === 'string' ? { room: b.room } : {};
     if (b?.on !== true) return { on: false, ...room };
+    const notebook = typeof b.notebook === 'number' ? { notebook: b.notebook } : {};
     const sheets = Array.isArray(b.sheets) ? b.sheets.filter((id) => typeof id === 'string') : [];
-    if (!sheets.length) return { on: true, ...room };
+    if (!sheets.length) return { on: true, ...room, ...notebook };
     return {
       on: true,
       sheets: sheets.slice(-STACK),
       scroll: typeof b.scroll === 'number' ? b.scroll : 0,
       ...room,
+      ...notebook,
     };
   } catch {
     return { on: false }; // a stale or hand-edited value is forgotten, not fatal to the Book

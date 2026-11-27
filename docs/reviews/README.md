@@ -12,6 +12,8 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 
 - [Review: Builder 6.5b, Cmd-K palette, keys and map keys (PR #822, loka-hcnlh.32)](2026-11-27-builder-6.5b-palette-keys-review.md): **CHANGES REQUIRED**
 - [Design review: Builder 6.5b palette and keys, PR #822 (loka-hcnlh.32)](2026-11-27-builder-6.5b-palette-keys-design-review.md): **CHANGES REQUIRED**
+- [Review: Builder 6.5a, wide layout and Open source routes (PR #821, loka-hcnlh.32)](2026-11-27-builder-6.5a-wide-layout-review.md): **APPROVE**
+- [Design review: Builder 6.5a, wide layout and Open source, PR #821 (loka-hcnlh.32)](2026-11-27-builder-6.5a-wide-layout-design-review.md): **APPROVE WITH NOTES**
 - [Review: Builder Story tab creates the outline and edits parts (PR #820, loka-hcnlh.45)](2026-11-27-builder-45-outline-create-review.md): **APPROVE WITH NOTES**
 - [Review: Phone checks in WebKit with an iPhone profile (PR #804, loka-hcnlh.61)](2026-11-26-phone-webkit-review.md): **APPROVE WITH NOTES**
 - [Review: Builder parity leftovers, cartridge `none` rows (PR #817, loka-hcnlh.56, .52, .81)](2026-11-26-parity-leftovers-review.md): **APPROVE WITH NOTES**

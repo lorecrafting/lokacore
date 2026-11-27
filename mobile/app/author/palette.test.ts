@@ -5,6 +5,8 @@ import { test } from 'node:test';
 import '../book/__tests__/combat-book.test.ts'; // the React Native stand-ins
 import { BUILD } from './build/build.ts';
 
+const sent: [string, unknown][] = [];
+
 // a reload after a field's write: its chip kept
 const kept = new Map([
   [BUILD, '{"on":true}'],
@@ -22,6 +24,11 @@ Object.assign(globalThis, {
     setItem: (k: string, v: string) => void kept.set(k, v),
   },
   addEventListener() {},
+  // Cmd-E's /open goes through page.ts `api`, which fetches
+  fetch: async (url: string, init?: { body: string }) => (
+    sent.push([url, init && JSON.parse(init.body)]),
+    { status: 200, json: async () => null }
+  ),
 });
 const build = await import('./build/Build.tsx');
 const { COMMANDS, RUN, keys, pick } = await import('./build/palette.tsx');
@@ -29,7 +36,6 @@ const { nodes } = await import('../book/__tests__/combat-book.test.ts');
 const { sheets } = await import('./build/sheet.tsx');
 const { mapKey } = await import('./build/mapcontrols.tsx');
 const { known } = await import('./build/room.tsx');
-const sent: [string, unknown][] = [];
 const api = async (path: string, body?: unknown): Promise<[number, any]> => (
   sent.push([path, body]),
   [200, null]
@@ -159,8 +165,8 @@ test('Cmd-K opens the palette, Esc closes it; Cmd-E posts /open for the top shee
   assert.equal(key('e', { ctrlKey: true }), true);
   await new Promise((r) => setTimeout(r));
   assert.deepEqual(
-    sent.filter(([p]) => p === '/open'),
-    [['/open', { file: 'rooms/hall.json', key: 'hall' }]],
+    sent.filter(([p]) => p === '/__author/open'),
+    [['/__author/open', { file: 'rooms/hall.json' }]],
   );
 });
 

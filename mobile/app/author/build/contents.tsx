@@ -24,7 +24,8 @@ const WORDS = {
   // placeholder: the owner writes these words
   go: (room: string) => `Go to ${room}`,
 };
-let tab = WORDS.tabs[0]; // the open tab
+const TAB = 'loka-build-tab'; // the open tab survives a reload, as the stack does
+let tab = WORDS.tabs.find((t) => t === globalThis.localStorage?.getItem(TAB)) ?? WORDS.tabs[0];
 /** The palette's beat row: Contents opens on its Story tab. */
 export const toStory = () => void (tab = WORDS.tabs[1]);
 const names = new Map<string, string>(); // a NAMED kind's key, as typed
@@ -48,9 +49,17 @@ export const made = (kind: string) =>
 
 sheets.contents = {
   title: () => WORDS.contents,
-  body: () => [
+  body: (host) => [
     <View key="tabs" style={row}>
-      {WORDS.tabs.map((t) => act(t, () => ((tab = t), known.redraw()), undefined, t, tab === t))}
+      {WORDS.tabs.map((t) =>
+        act(
+          t,
+          () => ((tab = t), globalThis.localStorage?.setItem(TAB, t), known.redraw()),
+          undefined,
+          t,
+          tab === t,
+        ),
+      )}
     </View>,
     ...(tab === WORDS.tabs[1]
       ? storyRows()
@@ -61,7 +70,7 @@ sheets.contents = {
           : tab === RECENT.tab
             ? recentRows()
             : tab === WORDS.tabs[3]
-              ? [sheets.checks.body('')]
+              ? [sheets.checks.body(host)]
               : [...findRows(), ...kinds()]),
   ],
 };

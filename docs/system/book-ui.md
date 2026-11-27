@@ -1047,8 +1047,8 @@ reasons and limits: [prose in the Book rulings](../design/prose-in-the-book-ruli
       at most a page column wide: with both open in a window under two page columns it narrows,
       down to half a page column (a phone's width) at the breakpoint, and lays out as on a phone
       of that width. It stays playable, links and walk keys included.
-    - **Crossing the breakpoint.** Narrowing closes the column; open sheets stay and rise over
-      the Book. Widening opens nothing.
+    - **Crossing the breakpoint.** Narrowing closes the column (a focus inside it goes to
+      `Notebook`); open sheets stay and rise over the Book. Widening opens nothing.
     - Below the breakpoint nothing changes: the Notebook is a sheet and every sheet rises over
       the Book.
   - **Device size** (the panel's phone and tablet sizes). The builder follows the window: a

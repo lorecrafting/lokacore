@@ -9,7 +9,7 @@ import { COMMANDS, items, rank, words } from '../../../../kernel/ts/play/palette
 import { fromRef, storyItems, type Item } from '../../../../kernel/ts/play/storylist.ts';
 import { space, type } from '../../book/tokens.ts';
 import { textField } from '../prose_rules.ts';
-import { ink } from './build.ts';
+import { ink, type Builder } from './build.ts';
 import { made, toStory } from './contents.tsx';
 import { opens } from './find.tsx';
 import { rootFile } from './generic.tsx';
@@ -17,7 +17,8 @@ import { chosen } from './map.tsx';
 import { held, known } from './room.tsx';
 import { addTo, dropIn } from './roomedit.tsx';
 import { act, parts, sheets } from './sheet.tsx';
-import { sheetOf } from './story.tsx';
+import { openFromStrip } from './source.ts';
+import { goTo, sheetOf } from './story.tsx';
 
 // placeholder: the owner writes these words
 const WORDS = {
@@ -27,17 +28,15 @@ const WORDS = {
 };
 
 type Hooks = {
-  on: () => boolean;
-  stack: () => string[]; // the open sheets, the top last
+  // on, the open sheets (the top last), whether the Undo chip shows, the unwritten keys
+  state: () => Builder & { undoable: boolean; placeholders: Record<string, string> };
   close: () => void;
   undo: () => boolean; // presses the Undo chip; false when there is none
-  undoable: () => boolean; // whether the Undo chip shows
-  placeholders: () => Record<string, string>;
   hold: { toggle: () => void };
-  startIn: (room: string) => void;
 };
 let hooks: Hooks;
-const top = () => hooks.stack().at(-1);
+const stack = () => hooks.state().sheets ?? [];
+const top = () => stack().at(-1);
 export { COMMANDS }; // the rows palette.test.ts counts (mobile tests reach the kernel only through here)
 
 /** The top sheet's definition: its key and source file; a sheet with no file has none. */
@@ -62,7 +61,7 @@ const add = (dir: 'npcs' | 'items') =>
   onRoom((r) => addTo(r, dir, known.nodes, held(), known.open));
 const undo = () => hooks.undo();
 /** The sheet the palette was opened over: a deletable definition there, else no Delete. */
-const deletable = (s = selection(hooks.stack().at(-2) ?? '')) => !!s && !rootFile(s.file);
+const deletable = (s = selection(stack().at(-2) ?? '')) => !!s && !rootFile(s.file);
 
 /** Each command's gesture, by COMMANDS id. */
 export const RUN: Record<string, () => unknown> = {
@@ -75,7 +74,7 @@ export const RUN: Record<string, () => unknown> = {
   },
   hold: () => (hooks.hold.toggle(), known.redraw()),
   undo,
-  go: onRoom((r) => hooks.startIn(r.key)),
+  go: onRoom((r) => goTo(r.key)),
   'map-grow': () => known.open('map'), // ＋ and Area… take a direction or an area on the map
   'map-area': () => known.open('map'),
   'map-npc': add('npcs'),
@@ -120,7 +119,11 @@ function useFound(q: string) {
 /** Commands with nothing to act on are not listed (§ Rows). */
 const listed = (i: Item) =>
   i.kind !== 'command' ||
-  (i.id === 'delete' ? deletable() : ['undo', 'map-undo'].includes(i.id) ? hooks.undoable() : true);
+  (i.id === 'delete'
+    ? deletable()
+    : ['undo', 'map-undo'].includes(i.id)
+      ? hooks.state().undoable
+      : true);
 const label = (i: Item) =>
   i.kind === 'command'
     ? i.label
@@ -131,7 +134,7 @@ function Palette() {
   const [at, setAt] = useState(0); // the active row: Up and Down move it, Enter runs it
   const story = known.story;
   const rows = rank(q, [
-    ...items(known.nodes, useFound(q), hooks.placeholders(), story?.names).filter(listed),
+    ...items(known.nodes, useFound(q), hooks.state().placeholders, story?.names).filter(listed),
     ...(story ? storyItems(story) : []),
   ]);
   const run = (i?: Item) => i && (hooks.close(), pick(i)); // closed first: a command acts on the sheet under
@@ -162,14 +165,14 @@ const mod = (e: KeyboardEvent) => (e.metaKey || e.ctrlKey) && !e.altKey;
 /** Whether the Builder took key `e`: off Build, or with nothing to do, the Book and panel get it. */
 function took(e: KeyboardEvent) {
   const k = e.key.toLowerCase();
-  if (!hooks.on()) return false;
+  if (!hooks.state().on) return false;
   if (mod(e) && k === 'k') return (known.open('palette'), true);
   if (e.key === 'Escape') return top() === 'palette' && (hooks.close(), true);
   if (mod(e) && k === 'z' && !e.shiftKey)
     return !textField(e.target as HTMLElement) && hooks.undo();
   if (!mod(e) || k !== 'e') return false;
   const s = selection();
-  return !!s && (void known.api?.('/open', { file: s.file, key: s.key }).catch(() => {}), true);
+  return !!s && (void openFromStrip({ file: s.file }), true);
 }
 /** The palette's keys, ahead of the Book's own (capture on the window). */
 export const keys = (e: KeyboardEvent) => took(e) && (e.preventDefault(), e.stopPropagation());
