@@ -188,6 +188,9 @@ export const walkable = (todoOnly: boolean) =>
     .sort((a, b) => (a.compareDocumentPosition(b) & 4 ? -1 : 1)); // 4: b follows a
 /** A phone has no Enter or Esc to read about: it shows these acts in place of the caption. */
 const coarse = () => globalThis.matchMedia?.('(pointer: coarse)').matches;
+// placeholder words (the owner writes the final): a fetch that never reached the server
+const DOWN = 'The server did not answer. Try again.';
+const down = (): [number, string] => [0, DOWN];
 
 async function edit(h: Hooks, key: string) {
   if (h.unsee?.()) return; // the words See as shows are not the key's: a tap first shows them again
@@ -198,11 +201,16 @@ async function edit(h: Hooks, key: string) {
     .then((s): [number, any] | Promise<[number, any]> =>
       s ? [200, s] : h.api(`/line?key=${enc(key)}&words=${enc(h.said.get(key) ?? '')}`),
     )
+    .catch(down)
     .finally(() => (busy = false));
   field =
     status === 200
       ? { key, at, draft: unwritten(at.words) ? '' : at.words, tall }
-      : { key, draft: '', note: noFieldNote(key, typeof at === 'string' ? at : undefined) };
+      : {
+          key,
+          draft: '',
+          note: status ? noFieldNote(key, typeof at === 'string' ? at : undefined) : at,
+        };
   h.redraw();
 }
 /** A double-click outside Build (page.ts) on the line drawing `shown`: its field. False: no key. */
@@ -268,6 +276,7 @@ async function save(h: Hooks, f: Field) {
         ? ['/restructure', { file, was, op: { reword: { line, words: draft } }, carry: [] }]
         : ['/edit', { file, line, was, words: draft, key: f.key }]) as [string, object]),
     )
+    .catch(down)
     .finally(() => (busy = false));
   if (status === 200) h.wrote({ id: answer.id, key: f.key, words: at.words, file });
   if (field !== f) return; // closed (Esc) while it saved

@@ -16,6 +16,7 @@ let focused: object | undefined;
 let on = false;
 let coarse = false;
 let reply: (path: string) => [number, object] | undefined = () => undefined; // else 200
+let down = false; // the dev server rebooting: every fetch rejects
 const body = { parentElement: null };
 Object.assign(globalThis, {
   HTMLElement: class {},
@@ -35,6 +36,7 @@ Object.assign(globalThis, {
   requestAnimationFrame: (run: () => void) => setTimeout(run),
   cancelAnimationFrame: clearTimeout,
   fetch: async (path: string, init?: { body: string }) => {
+    if (down) throw new TypeError('Failed to fetch');
     sent.push([path.split('?')[0], init && JSON.parse(init.body)]);
     const [status, given] = reply(path) ?? [200];
     if (given) return { status, json: async () => given };
@@ -100,6 +102,32 @@ test('a double-click outside Build opens the line, and its Enter sends one /edit
   await tick();
   assert.equal(sent.filter(([p]) => p === '/__author/edit').length, 1);
   shut();
+});
+
+// Breaks (ported from tools/author-panel/test/words.test.ts:229): a fetch that never answers taken
+// as a line (an unhandled rejection, the field left shut with nothing said, or a tap that cannot
+// read it again), or a save that never answers closing the field with nothing said.
+test('a read or save the server never answered says so', async () => {
+  on = true;
+  const drawn = () => line({ children: 'A low loft.' });
+  down = true;
+  drawn().onPress!({} as never);
+  await tick();
+  assert.match(text(drawn()), /did not answer/, 'a refused read said nothing');
+  down = false;
+  drawn().onPress!({} as never);
+  await tick();
+  const input = () => nodes(drawn().children).find((n) => n.type === 'TextInput');
+  assert.ok(input(), 'a second tap did not read the line again');
+  input().props.onChangeText('A high loft.');
+  down = true;
+  input().props.onSubmitEditing();
+  await tick();
+  assert.match(text(drawn()), /did not answer/, 'a save that never answered said nothing');
+  assert.ok(input(), 'a save that never answered shut the field');
+  down = false;
+  shut();
+  on = false;
 });
 
 // Breaks: a double-click picking a word inside a text field, or on a phone (no double-click to
