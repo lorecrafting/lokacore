@@ -361,6 +361,21 @@ test('an outline.json the last /story refused offers no Add part', () => {
   }
 });
 
+test('a titled part opens with its title in the Retitle field, and an untouched Retitle keeps it', async () => {
+  // Breaks: the field opening blank on a titled part, so an untouched Retitle sends '' and deletes the title.
+  await press('Part 1  Arrival'); // open: now picked
+  const field = sheet().find(
+    (e) => e.type === 'TextInput' && e.props.accessibilityLabel === 'title',
+  );
+  posts = [];
+  await press('Retitle');
+  assert.deepEqual(
+    [field.props.defaultValue, posts],
+    ['Arrival', [change([{ path: ['parts', 0, 'title'], value: 'Arrival' }])]],
+  );
+  await press('Part 1  Arrival'); // shut, as the next test expects
+});
+
 test('Add part appends an empty part; Retitle writes the typed title on part 1, Remove deletes part 2', async () => {
   // Breaks: an add that replaces the parts, or a part's edits landing on another part or a beat.
   posts = [];
