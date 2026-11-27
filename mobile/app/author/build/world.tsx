@@ -1,26 +1,33 @@
 // The notebook's World tab (slices 6.1a-b, the panel's World button and card): the root files, then the
 // populations, transports and barriers, each opening its def:<file> sheet, then each capability cartridge.json lacks with its Turn on; and the
 // World card's block, which a root field the registry gives to world.tsx draws as (generic.tsx `claims`).
-import { View } from 'react-native';
+import { cloneElement, type ReactElement } from 'react';
+import { Text, TextInput, View } from 'react-native';
 import {
   newEntry,
   pickable,
+  reachable,
   refusePick,
   rootNames,
   ROOTS,
   worldFile,
 } from '../../../../kernel/ts/play/world_card.ts';
 import CAPS from '../../../../protocol/capability_registry.json' with { type: 'json' };
-import { block } from './form.tsx';
-import type { Block, Ops } from './formwrite.ts';
+import { type } from '../../book/tokens.ts';
+import { ink } from './build.ts';
+import { block, INPUT } from './form.tsx';
+import { id, set, type At, type Block, type Ops, type Step } from './formwrite.ts';
 import { known } from './room.tsx';
 import { ed, refusal, row, run } from './roomedit.tsx';
-import { act } from './sheet.tsx';
+import { act, raise } from './sheet.tsx';
 
 export const WORDS = {
   tab: 'World',
   on: (cap: string) => `Turn on ${cap}`,
+  more: (n: number) => `+${n} more`,
 };
+const NODES = ['room', 'item', 'npc', 'transport']; // the kinds a compile's nodes hold (a long-list field)
+const SHORT = 6; // a long-list field with this many keys or fewer offers them all; also the matches' cap
 const FILES = ['cartridge.json', 'facts.json', 'resources.json', 'attributes.json', 'text.json']; // guard.ts ROOTS, the map's layout aside; the /story names none
 type Read = (file: string) => { doc: unknown; was: string } | undefined;
 type Cart = { requires?: { capabilities?: object } };
@@ -78,10 +85,17 @@ export const world =
     const docs = ROOTS.map((r) => read(r.rel));
     // a root file not read (yet, or at all) names no keys: its field stays free text, refusing nothing
     const named = Object.fromEntries(Object.entries(rootNames(docs)).filter((_, i) => docs[i]));
-    // a room, item or person stays free text here: its picker (the panel's datalist) waits on the long-list picker design, loka-hcnlh.66
-    const pick = (p: (string | number)[], v: unknown) => {
-      const got = pickable(p, known.nodes, named, v);
+    // the keys this file may name (the panel's `reachable` list); a resource or attribute refuses at the sheet's top
+    const nodes = reachable(known.nodes, known.story, at.file);
+    const pick = (p: Step[], v: unknown) => {
+      const got = pickable(p, nodes, named, v);
       return got && Object.hasOwn(named, got.kind) ? got : undefined;
+    };
+    const long = (p: Step[], v: unknown) => {
+      const got = pickable(p, nodes, named, v);
+      return got?.keys.length && NODES.includes(got.kind)
+        ? field(at, p, v as string, got)
+        : undefined;
     };
     const gate = (o: Ops) =>
       o
@@ -89,5 +103,108 @@ export const world =
           typeof x.value === 'string' ? refusePick(pick(x.path, x.value), x.value) : undefined,
         )
         .find(Boolean) ?? at.gate?.(o);
-    return block({ ...at, pick: (p, v) => pick(p, v)?.keys, gate }, path, node, value, removable);
+    return block(
+      { ...at, pick: (p, v) => pick(p, v)?.keys, long, gate },
+      path,
+      node,
+      value,
+      removable,
+    );
   };
+
+/** `keys` matching `text`, case ignored: the equal, then those starting with it, then those
+ * containing it, each in list order; the first SHORT, and how many more. */
+export function matches(keys: string[], text: string) {
+  const t = text.toLowerCase();
+  const by = (f: (k: string) => boolean) => keys.filter((k) => f(k.toLowerCase()));
+  const all = [
+    ...by((k) => k === t),
+    ...by((k) => k !== t && k.startsWith(t)),
+    ...by((k) => !k.startsWith(t) && k.includes(t)),
+  ];
+  return { shown: all.slice(0, SHORT), more: Math.max(0, all.length - SHORT) };
+}
+
+const typing = new Map<string, string>(); // a long-list field's text since its last keystroke, until a write or a blur on its key
+const told = new Set<string>(); // the fields left holding a refused text: their polite line reads it
+type Press = { onPressIn?: () => void };
+// the field whose match press is taking the focus: its blur writes nothing. Set on pointerdown, which a
+// browser sends before the blur (press-in comes 50 ms later); cleared by the write or the next focus, as
+// a touch tap's pointerup and press-out also come before its blur.
+// ponytail: a cancelled press or a Tab to a match goes unseen; the blur's relatedTarget would see it.
+let pressing: string | undefined;
+
+/** A room, item, person or transport field: free typing that writes only a key, refusing at the field. */
+function field(at: At, path: Step[], value: string, pick: { kind: string; keys: string[] }) {
+  const key = id(at, path);
+  const text = typing.get(key);
+  const no = text ? refusePick(pick, text) : undefined;
+  const write = (k: string) => {
+    pressing = undefined;
+    typing.delete(key);
+    told.delete(key);
+    if (k === value) known.redraw();
+    else set(at, path, k);
+  };
+  const { shown, more } = text === undefined ? { shown: [], more: 0 } : matches(pick.keys, text);
+  const small = (tone: 'danger' | 'dim') => ({ ...type.small, color: ink(tone) });
+  return [
+    input(key, String(path.at(-1)), value, text, pick.keys, write),
+    no && !told.has(key) ? (
+      <Text key={`no ${key}`} style={small('danger')}>
+        {no}
+      </Text>
+    ) : null,
+    <Text key={`told ${key}`} aria-live="polite" style={small('danger')}>
+      {told.has(key) ? no : ''}
+    </Text>,
+    <View key={`picks ${key}`} style={row} onPointerDown={() => void (pressing = key)}>
+      {(pick.keys.length <= SHORT ? pick.keys : shown).map((k) =>
+        cloneElement(act(k, () => write(k), undefined, k, k === value) as ReactElement<Press>, {
+          onPressIn: () => void (pressing = key), // native: no pointerdown
+        }),
+      )}
+    </View>,
+    more > 0 ? (
+      <Text key={`more ${key}`} style={small('dim')}>
+        {WORDS.more(more)}
+      </Text>
+    ) : null,
+  ];
+}
+
+/** The field's input: focus raises the sheet; blur writes an exact key, else holds its refusal. */
+function input(
+  key: string,
+  label: string,
+  value: string,
+  text: string | undefined,
+  keys: string[],
+  write: (k: string) => void,
+) {
+  return (
+    <TextInput
+      key={key}
+      accessibilityLabel={label}
+      value={text ?? value}
+      style={INPUT}
+      onFocus={(e) => {
+        pressing = undefined;
+        raise.full();
+        (e.target as unknown as Element | null)?.scrollIntoView?.({ block: 'start' });
+      }}
+      onChangeText={(t) => {
+        typing.set(key, t);
+        told.delete(key);
+        known.redraw();
+      }}
+      onBlur={() => {
+        const t = typing.get(key);
+        if (pressing === key || t === undefined) return;
+        if (t === '' || keys.includes(t))
+          write(t || value); // emptied: the key shows again
+        else (told.add(key), known.redraw());
+      }}
+    />
+  );
+}
