@@ -57,7 +57,10 @@ export const choices =
         const why = k && refuseKey(k, all);
         if (why) return tell(why);
         drafts.delete(typed);
-        if (k) set(at, [...path, k], minimal(at.defs[CHOICE]!, at.defs));
+        if (k)
+          void set(at, [...path, k], minimal(at.defs[CHOICE]!, at.defs))?.then(
+            (ok) => ok || void drafts.set(typed, k), // not written: the typed key waits for another Add
+          );
       };
       return [
         ...Object.entries(all).map(([k, c]) =>

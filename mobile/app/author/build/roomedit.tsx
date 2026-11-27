@@ -39,7 +39,6 @@ const WORDS = {
   add: '＋ Add here',
   npcs: 'Person',
   items: 'Item',
-  busy: 'Not written: another change was still saving. Try again.',
 };
 export type Node = { kind: string; ref: string };
 export type Template = { dir: 'npcs' | 'items'; key: string }; // /templates' abstract NPC or item
@@ -47,7 +46,7 @@ export type Template = { dir: 'npcs' | 'items'; key: string }; // /templates' ab
 let api: Hooks['api'] | undefined;
 let after = () => {}; // reads the map again and redraws (room.tsx `story`)
 let close = (_id: string) => {}; // closes a sheet by id (Build.tsx `back`)
-let busy = false; // one gesture at a time: a press while one runs is refused, and says so
+let busy = false; // one gesture at a time: a press while one runs does nothing
 let ran: Promise<void> = Promise.resolve(); // the gesture running now
 let said = ''; // the last refusal, shown at the sheet's top until the next press
 let asking: { key: string; files: string[]; answer: (yes: boolean) => void } | undefined;
@@ -84,9 +83,10 @@ export const refused = () => said;
 export const tell = (why: string) =>
   busy ? void ((said = why), after()) : void run(async () => why);
 
-/** Runs one gesture; a refusal (a thrown or returned reason) shows in the sheet. Resolves false when
- * it never ran: another gesture was writing (said, not silent; loka-x1frg) or no api is wired. */
-export async function run(go: () => Promise<unknown>): Promise<boolean> {
+/** Runs one gesture; a refusal (a thrown or returned reason) shows in the sheet. Resolves whether it
+ * went through: false when refused, or never run (no api; another gesture writing, said only as
+ * `busyNote`, as a press pressed twice is a double-tap; loka-x1frg). */
+export async function run(go: () => Promise<unknown>, busyNote = ''): Promise<boolean> {
   if (asking) {
     const { answer } = asking; // another press answers a pending Delete question Keep, then goes on
     asking = undefined;
@@ -94,15 +94,19 @@ export async function run(go: () => Promise<unknown>): Promise<boolean> {
     await ran;
   }
   if (!api) return false;
-  if (busy) return (tell(WORDS.busy), false);
+  if (busy) return (busyNote && tell(busyNote), false);
   busy = true;
   said = '';
+  let wrote = false;
   ran = (async () => {
     const was = ed.undoable();
     try {
       const why = await go();
       if (typeof why === 'string') said = why;
-      else if (ed.undoable() > was) saved(ed.last());
+      else {
+        wrote = true;
+        if (ed.undoable() > was) saved(ed.last());
+      }
     } catch (e) {
       said = (e as Error).message;
     } finally {
@@ -110,7 +114,7 @@ export async function run(go: () => Promise<unknown>): Promise<boolean> {
       after();
     }
   })();
-  return ran.then(() => true);
+  return ran.then(() => wrote);
 }
 
 const text = { ...type.small, color: ink('fg'), paddingHorizontal: space.md };

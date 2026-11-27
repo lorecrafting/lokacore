@@ -1,4 +1,4 @@
-// size: allow 711, one mocked /story and /change harness serves the registry rows (treatment:reverie too) and the Rules block cases
+// size: allow 720, one mocked /story and /change harness serves the registry rows (treatment:reverie too) and the Rules block cases
 // The generic sheet (author/build/generic.tsx, form.tsx; design §7, slice 2.3): every registry row
 // whose book verb is `generic` (kernel/ts/play/registry.json, held by bin/editor_gate.exs) is
 // added, edited or removed by the sheet, each a `/change` op at the row's own path.
@@ -351,22 +351,31 @@ test('a write refused after the file is read shows in the sheet', async () => {
 
 // Breaks (loka-x1frg): a field left while another gesture (the strip's Undo, Build.tsx) writes is
 // dropped with nothing said and its typed words (or a map's typed key) forgotten, so leaving it
-// again (or a second Add) writes nothing.
+// again (or a second Add) writes nothing; a double-tap told something; or a write sent under the
+// hash the Undo replaced before the sheet reads the file again.
 test('a field left while an Undo writes says it was not written; leaving it again writes it', async () => {
   const s = await opened('statuses', { tick_every: 5 });
   let release = () => {};
   void run(() => new Promise<void>((r) => (release = r))); // an Undo still putting back
+  const alert = () => words(s.shown().find((x) => x.props?.accessibilityRole === 'alert'));
+  const before = alert();
+  assert.equal(await run(async () => {}), false, 'a press ran mid-gesture');
+  assert.equal(alert(), before, 'a double-tap was told something');
   assert.deepEqual(await typeIn(s, ['tick_every'], '6'), [], 'a write went out mid-gesture');
-  const alert = s.shown().find((x) => x.props?.accessibilityRole === 'alert');
-  assert.match(words(alert), /Not written/, 'the dropped write said nothing');
+  assert.match(alert(), /Not written/, 'the dropped write said nothing');
   hash = 'U'; // the Undo rewrote the file
   release();
-  await settle(); // the Undo's new /story
-  s.shown(); // the sheet reads the file again under it
+  await settle(); // the Undo's new /story; the sheet still holds the old hash
+  const blur = () =>
+    within(s, ['tick_every'])
+      .find((x) => x.props?.onBlur)
+      .props.onBlur();
+  blur();
   await settle();
-  within(s, ['tick_every'])
-    .find((x) => x.props?.onBlur)
-    .props.onBlur();
+  assert.deepEqual(sent(), [], 'a stale write went out');
+  s.shown(); // the sheet reads the file again under the new /story
+  await settle();
+  blur();
   await settle();
   assert.deepEqual(sent(), [{ path: ['tick_every'], value: 6 }], 'the typed words were forgotten');
   hash = 'S';

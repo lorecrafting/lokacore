@@ -144,7 +144,7 @@ function field(at: At, path: Step[], value: string, pick: { kind: string; keys: 
     typing.delete(key);
     told.delete(key);
     if (k === value) known.redraw();
-    else set(at, path, k);
+    else void set(at, path, k)?.then((ok) => ok || void typing.set(key, k)); // not written: kept to write on leaving
   };
   const { shown, more } = text === undefined ? { shown: [], more: 0 } : matches(pick.keys, text);
   const small = (tone: 'danger' | 'dim') => ({ ...type.small, color: ink(tone) });

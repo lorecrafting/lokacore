@@ -252,3 +252,23 @@ test("a choice's Add… writes the picked field, and reveals an asked one unwrit
   assert.deepEqual(posts, [{ route: 'change', sent: { file: s.file, was: 'S', ops: [op] } }]);
   assert.equal(sitting, true);
 });
+
+// Breaks: an Add choice pressed while another save is out losing its typed key (loka-x1frg).
+test('an Add choice pressed while a save is out keeps its key; Add again writes it', async () => {
+  const s = await sheet(ONE, 'a', 'a.then');
+  let release = () => {};
+  held = new Promise((r) => (release = r));
+  await s.press(`link side_set ${s.file}:["choices","a","then"]`);
+  typeKey(s, 'no');
+  await s.press(`add choice ${s.file}:["choices","+"]`);
+  release();
+  held = undefined;
+  await settle();
+  posts.length = 0;
+  await s.press(`add choice ${s.file}:["choices","+"]`);
+  assert.deepEqual(
+    posts.map((p) => p.sent.ops[0].path),
+    [['choices', 'no']],
+    'the typed key was forgotten',
+  );
+});

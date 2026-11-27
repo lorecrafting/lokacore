@@ -7,6 +7,9 @@ import { reveal } from './reveal.ts';
 import { known } from './room.tsx';
 import { ed, run } from './roomedit.tsx';
 
+/** A field left while another gesture writes: its typed text is kept (loka-x1frg). */
+export const BUSY = 'Not written: another change was still saving. Try again.';
+
 export type Obj = Record<string, unknown>;
 export type Step = string | number;
 export type Write = Parameters<typeof ed.change>[number];
@@ -42,7 +45,7 @@ export const toggle = (key: string) => (
   opened.has(key) ? opened.delete(key) : opened.add(key),
   known.redraw()
 );
-/** Resolves false when the write never ran (roomedit `run`); undefined when it only reveals. */
+/** Resolves whether the write went through (roomedit `run`); undefined when it only reveals. */
 export const set = (at: At, path: Step[], value: unknown): Promise<boolean> | undefined =>
   value === undefined
     ? void (reveal(id(at, path), true), known.redraw())
@@ -52,7 +55,7 @@ export const own = (at: At, o: Ops) => at.pair?.(o) ?? o;
 /** One `/change` of `o` to the file, unless the gate refuses it: then the refusal shows, nothing sent. */
 export const send = (at: At, o: Ops, then = () => {}) => {
   const w = own(at, o);
-  return run(async () => at.gate?.(w) ?? ed.change([at.file, at.was, w]).then(then));
+  return run(async () => at.gate?.(w) ?? ed.change([at.file, at.was, w]).then(then), BUSY);
 };
 /** A write at `path`; at the root (a picked branch, a whole list) one op per top-level field. */
 export const ops = (path: Step[], value: unknown) =>
