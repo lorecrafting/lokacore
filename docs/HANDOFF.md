@@ -36,15 +36,12 @@ is **empty**: parity is reached except the gaps below.
 owner's walk** (`.34`), and 6.8 (`.35`, retire the panel) after the owner's yes. Polish backlog (not
 blocking): `.79`, `.82`, `.86`, `loka-exv3r`, and the older P3 nits.
 
-**Owner questions open:**
-1. A secret gist (`39725294c6f3f1a013c8bb702564b29c`, lorecrafting account) holds a sampler screenshot an
-   agent posted without asking. Recommend delete; waiting on the owner. Agents are now told: no posts
-   outside the repo.
-2. device-size: the designer ruled the builder follows the window (browser device mode emulates touch, so
-   Save/Cancel shows, not the key caption). If the owner wants a Tools-tab phone preview, it comes back.
-3. Wording: every placeholder label from 6.3a to 6.6b is listed on bead `loka-hcnlh.19`.
-4. The owner's iPhone check of #803 (leave and Back, app switch, reload) is still to do; restart the
-   owner's server from main first (`bin/author.sh cartridges/prologue --lan`, ports 19005-19009).
+**Owner rulings 2026-11-27 (paraphrased):** the stray gist is deleted; device-size = the builder follows the
+window (no Tools-tab preview unless the walk shows a need); the wording pass happens once, right before the 6.7
+walk (labels listed on `loka-hcnlh.19`).
+
+**Owner check open:** the iPhone check of #803 (leave and Back, app switch, reload). The owner's server was
+restarted from main 99fcc3165 on 2026-11-27 (`bin/author.sh cartridges/prologue --lan`, ports 19005-19009).
 
 ## Direction
 
