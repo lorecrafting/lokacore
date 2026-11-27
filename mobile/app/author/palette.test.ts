@@ -252,6 +252,12 @@ test('the palette: Down moves the active row, a query resets it, Enter runs it o
   known.open('def:text.json');
   key('k', { metaKey: true });
   assert.ok(!rows().some((r) => r.key === 'command delete'), 'no Delete over a root file');
+  known.open('def:scenes/dawn.scene');
+  key('k', { metaKey: true });
+  assert.ok(
+    !rows().some((r) => r.key === 'command delete'),
+    'no Delete over a scene: its sheet has none',
+  );
   known.open('def:rooms/hall.json');
   key('k', { metaKey: true });
   field().onKeyPress({ nativeEvent: { key: 'ArrowDown' } });
@@ -260,6 +266,17 @@ test('the palette: Down moves the active row, a query resets it, Enter runs it o
     drawn.slice(0, 2).map((r) => r.props.accessibilityState.selected),
     [false, true],
   );
+  build.hear({
+    text: {},
+    said: [],
+    placeholders: { gate: 'npcs/ann.json:3', moat: 'a.json:1' },
+  } as never);
+  assert.equal(
+    rows()[0].props.accessibilityState.selected,
+    true,
+    'new rows, as a late /find: the first',
+  );
+  field().onKeyPress({ nativeEvent: { key: 'ArrowDown' } });
   field().onChangeText('~');
   assert.deepEqual(
     [rows()[0].key, rows()[0].props.children.props.children],

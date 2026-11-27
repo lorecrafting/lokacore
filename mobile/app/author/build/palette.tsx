@@ -60,8 +60,9 @@ const exits = onRoom((r) => known.open(`room:${r.key}`)); // its exits' edits ar
 const add = (dir: 'npcs' | 'items') =>
   onRoom((r) => addTo(r, dir, known.nodes, held(), known.open));
 const undo = () => hooks.undo();
-/** The sheet the palette was opened over: a deletable definition there, else no Delete. */
-const deletable = (s = selection(stack().at(-2) ?? '')) => !!s && !rootFile(s.file);
+/** The sheet the palette was opened over: a deletable definition there (its foot has Delete), else none. */
+const deletable = (s = selection(stack().at(-2) ?? '')) =>
+  !!s && !s.file.endsWith('.scene') && !rootFile(s.file);
 
 /** Each command's gesture, by COMMANDS id. */
 export const RUN: Record<string, () => unknown> = {
@@ -131,24 +132,27 @@ const label = (i: Item) =>
 
 function Palette() {
   const [q, setQ] = useState('');
-  const [at, setAt] = useState(0); // the active row: Up and Down move it, Enter runs it
+  const [moved, setMoved] = useState([0, ''] as [number, string]); // the active row, and the rows it was in
   const story = known.story;
   const rows = rank(q, [
     ...items(known.nodes, useFound(q), hooks.state().placeholders, story?.names).filter(listed),
     ...(story ? storyItems(story) : []),
   ]);
   const run = (i?: Item) => i && (hooks.close(), pick(i)); // closed first: a command acts on the sheet under
-  const moved = (e: { nativeEvent: { key: string }; preventDefault?: () => void }) => {
+  const ids = rows.map((i) => `${i.kind} ${i.id}`).join('\n');
+  const at = moved[1] === ids ? moved[0] : 0; // the first when the list changes (a late /find too)
+  const step = (e: { nativeEvent: { key: string }; preventDefault?: () => void }) => {
     const by = { ArrowDown: 1, ArrowUp: -1 }[e.nativeEvent.key];
-    if (by) (e.preventDefault?.(), setAt(Math.max(0, Math.min(rows.length - 1, at + by))));
+    if (by)
+      (e.preventDefault?.(), setMoved([Math.max(0, Math.min(rows.length - 1, at + by)), ids]));
   };
   return [
     <TextInput
       key="q"
       autoFocus
       value={q}
-      onChangeText={(t) => (setQ(t), setAt(0))}
-      onKeyPress={moved as never}
+      onChangeText={setQ}
+      onKeyPress={step as never}
       onSubmitEditing={() => run(rows[at])}
       placeholder={WORDS.find}
       accessibilityLabel={WORDS.find}
