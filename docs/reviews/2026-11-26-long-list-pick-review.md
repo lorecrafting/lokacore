@@ -65,3 +65,26 @@
    - `sheet.tsx:166`: the `[ids, titles]` rewrite is churn.
 
 Wording: `no <kind> <text>` and `+N more` are placeholders, the owner's to replace (flagged, not rewritten).
+
+## Re-check: fix round at `4a7229c64` (commits `f2a3b122a`, `7c84a99a1`, `4a7229c64`)
+
+CI at `4a7229c64` (`gh run list --commit`): ci and book-e2e success. Verdict: **APPROVE WITH NOTES**.
+
+- Finding 1, fixed. The flag is now set on the picks row's `onPointerDown` (`world.tsx:161`). It names its field and is checked on blur (`:203`).
+  - Real Chrome (a scratch `vitest/browser` play mirroring `:161`, `:192`, `:203`):
+    - Typing `room_1`, then clicking the match, logged `down`, `blur guarded=true`, `in`, `press`. The blur writes nothing.
+  - Red controls (`author/world.test.ts`):
+    - Dropping the row's `onPointerDown`: three tests red.
+    - Unkeyed `if (pressing ...)`: the corpse test is red, as claimed.
+  - Touch: WebKit (iOS Safari 13+) sends `pointerdown` at touch start, before the compat mousedown that blurs. `tests/phone.ts:296` taps in WebKit. I did not run it; CI book-e2e is green.
+  - Native has no row pointerdown, so `onPressIn` sets the flag.
+- Finding 2, fixed: the `zzz` assertion after a refused leave.
+- Finding 3, fixed: the scroll is asserted. The mid-sheet screenshot stays an open question.
+- Finding 4, fixed: listed in the PR body.
+
+Notes (nits, author-side):
+- `world.tsx:161`, keyboard. The real Chrome probe logged `blur guarded=false` for `zz`, Tab, Enter on a match: the refusal is read, then the press writes the match.
+  - With `room_1` typed, the same keys write `room_1`, then the match: two Undo steps.
+  - This is "leaving writes an exact key", so it follows the spec. It is the open item named in the `ponytail:` comment.
+- `world.tsx:161`, a pointerdown in the row's gap between acts (or a cancelled press) leaves the flag set.
+  - Scenario: type `room_3`, then tap beside the picks. Nothing is written or refused until the next focus clears the flag (`:192`).
