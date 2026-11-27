@@ -247,8 +247,7 @@ export function go(key: string, refused: (note: string) => void = () => {}) {
     });
   return here;
 }
-const STALE =
-  'Changed since the last compile: this page is behind the cartridge. Wait for the compile, or press Cmd-E.';
+const STALE = 'Changed since the last compile: this page is behind the cartridge.';
 /** A pushed message's changed files: the open field's file changed, and its line with it, opens
  * the notice unasked. */
 export function changed(files: { file: string }[] = []) {

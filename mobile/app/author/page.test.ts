@@ -168,10 +168,7 @@ test('a Checks row whose line /open refuses says why', async () => {
   );
   await tick();
   reply = () => undefined;
-  assert.equal(
-    note,
-    'Changed since the last compile: this page is behind the cartridge. Wait for the compile, or press Cmd-E.',
-  );
+  assert.equal(note, 'Changed since the last compile: this page is behind the cartridge.');
 });
 
 // Breaks: the palette setter dropped or run only in Build: ink() falls back to its light colour,

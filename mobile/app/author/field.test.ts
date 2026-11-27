@@ -1,4 +1,4 @@
-// size: allow 580, a cut page’s caption and the phone field tests and the Checks refusal join the field seam’s harness
+// size: allow 590, a cut page’s caption and the phone field tests and the Checks refusal join the field seam’s harness
 // Build's in-place field (docs/system/book-ui.md#author-mode; slice 1.3): a room description's
 // line opens its field through the Book seam. The server's /line and /edit: kernel/ts/test/author.test.ts.
 import assert from 'node:assert/strict';
@@ -410,11 +410,14 @@ test('Checks says why a row cannot open; a changed file under the open field say
     .find((n) => n.props?.accessibilityRole === 'link')
     .props.onPress();
   await tick();
+  const drawn = strip();
+  const note = drawn.findIndex(
+    (n) =>
+      n.props?.children === 'Changed since the last compile: this page is behind the cartridge.',
+  );
   assert.ok(
-    shows(
-      'Changed since the last compile: this page is behind the cartridge. Wait for the compile, or press Cmd-E.',
-    ),
-    'a refused row says nothing',
+    note > 0 && drawn[note - 1].props.children === 'room.cellar.description: unwritten',
+    'the refusal is not under its row',
   );
   button('Checks · 1 unwritten').props.onPress();
   await opened(LINKED, at(LINKED));
