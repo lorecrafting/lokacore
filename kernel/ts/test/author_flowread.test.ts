@@ -4,8 +4,20 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { layout } from '../play/flow.ts';
 import * as read from '../play/flowread.ts';
-import { LAYOUT } from '../../../tools/author-panel/src/shell.ts';
-import { d1, d2, d3, f, model, OPEN, planted, q, r1, thera, V } from './author_flow_fixture.ts';
+import {
+  d1,
+  d2,
+  d3,
+  f,
+  model,
+  OPEN,
+  planted,
+  q,
+  r1,
+  thera,
+  V,
+  LAYOUT,
+} from './author_flow_fixture.ts';
 
 // Breaks: focus walks through the NPC anchor (d1 and thera both read it) or by one hop too many
 // (rulings S3 Focus: a stub must not light unrelated cells).

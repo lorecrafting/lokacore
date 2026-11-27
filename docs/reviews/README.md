@@ -10,6 +10,7 @@ of closed work are deleted once their lesson is folded, and linked by permalink
 Reviews before R2 live in the [legacy repository](https://github.com/lorecrafting/lokacore-v2-legacy)
 (commit `997a7a8`, `docs/rewrite-v3/reviews/`).
 
+- [Review: Builder 6.6b, port or retire the panel's card, words, undo and mapwire tests (PR #823, loka-hcnlh.33)](2026-11-27-builder-6.6b-card-tests-review.md): **APPROVE**
 - [Review: Builder 6.5b, Cmd-K palette, keys and map keys (PR #822, loka-hcnlh.32)](2026-11-27-builder-6.5b-palette-keys-review.md): **APPROVE WITH NOTES**
 - [Design review: Builder 6.5b palette and keys, PR #822 (loka-hcnlh.32)](2026-11-27-builder-6.5b-palette-keys-design-review.md): **APPROVE WITH NOTES**
 - [Review: Builder 6.5a, wide layout and Open source routes (PR #821, loka-hcnlh.32)](2026-11-27-builder-6.5a-wide-layout-review.md): **APPROVE**

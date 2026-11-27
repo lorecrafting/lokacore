@@ -20,7 +20,7 @@ import { after, test } from 'node:test';
 import { serve } from '../play/live.ts';
 import { story } from '../play/story.ts';
 import { wordsByNode } from '../play/story_counts.ts';
-import { named } from '../../../tools/author-panel/src/shell.ts';
+import { named } from '../play/palette.ts';
 
 const root = resolve(import.meta.dirname, '../../..');
 const dir = mkdtempSync(join(tmpdir(), 'loka-story-'));
