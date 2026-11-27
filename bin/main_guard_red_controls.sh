@@ -17,14 +17,14 @@ python3 -I "$guard" --files .beads/issues.jsonl docs/HANDOFF.md docs/ROADMAP.md 
   fail 'status-only and documentation commits were refused'
 
 # Refused: code, whatever the file's age or size.
-for f in mobile/app/author/inbook.ts kernel/ts/play/prose.ts bin/worktree_setup.sh \
+for f in mobile/app/author/panel.tsx kernel/ts/play/prose.ts bin/worktree_setup.sh \
   .github/workflows/ci.yml protocol/fixtures/toolbox_showcase_hash.json cartridges/prologue/room.json; do
   python3 -I "$guard" --files "$f" > /dev/null 2>&1 &&
     fail "code was allowed onto main: $f"
 done
 
 # A mixed push is refused for its code, not passed for its status files.
-python3 -I "$guard" --files .beads/issues.jsonl mobile/app/author/inbook.ts > /dev/null 2>&1 &&
+python3 -I "$guard" --files .beads/issues.jsonl mobile/app/author/panel.tsx > /dev/null 2>&1 &&
   fail 'a mixed push was allowed'
 
 # A real git pair, the way pre-push calls it: two commits, one status-only, one code.

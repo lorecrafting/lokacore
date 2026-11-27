@@ -297,6 +297,6 @@
   {
     "id": "prose-walk-keys",
     "panel": "mobile/app/author/prose_rules.ts",
-    "book": "todo"
+    "book": "page.ts"
   }
 ]

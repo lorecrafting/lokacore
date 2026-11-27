@@ -912,9 +912,10 @@ release build holds none of the code that sets it, and the plain dev preview nev
 other Book file names the seam or imports author code (lint `mobile-book-author-seam`). Looks: [author-mode marks](../BOOK-UI-COMPONENTS.md#component-catalogue);
 reasons and limits: [prose in the Book rulings](../design/prose-in-the-book-rulings.md).
 
-- **Edit in place.** A click plays. A double-click on a line's words (not on a link or card in it)
-  turns that line into a field in its place, nothing reflowing, the double-clicked word selected,
-  captioned `<file>:<line>  Enter saves · Esc cancels`; on a coarse pointer (touch) two acts a
+- **Edit in place.** A click plays. Outside Build, on a fine pointer, a double-click on a line's
+  words (not on a link or card in it, nor inside a text field) opens Build's own field on that line
+  (decisions 1 and 5, [builder mode §9](../rnd/in-game-builder-mode-2026-11-19.md); there is one
+  prose editor), in its place, nothing reflowing, captioned `<file>:<line>  Enter saves · Esc cancels`; on a coarse pointer (touch) two acts a
   touch target tall, Save and Cancel, stand in that caption's place, and Return still saves (owner
   2026-11-25, paraphrased). The field keeps the line's drawn height; the one caption or acts row
   under it is the only thing that moves the content below. It holds the source words unbound (slots
@@ -926,19 +927,26 @@ reasons and limits: [prose in the Book rulings](../design/prose-in-the-book-ruli
   refused compile marks the line unconfirmed (accessible name adds `unconfirmed`) until a good
   compile, and the console badge reads `The Book shows unconfirmed words (N)`, listing each
   line's `file:line` and refusal.
-- **Put it back.** Cmd-Z (Ctrl-Z) outside a text field undoes this page's last prose edit; each
-  press goes one further back; no redo; nothing left says `Nothing of yours to put back.` Inside
-  a field it is the field's own undo. A refused put-back says `<file> changed since; not put back.`
-- **`~` lines** carry a margin mark (accessible name adds `still to write`); the line is
-  unchanged. `]` and `[` walk the page's `~` lines (wrapping), `}` and `{` every editable line;
-  the landed line scrolls into view and takes focus, and Enter opens its field. The jump never
-  leaves the page; elsewhere is the console's Still to write list. Counts are in the console:
-  `~ 2 of 5 here · 41 in cartridge`. No key fires in a text field (the say field too) or with a
-  modifier, Cmd-Z aside; the keys work from the Book frame and the panel.
+- **Put it back.** No key puts a write back: Build's Undo and the notebook's Recent do (below).
+  Cmd-Z (Ctrl-Z) returns with slice 6.5b (ruling 7). Inside a field it is the field's own undo.
+- **Walk keys** (Build, a hardware keyboard; [builder mode §5](../rnd/in-game-builder-mode-2026-11-19.md)).
+  `]` and `[` walk the page's unwritten lines (wrapping), `}` and `{` every line Build draws as a
+  field but a choice's label (titles are their pencils'); the landed line scrolls into view and
+  takes focus, and Enter or Space opens its field. The jump never leaves the page; elsewhere is the
+  Checks sheet's still-to-write rows. No key fires in a text field (the say field too) or with a
+  modifier. The panel's own shortcuts pressed with the Book focused still reach the panel; nothing
+  the panel sends reaches the Book any more (its relays ended with the E5 field; the panel retires
+  at 6.8).
+- **Counts** are in the panel's console, Build on or off: `~ 2 of 5 here · 41 in cartridge`, the
+  page's unwritten lines (`2 of` only while a walked-to line has focus) and the cartridge's.
 - **Changed on disk (409).** The field keeps the draft; under it: `Changed on disk since you
   opened it.`, their words, and Keep mine (writes the draft over their line, found again) or Take
   theirs; only Open source when their line is not found exactly once. It opens unasked when a
   pushed change alters the field's line.
+- **Behind the compile** (a Checks row naming a line this page does not draw, whose words `/open`
+  no longer finds, a 404: the page was drawn before the last compile). Under that row, in a row of
+  its own (the No-field note's look and timing), read politely: `Changed since the last compile:
+  this page is behind the cartridge.` (placeholder words, the owner's to replace). Nothing opens.
 - **Hold** shows in the panel header (a toggle and `Held · N waiting`), on the Build strip and
   (6.2a) on the Notebook's Tools tab, never in the Book; leaving the page releases a Hold it set.
 - **Build** (the in-game builder, [builder mode §4.1, §5](../rnd/in-game-builder-mode-2026-11-19.md)).
@@ -1494,17 +1502,11 @@ reasons and limits: [prose in the Book rulings](../design/prose-in-the-book-ruli
   - Not in 5.3: a dialogue's `policy` (its row stays todo); a failure outcome added or removed by
     hand against its check is rewritten silently to match, with no reason shown.
   - Labels here are placeholder words, the owner's to replace.
-- **No field.** A double-click on a line that is not words opens nothing; a note under it, in a
+- **No field.** A double-click on a line that is not words, or on words two keys draw alike
+  (either key's field would write the other's line), opens nothing; a note under it, in a
   row of its own (the lines below move down by its height while it shows and back when it goes,
   with no motion; a note never covers a line, loka-wfrgk.39), until the next click or key, read politely: `A choice label is its key. Alt-click opens the scene.`,
   `The engine writes this line.`, else `Not a line of words. Alt-click opens its source.`
-- **Add here** (E6a, #649). While the panel's selection is a room, a click on that room's line in the
-  Book (the line the panel's `select` marks) shows the no-field note under it: `Add here`, then one
-  button per registry field the room lacks, in the panel's order; nothing when it lacks none. It is
-  the same note ([author-mode marks](../BOOK-UI-COMPONENTS.md#component-catalogue)) and lasts until
-  the next click or key. A pick is the panel's card writing that field's least valid value (a text key is `~`; a
-  key or choice the author must make is only revealed, not written), undone by the card's Undo, and
-  asks for no second note. Nothing is added from the Book without a pick.
 - Nothing here animates but a sheet coming in (above); the scroll to a landed line is instant under
   reduced motion.
 

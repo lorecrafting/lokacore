@@ -6,7 +6,7 @@ import { size, space, type } from '../../book/tokens.ts';
 import type { Message } from '../live.ts';
 import type { Step } from '../place.ts';
 import { install as seam } from './seam.ts';
-import { heard as told, shut, type Hooks, type Wrote } from './field.tsx';
+import { changed, heard as told, shut, type Hooks, type Wrote } from './field.tsx';
 import {
   autoHold,
   badge,
@@ -32,11 +32,13 @@ import './flow.tsx'; // registers the flow:<ref> sheet
 import { WORDS as RECENT } from './recent.tsx';
 import { undo as putBackIds } from '../../../../kernel/ts/play/mapedit.ts';
 import { io, onSaved, refused, run, running } from './roomedit.tsx';
-import { checked } from './checks.tsx';
+import { checked, unrefuse } from './checks.tsx';
 import { act, CONTROL, Frame, parts, sheets, stack, stepBack } from './sheet.tsx';
 export { Sheet, sheets } from './sheet.tsx';
 export { drawn, unsee } from './seeas.tsx';
 export { updated } from './tools.tsx';
+export { api, recount, start } from './page.ts';
+export { tagged } from '../prose_rules.ts';
 const WORDS = {
   build: 'Build',
   on: '✎ Build',
@@ -93,6 +95,7 @@ toolsWith({ game: () => placed, hold, heard: () => heard });
 /** Opens a sheet on the stack (or brings it to the top); the first remembers the focus to return. */
 export function open(id: string) {
   if (!builder.sheets) opener = globalThis.document?.activeElement as typeof opener;
+  if (id === 'checks') unrefuse();
   set(opened(builder, id));
   redrawStrip();
   shut();
@@ -106,7 +109,7 @@ function back(id?: string) {
   redrawStrip();
   if (!builder.sheets) opener?.focus?.();
 }
-/** `book`: the Book's word bindings, redraw and E5's api (panel.tsx), for the field. */
+/** `book`: the Book's word bindings, redraw and page.ts's api (panel.tsx), for the field. */
 export function install(book: Pick<Hooks, 'seen' | 'said' | 'redraw' | 'api'>) {
   api = book.api;
   seam({
@@ -142,9 +145,11 @@ export function install(book: Pick<Hooks, 'seen' | 'said' | 'redraw' | 'api'>) {
 }
 export function hear(message: Message & Said) {
   heard = message;
+  unrefuse();
   unsee(); // any live message ends it (fail safe)
   hold.heard(message.held);
   told(message.unconfirmed?.map((u) => u.key));
+  changed(message.changed);
   story(api, mapped, back, open); // a compile may have added, moved or renamed rooms
 }
 const set = (next: Builder) => {
@@ -268,7 +273,7 @@ export function Strip({ children }: { children: ReactNode }) {
       >
         <View
           style={{ flex: 1 }} /* mutate-skip: layout; the Book keeps its place as sheets open */
-          testID="loka-book" /* inbook.ts reads the page's palette under it */
+          testID="loka-book" /* page.ts reads the page's palette under it */
         >
           {children}
         </View>
