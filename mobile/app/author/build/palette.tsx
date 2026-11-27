@@ -24,7 +24,7 @@ import { goTo, sheetOf } from './story.tsx';
 const WORDS = {
   title: 'Commands',
   find: 'Type a command, a key or words',
-  unwritten: (key: string) => `${key}: unwritten`, // as Checks reads it, never `~` (ruling 9)
+  unwritten: (key: string) => `${key}: unwritten`, // as Checks reads it, never `~` (ruling nine)
 };
 
 type Hooks = {
