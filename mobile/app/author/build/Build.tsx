@@ -95,9 +95,10 @@ export const hold = autoHold(
 toolsWith({ game: () => placed, hold, heard: () => heard });
 paletteWith({
   on: () => builder.on,
-  top: () => builder.sheets?.at(-1),
+  stack: () => builder.sheets ?? [],
   close: () => back('palette'),
   undo: () => !!undo && (void putBack(undo), true),
+  undoable: () => !!undo,
   placeholders: () => heard.placeholders ?? {},
   hold,
   startIn: (room) => placed?.startIn(room),

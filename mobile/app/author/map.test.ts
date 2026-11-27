@@ -93,7 +93,8 @@ test('Map opens from the Build strip on the current room level; every room there
   assert.equal(drawn().sort().join(' '), LEVEL0);
 });
 
-test('a tap selects and plays nothing; Go here starts in that room, Sheet opens its sheet', () => {
+// Breaks (last lines): the palette's exit commands opening the Map again instead of the selected room's sheet.
+test('a tap selects and plays nothing; Go here starts in that room, Sheet opens its sheet', async () => {
   room('smithy').onPress();
   assert.deepEqual(went, []);
   assert.deepEqual(
@@ -105,6 +106,13 @@ test('a tap selects and plays nothing; Go here starts in that room, Sheet opens 
   assert.deepEqual(went, ['smithy']);
   press('Sheet');
   assert.equal(JSON.parse(kept.get(BUILD)!).sheets.at(-1), 'room:smithy');
+  build.open('map');
+  (await import('./build/palette.tsx')).RUN['map-unlink']!();
+  assert.equal(
+    JSON.parse(kept.get(BUILD)!).sheets.at(-1),
+    'room:smithy',
+    'an exit command: its sheet',
+  );
 });
 
 test('the least zoom makes a cell a touch target; a level too big for it centres on the current room', () => {
@@ -365,7 +373,9 @@ test('an exit runs box edge to box edge over a room between its two rooms', asyn
   known.rooms = all;
 });
 
-test("the ground's keys: a focused room keeps its own keys, and an open Join… takes no arrow", async () => {
+// Breaks: a focused room taking no map keys (a click on a room leaves the arrows dead), Enter on a
+// focused room also running the ground's select, or Join… left open taking arrows.
+test("the ground's keys: a focused room keeps Enter, takes arrows; an open Join… takes no arrow", async () => {
   const { known } = await import('./build/room.tsx');
   const all = known.rooms;
   known.rooms = [0, 1].map((x) => ({
@@ -390,21 +400,26 @@ test("the ground's keys: a focused room keeps its own keys, and an open Join… 
   const el = { addEventListener: (t: string, f: typeof keyed) => t === 'keydown' && (keyed = f) };
   ground().props.ref(el);
   assert.equal((el as { tabIndex?: number }).tabIndex, 0, 'a click on the ground focuses it');
-  const arrow = (target: object) =>
+  let taken = false;
+  const arrow = (target: object, key = 'ArrowRight') =>
     keyed({
-      key: 'ArrowRight',
+      key,
       target,
       currentTarget: node,
-      preventDefault() {},
+      preventDefault: () => void (taken = true),
       stopPropagation() {},
     });
   arrow({}); // on a focused room
-  assert.deepEqual(selectedNow(), ['r0'], 'a focused room keeps its keys');
+  assert.deepEqual(selectedNow(), ['r1'], 'an arrow on a focused room moves the selection');
+  taken = false;
+  arrow({}, 'Enter');
+  arrow({}, ' ');
+  assert.equal(taken, false, "a focused room's Enter and Space are its own press");
   press('Join…');
-  arrow(node);
-  assert.deepEqual(selectedNow(), ['r0'], 'Join… stays on the selection');
+  arrow(node, 'ArrowLeft');
+  assert.deepEqual(selectedNow(), ['r1'], 'Join… stays on the selection');
   press('Cancel');
-  arrow(node);
-  assert.deepEqual(selectedNow(), ['r1'], 'the ground itself moves it');
+  arrow(node, 'ArrowLeft');
+  assert.deepEqual(selectedNow(), ['r0'], 'the ground itself moves it');
   known.rooms = all;
 });

@@ -41,11 +41,12 @@ export const keep = (store: Store, builder: Builder) =>
 /** Leaving Build closes every sheet. */
 export const toggled = ({ on, room }: Builder): Builder => ({ on: !on, ...(room && { room }) });
 /** `id` on top of the stack (moved there if it is lower), scrolled to its start; already on top,
- * nothing changes. */
+ * nothing changes. A full stack loses its top, but the palette, which acts on the top, drops the lowest. */
 export function opened(b: Builder, id: string): Builder {
   if (b.sheets?.at(-1) === id) return b;
   const s = (b.sheets ?? []).filter((x) => x !== id);
-  return { ...b, sheets: [...(s.length < STACK ? s : s.slice(0, -1)), id], scroll: 0 };
+  const kept = s.length < STACK ? s : id === 'palette' ? s.slice(1) : s.slice(0, -1);
+  return { ...b, sheets: [...kept, id], scroll: 0 };
 }
 /** The top sheet becomes `id` (the Flow walk re-centres or steps back): the stack keeps its order. */
 export const swapped = (b: Builder, id: string): Builder => ({

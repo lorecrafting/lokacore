@@ -1,9 +1,9 @@
 // The Builder's Cmd-K palette (slice 6.5b, the panel's palette.tsx): kernel palette.ts's rows (each
-// command, the definitions, /find's text keys and the `~` lines) and the Story's beats, each run as
+// command, the definitions, /find's text keys and the unwritten lines) and the Story's beats, each run as
 // the Builder gesture it names. Its keys, over the Book while Build is on: Cmd-K opens it, Esc
 // closes it, Cmd-Z presses the Undo chip, Cmd-E opens the top sheet's source (POST /open).
 import { useEffect, useState } from 'react';
-import { TextInput } from 'react-native';
+import { TextInput, View } from 'react-native';
 import { type MapRoom } from '../../../../kernel/ts/play/map.ts';
 import { COMMANDS, items, rank, words } from '../../../../kernel/ts/play/palette.ts';
 import { fromRef, storyItems, type Item } from '../../../../kernel/ts/play/storylist.ts';
@@ -20,22 +20,28 @@ import { act, parts, sheets } from './sheet.tsx';
 import { sheetOf } from './story.tsx';
 
 // placeholder: the owner writes these words
-const WORDS = { title: 'Commands', find: 'Type a command, a key or words' };
+const WORDS = {
+  title: 'Commands',
+  find: 'Type a command, a key or words',
+  unwritten: (key: string) => `${key}: unwritten`, // as Checks reads it, never `~` (ruling 9)
+};
 
 type Hooks = {
   on: () => boolean;
-  top: () => string | undefined;
+  stack: () => string[]; // the open sheets, the top last
   close: () => void;
   undo: () => boolean; // presses the Undo chip; false when there is none
+  undoable: () => boolean; // whether the Undo chip shows
   placeholders: () => Record<string, string>;
   hold: { toggle: () => void };
   startIn: (room: string) => void;
 };
 let hooks: Hooks;
+const top = () => hooks.stack().at(-1);
 export { COMMANDS }; // the rows palette.test.ts counts (mobile tests reach the kernel only through here)
 
 /** The top sheet's definition: its key and source file; a sheet with no file has none. */
-const selection = (id = hooks.top() ?? '') => {
+const selection = (id = top() ?? '') => {
   const [s, arg] = parts(id);
   const file = s?.file?.(arg);
   return (
@@ -55,6 +61,8 @@ const exits = onRoom((r) => known.open(`room:${r.key}`)); // its exits' edits ar
 const add = (dir: 'npcs' | 'items') =>
   onRoom((r) => addTo(r, dir, known.nodes, held(), known.open));
 const undo = () => hooks.undo();
+/** The sheet the palette was opened over: a deletable definition there, else no Delete. */
+const deletable = (s = selection(hooks.stack().at(-2) ?? '')) => !!s && !rootFile(s.file);
 
 /** Each command's gesture, by COMMANDS id. */
 export const RUN: Record<string, () => unknown> = {
@@ -63,7 +71,7 @@ export const RUN: Record<string, () => unknown> = {
   ),
   delete: () => {
     const s = selection();
-    return s && !rootFile(s.file) && dropIn(s.key, s.file, s.id); // a further file it takes is asked in its sheet
+    return s && deletable(s) && dropIn(s.key, s.file, s.id); // a further file it takes is asked in its sheet
   },
   hold: () => (hooks.hold.toggle(), known.redraw()),
   undo,
@@ -109,33 +117,43 @@ function useFound(q: string) {
   return q.trim() ? text : {};
 }
 
+/** Commands with nothing to act on are not listed (§ Rows). */
+const listed = (i: Item) =>
+  i.kind !== 'command' ||
+  (i.id === 'delete' ? deletable() : ['undo', 'map-undo'].includes(i.id) ? hooks.undoable() : true);
+const label = (i: Item) =>
+  i.kind === 'command'
+    ? i.label
+    : `${i.kind === 'todo' ? WORDS.unwritten(i.id) : i.label} · ${i.detail}`;
+
 function Palette() {
   const [q, setQ] = useState('');
+  const [at, setAt] = useState(0); // the active row: Up and Down move it, Enter runs it
   const story = known.story;
   const rows = rank(q, [
-    ...items(known.nodes, useFound(q), hooks.placeholders(), story?.names),
+    ...items(known.nodes, useFound(q), hooks.placeholders(), story?.names).filter(listed),
     ...(story ? storyItems(story) : []),
   ]);
-  const run = (i?: Item) => i && (hooks.close(), pick(i));
+  const run = (i?: Item) => i && (hooks.close(), pick(i)); // closed first: a command acts on the sheet under
+  const moved = (e: { nativeEvent: { key: string }; preventDefault?: () => void }) => {
+    const by = { ArrowDown: 1, ArrowUp: -1 }[e.nativeEvent.key];
+    if (by) (e.preventDefault?.(), setAt(Math.max(0, Math.min(rows.length - 1, at + by))));
+  };
   return [
     <TextInput
       key="q"
       autoFocus
       value={q}
-      onChangeText={setQ}
-      onSubmitEditing={() => run(rows[0])} // ponytail: Enter runs the first row; no Up/Down yet
+      onChangeText={(t) => (setQ(t), setAt(0))}
+      onKeyPress={moved as never}
+      onSubmitEditing={() => run(rows[at])}
       placeholder={WORDS.find}
       accessibilityLabel={WORDS.find}
       style={{ ...type.body, color: ink('fg'), padding: space.md }}
     />,
-    ...rows.map((i) =>
-      act(
-        i.kind === 'command' ? i.label : `${i.label} · ${i.detail}`,
-        () => run(i),
-        undefined,
-        `${i.kind} ${i.id}`,
-      ),
-    ),
+    <View key="rows" style={{ paddingHorizontal: space.md }}>
+      {rows.map((i, n) => act(label(i), () => run(i), undefined, `${i.kind} ${i.id}`, n === at))}
+    </View>,
   ];
 }
 sheets.palette = { title: () => WORDS.title, body: () => <Palette /> };
@@ -146,7 +164,7 @@ function took(e: KeyboardEvent) {
   const k = e.key.toLowerCase();
   if (!hooks.on()) return false;
   if (mod(e) && k === 'k') return (known.open('palette'), true);
-  if (e.key === 'Escape') return hooks.top() === 'palette' && (hooks.close(), true);
+  if (e.key === 'Escape') return top() === 'palette' && (hooks.close(), true);
   if (mod(e) && k === 'z' && !e.shiftKey)
     return !textField(e.target as HTMLElement) && hooks.undo();
   if (!mod(e) || k !== 'e') return false;

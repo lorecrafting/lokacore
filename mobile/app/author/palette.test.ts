@@ -91,7 +91,7 @@ const acts = () => {
   };
   return { did, a };
 };
-const press = (k: string, mods: object = {}, z = 0) => {
+const press = (k: string, mods: object = {}, z = 0, from = 'hall') => {
   const { did, a } = acts();
   const e = {
     key: k,
@@ -99,7 +99,8 @@ const press = (k: string, mods: object = {}, z = 0) => {
     stopPropagation() {},
     ...mods,
   };
-  mapKey(e as never, [...rooms, room('cellar', 0, 0, -1)] as never, z, 'hall', undefined, a);
+  const below = [room('cellar', 0, 0, -1), room('vault', -2, 0, -1)];
+  mapKey(e as never, [...rooms, ...below] as never, z, from, undefined, a);
   return did.filter((d) => (d as string[])[0] !== 'taken');
 };
 const takes = (k: string) => {
@@ -115,8 +116,14 @@ const takes = (k: string) => {
   return did.includes('taken');
 };
 
+// Breaks: an arrow reaching a room on another level (the vault, west of west a floor down).
 test('map keys: ArrowRight selects the east neighbour, Enter selects, Shift-Enter goes', () => {
   assert.deepEqual(press('ArrowRight'), [['pick', 'east']]);
+  assert.deepEqual(
+    press('ArrowLeft', {}, 0, 'west'),
+    [],
+    'west is the last room that way on its level',
+  );
   assert.deepEqual(press('Enter'), [['pick', 'hall']]);
   assert.deepEqual(press('Enter', { shiftKey: true }), [['go', 'hall']]);
 });
@@ -219,13 +226,58 @@ test('the palette: Enter runs the top row; the command rows read as their label'
   assert.equal(sent.slice(posts).find(([p]) => p === '/new')?.[1]?.kind, 'actions');
 });
 
+// Breaks: Down not moving the active row (or it not drawn selected), a new query keeping it, Enter
+// running another row, the palette closed after its row runs (Delete then reads the palette as the
+// top sheet and does nothing), Delete listed over a root file, or an unwritten line read as `~`.
+test('the palette: Down moves the active row, a query resets it, Enter runs it on the sheet under', async () => {
+  const shim = Symbol.for('combat-state');
+  const was = (globalThis as any)[shim];
+  const state: unknown[] = [];
+  let n = 0;
+  (globalThis as any)[shim] = (v: unknown) => {
+    const i = n++;
+    if (!(i in state)) state[i] = v;
+    return [state[i], (x: unknown) => void (state[i] = x)];
+  };
+  const draw = () => ((n = 0), nodes(sheets.palette!.body('')));
+  const rows = () => draw().filter((d) => d.type === 'Pressable');
+  const field = () => draw().find((d) => d.props?.onKeyPress).props;
+  build.hear({ text: {}, said: [], placeholders: { gate: 'npcs/ann.json:3' } } as never);
+  known.open('def:text.json');
+  key('k', { metaKey: true });
+  assert.ok(!rows().some((r) => r.key === 'command delete'), 'no Delete over a root file');
+  known.open('def:rooms/hall.json');
+  key('k', { metaKey: true });
+  field().onKeyPress({ nativeEvent: { key: 'ArrowDown' } });
+  const drawn = rows();
+  assert.deepEqual(
+    drawn.slice(0, 2).map((r) => r.props.accessibilityState.selected),
+    [false, true],
+  );
+  field().onChangeText('~');
+  assert.deepEqual(
+    [rows()[0].key, rows()[0].props.children.props.children],
+    ['todo gate', 'gate: unwritten · npcs/ann.json:3'],
+  );
+  const asked = () => sent.filter(([p]) => p === '/source?file=rooms%2Fhall.json').length;
+  const before = asked();
+  field().onChangeText('delete');
+  assert.equal(rows()[0].key, 'command delete');
+  assert.equal(rows()[0].props.accessibilityState.selected, true, 'a new query: the first row');
+  field().onSubmitEditing();
+  await new Promise((r) => setTimeout(r));
+  assert.notEqual(top(), 'palette');
+  assert.equal(asked(), before + 1, 'Delete read the sheet under the palette');
+  (globalThis as any)[shim] = was;
+});
+
 test('typing asks /find once, after a pause; a closed palette asks nothing', async () => {
   const shim = Symbol.for('combat-state');
   const was = (globalThis as any)[shim];
   const set: unknown[] = [];
   let calls = 0;
   (globalThis as any)[shim] = (v: unknown) => [
-    calls++ % 2 ? v : 'gate',
+    calls++ % 3 ? v : 'gate', // the query; the active row and the reply as given
     (n: unknown) => void set.push(n),
   ];
   const stops: (() => void)[] = [];

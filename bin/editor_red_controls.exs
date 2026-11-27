@@ -11,7 +11,6 @@ editor = JSON.decode!(File.read!(Path.join(root, editor_registry)))
 base = File.read!(Path.join(root, editor_baseline))
 parity = JSON.decode!(File.read!(Path.join(root, parity_table)))
 todo = File.read!(Path.join(root, todo_baseline))
-[parity_todo | _] = Regex.run(~r/^parity:\S+/m, todo)
 notyet_list = "test/loka/builder_generic_notyet.txt"
 notyet = File.read!(Path.join(root, notyet_list))
 
@@ -126,9 +125,9 @@ editor_controls =
          "\"hierarchy\": book generic: refused"},
         {"parity-duplicate", %{parity: parity ++ [hd(parity)]},
          "\"hierarchy\": ids are unique strings"},
-        # the first parity row still todo, so the plant outlives each slice that ships one
-        {"parity-unlisted", %{todo: Regex.replace(~r/^#{parity_todo}\b.*\n/m, todo, "")},
-         "#{parity_todo}: todo but not in the baseline"}
+        # a row planted todo, so the plant outlives the last slice that ships one
+        {"parity-unlisted", %{parity: [Map.put(hd(parity), "book", "todo") | tl(parity)]},
+         "parity:hierarchy: todo but not in the baseline"}
       ] do
     files =
       for {k, v} <- planted,
