@@ -280,10 +280,8 @@ never in `mobile/app/book/`; behaviour: [Book UI](system/book-ui.md#author-mode-
 [rulings](design/prose-in-the-book-rulings.md)). Existing tokens only, in the Book's current palette.
 The prose field: the line's own type role at the reading size, its own wrap and width, `fg` on
 `card`, the focus ring (`size.focus`, `action`), caret `action`, browser selection; its caption and
-any no-field note `type.label` in `dim` on `card`, the note's buttons (Add here's fields) `action`, no
-border. Unconfirmed words: a static wavy underline in `warning`
-(never dotted: that is the fixture link). A `~` line: a `size.speechBar` bar in `warning` in the
-left page margin over the line's full height, `action` on the landed line. The changed-on-disk
+any no-field note `type.label` in `dim` on `card`, no border. Unconfirmed words: a static wavy underline in `warning`
+(never dotted: that is the fixture link). A line a walk key landed on: the focus ring. The changed-on-disk
 notice: `type.label` in `warning`, its buttons `type.control` in `action`, each a touch target tall.
 Build's tap field (builder 1.3): the line's own type role and width on page paper, a `size.rule`
 rule in `action` beneath it; an unwritten line in Build: a blank line of the line's own height
