@@ -28,19 +28,8 @@ import {
   thera,
   V,
   xy,
+  LAYOUT,
 } from './author_flow_fixture.ts';
-import type { Layout } from '../play/flow.ts';
-// The panel's default layout (its shell.ts LAYOUT), held here so no test imports the panel (6.6b).
-const LAYOUT: Layout = {
-  left: 280,
-  right: 360,
-  slot: 240,
-  leftOpen: true,
-  rightOpen: true,
-  tablet: false,
-  tab: 'hierarchy',
-  map: 'map',
-};
 
 // Breaks: the cap is off by one, the stub counts the kept chips, or opening the cell keeps the cap.
 test('20 reactions with no inbound edge: 12 chips and +8; opened, 20 and the lane grows', () => {

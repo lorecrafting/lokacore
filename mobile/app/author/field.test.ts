@@ -127,6 +127,7 @@ test('a field left open blocks nothing and holds only while focused', async () =
   input.props.onFocus();
   input.props.onChangeText('');
   input.props.onSubmitEditing(); // the "Empty." notice keeps it open
+  assert.match(JSON.stringify(page(LINKED)), /Empty\./, 'an emptied field shut without its notice');
   input.props.onBlur();
   await tick();
   assert.deepEqual(holds(), [true, false], 'the Hold outlived the focus');

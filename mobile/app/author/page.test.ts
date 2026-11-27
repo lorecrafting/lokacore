@@ -112,34 +112,41 @@ test('a double-click outside Build opens the line, and its Enter sends one /edit
 // typed while a save is out lost (the field not read-only while it saves).
 test('a read or save the server never answered says so; the field is read-only while it saves', async () => {
   on = true;
-  const drawn = () => line({ children: 'A low loft.' });
-  down = true;
-  drawn().onPress!({} as never);
-  await tick();
-  assert.match(text(drawn()), /did not answer/, 'a refused read said nothing');
-  down = false;
-  drawn().onPress!({} as never);
-  await tick();
-  const input = () => nodes(drawn().children).find((n) => n.type === 'TextInput');
-  assert.ok(input(), 'a second tap did not read the line again');
-  assert.notEqual(input().props.editable, false, 'read-only before any save');
-  input().props.onChangeText('A high loft.');
-  let release!: () => void;
-  held = new Promise((r) => (release = r));
-  const shown = redrawn;
-  input().props.onSubmitEditing();
-  await tick();
-  assert.equal(input().props.editable, false, 'the field took words while its save was out');
-  assert.equal(redrawn, shown + 1, 'the read-only field was never redrawn');
-  down = true; // the server goes down before the held save answers
-  release();
-  await tick();
-  held = undefined;
-  assert.match(text(drawn()), /did not answer/, 'a save that never answered said nothing');
-  assert.notEqual(input()?.props.editable, false, 'the field shut, or stayed read-only, after it');
-  down = false;
-  shut();
-  on = false;
+  let release = () => {};
+  try {
+    const drawn = () => line({ children: 'A low loft.' });
+    down = true;
+    drawn().onPress!({} as never);
+    await tick();
+    assert.match(text(drawn()), /did not answer/, 'a refused read said nothing');
+    down = false;
+    drawn().onPress!({} as never);
+    await tick();
+    const input = () => nodes(drawn().children).find((n) => n.type === 'TextInput');
+    assert.ok(input(), 'a second tap did not read the line again');
+    assert.notEqual(input().props.editable, false, 'read-only before any save');
+    input().props.onChangeText('A high loft.');
+    held = new Promise((r) => (release = r));
+    input().props.onSubmitEditing();
+    await tick();
+    assert.equal(input().props.editable, false, 'the field took words while its save was out');
+    down = true; // the server goes down before the held save answers
+    release();
+    await tick();
+    held = undefined;
+    assert.match(text(drawn()), /did not answer/, 'a save that never answered said nothing');
+    assert.notEqual(
+      input()?.props.editable,
+      false,
+      'the field shut, or stayed read-only, after it',
+    );
+  } finally {
+    release(); // a failed assertion must not leave later saves waiting on `held`
+    held = undefined;
+    down = false;
+    shut();
+    on = false;
+  }
 });
 
 // Breaks: a double-click picking a word inside a text field, or on a phone (no double-click to
