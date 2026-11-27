@@ -1006,7 +1006,7 @@ reasons and limits: [prose in the Book rulings](../design/prose-in-the-book-ruli
   - **Sheets.** A sheet has a Back button, the breadcrumb of the sheets under it (their titles
     joined ` › `), and its title, a header that takes focus whenever a new sheet comes on top; its
     body scrolls, from its start when it comes on top. Sheets stack, at most four: opening a fifth
-    replaces the top one, opening one already lower moves it to the top, and Back closes only the
+    replaces the top one (the palette excepted, below), opening one already lower moves it to the top, and Back closes only the
     top one (a Flow walk first steps back along its trail, Flow walk below). Closing the last returns focus to what opened the first. The stack and the top
     sheet's scroll survive a reload; leaving Build closes every sheet.
   - **Sheet foot** (6.2b, the panel's source footer). A sheet that draws one source file (a Room,
@@ -1400,8 +1400,8 @@ reasons and limits: [prose in the Book rulings](../design/prose-in-the-book-ruli
     - A moved room's exits keep their directions: a line runs centre to centre even when the
       layout contradicts its direction ([E3a Exits](../design/editor-map-and-story-rulings.md)),
       so it may slant; a line is never hidden by a box that is not one of its two rooms.
-  - **Keys** (6.5b, the panel's map keys). While focus is on the ground or a room in it, never in
-    Join… or Move…: an arrow selects the nearest room that way on the level shown (from the
+  - **Keys** (6.5b, the panel's map keys). While focus is on the ground or a room in it and no mode is
+    armed: an arrow selects the nearest room that way on the level shown (from the
     selection, else the current room, else the first), Enter selects, Shift-Enter is `Go here`,
     PageUp and PageDown step a level up or down (none past the last), `+` (`=`) and `-` zoom by one
     step, `0` fits. On a focused room Enter and Space are its press. A key with Cmd, Ctrl or Alt is
@@ -1520,8 +1520,9 @@ reasons and limits: [prose in the Book rulings](../design/prose-in-the-book-ruli
   - **Rows.** At most 50, ranked as the panel's: every command, the definitions (`<key> · <name> ·
     <kind>`), `/find`'s text keys (`<words> · <key>`, asked once per typing pause) and the lines
     still to write, read as Checks reads them (`<key>: unwritten · <file>`, never `~`, ruling 9);
-    a query starting `~` narrows to those. A row runs as the Builder gesture it names: a command
-    its act, a definition its sheet, a line its source. A command with nothing to act on is not
+    a query starting `~` narrows to those; then the Story's rows. A row runs as the Builder gesture it names: a command
+    its act, a definition its sheet, a line its source, a
+    beat the Story in Contents, a Story row its sheet. A command with nothing to act on is not
     listed: Delete only while the sheet the palette was opened over draws a deletable definition
     (never a root file), Undo and `Undo the last map edit` only while the strip's Undo shows. A room
     command with no room selected opens the Map to pick one.
