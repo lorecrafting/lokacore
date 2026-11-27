@@ -69,6 +69,7 @@ test("Add mechanic…'s options show their field's description", async () => {
     await s.press(`mechanic ${file}:["+mechanic"]`);
     const option = s.shown().find((x) => String(x.key).startsWith(`mechanic ${f} `));
     assert.equal(words(option), `${f}${defs[def].properties[f].description}`);
+    assert.equal(option.props.accessibilityLabel, f); // the description is its hint, not its name
   }
 });
 
@@ -81,11 +82,32 @@ test("an Add… option shows its field's description", async () => {
   assert.equal(words(amount), `amount${defs.ItemEdible.properties.amount.description}`);
 });
 
-// Break (:70): a list item hides its description; the lute's one keyword is a bare `{$ref: Alias}`, so the
+// Break (:70): a list item hides its description; the harp's one keyword is a bare `{$ref: Alias}`, so the
 // words are the definition's.
 test('a list item shows its description', async () => {
   const s = await opened('items/harp.json', { keywords: ['harp'] });
   await s.press('fold items/harp.json:["keywords"]');
   const item = at(s, 'items/harp.json:["keywords",0]');
   assert.ok(nodes(item).some((x) => words(x) === defs.Alias.description));
+});
+
+// Break (review): a refused mechanic, greyed with why, drops its description where the author decides
+// whether to turn it on.
+test("a greyed Add mechanic… row shows its field's description", async () => {
+  files.set('cartridge.json', { requires: { capabilities: {} }, world: {} }); // every gate shut
+  story(
+    api,
+    () => {},
+    () => {},
+    () => {},
+  ); // a new /story reads cartridge.json again
+  (await settle(), await settle());
+  const s = await opened('items/flute.json', { name: 'x' });
+  await s.press('mechanic items/flute.json:["+mechanic"]');
+  const row = s.shown().find((x) => String(x.key).startsWith('mechanic edible '));
+  assert.ok(
+    nodes(row).some(
+      (x) => words(x) === defs['source.ItemDefinition'].properties.edible.description,
+    ),
+  );
 });

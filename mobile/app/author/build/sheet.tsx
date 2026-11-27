@@ -68,6 +68,8 @@ export const act = (
     <Pressable
       key={key}
       accessibilityRole="button"
+      accessibilityLabel={about && label} // the description is the hint, not the name
+      accessibilityHint={about}
       accessibilityState={
         expanded === undefined && selected === undefined
           ? undefined
@@ -92,10 +94,17 @@ export const note = (about?: string) =>
   ) : null;
 
 /** A control that cannot act yet, dim with why; pressable only given `run` (Add mechanic… turns one on). */
-export const greyed = (label: string, why: string, key: string, run?: () => void) => (
+export const greyed = (
+  label: string,
+  why: string,
+  key: string,
+  run?: () => void,
+  about?: string, // as `act`'s, beneath the reason
+) => (
   <Pressable
     key={key}
     accessibilityRole="button"
+    accessibilityHint={about}
     accessibilityState={{ disabled: !run }}
     disabled={!run}
     onPress={run}
@@ -103,6 +112,7 @@ export const greyed = (label: string, why: string, key: string, run?: () => void
   >
     <Text style={{ ...type.control, color: ink('dim') }}>{label}</Text>
     <Text style={{ ...type.label, color: ink(run ? 'action' : 'dim') }}>{why}</Text>
+    {note(about)}
   </Pressable>
 );
 

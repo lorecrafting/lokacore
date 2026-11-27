@@ -43,32 +43,24 @@ export function mechanics(
   const yes = m.allowed.filter((k) => !hidden(k));
   const no = m.blocked.filter((b) => !hidden(b.field));
   if (!yes.length && !no.length) return [];
+  const head = side(
+    [],
+    act(WORDS.mechanic, () => toggle(menu), opened.has(menu), `mechanic ${menu}`),
+  );
+  if (!opened.has(menu)) return [head];
   return [
-    side(
-      [],
-      act(WORDS.mechanic, () => toggle(menu), opened.has(menu), `mechanic ${menu}`),
+    head,
+    ...yes.map((k) =>
+      act(k, () => set(at, [k], start(k)), undefined, `mechanic ${k} ${menu}`, undefined, said(k)),
     ),
-    ...(opened.has(menu)
-      ? [
-          ...yes.map((k) =>
-            act(
-              k,
-              () => set(at, [k], start(k)),
-              undefined,
-              `mechanic ${k} ${menu}`,
-              undefined,
-              said(k),
-            ),
-          ),
-          ...no.map((b) =>
-            greyed(
-              b.field,
-              why(b),
-              `mechanic ${b.field} ${menu}`,
-              b.on && turn(at, start, b.field, b.on),
-            ),
-          ),
-        ]
-      : []),
+    ...no.map((b) =>
+      greyed(
+        b.field,
+        why(b),
+        `mechanic ${b.field} ${menu}`,
+        b.on && turn(at, start, b.field, b.on),
+        said(b.field),
+      ),
+    ),
   ];
 }
