@@ -6,7 +6,7 @@ import { placed } from './card.ts';
 import type { At, MapRoom } from './map.ts';
 import { freeKey, NAMED, nodeOf } from './keys.ts';
 export { childKey, freeKey, NAMED, nodeOf } from './keys.ts';
-import { addBeat, bind, dropBeat, titleBeat } from './outlineedit.ts';
+import { addBeat, addPart, bind, dropBeat, dropPart, titleBeat, titlePart } from './outlineedit.ts';
 
 type Told = { ok: boolean; told: unknown };
 export type Io = {
@@ -254,7 +254,7 @@ async function gesture<T>(io: Io, done: Done[], steps: (s: Run) => Promise<T>) {
 }
 
 /** The map's gestures over the panel's routes, and an undo of the last whole gesture. */
-// size: allow 48, a flat table: one line per gesture the builder's sheets run
+// size: allow 51, a flat table: one line per gesture the builder's sheets run
 export function editor(io: Io) {
   const done: Done[] = []; // each gesture's journal ids and files, oldest first
   const run = <T>(steps: (s: Run) => Promise<T>) => gesture(io, done, steps);
@@ -301,6 +301,9 @@ export function editor(io: Io) {
     addBeat: (part: number, n: number) => run((s) => addBeat(s, part, n)),
     titleBeat: (part: number, n: number, title: string) => run((s) => titleBeat(s, part, n, title)),
     dropBeat: (part: number, n: number) => run((s) => dropBeat(s, part, n)),
+    addPart: () => run(addPart),
+    titlePart: (part: number, title: string) => run((s) => titlePart(s, part, title)),
+    dropPart: (part: number) => run((s) => dropPart(s, part)),
   };
 }
 export type Editor = ReturnType<typeof editor>;

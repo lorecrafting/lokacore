@@ -1,5 +1,2 @@
-outline.parts.book.create  # loka-hcnlh.45
-outline.parts.book.edit  # loka-hcnlh.45
-outline.parts.book.delete  # loka-hcnlh.45
 parity:device-size  # 6.5, loka-hcnlh.32
 parity:column-folds  # 6.5

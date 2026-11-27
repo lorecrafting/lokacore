@@ -14,12 +14,16 @@ todo = File.read!(Path.join(root, todo_baseline))
 [parity_todo | _] = Regex.run(~r/^parity:\S+/m, todo)
 notyet_list = "test/loka/builder_generic_notyet.txt"
 notyet = File.read!(Path.join(root, notyet_list))
-# outline.parts (book create still todo) with its book create set to v (nil drops the key)
+
+# outline.parts with its book create set to v (nil drops the key); a todo or not-yet control plants
+# that row back as todo and lists it itself, as no schema row is meant to stay todo
 book = fn v ->
   b = editor["outline.parts"]["book"]
   b = if v, do: Map.put(b, "create", v), else: Map.delete(b, "create")
   Map.put(editor, "outline.parts", Map.put(editor["outline.parts"], "book", b))
 end
+
+listed = &(&1 <> "outline.parts.book.create  # red control\n")
 
 panel = &[Map.put(hd(parity), "panel", &1) | tl(parity)]
 card = &Map.put(editor, "services.name", Map.put(editor["services.name"], "edit", &1))
@@ -87,25 +91,33 @@ editor_controls =
              |> put_in(["cartridge.id", "book", "delete"], "none")
          }, "cartridge.id: book delete \"none\": none needs a reason"},
         {"notyet-generic",
-         %{registry: put_in(editor, ["outline.parts", "book", "delete"], "generic")},
-         "outline.parts.book.delete: no longer not yet generic, delete the line"},
+         %{registry: book.("generic"), notyet: listed.(notyet), notyet_main: listed.(notyet)},
+         "outline.parts.book.create: no longer not yet generic, delete the line"},
         {"generic-off-panel",
          %{registry: put_in(editor, ["actions.cooldown", "book", "create"], "generic")},
          "actions.cooldown: book create generic: refused"},
         {"notyet-grown",
-         %{notyet_main: String.replace(notyet, ~r/^outline\.parts\.book\.delete .*\n/m, "")},
-         "outline.parts.book.delete: not in main's baseline"},
+         %{
+           registry: book.("todo"),
+           todo: listed.(todo),
+           todo_main: listed.(todo),
+           notyet: listed.(notyet),
+           notyet_main: notyet
+         }, "outline.parts.book.create: not in main's baseline"},
         {"book-missing", %{registry: book.("Nope.tsx")},
          "outline.parts: book create Nope.tsx: no such file"},
         {"book-escape", %{registry: book.("../panel.tsx")},
          "outline.parts: book create ../panel.tsx: no such file"},
-        {"book-accepted", %{registry: book.("RedSheet.tsx"), sheet: ""},
-         "outline.parts.book.create: no longer todo"},
-        {"todo-unlisted",
-         %{todo: Regex.replace(~r/^outline\.parts\.book\.create\b.*\n/m, todo, "")},
+        {"book-accepted",
+         %{
+           registry: book.("RedSheet.tsx"),
+           sheet: "",
+           todo: listed.(todo),
+           todo_main: listed.(todo)
+         }, "outline.parts.book.create: no longer todo"},
+        {"todo-unlisted", %{registry: book.("todo"), todo: todo, todo_main: todo},
          "outline.parts.book.create: todo but not in the baseline"},
-        {"todo-grown",
-         %{todo_main: Regex.replace(~r/^outline\.parts\.book\.create\b.*\n/m, todo, "")},
+        {"todo-grown", %{registry: book.("todo"), todo: listed.(todo), todo_main: todo},
          "outline.parts.book.create: not in main's baseline"},
         {"parity-panel", %{parity: panel.("tools/author-panel/src/nope.tsx")},
          "\"hierarchy\": no panel file"},
