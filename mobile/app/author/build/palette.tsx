@@ -12,6 +12,7 @@ import { textField } from '../prose_rules.ts';
 import { ink } from './build.ts';
 import { made, toStory } from './contents.tsx';
 import { opens } from './find.tsx';
+import { rootFile } from './generic.tsx';
 import { chosen } from './map.tsx';
 import { held, known } from './room.tsx';
 import { addTo, dropIn } from './roomedit.tsx';
@@ -62,7 +63,7 @@ export const RUN: Record<string, () => unknown> = {
   ),
   delete: () => {
     const s = selection();
-    return s && dropIn(s.key, s.file, s.id); // a further file it takes is asked in its sheet
+    return s && !rootFile(s.file) && dropIn(s.key, s.file, s.id); // a further file it takes is asked in its sheet
   },
   hold: () => (hooks.hold.toggle(), known.redraw()),
   undo,
@@ -99,7 +100,7 @@ function useFound(q: string) {
     let live = true; // a slower reply to an older query never overwrites a newer one
     const ask = () =>
       known.api?.(`/find?q=${encodeURIComponent(q.trim())}`).then(
-        ([status, f]) => live && status === 200 && setText(words(f.hits)),
+        ([status, f]) => live && status === 200 && setText(words(f?.hits ?? [])),
         () => {},
       );
     const typing = q.trim() ? setTimeout(ask, 150) : undefined;

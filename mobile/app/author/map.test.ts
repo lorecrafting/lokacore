@@ -364,3 +364,47 @@ test('an exit runs box edge to box edge over a room between its two rooms', asyn
   );
   known.rooms = all;
 });
+
+test("the ground's keys: a focused room keeps its own keys, and an open Join… takes no arrow", async () => {
+  const { known } = await import('./build/room.tsx');
+  const all = known.rooms;
+  known.rooms = [0, 1].map((x) => ({
+    ...all[0]!,
+    key: `r${x}`,
+    ref: `r${x}`,
+    at: { x, y: 0, z: 0 },
+    exits: [],
+  }));
+  const t = { setPointerCapture() {}, getBoundingClientRect: () => ({ left: 0, top: 0 }) };
+  const held = {
+    nativeEvent: { pointerId: 1, clientX: 0, clientY: 0 },
+    target: {},
+    currentTarget: t,
+  };
+  ground().props.onPointerDown(held); // a fresh press: an earlier test's pan is over
+  ground().props.onPointerCancel(held);
+  room('r0').onPress();
+  const selectedNow = () => drawn().filter((k) => room(k).accessibilityState.selected);
+  const node = {};
+  let keyed: (e: object) => void = () => {};
+  ground().props.ref({
+    addEventListener: (t: string, f: typeof keyed) => t === 'keydown' && (keyed = f),
+  });
+  const arrow = (target: object) =>
+    keyed({
+      key: 'ArrowRight',
+      target,
+      currentTarget: node,
+      preventDefault() {},
+      stopPropagation() {},
+    });
+  arrow({}); // on a focused room
+  assert.deepEqual(selectedNow(), ['r0'], 'a focused room keeps its keys');
+  press('Join…');
+  arrow(node);
+  assert.deepEqual(selectedNow(), ['r0'], 'Join… stays on the selection');
+  press('Cancel');
+  arrow(node);
+  assert.deepEqual(selectedNow(), ['r1'], 'the ground itself moves it');
+  known.rooms = all;
+});

@@ -26,6 +26,7 @@ Object.assign(globalThis, {
 const build = await import('./build/Build.tsx');
 const { COMMANDS, RUN, keys } = await import('./build/palette.tsx');
 const { mapKey } = await import('./build/mapcontrols.tsx');
+const { known } = await import('./build/room.tsx');
 const sent: [string, unknown][] = [];
 const api = async (path: string, body?: unknown): Promise<[number, any]> => (
   sent.push([path, body]),
@@ -58,6 +59,19 @@ test('Cmd-Z presses the Undo chip: one /undo of the last write, then nothing', a
   );
 });
 
+test("Delete from the palette drops the top sheet's definition, never a root file", async () => {
+  // a drop reads the file's source first (kernel drop.ts), then posts delete with its sha
+  const asked = (file: string) =>
+    sent.filter(([p]) => p === `/source?file=${encodeURIComponent(file)}`);
+  for (const file of ['text.json', 'rooms/hall.json']) {
+    known.open(`def:${file}`);
+    RUN.delete();
+    await new Promise((r) => setTimeout(r));
+  }
+  assert.equal(asked('text.json').length, 0);
+  assert.notEqual(asked('rooms/hall.json').length, 0);
+});
+
 const room = (key: string, x: number, y: number) =>
   ({ ref: key, key, area: null, title: key, exits: [], at: { x, y, z: 0 } }) as const;
 const rooms = [room('hall', 0, 0), room('east', 2, 0), room('west', -1, 0), room('north', 0, -1)];
@@ -85,9 +99,10 @@ test('map keys: ArrowRight selects the east neighbour, Enter selects, Shift-Ente
   assert.deepEqual(press('Enter', { shiftKey: true }), [['go', 'hall']]);
 });
 
-test('map keys: + and - zoom by M.step (1.25), 0 fits', () => {
+test("map keys: + and - zoom by M.step (1.25), 0 fits; Cmd-0 and Cmd-+ stay the browser's", () => {
   assert.deepEqual(
     [...press('+'), ...press('-'), ...press('0')],
     [['zoom', 1.25], ['zoom', 1 / 1.25], ['fit']],
   );
+  assert.deepEqual([...press('0', { metaKey: true }), ...press('+', { ctrlKey: true })], []);
 });

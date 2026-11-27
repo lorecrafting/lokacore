@@ -198,7 +198,10 @@ const cancel = () => ((mode = undefined), known.redraw());
 const esc = (e: KeyboardEvent) => e.key === 'Escape' && mode && cancel();
 const goTo = (key: string) => ((z = undefined), hooks.go(key));
 const fit = () => set(fitted());
+// the ground's own keys: a focused room's Enter is its press, and an open Join… or Move… takes taps
 const keyed = (e: KeyboardEvent) =>
+  !mode &&
+  e.target === e.currentTarget &&
   mapKey(e, rooms(), level(), selected, hooks.here(), { pick, goTo, step, zoom, fit });
 /** Join… then a tap on `b`: an exit from the selection toward it and the way back (the panel's Shift-drag). */
 function join(b: map.MapRoom) {

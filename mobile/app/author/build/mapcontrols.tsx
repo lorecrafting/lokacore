@@ -38,7 +38,10 @@ export type Acts = {
   zoom: (f: number) => void;
   fit: () => void;
 };
-type Key = Pick<KeyboardEvent, 'key' | 'shiftKey' | 'preventDefault' | 'stopPropagation'>;
+type Key = Pick<
+  KeyboardEvent,
+  'key' | 'shiftKey' | 'metaKey' | 'ctrlKey' | 'altKey' | 'preventDefault' | 'stopPropagation'
+>;
 
 /** Runs the map act key `e` asks for on level `z` of `rooms`, from the selection (else the
  * current room, else the first): the key goes no further (the Book's walk keys). */
@@ -50,6 +53,7 @@ export function mapKey(
   here: string | undefined,
   a: Acts,
 ) {
+  if (e.metaKey || e.ctrlKey || e.altKey) return; // Cmd-+ and Cmd-0 stay the browser's zoom
   const level = map.onLevel(rooms, z);
   const from = map.entry(level, selected, here);
   const all = map.levels(rooms);
