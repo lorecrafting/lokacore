@@ -52,7 +52,7 @@ sheets.contents = {
       {WORDS.tabs.map((t) =>
         act(
           t,
-          () => ((tab = t), localStorage.setItem(TAB, t), known.redraw()),
+          () => ((tab = t), globalThis.localStorage?.setItem(TAB, t), known.redraw()),
           undefined,
           t,
           tab === t,
