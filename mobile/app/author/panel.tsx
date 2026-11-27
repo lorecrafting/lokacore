@@ -33,9 +33,6 @@ export const devClock =
   process.env.EXPO_PUBLIC_LOKA_DEV_CARTRIDGE === '1' &&
   Platform.OS === 'web' &&
   new URLSearchParams(location.search).get('dev') === '1';
-// the in-Book editor (E5) is required only in the author preview, so a player build drops it
-const inBook: typeof import('./inbook.ts') | undefined =
-  process.env.EXPO_PUBLIC_LOKA_DEV_CARTRIDGE === '1' ? require('./inbook.ts') : undefined;
 // the builder (its Book seam in book/Text.tsx, the Build strip), required behind the same gate
 const build: typeof import('./build/Build.tsx') | undefined =
   process.env.EXPO_PUBLIC_LOKA_DEV_CARTRIDGE === '1' ? require('./build/Build.tsx') : undefined;
@@ -43,7 +40,7 @@ const build: typeof import('./build/Build.tsx') | undefined =
 export const Building = devClock ? build?.Strip : undefined;
 let redrawBook = () => {}; // the mounted App's, once useAuthorPanel runs
 if (devClock) {
-  build?.install({ seen, said, redraw: () => redrawBook(), api: inBook!.api });
+  build?.install({ seen, said, redraw: () => redrawBook(), api: build.api });
   worded.note = (words, key) => bind(seen, words, key); // a line as shown, bound too
   worded.made = new Map(); // an open conversation re-words its lines from the overlay (loka-wfrgk.19)
 }
@@ -139,10 +136,8 @@ export function played(game: Opened | undefined) {
       ...game,
       text: (asked) => {
         const key = build?.drawn(asked) ?? asked; // See as: a variant's words, bound as its own
-        const held = inBook?.frozen(key); // an open field's words stay put under React
-        if (held !== undefined) return held;
         const words = overlay[key] ?? game.text(key);
-        const shown = inBook?.tagged(key, words) ?? words; // two `~` lines show apart
+        const shown = build?.tagged(key, words) ?? words; // two `~` lines show apart
         bind(seen, shown, key);
         said.set(key, words);
         return shown;
@@ -238,7 +233,7 @@ const onClick = (e: MouseEvent) => {
 // Through `played`, so an accepted cheat is a recorded step `bin/loka check` replays.
 const askCheat = (game: Opened, cheat: Cheat) =>
   (placeNote = sendCheat(played(game)!, cheat, canon().manifest, place.stopped?.note));
-const heard = (message: Message) => (inBook?.heard(message), build?.hear(message));
+const heard = (message: Message) => build?.hear(message);
 const loaded = { sha256: chapter.sha256, at: Date.now() }; // this Book's load (timings.ts loadOf)
 const NO_STEPS = 'Place: that checkpoint has no steps list; nothing changed.';
 const placeHooks = (game: Opened, latest: { current: Tools }) => ({
@@ -267,7 +262,7 @@ export function useAuthorPanel(tools: Tools, game: Opened | undefined) {
     const onMessage = (e: MessageEvent<Asked>) => {
       if (!LOCAL.test(e.origin) || !e.source || !OPS.has(e.data?.op)) return;
       panel = { to: e.source as Window, origin: e.origin }; // a cross-origin window is never `instanceof Window`
-      if (e.data.op === 'hello') inBook?.recount(); // a new panel missed the `~` counts
+      if (e.data.op === 'hello') build?.recount(); // a new panel missed the `~` counts
       if (e.data.op === 'trace') return void tell({ trace: game.trace(), id: e.data.id });
       if (e.data.op === 'advance') advance(e.data.minutes, game);
       if (isCheat(e.data)) askCheat(game, e.data);
@@ -284,7 +279,7 @@ export function useAuthorPanel(tools: Tools, game: Opened | undefined) {
     const unsubscribe = game.subscribe((u) => (nextPage(seen), build?.updated(u), state()));
     redrawBook = () => latest.current.redraw({});
     const unlisten = listen((message) => (heard(message), redrawBook())); // a text overlay redraws in place
-    const stop = inBook?.start({ seen, said, tell, redraw: redrawBook });
+    const stop = build?.start(tell);
     build?.place(placeHooks(game, latest));
     if (panel) state();
     else if (window.parent !== window)

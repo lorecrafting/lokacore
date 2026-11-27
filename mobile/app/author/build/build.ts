@@ -5,8 +5,8 @@ import { color } from '../../book/tokens.ts';
 import type { Message } from '../live.ts';
 import { named, type Step } from '../place.ts';
 
-/** The Book's current palette, night included: inbook.ts sets `--loka-<role>` from
- * `paletteNear(paper(...))` after every Book render; light until it first has. */
+/** The Book's current palette, night included: page.ts sets `--loka-<role>` from
+ * `paletteNear(pagePaper(...))` after every Book render; light until it first has. */
 export const ink = (role: keyof typeof color.light) => `var(--loka-${role}, ${color.light[role]})`;
 /** Where the builder state is kept, beside the place (`loka-place`), so a reload restores it. */
 export const BUILD = 'loka-build';

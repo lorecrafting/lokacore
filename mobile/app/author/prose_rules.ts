@@ -1,7 +1,7 @@
-// The rules of E5's in-Book editing (docs/design/prose-in-the-book-rulings.md), apart from the
-// DOM so node tests reach them; inbook.ts draws them.
+// The rules of in-Book editing (docs/design/prose-in-the-book-rulings.md), apart from the DOM so
+// node tests reach them; Build's field draws them (build/field.tsx, build/page.ts).
 import { LINE_WORDS } from '../../packages/game-view/line_words.ts';
-import { color, size, space, type } from '../book/tokens.ts';
+import { color } from '../book/tokens.ts';
 
 /** A pasted newline or tab is one space: /edit takes one line. */
 export const oneLine = (typed: string) => typed.replace(/\r\n|[\r\n\t]/g, ' ');
@@ -83,10 +83,6 @@ export const shortcut = (e: Key) =>
   (e.metaKey || e.ctrlKey) && !e.altKey && ['k', '.', 'e', '\\', '/'].includes(e.key)
     ? e.key
     : undefined;
-/** Whether a Book line (its text key `kind.key.field`) belongs to the selected definition. */
-export const selects = (textKey: string | undefined, kind: string, key: string) =>
-  !!textKey?.startsWith(`${kind}.${key}.`);
-
 /** Whether the panel hands a key to the Book: a walk key or Cmd-Z, or Enter anywhere but a text
  * field or a control (whose Enter is its own). */
 export function relays(e: Key, target: Target) {
@@ -121,22 +117,6 @@ export function paletteNear(rgb: string) {
     );
   return Object.values(color).sort((a, b) => far(a.bg) - far(b.bg))[0];
 }
-
-const label = `${type.label.fontSize}px/${type.label.lineHeight}px ${type.label.fontFamily}`;
-
-/** The Book's author marks (inbook.ts). */
-export const CSS = `
-[data-loka-todo]{position:relative}
-[data-loka-todo]::before{content:"";position:absolute;left:-${space.lg}px;top:0;bottom:0;width:${size.speechBar}px;background:var(--loka-warning)}
-[data-loka-landed]::before{background:var(--loka-action)}
-[data-loka-selected]{background:color-mix(in srgb,var(--loka-action) 14%,transparent)}
-[data-loka-landed],[data-loka-field]{outline:${size.focus}px solid var(--loka-action);outline-offset:${size.focus}px}
-[data-loka-field]{background:var(--loka-card);color:var(--loka-fg);caret-color:var(--loka-action)}
-[data-loka-unconfirmed]{text-decoration:underline wavy var(--loka-warning)}
-[data-loka-a11y]::after{content:", " attr(data-loka-a11y);position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
-.loka-note{position:absolute;font:${label};letter-spacing:${type.label.letterSpacing}px;color:var(--loka-dim);background:var(--loka-card);z-index:10} /* mutate-skip: paint, not logic */
-.loka-note[data-warn]{color:var(--loka-warning)}
-.loka-note button{font:inherit;color:var(--loka-action);background:none;border:0;padding:0 0 0 ${space.md}px;cursor:pointer}`;
 
 /** `el`'s own computed background, when it paints one. */
 export function painted(el: Element) {

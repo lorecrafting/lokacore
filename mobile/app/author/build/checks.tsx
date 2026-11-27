@@ -29,13 +29,15 @@ export function checked(heard: Message & Said, api: Api, close: () => void, redr
           {WORDS.nothing}
         </Text>
       )
-    : rows.map((c, i) =>
+    : rows.flatMap((c, i) => [
         c.key || c.file ? (
           <Pressable
             key={i}
             accessibilityRole="link"
             onPress={() => {
-              if (c.key ? go(c.key) : void api('/open', { file: c.file })) close();
+              unrefuse();
+              const told = (note: string) => ((refusal = { at: i, note }), redraw());
+              if (c.key ? go(c.key, told) : void api('/open', { file: c.file })) close();
               redraw();
             }}
             style={LINK}
@@ -47,10 +49,19 @@ export function checked(heard: Message & Said, api: Api, close: () => void, redr
             {c.label}
           </Text>
         ),
-      );
+        refusal.at === i && (
+          <Text key="refusal" style={{ ...type.label, color: ink('dim'), padding: space.md }}>
+            {refusal.note}
+          </Text>
+        ),
+      ]);
   return [said, ...files.flatMap((t) => fileRows(t, api))];
 }
 type Todo = { file: string; words: number; placeholders: string[] };
+/** Why the last pressed check's line did not open (field.tsx `go`), shown under its row. */
+let refusal = { at: -1, note: '' };
+/** Drops the note: on a row press, Checks opening and each message (a compile can reorder the rows). */
+export const unrefuse = () => void (refusal = { at: -1, note: '' });
 let todos: { of: unknown; rows: Todo[] } = { of: undefined, rows: [] };
 /** GET /todo's files, asked again after each message (the last rows stay until it answers); a failed ask lists none. */
 function todo(heard: Message, api: Api, redraw: () => void) {

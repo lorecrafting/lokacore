@@ -3,4 +3,3 @@ parity:map-pan-zoom-keys  # 6.5
 parity:palette  # 6.5
 parity:open-source-key  # 6.5
 parity:column-folds  # 6.5
-parity:prose-walk-keys  # 6.4

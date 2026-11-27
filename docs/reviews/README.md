@@ -20,6 +20,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Review: the Builder long-list pick (PR #814, loka-hcnlh.76)](2026-11-26-long-list-pick-review.md): **APPROVE WITH NOTES**
 - [Review: builder items weigh 1 g; a weightless stock item is named (PR #812, loka-hcnlh.80)](2026-11-26-item-mass-review.md): **APPROVE WITH NOTES**
 - [Review: Field Undo chip flake (PR #815, loka-2z6b0)](2026-11-26-field-undo-flake-review.md): **APPROVE**
+- [Review: Builder 6.4, retire the E5 DOM field (PR #818, loka-hcnlh.31)](2026-11-26-builder-6.4-retire-e5-review.md): **APPROVE WITH NOTES**
 - [Review: Builder 6.3b, Find, Recent and Worlds in the notebook (PR #813, loka-hcnlh.30)](2026-11-26-builder-6.3b-review.md): **APPROVE WITH NOTES**
 - [Review: Builder 6.3a parity sweep (PR #808, loka-hcnlh.30.1)](2026-11-26-builder-6.3a-parity-sweep-review.md): **APPROVE WITH NOTES**
 - [Design review: Builder 6.3a parity sweep, PR #808 (loka-hcnlh.30.1)](2026-11-26-builder-6.3a-parity-sweep-design-review.md): **CHANGES REQUIRED**

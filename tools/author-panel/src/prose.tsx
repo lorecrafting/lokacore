@@ -1,5 +1,5 @@
 // E5's panel pieces (docs/design/prose-in-the-book-rulings.md): the Hold, the Book's `~` counts,
-// its unconfirmed words and its notes. The editing itself is the Book's (mobile/app/author/inbook.ts).
+// its unconfirmed words and its notes. The editing itself is the Book's (Build's field, mobile/app/author/build/field.tsx).
 import { useEffect, useRef, useState } from 'react';
 import { ask, todo } from './author.ts';
 import type { Prose } from './book.ts';
