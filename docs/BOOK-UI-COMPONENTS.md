@@ -295,9 +295,12 @@ and notices (Held, not put back, couldn't keep your place) `type.small` in `warn
 sheet: `card` paper, rows `type.small` with `space.md` sides; a row that goes somewhere is a touch
 target tall in `action`, a plain row and `Nothing to check.` `fg` with `space.md` padding. Builder
 sheets (2.1): `card` paper; docked, half a `size.column` wide with a `size.rule` `line` rule on its
-Book side, from a window `size.column` and a half wide (so the Book keeps its full column and the
-sheet is about a phone's width); on a phone, absolute over the Book's lower half or all of it, a
-`size.rule` `line` rule on top, no scrim. The grip: a touch target in both axes holding a
+Book side, from a window `size.column` and a half wide (so the Book keeps its full column, the
+notebook column aside, and the sheet is about a phone's width); on a phone, absolute over the Book's lower half or all of it, a
+`size.rule` `line` rule on top, no scrim. The notebook column (6.5a): the docked sheet's look
+mirrored, its `size.rule` `line` rule on its right (Book) side; `Close` is Back's act. The sheet
+foot's path (6.5a) is an act (`type.small` in `action`, a touch target tall); its refusal line
+`type.small` in `warning`, as is Alt-click's on the strip. The grip: a touch target in both axes holding a
 `size.touch`-wide bar four `size.rule` tall in `line`. The header row: Back `type.control` in
 `action`, the breadcrumb `type.small` in `dim`, `space.md` sides; the title `type.control` in `fg`.
 It slides in over `motion.quick`, none under reduced motion. The title pencil: `✎` in
@@ -358,7 +361,7 @@ one per line, wrapping. `＋ Add dialogue` on the Person sheet is an act.
 Builder 5.4b: the Notebook's `Contents`, `Story`, (6.1a) `World` and (6.2a) `Tools` tabs are acts. Story rows are Room sheet rows,
 each level indented half a touch target more; a part's, beat's or definition's name with its marks
 (joined by ` · `) is an act, a Seed's name `type.small` `fg`; Facts, Pacing, Add beat, Go there,
-Sheet, Trace, Consequences, Retitle, Remove, Knowledge, `Bind…` and each `Bind <short>` are acts,
+Sheet, Source, Trace, Consequences, Retitle, Remove, Knowledge, `Bind…` and each `Bind <short>` are acts,
 wrapping at 390 px. The number field is Schedule's hour field (a fixed width for two digits), the
 title field the Area field; both placeholders `type.small` in `dim`. The no-story line and a
 sheet's rows that name no definition are `type.small` `fg`.
@@ -413,8 +416,12 @@ key a selected act. A reader's heading is the field caption (`type.label` `dim`)
 `type.small`, `fg`, `dim` for plain and empty lines, `danger` for a `no`, a refusal or a stale
 report, wrapping whole. Headings and lines start at the sheet's text edge (a row's `space.md`), a
 nested line `space.md` more per depth. A table row is Combat's (Builder 2.4): cells joined by ` · `,
-the header row `dim`, no columns. The sheet foot: the path `type.small` `dim` with `space.md`
-padding, after the body. No raw sizes. No new ink pair: every tone above is already on `card`.
+the header row `dim`, no columns. The sheet foot: the path with `space.md`
+padding, after the body (an act since 6.5a, above). Why's `Full report` is a selected act while open, its JSON one `type.small`
+`fg` line wrapping whole. A Step rule row is a Room sheet row: its ref an act, its verdict `type.small`,
+`fg`, or `danger` when the rule did not fire (with no sheet, one reader line). The sheet head (loka-hcnlh.71)
+is Room sheet rows: the ref (or path) and the counts `type.small` `dim` at every count, the unreached line `type.small`
+`warning` (to look at, not barred). No raw sizes. No new ink pair: every tone above is already on `card`.
 Worst pair: `warning` on `card`,
 4.75 (light).
 Builder 6.3a: the Room sheet's summary is one Room sheet row: its parts (`dark` and the variants

@@ -1005,18 +1005,58 @@ reasons and limits: [prose in the Book rulings](../design/prose-in-the-book-ruli
     generic sheet) or drawing no single file has none. Above it (6.3a, §4.9) every sheet of one
     deletable definition (Room, Person, Item, and the generic sheet of a file under a folder; never
     a root file) ends with `Delete <key>`, as Room sheet edits run it.
+  - **Sheet head** (parity gaps, loka-hcnlh.71; the panel's inspector header). Once a story has arrived, a sheet of one
+    definition (Room, Person, Item, and the generic sheet of a file that defines one; a bundle
+    member by its ref, as it has no file of its own) starts its body, above the refusal line, with
+    the definition's ref, then one line of its counts from the last story, `N unwritten · N
+    diagnostics` (placeholder words; both always shown, zero included), then, only when the story
+    finds it unreachable from the start, an unreached line (placeholder words). Unwritten counts the
+    `~` lines still to write that the definition's own file and the `text.json` keys it names hold,
+    as Checks counts a file's (6.3a), not the panel's rows of them; never `~` (ruling 9). A sheet of
+    no definition (a root file's) heads with its file's path alone, as the panel does. The head is
+    read only, nothing in it pressable.
   - **Two layouts** (ruling 7). Where the window holds the full page column with a docked sheet
     beside it (the page column and half of it again), the sheet docks at the Book's right edge,
-    half a page column wide, not modal, and the Book beside it keeps its full column and stays
-    playable. In a narrower window it rises over the Book's lower half, modal, with a grip (a
+    half a page column wide, not modal, and the Book beside it keeps its full column, unless
+    the notebook column is open too (Wide layout below), and stays playable. In a narrower window it rises over the Book's lower half, modal, with a grip (a
     button named `Full height`, expanded when full): a drag up makes it full height, a drag down
     from full halves it, from half closes it as Back does, and a tap or Enter toggles the height.
     A sheet slides in from the side it docks on (from below on a phone); under reduced motion it
     cuts in. Closing never animates.
+  - **Wide layout** (6.5a, ruling 7; the panel's columns, column-folds). The breakpoint is Two
+    layouts' (`DOCK.at`, the page column and half of it again; no other). From it:
+    - **Notebook column.** The strip's `Notebook` opens the notebook as a column docked at the
+      Book's left edge, half a page column wide, not modal, never in the sheet stack; pressed
+      again, or its own `Close` in Back's place in its header, it closes. Left to right: the
+      column, the Book, a docked sheet. The column stays open while sheets open, stack and close
+      beside it; a sheet it opens docks at the Book's right edge, and Back closes only sheets.
+      Its header (title `Notebook`, then the tabs) takes focus when it opens; closing returns
+      focus to `Notebook`, which shows selected while the column is open. Its open state, tab and
+      scroll survive a reload as the stack does; leaving Build closes it. It slides in from the
+      left and closes as a sheet does.
+    - **The Book** takes what the open column and sheet leave, its page column still centred and
+      at most a page column wide: with both open in a window under two page columns it narrows,
+      down to half a page column (a phone's width) at the breakpoint, and lays out as on a phone
+      of that width. It stays playable, links and walk keys included.
+    - **Crossing the breakpoint.** Narrowing closes the column; open sheets stay and rise over
+      the Book. Widening opens nothing.
+    - Below the breakpoint nothing changes: the Notebook is a sheet and every sheet rises over
+      the Book.
+  - **Device size** (the panel's phone and tablet sizes). The builder follows the window: a
+    window, or the browser's responsive device mode, at a phone's width is the phone layout (sheets rising, the Notebook a sheet),
+    so no control previews the Book at a phone's width inside a wide window, where it would sit
+    beside docked sheets no phone shows (designer ruling 2026-11-26; the owner may overrule).
+  - **Open source** (6.5a, the panel's source footer). At every width, never only when wide, as
+    the changed-on-disk notice's `Open source` already is:
+    - The Sheet foot's path is a button named by the path; a press asks the owner's editor to
+      open that file (`/open`). A refusal shows under it, politely, until the next press: `Not
+      opened: <why>` (placeholder words, the owner's to replace); success says nothing.
+    - Alt-click (Option-click) on a Book line, a fine pointer, Build on or off, opens its source
+      once (one `/open` per click), with Sheet foot's refusal line on the strip.
   - **Title pencil.** In Build the room page's own title is followed by a pencil button named
     `Edit <title>`, which opens that room's sheet (2.2 adds the name pencil). An unwritten title shows its field
     name `title`, as Build's in-place field draws an unwritten line.
-  - **Room sheet.** Titled by the room's title. At its top, a summary line (6.3a, §4.3 item 2):
+  - **Room sheet.** Titled by the room's title. At its top, under the sheet head and the refusal line, a summary line (6.3a, §4.3 item 2):
     `dark · N variants · N exits` (`1 variant`, `1 exit`), each absent part left out (its look
     in the catalogue); the dark and variants parts are actions opening the room's `def:` sheet, the
     exits plain (their rows are below). The area is not in it: the `Area` field holds it. Then a row
@@ -1077,7 +1117,9 @@ reasons and limits: [prose in the Book rulings](../design/prose-in-the-book-ruli
     press on the selected row shuts and deselects it, and a press on an open row that is not
     selected only selects it. A definition row is selected without opening. Only the selected row
     shows its acts, in rows of their own under it. A definition offers `Go there` (the room a
-    placement edge, `.room` or `.items`, joins it to; none, no Go there), `Sheet`, `Trace` (a fact's
+    placement edge, `.room` or `.items`, joins it to; none, no Go there), `Sheet` (a room's, person's
+    or item's own sheet, else its file's generic sheet), `Source` (only beside a room's, person's or
+    item's own sheet: its file's generic sheet, the panel's Alt-click), `Trace` (a fact's
     setters, then its readers, each naming a definition opening its sheet), `Consequences` and,
     for a node the Flow draws, `Flow` (the walk centred on it). A
     beat offers a title field with `Retitle` (empty removes the title), `Remove` (no confirm: the
@@ -1130,14 +1172,18 @@ reasons and limits: [prose in the Book rulings](../design/prose-in-the-book-ruli
       offered is one plain line. A press asks why that one is or is not on offer now and shows the
       answer under the buttons, its key as the heading, the pressed button marked selected: one
       line per condition, `yes`, `no` or `depends on the target`, then its words, a nested
-      condition indented one step; a `no` line in the danger tone. A refused ask says why in the
+      condition indented one step; a `no` line in the danger tone. Under the lines, `Full report`, a
+      toggle shown selected while open, folds the answer's whole report as indented JSON (the panel's
+      Full report); a new answer comes with it shut. A refused ask says why in the
       danger tone. The answer holds only for the state it was asked on; any change drops it.
     - **Step** (6.2b): what the last step did. Before the first step one plain line says to take
       one; past 400 steps one plain line says Step is off and to jump to a checkpoint, with no ask.
       Otherwise a heading `Step N` (with the step's command and outcome once told), the time the
       ask took (marked slow past 2 s, never hidden), then three headed lists, each with its count:
       the facts it changed (`<key> <from> → <to>`), the quests it changed, and every rule whose
-      trigger matched (one that did not fire in the danger tone). An empty list shows `none`; the
+      trigger matched: its ref, a button opening its sheet when the last story names its file (the
+      panel's select), then its verdict, the verdict alone in the danger tone when the rule did not
+      fire; with no sheet, one plain line of both, wholly in the danger tone when it did not fire. An empty list shows `none`; the
       rules show `asking…` until the answer comes, then `none matched`. It asks once per step; a
       step taken with the notebook shut still pairs with the state before it. A refused ask says
       why in the danger tone.

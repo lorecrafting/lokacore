@@ -19,6 +19,7 @@ const WORDS = {
   unreached: 'unreached',
   go: 'Go there',
   sheet: 'Sheet',
+  source: 'Source',
   trace: 'Trace',
   consequences: 'Consequences',
   flow: 'Flow',
@@ -108,14 +109,19 @@ const bound = (short: string, refs: string[]) => {
   });
 };
 
-/** A node row's actions: each one a sheet or the room it plays in. */
+const CARDS = new Set(['room', 'npc', 'item']); // the kinds with their own sheet (room.tsx, thing.tsx)
+/** A node row's actions: each one a sheet or the room it plays in. Sheet is its card (its own sheet,
+ * else its fields), Source its fields beside a card (the panel's click and Alt-click). */
 function nodeActs(r: L.Row) {
   const room = roomOf(r.ref!);
-  const sheet = sheetOf(r.ref);
+  const source = sheetOf(r.ref);
+  const card = CARDS.has(r.node!) ? `${r.node}:${keyOf(r.ref!)}` : undefined;
+  const sheet = card ?? source;
   return [
     <View key="acts" style={row}>
       {room ? act(WORDS.go, () => go(room)) : null}
       {sheet ? act(WORDS.sheet, () => known.open(sheet)) : null}
+      {card && source ? act(WORDS.source, () => known.open(source)) : null}
       {L.TRACED.has(r.node!) ? act(WORDS.trace, () => known.open(`trace:${r.ref}`)) : null}
       {L.CONSEQUENCES.has(r.node!)
         ? act(WORDS.consequences, () => known.open(`consequences:${r.ref}`))
