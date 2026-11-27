@@ -34,6 +34,8 @@ export const stepBack = (id: string) => {
 };
 /** Build.tsx hands in `swap`: the top sheet becomes `id`, the stack does not grow (Flow re-centring). */
 export const stack = { swap: (_id: string) => {} };
+/** The phone sheet's raise to full height (Frame sets it; docked, nothing): a long-list field's focus. */
+export const raise = { full: () => {} };
 const titled = (id: string) => {
   const [s, arg] = parts(id);
   return s?.title(arg) ?? id;
@@ -160,8 +162,8 @@ export function Grip({
 export function Frame({ open, saved, back }: Stack & { back: () => void }) {
   const docked = useWindowDimensions().width >= DOCK.at;
   const [full, grow] = useState(false);
-  const ids = open.sheets!;
-  const titles = ids.map(titled);
+  raise.full = () => grow(true); // docked, the sheet ignores full
+  const [ids, titles] = [open.sheets!, open.sheets!.map(titled)];
   return (
     <View
       role="dialog"

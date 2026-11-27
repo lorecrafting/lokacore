@@ -260,6 +260,8 @@ const picks = (at: At, path: Step[], options: unknown[], value: unknown) => (
 
 /** A typed field (a string, a number, a text's words, a definition's key), written when it loses focus. */
 function typed(at: At, path: Step[], s: Shape, value: unknown) {
+  const long = at.long?.(path, value);
+  if (long) return long;
   const key = id(at, path);
   const number = s.as === 'scalar' && s.type !== 'string';
   const prose =

@@ -16,6 +16,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Review: New room, NPC and item from a bundled room (PR #809, loka-hcnlh.78)](2026-11-26-new-from-bundled-room-review.md): **APPROVE WITH NOTES**
 - [Review: Map edits on full-ref exits (PR #806, loka-hcnlh.74)](2026-11-26-mapedit-object-exits-review.md): **APPROVE WITH NOTES**
 - [Review: Map edits on area-bundle rooms (PR #807, loka-hcnlh.77)](2026-11-26-mapedit-bundled-rooms-review.md): **APPROVE WITH NOTES**
+- [Review: the Builder long-list pick (PR #814, loka-hcnlh.76)](2026-11-26-long-list-pick-review.md): **APPROVE WITH NOTES**
 - [Review: builder items weigh 1 g; a weightless stock item is named (PR #812, loka-hcnlh.80)](2026-11-26-item-mass-review.md): **APPROVE WITH NOTES**
 - [Review: Field Undo chip flake (PR #815, loka-2z6b0)](2026-11-26-field-undo-flake-review.md): **APPROVE**
 - [Review: Builder 6.3b, Find, Recent and Worlds in the notebook (PR #813, loka-hcnlh.30)](2026-11-26-builder-6.3b-review.md): **APPROVE WITH NOTES**

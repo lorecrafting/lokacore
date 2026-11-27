@@ -1,3 +1,4 @@
+// size: allow 330, a test suite (one WebKit phone, its servers started once), not app source
 // npm run test:phone (loka-hcnlh.61): the builder's phase 1-2 acceptance and the Safari save path in
 // Playwright WebKit with an iPhone profile (touch, 393 px, iOS UA). The e2e runner cannot turn touch
 // on, so this drives Playwright directly, as .storybook/live.ts does. It compiles a copy of
@@ -287,4 +288,41 @@ test('+ Add here makes a person and opens its sheet', LONG, async () => {
   await sheet().getByText('npcs/npc_1.json').waitFor();
   await sheet().getByRole('button', { name: LABEL.back }).tap();
   await sheet().getByText('rooms/ferry_landing.json').waitFor();
+});
+
+// Catches: a match tap after typing letting the field's blur (which a browser sends before the
+// press) read its refusal aloud, or the tap writing other than once. No sampler room key is a prefix
+// of another, so a blur writing a typed key first is world.test.ts's CLICK case.
+test('a long-list field: lantern, then a tap on lantern_cellar writes only it', LONG, async () => {
+  await builder();
+  const entry = () => JSON.parse(readFileSync(join(cart, 'cartridge.json'), 'utf8')).entry;
+  const was = entry();
+  await p.getByRole('button', { name: 'Notebook' }).tap();
+  await sheet().getByRole('button', { name: 'World' }).tap();
+  await sheet().getByRole('button', { name: 'cartridge.json' }).tap();
+  const field = sheet().getByRole('textbox', { name: 'entry' });
+  await field.tap();
+  await field.fill('lantern');
+  await sheet().getByText('no room lantern').waitFor();
+  await p.evaluate(() => {
+    const w = window as Window & { told?: string[] };
+    w.told = [];
+    for (const n of document.querySelectorAll('[aria-live=polite]'))
+      new MutationObserver(() => n.textContent && w.told!.push(n.textContent)).observe(n, {
+        subtree: true,
+        childList: true,
+        characterData: true,
+      });
+  });
+  const changes: string[] = [];
+  const count = (r: { url(): string }) =>
+    void (r.url().includes('/change') && changes.push(r.url()));
+  p.on('request', count);
+  await sheet().getByRole('button', { name: 'lantern_cellar' }).tap();
+  assert.deepEqual(await p.evaluate(() => (window as Window & { told?: string[] }).told), []);
+  await until(() => entry() === 'lantern_cellar', 'picked');
+  p.off('request', count);
+  assert.equal(changes.length, 1, 'one write');
+  await p.getByRole('button', { name: 'Undo' }).tap();
+  await until(() => entry() === was, 'one Undo');
 });
