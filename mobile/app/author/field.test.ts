@@ -1,4 +1,4 @@
-// size: allow 590, a cut page’s caption and the phone field tests and the Checks refusal join the field seam’s harness
+// size: allow 600, a cut page’s caption, the phone field tests and the Checks refusal (shown, cleared) join the field seam’s harness
 // Build's in-place field (docs/system/book-ui.md#author-mode; slice 1.3): a room description's
 // line opens its field through the Book seam. The server's /line and /edit: kernel/ts/test/author.test.ts.
 import assert from 'node:assert/strict';
@@ -398,17 +398,21 @@ test('Checks: the badge opens the list, each row goes to its line', async () => 
 
 // Breaks: a Checks row whose /open is refused (a page behind the cartridge) going nowhere silently,
 // or Build's message handler not passing a compile's changed files to the open field (no notice).
+// Also: the refusal left standing when Checks reopens or a message comes, so it shows under another row.
 test('Checks says why a row cannot open; a changed file under the open field says so', async () => {
-  build.hear({
+  const cellar = {
     text: {},
     said: [],
     placeholders: { 'room.cellar.description': 'world/cellar.md:4' },
-  });
+  };
+  const link = () =>
+    strip()
+      .find((n) => n.props?.accessibilityRole === 'link')
+      .props.onPress();
+  build.hear(cellar);
   button('Checks · 1 unwritten').props.onPress();
   answers = [[404, null]];
-  strip()
-    .find((n) => n.props?.accessibilityRole === 'link')
-    .props.onPress();
+  link();
   await tick();
   const drawn = strip();
   const note = drawn.findIndex(
@@ -419,6 +423,16 @@ test('Checks says why a row cannot open; a changed file under the open field say
     note > 0 && drawn[note - 1].props.children === 'room.cellar.description: unwritten',
     'the refusal is not under its row',
   );
+  const noted = () => strip().some((n) => n.props?.children === drawn[note].props.children);
+  button('Checks · 1 unwritten').props.onPress(); // closes
+  button('Checks · 1 unwritten').props.onPress(); // reopens
+  assert.ok(!noted(), 'a reopened Checks still shows the old refusal');
+  answers = [[404, null]];
+  link();
+  await tick();
+  assert.ok(noted());
+  build.hear(cellar);
+  assert.ok(!noted(), 'a message (a compile may reorder rows) keeps the old refusal');
   button('Checks · 1 unwritten').props.onPress();
   await opened(LINKED, at(LINKED));
   answers = [[200, at('A cold loft.')]];

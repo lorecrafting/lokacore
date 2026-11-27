@@ -35,7 +35,7 @@ export function checked(heard: Message & Said, api: Api, close: () => void, redr
             key={i}
             accessibilityRole="link"
             onPress={() => {
-              refusal = { at: -1, note: '' };
+              unrefuse();
               const told = (note: string) => ((refusal = { at: i, note }), redraw());
               if (c.key ? go(c.key, told) : void api('/open', { file: c.file })) close();
               redraw();
@@ -60,6 +60,8 @@ export function checked(heard: Message & Said, api: Api, close: () => void, redr
 type Todo = { file: string; words: number; placeholders: string[] };
 /** Why the last pressed check's line did not open (field.tsx `go`), shown under its row. */
 let refusal = { at: -1, note: '' };
+/** Drops the note: on a row press, Checks opening and each message (a compile can reorder the rows). */
+export const unrefuse = () => void (refusal = { at: -1, note: '' });
 let todos: { of: unknown; rows: Todo[] } = { of: undefined, rows: [] };
 /** GET /todo's files, asked again after each message (the last rows stay until it answers); a failed ask lists none. */
 function todo(heard: Message, api: Api, redraw: () => void) {

@@ -32,7 +32,7 @@ import './flow.tsx'; // registers the flow:<ref> sheet
 import { WORDS as RECENT } from './recent.tsx';
 import { undo as putBackIds } from '../../../../kernel/ts/play/mapedit.ts';
 import { io, onSaved, refused, run, running } from './roomedit.tsx';
-import { checked } from './checks.tsx';
+import { checked, unrefuse } from './checks.tsx';
 import { act, CONTROL, Frame, parts, sheets, stack, stepBack } from './sheet.tsx';
 export { Sheet, sheets } from './sheet.tsx';
 export { drawn, unsee } from './seeas.tsx';
@@ -95,6 +95,7 @@ toolsWith({ game: () => placed, hold, heard: () => heard });
 /** Opens a sheet on the stack (or brings it to the top); the first remembers the focus to return. */
 export function open(id: string) {
   if (!builder.sheets) opener = globalThis.document?.activeElement as typeof opener;
+  if (id === 'checks') unrefuse();
   set(opened(builder, id));
   redrawStrip();
   shut();
@@ -144,6 +145,7 @@ export function install(book: Pick<Hooks, 'seen' | 'said' | 'redraw' | 'api'>) {
 }
 export function hear(message: Message & Said) {
   heard = message;
+  unrefuse();
   unsee(); // any live message ends it (fail safe)
   hold.heard(message.held);
   told(message.unconfirmed?.map((u) => u.key));
