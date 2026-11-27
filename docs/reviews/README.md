@@ -22,6 +22,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 - [Review: Builder 6.3b, Find, Recent and Worlds in the notebook (PR #813, loka-hcnlh.30)](2026-11-26-builder-6.3b-review.md): **APPROVE WITH NOTES**
 - [Review: Builder 6.3a parity sweep (PR #808, loka-hcnlh.30.1)](2026-11-26-builder-6.3a-parity-sweep-review.md): **APPROVE WITH NOTES**
 - [Design review: Builder 6.3a parity sweep, PR #808 (loka-hcnlh.30.1)](2026-11-26-builder-6.3a-parity-sweep-design-review.md): **CHANGES REQUIRED**
+- [Review: Builder parity gaps, story row sheets and inspector header (PR #816, loka-hcnlh.71)](2026-11-26-816-parity-gaps-review.md): **APPROVE**
 - [Review: Safari save lock after leaving the Book, end the save worker on pagehide (PR #803, loka-hcnlh.19.5)](2026-11-25-safari-bfcache-lock-review.md): **APPROVE WITH NOTES**
 - [Review: Builder 6.2b, the Tools readers (PR #800, loka-hcnlh.29.2)](2026-11-25-builder-6.2b-tools-read-review.md): **CHANGES REQUIRED**
 - [Review: Builder 6.2a, the Tools tab (PR #799, loka-hcnlh.29.1)](2026-11-25-builder-6.2a-tools-review.md): **CHANGES REQUIRED**
