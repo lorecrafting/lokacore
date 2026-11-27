@@ -263,6 +263,10 @@ test('the palette: Down moves the active row, a query resets it, Enter runs it o
   field().onKeyPress({ nativeEvent: { key: 'ArrowUp' } });
   assert.equal(rows()[0].props.accessibilityState.selected, true, 'Up at the top stays');
   field().onKeyPress({ nativeEvent: { key: 'ArrowDown' } });
+  field().onChangeText('x');
+  field().onChangeText('');
+  assert.equal(rows()[0].props.accessibilityState.selected, true, 'typed and erased: the first');
+  field().onKeyPress({ nativeEvent: { key: 'ArrowDown' } });
   const drawn = rows();
   assert.deepEqual(
     drawn.slice(0, 2).map((r) => r.props.accessibilityState.selected),

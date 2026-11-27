@@ -24,7 +24,7 @@ import { goTo, sheetOf } from './story.tsx';
 const WORDS = {
   title: 'Commands',
   find: 'Type a command, a key or words',
-  unwritten: (key: string) => `${key}: unwritten`, // as Checks reads it, never `~` (ruling nine)
+  unwritten: (key: string) => `${key}: unwritten`, // as Checks reads it, never `~` (ruling 9; mutate-skip: a comment)
 };
 
 type Hooks = {
@@ -151,7 +151,7 @@ function Palette() {
       key="q"
       autoFocus
       value={q}
-      onChangeText={setQ}
+      onChangeText={(t) => (setQ(t), setMoved([0, '']))}
       onKeyPress={step as never}
       onSubmitEditing={() => run(rows[at])}
       placeholder={WORDS.find}
