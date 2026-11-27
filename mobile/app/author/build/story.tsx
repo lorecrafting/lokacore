@@ -167,6 +167,7 @@ function beatActs(r: L.Row, s: L.Story) {
 
 /** A part's edits, each one gesture: Retitle ('' removes the title) and Remove, its beats with it. */
 function partActs(r: L.Row, s: L.Story) {
+  if (!r.id.startsWith('part:')) return []; // Seeds and Unplaced: no outline part to edit
   const part = partNo(r.id);
   const shown = L.outlineOf(s)?.parts[part] ?? undefined;
   const drop = () => {

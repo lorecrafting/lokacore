@@ -376,6 +376,15 @@ test('Add part appends an empty part; on part 1, Retitle writes the typed title 
   ]);
 });
 
+test('Unplaced, opened, offers no Retitle or Remove', async () => {
+  // Breaks: a part's edits on Seeds or Unplaced, whose id reads as a part number and removes Part 1.
+  const unplaced = sheet()
+    .map(label)
+    .find((l) => /^Unplaced/.test(String(l)));
+  await press(unplaced);
+  assert.deepEqual([all('Retitle').length, all('Remove').length], [0, 0]);
+});
+
 test('a sheet restored before /story arrives says Nothing here, the tab the refusal then the no-story line', async () => {
   const s = known.story;
   known.story = undefined;
