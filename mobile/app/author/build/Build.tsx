@@ -29,6 +29,7 @@ import './generic.tsx'; // registers the def:<file> sheet
 import { MAP, mapSheet, measured, unborn } from './map.tsx';
 import { storySheet } from './story.tsx';
 import './flow.tsx'; // registers the flow:<ref> sheet
+import { WORDS as RECENT } from './recent.tsx';
 import { undo as putBackIds } from '../../../../kernel/ts/play/mapedit.ts';
 import { io, onSaved, refused, run, running } from './roomedit.tsx';
 import { checked } from './checks.tsx';
@@ -41,7 +42,6 @@ const WORDS = {
   on: '✎ Build',
   held: (n: number) => `Held · ${n} waiting`,
   undo: 'Undo',
-  notUndone: (file: string) => `${file} changed since; not put back.`,
   source: 'Open source',
   drop: 'Drop it and go on',
   back: 'Back to checkpoint',
@@ -253,7 +253,7 @@ export function Strip({ children }: { children: ReactNode }) {
         {warn(heard.held ? WORDS.held(heard.pending ?? 0) : '')}
         {chip()}
         {undo ? act(WORDS.undo, () => void putBack(undo!)) : null}
-        {notBack ? warn(WORDS.notUndone(notBack.file)) : null}
+        {notBack ? warn(RECENT.notUndone(notBack.file)) : null}
         {stopped ? warn(stopped) : null}
         {notBack ? act(WORDS.source, openBack) : null}
         {builder.on ? pad(CONTENTS.contents, 'contents', top) : null}

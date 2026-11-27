@@ -90,9 +90,11 @@ editor_controls =
          "dialogues.policy: book create ../panel.tsx: no such file"},
         {"book-accepted", %{registry: book.("RedSheet.tsx"), sheet: ""},
          "dialogues.policy.book.create: no longer todo"},
-        {"todo-unlisted", %{todo: String.replace(todo, "dialogues.policy.book.create\n", "")},
+        {"todo-unlisted",
+         %{todo: Regex.replace(~r/^dialogues\.policy\.book\.create\b.*\n/m, todo, "")},
          "dialogues.policy.book.create: todo but not in the baseline"},
-        {"todo-grown", %{todo_main: String.replace(todo, "dialogues.policy.book.create\n", "")},
+        {"todo-grown",
+         %{todo_main: Regex.replace(~r/^dialogues\.policy\.book\.create\b.*\n/m, todo, "")},
          "dialogues.policy.book.create: not in main's baseline"},
         {"parity-panel", %{parity: panel.("tools/author-panel/src/nope.tsx")},
          "\"hierarchy\": no panel file"},
@@ -101,8 +103,8 @@ editor_controls =
          "\"hierarchy\": book generic: refused"},
         {"parity-duplicate", %{parity: parity ++ [hd(parity)]},
          "\"hierarchy\": ids are unique strings"},
-        {"parity-unlisted", %{todo: String.replace(todo, "parity:project-tabs\n", "")},
-         "parity:project-tabs: todo but not in the baseline"}
+        {"parity-unlisted", %{todo: String.replace(todo, "parity:palette  # 6.5\n", "")},
+         "parity:palette: todo but not in the baseline"}
       ] do
     files =
       for {k, v} <- planted,

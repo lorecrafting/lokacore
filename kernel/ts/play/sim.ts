@@ -8,7 +8,7 @@ import { encode, type Json } from '../src/foundation/canonical.ts';
 import { INSTALLED, loadCartridge, type Cartridge } from '../src/index.ts';
 import { units } from '../src/mechanics/calendar.ts';
 import { refString } from '../src/runtime/decision.ts';
-import { gameView } from '../src/runtime/world.ts';
+import { resources } from '../src/view/resources.ts';
 import { artifactBytes, compiled } from './compiled.ts';
 import { fights } from './fight.ts';
 import { flows, median, type Observe, type Policy } from './flows.ts';
@@ -33,7 +33,7 @@ function watch(c: Cartridge, opts: { seeds: number; days: number; policy?: Polic
     const run = (runs[seed] ??= { start: w.state.clock, last: 0, pools: {} });
     const at = Math.floor((w.state.clock - run.start) / hour);
     run.last = at;
-    for (const r of gameView(w).resources ?? []) {
+    for (const r of resources(w, w.body)) {
       const p = (run.pools[refString(r.resource)] ??= {
         maximum: r.maximum,
         start: r.current,

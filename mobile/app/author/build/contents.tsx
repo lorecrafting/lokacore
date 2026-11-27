@@ -1,6 +1,7 @@
 // The notebook (design §7, slice 2.2; tabs, slice 5.4b): Contents lists every kind New makes (kernel/ts/play/new.json),
 // each with its New, then its files; a person or item made, or a file, opens its sheet. Story is story.tsx's,
-// World world.tsx's (slice 6.1a).
+// World world.tsx's (slice 6.1a), Checks the Checks sheet's, Recent recent.tsx's (slice 6.3b).
+// Contents opens with Find (find.tsx).
 import { TextInput, View } from 'react-native';
 import NEW from '../../../../kernel/ts/play/new.json' with { type: 'json' };
 import { create, NAMED, nodeOf } from '../../../../kernel/ts/play/mapedit.ts';
@@ -13,10 +14,12 @@ import { load } from './generic.tsx';
 import { goTo, storyRows } from './story.tsx';
 import { WORDS as WORLD, worldRows } from './world.tsx';
 import { WORDS as TOOLS, toolRows } from './tools.tsx';
+import { findRows } from './find.tsx';
+import { WORDS as RECENT, recentRows } from './recent.tsx';
 
 const WORDS = {
   contents: 'Notebook',
-  tabs: ['Contents', 'Story', WORLD.tab, TOOLS.tab],
+  tabs: ['Contents', 'Story', WORLD.tab, 'Checks', RECENT.tab, TOOLS.tab],
   new: (kind: string) => `New ${kind}`,
   // placeholder: the owner writes these words
   go: (room: string) => `Go to ${room}`,
@@ -53,7 +56,11 @@ sheets.contents = {
         ? worldRows(load)
         : tab === TOOLS.tab
           ? toolRows()
-          : kinds()),
+          : tab === RECENT.tab
+            ? recentRows()
+            : tab === WORDS.tabs[3]
+              ? [sheets.checks.body('')]
+              : [...findRows(), ...kinds()]),
   ],
 };
 const kinds = () => [

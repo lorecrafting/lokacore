@@ -96,6 +96,7 @@ test('Why on an action names the failed condition in its words; a failure says w
       ['Why', true],
       ['Step', false],
       ['Numbers', false],
+      ['Worlds', false],
     ],
   );
   const asked = nodes(toolRows()).find((n) => n.key === 'action light_lamp');

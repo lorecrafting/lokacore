@@ -17,7 +17,7 @@ import { permits } from '../src/mechanics/status/permits.ts';
 import { identify, resolve } from '../src/commands/invocation.ts';
 import { resolved } from '../src/commands/actions.ts';
 import { check } from '../src/runtime/invariants.ts';
-import { statusKey } from '../src/mechanics/status/shared.ts';
+import { activeStatuses, statusKey } from '../src/mechanics/status/shared.ts';
 import { sight } from '../src/mechanics/movement/rule.ts';
 import { visible } from '../src/mechanics/light/shared.ts';
 import { validate } from '../src/foundation/validate.ts';
@@ -106,6 +106,20 @@ test('status resistances join the G2 sum, for the player and for an NPC', () => 
     } as World);
   };
   assert.deepEqual(fight(fresh(), brittle), [8, 4], '-100 - 100 clamps to -100: the player hits 4');
+});
+
+// Breaks (loka-hcnlh.70): activeStatuses reading and sorting the cartridge's statuses on every
+// call (per visibility check: half of a showcase sim run); or a cached list that loses a status.
+test("active statuses read a cartridge's status list once, then list the holder's in order", () => {
+  let reads = 0;
+  const c = { ...content } as Cartridge;
+  Object.defineProperty(c, 'statuses', { get: () => (reads++, content.statuses) });
+  const w = shrine(c);
+  const listed = () => activeStatuses(w, w.body).map(({ status }) => status.key);
+  assert.deepEqual(listed(), ['hushed', 'warded']);
+  const seen = reads;
+  for (let i = 0; i < 3; i++) assert.deepEqual(listed(), ['hushed', 'warded']);
+  assert.equal(reads, seen);
 });
 
 // Breaks (loka-kgd.98): a combat turn ignores the NPC's statuses (the stunned troll still clubs for
