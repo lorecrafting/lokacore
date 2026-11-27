@@ -31,6 +31,7 @@ Object.assign(globalThis, {
   getComputedStyle: () => ({ backgroundColor: paper }),
   matchMedia: () => ({ matches: false }),
   requestAnimationFrame: (run: () => void) => setTimeout(run),
+  cancelAnimationFrame: clearTimeout,
   fetch: async (path: string, init?: { body: string }) => {
     sent.push([path.split('?')[0], init && JSON.parse(init.body)]);
     const answer = path.startsWith('/__author/line')
@@ -119,5 +120,24 @@ test('`]` lands on the next unwritten line in page order, and the counts follow'
   assert.deepEqual(told.at(-1), { todoHere: { here: 2, at: 2 } });
   listeners.get('keydown')!(key('}'));
   assert.equal(focused, low, '`}` steps through written lines too, wrapping');
+});
+
+// Breaks: the panel's shortcuts (Cmd-K and the rest) dying while the Book has the focus.
+test('Cmd-K on the Book goes to the panel, not the browser', () => {
+  let prevented = false;
+  listeners.get('keydown')!({
+    ...key('k'),
+    metaKey: true,
+    preventDefault: () => (prevented = true),
+  });
+  assert.deepEqual([told.at(-1), prevented], [{ shortcut: 'k' }, true]);
+});
+
+// Breaks: stop() leaving a frame it already asked for, which then tells the panel stale counts.
+test('a stop cancels the frame already asked for', async () => {
+  listeners.get('focusin')!({}); // `}` moved the focus to a written line: the counts change
+  const before = told.length;
   stop();
+  await tick();
+  assert.equal(told.length, before);
 });

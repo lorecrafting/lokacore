@@ -63,5 +63,7 @@ export function start(given: (sent: object) => void) {
   return () => {
     for (const [target, name, run] of on()) target.removeEventListener(name, run, true);
     observer?.disconnect();
+    cancelAnimationFrame(frame); // a frame already asked for would tell the panel after the stop
+    frame = 0;
   };
 }
