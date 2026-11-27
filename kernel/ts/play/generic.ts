@@ -80,7 +80,8 @@ export function shapeOf(
 
 /** An if/then/else's object with the fields its `if` tests (`abstract`, `extends`, `command`) addable,
  * each as the `then` branch declares it: adding one moves the definition to that branch. A union of
- * shapes (a scene's modal or dream) offers them in each inline branch. */
+ * shapes (a scene's modal or dream) offers them in each inline branch; ponytail: a `then` that is
+ * itself a union (a scene's `extends`) adds nothing yet. */
 function keyed(n: Obj, [sh, s]: [Shape, string[]], value: unknown, defs: Defs): [Shape, string[]] {
   const add = (own: Record<string, Obj>) => {
     const props = { ...own };
