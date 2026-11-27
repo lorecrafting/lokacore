@@ -323,7 +323,11 @@ free width (`minWidth: 0` in a row) so the rule never runs past the sheet. Conte
 are acts, wrapping in a Room sheet row under their kind's row. `Add mechanic…` and its allowed
 names are acts; a greyed row is a touch target tall with no border or fill, its name
 `type.control` in `dim` and its reason `type.label` beneath, in `action` when the row can be
-pressed, else `dim`. Builder 2.4: Combat's `Run fights` is an act; `running the fights…`, which
+pressed, else `dim`. A field's schema description (loka-hcnlh.84) is a note, `type.small` in
+`dim`, wrapping, beneath an `Add…` or `Add mechanic…` option's name, a greyed row's reason, or a
+block's header row (folded too); option rows keep the Room sheet row's `space.md` sides. A
+described option's accessible name is its name, the note its hint (on web `aria-description`, set
+by hand as Unavailable's wait); a greyed row's name is its name then its reason. Builder 2.4: Combat's `Run fights` is an act; `running the fights…`, which
 stands in for it, and the answer under it (a target's name, its verdict, each table row, a
 why-not line) are `type.small` `fg`, one per line in one column with `space.md` sides, a row's
 cells joined by ` · ` and wrapping at word gaps, with no columns and no sideways scroll (a row wraps on a 384 px docked sheet or a 390 px phone).
