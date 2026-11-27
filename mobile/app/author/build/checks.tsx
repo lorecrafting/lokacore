@@ -35,7 +35,9 @@ export function checked(heard: Message & Said, api: Api, close: () => void, redr
             key={i}
             accessibilityRole="link"
             onPress={() => {
-              if (c.key ? go(c.key) : void api('/open', { file: c.file })) close();
+              refusal = '';
+              const told = (note: string) => ((refusal = note), redraw());
+              if (c.key ? go(c.key, told) : void api('/open', { file: c.file })) close();
               redraw();
             }}
             style={LINK}
@@ -48,9 +50,16 @@ export function checked(heard: Message & Said, api: Api, close: () => void, redr
           </Text>
         ),
       );
-  return [said, ...files.flatMap((t) => fileRows(t, api))];
+  const why = refusal && (
+    <Text key="refusal" style={{ ...type.small, color: ink('warning'), padding: space.md }}>
+      {refusal}
+    </Text>
+  );
+  return [why, said, ...files.flatMap((t) => fileRows(t, api))];
 }
 type Todo = { file: string; words: number; placeholders: string[] };
+/** Why the last pressed check's line did not open (field.tsx `go`), shown above the rows. */
+let refusal = '';
 let todos: { of: unknown; rows: Todo[] } = { of: undefined, rows: [] };
 /** GET /todo's files, asked again after each message (the last rows stay until it answers); a failed ask lists none. */
 function todo(heard: Message, api: Api, redraw: () => void) {

@@ -6,7 +6,7 @@ import { size, space, type } from '../../book/tokens.ts';
 import type { Message } from '../live.ts';
 import type { Step } from '../place.ts';
 import { install as seam } from './seam.ts';
-import { heard as told, shut, type Hooks, type Wrote } from './field.tsx';
+import { changed, heard as told, shut, type Hooks, type Wrote } from './field.tsx';
 import {
   autoHold,
   badge,
@@ -147,6 +147,7 @@ export function hear(message: Message & Said) {
   unsee(); // any live message ends it (fail safe)
   hold.heard(message.held);
   told(message.unconfirmed?.map((u) => u.key));
+  changed(message.changed);
   story(api, mapped, back, open); // a compile may have added, moved or renamed rooms
 }
 const set = (next: Builder) => {

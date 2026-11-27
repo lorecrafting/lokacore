@@ -3,7 +3,7 @@
 // reads (build.ts), the `~` counts the panel shows, a double-click outside Build opening a line's
 // field, and the walk keys. panel.tsx starts it only in the author preview.
 import { pagePaper, paletteNear, shortcut, step, textField, walk } from '../prose_rules.ts';
-import { opens, walkable } from './field.tsx';
+import { building, opens, walkable } from './field.tsx';
 
 export async function api(path: string, sent?: object): Promise<[number, any]> {
   const init = sent && { method: 'POST', body: JSON.stringify(sent) };
@@ -30,7 +30,7 @@ function onKey(e: KeyboardEvent) {
   const asks = shortcut(e); // the panel's, though the Book has the focus
   if (asks) return void (e.preventDefault(), tell({ shortcut: asks }));
   const asked = walk(e, typing(e.target));
-  if (!asked) return;
+  if (!asked || !building()) return;
   const list = walkable(asked[0]);
   const next = list[step(list.length, list.indexOf(focused()), asked[1])];
   next?.focus(); // Enter or Space on it opens its field (field.tsx `keyed`)

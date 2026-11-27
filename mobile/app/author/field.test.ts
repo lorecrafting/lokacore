@@ -1,4 +1,4 @@
-// size: allow 550, a cut page’s caption and the phone field tests join the field seam’s harness
+// size: allow 580, a cut page’s caption and the phone field tests and the Checks refusal join the field seam’s harness
 // Build's in-place field (docs/system/book-ui.md#author-mode; slice 1.3): a room description's
 // line opens its field through the Book seam. The server's /line and /edit: kernel/ts/test/author.test.ts.
 import assert from 'node:assert/strict';
@@ -393,6 +393,36 @@ test('Checks: the badge opens the list, each row goes to its line', async () => 
     'an invisible sheet eats taps',
   );
   button('Checks').props.onPress();
+  sent.length = 0;
+});
+
+// Breaks: a Checks row whose /open is refused (a page behind the cartridge) going nowhere silently,
+// or Build's message handler not passing a compile's changed files to the open field (no notice).
+test('Checks says why a row cannot open; a changed file under the open field says so', async () => {
+  build.hear({
+    text: {},
+    said: [],
+    placeholders: { 'room.cellar.description': 'world/cellar.md:4' },
+  });
+  button('Checks · 1 unwritten').props.onPress();
+  answers = [[404, null]];
+  strip()
+    .find((n) => n.props?.accessibilityRole === 'link')
+    .props.onPress();
+  await tick();
+  assert.ok(
+    shows(
+      'Changed since the last compile: this page is behind the cartridge. Wait for the compile, or press Cmd-E.',
+    ),
+    'a refused row says nothing',
+  );
+  button('Checks · 1 unwritten').props.onPress();
+  await opened(LINKED, at(LINKED));
+  answers = [[200, at('A cold loft.')]];
+  build.hear({ text: {}, said: [], changed: [{ file: 'world/loft.md' }] });
+  await tick();
+  assert.match(JSON.stringify(page(LINKED)), /Changed on disk since you opened it\. A cold loft\./);
+  shut();
   sent.length = 0;
 });
 

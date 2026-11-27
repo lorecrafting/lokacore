@@ -1,4 +1,4 @@
-// size: allow 330, the walk's lines and the double-click's field share the field's module state
+// size: allow 360, the walk's lines and the double-click's field share the field's module state
 // Build's in-place field (docs/system/book-ui.md#author-mode; slice 1.3 of
 // docs/rnd/in-game-builder-mode-2026-11-19.md §7): in Build a tap on a description's plain words
 // opens a field on that line, through the Book seam; outside Build a double-click does (page.ts). A
@@ -19,6 +19,7 @@ type Field = {
   at?: At;
   draft: string;
   note?: string;
+  shown?: string; // a note-only field on words two keys draw alike: no key, so drawn under these words
   tall?: number; // the line's drawn height when the field opened
   choices?: [string, () => void][];
 };
@@ -64,11 +65,14 @@ const EDITS =
  * words, else its source with links as words.
  * ponytail: one paragraph of a many-paragraph description matches no key, so it does not edit. */
 function keyOf(h: Hooks, shown: string) {
+  const keys = keysOf(h, shown);
+  return keys.length === 1 && EDITS.test(keys[0]) ? keys[0] : undefined;
+}
+function keysOf(h: Hooks, shown: string) {
   const w = drawnWords(h.seen, shown);
-  const keys = w
+  return w
     ? [h.seen.get(w)!]
     : [...h.said].filter(([, s]) => s && plain(s).trim() === shown.trim()).map(([k]) => k); // a key with no words is undefined
-  return keys.length === 1 && EDITS.test(keys[0]) ? keys[0] : undefined;
 }
 
 /** The one person's or item's name in these words: two in the same words (or two new `~`) get none. */
@@ -85,9 +89,14 @@ export function line(p: Props): Props {
   const h = hooks;
   if (!h) return p;
   if (!h.on()) {
-    if (!field) return p;
     const shown = flat(p.children);
-    return keyOf(h, shown) === field.key ? editable(h, p, field.key, shown, unwritten(shown)) : p;
+    if (field?.shown === shown) return { ...p, children: [p.children, under(field.note!)] };
+    const key = keyOf(h, shown);
+    if (!key) return p;
+    // only the open field draws; every other line is just counted (page.ts's `~ here`)
+    if (key !== field?.key)
+      return { ...p, ...({ ref: box(key, unwritten(shown), LABEL.test(key)) } as object) };
+    return editable(h, p, key, shown, unwritten(shown));
   }
   const shown = flat(p.children);
   const blank = unwritten(shown);
@@ -123,7 +132,7 @@ function editable(h: Hooks, p: Props, key: string, shown: string, blank: boolean
   const marked = unconfirmed.has(key);
   const press = () => void edit(h, key);
   const own = {
-    ref: (n: Box | null) => void (n ? boxes.set(key, { n, blank, label }) : boxes.delete(key)), // 19.4
+    ref: box(key, blank, label), // 19.4
     style: [p.style, blank && !label && BLANK, marked && MARKED],
     children: [
       PAGE.test(key) && (
@@ -131,9 +140,7 @@ function editable(h: Hooks, p: Props, key: string, shown: string, blank: boolean
       ),
       // a label's rule sits under its words, not under the icon row after them
       blank ? hint(name, label) : p.children,
-      field?.key === key && field.note && (
-        <Text key="note" style={CAPTION}>{`\n${field.note}`}</Text>
-      ),
+      field?.key === key && field.note && under(field.note),
       label && h.icons?.(key, press),
     ],
   };
@@ -174,8 +181,13 @@ const FIELD = { width: '100%', borderBottomWidth: size.rule, borderColor: ink('a
  * ponytail: native Text has no getBoundingClientRect, so its field keeps its own rows. */
 type Box = Partial<HTMLElement>;
 const boxes = new Map<string, { n: Box; blank: boolean; label: boolean }>();
+const box = (key: string, blank: boolean, label: boolean) => (n: Box | null) =>
+  void (n ? boxes.set(key, { n, blank, label }) : boxes.delete(key));
+const under = (note: string) => <Text key="note" style={CAPTION}>{`\n${note}`}</Text>;
 /** The lines a walk key steps through (page.ts), in page order: the unwritten ones, or every one
  * but a choice's label (its card's press is the card's). */
+/** Build is on: off it the lines are counted, not walked (their Text takes no focus). */
+export const building = () => !!hooks?.on();
 export const walkable = (todoOnly: boolean) =>
   [...boxes.values()]
     .filter((b) => !b.label && (!todoOnly || b.blank))
@@ -210,17 +222,39 @@ async function edit(h: Hooks, key: string) {
 /** A double-click outside Build (page.ts) on the line drawing `shown`: its field. False: no key. */
 export function opens(shown: string) {
   const h = hooks;
-  const key = h && !h.on() && keyOf(h, shown);
+  if (!h || h.on()) return false;
+  if (keysOf(h, shown).length > 1) {
+    // words two keys draw alike: opening one would write the other's line, so say why none opens
+    field = { key: '', shown, draft: '', note: noFieldNote(undefined) };
+    h.redraw();
+    return true;
+  }
+  const key = keyOf(h, shown);
   if (key) void edit(h, key);
   return !!key;
 }
 /** A Checks row's line: its field when this page draws the key, else the source in the owner's
- * editor. False: not on this page. */
-export function go(key: string) {
+ * editor, `refused` told why it could not open. False: not on this page. */
+export function go(key: string, refused: (note: string) => void = () => {}) {
   const h = hooks!; // install attaches it before Build can open the Checks sheet
   const here = EDITS.test(key) && [...h.seen.values()].includes(key); // as keyOf draws
-  void (here ? edit(h, key) : h.api('/open', { key, words: h.said.get(key) ?? '' }));
+  if (here) void edit(h, key);
+  else
+    void h.api('/open', { key, words: h.said.get(key) ?? '' }).then(([status]) => {
+      // a 404 is stale words: the compile moved on since this page drew, so /open has no line
+      if (status !== 200)
+        refused(status === 404 ? STALE : `The editor could not open that line (HTTP ${status}).`);
+    });
   return here;
+}
+const STALE =
+  'Changed since the last compile: this page is behind the cartridge. Wait for the compile, or press Cmd-E.';
+/** A pushed message's changed files: the open field's file changed, and its line with it, opens
+ * the notice unasked. */
+export function changed(files: { file: string }[] = []) {
+  const [h, f] = [hooks, field];
+  if (!h || !f?.at || f.choices || busy || !files.some((c) => c.file === f.at!.file)) return;
+  void theirs(h, f).then((t) => field === f && t[1]?.was !== f.at!.was && conflict(h, f, t));
 }
 /** Build turned on or off: no field stays open, and the Book redraws its lines. */
 export const shut = () => hooks && close(hooks);
@@ -255,15 +289,21 @@ async function save(h: Hooks, f: Field) {
   if (status === 200) return close(h); // the server sends the new words at once (kernel/ts/play/told.ts)
   if (status !== 409)
     return say(h, f, typeof answer === 'string' ? answer : `Not saved (${status}).`);
-  const [got, theirs] = at.scene
-    ? [200, await h.scene!(f.key)]
-    : await h.api(`/line?key=${enc(f.key)}&words=${enc(at.words)}`);
-  if (got !== 200 || !theirs)
+  conflict(h, f, await theirs(h, f));
+}
+/** The field's line as the file has it now. */
+const theirs = (h: Hooks, f: Field): Promise<[number, At | undefined]> =>
+  f.at!.scene
+    ? h.scene!(f.key).then((t) => [200, t])
+    : h.api(`/line?key=${enc(f.key)}&words=${enc(f.at!.words)}`);
+function conflict(h: Hooks, f: Field, [got, now]: [number, At | undefined]) {
+  const words = f.at!.words;
+  if (got !== 200 || !now)
     return say(h, f, 'Changed on disk since you opened it.', [
-      ['Open source', () => (void h.api('/open', { key: f.key, words: at.words }), close(h))],
+      ['Open source', () => (void h.api('/open', { key: f.key, words }), close(h))],
     ]);
-  say(h, f, `Changed on disk since you opened it. ${theirs.words}`, [
-    ['Keep mine', () => ((f.at = theirs), (f.choices = undefined), void save(h, f))],
+  say(h, f, `Changed on disk since you opened it. ${now.words}`, [
+    ['Keep mine', () => ((f.at = now), (f.choices = undefined), void save(h, f))],
     ['Take theirs', () => close(h)],
   ]);
 }
