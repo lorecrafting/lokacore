@@ -51,34 +51,40 @@ test(
   LONG,
   async () => {
     const p = await book(390);
-    const mass = () => file('areas/fell_road/items/oilskin.json').mass_grams;
-    await palette(p, 'oilskin');
-    await sheet(p).getByRole('button', { name: 'Fields' }).click();
-    const field = p.getByRole('textbox', { name: 'mass_grams' });
-    const set = async (v: string) => (await field.fill(v), await field.press('Tab'));
-    const compiled = p.waitForEvent('load', LONG); // the reload a structural compile brings
-    await set('600');
-    await until(() => mass() === 600, 'mass 600 written');
-    await compiled;
-    await undo(p).waitFor(); // kept across that reload
-    for (const [status, body, shown, value] of [
-      [409, '"refused here"', 'refused here', '700'],
-      [500, 'boom', 'a file changed since the map read it', '800'], // mapedit.ts said(): no why
-    ] as const) {
-      await p.route('**/__author/change', (r) => r.fulfill({ status, body }), { times: 1 });
-      await set(value);
-      await sheet(p).getByText(shown).waitFor();
-      assert.equal(mass(), 600);
-      assert.ok(await undo(p).isVisible(), `${status}: the last write's Undo stands`);
+    const rel = 'areas/fell_road/items/oilskin.json';
+    const bytes = readFileSync(join(cart, rel), 'utf8');
+    const mass = () => file(rel).mass_grams;
+    try {
+      await palette(p, 'oilskin');
+      await sheet(p).getByRole('button', { name: 'Fields' }).click();
+      const field = p.getByRole('textbox', { name: 'mass_grams' });
+      const set = async (v: string) => (await field.fill(v), await field.press('Tab'));
+      const compiled = p.waitForEvent('load', LONG); // the reload a structural compile brings
+      await set('600');
+      await until(() => mass() === 600, 'mass 600 written');
+      await compiled;
+      await undo(p).waitFor(); // kept across that reload
+      for (const [status, body, shown, value] of [
+        [409, '"refused here"', 'refused here', '700'],
+        [500, 'boom', 'a file changed since the map read it', '800'], // mapedit.ts said(): no why
+      ] as const) {
+        await p.route('**/__author/change', (r) => r.fulfill({ status, body }), { times: 1 });
+        await set(value);
+        await sheet(p).getByText(shown).waitFor();
+        assert.equal(mass(), 600);
+        assert.ok(await undo(p).isVisible(), `${status}: the last write's Undo stands`);
+      }
+      await set('-1');
+      const refused = p.getByText(/Checks · 1 refused/);
+      await refused.waitFor();
+      assert.equal(mass(), -1);
+      await undo(p).click();
+      await until(() => mass() === 600, 'Undo put back 600');
+      await refused.waitFor({ state: 'detached' });
+      assert.equal(await undo(p).count(), 0); // an undone write offers no Undo of the undo
+    } finally {
+      writeFileSync(join(cart, rel), bytes);
     }
-    await set('-1');
-    const refused = p.getByText(/Checks · 1 refused/);
-    await refused.waitFor();
-    assert.equal(mass(), -1);
-    await undo(p).click();
-    await until(() => mass() === 600, 'Undo put back 600');
-    await refused.waitFor({ state: 'detached' });
-    assert.equal(await undo(p).count(), 0); // an undone write offers no Undo of the undo
     await p.close();
   },
 );
@@ -159,15 +165,21 @@ test("the warden's Combat and Schedule blocks run and write on the showcase", LO
 // Breaks (panel :519): One-way writing only one room, or Undo not putting back both legs.
 test("a one-way exit's reverse comes back by Undo", LONG, async () => {
   const p = await book(390);
-  const south = () => 'south' in file('areas/tidewater/rooms/cliff_top.json').exits;
+  const top = join(cart, 'areas/tidewater/rooms/cliff_top.json');
+  const bytes = readFileSync(top, 'utf8');
+  const south = () => 'south' in JSON.parse(readFileSync(top, 'utf8')).exits;
   const north = () => 'north' in file('areas/tidewater/rooms/cliff_path.json').exits;
-  await palette(p, 'cliff_path', /^cliff_path · /);
-  await sheet(p).getByRole('button', { name: 'One-way' }).first().click(); // north → Cliff Top
-  await until(() => !south(), 'the reverse leg removed');
-  assert.ok(north());
-  await undo(p).click();
-  await until(south, 'Undo put back the reverse leg');
-  assert.ok(north());
+  try {
+    await palette(p, 'cliff_path', /^cliff_path · /);
+    await sheet(p).getByRole('button', { name: 'One-way' }).first().click(); // north → Cliff Top
+    await until(() => !south(), 'the reverse leg removed');
+    assert.ok(north());
+    await undo(p).click();
+    await until(south, 'Undo put back the reverse leg');
+    assert.ok(north());
+  } finally {
+    writeFileSync(top, bytes);
+  }
   await p.close();
 });
 

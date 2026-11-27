@@ -207,7 +207,7 @@ jobs:
     needs: changes
     if: needs.changes.outputs.code != 'false'
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20 # about 9 min on main before the Builder smoke
     env:
       MIX_ENV: test
     steps:
