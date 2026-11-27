@@ -4,37 +4,40 @@ The present only: open work, next steps, owner questions, and standing owner rul
 yet. Rewrite this page in place once per session, at its end; never add dated session sections. History lives in git, Beads and `docs/reviews/`; lessons
 go to [PM lessons](lessons/pm.md) ([harness patterns](decisions/owner-decision-harness-patterns-2026-10-28.md)).
 
-AS OF main 99fcc3165 (after #822); written 2026-11-27 in Claude Code (Opus 5.5), PM session. The $20 Pro
+AS OF main ba01ee753 (after #824); written 2026-11-27 in Claude Code (Opus 5.5), PM session. The $20 Pro
 plan: **two concurrent developer agents** on non-overlapping slices (owner 2026-11-25). Designers and
 reviewers may run beside them within `bin/agent_load_gate.sh` (load <= 8). Subagents use Opus. Usage
-limits hit about every five hours: resume each agent with SendMessage after the reset, never a fresh spawn
-(unless its context was compacted; then spawn a fresh one with a state note).
+limits hit about every five hours: resume each agent with SendMessage after the reset; a compacted agent
+cannot be resumed, so spawn a fresh one with a state note.
 
-**Live state at this handoff (check `ListAgents` and `gh pr list`):**
-- **6.6b, PR #823** (`loka-hcnlh.33`, branch `builder/6.6b-card-tests`): review APPROVE WITH NOTES; a fix
-  round adds a red control for the read-only-while-saving redraw (field.tsx:272) and re-points the four
-  kernel tests that waited on #822 (author_shell, author_chrome, story.test `named`, author_story `rank`).
-  Then the record (local branch `review-823`) goes on and it merges.
-- **loka-x1frg (P1, data loss):** a form write blurred while Undo runs is dropped (roomedit.tsx run()).
-  The 6.6b developer fixes it next.
-- **6.6a** (`loka-hcnlh.33`, worktree `hcnlh33a-browser`): a fresh developer is porting the panel's
-  browser tests (panel.test.ts 22, map.test.ts 12) onto a builder harness at 390 and 1280.
-- **Merge helper lesson:** when merging main into a slice branch, only `docs/reviews/README.md` may be
-  resolved by regeneration; stop on any other conflict (#821 left markers in the todo baseline once).
+**Live state at this handoff (check `ListAgents` and `gh pr list`; both developers keep running across a clear):**
+- **6.6a, PR #825** (`loka-hcnlh.33`, branch `builder/6.6a-browser-tests`, worktree `hcnlh33a-browser`):
+  the builder browser harness and the panel's E2E cases. Its smoke exposed a real bug: on Linux the dev
+  watcher misses a second atomic rename of the same file (`kernel/ts/play/author.ts` watch, `write.ts:73`),
+  so no recompile. PM ruling (a): its developer files a P1 bead and fixes the watcher in its own PR
+  (`fix/watcher-second-rename`), then reruns #825. Both need a reviewer before merge.
+- **.84** (`loka-hcnlh.84`, field descriptions in menus): the other developer starts it from fresh main
+  (branch `builder/84-field-descriptions`); it plans `type.small` in `dim` for the description line and asks
+  the designer to rule (no description style in the Book UI docs yet).
+- **Merge helper:** when merging main into a slice branch, only `docs/reviews/README.md` may be resolved
+  by regeneration; stop on any other conflict, and check the merge commit actually landed (hooks need
+  root, mobile/app and kernel/ts `node_modules` in the worktree).
 
-**Shipped this session (2026-11-25 to 27):** #803 (Safari save lock: worker ends on pagehide), #804 (iPhone
-WebKit checks on every PR), #806/#807/#809 (map edits on full-ref and bundled exits; new things from
-bundled rooms), #810/#812 (new items weigh 1 g; stock weight error), #811 (Numbers sims 6x faster), #815
-(field Undo flake: Date mocked), #808 (6.3a parity sweep), #813 (6.3b Find, Recent, Worlds), #814 (.76
-long-list pick), #816 (.71 parity gaps: sheet head, story rows, Step rules, full report), #817 (.56/.52 rows;
-`none: <reason>` registry value for rows neither tool offers), #818 (6.4: E5 field retired), #819 (6.5a
-spec), #820 (.45 story outline), #821 (6.5a wide layout), #822 (6.5b palette and keys). The todo baseline
-is **empty**: parity is reached except the gaps below.
+**Shipped this session (2026-11-25 to 27):** #803 (Safari save lock), #804 (iPhone WebKit checks on every
+PR), #806/#807/#809 (map edits on full-ref and bundled exits; new things from bundled rooms), #810/#812
+(new items weigh 1 g; stock weight error), #811 (Numbers sims 6x faster), #815 (field Undo flake), #808
+(6.3a), #813 (6.3b Find, Recent, Worlds), #814 (.76 long-list pick), #816 (.71 parity gaps), #817 (.56/.52
+rows; `none: <reason>` registry value), #818 (6.4 E5 field retired), #819 (6.5a spec), #820 (.45 story
+outline), #821 (6.5a wide layout), #822 (6.5b palette and keys), #823 (6.6b panel card/words/undo/mapwire
+tests ported; kernel tests off the panel except author_shell, author_chrome, editor_routes, which end at
+6.8), #824 (x1frg: no form write is dropped silently during another gesture), #826 (.85 up/down exits).
+The todo baseline is **empty**.
 
-**Next, in order:** finish #823 and loka-x1frg; 6.6a; the parity gaps found by the test port,
-`loka-hcnlh.84` (field descriptions in menus) and `.85` (up/down exits with no layout); then **6.7, the
-owner's walk** (`.34`), and 6.8 (`.35`, retire the panel) after the owner's yes. Polish backlog (not
-blocking): `.79`, `.82`, `.86`, `loka-exv3r`, and the older P3 nits.
+**Next, in order:** the watcher fix and #825 (6.6a); .84; then **6.7, the owner's walk** (`.34`, with the
+wording pass right before it), and 6.8 (`.35`, retire the panel) after the owner's yes. Follow-ups (not
+blocking 6.7): `.91` (Join long-list pick), `.79`, `.82`, `.86`,
+`loka-exv3r`, older P3 nits. Retro beads awaiting the owner: `loka-td9on`, `loka-h7vmp`, `loka-zzgsf`,
+`loka-h4i51`, `loka-rndo7` (`br list -l housekeeping`).
 
 **Owner rulings 2026-11-27 (paraphrased):** the stray gist is deleted; device-size = the builder follows the
 window (no Tools-tab preview unless the walk shows a need); the wording pass happens once, right before the 6.7
