@@ -1,7 +1,7 @@
-// size: allow 320, the strip draws the notebook column beside the sheet stack (Wide layout)
+// size: allow 330, the strip draws the notebook column beside the sheet stack (Wide layout)
 // Build mode's chrome (docs/system/book-ui.md#author-mode; slice 1.2): the Build toggle and strip,
 // the sheet host, auto-hold. Only the author preview requires it (author/seam.test.ts: `BUILD`).
-import { useState, type ReactNode } from 'react';
+import { cloneElement, useState, type ReactNode } from 'react';
 import { Pressable, Text, useWindowDimensions, View } from 'react-native';
 import { size, space, type } from '../../book/tokens.ts';
 import type { Message } from '../live.ts';
@@ -65,7 +65,7 @@ let notBack: Wrote | undefined; // a refused put-back
 let stopped = ''; // a gesture's put-back refused
 let redrawStrip = () => {};
 let mapped = () => {}; // the map has come: the strip and the Book's pencil draw again
-let notebookOpener: { focus?: () => void } | null | undefined;
+let notebookChip: { focus?: () => void } | null = null; // Close hands the focus back here
 let opener: { focus?: () => void } | null | undefined; // what had focus before the first sheet opened
 /** What the keep-my-place notice reads and does; panel.tsx hands it in per game. */
 export type Place = Game & {
@@ -196,10 +196,12 @@ async function putBack(w: Wrote | Gesture) {
   redrawStrip();
 }
 const openBack = () => void api!('/open', { key: notBack!.key, words: notBack!.words });
-/** Checks: each row goes to its line; one on this page closes the sheet to show its field. */
+/** Checks: each row goes to its line; one on this page closes the sheets to show its field (from the
+ * notebook column the stack stays: nothing covers the Book there). */
+const shown = () => builder.notebook === undefined && set({ ...builder, sheets: undefined });
 sheets.checks = {
   title: () => WORDS.checks,
-  body: () => checked(heard, api!, () => set({ ...builder, sheets: undefined }), redrawStrip),
+  body: () => checked(heard, api!, shown, redrawStrip),
 };
 const STRIP = {
   minHeight: size.touch,
@@ -247,15 +249,15 @@ const buildSwitch = (flip: () => void) => (
   </Pressable>
 );
 /** The strip's `Notebook` from DOCK.at: opens or closes the column (a notebook sheet gives way to it);
- * closing returns the focus to it. */
+ * closing returns the focus to it, after a reload too. */
 function column() {
   const open = builder.notebook === undefined;
-  if (open) notebookOpener = globalThis.document?.activeElement as typeof opener;
   const rest = open && builder.sheets?.includes('contents') ? closed(builder, 'contents') : builder;
   set({ ...rest, notebook: open ? 0 : undefined });
   redrawStrip();
-  if (!open) notebookOpener?.focus?.();
+  if (!open) notebookChip?.focus?.();
 }
+const CHIP = { ref: (el: typeof notebookChip) => void (notebookChip = el) } as object;
 /** A strip chip that opens sheet `id`, or closes it when it is the top sheet. */
 const pad = (label: string, id: string, top?: string) =>
   act(label, () => (top === id ? back(id) : open(id)), top === id);
@@ -263,12 +265,16 @@ const pad = (label: string, id: string, top?: string) =>
 const sheetChips = (wide: boolean, top?: string) => (
   <>
     {wide
-      ? act(CONTENTS.contents, column, undefined, undefined, builder.notebook !== undefined)
+      ? cloneElement(
+          act(CONTENTS.contents, column, undefined, undefined, builder.notebook !== undefined),
+          CHIP,
+        )
       : pad(CONTENTS.contents, 'contents', top)}
     {pad(MAP.map, 'map', top)}
     {pad(badge(heard), 'checks', top)}
   </>
 );
+const scrolled = (n: Builder) => set({ ...builder, scroll: n.scroll }); // the stack's, not the column's
 const notebook = () =>
   builder.notebook === undefined ? null : (
     <Column
@@ -311,7 +317,9 @@ export function Strip({ children }: { children: ReactNode }) {
         >
           {children}
         </View>
-        {top && parts(top)[0] ? <Frame open={builder} saved={set} back={() => back()} /> : null}
+        {top && parts(top)[0] ? (
+          <Frame open={builder} saved={scrolled} back={() => back()} />
+        ) : null}
       </View>
     </View>
   );

@@ -215,6 +215,7 @@ export function Column({ open, saved, close }: Stack & { close: () => void }) {
   const title = titled(open.sheets![0]);
   return (
     <View
+      role="region"
       aria-label={title}
       style={[
         { backgroundColor: ink('card'), borderColor: ink('line') },

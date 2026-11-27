@@ -24,7 +24,7 @@ Object.assign(globalThis, {
     return { status: answer[0], json: async () => answer[1] };
   },
 });
-const { Strip, install, open, altClick } = await import('./build/Build.tsx');
+const { Strip, install, open, altClick, hear, sheets } = await import('./build/Build.tsx');
 const { DOCK, Foot } = await import('./build/sheet.tsx');
 const { BUILD, restored } = await import('./build/build.ts');
 const { strip } = await import('./build/source.ts');
@@ -94,20 +94,48 @@ test('the foot and Alt-click each send one /open; a refusal shows until the next
 // scroll on a reload, or Close leaving the focus in nowhere.
 test('from 1152 Notebook opens a column beside the Book and the docked sheet; narrowing closes it', async () => {
   stored.set(BUILD, '{"on":true}');
-  install({ seen: new Map(), said: new Map(), redraw() {}, api: async () => [200, { map: [] }] });
+  const seen = new Map([[{}, 'room.hall.description']]); // a line on this page
+  const api = async (path: string) => [
+    200,
+    path.startsWith('/line') ? { words: 'Hall' } : { map: [] },
+  ];
+  install({ seen, said: new Map(), redraw() {}, api: api as never });
   let focused = 0;
-  Object.assign(globalThis, {
-    innerWidth: DOCK.at,
-    document: { activeElement: { focus: () => focused++ } },
-  });
+  Object.assign(globalThis, { innerWidth: DOCK.at });
   const drawn = () => nodes(Strip({ children: 'book' }));
-  const column = () => drawn().find((n) => n.props?.['aria-label'] === 'Notebook' && !n.props.role);
+  const column = () =>
+    drawn().find((n) => n.props?.['aria-label'] === 'Notebook' && n.props.role === 'region');
   const chip = () =>
     drawn().find((n) => n.type === 'Pressable' && label(n) === 'Notebook').props.accessibilityState;
-  assert.equal(DOCK.width, 384);
+  const scrolled = (all: any[], y: number) =>
+    all.find((n) => n.props?.onScroll).props.onScroll({ nativeEvent: { contentOffset: { y } } });
+  open('checks');
+  const sheet = () => nodes(drawn().find((n) => n.props?.role === 'dialog'));
+  scrolled(sheet(), 40);
+  press(drawn(), 'Notebook');
+  assert.deepEqual(restored(localStorage), {
+    on: true,
+    sheets: ['checks'],
+    scroll: 40,
+    notebook: 0,
+  });
+  const held = sheet(); // drawn before the column scrolls
+  scrolled(nodes(column()), 7);
+  scrolled(held, 50);
+  assert.deepEqual([restored(localStorage).notebook, restored(localStorage).scroll], [7, 50]);
+  hear({ text: {}, said: [], placeholders: { 'room.hall.description': [] } } as never);
+  nodes(sheets.checks.body('')) // the column's Checks tab
+    .find((n) => n.props?.accessibilityRole === 'link')
+    .props.onPress();
+  assert.deepEqual(
+    restored(localStorage).sheets,
+    ['checks'],
+    'a check from the column keeps the stack',
+  );
+  press(drawn(), 'Notebook');
   open('contents');
   press(drawn(), 'Notebook');
-  assert.deepEqual(restored(localStorage).sheets, undefined, 'the notebook sheet gives way');
+  assert.deepEqual(restored(localStorage).sheets, ['checks'], 'the notebook sheet gives way');
   const slid = column().props.style.at(-1).animationKeyframes[0].from.transform;
   assert.equal(slid, 'translateX(-100%)', 'the column slides in from the left');
   assert.equal(chip().selected, true);
@@ -120,7 +148,7 @@ test('from 1152 Notebook opens a column beside the Book and the docked sheet; na
   assert.equal(dialog.props['aria-modal'], false);
   const at = (find: (n: any) => boolean) => drawn().findIndex(find);
   const order = [
-    at((n) => n.props?.['aria-label'] === 'Notebook' && !n.props.role),
+    at((n) => n.props?.['aria-label'] === 'Notebook' && n.props.role === 'region'),
     at((n) => n.props?.testID === 'loka-book'),
     at((n) => n.props?.role === 'dialog'),
   ];
@@ -133,9 +161,15 @@ test('from 1152 Notebook opens a column beside the Book and the docked sheet; na
   press(nodes(dialog), 'Back');
   assert.ok(column(), 'Back closes the sheet, not the column');
   assert.equal(restored(localStorage).notebook, 0, 'a reload brings the column back');
-  const before = focused; // Back handed the focus back to the same opener
+  drawn() // a reload: the chip is drawn again, nothing remembered of the press that opened the column
+    .find((n) => n.type === 'Pressable' && label(n) === 'Notebook')
+    .props.ref({ focus: () => focused++ });
   press(nodes(column()), 'Close');
-  assert.deepEqual([column(), focused - before], [undefined, 1], 'Close hands the focus back');
+  assert.deepEqual(
+    [column(), focused],
+    [undefined, 1],
+    'Close hands the focus to the Notebook chip',
+  );
 
   press(drawn(), 'Notebook');
   Object.assign(globalThis, { innerWidth: DOCK.at - 1 });
