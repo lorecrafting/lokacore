@@ -5,6 +5,7 @@ import { useWindowDimensions, View } from 'react-native';
 import type { Message } from '../live.ts';
 import type { Step } from '../place.ts';
 import { install as seam } from './seam.ts';
+import { paletteWith } from './palette.tsx';
 import { changed, heard as told, shut, type Hooks, type Wrote } from './field.tsx';
 import {
   autoHold,
@@ -74,15 +75,12 @@ export const place = (p: Place) => void ((placed = p), seeWith(p, () => mapped()
 mapSheet({ go: (room) => placed?.startIn(room), here: () => placed?.here() });
 storySheet((room) => placed?.startIn(room));
 onSaved((ids) => wrote({ ids }));
-let asked = Promise.resolve();
+let asked: Promise<unknown> = Promise.resolve();
 /** One at a time: the server keeps the last flag it got, so an on overtaking its off would stick.
  * A refused or failed request shows as no Held in the strip. */
 const ask = (on: boolean) => {
   const send = () => fetch('/__author/hold', { method: 'POST', body: JSON.stringify({ on }) });
-  asked = asked.then(send).then(
-    () => {},
-    () => {},
-  );
+  asked = asked.then(send).catch(() => {});
 };
 /** A builder field calls `focus` and `commit` (Enter, blur, a picker closing). */
 export const hold = autoHold(
@@ -91,6 +89,12 @@ export const hold = autoHold(
   (release) => setTimeout(release),
 );
 toolsWith({ game: () => placed, hold, heard: () => heard });
+paletteWith({
+  state: () => ({ ...builder, undoable: !!undo, placeholders: heard.placeholders ?? {} }),
+  close: () => back('palette'),
+  undo: () => !!undo && (void putBack(undo), true),
+  hold,
+});
 /** Opens a sheet on the stack (or brings it to the top); the first remembers the focus to return. */
 export function open(id: string) {
   if (!builder.sheets) opener = globalThis.document?.activeElement as typeof opener;

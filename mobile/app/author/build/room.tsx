@@ -83,7 +83,7 @@ export const known = {
 let listed: object | undefined; // the /story the templates were asked under
 
 /** /templates' abstract NPCs and items, asked again once under each new /story; then the Book redraws. */
-function held() {
+export function held() {
   if (listed !== known.files) {
     listed = known.files;
     void known.api?.('/templates').then(
