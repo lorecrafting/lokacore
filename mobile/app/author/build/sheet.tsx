@@ -98,7 +98,14 @@ export function Foot({ file }: { file: string }) {
   const [note, say] = useState('');
   return (
     <View style={{ padding: space.md }} /* mutate-skip: layout */>
-      {act(file, () => (say(''), void openSource({ file }).then(say)))}
+      {/* a path keeps its case: type.small, not act's small caps (catalogue, the sheet foot's path) */}
+      <Pressable
+        accessibilityRole="button"
+        onPress={() => (say(''), void openSource({ file }).then(say))}
+        style={CONTROL}
+      >
+        <Text style={{ ...type.small, color: ink('action') }}>{file}</Text>
+      </Pressable>
       <Text aria-live="polite" style={{ ...type.small, color: ink('warning') }}>
         {note}
       </Text>
@@ -208,15 +215,18 @@ export function Frame({ open, saved, back }: Stack & { back: () => void }) {
     </View>
   );
 }
+type Column = Stack & { close: () => void; held: (inside: boolean) => void };
 /** The notebook column (Wide layout): from DOCK.at, at the Book's left edge, not modal, never in the
  * stack; `Close` in Back's place, the header taking the focus as it opens. `open` holds only the
  * notebook, at the column's scroll. */
-export function Column({ open, saved, close }: Stack & { close: () => void }) {
+export function Column({ open, saved, close, held }: Column) {
   const title = titled(open.sheets![0]);
   return (
     <View
       role="region"
       aria-label={title}
+      onFocus={() => held(true)} // React's focus events bubble: any control inside counts
+      onBlur={() => held(false)}
       style={[
         { backgroundColor: ink('card'), borderColor: ink('line') },
         { width: DOCK.width, borderRightWidth: size.rule },

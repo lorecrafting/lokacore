@@ -1,6 +1,6 @@
 // Build mode's chrome (docs/system/book-ui.md#author-mode; slice 1.2): the Build toggle and strip,
 // the sheet host, auto-hold. Only the author preview requires it (author/seam.test.ts: `BUILD`).
-import { cloneElement, useState, type ReactNode } from 'react';
+import { cloneElement, useEffect, useState, type ReactNode } from 'react';
 import { useWindowDimensions, View } from 'react-native';
 import type { Message } from '../live.ts';
 import type { Step } from '../place.ts';
@@ -59,6 +59,8 @@ let stopped = ''; // a gesture's put-back refused
 let redrawStrip = () => {};
 let mapped = () => {}; // the map has come: the strip and the Book's pencil draw again
 let notebookChip: { focus?: () => void } | null = null; // Close hands the focus back here
+let inColumn = false; // the focus is inside the notebook column
+let refocus = false; // narrowing closed the column with the focus in it: Notebook takes it
 let opener: { focus?: () => void } | null | undefined; // what had focus before the first sheet opened
 /** What the keep-my-place notice reads and does; panel.tsx hands it in per game. */
 export type Place = Game & {
@@ -219,7 +221,9 @@ const pad = (label: string, id: string, top?: string) =>
 /** Notebook (a column chip when wide, else a sheet chip), Map and Checks. */
 const sheetChips = (wide: boolean, top?: string) => (
   <>
-    {wide ? columnChip(builder.notebook !== undefined) : pad(CONTENTS.contents, 'contents', top)}
+    {wide
+      ? columnChip(builder.notebook !== undefined)
+      : cloneElement(pad(CONTENTS.contents, 'contents', top), CHIP)}
     {pad(MAP.map, 'map', top)}
     {pad(badge(heard), 'checks', top)}
   </>
@@ -231,14 +235,29 @@ const notebook = () =>
       open={{ on: true, sheets: ['contents:column'], scroll: builder.notebook }}
       saved={(n) => set({ ...builder, notebook: n.scroll })}
       close={column}
+      held={(inside) => void (inColumn = inside)}
     />
   );
+/** Wide from DOCK.at; narrowing closes the column, and the focus inside it goes to Notebook. */
+function useWide() {
+  const wide = useWindowDimensions().width >= DOCK.at;
+  if (!wide && builder.notebook !== undefined) {
+    refocus = inColumn; // narrowed
+    inColumn = false;
+    set({ ...builder, notebook: undefined });
+  }
+  useEffect(() => {
+    if (!refocus) return;
+    refocus = false;
+    notebookChip?.focus?.(); // the narrow chip's ref is set by now: refs attach before effects
+  });
+  return wide;
+}
 /** The strip at `size.touch`: Build, Hold, the last edit's timing, Undo, Checks, a refused replay. */
 export function Strip({ children }: { children: ReactNode }) {
   const [, redraw] = useState({});
   redrawStrip = strip.redraw = () => redraw({});
-  const wide = useWindowDimensions().width >= DOCK.at;
-  if (!wide && builder.notebook !== undefined) set({ ...builder, notebook: undefined }); // narrowed
+  const wide = useWide();
   const change = (next: Builder) => (set(next), unsee(), redraw({}), shut());
   const top = builder.sheets?.at(-1);
   return (

@@ -26,6 +26,7 @@ Object.assign(globalThis, {
 });
 const { Strip, install, open, altClick, hear } = await import('./build/Build.tsx');
 const { DOCK, Foot } = await import('./build/sheet.tsx');
+const { type } = await import('../book/tokens.ts');
 const { BUILD, restored } = await import('./build/build.ts');
 const { strip } = await import('./build/source.ts');
 const label = (n: any) => n.props?.children?.props?.children;
@@ -33,8 +34,8 @@ const press = (all: any[], name: string) =>
   all.find((n) => n.type === 'Pressable' && label(n) === name).props.onPress();
 
 // Breaks: a route sending no /open or two (the panel relay kept beside the Book's own post, or the
-// Book line's own press also firing), Alt-click outside the Book or on touch, or a refusal unsaid
-// or outliving the next press.
+// Book line's own press also firing), Alt-click outside the Book or on touch, a refusal unsaid
+// or outliving the next press, or the foot's path drawn in small caps (its case lost).
 test('the foot and Alt-click each send one /open; a refusal shows until the next press', async () => {
   let note = '';
   const state = Symbol.for('combat-state');
@@ -42,6 +43,8 @@ test('the foot and Alt-click each send one /open; a refusal shows until the next
   (globalThis as any)[state] = () => [note, (n: string) => (note = n)];
   try {
     const foot = () => nodes(Foot({ file: 'rooms/hall.yaml' }));
+    const path = foot().find((n) => n.type === 'Text' && n.props.children === 'rooms/hall.yaml');
+    assert.equal(path.props.style.fontFamily, type.small.fontFamily, 'the body face, not caps');
     press(foot(), 'rooms/hall.yaml');
     await settle();
     assert.deepEqual(sent.splice(0), [['/__author/open', { file: 'rooms/hall.yaml' }]]);
@@ -91,7 +94,8 @@ test('the foot and Alt-click each send one /open; a refusal shows until the next
 
 // Breaks: the column at the wrong width or not 384 wide, opening in the stack (Back closing it), a
 // notebook sheet left under it, staying open (or reopening) after narrowing, losing its tab or
-// scroll on a reload, or Close leaving the focus in nowhere.
+// scroll on a reload, or Close or narrowing leaving the focus in nowhere (or narrowing taking a
+// focus that was not in the column).
 test('from 1152 Notebook opens a column beside the Book and the docked sheet; narrowing closes it', async () => {
   stored.set(BUILD, '{"on":true}');
   const seen = new Map([[{}, 'room.hall.description']]); // a line on this page
@@ -142,6 +146,7 @@ test('from 1152 Notebook opens a column beside the Book and the docked sheet; na
   assert.deepEqual(restored(localStorage).sheets, ['checks'], 'the notebook sheet gives way');
   const slid = column().props.style.at(-1).animationKeyframes[0].from.transform;
   assert.equal(slid, 'translateX(-100%)', 'the column slides in from the left');
+  assert.equal(column().props.style[1].width, 384);
   assert.deepEqual(chip(), { expanded: true, selected: true });
   press(nodes(column()), 'Recent');
   assert.equal(stored.get('loka-build-tab'), 'Recent');
@@ -173,14 +178,31 @@ test('from 1152 Notebook opens a column beside the Book and the docked sheet; na
     'Close hands the focus to the Notebook chip',
   );
 
+  const effects: (() => void)[] = [];
+  const effect = Symbol.for('combat-effect');
+  const was = (globalThis as any)[effect];
+  (globalThis as any)[effect] = (f: () => void) => void effects.push(f);
+  const narrowed = (focus: object) => {
+    Object.assign(globalThis, { innerWidth: DOCK.at - 1 });
+    drawn() // React attaches the narrow chip's ref, then runs the effects
+      .find((n) => n.type === 'Pressable' && label(n) === 'Notebook')
+      .props.ref(focus);
+    effects.splice(0).forEach((f) => f());
+  };
   press(drawn(), 'Notebook');
-  Object.assign(globalThis, { innerWidth: DOCK.at - 1 });
-  assert.equal(column(), undefined, 'a narrow window has no column');
+  narrowed({ focus: () => focused++ });
+  assert.deepEqual([column(), focused], [undefined, 1], 'a focus outside the column stays put');
   press(drawn(), 'Notebook');
-  assert.ok(
-    drawn().find((n) => n.props?.role === 'dialog'),
+  assert.equal(
+    drawn().find((n) => n.props?.role === 'dialog').props['aria-label'],
+    'Notebook',
     'below 1152 the notebook is a sheet',
   );
   Object.assign(globalThis, { innerWidth: DOCK.at });
   assert.equal(column(), undefined, 'widening again does not reopen it');
+  press(drawn(), 'Notebook');
+  column().props.onFocus(); // a control inside the column holds the focus
+  narrowed({ focus: () => focused++ });
+  assert.equal(focused, 2, 'narrowing hands the focus to the Notebook chip');
+  (globalThis as any)[effect] = was;
 });

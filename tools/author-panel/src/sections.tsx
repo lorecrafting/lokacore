@@ -1,9 +1,9 @@
 // The panel's sections, each reading the Book's state or the watcher's API; no game logic here.
-import { Bookmark, Clock, FileCode2, PenLine, Pin } from 'lucide-react';
+import { Bookmark, Clock, PenLine, Pin } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { ask, checkpoints, type Checked, type Todo as TodoRow, todo } from './author.ts';
+import { checkpoints, type Checked, type Todo as TodoRow, todo } from './author.ts';
 import { verdicts } from '../../../kernel/ts/play/verdicts.ts';
-import type { Line, State, Step } from './book.ts';
+import type { State, Step } from './book.ts';
 import { steps } from '../../../mobile/app/author/place.ts';
 import { Badge } from './components/ui/badge.tsx';
 import { Button } from './components/ui/button.tsx';
@@ -231,23 +231,5 @@ export function Todo({ said }: { said?: string[] }) {
         ))
       )}
     </div>
-  );
-}
-
-/** An Alt-clicked Book line, opened in the owner's editor by the watcher (LOKA_EDITOR). */
-export function Source({ line }: { line?: Line }) {
-  const [note, setNote] = useState('Alt-click a Book line to open its source.');
-  useEffect(() => {
-    if (!line) return;
-    ask('open', line).then(
-      ({ ok, told }) => setNote(ok ? `Opened ${told}` : `Not opened: ${told}`),
-      (err: Error) => setNote(`Not opened: ${err.message}`),
-    );
-  }, [line]);
-  return (
-    <footer className="flex items-center gap-1.5 border-t px-3 py-1.5 text-xs text-muted-foreground">
-      <FileCode2 className="size-3.5 shrink-0" />
-      <span className="truncate" title={note}>{note}</span>
-    </footer>
   );
 }
