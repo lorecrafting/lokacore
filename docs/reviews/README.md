@@ -10,6 +10,7 @@ of closed work are deleted once their lesson is folded, and linked by permalink
 Reviews before R2 live in the [legacy repository](https://github.com/lorecrafting/lokacore-v2-legacy)
 (commit `997a7a8`, `docs/rewrite-v3/reviews/`).
 
+- [Design review: Builder 6.5b palette and keys, PR #822 (loka-hcnlh.32)](2026-11-27-builder-6.5b-palette-keys-design-review.md): **CHANGES REQUIRED**
 - [Review: Phone checks in WebKit with an iPhone profile (PR #804, loka-hcnlh.61)](2026-11-26-phone-webkit-review.md): **APPROVE WITH NOTES**
 - [Review: Builder parity leftovers, cartridge `none` rows (PR #817, loka-hcnlh.56, .52, .81)](2026-11-26-parity-leftovers-review.md): **APPROVE WITH NOTES**
 - [Review: Numbers sims under the 90 s timeout (PR #811, loka-hcnlh.70)](2026-11-26-numbers-sims-review.md): **APPROVE WITH NOTES**

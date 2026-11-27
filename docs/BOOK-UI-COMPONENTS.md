@@ -298,7 +298,10 @@ notebook column aside, and the sheet is about a phone's width); on a phone, abso
 `size.rule` `line` rule on top, no scrim. The notebook column (6.5a): the docked sheet's look
 mirrored, its `size.rule` `line` rule on its right (Book) side; `Close` is Back's act. The sheet
 foot's path (6.5a) is an act (`type.small` in `action`, a touch target tall); its refusal line
-`type.small` in `warning`, as is Alt-click's on the strip. The grip: a touch target in both axes holding a
+`type.small` in `warning`, as is Alt-click's on the strip. The palette (6.5b): the query field `type.body` in `fg`, `space.md` padding, the Build field's
+`size.rule` `action` rule beneath; its rows acts (`type.control` in `action`, each a touch target tall) inset
+`space.md` as the Checks rows are, the active row the selected act's fill (`action`, its
+words `bg`). The grip: a touch target in both axes holding a
 `size.touch`-wide bar four `size.rule` tall in `line`. The header row: Back `type.control` in
 `action`, the breadcrumb `type.small` in `dim`, `space.md` sides; the title `type.control` in `fg`.
 It slides in over `motion.quick`, none under reduced motion. The title pencil: `✎` in
