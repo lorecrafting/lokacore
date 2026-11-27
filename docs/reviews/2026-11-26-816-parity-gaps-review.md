@@ -47,3 +47,30 @@
 Accepted as author-side or pre-existing (developer's nits): `story.tsx:118`, `inspected.tsx:20`, `reading.tsx:221`, `reading.tsx:170`.
 
 Player-facing words (`unwritten`, `diagnostics`, `unreached from the start`, `Full report`, `Source`) are the owner's placeholders: flagged, not rewritten.
+
+## Fix re-check at `d361dad38` (commits `dd1742e5c`, `d361dad38`)
+
+- CI at the head (`gh run list --commit d361dad38…`): graph-diff, book-e2e, ci all success.
+- Finding 1, **resolved**. `dd1742e5c` amends the spec, and I checked each amendment against the code:
+  - `book-ui.md`: the Sheet head bullet matches `inspected.tsx:17-35`:
+    - ref, or a root file's path alone;
+    - the counts always shown;
+    - the unreached line only when the node is unreachable;
+    - a bundle member by its ref.
+  - Room summary "under the sheet head" matches `room.tsx:195`.
+  - Story `Sheet`/`Source` matches `story.tsx:118-124`: Source is shown only beside a card.
+  - Why `Full report`, shut on each new answer, matches `reading.tsx:151`.
+  - Step rule rows match `reading.tsx:217-227`:
+    - a ref act with the verdict alone in danger;
+    - with no sheet, one plain line in danger.
+  - `BOOK-UI-COMPONENTS.md:417-421` gives the looks.
+- Finding 2, **resolved by ruling**:
+  - (a) unreached is now `warning` (`inspected.tsx:33`);
+  - (b) `N unwritten` counts the `~` lines, written into the Sheet head bullet;
+  - (c) the counts stay dim.
+
+  No test pins the tone: `warning` → `danger` stays green. That was already true before this PR and is a drawn style; noted, not a finding.
+- Finding 3, **resolved**: a 390 px shot of the shipped Step row (a `…:reaction/square_topics` act, `fired` beside it, on one line). The PR body's Runs line still calls the Step shot pre-fix: the body is stale, not the code.
+- Finding 4, **resolved**: `field.test.ts:491-492` checks `['Loft','L','1 exit','down → cellar']` again, with the title before the head and the summary.
+- Finding 5, **resolved**: `story.test.ts:279` restores `known.story` with `t.after`.
+- Re-check verdict: **APPROVE**.
