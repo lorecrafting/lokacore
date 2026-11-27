@@ -1124,12 +1124,15 @@ reasons and limits: [prose in the Book rulings](../design/prose-in-the-book-ruli
     for a node the Flow draws, `Flow` (the walk centred on it). A
     beat offers a title field with `Retitle` (empty removes the title), `Remove` (no confirm: the
     Undo chip covers it), `Knowledge` (the facts set before it, as words) and `Bind…`, a fold of
-    `Bind <short>` per short ref. Each edit is one gesture with one Undo. Facts, Pacing, Trace,
+    `Bind <short>` per short ref. A part offers a title field with `Retitle` (empty removes the
+    title) and `Remove` (its beats with it). `Add part` follows `Pacing`: it appends an untitled
+    part, or with no outline asks /new for the starter; it is hidden while the last compile
+    refused outline.json. Each edit is one gesture with one Undo. Facts, Pacing, Trace,
     Consequences and Knowledge open as sheets.
     - **No story yet.** Until a story arrives, or while the compile is refused, the tab shows the
       refusal line (if any) and one plain line saying there is no story yet, never a blank tab.
-      With a story but no parts (no outline file, or none in it), it shows that plain line, then
-      the number field and `Add beat`, which writes beat n into the first part. A sheet opened
+      With a story but no parts (no outline file, or none in it), it shows that plain line under
+      `Add part` (placeholder words), which writes the first part. A sheet opened
       from it with no story says Nothing here.
   - **World (6.1a-b).** The refusal line, then a row of the world's root files that were read, in
     the order `cartridge.json`, `facts.json`, `resources.json`, `attributes.json`, `text.json`; a
