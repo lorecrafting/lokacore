@@ -1,15 +1,17 @@
 # The editor gate (gui-editor-design §7, §11), evaluated by bin/toolbox_page.exs with its root,
 # json, read, defs and treatment enum bound; it returns {problems, registry}. Every top-level
 # field of each source kind (a kind with none, the text catalog, is its own path) and every
-# treatment has a create, edit and delete surface, a component under tools/author-panel/src/edit/
-# or `generic`. areas/ bundles the other kinds, so their paths cover it. Generic surfaces are
+# treatment has a create, edit and delete surface, a component under tools/author-panel/src/edit/,
+# `generic` or `none: <reason>` (below). areas/ bundles the other kinds, so their paths cover it. Generic surfaces are
 # exactly the baseline, which only shrinks against main's copy, so a new path ships hand-built.
 # The Book builder's parity (in-game-builder-mode §6.7): each row also has `book` create, edit
 # and delete, and each kernel/ts/play/parity.json row (a panel feature outside the schema) names
 # its panel file and a `book`; a book value is a file under mobile/app/author/build/, `todo` or
 # (a schema row only) `generic`, the builder's generic sheet: mobile/app/author/generic.test.ts
 # draws and writes every generic row. The todos are exactly the shared todo baseline, which only
-# shrinks against main's copy (absent there: this gate's first change). The panel's generic rows
+# shrinks against main's copy (absent there: this gate's first change). `none: <reason>` on both
+# the panel and the book side of a schema row says neither tool offers that verb (a required
+# field's delete); one side alone, or a bare `none`, is refused. The panel's generic rows
 # still todo in the Book are exactly the not-yet list (each line `<row>  # its home`), which
 # only shrinks against main's copy: a not-yet row turned generic is refused until its line goes.
 # Arguments 4 to 11 after --check: registry.json baseline.txt main_baseline.txt parity.json
@@ -110,9 +112,13 @@ notyet =
 # a safe relative path to a regular file under dir, never a path out of it
 file? = &(match?({:ok, _}, Path.safe_relative(&2)) and File.regular?(Path.join([root, &1, &2])))
 
-# a surface is "generic" or a component file in the edit folder
+# `none: <reason>`, a verb neither tool offers; a bare `none` has no reason
+none? = &(is_binary(&1) and String.match?(&1, ~r/^none: \S/))
+
+# a surface is "generic", none, or a component file in the edit folder
 surface? = fn
   "generic" -> true
+  "none" <> r = s when r == "" or binary_part(r, 0, 1) == ":" -> none?.(s)
   s when is_binary(s) -> String.ends_with?(s, ".tsx") and file?.("tools/author-panel/src/edit", s)
   _ -> false
 end
@@ -123,6 +129,9 @@ book = fn
 
   v when v in ["todo", "generic"] ->
     nil
+
+  "none" <> r = s when r == "" or binary_part(r, 0, 1) == ":" ->
+    if(!none?.(s), do: "#{inspect(s)}: none needs a reason, none: <why>")
 
   s when is_binary(s) ->
     if(!file?.("mobile/app/author/build", s),
@@ -151,10 +160,16 @@ problems =
       p <- schema_paths,
       v <- verbs,
       m =
-        if(editor[p]["book"][v] == "generic" and editor[p][v] != "generic",
-          do: "generic: refused, the panel's own #{v} is #{inspect(editor[p][v])}",
-          else: book.(editor[p]["book"][v])
-        ),
+        cond do
+          editor[p]["book"][v] == "generic" and editor[p][v] != "generic" ->
+            "generic: refused, the panel's own #{v} is #{inspect(editor[p][v])}"
+
+          none?.(editor[p]["book"][v]) != none?.(editor[p][v]) ->
+            "none: refused unless both sides are none, panel #{inspect(editor[p][v])}"
+
+          true ->
+            book.(editor[p]["book"][v])
+        end,
       do: "#{editor_path}: #{p}: book #{v} #{m}"
     ) ++
     for(
@@ -163,8 +178,9 @@ problems =
         if(!(is_binary(r["panel"]) and file?.("", r["panel"])),
           do: "no panel file #{inspect(r["panel"])}"
         ),
-        if(r["book"] == "generic",
-          do: "book generic: refused, a panel feature outside the schema has no generic sheet",
+        if(r["book"] == "generic" or none?.(r["book"]),
+          do:
+            "book #{r["book"]}: refused, a panel feature outside the schema has no generic sheet or none",
           else: if(m = book.(r["book"]), do: "book #{m}")
         )
       ],

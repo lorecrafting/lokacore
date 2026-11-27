@@ -112,6 +112,7 @@ const FIRST: Record<string, object | object[]> = {
     { container: true },
   ], // weapon; intended_level, block_chance, capacity (allowed.ts NEEDS)
   populations: [{ day_target: 1 }, { member_role: 'prey' }], // floor; sight
+  scenes: { control: 'modal' }, // a picked shape: its fields' Add… offers abstract
   quests: [
     { objective: { evidence: 'expedition' } },
     { objective: { evidence: 'patrol' } },

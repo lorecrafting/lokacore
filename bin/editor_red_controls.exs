@@ -79,6 +79,16 @@ editor_controls =
         {"grown", %{main: String.replace(base, "services.name.edit\n", "")},
          "services.name.edit: not in main's baseline"},
         {"book-dropped", %{registry: book.(nil)}, "outline.parts: book create missing"},
+        {"none-one-side",
+         %{registry: put_in(editor, ["cartridge.id", "delete"], "cards/World.tsx")},
+         "cartridge.id: book delete none: refused unless both sides are none"},
+        {"none-no-reason",
+         %{
+           registry:
+             editor
+             |> put_in(["cartridge.id", "delete"], "none")
+             |> put_in(["cartridge.id", "book", "delete"], "none")
+         }, "cartridge.id: book delete \"none\": none needs a reason"},
         {"notyet-generic",
          %{registry: book.("generic"), notyet: listed.(notyet), notyet_main: listed.(notyet)},
          "outline.parts.book.create: no longer not yet generic, delete the line"},

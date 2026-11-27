@@ -1,14 +1,3 @@
-cartridge.api_version.book.edit
-cartridge.api_version.book.delete
-cartridge.id.book.delete
-cartridge.requires.book.delete
-cartridge.supported_profiles.book.delete
-cartridge.title.book.delete
-cartridge.version.book.delete
-dialogues.policy.book.create  # loka-hcnlh.56
-dialogues.policy.book.edit  # loka-hcnlh.56
-dialogues.policy.book.delete  # loka-hcnlh.56
-scenes.abstract.book.create  # loka-hcnlh.52
 parity:device-size  # 6.5, loka-hcnlh.32
 parity:map-pan-zoom-keys  # 6.5
 parity:palette  # 6.5
