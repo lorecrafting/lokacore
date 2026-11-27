@@ -11,6 +11,7 @@ Reviews before R2 live in the [legacy repository](https://github.com/lorecraftin
 (commit `997a7a8`, `docs/rewrite-v3/reviews/`).
 
 - [Review: Phone checks in WebKit with an iPhone profile (PR #804, loka-hcnlh.61)](2026-11-26-phone-webkit-review.md): **APPROVE WITH NOTES**
+- [Review: Builder parity leftovers, cartridge `none` rows (PR #817, loka-hcnlh.56, .52, .81)](2026-11-26-parity-leftovers-review.md): **APPROVE WITH NOTES**
 - [Review: Numbers sims under the 90 s timeout (PR #811, loka-hcnlh.70)](2026-11-26-numbers-sims-review.md): **APPROVE WITH NOTES**
 - [Review: a new item carries the mass world.carry requires (PR #810, loka-hcnlh.75)](2026-11-26-new-item-mass-review.md): **APPROVE WITH NOTES**
 - [Review: New room, NPC and item from a bundled room (PR #809, loka-hcnlh.78)](2026-11-26-new-from-bundled-room-review.md): **APPROVE WITH NOTES**
