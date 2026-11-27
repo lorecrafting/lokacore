@@ -53,7 +53,7 @@ let busy = false; // one gesture at a time: a press while one runs does nothing
 let ran: Promise<void> = Promise.resolve(); // the gesture running now
 let said = ''; // the last refusal, shown at the sheet's top until the next press
 let asking: { key: string; files: string[]; answer: (yes: boolean) => void } | undefined;
-const drafts = new Map<string, string>(); // each room's Move field, as typed
+const drafts = new Map<string, string>(); // each room's Move field (and `join:` Join field), as typed
 let saved = (_ids: number[]) => {}; // Build.tsx's Undo chip
 
 /** mapedit's Io over the builder's /__author calls: a missing source rejects, as the panel's does. */
@@ -211,11 +211,10 @@ export const addTo = (
     open(`${nodeOf(dir)}:${key}`);
   });
 
-// mutate-skip: layout; the field fills the row's free width, may shrink, ruled as Build's tap field
 const field = {
   ...inRow,
-  flex: 1,
-  minWidth: 0,
+  flex: 1, // mutate-skip: layout; the field fills the row's free width, ruled as Build's tap field
+  minWidth: 0, // mutate-skip: layout; it may shrink
   borderBottomWidth: size.rule,
   borderColor: ink('action'),
 };
