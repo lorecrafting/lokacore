@@ -153,6 +153,7 @@ The picker's queue and status files: [Polish queue](web-preview.md#polish-queue)
 
 PM, developer, reviewer and designer alike; the role files link here instead of restating it.
 
+- Never publish outside the repo (gists, pastes, image hosts) without the owner's yes. Screenshots and logs stay in the scratchpad; the PR names their path.
 - [`bin/bash_guard.py`](../bin/bash_guard.py) (a PreToolUse hook) refuses what these rules forbid ([CHECKS.md](CHECKS.md) lists them); the owner's OK is the prefix `LOKA_OWNER_OK_NO_VERIFY=1`, the PM's is `LOKA_PM=1`. If it or a hook blocks wrongly, report it; never work around it.
 - On the M1 run only the type checks and focused tests your diff touches, under `nice -n 10`; hosted CI runs the rest ([two-lane CI](decisions/owner-decision-two-lane-ci-2026-10-09.md); load average 30-70 with five agents failed smokes and blocked pushes 20-60 minutes, loka-jjq).
 - Long commands (checks, tests, mutant runs) run with `run_in_background`; wait for the completion

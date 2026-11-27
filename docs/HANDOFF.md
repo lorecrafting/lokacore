@@ -4,36 +4,47 @@ The present only: open work, next steps, owner questions, and standing owner rul
 yet. Rewrite this page in place once per session, at its end; never add dated session sections. History lives in git, Beads and `docs/reviews/`; lessons
 go to [PM lessons](lessons/pm.md) ([harness patterns](decisions/owner-decision-harness-patterns-2026-10-28.md)).
 
-AS OF main after the #790 merge; written 2026-11-24 in Claude Code (Opus 5.5), PM session. The $20 Pro
-plan: **one developer agent at a time** (owner reaffirmed 2026-11-24). A designer or reviewer may run
-beside it. Subagents use Opus. `kernel_api` is 1.159.
+AS OF main ba01ee753 (after #824); written 2026-11-27 in Claude Code (Opus 5.5), PM session. The $20 Pro
+plan: **two concurrent developer agents** on non-overlapping slices (owner 2026-11-25). Designers and
+reviewers may run beside them within `bin/agent_load_gate.sh` (load <= 8). Subagents use Opus. Usage
+limits hit about every five hours: resume each agent with SendMessage after the reset; a compacted agent
+cannot be resumed, so spawn a fresh one with a state note.
 
-**Live state at this handoff:**
-- **Developer running:** slice 5.2 (`loka-hcnlh.24`, worktree `loka-hcnlh.24`, scene rows). Check `ListAgents`
-  after a /clear; it keeps running.
-- **The owner's author server runs from worktree `pm-pagehide`** (branch `fix/dev-save-pagehide`,
-  **PR #789**), with `--lan` on the prologue: preview 19006, panel 19009, CA 19005. Never touch those ports
-  or that worktree while the owner tests. `merge_pr.sh 789` would delete the worktree under the live
-  server, so merge #789 only after the owner stops testing, then restart `bin/author.sh cartridges/prologue --lan`
-  from main.
-- **#789:** Safari's save lock (WebKit's "The object is in an invalid state.") now reads as "open in
-  another tab" with Try again. Uncommitted in pm-pagehide: `mobile/app/SaveError.tsx` shows the raw
-  error in the dev preview (`loka-hcnlh.19.2`). Commit it to #789 once it has a test.
-- **Open phone bug:** Safari on the Mac and the iPhone show "The save could not be opened" (not the lock).
-  The raw error line is pending from the owner. Bead `loka-hcnlh.19.2` (fresh WebKit profiles hit
-  "Sync operation timeout"). Repro tool: Playwright WebKit is installed; OPFS needs `launchPersistentContext`.
-- **Owner checks:** 3.1 passed on the iPhone (closed). 3.2 (`loka-hcnlh.19`) is blocked on the save bug. 6.7
-  and 6.8 wait for the owner.
+**Live state at this handoff (check `ListAgents` and `gh pr list`; both developers keep running across a clear):**
+- **6.6a, PR #825** (`loka-hcnlh.33`, branch `builder/6.6a-browser-tests`, worktree `hcnlh33a-browser`):
+  the builder browser harness and the panel's E2E cases. Its smoke exposed a real bug: on Linux the dev
+  watcher misses a second atomic rename of the same file (`kernel/ts/play/author.ts` watch, `write.ts:73`),
+  so no recompile. PM ruling (a): its developer files a P1 bead and fixes the watcher in its own PR
+  (`fix/watcher-second-rename`), then reruns #825. Both need a reviewer before merge.
+- **.84** (`loka-hcnlh.84`, field descriptions in menus): the other developer starts it from fresh main
+  (branch `builder/84-field-descriptions`); it plans `type.small` in `dim` for the description line and asks
+  the designer to rule (no description style in the Book UI docs yet).
+- **Merge helper:** when merging main into a slice branch, only `docs/reviews/README.md` may be resolved
+  by regeneration; stop on any other conflict, and check the merge commit actually landed (hooks need
+  root, mobile/app and kernel/ts `node_modules` in the worktree).
 
-**Shipped this session:** #780 (map test flake), #779 (ghost lines; the owner's every-ghost ruling), #781
-and #783 (LAN pairing + HTTPS under a name-constrained CA; `loka-xetp3`), #782 and #784 (the Build map and its
-edits), #785 and #786 (story-list and flow logic moved to `kernel/ts/play`), #787 and #790 (5.1 dialogue sheet
-and conversation), #788 (5.4b Story tab).
+**Shipped this session (2026-11-25 to 27):** #803 (Safari save lock), #804 (iPhone WebKit checks on every
+PR), #806/#807/#809 (map edits on full-ref and bundled exits; new things from bundled rooms), #810/#812
+(new items weigh 1 g; stock weight error), #811 (Numbers sims 6x faster), #815 (field Undo flake), #808
+(6.3a), #813 (6.3b Find, Recent, Worlds), #814 (.76 long-list pick), #816 (.71 parity gaps), #817 (.56/.52
+rows; `none: <reason>` registry value), #818 (6.4 E5 field retired), #819 (6.5a spec), #820 (.45 story
+outline), #821 (6.5a wide layout), #822 (6.5b palette and keys), #823 (6.6b panel card/words/undo/mapwire
+tests ported; kernel tests off the panel except author_shell, author_chrome, editor_routes, which end at
+6.8), #824 (x1frg: no form write is dropped silently during another gesture), #826 (.85 up/down exits).
+The todo baseline is **empty**.
 
-**Next, in order (briefs are in each bead's notes; split parts merge under their own child id):** 5.2 (running),
-5.3 (`.25`), 5.5b (`.27`, readers below, setters above), then phase 6 (`.28`-`.33`; parity is checked at 6.5b).
-6.8 waits for the owner's 6.7 yes. Follow-ups: `.42` (parity rows), `.43`, `.44`, `.45` (create the outline),
-`.46` (builder dark palette + a stale book-ui line), `loka-x38dh` (inbook flake).
+**Next, in order:** the watcher fix and #825 (6.6a); .84; then **6.7, the owner's walk** (`.34`, with the
+wording pass right before it), and 6.8 (`.35`, retire the panel) after the owner's yes. Follow-ups (not
+blocking 6.7): `.91` (Join long-list pick), `.79`, `.82`, `.86`,
+`loka-exv3r`, older P3 nits. Retro beads awaiting the owner: `loka-td9on`, `loka-h7vmp`, `loka-zzgsf`,
+`loka-h4i51`, `loka-rndo7` (`br list -l housekeeping`).
+
+**Owner rulings 2026-11-27 (paraphrased):** the stray gist is deleted; device-size = the builder follows the
+window (no Tools-tab preview unless the walk shows a need); the wording pass happens once, right before the 6.7
+walk (labels listed on `loka-hcnlh.19`).
+
+**Owner check open:** the iPhone check of #803 (leave and Back, app switch, reload). The owner's server was
+restarted from main 99fcc3165 on 2026-11-27 (`bin/author.sh cartridges/prologue --lan`, ports 19005-19009).
 
 ## Direction
 
@@ -42,8 +53,8 @@ and conversation), #788 (5.4b Story tab).
   screen (Build mode), responsive phone to desktop, **100% parity**, then `tools/author-panel` is
   deleted. Until parity the panel takes fixes only. Unwritten lines never show `~` to the owner (ruling 9).
   No builder for players unless hosted.
-- **Pro low-token workflow** (owner 2026-11-07): one session does small slices itself; at most one
-  developer at a time; a separate reviewer only for engine, save, contract, compiler-facing or security.
+- **Pro low-token workflow** (owner 2026-11-07, cap raised 2026-11-25): at most two
+  developers at a time, on non-overlapping slices; a fresh reviewer per slice (docs/WORKFLOW.md).
 - **The prologue is v1.** The owner builds Part 1 in `cartridges/prologue/` (**uncommitted on purpose**;
   three rooms and a test item so far). Start: `bin/author.sh cartridges/prologue`; restart after each merge.
   **Give the owner http://localhost:19009 (panel) or http://localhost:19006/?dev=1 (the Book with Build).**
