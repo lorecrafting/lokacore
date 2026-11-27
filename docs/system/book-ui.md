@@ -1017,12 +1017,42 @@ reasons and limits: [prose in the Book rulings](../design/prose-in-the-book-ruli
     read only, nothing in it pressable.
   - **Two layouts** (ruling 7). Where the window holds the full page column with a docked sheet
     beside it (the page column and half of it again), the sheet docks at the Book's right edge,
-    half a page column wide, not modal, and the Book beside it keeps its full column and stays
-    playable. In a narrower window it rises over the Book's lower half, modal, with a grip (a
+    half a page column wide, not modal, and the Book beside it keeps its full column, unless
+    the notebook column is open too (Wide layout below), and stays playable. In a narrower window it rises over the Book's lower half, modal, with a grip (a
     button named `Full height`, expanded when full): a drag up makes it full height, a drag down
     from full halves it, from half closes it as Back does, and a tap or Enter toggles the height.
     A sheet slides in from the side it docks on (from below on a phone); under reduced motion it
     cuts in. Closing never animates.
+  - **Wide layout** (6.5a, ruling 7; the panel's columns, column-folds). The breakpoint is Two
+    layouts' (`DOCK.at`, the page column and half of it again; no other). From it:
+    - **Notebook column.** The strip's `Notebook` opens the notebook as a column docked at the
+      Book's left edge, half a page column wide, not modal, never in the sheet stack; pressed
+      again, or its own `Close` in Back's place in its header, it closes. Left to right: the
+      column, the Book, a docked sheet. The column stays open while sheets open, stack and close
+      beside it; a sheet it opens docks at the Book's right edge, and Back closes only sheets.
+      Its header (title `Notebook`, then the tabs) takes focus when it opens; closing returns
+      focus to `Notebook`, which shows selected while the column is open. Its open state, tab and
+      scroll survive a reload as the stack does; leaving Build closes it. It slides in from the
+      left and closes as a sheet does.
+    - **The Book** takes what the open column and sheet leave, its page column still centred and
+      at most a page column wide: with both open in a window under two page columns it narrows,
+      down to half a page column (a phone's width) at the breakpoint, and lays out as on a phone
+      of that width. It stays playable, links and walk keys included.
+    - **Crossing the breakpoint.** Narrowing closes the column; open sheets stay and rise over
+      the Book. Widening opens nothing.
+    - Below the breakpoint nothing changes: the Notebook is a sheet and every sheet rises over
+      the Book.
+  - **Device size** (the panel's phone and tablet sizes). The builder follows the window: a
+    window, or the browser's responsive device mode, at a phone's width is the phone layout (sheets rising, the Notebook a sheet),
+    so no control previews the Book at a phone's width inside a wide window, where it would sit
+    beside docked sheets no phone shows (designer ruling 2026-11-26; the owner may overrule).
+  - **Open source** (6.5a, the panel's source footer). At every width, never only when wide, as
+    the changed-on-disk notice's `Open source` already is:
+    - The Sheet foot's path is a button named by the path; a press asks the owner's editor to
+      open that file (`/open`). A refusal shows under it, politely, until the next press: `Not
+      opened: <why>` (placeholder words, the owner's to replace); success says nothing.
+    - Alt-click (Option-click) on a Book line, a fine pointer, Build on or off, opens its source
+      once (one `/open` per click), with Sheet foot's refusal line on the strip.
   - **Title pencil.** In Build the room page's own title is followed by a pencil button named
     `Edit <title>`, which opens that room's sheet (2.2 adds the name pencil). An unwritten title shows its field
     name `title`, as Build's in-place field draws an unwritten line.
