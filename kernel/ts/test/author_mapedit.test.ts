@@ -1,4 +1,4 @@
-// size: allow 625, one scaffolded cartridge the tests edit in turn and the last undoes; a split needs a second scaffold
+// size: allow 630, one scaffolded cartridge the tests edit in turn and the last undoes; a split needs a second scaffold
 // The editor map's edits (kernel/ts/play/mapedit.ts) through the real write routes
 // (play/write.ts) and the real `mix loka.new`, on one scaffolded cartridge the tests edit in turn;
 // the last one undoes every gesture. Expected files are written by hand.
@@ -486,6 +486,9 @@ test('a part is added last with no beats, retitled and removed with its beats; a
     ['Placeholder two', []],
   ]);
   await ed.titlePart(1, '');
+  const steps = ed.undoable();
+  await ed.titlePart(0, ''); // untitled already: no write, no Undo step
+  assert.equal(ed.undoable(), steps);
   await ed.dropPart(0);
   assert.deepEqual(parts(), [[undefined, []]]);
   await assert.rejects(ed.dropPart(1), /outline.json has no part 2/);

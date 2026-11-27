@@ -361,28 +361,73 @@ test('an outline.json the last /story refused offers no Add part', () => {
   }
 });
 
-test('Add part appends an empty part; on part 1, Retitle writes the typed title and Remove deletes the part', async () => {
+test('Add part appends an empty part; Retitle writes the typed title on part 1, Remove deletes part 2', async () => {
   // Breaks: an add that replaces the parts, or a part's edits landing on another part or a beat.
   posts = [];
   await press('Add part');
   await press('Part 1  Arrival'); // open: now picked
   type('title', 'Placeholder one');
   await press('Retitle');
+  await press('Part 2');
   await press('Remove');
   assert.deepEqual(posts, [
     change([{ path: ['parts'], value: [...outline.parts, { beats: [] }] }]),
     change([{ path: ['parts', 0, 'title'], value: 'Placeholder one' }]),
-    change([{ path: ['parts', 0], delete: true }]),
+    change([{ path: ['parts', 1], delete: true }]),
   ]);
 });
 
-test('Unplaced, opened, offers no Retitle or Remove', async () => {
-  // Breaks: a part's edits on Seeds or Unplaced, whose id reads as a part number and removes Part 1.
-  const unplaced = sheet()
-    .map(label)
-    .find((l) => /^Unplaced/.test(String(l)));
-  await press(unplaced);
-  assert.deepEqual([all('Retitle').length, all('Remove').length], [0, 0]);
+test("after Remove, a later part's typed title and beat number do not follow its old id", async () => {
+  // Breaks: drafts keyed `part:<i>` kept after a remove shifts every later part down one id,
+  // so Retitle or Add beat on what is now part 2 sends what was typed for the old part 2.
+  await press('Part 2');
+  type('title', 'Typed for old part 2');
+  type('number', '7', 1);
+  await press('Part 1  Arrival');
+  await press('Remove');
+  posts = [];
+  await press('Part 2');
+  await press('Retitle');
+  await press('Add beat', 1);
+  const sent = JSON.stringify(posts);
+  assert.deepEqual([sent.includes('Typed for old part 2'), sent.includes('"n":7')], [false, false]);
+});
+
+test('a refused Remove keeps the part picked and its typed title', async () => {
+  // Breaks: the pick and drafts cleared before the remove is known to have happened.
+  const s = known.story;
+  const parts = ['Arrival', null, 'Gone'];
+  const three = { ...story, outline: { ...story.outline, parts } } as never;
+  known.story = three;
+  try {
+    await press('Part 3  Gone');
+    type('title', 'Kept');
+    await press('Remove'); // outline.json has no part 3
+    known.story = three; // the refusal's run fetched /story again
+    assert.equal(
+      sheet().find((e) => e.props.accessibilityLabel === 'title')?.props.defaultValue,
+      'Kept',
+    );
+  } finally {
+    known.story = s;
+    roomedit.tell(''); // clear the refusal for the tests after
+    await settle();
+  }
+});
+
+test('Seeds, opened, offers no Retitle or Remove', async () => {
+  // Breaks: a part's edits on Seeds, whose id 'seeds' reads as part number 0 and removes Part 1.
+  const s = known.story;
+  known.story = {
+    ...story,
+    outline: { ...story.outline, unpaid: [{ seed: 'lamp', n: 1 }] },
+  } as never;
+  try {
+    await press('Seeds');
+    assert.deepEqual([all('Retitle').length, all('Remove').length], [0, 0]);
+  } finally {
+    known.story = s;
+  }
 });
 
 test('a sheet restored before /story arrives says Nothing here, the tab the refusal then the no-story line', async () => {

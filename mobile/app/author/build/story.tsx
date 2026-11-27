@@ -1,4 +1,4 @@
-// size: allow 330, the rows, their part and beat edits and the sheets share the tab's drafts and pick
+// size: allow 335, the rows, their part and beat edits and the sheets share the tab's drafts and pick
 // The notebook's Story tab (design §4.8, slice 5.4b): the panel's Story list (kernel/ts/play/storylist.ts `rows`)
 // as rows. A node row has Go there, Sheet, Trace, Consequences and Flow (flow.tsx); Add part starts the outline or adds a
 // part; a part adds a beat, is retitled and removed; a beat binds, retitles, is removed and shows Knowledge. Trace, Consequences, Knowledge, Facts and Pacing are sheets.
@@ -170,10 +170,14 @@ function partActs(r: L.Row, s: L.Story) {
   if (!r.id.startsWith('part:')) return []; // Seeds and Unplaced: no outline part to edit
   const part = partNo(r.id);
   const shown = L.outlineOf(s)?.parts[part] ?? undefined;
-  const drop = () => {
-    picked = undefined; // the next part takes this one's id
-    titles.delete(r.id);
-    return ed.dropPart(part);
+  const drop = async () => {
+    await ed.dropPart(part); // refused: throws, the pick and drafts stay
+    picked = undefined;
+    // every later part takes the next lower id: drop the part-keyed drafts rather than shift them
+    // ponytail: open/shut folds keep their ids (looks only); shift them if authors notice
+    [titles, numbers].forEach((m) =>
+      [...m.keys()].filter((k) => k.startsWith('part:')).forEach((k) => m.delete(k)),
+    );
   };
   return [
     <View key="edit" style={row}>
