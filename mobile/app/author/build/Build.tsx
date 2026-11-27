@@ -1,8 +1,7 @@
 // Build mode's chrome (docs/system/book-ui.md#author-mode; slice 1.2): the Build toggle and strip,
 // the sheet host, auto-hold. Only the author preview requires it (author/seam.test.ts: `BUILD`).
-import { useState, type ReactNode } from 'react';
-import { Pressable, Text, View } from 'react-native';
-import { size, space, type } from '../../book/tokens.ts';
+import { cloneElement, useEffect, useState, type ReactNode } from 'react';
+import { useWindowDimensions, View } from 'react-native';
 import type { Message } from '../live.ts';
 import type { Step } from '../place.ts';
 import { install as seam } from './seam.ts';
@@ -14,7 +13,6 @@ import {
   ink,
   keep,
   opened,
-  refusal,
   restored,
   swapped,
   toggled,
@@ -33,21 +31,19 @@ import { WORDS as RECENT } from './recent.tsx';
 import { undo as putBackIds } from '../../../../kernel/ts/play/mapedit.ts';
 import { io, onSaved, refused, run, running } from './roomedit.tsx';
 import { checked, unrefuse } from './checks.tsx';
-import { act, CONTROL, Frame, parts, sheets, stack, stepBack } from './sheet.tsx';
+import { act, Column, DOCK, Frame, parts, sheets, stack, stepBack } from './sheet.tsx';
+import { strip } from './source.ts';
+import { buildSwitch, Notice, STRIP, TOP, warn } from './strip.tsx';
 export { Sheet, sheets } from './sheet.tsx';
 export { drawn, unsee } from './seeas.tsx';
 export { updated } from './tools.tsx';
+export { altClick } from './source.ts';
 export { api, recount, start } from './page.ts';
 export { tagged } from '../prose_rules.ts';
 const WORDS = {
-  build: 'Build',
-  on: '✎ Build',
   held: (n: number) => `Held · ${n} waiting`,
   undo: 'Undo',
   source: 'Open source',
-  drop: 'Drop it and go on',
-  back: 'Back to checkpoint',
-  room: 'Start in this room',
   checks: 'Checks',
 };
 const UNDO_MS = 5000; // the chip's life after a write (docs/rnd/in-game-builder-mode-2026-11-19.md)
@@ -62,6 +58,9 @@ let notBack: Wrote | undefined; // a refused put-back
 let stopped = ''; // a gesture's put-back refused
 let redrawStrip = () => {};
 let mapped = () => {}; // the map has come: the strip and the Book's pencil draw again
+let notebookChip: { focus?: () => void } | null = null; // Close hands the focus back here
+let inColumn = false; // the focus is inside the notebook column
+let refocus = false; // narrowing closed the column with the focus in it: Notebook takes it
 let opener: { focus?: () => void } | null | undefined; // what had focus before the first sheet opened
 /** What the keep-my-place notice reads and does; panel.tsx hands it in per game. */
 export type Place = Game & {
@@ -192,92 +191,104 @@ async function putBack(w: Wrote | Gesture) {
   redrawStrip();
 }
 const openBack = () => void api!('/open', { key: notBack!.key, words: notBack!.words });
-/** Checks: each row goes to its line; one on this page closes the sheet to show its field. */
+/** Checks: each row goes to its line; one on this page closes the sheets to show its field (the
+ * notebook column's Checks tab, `host` `column`, leaves the stack: nothing covers the Book there). */
 sheets.checks = {
   title: () => WORDS.checks,
-  body: () => checked(heard, api!, () => set({ ...builder, sheets: undefined }), redrawStrip),
+  body: (host) =>
+    checked(
+      heard,
+      api!,
+      () => host !== 'column' && set({ ...builder, sheets: undefined }),
+      redrawStrip,
+    ),
 };
-const STRIP = {
-  minHeight: size.touch,
-  flexDirection: 'row',
-  alignItems: 'center',
-  gap: space.md,
-  flexWrap: 'wrap',
-  // public/index.html's viewport-fit=cover draws under the notch; RN-web passes env() through
-  paddingLeft: `max(${space.md}px, env(safe-area-inset-left))` as never,
-  paddingRight: `max(${space.md}px, env(safe-area-inset-right))` as never,
-  borderBottomWidth: size.rule,
-} as const;
-const TOP = { paddingTop: 'env(safe-area-inset-top)' as never }; // the top strip only, not the Notice under it
-const warn = (text: ReactNode) => (
-  <Text aria-live="polite" style={{ ...type.small, color: ink('warning') }}>
-    {text}
-  </Text>
-);
-/** The keep-my-place notice, while the recorded path's replay stands refused. */
-function Notice() {
-  const at = placed?.place();
-  const room = builder.room;
-  if (at?.refused === undefined) return null;
-  return (
-    <View style={{ ...STRIP, backgroundColor: ink('bg'), borderColor: ink('line') }}>
-      {warn(refusal(at.steps, at.refused))}
-      {act(WORDS.drop, placed!.drop)}
-      {at.checkpoint ? act(WORDS.back, placed!.back) : null}
-      {room ? act(WORDS.room, () => placed!.startIn(room)) : null}
-    </View>
-  );
+/** The strip's `Notebook` from DOCK.at: opens or closes the column (a notebook sheet gives way to it);
+ * closing returns the focus to it, after a reload too. */
+function column() {
+  const open = builder.notebook === undefined;
+  const rest = open && builder.sheets?.includes('contents') ? closed(builder, 'contents') : builder;
+  set({ ...rest, notebook: open ? 0 : undefined });
+  redrawStrip();
+  if (!open) notebookChip?.focus?.();
 }
-/** The Build switch: on, it reads as on, in action ink. */
-const buildSwitch = (flip: () => void) => (
-  <Pressable
-    accessibilityRole="switch"
-    accessibilityState={{ checked: builder.on }}
-    accessibilityLabel={WORDS.build}
-    onPress={flip}
-    style={CONTROL}
-  >
-    <Text style={{ ...type.control, color: ink(builder.on ? 'action' : 'fg') }}>
-      {builder.on ? WORDS.on : WORDS.build}
-    </Text>
-  </Pressable>
-);
+const CHIP = { ref: (el: typeof notebookChip) => void (notebookChip = el) } as object;
+const columnChip = (on: boolean) =>
+  cloneElement(act(CONTENTS.contents, column, on, undefined, on), CHIP);
 /** A strip chip that opens sheet `id`, or closes it when it is the top sheet. */
 const pad = (label: string, id: string, top?: string) =>
   act(label, () => (top === id ? back(id) : open(id)), top === id);
+/** Notebook (a column chip when wide, else a sheet chip), Map and Checks. */
+const sheetChips = (wide: boolean, top?: string) => (
+  <>
+    {wide
+      ? columnChip(builder.notebook !== undefined)
+      : cloneElement(pad(CONTENTS.contents, 'contents', top), CHIP)}
+    {pad(MAP.map, 'map', top)}
+    {pad(badge(heard), 'checks', top)}
+  </>
+);
+const scrolled = (n: Builder) => set({ ...builder, scroll: n.scroll }); // the stack's, not the column's
+const notebook = () =>
+  builder.notebook === undefined ? null : (
+    <Column
+      open={{ on: true, sheets: ['contents:column'], scroll: builder.notebook }}
+      saved={(n) => set({ ...builder, notebook: n.scroll })}
+      close={column}
+      held={(inside) => void (inColumn = inside)}
+    />
+  );
+/** Wide from DOCK.at; narrowing closes the column, and the focus inside it goes to Notebook. */
+function useWide() {
+  const wide = useWindowDimensions().width >= DOCK.at;
+  if (!wide && builder.notebook !== undefined) {
+    refocus = inColumn; // narrowed
+    inColumn = false;
+    set({ ...builder, notebook: undefined });
+  }
+  useEffect(() => {
+    if (!refocus) return;
+    refocus = false;
+    notebookChip?.focus?.(); // the narrow chip's ref is set by now: refs attach before effects
+  });
+  return wide;
+}
 /** The strip at `size.touch`: Build, Hold, the last edit's timing, Undo, Checks, a refused replay. */
 export function Strip({ children }: { children: ReactNode }) {
   const [, redraw] = useState({});
-  redrawStrip = () => redraw({});
+  redrawStrip = strip.redraw = () => redraw({});
+  const wide = useWide();
   const change = (next: Builder) => (set(next), unsee(), redraw({}), shut());
   const top = builder.sheets?.at(-1);
   return (
     <View style={{ flex: 1 }} /* mutate-skip: layout */>
       <View style={{ ...STRIP, ...TOP, backgroundColor: ink('bg'), borderColor: ink('line') }}>
-        {buildSwitch(() => change(toggled(builder)))}
+        {buildSwitch(builder.on, () => change(toggled(builder)))}
         {warn(heard.held ? WORDS.held(heard.pending ?? 0) : '')}
         {chip()}
         {undo ? act(WORDS.undo, () => void putBack(undo!)) : null}
         {notBack ? warn(RECENT.notUndone(notBack.file)) : null}
         {stopped ? warn(stopped) : null}
         {notBack ? act(WORDS.source, openBack) : null}
-        {builder.on ? pad(CONTENTS.contents, 'contents', top) : null}
-        {builder.on ? pad(MAP.map, 'map', top) : null}
-        {builder.on ? pad(badge(heard), 'checks', top) : null}
+        {strip.note ? warn(strip.note) : null}
+        {builder.on ? sheetChips(wide, top) : null}
         {timing(heard.timings, placed?.loaded)}
       </View>
-      <Notice />
+      <Notice placed={placed} room={builder.room} />
       <View
         style={{ flex: 1, flexDirection: 'row' }} /* mutate-skip: layout */
         onLayout={measured('book')} // the phone sheet is half this row
       >
+        {notebook()}
         <View
           style={{ flex: 1 }} /* mutate-skip: layout; the Book keeps its place as sheets open */
           testID="loka-book" /* page.ts reads the page's palette under it */
         >
           {children}
         </View>
-        {top && parts(top)[0] ? <Frame open={builder} saved={set} back={() => back()} /> : null}
+        {top && parts(top)[0] ? (
+          <Frame open={builder} saved={scrolled} back={() => back()} />
+        ) : null}
       </View>
     </View>
   );

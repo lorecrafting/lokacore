@@ -17,7 +17,7 @@ import { Project } from './project.tsx';
 import { Counts, Unconfirmed } from './prose.tsx';
 import { flowGo, flowItems } from '../../../kernel/ts/play/flowread.ts';
 import { Feed, Inspector } from './right.tsx';
-import { Compile, Source } from './sections.tsx';
+import { Compile } from './sections.tsx';
 import {
   fileOf, fold,
   fromRef,
@@ -144,7 +144,6 @@ function Right({ layout, set, story, book, diag, offer, pick }: Shell) {
           <Unconfirmed prose={book.prose} unconfirmed={unconfirmed} said={said} />
         </section>
         <Feed changes={diag.changes} />
-        <Source line={book.line} />
       </ScrollArea>
     </>
   );

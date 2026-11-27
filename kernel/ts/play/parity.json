@@ -37,7 +37,7 @@
   {
     "id": "device-size",
     "panel": "tools/author-panel/src/centre.tsx",
-    "book": "todo"
+    "book": "sheet.tsx"
   },
   {
     "id": "last-edit-timing",
@@ -292,7 +292,7 @@
   {
     "id": "column-folds",
     "panel": "tools/author-panel/src/shell.ts",
-    "book": "todo"
+    "book": "Build.tsx"
   },
   {
     "id": "prose-walk-keys",
