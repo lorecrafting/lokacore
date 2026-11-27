@@ -1,7 +1,8 @@
+// size: allow 320, the strip draws the notebook column beside the sheet stack (Wide layout)
 // Build mode's chrome (docs/system/book-ui.md#author-mode; slice 1.2): the Build toggle and strip,
 // the sheet host, auto-hold. Only the author preview requires it (author/seam.test.ts: `BUILD`).
 import { useState, type ReactNode } from 'react';
-import { Pressable, Text, View } from 'react-native';
+import { Pressable, Text, useWindowDimensions, View } from 'react-native';
 import { size, space, type } from '../../book/tokens.ts';
 import type { Message } from '../live.ts';
 import type { Step } from '../place.ts';
@@ -33,10 +34,12 @@ import { WORDS as RECENT } from './recent.tsx';
 import { undo as putBackIds } from '../../../../kernel/ts/play/mapedit.ts';
 import { io, onSaved, refused, run, running } from './roomedit.tsx';
 import { checked, unrefuse } from './checks.tsx';
-import { act, CONTROL, Frame, parts, sheets, stack, stepBack } from './sheet.tsx';
+import { act, Column, CONTROL, DOCK, Frame, parts, sheets, stack, stepBack } from './sheet.tsx';
+import { strip } from './source.ts';
 export { Sheet, sheets } from './sheet.tsx';
 export { drawn, unsee } from './seeas.tsx';
 export { updated } from './tools.tsx';
+export { altClick } from './source.ts';
 export { api, recount, start } from './page.ts';
 export { tagged } from '../prose_rules.ts';
 const WORDS = {
@@ -62,6 +65,7 @@ let notBack: Wrote | undefined; // a refused put-back
 let stopped = ''; // a gesture's put-back refused
 let redrawStrip = () => {};
 let mapped = () => {}; // the map has come: the strip and the Book's pencil draw again
+let notebookOpener: { focus?: () => void } | null | undefined;
 let opener: { focus?: () => void } | null | undefined; // what had focus before the first sheet opened
 /** What the keep-my-place notice reads and does; panel.tsx hands it in per game. */
 export type Place = Game & {
@@ -242,13 +246,43 @@ const buildSwitch = (flip: () => void) => (
     </Text>
   </Pressable>
 );
+/** The strip's `Notebook` from DOCK.at: opens or closes the column (a notebook sheet gives way to it);
+ * closing returns the focus to it. */
+function column() {
+  const open = builder.notebook === undefined;
+  if (open) notebookOpener = globalThis.document?.activeElement as typeof opener;
+  const rest = open && builder.sheets?.includes('contents') ? closed(builder, 'contents') : builder;
+  set({ ...rest, notebook: open ? 0 : undefined });
+  redrawStrip();
+  if (!open) notebookOpener?.focus?.();
+}
 /** A strip chip that opens sheet `id`, or closes it when it is the top sheet. */
 const pad = (label: string, id: string, top?: string) =>
   act(label, () => (top === id ? back(id) : open(id)), top === id);
+/** Notebook (a column chip when wide, else a sheet chip), Map and Checks. */
+const sheetChips = (wide: boolean, top?: string) => (
+  <>
+    {wide
+      ? act(CONTENTS.contents, column, undefined, undefined, builder.notebook !== undefined)
+      : pad(CONTENTS.contents, 'contents', top)}
+    {pad(MAP.map, 'map', top)}
+    {pad(badge(heard), 'checks', top)}
+  </>
+);
+const notebook = () =>
+  builder.notebook === undefined ? null : (
+    <Column
+      open={{ on: true, sheets: ['contents'], scroll: builder.notebook }}
+      saved={(n) => set({ ...builder, notebook: n.scroll })}
+      close={column}
+    />
+  );
 /** The strip at `size.touch`: Build, Hold, the last edit's timing, Undo, Checks, a refused replay. */
 export function Strip({ children }: { children: ReactNode }) {
   const [, redraw] = useState({});
-  redrawStrip = () => redraw({});
+  redrawStrip = strip.redraw = () => redraw({});
+  const wide = useWindowDimensions().width >= DOCK.at;
+  if (!wide && builder.notebook !== undefined) set({ ...builder, notebook: undefined }); // narrowed
   const change = (next: Builder) => (set(next), unsee(), redraw({}), shut());
   const top = builder.sheets?.at(-1);
   return (
@@ -261,9 +295,8 @@ export function Strip({ children }: { children: ReactNode }) {
         {notBack ? warn(RECENT.notUndone(notBack.file)) : null}
         {stopped ? warn(stopped) : null}
         {notBack ? act(WORDS.source, openBack) : null}
-        {builder.on ? pad(CONTENTS.contents, 'contents', top) : null}
-        {builder.on ? pad(MAP.map, 'map', top) : null}
-        {builder.on ? pad(badge(heard), 'checks', top) : null}
+        {strip.note ? warn(strip.note) : null}
+        {builder.on ? sheetChips(wide, top) : null}
         {timing(heard.timings, placed?.loaded)}
       </View>
       <Notice />
@@ -271,6 +304,7 @@ export function Strip({ children }: { children: ReactNode }) {
         style={{ flex: 1, flexDirection: 'row' }} /* mutate-skip: layout */
         onLayout={measured('book')} // the phone sheet is half this row
       >
+        {notebook()}
         <View
           style={{ flex: 1 }} /* mutate-skip: layout; the Book keeps its place as sheets open */
           testID="loka-book" /* page.ts reads the page's palette under it */

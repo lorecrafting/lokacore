@@ -5,11 +5,12 @@ import { Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } fr
 import { focusTitle } from '../../book/title.ts';
 import { motion, size, space, type } from '../../book/tokens.ts';
 import { ink, type Builder } from './build.ts';
+import { openSource } from './source.ts';
 
-const WORDS = { close: 'Back', grow: 'Full height' };
-/** Where the sheet docks beside the Book instead of rising over it, and its docked width.
- * ponytail: a placeholder; the designer names the breakpoint (ruling 7 gives none). */
-export const DOCK = { at: size.column + size.column / 2, width: size.column / 2 }; // mutate-skip: placeholder
+const WORDS = { close: 'Back', grow: 'Full height', shut: 'Close' };
+/** From `at` (the page column and half of it again; book-ui.md, Wide layout) a sheet docks beside
+ * the Book instead of rising over it, and the notebook column opens; both are `width` wide. */
+export const DOCK = { at: size.column + size.column / 2, width: size.column / 2 };
 
 /** Sheet kinds by the id's head (`room:cellar` is `room` with `cellar`); `back`, the id Back shows
  * in this sheet's place instead of closing it (the Flow walk's trail); `file`, the source file its
@@ -89,13 +90,21 @@ export const greyed = (label: string, why: string, key: string, run?: () => void
   </Pressable>
 );
 
+const foot = (file?: string) => (file ? <Foot key="source" file={file} /> : null);
 type Stack = { open: Builder; saved: (next: Builder) => void };
-const foot = (file: string | undefined) =>
-  file ? (
-    <Text key="source" style={{ ...type.small, color: ink('dim'), padding: space.md }}>
-      {file}
-    </Text>
-  ) : null;
+/** The source footer: the path, a button that opens it in the owner's editor; a refusal under it
+ * until the next press. */
+export function Foot({ file }: { file: string }) {
+  const [note, say] = useState('');
+  return (
+    <View style={{ padding: space.md }} /* mutate-skip: layout */>
+      {act(file, () => (say(''), void openSource({ file }).then(say)))}
+      <Text aria-live="polite" style={{ ...type.small, color: ink('warning') }}>
+        {note}
+      </Text>
+    </View>
+  );
+}
 /** The open sheet, scrolled back to where it was when it is drawn again after a reload. */
 export function Sheet({ open, saved }: Stack) {
   const scroller: { current: ScrollView | null } = { current: null };
@@ -174,7 +183,7 @@ export function Frame({ open, saved, back }: Stack & { back: () => void }) {
         docked
           ? { width: DOCK.width, borderLeftWidth: size.rule }
           : { ...FLOAT, height: full ? '100%' : '50%', borderTopWidth: size.rule },
-        slide(docked),
+        slide(docked ? 'side' : 'up'),
       ]}
     >
       {docked ? null : <Grip full={full} grow={grow} back={back} />}
@@ -199,6 +208,37 @@ export function Frame({ open, saved, back }: Stack & { back: () => void }) {
     </View>
   );
 }
+/** The notebook column (Wide layout): from DOCK.at, at the Book's left edge, not modal, never in the
+ * stack; `Close` in Back's place, the header taking the focus as it opens. `open` holds only the
+ * notebook, at the column's scroll. */
+export function Column({ open, saved, close }: Stack & { close: () => void }) {
+  const title = titled(open.sheets![0]);
+  return (
+    <View
+      aria-label={title}
+      style={[
+        { backgroundColor: ink('card'), borderColor: ink('line') },
+        { width: DOCK.width, borderRightWidth: size.rule },
+        slide('left'),
+      ]}
+    >
+      <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: space.md }}>
+        {act(WORDS.shut, close)}
+      </View>
+      <Text
+        ref={focusTitle}
+        {...({ tabIndex: -1 } as object)} // mutate-skip: any negative tabIndex is the same
+        accessibilityRole="header"
+        style={{ ...type.control, color: ink('fg'), paddingHorizontal: space.md }}
+      >
+        {title}
+      </Text>
+      <View style={{ flex: 1 }} /* mutate-skip: layout */>
+        <Sheet open={open} saved={saved} />
+      </View>
+    </View>
+  );
+}
 /** The slide in from the docked side; a cut under reduced motion. RN-web compiles keyframes only
  * in StyleSheet.create, not inline. */
 const from = (transform: string) =>
@@ -206,10 +246,13 @@ const from = (transform: string) =>
     animationKeyframes: [{ from: { transform } }],
     animationDuration: `${motion.quick.duration}ms`,
   }) as object;
-const SLIDE = StyleSheet.create({ side: from('translateX(100%)'), up: from('translateY(100%)') });
-const slide = (docked: boolean) =>
-  !globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches &&
-  SLIDE[docked ? 'side' : 'up'];
+const SLIDE = StyleSheet.create({
+  side: from('translateX(100%)'),
+  up: from('translateY(100%)'),
+  left: from('translateX(-100%)'),
+});
+const slide = (from: keyof typeof SLIDE) =>
+  !globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches && SLIDE[from];
 const FLOAT = {
   position: 'absolute', // mutate-skip: layout
   left: 0, // mutate-skip: layout

@@ -221,14 +221,11 @@ const stateOf = (game: Opened) => ({
   shown: shown(game.view().view, played(game)!.text, canon(), game.entityIds(), game.roomIds()),
 });
 // A click on a Book line selects its definition in the panel; Alt-click (Option-click) also opens
-// its source in the owner's editor.
+// its source in the owner's editor (build/source.ts; the Book posts /open itself, no relay).
 const onClick = (e: MouseEvent) => {
   const line = clicked(seen, said, (e.target as HTMLElement).textContent ?? '');
   if (line.key) tell({ select: line.key });
-  if (!e.altKey) return;
-  e.preventDefault();
-  e.stopPropagation();
-  tell({ line });
+  build?.altClick(e, line);
 };
 // Through `played`, so an accepted cheat is a recorded step `bin/loka check` replays.
 const askCheat = (game: Opened, cheat: Cheat) =>

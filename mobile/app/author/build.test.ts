@@ -213,7 +213,7 @@ test('a reload brings back the open sheet, scrolled where it was, its source fil
   const drawn = Sheet({ open, saved: () => {} }) as any;
   const [body, foot] = drawn.props.children.props.children;
   assert.equal(body, 'stand-in sheet');
-  assert.equal(foot.props.children, 'rooms/hall.yaml');
+  assert.equal(foot.props.file, 'rooms/hall.yaml');
   let to: unknown;
   drawn.props.ref.current = { scrollTo: (at: unknown) => (to = at) };
   drawn.props.onContentSizeChange();

@@ -24,7 +24,8 @@ const WORDS = {
   // placeholder: the owner writes these words
   go: (room: string) => `Go to ${room}`,
 };
-let tab = WORDS.tabs[0]; // the open tab
+const TAB = 'loka-build-tab'; // the open tab survives a reload, as the stack does
+let tab = WORDS.tabs.find((t) => t === globalThis.localStorage?.getItem(TAB)) ?? WORDS.tabs[0];
 const names = new Map<string, string>(); // a NAMED kind's key, as typed
 /** `kind`'s JSON source files the last /story named (a `.scene` has no schema sheet): `<kind>.json`,
  * `<kind>/<key>.json` or `areas/<area>/<kind>/<key>.json` (guard.ts `placed`). */
@@ -48,7 +49,15 @@ sheets.contents = {
   title: () => WORDS.contents,
   body: () => [
     <View key="tabs" style={row}>
-      {WORDS.tabs.map((t) => act(t, () => ((tab = t), known.redraw()), undefined, t, tab === t))}
+      {WORDS.tabs.map((t) =>
+        act(
+          t,
+          () => ((tab = t), localStorage.setItem(TAB, t), known.redraw()),
+          undefined,
+          t,
+          tab === t,
+        ),
+      )}
     </View>,
     ...(tab === WORDS.tabs[1]
       ? storyRows()
