@@ -40,6 +40,8 @@ export type At = {
 };
 export const opened = new Set<string>(); // the folded blocks and Add… menus open, by file and path
 export const drafts = new Map<string, string>(); // each typed field, as typed
+/** A refused write's text, kept for the next try unless newer typing replaced it (a late refusal). */
+export const keep = (key: string, v: string) => drafts.has(key) || void drafts.set(key, v);
 export const id = (at: At, path: Step[]) => `${at.file}:${JSON.stringify(path)}`;
 export const toggle = (key: string) => (
   opened.has(key) ? opened.delete(key) : opened.add(key),

@@ -14,6 +14,7 @@ import { ink } from './build.ts';
 import { block, INPUT } from './form.tsx';
 import {
   drafts,
+  keep,
   drop,
   id,
   opened,
@@ -60,7 +61,7 @@ export const choices =
         drafts.delete(typed);
         if (k)
           void set(at, [...path, k], minimal(at.defs[CHOICE]!, at.defs), BUSY)?.then(
-            (ok) => ok || drafts.has(typed) || void drafts.set(typed, k), // not written: the typed key waits for another Add
+            (ok) => ok || keep(typed, k), // not written: the typed key waits for another Add
           );
       };
       return [

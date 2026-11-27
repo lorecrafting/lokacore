@@ -42,11 +42,13 @@ const files = new Map<string, any>([
 let storyFiles: Record<string, string> = {}; // the /story's node files (the world files test names its own)
 let storyBundled: Record<string, string> = {}; // the /story's area-bundled node files
 let storyNodes = [{ ref: 'r1', kind: 'room' }]; // the last good compile's nodes
+let stale: Promise<void> | undefined; // when set, the next write waits here, then is refused as stale
 const posts: { file: string; ops: { path: string[]; value?: unknown; delete?: true }[] }[] = [];
 /** The builder api: a /change lands in `files` (as write.ts writes it), so the next /story rereads it. */
 async function api(path: string, sent?: any): Promise<[number, any]> {
   if (sent) {
     posts.push(sent);
+    if (stale) return (await stale, (stale = undefined), [409, 'stale']);
     for (const { path: p, value } of sent.ops) {
       let o = files.get(sent.file);
       for (const k of p.slice(0, -1)) o = o[k] ??= {};
@@ -479,4 +481,20 @@ test('a room key left while another gesture writes stays typed; leaving it again
   g.input().props.onBlur();
   await settle();
   assert.deepEqual(sent(), [['entry', 'room_2']], 'the typed key was forgotten');
+});
+
+// Breaks (loka-x1frg review): a late refusal puts its key back over newer typing; leaving writes the old.
+test('a room key refused after newer typing keeps the newer key; leaving writes it', async (t) => {
+  const cart = structuredClone(files.get('cartridge.json'));
+  t.after(() => ((storyNodes = [{ ref: 'r1', kind: 'room' }]), files.set('cartridge.json', cart)));
+  const rooms = ['r1', 'room_2', 'room_3'].map((ref) => ({ ref, kind: 'room' }));
+  const g = await compiled(rooms, 'cartridge.json', 'entry');
+  let release = () => {};
+  stale = new Promise((r) => (release = r));
+  t.after(() => release());
+  await g.typed('room_2');
+  await g.typed('room_3');
+  (release(), await settle(), sent());
+  (g.input().props.onBlur(), await settle());
+  assert.deepEqual(sent(), [['entry', 'room_3']], 'the refused key overwrote the newer one');
 });

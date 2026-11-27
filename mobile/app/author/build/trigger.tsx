@@ -14,7 +14,7 @@ import {
 import { space, type } from '../../book/tokens.ts';
 import { ink } from './build.ts';
 import { INPUT } from './form.tsx';
-import { BUSY, drafts, id, ops, send, type At, type Step } from './formwrite.ts';
+import { BUSY, drafts, id, keep, ops, send, type At, type Step } from './formwrite.ts';
 import { known } from './room.tsx';
 import { row, tell } from './roomedit.tsx';
 import { act } from './sheet.tsx';
@@ -106,7 +106,7 @@ function questOutcome(
     if (outcomeRefused(t, key, on, o)) tell(WORDS.badOutcome);
     else
       void send(at, ops(path, { quest: on.quest, outcome: o }), undefined, BUSY).then(
-        (ok) => ok || drafts.has(k) || void drafts.set(k, o), // not written: leaving again writes it
+        (ok) => ok || keep(k, o), // not written: leaving again writes it
       );
   };
   return (
