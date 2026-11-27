@@ -15,7 +15,9 @@ export function watchDirs(root: string, on: (file: string) => void) {
       const w = watch(dir, (_, name) => {
         if (!name) return;
         const file = join(dir, name);
-        if (statSync(file, { throwIfNoEntry: false })?.isDirectory()) arm(file);
+        try {
+          if (statSync(file).isDirectory()) arm(file);
+        } catch {} // gone, a loop or unreadable: not a directory to watch
         on(relative(root, file));
       });
       // a removed directory's watch ends
@@ -25,7 +27,10 @@ export function watchDirs(root: string, on: (file: string) => void) {
       );
       for (const d of readdirSync(dir, { withFileTypes: true }))
         if (d.isDirectory()) arm(join(dir, d.name));
-    } catch {} // removed before it was watched: nothing to see there
+    } catch (e) {
+      // removed before it was watched: nothing to see there; else (ENOSPC: inotify's limit) say so
+      if ((e as NodeJS.ErrnoException).code !== 'ENOENT') console.warn(`not watched: ${dir}: ${e}`);
+    }
   };
   arm(root);
   return { close: () => dirs.forEach((w) => w.close()) };

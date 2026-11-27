@@ -39,3 +39,16 @@ test('each atomic write is seen, the second to a file and one in a new directory
   await live('areas/b'); // armed by its parent's event
   await put('areas/b/g.json', '1');
 });
+
+// Breaks: a directory left unwatched in silence (ENOTDIR here; ENOSPC on Linux), or a warning for
+// one removed before it was watched.
+test('a directory it cannot watch is warned of, one already gone is not', (t) => {
+  const root = realpathSync(mkdtempSync(join(tmpdir(), 'loka-watch-')));
+  writeFileSync(join(root, 'file'), '');
+  const warn = t.mock.method(console, 'warn', () => {});
+  t.after(() => rmSync(root, { recursive: true }));
+  watchDirs(join(root, 'gone'), () => {}).close();
+  assert.equal(warn.mock.callCount(), 0);
+  watchDirs(join(root, 'file'), () => {}).close();
+  assert.match(String(warn.mock.calls[0]?.arguments[0]), /not watched: .*file: .*ENOTDIR/);
+});
