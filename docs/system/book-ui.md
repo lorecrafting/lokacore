@@ -1074,7 +1074,9 @@ reasons and limits: [prose in the Book rulings](../design/prose-in-the-book-ruli
     ways); Door and Lock are greyed, with one reason shown once, on an exit that already has a
     barrier or has no way back. Then `＋ <dir>` for each side with no exit (for
     a room on the map grid, also none toward a cell another room holds): it makes a new room
-    there, keyed `room_N`, in this room's area, linked both ways, every word unwritten. Then an
+    there, keyed `room_N`, in this room's area, linked both ways, every word unwritten. Then an `Exit to` field and `Join <dir>` for each side with no
+    exit: an exit that way to the typed room and its way back, on any level, no layout needed (builder
+    §4.3 exits); an unknown key refuses `No room <key>`, nothing typed sends nothing. Then an
     `Area` field, shown holding the room's area, and `Move to area`, which moves the room to the
     typed area (empty: the root). Then `Fields`, opening the room's `def:` sheet. Last, `Delete <key>`. A room with an unwritten title shows its
     key wherever the sheet names it (title, breadcrumb, exit rows, `Edit <key>`; ruling 9), never

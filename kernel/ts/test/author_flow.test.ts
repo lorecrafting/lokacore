@@ -8,7 +8,6 @@ import { join, resolve } from 'node:path';
 import { test } from 'node:test';
 import { burst, cmp, F, inColumn, layers, layout, type Flow } from '../play/flow.ts';
 import * as read from '../play/flowread.ts';
-import { LAYOUT } from '../../../tools/author-panel/src/shell.ts';
 import type { Story } from '../play/storylist.ts';
 import { story as build } from '../play/story.ts';
 import {
@@ -29,6 +28,7 @@ import {
   thera,
   V,
   xy,
+  LAYOUT,
 } from './author_flow_fixture.ts';
 
 // Breaks: the cap is off by one, the stub counts the kept chips, or opening the cell keeps the cap.

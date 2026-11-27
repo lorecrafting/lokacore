@@ -14,6 +14,7 @@ import { ink } from './build.ts';
 import { block, INPUT } from './form.tsx';
 import {
   drafts,
+  keep,
   drop,
   id,
   opened,
@@ -22,6 +23,7 @@ import {
   type At,
   type Block,
   type Obj,
+  BUSY,
 } from './formwrite.ts';
 import { reveals } from './reveal.ts';
 import { known } from './room.tsx';
@@ -57,7 +59,10 @@ export const choices =
         const why = k && refuseKey(k, all);
         if (why) return tell(why);
         drafts.delete(typed);
-        if (k) set(at, [...path, k], minimal(at.defs[CHOICE]!, at.defs));
+        if (k)
+          void set(at, [...path, k], minimal(at.defs[CHOICE]!, at.defs), BUSY)?.then(
+            (ok) => ok || keep(typed, k), // not written: the typed key waits for another Add
+          );
       };
       return [
         ...Object.entries(all).map(([k, c]) =>

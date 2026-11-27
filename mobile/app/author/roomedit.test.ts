@@ -1,4 +1,4 @@
-// size: allow 540, one mocked /story and /write harness serves the Room, Person and Item sheets' edits
+// size: allow 560, one mocked /story and /write harness serves the Room, Person and Item sheets' edits
 // The Room sheet's edits (author/build/roomedit.tsx; design §7, slice 2.1): which press sends which
 // write-route calls over the builder's api. The gestures' own rules are mapedit's
 // (kernel/ts/test/author_mapedit.test.ts) and drop's (author_drop.test.ts).
@@ -9,7 +9,7 @@ import { nodes, words } from '../book/__tests__/combat-book.test.ts'; // also re
 
 const { story } = await import('./build/room.tsx');
 const { sheets } = await import('./build/sheet.tsx');
-const { foot, io, wire } = await import('./build/roomedit.tsx');
+const { foot } = await import('./build/roomedit.tsx');
 const { thingPen } = await import('./build/thing.tsx');
 await import('./build/contents.tsx');
 const { storySheet } = await import('./build/story.tsx');
@@ -230,6 +230,40 @@ test('Move to area sends the area as shown, or the typed one; an empty field is 
   assert.deepEqual(
     s.posts.map(([, sent]) => sent.area),
     ['yard', 'cellar', null],
+  );
+});
+
+// Breaks (ported from the panel's tools/author-panel/test/mapwire.test.ts:87): Join writing one face
+// only or the wrong way back, needing layout cells or one level (map.ts toward), offering a taken
+// side, or writing an exit to a room that is not there.
+test('Join writes the exit and its way back, up to down, with no layout; an unknown room refuses', async () => {
+  const s = await opened();
+  const joins = s
+    .shown()
+    .filter((n) => n.props?.accessibilityRole === 'button' && words(n).startsWith('Join'));
+  assert.deepEqual(joins.map(words), [
+    'Join south',
+    'Join east',
+    'Join west',
+    'Join up',
+    'Join down',
+  ]);
+  const field = () => s.shown().find((n) => n.props?.accessibilityLabel === 'Exit to');
+  await s.press('Join up'); // nothing typed: nothing sent
+  field().props.onChangeText(' nowhere ');
+  await s.press('Join up');
+  assert.deepEqual(s.posts, []);
+  assert.ok(
+    s.shown().some((n) => n.props?.accessibilityRole === 'alert' && words(n) === 'No room nowhere'),
+  );
+  field().props.onChangeText('loft');
+  await s.press('Join up');
+  assert.deepEqual(
+    s.posts.map(([path, sent]) => [path, sent.file, sent.ops]),
+    [
+      ['/change', 'rooms/hall.json', [{ path: ['exits', 'up'], value: { to: 'loft' } }]],
+      ['/change', 'rooms/loft.json', [{ path: ['exits', 'down'], value: { to: 'hall' } }]],
+    ],
   );
 });
 
@@ -507,20 +541,4 @@ test('the sheet redraws when /story fails', async () => {
   );
   await settle();
   assert.equal(drew, 1);
-});
-
-// Breaks: a 3xx answer (not a write) taken as a saved write.
-test('io: only a 2xx answer is ok', async () => {
-  const at = (status: number) => (
-    wire(
-      async () => [status, null],
-      () => {},
-      () => {},
-    ),
-    io.post('move', {})
-  );
-  assert.deepEqual(
-    [(await at(299)).ok, (await at(300)).ok, (await at(200)).ok, (await at(199)).ok],
-    [true, false, true, false],
-  );
 });

@@ -12,7 +12,8 @@ Object.assign(globalThis, { localStorage: { getItem: () => null, setItem() {} } 
 await import('./build/Build.tsx'); // the app's registration of the def: and contents sheets
 const { WORDS } = await import('./build/form.tsx');
 const { WORDS: WORLD, matches } = await import('./build/world.tsx');
-const { refused } = await import('./build/roomedit.tsx');
+const { refused, run } = await import('./build/roomedit.tsx');
+const { BUSY } = await import('./build/formwrite.ts');
 
 const root = new URL('../../../', import.meta.url);
 const read = (rel: string) => JSON.parse(readFileSync(new URL(rel, root), 'utf8'));
@@ -41,11 +42,13 @@ const files = new Map<string, any>([
 let storyFiles: Record<string, string> = {}; // the /story's node files (the world files test names its own)
 let storyBundled: Record<string, string> = {}; // the /story's area-bundled node files
 let storyNodes = [{ ref: 'r1', kind: 'room' }]; // the last good compile's nodes
+let stale: Promise<void> | undefined; // when set, the next write waits here, then is refused as stale
 const posts: { file: string; ops: { path: string[]; value?: unknown; delete?: true }[] }[] = [];
 /** The builder api: a /change lands in `files` (as write.ts writes it), so the next /story rereads it. */
 async function api(path: string, sent?: any): Promise<[number, any]> {
   if (sent) {
     posts.push(sent);
+    if (stale) return (await stale, (stale = undefined), [409, 'stale']);
     for (const { path: p, value } of sent.ops) {
       let o = files.get(sent.file);
       for (const k of p.slice(0, -1)) o = o[k] ??= {};
@@ -450,4 +453,48 @@ test('a cartridge entry with 6 rooms offers all six; with 7, r shows six and +1 
   await seven.typed('r', false);
   assert.equal(seven.picks(['entry']).length, 6);
   assert.ok(seven.s.shown().some((x) => words(x) === WORLD.more(1)));
+});
+
+// Breaks (loka-x1frg): a room key typed and left while another gesture writes is forgotten, so
+// leaving the field again writes nothing; a pick pressed mid-gesture told something or left typed.
+test('a room key left while another gesture writes stays typed; leaving it again writes it', async (t) => {
+  const cart = structuredClone(files.get('cartridge.json'));
+  t.after(() => ((storyNodes = [{ ref: 'r1', kind: 'room' }]), files.set('cartridge.json', cart)));
+  const rooms = ['r1', 'room_2'].map((ref) => ({ ref, kind: 'room' }));
+  const g = await compiled(rooms, 'cartridge.json', 'entry');
+  let release = () => {};
+  t.after(() => release());
+  void run(() => new Promise<void>((r) => (release = r)));
+  const before = (sent(), refused());
+  nodes(g.s.shown().find((x) => x.key === 'picks cartridge.json:["entry"]').props.children)
+    .find((x) => words(x) === 'room_2')
+    .props.onPress();
+  await settle();
+  assert.deepEqual([sent(), refused()], [[], before], 'a press mid-gesture told something');
+  assert.notEqual(g.input().props.value, 'room_2', 'a press mid-gesture left the key typed');
+  g.input().props.onFocus({ target: null });
+  await g.typed('room_2');
+  assert.deepEqual(sent(), [], 'written mid-gesture');
+  assert.deepEqual([refused(), g.input().props.value], [BUSY, 'room_2'], 'not kept and said');
+  release();
+  await settle();
+  g.input().props.onBlur();
+  await settle();
+  assert.deepEqual(sent(), [['entry', 'room_2']], 'the typed key was forgotten');
+});
+
+// Breaks (loka-x1frg review): a late refusal puts its key back over newer typing; leaving writes the old.
+test('a room key refused after newer typing keeps the newer key; leaving writes it', async (t) => {
+  const cart = structuredClone(files.get('cartridge.json'));
+  t.after(() => ((storyNodes = [{ ref: 'r1', kind: 'room' }]), files.set('cartridge.json', cart)));
+  const rooms = ['r1', 'room_2', 'room_3'].map((ref) => ({ ref, kind: 'room' }));
+  const g = await compiled(rooms, 'cartridge.json', 'entry');
+  let release = () => {};
+  stale = new Promise((r) => (release = r));
+  t.after(() => release());
+  await g.typed('room_2');
+  await g.typed('room_3');
+  (release(), await settle(), sent());
+  (g.input().props.onBlur(), await settle());
+  assert.deepEqual(sent(), [['entry', 'room_3']], 'the refused key overwrote the newer one');
 });

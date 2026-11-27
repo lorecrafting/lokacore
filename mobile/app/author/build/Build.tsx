@@ -185,8 +185,8 @@ async function putBack(w: Wrote | Gesture) {
   // the chip's own ids, not the editor's newest: after a reload the editor's journal is gone
   if ('ids' in w) {
     unborn();
-    await run(() => putBackIds(io, [...w.ids]));
-    stopped = refused(); // shown on the strip, as no sheet may be open
+    // on the strip, as no sheet may be open; only the Undo's own refusal (a field's busy note is the sheet's)
+    stopped = (await run(() => putBackIds(io, [...w.ids]))) ? '' : refused();
     return redrawStrip();
   }
   const undone = api!('/undo', { id: w.id, key: w.key, words: w.words });
