@@ -12,7 +12,6 @@ import {
   type Paired,
   type Report as Stepped,
 } from '../../../../kernel/ts/play/step.ts';
-import { fromRef } from '../../../../kernel/ts/play/storylist.ts';
 import type { Row as Told } from '../../../../kernel/ts/play/why_words.ts';
 import { space, type } from '../../book/tokens.ts';
 import { clockWords, type shown } from '../shown.ts';
@@ -218,11 +217,7 @@ function askStep(g: Reader, at: string) {
 function ruleRow(x: Stepped['reactions'][number]) {
   const line = lookedLine(x);
   const tone = line.ok === false ? ('danger' as const) : undefined;
-  const ref = Object.keys(known.files).find((r) => {
-    const n = fromRef(r);
-    return n?.kind === 'reaction' && n.key === x.rule;
-  });
-  const sheet = sheetOf(ref);
+  const sheet = sheetOf(x.rule); // the explainer names a rule by its ref (why.ts)
   if (!sheet) return { text: `${x.rule} ${line.text}`, tone };
   return (
     <View key={`rule ${x.rule}`} style={row}>

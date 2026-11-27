@@ -192,14 +192,14 @@ test('Step: a rule that looked opens its sheet; its verdict keeps its tone', asy
     command: 'wait',
     outcome: 'accepted',
     reactions: [
-      { rule: 'glow', causes: [1], fired: 1 },
-      { rule: 'hush', causes: [1], fired: 0 },
+      { rule: 'p@1:reaction/glow', causes: [1], fired: 1 }, // the explainer names rules by ref
+      { rule: 'p@1:reaction/hush', causes: [1], fired: 0 },
     ],
   });
   await pressed('Step');
-  await pressed('hush');
+  await pressed('p@1:reaction/hush');
   assert.deepEqual(opened, ['def:reactions/hush.yaml']);
-  assert.match(text(), /\|glow fired\|hush\|no when leaf held$/); // glow: a scene's file, not a rule's
+  assert.match(text(), /\|p@1:reaction\/glow fired\|p@1:reaction\/hush\|no when leaf held$/); // glow: no file
   assert.equal(tone('no when leaf held'), ink('danger'));
 });
 
