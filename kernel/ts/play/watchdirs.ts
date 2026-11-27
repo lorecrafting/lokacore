@@ -20,7 +20,7 @@ export function watchDirs(root: string, on: (file: string) => void) {
         } catch {} // gone, a loop or unreadable: not a directory to watch
         on(relative(root, file));
       });
-      // a removed directory's watch ends
+      // an error (EPERM, a watch limit) ends this watch, not the server
       dirs.set(
         dir,
         w.on('error', () => w.close()),
