@@ -244,6 +244,10 @@ jobs:
       - name: Author panel smoke
         run: npm test
         working-directory: tools/author-panel
+      # The builder in the Book, Build on, in stable Chrome on the showcase: the panel cases it kept (tests/build.ts).
+      - name: Builder smoke
+        run: npm run test:build
+        working-directory: mobile/app
       - run: npm ci --no-audit --no-fund && git ls-files -z '*.ts' '*.tsx' '*.mjs' '*.js' '*.json' ':(exclude)mobile/**' | xargs -0 npx prettier --check
       - if: failure()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1

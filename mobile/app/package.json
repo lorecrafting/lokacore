@@ -18,6 +18,7 @@
     "storybook:build": "storybook build",
     "storybook:live": "node .storybook/live.ts",
     "test:phone": "node patch-sqlite-web.cjs && node tests/phone.ts",
+    "test:build": "node patch-sqlite-web.cjs && node tests/build.ts",
     "storybook:picker": "node .storybook/picker/test.ts",
     "stories:sheet": "node .storybook/sheet.ts",
     "storybook:smoke": "tsc -p .storybook && storybook build --quiet && vitest run"
@@ -49,6 +50,7 @@
     "@storybook/react-native-web-vite": "10.6.1",
     "@types/react": "19.2.18",
     "@vitest/browser-playwright": "5.0.3",
+    "axe-core": "4.14.0",
     "e2e": "^0.17.0",
     "esbuild": "0.28.2",
     "html-to-image": "1.11.13",
