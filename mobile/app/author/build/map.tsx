@@ -62,7 +62,7 @@ let paint = () => {}; // the drawing's own redraw: a drag or pinch redraws the m
 let hooks = { go: (_room: string) => {}, here: (): string | undefined => undefined };
 
 const rooms = () => known.rooms;
-const chosen = () => rooms().find((r) => r.key === selected);
+export const chosen = () => rooms().find((r) => r.key === selected);
 /** The level shown: the one stepped to while it still has rooms, else the current room's, else the lowest.
  * Not stored: a call before the Book knows its room must not pin the lowest level. */
 function level() {

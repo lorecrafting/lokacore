@@ -6,6 +6,7 @@ import { size, space, type } from '../../book/tokens.ts';
 import type { Message } from '../live.ts';
 import type { Step } from '../place.ts';
 import { install as seam } from './seam.ts';
+import { paletteWith } from './palette.tsx';
 import { changed, heard as told, shut, type Hooks, type Wrote } from './field.tsx';
 import {
   autoHold,
@@ -92,6 +93,15 @@ export const hold = autoHold(
   (release) => setTimeout(release),
 );
 toolsWith({ game: () => placed, hold, heard: () => heard });
+paletteWith({
+  on: () => builder.on,
+  top: () => builder.sheets?.at(-1),
+  close: () => back('palette'),
+  undo: () => !!undo && (void putBack(undo), true),
+  placeholders: () => heard.placeholders ?? {},
+  hold,
+  startIn: (room) => placed?.startIn(room),
+});
 /** Opens a sheet on the stack (or brings it to the top); the first remembers the focus to return. */
 export function open(id: string) {
   if (!builder.sheets) opener = globalThis.document?.activeElement as typeof opener;

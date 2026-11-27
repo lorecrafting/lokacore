@@ -203,7 +203,7 @@ test('zoom, pinch and wheel act about their point; a room press within slop taps
   g.onPointerUp(ev(2, c.x + 20));
   near(mid('crossroads_inn'), { ...c, w: c.w * 2 }, 'a pinch apart doubles about its midpoint');
   let wheel: (e: object) => void = () => {};
-  g.ref({ addEventListener: (_: string, f: typeof wheel) => (wheel = f) });
+  g.ref({ addEventListener: (t: string, f: typeof wheel) => t === 'wheel' && (wheel = f) });
   wheel({
     preventDefault() {},
     deltaY: -50,
