@@ -47,7 +47,7 @@ const made = (kind: string) =>
 
 sheets.contents = {
   title: () => WORDS.contents,
-  body: () => [
+  body: (host) => [
     <View key="tabs" style={row}>
       {WORDS.tabs.map((t) =>
         act(
@@ -68,7 +68,7 @@ sheets.contents = {
           : tab === RECENT.tab
             ? recentRows()
             : tab === WORDS.tabs[3]
-              ? [sheets.checks.body('')]
+              ? [sheets.checks.body(host)]
               : [...findRows(), ...kinds()]),
   ],
 };

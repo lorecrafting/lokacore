@@ -182,8 +182,8 @@ function jumpTo(steps: Step[], { session, startOver }: Tools, checkpoint = place
 }
 
 // The panel protocol: the panel says hello (and after every Book reload, answered by `ready`), the
-// Book posts its state on every session update and answers `trace`; a Book line Alt-clicked posts
-// `line`. Only a local page may drive it: the panel's page and the Book's are different ports.
+// Book posts its state on every session update and answers `trace` (an Alt-clicked Book line opens
+// its source itself: build/source.ts). Only a local page may drive it: the panel's page and the Book's are different ports.
 const LOCAL = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/;
 type Asked =
   | { op: 'hello' }

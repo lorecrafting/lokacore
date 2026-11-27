@@ -12,8 +12,8 @@ export const ink = (role: keyof typeof color.light) => `var(--loka-${role}, ${co
 export const BUILD = 'loka-build';
 /** Build on or off, and the open sheets (bottom first, ids like `checks` or `room:<key>`) with the
  * top one's scroll offset; sheets are open only in Build.
- * `room`: the room of the last write, which Start in this room goes back to. */
-/** `notebook`: the notebook column's scroll, there while it is open (Wide layout). */
+ * `room`: the room of the last write, which Start in this room goes back to.
+ * `notebook`: the notebook column's scroll, there while it is open (Wide layout). */
 export type Builder = {
   on: boolean;
   sheets?: string[];
