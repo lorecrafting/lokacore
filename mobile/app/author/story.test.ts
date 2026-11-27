@@ -243,7 +243,7 @@ test("a person's row opens her own sheet and her source; a dialogue's, its field
 
 // Break: a sheet's head losing its ref, counting another node's unwritten or diagnostics, marking a
 // reached node unreached, or a World file (no ref) showing nothing; each sheet kind draws it.
-test("each node sheet's head names its ref, unwritten and diagnostics counts, and unreached", () => {
+test("each node sheet's head names its ref, unwritten and diagnostics counts, and unreached", (t) => {
   const head = (kind: string, arg: string) =>
     nodes(build.sheets[kind].body(arg))
       .filter((e) => e.type === 'Text' && typeof e.props.children === 'string')
@@ -276,13 +276,13 @@ test("each node sheet's head names its ref, unwritten and diagnostics counts, an
     '0 unwritten · 0 diagnostics',
   ]);
   const s = known.story;
+  t.after(() => (known.story = s)); // a failed assert would leave every later test with no /story
   known.story = undefined;
   assert.notEqual(
     head('def', 'dialogues/farewell.json')[0],
     R('dialogue', 'farewell'),
     'no /story, no head',
   );
-  known.story = s;
 });
 
 test('Go there starts in the room a story edge joins the node to, either way: nell to the hall, the cellar to its lamp', async () => {

@@ -30,7 +30,7 @@ export function inspected(
     <View key="inspected" style={{ paddingHorizontal: space.md /* mutate-skip: layout */ }}>
       <Text style={dim}>{ref || file}</Text>
       {ref ? <Text style={dim}>{WORDS.counts(todo, diagnostics)}</Text> : null}
-      {off ? <Text style={{ ...inRow, color: ink('danger') }}>{WORDS.unreached}</Text> : null}
+      {off ? <Text style={{ ...inRow, color: ink('warning') }}>{WORDS.unreached}</Text> : null}
     </View>
   );
 }
