@@ -4,7 +4,6 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import type { MapRoom } from '../play/map.ts';
 import * as map from '../play/map.ts';
-import { places } from '../../../tools/author-panel/src/shell.ts';
 
 const room = (key: string, area: string | null, at?: MapRoom['at'], exits: MapRoom['exits'] = []) =>
   ({
@@ -48,17 +47,10 @@ test('selecting a room shows its level; an unplaced or unknown key keeps the one
   assert.equal(map.levelOf(ROOMS, 'zz', 0), 0);
 });
 
-// Breaks: a map click selects something the hierarchy and Book cannot find (the selection-sync
-// red control: a wrong kind, or the ref where the key belongs).
-test('a room click is the selection the hierarchy and the Book show', () => {
-  const sel = map.select(B);
-  assert.deepEqual(sel, { file: 'areas/north/b.json', kind: 'room', key: 'b' });
-  const p = places(
-    sel,
-    [A, B].map((r) => ({ ref: r.ref, kind: 'room' })),
-  );
-  assert.equal(p.hierarchy, 'demo@1:room/b');
-  assert.equal(p.map, 'demo@1:room/b');
+// Breaks: a map click selects a wrong kind, or the ref where the key belongs. (The panel's
+// hierarchy sync, shell.ts `places`, is panel-only and retired with the panel's import, 6.6b.)
+test('a room click selects the room by file, kind and key', () => {
+  assert.deepEqual(map.select(B), { file: 'areas/north/b.json', kind: 'room', key: 'b' });
 });
 
 // Breaks: a reciprocal pair draws twice, a one-way loses its arrow, a barrier set on the far side
