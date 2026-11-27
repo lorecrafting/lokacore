@@ -56,12 +56,12 @@ const seen = new Map([
   ['~\u200c', 'room.shed.description'],
 ]);
 const said = new Map([[KEY, 'A low loft.']]);
-let redrawn = 0;
+let redrawn = () => {}; // a test reads the render a redraw produces, not one the harness adds
 attach({
   on: () => on,
   seen,
   said,
-  redraw: () => redrawn++,
+  redraw: () => redrawn(),
   focus() {},
   commit() {},
   api,
@@ -127,9 +127,11 @@ test('a read or save the server never answered says so; the field is read-only w
     assert.notEqual(input().props.editable, false, 'read-only before any save');
     input().props.onChangeText('A high loft.');
     held = new Promise((r) => (release = r));
+    let drew: unknown = 'no redraw';
+    redrawn = () => (drew = input()?.props.editable);
     input().props.onSubmitEditing();
     await tick();
-    assert.equal(input().props.editable, false, 'the field took words while its save was out');
+    assert.equal(drew, false, 'the field took words while its save was out');
     down = true; // the server goes down before the held save answers
     release();
     await tick();
@@ -142,6 +144,7 @@ test('a read or save the server never answered says so; the field is read-only w
     );
   } finally {
     release(); // a failed assertion must not leave later saves waiting on `held`
+    redrawn = () => {};
     held = undefined;
     down = false;
     shut();
