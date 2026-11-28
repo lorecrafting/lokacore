@@ -15,8 +15,12 @@ export const WORDS = {
   back: 'Put back',
   nothing: 'No change yet.',
   // what each change did, by the journal entry's first word (write.ts `what`); an outside one says none
-  did: { new: 'new', delete: 'delete', undo: 'put back', outside: '' } as Record<string, string>,
+  did: { new: 'new', delete: 'delete', move: 'move', undo: 'put back', outside: '' } as Record<
+    string,
+    string
+  >,
   edit: 'edit',
+  from: 'from', // a row delete (`delete <section> <key>`): its key, from its file
   notUndone: (file: string) => `${file} changed since; not put back.`,
 };
 type Entry = { id: number; at: number; what: string; by: 'editor' | 'outside'; files: string[] };
@@ -43,7 +47,11 @@ const putBack = (id: number) =>
     return body?.file ? WORDS.notUndone(body.file) : String(body);
   });
 
-const did = (what: string) => WORDS.did[what.split(' ')[0]] ?? WORDS.edit;
+const did = (what: string) => {
+  const [verb, , key] = what.split(' ');
+  const said = WORDS.did[verb] ?? WORDS.edit;
+  return verb === 'delete' && key ? `${said} ${key} ${WORDS.from}` : said;
+};
 const clock = (at: number) => new Date(at).toTimeString().slice(0, 5); // mutate-skip: a local HH:MM
 
 export function recentRows() {

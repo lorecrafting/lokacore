@@ -232,10 +232,18 @@ test('the Contents tab lists a cutscene file under New cutscene', async () => {
   assert.deepEqual(opens, ['def:scenes/x.json']);
 });
 
-// Breaks: a Recent row naming only its file, so a delete reads as an edit of it (F15).
-test('Recent says what each change did: new, edit, delete, put back', async () => {
+// Breaks: a Recent row naming only its file, so a delete reads as an edit of it (F15), a move as
+// an edit, or a row delete as the whole file deleted.
+test('Recent says what each change did: new, edit, delete, move, put back', async () => {
   const at = (id: number, what: string) => ({ id, at: 0, what, by: 'editor', files: ['r.json'] });
-  const ws = ['new reactions r', 'set r.json:2', 'delete r.json', 'undo delete r.json'];
+  const ws = [
+    'new reactions r',
+    'set r.json:2',
+    'delete r.json',
+    'move r.json to x',
+    'delete r k',
+    'undo delete r.json',
+  ];
   await opened({ '/journal': () => [200, ws.map((w, i) => at(i, w))] });
   known.files = { again: 'x' }; // a new /story: Recent asks /journal again
   recentRows();
@@ -246,7 +254,14 @@ test('Recent says what each change did: new, edit, delete, put back', async () =
     .filter((w) => w.includes(' · '));
   assert.deepEqual(
     said.map((w) => w.split(' · ')[1]),
-    ['new r.json', 'edit r.json', 'delete r.json', 'put back r.json'],
+    [
+      'new r.json',
+      'edit r.json',
+      'delete r.json',
+      'move r.json',
+      'delete k from r.json',
+      'put back r.json',
+    ],
   );
 });
 

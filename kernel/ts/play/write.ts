@@ -189,7 +189,7 @@ async function create(t: Tree, { kind, name, from, area, extends: up }: Sent): P
     ]);
     const plain = refused // mix's CLI line in the builder's words
       ?.replace(/^\*\* \(Mix\) mix loka\.new: /, '')
-      .replace(/bin\/loka new (\w+) <name>/, 'use New $1');
+      .replace(/bin\/loka new (\w+) \S+/, 'use New $1');
     if (plain !== undefined) refuse(400, plain);
     const changes = diff(before, t.snapshot());
     return [
