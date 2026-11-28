@@ -7,6 +7,7 @@ import { size, space } from '../../book/tokens.ts';
 import { ink, keep } from './build.ts';
 import { known } from './room.tsx';
 import { inRow, refusal, row, run, tell } from './roomedit.tsx';
+import { opened as open, toggle } from './formwrite.ts';
 import { act } from './sheet.tsx';
 
 // placeholder: the owner writes these words
@@ -18,6 +19,7 @@ export const WORDS = {
   stuck: (name: string) => `${name} did not open: see the watcher's terminal`,
   updating: (name: string) => `Opening ${name}…`,
   wait: 'One world at a time: wait for this one to open',
+  samples: 'Samples',
 };
 type Worlds = { current: string; worlds: { name: string; title: string }[] };
 // the world left's keys (panel.tsx PLACE, tools.tsx START, Build.tsx KEPT, map.tsx PICKED, scene.tsx ROW)
@@ -32,6 +34,9 @@ let all: Worlds | undefined;
 let asked = false;
 let name = '';
 let opening = ''; // the world a switch waits on
+const SAMPLES = 'worlds samples'; // the fold's key in the sheet's open set
+// a sampler is a mechanic's demonstration, not a world to author (lantern_proof: worlds.ts FROZEN)
+const sample = (name: string) => name.endsWith('_sampler');
 
 /** Switches to `sent.name` (made first when `new`); true once /world names it, false after a minute. */
 async function go(sent: { name: string; new?: true; from?: string }) {
@@ -57,7 +62,10 @@ async function go(sent: { name: string; new?: true; from?: string }) {
 function ask() {
   asked = true;
   void known.api?.('/world').then(
-    ([status, w]) => (status === 200 ? ((all = w), known.redraw()) : (asked = false)),
+    ([status, w]) =>
+      status === 200
+        ? ((all = w), sample(w.current) && open.add(SAMPLES), known.redraw()) // the current one shown
+        : (asked = false),
     () => (asked = false),
   );
 }
@@ -74,22 +82,50 @@ const opened = () =>
 const pick = (sent: () => Parameters<typeof go>[0]) => () =>
   opening ? tell(WORDS.wait) : void run(() => go(sent()));
 
+/** Each listed world's switch, then its copy row's buttons (the copies follow the same split). */
+const picks = (list: Worlds['worlds']) =>
+  list.map((w) =>
+    act(
+      w.title,
+      w.name === all!.current ? () => {} : pick(() => ({ name: w.name })),
+      undefined,
+      `world ${w.name}`,
+      w.name === all!.current,
+    ),
+  );
+const copies = (list: Worlds['worlds']) =>
+  list.map((w) =>
+    act(
+      WORDS.copy(w.title),
+      pick(() => ({ name, new: true, from: w.name })),
+      undefined,
+      `copy ${w.name}`,
+    ),
+  );
+
+/** Real worlds first, then a Samples fold (closed unless the current world is a sampler) above the
+ * name row, whose copies take the samplers' while it is open. */
 export function worldRows() {
   if (!asked) ask();
+  const real = all?.worlds.filter((w) => !sample(w.name)) ?? [];
+  const samples = all?.worlds.filter((w) => sample(w.name)) ?? [];
+  const shown = open.has(SAMPLES);
   return [
     refusal(),
     opened(),
     <View key="worlds" style={row}>
-      {all?.worlds.map((w) =>
-        act(
-          w.title,
-          w.name === all!.current ? () => {} : pick(() => ({ name: w.name })),
-          undefined,
-          `world ${w.name}`,
-          w.name === all!.current,
-        ),
-      )}
+      {picks(real)}
     </View>,
+    samples.length ? (
+      <View key="samples fold" style={row}>
+        {act(WORDS.samples, () => toggle(SAMPLES), shown, `fold ${SAMPLES}`)}
+      </View>
+    ) : null,
+    shown ? (
+      <View key="samples" style={row}>
+        {picks(samples)}
+      </View>
+    ) : null,
     <View key="new world" style={row}>
       <TextInput
         accessibilityLabel={WORDS.name}
@@ -102,14 +138,8 @@ export function worldRows() {
         WORDS.blank,
         pick(() => ({ name, new: true })),
       )}
-      {all?.worlds.map((w) =>
-        act(
-          WORDS.copy(w.title),
-          pick(() => ({ name, new: true, from: w.name })),
-          undefined,
-          `copy ${w.name}`,
-        ),
-      )}
+      {copies(real)}
+      {shown ? copies(samples) : null}
     </View>,
   ];
 }
