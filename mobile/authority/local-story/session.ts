@@ -81,7 +81,7 @@ function checked(story: Extract<ReturnType<typeof openStory>, { kind: 'open' }>,
   }
 }
 
-// In dev a cartridge that does not compile, build its world, save it or draw its first screen says why,
+// In dev a cartridge that does not compile, build its world or draw its first screen says why,
 // and offers no start over: the author fixes the files (save.md, refusals).
 function built<T>(dev: boolean | undefined, make: () => T): T {
   try {
@@ -106,9 +106,7 @@ export function openGame(db: Db, bundled: Bundled, host: HostPart) {
     throw Object.assign(new Error('elapsed clocks are required'), {
       cause: { kind: 'elapsed_clock_missing' },
     });
-  const story = built(host.dev, () =>
-    openStory(db, [{ content_hash: bundled.sha256, fresh }], host),
-  );
+  const story = openStory(db, [{ content_hash: bundled.sha256, fresh }], host);
   const why = story.kind === 'cartridge_error' ? story.message : story.kind;
   if (story.kind !== 'open') throw Object.assign(new Error(why), { cause: story });
   checked(story, host.dev);

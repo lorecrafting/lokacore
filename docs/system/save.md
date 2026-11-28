@@ -35,7 +35,7 @@ Refusals, nothing written:
 | `save_corrupt` | the head, a state row, the identity or the RNG does not parse; half a save (rows or receipts without their tables) | yes, in place; reports and the trace survive |
 | `save_corrupt` | SQLite says the file is not a database or a page is malformed (`store.ts:178`) | yes, but `newGame` throws: the host deletes the file (below) |
 | `pinned_release_missing` | the pin names a release the app does not carry, or a kernel_api other than the installed one | yes, on the newest release |
-| `cartridge_error` | dev only (`host.dev`: `?dev=1`, `bin/loka check`): the cartridge does not compile, its genesis or first screen throws, or a save whose rows parse does not restore, recover its receipts or load its head under it (`session.ts` `built`, `store.ts` `restored`); the reply's message is the error's own text, naming the file when the error does; a release reports these as above | no: the author fixes the files; the Build strip stays above it |
+| `cartridge_error` | dev only (`host.dev`: `?dev=1`, `bin/loka check`): the cartridge does not compile, its genesis or first screen throws, or a save whose rows parse does not restore under it (`session.ts` `built`, `store.ts` `restored`); the reply's message is the error's own text, naming the file when the error does; a release reports these as above | no: the author fixes the files; the Build strip stays above it |
 
 ### What reopen proves
 

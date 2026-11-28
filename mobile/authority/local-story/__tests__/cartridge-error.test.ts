@@ -4,7 +4,6 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { read } from '../../../../kernel/ts/test/read.ts';
 import { localSession, openGame } from '../session.ts';
-import { bundle as codex } from './priory-fixture.ts';
 import { sqliteHost } from './elapsed-host.test.ts';
 
 const { canonical, sha256 } = read('protocol/fixtures/toolbox_showcase_hash.json');
@@ -41,7 +40,7 @@ test('in dev a parsed save the cartridge cannot restore is a cartridge_error tha
   const r = refusal(() => openGame(a.db, toolbox, { ...a.host, dev: true }));
   assert.deepEqual(r, {
     kind: 'cartridge_error',
-    message: 'SyntaxError: malformed JSON: the saved world does not fit the cartridge',
+    message: 'the saved world does not fit the cartridge',
   });
   assert.equal(a.rows(), a.before);
   const s = localSession(
@@ -66,23 +65,17 @@ test('in dev a save whose rows do not parse is still save_corrupt', () => {
   );
 });
 
-// Breaks: session.ts built() is dropped around cartridgeOf/newWorld/openStory, so a cartridge that
-// does not load or whose genesis cannot be saved reaches the Book untyped, its cause unnamed.
-test('in dev a cartridge that does not load or build its first save names the cause; a release stays untyped', () => {
+// Breaks: session.ts built() is dropped around cartridgeOf/newWorld, so a cartridge that does not
+// load reaches the Book untyped, its cause unnamed.
+test('in dev a cartridge that does not load names the cause; a release stays untyped', () => {
   const broken = { canonical, sha256: '0'.repeat(64) };
-  const nowhere = codex((c) => (c.entry.key = 'nowhere'));
-  for (const [bundled, text] of [
-    [broken, 'CONTENT_HASH_MISMATCH'],
-    [nowhere, 'invalid_canonical'],
-  ] as const) {
-    const a = sqliteHost();
-    const r = refusal(() => openGame(a.db, bundled, { ...a.host, dev: true }));
-    assert.equal(r.kind, 'cartridge_error');
-    assert.match(r.message, new RegExp(text));
-    assert.equal(
-      a.sql.prepare("SELECT count(*) AS n FROM sqlite_master WHERE name = 'save'").get()?.n ?? 0,
-      0,
-    );
-    assert.equal(refusal(() => openGame(sqliteHost().db, bundled, a.host)).kind, undefined);
-  }
+  const a = sqliteHost();
+  const r = refusal(() => openGame(a.db, broken, { ...a.host, dev: true }));
+  assert.equal(r.kind, 'cartridge_error');
+  assert.match(r.message, /CONTENT_HASH_MISMATCH/);
+  assert.equal(
+    a.sql.prepare("SELECT count(*) AS n FROM sqlite_master WHERE name = 'save'").get()?.n ?? 0,
+    0,
+  );
+  assert.equal(refusal(() => openGame(sqliteHost().db, broken, a.host)).kind, undefined);
 });

@@ -1,4 +1,4 @@
-// size: allow 670, one scaffolded cartridge the tests edit in turn and the last undoes; a split needs a second scaffold
+// size: allow 675, one scaffolded cartridge the tests edit in turn and the last undoes; a split needs a second scaffold
 // The editor map's edits (kernel/ts/play/mapedit.ts) through the real write routes
 // (play/write.ts) and the real `mix loka.new`, on one scaffolded cartridge the tests edit in turn;
 // the last one undoes every gesture. Expected files are written by hand.
@@ -635,6 +635,11 @@ test("New counts only the kind's own file as made, not a capability merge into c
   );
   assert.match(await made((n) => ['cartridge.json', `skills/${n}.json`]), /^skill_\d+$/);
   assert.equal(await made(() => ['outline.json'], 'outline'), 'outline'); // a root file has no folder
+  // Breaks: matching `<name>.json`, when a single-file kind's starter writes resources.json
+  assert.match(
+    await made(() => ['cartridge.json', 'resources.json'], 'resources'),
+    /^resource_\d+$/,
+  );
 });
 
 test("Add dialogue in a world without the capability writes the speaker into the dialogue's file", async () => {

@@ -187,8 +187,8 @@ export async function create(
   if (!name) return '';
   const { ok, told } = await io.post('new', { kind, name });
   if (!ok) no(said(told));
-  if (!(told as { files: string[] }).files.some((f) => `/${f}`.endsWith(`/${name}.json`)))
-    no(`${name} already exists`); // the starter reran on its file
+  const made = (told as { files: string[] }).files.some((f) => f !== 'cartridge.json'); // not a capability merge
+  if (!made) no(`${name} already exists`); // the starter reran on its file
   return name;
 }
 

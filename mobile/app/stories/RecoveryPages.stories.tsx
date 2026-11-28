@@ -34,7 +34,7 @@ export const SaveErrorCorrupt: StoryObj = {
 export const SaveErrorCartridge: StoryObj = {
   ...failed(
     'cartridge_error', // dev only (save.md): the error's own text, no Start over
-    'SyntaxError: malformed JSON: the saved world does not fit the cartridge',
+    'the saved world does not fit the cartridge',
     false,
   ),
   name: 'Save error: cartridge (dev)',

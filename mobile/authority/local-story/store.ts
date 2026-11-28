@@ -132,7 +132,7 @@ export function load(db: Db, fresh: World, first: () => Meta, dev = false) {
       dev,
     );
   } catch (e) {
-    if (unreadable(e) && !(e instanceof CartridgeError)) return undefined;
+    if (unreadable(e)) return undefined;
     throw e;
   }
 }
@@ -141,16 +141,13 @@ export function load(db: Db, fresh: World, first: () => Meta, dev = false) {
 export class CartridgeError extends Error {}
 
 function restored(fresh: World, state: object, revision: number, meta: Meta, db: Db, dev: boolean) {
-  try {
-    const world = hydrate(fresh, state as World['state'], true);
-    if (!world || !restorable(world))
-      throw new SyntaxError('malformed JSON: the saved world does not fit the cartridge');
-    receiptRecovery(fresh, world, db, meta, revision, dev);
-    return saved(world, revision, meta, db);
-  } catch (e) {
-    if (dev && unreadable(e)) throw new CartridgeError(String(e));
-    throw e;
+  const world = hydrate(fresh, state as World['state'], true);
+  if (!world || !restorable(world)) {
+    if (dev) throw new CartridgeError('the saved world does not fit the cartridge');
+    throw new SyntaxError('malformed JSON: the saved world does not fit the cartridge');
   }
+  receiptRecovery(fresh, world, db, meta, revision, dev);
+  return saved(world, revision, meta, db);
 }
 
 function firstSave(db: Db, fresh: World, meta: Meta) {
