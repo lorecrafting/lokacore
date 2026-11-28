@@ -141,6 +141,19 @@ test('a refused key, link, remove or gated write sends nothing and shows why', a
   );
 });
 
+// Breaks (the panel's broken-dialogue case): generic.tsx's gate counting a refusal the file
+// already had as new, so a dialogue broken twice refuses the edit that fixes one break.
+test('a dialogue already broken takes the edit that fixes it', async () => {
+  const a = { ...ONE.choices.a, then: 'side_set' }; // no then in a quest dialogue
+  const b = { ...ONE.choices.a, check: {} }; // no check choice in a quest dialogue
+  const s = await sheet({ quest: 'q', choices: { a, b } }, 'a', 'a.then');
+  await s.press(`clear ${s.file}:["choices","a","then"]`);
+  assert.deepEqual(
+    posts.map((p) => p.sent.ops),
+    [[{ path: ['choices', 'a', 'then'], delete: true }]],
+  );
+});
+
 // Breaks: a choice's Flow opening a walk on anything but its own dialogue's node, or drawn on a
 // dialogue /story names no node for.
 test("a choice's Flow opens the walk on its dialogue's node; an unnamed file draws none", async () => {

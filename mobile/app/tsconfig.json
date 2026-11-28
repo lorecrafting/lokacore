@@ -10,6 +10,8 @@
     "author/*.test.ts",
     "*.test.ts",
     "tests/phone.ts",
+    "tests/build.ts",
+    "tests/builder.ts",
     "stories"
   ]
 }
