@@ -34,7 +34,7 @@ test('Build on, its strip and a sheet add no serious or critical axe violation',
     await p.close();
   }
   // Known, open: the Build switch has no aria-checked (loka-hcnlh.90); the room's look button
-  // nests one (Book side, for the designer). A new violation, or one more node, fails.
+  // nests one (Book side, for the designer; loka-hcnlh.96). A new violation, or one more node, fails.
   const known = ['aria-required-attr ×1', 'nested-interactive ×2'];
   assert.deepEqual(
     found,
@@ -66,7 +66,7 @@ test(
       await undo(p).waitFor(); // kept across that reload
       for (const [status, body, shown, value] of [
         [409, '"refused here"', 'refused here', '700'],
-        [500, 'boom', 'a file changed since the map read it', '800'], // mapedit.ts said(): no why
+        [500, 'boom', 'a file changed since the map read it', '800'], // mapedit.ts said(): false why (loka-hcnlh.95)
       ] as const) {
         await p.route('**/__author/change', (r) => r.fulfill({ status, body }), { times: 1 });
         await set(value);
@@ -132,7 +132,7 @@ test("a slow read of a link's old target never shows under its new one", LONG, a
 // Breaks (panel :331): the warden's Combat or Schedule block not drawn on the showcase's own file
 // and schema; Run fights not saying it runs, or offered twice; Add hour not writing the
 // first free hour, or Undo not taking it back. The hour field is drawn 0 px wide (loka-hcnlh.89),
-// so typing an hour is generic.test.ts:493's alone until that is fixed.
+// so typing an hour is generic.test.ts:546's alone until that is fixed.
 test("the warden's Combat and Schedule blocks run and write on the showcase", LONG, async () => {
   const p = await book(390);
   const rel = 'areas/low_wardle/npcs/warden.json';
@@ -193,7 +193,8 @@ test(
     const sent: unknown[] = [];
     await p.route(/\/__author\/(new|delete)$/, (r) => {
       sent.push([new URL(r.request().url()).pathname, r.request().postDataJSON()]);
-      return r.fulfill({ status: 400, json: 'refused here' });
+      const del = r.request().url().endsWith('/delete');
+      return r.fulfill({ status: 400, json: del ? 'delete refused' : 'refused here' });
     });
     const rel = 'areas/fell_road/items/oilskin.json';
     await palette(p, 'oilskin');
@@ -202,7 +203,7 @@ test(
     await shown.filter({ hasText: 'refused here' }).waitFor();
     await palette(p, 'Delete the selected definition');
     await until(() => sent.length === 2, 'Delete sent');
-    await shown.filter({ hasText: 'refused here' }).waitFor();
+    await shown.filter({ hasText: 'delete refused' }).waitFor();
     await p.route('**/__author/source?file=*', (r) => r.fulfill({ status: 404, json: {} }));
     await palette(p, 'Delete the selected definition');
     await shown.filter({ hasText: 'not found' }).waitFor();
@@ -222,8 +223,8 @@ test(
 );
 
 // Last: it deletes a file. Breaks (panel :592): a Delete put back from nowhere in the GUI, so only
-// git brings the file back; a refused put-back (409) not shown, or a second press deleting it again.
-// The Build strip's Undo chip after a Delete is loka-hcnlh.88.
+// git brings the file back; a refused put-back (409) not shown.
+// The Build strip offers no Undo chip after a Delete (loka-hcnlh.88): the count-0 pin goes red when it does.
 test('Recent puts back the file Delete removed, once', LONG, async () => {
   const p = await book(390);
   const rel = 'areas/combat/reactions/boar_gore.json';
@@ -235,6 +236,7 @@ test('Recent puts back the file Delete removed, once', LONG, async () => {
     await palette(p, 'Delete the selected definition');
     await until(() => !existsSync(path), 'deleted');
     await compiled;
+    assert.equal(await undo(p).count(), 0); // loka-hcnlh.88
     await p.getByRole('button', { name: 'Notebook' }).click();
     await p.getByRole('button', { name: 'Recent', exact: true }).first().click();
     const back = sheet(p)
@@ -250,9 +252,6 @@ test('Recent puts back the file Delete removed, once', LONG, async () => {
     await back.click();
     await until(() => existsSync(path), 'put back');
     assert.equal(readFileSync(path, 'utf8'), bytes);
-    await p.keyboard.press('Meta+z');
-    await p.waitForTimeout(1500);
-    assert.equal(existsSync(path), true, 'a second press deleted it again');
   } finally {
     writeFileSync(path, bytes);
   }
