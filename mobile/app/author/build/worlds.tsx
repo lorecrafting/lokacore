@@ -129,7 +129,11 @@ export function worldRows() {
       )}
       {copies(real)}
     </View>,
-    samples.length ? act(WORDS.samples, () => toggle(SAMPLES), shown, `fold ${SAMPLES}`) : null,
+    samples.length ? (
+      <View key="samples fold" style={row}>
+        {act(WORDS.samples, () => toggle(SAMPLES), shown, `fold ${SAMPLES}`)}
+      </View>
+    ) : null,
     shown ? (
       <View key="samples" style={row}>
         {picks(samples)}
