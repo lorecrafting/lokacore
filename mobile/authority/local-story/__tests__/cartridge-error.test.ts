@@ -3,7 +3,10 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { read } from '../../../../kernel/ts/test/read.ts';
-import { localSession, openGame } from '../session.ts';
+import { newWorld } from '../../../../kernel/ts/src/index.ts';
+import { ElapsedRecoveryError } from '../elapsed-store.ts';
+import { adopt, type Story } from '../save.ts';
+import { cartridgeOf, CONTEXT, localSession, openGame, SEED } from '../session.ts';
 import { sqliteHost } from './elapsed-host.test.ts';
 
 const { canonical, sha256 } = read('protocol/fixtures/toolbox_showcase_hash.json');
@@ -78,4 +81,16 @@ test('in dev a cartridge that does not load names the cause; a release stays unt
     0,
   );
   assert.equal(refusal(() => openGame(sqliteHost().db, broken, a.host)).kind, undefined);
+});
+
+// Breaks: save.ts adopt() lets a dev CartridgeError escape a mid-play reload, so a commit another
+// tab wrote fails untyped instead of as save_corrupt (only the open names a cartridge_error).
+test('a mid-play reload of a dev save that does not fit is save_corrupt', () => {
+  const a = saveWith(STRANGER);
+  const fresh = newWorld(cartridgeOf(toolbox), CONTEXT as never, SEED as never);
+  const s = { db: a.db, fresh, host: { ...a.host, dev: true } } as unknown as Story;
+  assert.throws(
+    () => adopt(s),
+    (e) => e instanceof ElapsedRecoveryError && e.kind === 'save_corrupt',
+  );
 });
