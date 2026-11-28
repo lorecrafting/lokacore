@@ -34,7 +34,8 @@ export const WORDS = {
   join: (p: number) => `Join page ${p}`,
   removePage: (p: number) => `Remove page ${p}`,
   split: (p: number, n: number) => `Split page ${p} at line ${n}`,
-  kind: (k: SceneKind) => (k === 'speaker' || k === 'words' ? `${k} line` : k),
+  kind: (k: SceneKind, role?: string) =>
+    k === 'speaker' || k === 'words' ? `${k} line${role ? ` ${role}` : ''}` : k,
 };
 const UNDER = 1; // mutate-skip: layout only (an act row's indent under its line)
 const FLUSH = 0; // mutate-skip: layout only (a cut line's indent)
@@ -180,6 +181,17 @@ const units = (me: Row) => (ls: string[]) =>
       : [],
   );
 
+// Add items: a speaker line per role the header names (rulings §1); none: the one refused item
+const adds = (rs: Row[], i: number) => {
+  const roles = new Set(rs.flatMap((r) => /^(?:npc|with): (\w+)/.exec(r.text)?.slice(1) ?? []));
+  return kindsAt(rs, i).flatMap((kind) =>
+    (kind === 'speaker' && roles.size ? [...roles] : [undefined]).map((value) => {
+      const op = { add: { after: i + 1, kind, ...(value && { value }) } };
+      return [WORDS.kind(kind, value), op] as const;
+    }),
+  );
+};
+
 /** Line `i + 1`'s Add after (its kinds), Move up and down and Remove, checked by scene() on `s`. */
 function sceneRow(file: string, s: Src, rs: Row[], i: number) {
   const n = i + 1;
@@ -193,7 +205,7 @@ function sceneRow(file: string, s: Src, rs: Row[], i: number) {
     [WORDS.down(n), down],
     [WORDS.remove(n), { remove: n }],
   ];
-  const kinds = kindsAt(rs, i).map((k) => [WORDS.kind(k), { add: { after: n, kind: k } }] as const);
+  const kinds = adds(rs, i);
   const open = opened.has(key);
   const depth = rs[i].indent / 2; // mutate-skip: layout only
   return (

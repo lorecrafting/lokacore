@@ -27,7 +27,8 @@ export const WORDS = {
 const KINDS: Kind[] = ['start', 'story_point', 'quest', 'action'];
 const LABEL = { ...type.label, color: ink('dim') };
 
-/** A row of trigger picks, `now` lit; a pick puts `next(v)`. */
+/** A row of trigger picks, `now` lit (first when none offers it, as the panel's Pick); a pick puts
+ * `next(v)`. */
 const picks = (
   put: (o: On | undefined) => unknown,
   what: string,
@@ -36,7 +37,7 @@ const picks = (
   now: unknown,
 ) => (
   <View style={{ ...row, flexWrap: 'wrap' }}>
-    {vs.map((v) =>
+    {(now === undefined || vs.includes(now) ? vs : [now, ...vs]).map((v) =>
       act(
         String(v),
         () => v === now || put(next(v as never)),

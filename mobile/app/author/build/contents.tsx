@@ -30,10 +30,11 @@ let tab = WORDS.tabs.find((t) => t === globalThis.localStorage?.getItem(TAB)) ??
 export const toStory = () => void (tab = WORDS.tabs[1]);
 const names = new Map<string, string>(); // a NAMED kind's key, as typed
 /** `kind`'s JSON source files the last /story named (a `.scene` has no schema sheet): `<kind>.json`,
- * `<kind>/<key>.json` or `areas/<area>/<kind>/<key>.json` (guard.ts `placed`). */
-const filesOf = (kind: string) =>
+ * `<kind>/<key>.json` or `areas/<area>/<kind>/<key>.json` (guard.ts `placed`); a cutscene's dir is
+ * `scenes` (guard.ts newRefused's map). */
+const filesOf = (kind: string, dir = kind === 'cutscene' ? 'scenes' : kind) =>
   [...new Set(Object.values(known.files))]
-    .filter((f) => f.endsWith('.json') && (f.split('/').at(-2) ?? f.split('.')[0]) === kind)
+    .filter((f) => f.endsWith('.json') && (f.split('/').at(-2) ?? f.split('.')[0]) === dir)
     .sort();
 
 /** New `kind`: its starter under a free key (or the typed one); a person or item opens its sheet. */
