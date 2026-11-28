@@ -6,6 +6,7 @@ import { read } from '../../../../kernel/ts/test/read.ts';
 import { newWorld } from '../../../../kernel/ts/src/index.ts';
 import { ElapsedRecoveryError } from '../elapsed-store.ts';
 import { adopt, type Story } from '../save.ts';
+import { corrupt } from '../store.ts';
 import { cartridgeOf, CONTEXT, localSession, openGame, SEED } from '../session.ts';
 import { sqliteHost } from './elapsed-host.test.ts';
 
@@ -93,4 +94,12 @@ test('a mid-play reload of a dev save that does not fit is save_corrupt', () => 
     () => adopt(s),
     (e) => e instanceof ElapsedRecoveryError && e.kind === 'save_corrupt',
   );
+});
+
+// Breaks: store.ts corrupt() reads a dev cartridge_error whose text says "malformed" as a corrupt
+// file, so localSession offers a Start over that deletes the save (session.ts reopen's replace).
+test('a dev cartridge_error is never a corrupt file, whatever its text', () => {
+  const told = (cause?: object) => Object.assign(new Error('TypeError: malformed rule'), { cause });
+  assert.equal(corrupt(told({ kind: 'cartridge_error' })), false);
+  assert.equal(corrupt(told()), true); // control: the same text untyped is a corrupt file
 });
