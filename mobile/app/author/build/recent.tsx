@@ -15,10 +15,14 @@ export const WORDS = {
   back: 'Put back',
   nothing: 'No change yet.',
   // what each change did, by the journal entry's first word (write.ts `what`); an outside one says none
-  did: { new: 'new', delete: 'delete', move: 'move', undo: 'put back', outside: '' } as Record<
-    string,
-    string
-  >,
+  did: {
+    new: 'new',
+    delete: 'delete',
+    move: 'move',
+    rename: 'rename',
+    undo: 'put back',
+    outside: '',
+  } as Record<string, string>,
   edit: 'edit',
   from: 'from', // a row delete (`delete <section> <key>`): its key, from its file
   notUndone: (file: string) => `${file} changed since; not put back.`,

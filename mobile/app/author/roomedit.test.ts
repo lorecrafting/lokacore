@@ -423,7 +423,7 @@ test("the pencil after a person's name opens that person's sheet; no other key g
 });
 
 // Breaks: Contents' New making a named kind under a free key or an item under an item template's
-// key, a new person or item not opening its sheet, or a named kind's opening one.
+// key, a new person or item not opening its sheet, or a made named kind not opening its file's.
 test("Contents' New makes a person under a free key and opens it; a named kind needs its name", async () => {
   const s = await opened(made);
   s.on(() => sheets.contents.body(''));

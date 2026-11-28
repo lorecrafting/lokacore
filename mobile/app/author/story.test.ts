@@ -174,15 +174,16 @@ test('the Story tab marks a beat unwritten, a node with its refusals, unwritten 
   );
 });
 
-test('Add beat 3 on the second part (part:1) writes beat 3 after beat 2 there', async () => {
+// Breaks: Add beat ignoring the typed number (the computed next here is 3).
+test('Add beat 5 on the second part (part:1) writes beat 5 after beat 2 there', async () => {
   posts = [];
-  type('number', '3', 1);
+  type('number', '5', 1);
   await press('Add beat', 1);
   assert.deepEqual(posts, [
     change([
       {
         path: ['parts', 1, 'beats'],
-        value: [{ n: 2, nodes: ['dialogues/farewell'] }, { n: 3 }],
+        value: [{ n: 2, nodes: ['dialogues/farewell'] }, { n: 5 }],
       },
     ]),
   ]);

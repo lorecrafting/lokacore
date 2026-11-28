@@ -1114,14 +1114,15 @@ reasons and limits: [prose in the Book rulings](../design/prose-in-the-book-ruli
     kind a starter exists for, each with `New <kind>`; a kind whose key is the author's (text,
     behaviours) has a field named by the kind before it, and New with it empty does nothing. New
     makes the kind's starter under a free key (or the typed one); a person or item opens its
-    sheet, any other kind stays on Contents. Under each kind's row, in a row of its own, its JSON
+    sheet, any other kind opens the `def:<file>` sheet of the file it wrote (its own, else the one it
+    changed). Under each kind's row, in a row of its own, its JSON
     source files the latest story names, sorted by path; a file opens its `def:<file>` sheet
     (Build: the generic sheet) on top. A file that defines rooms is followed by `Go to <room>` per
     room (6.3a), which plays from that room.
   - **Story (5.4b, [builder mode §4.8](../rnd/in-game-builder-mode-2026-11-19.md#48-the-story-on-a-phone)).**
     The Notebook sheet has four tabs, `Contents`, `Story`, `World` (6.1a) and `Tools` (6.2a); the open tab is marked selected. Story
     shows the refusal line, then `Facts` and `Pacing`, then each part (`Part n Title`) with a number
-    field and `Add beat`, its beats (`n Title`, `· unwritten` where the panel marks it `~`, `· missing`
+    field and `Add beat` (with the number empty it takes the outline's highest beat number + 1), its beats (`n Title`, `· unwritten` where the panel marks it `~`, `· missing`
     when unbuilt), each beat's bound definitions, Seeds as plain lines that are not buttons, and
     `Unplaced (n)`. A row is marked built, missing or unreached, with its refusal count, and never
     `~`. Open and selected are one state: the first press on a part or beat opens and selects it, a
