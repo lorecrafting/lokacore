@@ -183,9 +183,9 @@ const units = (me: Row) => (ls: string[]) =>
 
 // Add items: a speaker line per role the header names (rulings §1); none: the one refused item
 const adds = (rs: Row[], i: number) => {
-  const roles = rs.flatMap((r) => /^(?:npc|with): (\w+)/.exec(r.text)?.slice(1) ?? []);
+  const roles = new Set(rs.flatMap((r) => /^(?:npc|with): (\w+)/.exec(r.text)?.slice(1) ?? []));
   return kindsAt(rs, i).flatMap((kind) =>
-    (kind === 'speaker' && roles.length ? roles : [undefined]).map((value) => {
+    (kind === 'speaker' && roles.size ? [...roles] : [undefined]).map((value) => {
       const op = { add: { after: i + 1, kind, ...(value && { value }) } };
       return [WORDS.kind(kind, value), op] as const;
     }),

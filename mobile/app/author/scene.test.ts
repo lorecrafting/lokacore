@@ -119,7 +119,7 @@ test('a new /story re-reads the lines; Add after, words line sends {add:{after, 
 });
 
 // Breaks: the speaker kind greyed though the header names roles, sent without its role, or offered
-// pressable with no role named.
+// pressable with no role named, or one role named twice offered twice.
 test('Add offers a speaker line per header role and sends its value; none named stays refused', async () => {
   const file = 'scenes/r.scene';
   files[file] = 'npc: bram\nwith: nell\n\n- A #a\n  * x\n';
@@ -134,6 +134,15 @@ test('Add offers a speaker line per header role and sends its value; none named 
   await press(named(all, 'Add after line 1'));
   all = nodes(lines('scenes/b.scene'));
   assert.equal(named(all, 'speaker line').props.disabled, true);
+  files['scenes/g.scene'] = 'npc: guard\nwith: guard\n\n- A #a\n  * x\n';
+  all = await drawn(() => lines('scenes/g.scene'), 'scenes/g.scene', 4);
+  await press(named(all, 'Add after line 4'));
+  all = nodes(lines('scenes/g.scene'));
+  const guard = all.filter((x) => x.props?.accessibilityRole === 'button');
+  const once = guard.filter(
+    (x) => nodes(x.props.children)[0]?.props?.children === 'speaker line guard',
+  );
+  assert.equal(once.length, 1); // a role named twice is offered once
 });
 
 // Breaks: a refused act drawn pressable, without its reason, or sending anyway (by press or Alt-key).
