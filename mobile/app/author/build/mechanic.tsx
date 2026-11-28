@@ -43,11 +43,8 @@ export function mechanics(
   const yes = m.allowed.filter((k) => !hidden(k));
   const no = m.blocked.filter((b) => !hidden(b.field));
   if (!yes.length && !no.length) return [];
-  const head = side(
-    [],
-    act(WORDS.mechanic, () => toggle(menu), opened.has(menu), `mechanic ${menu}`),
-  );
-  if (!opened.has(menu)) return [head];
+  const head = act(WORDS.mechanic, () => toggle(menu), opened.has(menu), `mechanic ${menu}`);
+  if (!opened.has(menu)) return [side([], head)];
   return [
     head,
     ...yes.map((k) =>
@@ -62,5 +59,5 @@ export function mechanics(
         said(b.field),
       ),
     ),
-  ];
+  ].map((row) => side([], row)); // each row keeps the sheet's sides
 }

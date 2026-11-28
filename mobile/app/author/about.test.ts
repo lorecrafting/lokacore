@@ -56,30 +56,41 @@ async function opened(file: string, doc: unknown) {
   };
   return { shown, press };
 }
-const at = (s: { shown: () => any[] }, key: string) => s.shown().find((x) => x.key === key);
+const at = (s: { shown: () => any[] }, key: string) =>
+  s.shown().find((x) => x.props?.onPress && String(x.key).startsWith(key));
+/** A button's hint as native reads it, and its web `aria-description` (set by its ref). */
+function hint(b: any) {
+  const set = new Map<string, string>();
+  b.props.ref?.({ setAttribute: (k: string, v: string) => set.set(k, v) });
+  return [b.props.accessibilityHint, set.get('aria-description')];
+}
 
 // Break (:44, :104): Add mechanic… shows bare field names, so the author cannot tell what `edible` or
-// `sanctuary` does; or it shows the definition's words (ItemEdible's) for the field's own beside its `$ref`.
+// `sanctuary` does; or it shows the definition's words (ItemEdible's) for the field's own beside its `$ref`; or its options show with the menu closed; or the hint is dropped (web: aria-description).
 test("Add mechanic…'s options show their field's description", async () => {
   for (const [file, f, def] of [
     ['items/lute.json', 'edible', 'source.ItemDefinition'],
     ['rooms/top.json', 'sanctuary', 'source.RoomDefinition'],
   ]) {
     const s = await opened(file, { name: 'x' });
+    assert.equal(at(s, `mechanic ${f} `), undefined); // the menu opens closed
     await s.press(`mechanic ${file}:["+mechanic"]`);
-    const option = s.shown().find((x) => String(x.key).startsWith(`mechanic ${f} `));
-    assert.equal(words(option), `${f}${defs[def].properties[f].description}`);
+    const option = at(s, `mechanic ${f} `);
+    const d = defs[def].properties[f].description;
+    assert.equal(words(option), `${f}${d}`);
     assert.equal(option.props.accessibilityLabel, f); // the description is its hint, not its name
+    assert.deepEqual(hint(option), [d, d]);
   }
 });
 
-// Break: a nested Add… menu (an object field's absent fields) shows bare names.
+// Break: a nested Add… menu (an object field's absent fields) shows bare names, or a field's own words
+// beside its `$ref` (resource's, a DefinitionRef) give way to the definition's.
 test("an Add… option shows its field's description", async () => {
   const s = await opened('items/bun.json', { edible: { label: 'l', narration: 'n' } });
   await s.press('fold items/bun.json:["edible"]');
   await s.press('add items/bun.json:["edible","+"]');
-  const amount = at(s, 'add amount items/bun.json:["edible","+"]');
-  assert.equal(words(amount), `amount${defs.ItemEdible.properties.amount.description}`);
+  const resource = at(s, 'add resource items/bun.json:["edible","+"]');
+  assert.equal(words(resource), `resource${defs.ItemEdible.properties.resource.description}`);
 });
 
 // Break (:70): a list item hides its description; the harp's one keyword is a bare `{$ref: Alias}`, so the
@@ -87,12 +98,12 @@ test("an Add… option shows its field's description", async () => {
 test('a list item shows its description', async () => {
   const s = await opened('items/harp.json', { keywords: ['harp'] });
   await s.press('fold items/harp.json:["keywords"]');
-  const item = at(s, 'items/harp.json:["keywords",0]');
+  const item = s.shown().find((x) => x.key === 'items/harp.json:["keywords",0]');
   assert.ok(nodes(item).some((x) => words(x) === defs.Alias.description));
 });
 
 // Break (review): a refused mechanic, greyed with why, drops its description where the author decides
-// whether to turn it on.
+// whether to turn it on; or its name is not name then reason, or its hint is dropped.
 test("a greyed Add mechanic… row shows its field's description", async () => {
   files.set('cartridge.json', { requires: { capabilities: {} }, world: {} }); // every gate shut
   story(
@@ -104,10 +115,9 @@ test("a greyed Add mechanic… row shows its field's description", async () => {
   (await settle(), await settle());
   const s = await opened('items/flute.json', { name: 'x' });
   await s.press('mechanic items/flute.json:["+mechanic"]');
-  const row = s.shown().find((x) => String(x.key).startsWith('mechanic edible '));
-  assert.ok(
-    nodes(row).some(
-      (x) => words(x) === defs['source.ItemDefinition'].properties.edible.description,
-    ),
-  );
+  const row = at(s, 'mechanic edible ');
+  const d = defs['source.ItemDefinition'].properties.edible.description;
+  assert.ok(nodes(row).some((x) => words(x) === d));
+  assert.equal(row.props.accessibilityLabel, `edible, ${words(row).slice(6, -d.length)}`);
+  assert.deepEqual(hint(row), [d, d]);
 });

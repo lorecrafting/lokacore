@@ -26,7 +26,8 @@ import {
   BUSY,
   about,
 } from './formwrite.ts';
-import { act, note } from './sheet.tsx';
+import { note } from './note.tsx';
+import { act } from './sheet.tsx';
 
 export const WORDS = {
   add: 'Add…',
@@ -125,8 +126,10 @@ function object(at: At, path: Step[], s: Extract<Shape, { as: 'object' }>, value
   const refused = (k: string) => start(k) !== undefined && !!at.gate?.(ops([...path, k], start(k)));
   const absent = Object.keys(s.props).filter((k) => !shown(k) && !theirs.has(k));
   const menu = id(at, [...path, '+']);
-  const add = (k: string) => set(at, [...path, k], start(k));
   const said = (k: string) => about(at, s.props[k]); // each option's description
+  const add = (k: string) => () => set(at, [...path, k], start(k));
+  const option = (k: string) =>
+    side(path, act(k, add(k), undefined, `add ${k} ${menu}`, undefined, said(k)));
   const more = act(WORDS.add, () => toggle(menu), opened.has(menu), `add ${menu}`);
   return [
     ...keys.map((k) =>
@@ -139,9 +142,7 @@ function object(at: At, path: Step[], s: Extract<Shape, { as: 'object' }>, value
       ),
     ),
     absent.length ? side(path, more) : null,
-    ...(opened.has(menu)
-      ? absent.map((k) => act(k, () => add(k), undefined, `add ${k} ${menu}`, undefined, said(k)))
-      : []),
+    ...(opened.has(menu) ? absent : []).map(option),
     ...(m
       ? mechanics(at, m, (k) => shown(k) || !Object.hasOwn(s.props, k) || refused(k), start, said)
       : []), // this branch's fields

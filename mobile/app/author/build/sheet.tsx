@@ -5,6 +5,7 @@ import { Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } fr
 import { focusTitle } from '../../book/title.ts';
 import { motion, size, space, type } from '../../book/tokens.ts';
 import { ink, type Builder } from './build.ts';
+import { hint, note } from './note.tsx';
 import { openSource } from './source.ts';
 
 const WORDS = { close: 'Back', grow: 'Full height', shut: 'Close' };
@@ -68,8 +69,7 @@ export const act = (
     <Pressable
       key={key}
       accessibilityRole="button"
-      accessibilityLabel={about && label} // the description is the hint, not the name
-      accessibilityHint={about}
+      {...hint(label, about)}
       accessibilityState={
         expanded === undefined && selected === undefined
           ? undefined
@@ -85,13 +85,6 @@ export const act = (
     </Pressable>
   );
 };
-/** A field's description: a dim sentence under its name, wrapped whole (loka-hcnlh.84). */
-export const note = (about?: string) =>
-  about ? (
-    <Text key="a" style={{ ...type.small, color: ink('dim') }}>
-      {about}
-    </Text>
-  ) : null;
 
 /** A control that cannot act yet, dim with why; pressable only given `run` (Add mechanic… turns one on). */
 export const greyed = (
@@ -104,7 +97,7 @@ export const greyed = (
   <Pressable
     key={key}
     accessibilityRole="button"
-    accessibilityHint={about}
+    {...hint(`${label}, ${why}`, about)}
     accessibilityState={{ disabled: !run }}
     disabled={!run}
     onPress={run}
