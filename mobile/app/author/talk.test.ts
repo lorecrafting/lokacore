@@ -299,4 +299,6 @@ test("a person's or item's title gets its name pencil by the words the page boun
   bind(seen, 'Hen', 'item.hen.name');
   title('npc.hen.name', 'Hen');
   assert.deepEqual(keys, ['npc.wren.name', 'item.lamp.name', undefined]);
+  for (const k of ['npc.wren.name', 'item.lamp.name']) said.delete(k);
+  seen.clear(); // no binding left for the tests after
 });
