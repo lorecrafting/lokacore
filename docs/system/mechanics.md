@@ -32,8 +32,9 @@ The body starts in `entry`, each ordinary NPC in its room, each ordinary item at
 `calendar.start` or 0; each scheduled NPC's first job is due at its schedule's first
 hour strictly after the start; facts hold their defaults, with no record until the first change
 (so the [position](#position1-kerneltssrcmechanicspositionrulets) fact adds nothing to a fresh state); a world starting after time 0 stores
-the body's legacy resources at their start values, and one starting at 0 still stores the row of
-the [wage](#hireling-wages-toolbox-row-22b) resource. Every opted recovery pool has a required
+the body's legacy resources at their start values, and one starting at 0 still stores the rows of
+the [wage](#hireling-wages-toolbox-row-22b) resource, a shop's currency, the service and transport currencies and a dialogue
+`lesson_payment` or `payment` currency (`started`, `kernel/ts/src/runtime/fresh.ts`), since `transfer` needs a real row. Every opted recovery pool has a required
 player-body row at the birth clock, including zero, with its authored start, standing rate
 and zero remainder ([resource@1](#resource1-kerneltssrcmechanicsresourcets)). One body per world;
 rules read the actor from the

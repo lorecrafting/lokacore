@@ -277,15 +277,16 @@ export default function App() {
   useAuthorPanel({ redraw, session: { game: () => activeSession?.game() }, startOver }, game);
   if (!activeSession) return null;
   if (!loaded && !fontError) return null;
-  if (!game)
-    return (
-      <SaveError
-        failed={activeSession.failed()!}
-        startOver={() => shell.confirm(startOver)}
-        tryAgain={Platform.OS === 'web' ? () => location.reload() : undefined}
-        haptics={shell.effects?.haptics?.get()}
-      />
-    );
-  const book = <Book key={starts} game={played(game)!} shell={bookShell} startOver={startOver} />;
+  // In the author preview Build stays above a save that did not open: the files are fixed there.
+  const book = game ? (
+    <Book key={starts} game={played(game)!} shell={bookShell} startOver={startOver} />
+  ) : (
+    <SaveError
+      failed={activeSession.failed()!}
+      startOver={() => shell.confirm(startOver)}
+      tryAgain={Platform.OS === 'web' ? () => location.reload() : undefined}
+      haptics={shell.effects?.haptics?.get()}
+    />
+  );
   return Building ? <Building>{book}</Building> : book;
 }

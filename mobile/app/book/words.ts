@@ -1,4 +1,4 @@
-// size: allow 322, corpse names bind their victim (loka-kgd.203), the author hook (loka-vduxr.51, .53, wfrgk.19)
+// size: allow 324, corpse names bind their victim (loka-kgd.203), the author hook (loka-vduxr.51, .53, wfrgk.19), dev cartridge_error text (hcnlh.100.1)
 // The app's own words for the kernel's codes (R6P Polish): what an accepted outcome says in the log
 // and what a refusal reason says. A raw code is never shown as an answer; a code with no words here
 // gets none (an outcome) or its code with spaces (a reason).
@@ -43,21 +43,23 @@ export const locked = (f: Failed) =>
   /Access Handles? cannot be created|^The object is in an invalid state\.?$/.test(f.message);
 
 /**
- * The line under the save-error headline, never a raw code or exception text: a Start over that is
- * not confirmed gets its words, an empty message or one that is only the kind none (the headline
- * says it), the browser's save-file lock a sentence, any other message one plain sentence.
- * ponytail: the lock is matched on its message text (Chrome's, Safari's bare InvalidStateError).
+ * The line under the save-error headline, never a raw code or exception text but a dev cartridge error's
+ * own (save.md): an unconfirmed Start over its words, a message that is empty or only the kind none,
+ * the browser's save-file lock a sentence, any other one plain sentence. ponytail: the lock is matched on
+ * its message text (Chrome's, Safari's bare InvalidStateError).
  */
 export const detail = (f: Failed) =>
-  f.code === 'start_over_pending'
-    ? 'Start over was not confirmed.'
-    : f.message === f.kind
-      ? undefined
-      : locked(f)
-        ? 'Loka is already open in another tab.'
-        : f.message
-          ? 'The save could not be opened.'
-          : undefined;
+  f.kind === 'cartridge_error'
+    ? f.message
+    : f.code === 'start_over_pending'
+      ? 'Start over was not confirmed.'
+      : f.message === f.kind
+        ? undefined
+        : locked(f)
+          ? 'Loka is already open in another tab.'
+          : f.message
+            ? 'The save could not be opened.'
+            : undefined;
 
 // Book UI Conditions details: seconds under two minutes, whole minutes under two hours, then hours.
 export const dur = (s: number) =>

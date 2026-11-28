@@ -4,7 +4,7 @@ import type { Command, DecisionResult } from '../../../kernel/ts/src/contracts.g
 import type { World } from '../../../kernel/ts/src/runtime/decision.ts';
 import type { Host, Release, Reply } from './authority.ts';
 import { commit, type Captured } from './commit.ts';
-import { load, receipt, reconcile, identityOf } from './store.ts';
+import { CartridgeError, load, receipt, reconcile, identityOf } from './store.ts';
 import type { Db, Meta, Receipt } from './store.ts';
 import {
   ElapsedRecoveryError,
@@ -111,14 +111,15 @@ export function settle(s: Story): Receipt | undefined {
 
 /** Memory takes the saved head, identity and world, after a commit it did not write itself. */
 export function adopt(s: Story) {
-  const saved = load(
-    s.db,
-    s.fresh,
-    () => {
-      throw new Error('no save');
-    },
-    s.host.dev,
-  );
+  const noSave = () => {
+    throw new Error('no save');
+  };
+  let saved;
+  try {
+    saved = load(s.db, s.fresh, noSave, s.host.dev);
+  } catch (e) {
+    if (!(e instanceof CartridgeError)) throw e; // only the open names a dev cartridge_error
+  }
   if (!saved) throw new ElapsedRecoveryError('save_corrupt', 'save corrupt');
   Object.assign(s, saved);
 }

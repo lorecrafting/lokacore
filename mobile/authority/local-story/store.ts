@@ -123,15 +123,31 @@ export function load(db: Db, fresh: World, first: () => Meta, dev = false) {
     const rng = JSON.parse(h.rng!);
     const [parent, seed, pin] = [m.parent, m.seed, m.pin].map((v) => JSON.parse(v as string));
     if ([rng, seed].some((r) => validate('RngState', r).length)) return undefined; // no RNG state
-    const world = hydrate(fresh, { ...state, clock: h.clock, rng } as World['state'], true);
-    if (!world || !restorable(world)) return undefined;
-    const meta = { ...m, parent, seed, pin } as Meta;
-    receiptRecovery(fresh, world, db, meta, h.revision, dev);
-    return saved(world, h.revision, meta, db);
+    return restored(
+      fresh,
+      { ...state, clock: h.clock, rng },
+      h.revision,
+      { ...m, parent, seed, pin } as Meta,
+      db,
+      dev,
+    );
   } catch (e) {
     if (unreadable(e)) return undefined;
     throw e;
   }
+}
+
+/** In dev a parsed save the cartridge cannot restore is the cartridge's fault, not a damaged save (save.md). */
+export class CartridgeError extends Error {}
+
+function restored(fresh: World, state: object, revision: number, meta: Meta, db: Db, dev: boolean) {
+  const world = hydrate(fresh, state as World['state'], true);
+  if (!world || !restorable(world)) {
+    if (dev) throw new CartridgeError('the saved world does not fit the cartridge');
+    throw new SyntaxError('malformed JSON: the saved world does not fit the cartridge');
+  }
+  receiptRecovery(fresh, world, db, meta, revision, dev);
+  return saved(world, revision, meta, db);
 }
 
 function firstSave(db: Db, fresh: World, meta: Meta) {
@@ -192,7 +208,10 @@ export const unreadable = (e: unknown) =>
   e instanceof SyntaxError || /malformed JSON/.test(String(e));
 
 /** True when SQLite reports the file is not a database or a page of it corrupt, not bad JSON (OFF-07). */
-export const corrupt = (e: unknown) => /file is not a database|malformed(?! JSON)/.test(String(e));
+// A dev cartridge_error's text may say "malformed": the files are at fault, not the save.
+export const corrupt = (e: unknown) =>
+  ((e as Error)?.cause as { kind?: string } | undefined)?.kind !== 'cartridge_error' &&
+  /file is not a database|malformed(?! JSON)/.test(String(e));
 
 /**
  * Makes the save `fresh` at revision 0 under the identity `meta`, with no receipts, in one

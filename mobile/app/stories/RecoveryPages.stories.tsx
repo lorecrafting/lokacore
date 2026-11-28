@@ -3,13 +3,14 @@
 import type { Meta, StoryObj } from '@storybook/react-native-web-vite';
 import { fn } from 'storybook/test';
 import { SaveError } from '../SaveError.tsx';
+import type { Failed } from '../../packages/game-view/session.ts';
 import { pageStory } from './screen.tsx';
 import firstRoom from './views/room-first.json';
 
 const meta: Meta = { title: 'Pages/Recovery', component: SaveError, tags: ['!autodocs'] };
 export default meta;
 const failed = (
-  kind: 'unsupported_save_format' | 'save_corrupt' | 'pinned_release_missing' | undefined,
+  kind: Failed['kind'],
   message: string,
   startOver = true, // never for a newer app's save or a lock (session.ts offered)
 ) => ({
@@ -29,6 +30,14 @@ export const SaveErrorFormat: StoryObj = {
 export const SaveErrorCorrupt: StoryObj = {
   ...failed('save_corrupt', 'row 4 failed its hash'),
   name: 'Save error: corrupt',
+};
+export const SaveErrorCartridge: StoryObj = {
+  ...failed(
+    'cartridge_error', // dev only (save.md): the error's own text, no Start over
+    'the saved world does not fit the cartridge',
+    false,
+  ),
+  name: 'Save error: cartridge (dev)',
 };
 export const SaveErrorLocked: StoryObj = {
   ...failed(
