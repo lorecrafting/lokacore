@@ -267,8 +267,8 @@ test('Join writes the exit and its way back, up to down, with no layout; an unkn
   );
 });
 
-const made = (path: string): [number, unknown] =>
-  path === '/new' ? [200, { files: ['npcs/npc_1.json'] }] : [200, { id: 1 }];
+const made = (path: string, sent: { kind: string; name: string }): [number, unknown] =>
+  path === '/new' ? [200, { files: [`${sent.kind}/${sent.name}.json`] }] : [200, { id: 1 }];
 
 // Breaks: Add here making the person outside this room (no `room`, another room, no area), under
 // a key the graph holds or an item under an item template's key, or not opening the sheet.
@@ -435,13 +435,13 @@ test("Contents' New makes a person under a free key and opens it; a named kind n
   s.shown()
     .find((n) => n.props?.accessibilityLabel === 'text')
     .props.onChangeText('intro');
-  await s.press('New text'); // a named kind made: no sheet opens
+  await s.press('New text'); // a named kind made: its file's sheet opens
   await s.press('New items');
   assert.deepEqual(
     s.posts.slice(1).map(([, sent]) => sent.name),
     ['intro', 'item_3'], // item_2 is Add here's
   );
-  assert.deepEqual(s.opens, [`npc:${sent.name}`, 'item:item_3']);
+  assert.deepEqual(s.opens, [`npc:${sent.name}`, 'def:text/intro.json', 'item:item_3']);
 });
 
 // Breaks: Contents listing no file, a file under the wrong kind (an area's by `areas`), a `.scene`
