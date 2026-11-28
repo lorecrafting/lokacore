@@ -242,7 +242,9 @@ function typed(at: At, path: Step[], s: Shape, value: unknown) {
     <TextInput
       key={key}
       accessibilityLabel={String(path.at(-1))}
-      defaultValue={drafts.get(key) ?? shown} // reopened, it shows a draft not yet written
+      defaultValue={drafts.get(key) ?? (shown === '~' ? '' : shown)} // reopened, it shows a draft not yet written
+      placeholder={shown === '~' ? '~' : undefined} // unwritten: typing replaces it, select-all or not
+      placeholderTextColor={ink('dim')}
       style={INPUT}
       onChangeText={(t) => void drafts.set(key, t)}
       onBlur={write}

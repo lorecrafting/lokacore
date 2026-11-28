@@ -247,7 +247,7 @@ export const nameLink = (name: string, onPress: () => void, key?: string | numbe
 export function Heard({ said }: { said: { key: number; text: string } }) {
   return (
     <View aria-live="polite" style={unseen}>
-      <Text key={said.key} numberOfLines={1}>
+      <Text key={said.key} numberOfLines={1} unseen>
         {said.text}
       </Text>
     </View>

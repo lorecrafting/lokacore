@@ -270,3 +270,33 @@ test('a JSON Add choice opens the choices fold; titled draws the header alone, o
     undefined,
   );
 });
+
+// Breaks (F20, F7 of loka-hcnlh.101): a person's or item's title read by its file words alone, so
+// a new `~` name (drawn with its key's marks) or a refused compile's (file words not those drawn)
+// gets no name pencil; two keys bound to the same words getting one.
+test("a person's or item's title gets its name pencil by the words the page bound", () => {
+  const keys: (string | undefined)[] = [];
+  attach({
+    on: () => true,
+    seen,
+    said,
+    redraw() {},
+    focus() {},
+    commit() {},
+    api,
+    wrote() {},
+    pencil: (_shown, key) => (keys.push(key), key && 'pen'),
+  });
+  const title = (key: string, words: string) => {
+    const shown = tagged(key, words);
+    bind(seen, shown, key);
+    return line({ accessibilityRole: 'header', children: shown } as any).children;
+  };
+  said.set('npc.wren.name', '~');
+  title('npc.wren.name', '~');
+  said.set('item.lamp.name', 'Old lamp'); // the refused file's words
+  title('item.lamp.name', 'Lamp');
+  bind(seen, 'Hen', 'item.hen.name');
+  title('npc.hen.name', 'Hen');
+  assert.deepEqual(keys, ['npc.wren.name', 'item.lamp.name', undefined]);
+});
