@@ -4,6 +4,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
 import { nodes, words } from '../book/__tests__/combat-book.test.ts'; // also registers the .tsx loader
+import { space } from '../book/tokens.ts';
 
 const { story } = await import('./build/room.tsx');
 const { sheets } = await import('./build/sheet.tsx');
@@ -100,6 +101,18 @@ test('a list item shows its description', async () => {
   await s.press('fold items/harp.json:["keywords"]');
   const item = s.shown().find((x) => x.key === 'items/harp.json:["keywords",0]');
   assert.ok(nodes(item).some((x) => words(x) === defs.Alias.description));
+});
+
+// Break: a root Add… or Add mechanic… option loses the sheet's sides (space.md) and runs to the edge (each
+// file has its own menus: the first test left lute's open).
+test('root Add… and Add mechanic… options sit inside the sheet sides', async () => {
+  const s = await opened('items/fig.json', { name: 'x' });
+  await s.press('add items/fig.json:["+"]');
+  await s.press('mechanic items/fig.json:["+mechanic"]');
+  const inset = (b: { key: string }) =>
+    s.shown().some((x) => x.props?.style?.marginHorizontal === space.md && x.key === b.key);
+  assert.ok(inset(at(s, 'add extends ')));
+  assert.ok(inset(at(s, 'mechanic edible ')));
 });
 
 // Break (review): a refused mechanic, greyed with why, drops its description where the author decides
