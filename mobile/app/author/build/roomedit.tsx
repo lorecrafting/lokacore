@@ -220,11 +220,21 @@ export const dropIn = (key: string, file: string | undefined, shut: string) =>
     const ask = (files: string[]) =>
       new Promise<boolean>((answer) => ((asking = { key: shut, files, answer }), after()));
     let yes = true;
-    const why = await drop(io, key, file, (files) => ask(files).then((y) => (yes = y)));
+    let id: number | undefined; // the delete's journal id: the Undo chip puts it back as Recent does
+    const post: Io['post'] = async (route, sent) => {
+      const r = await io.post(route, sent);
+      id = (r.told as { id?: number } | null)?.id ?? id;
+      return r;
+    };
+    const why = await drop({ ...io, post }, key, file, (files) =>
+      ask(files).then((y) => (yes = y)),
+    );
+    if (why !== '' || !yes) return why; // refused, or declined: nothing written
     // it is gone: its sheets go too (kind and definition), wherever they sit
-    const sheets = new Set([shut, `${nodeOf(file.split('/').at(-2) ?? '')}:${key}`, `def:${file}`]);
-    if (why === '' && yes) sheets.forEach((id) => close(id));
-    return why;
+    new Set([shut, `${nodeOf(file.split('/').at(-2) ?? '')}:${key}`, `def:${file}`]).forEach((s) =>
+      close(s),
+    );
+    if (id) saved([id]); // not ed's journal: run() sees no undoable write of its own
   });
 
 /** A sheet's foot: Delete `key` (`refs` definitions name it, when known), then the other files it

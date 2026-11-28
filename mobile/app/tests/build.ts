@@ -9,6 +9,7 @@ import { join } from 'node:path';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import axe from 'axe-core';
+import type { Page } from 'playwright';
 import { book, cart, file, LONG, palette, sheet, undo, until } from './builder.ts';
 
 // Breaks (panel :301): a Build control or sheet losing its accessible name, label or contrast (axe
@@ -33,13 +34,28 @@ test('Build on, its strip and a sheet add no serious or critical axe violation',
     found.push(...seen.map((v) => `${width}: ${v}`));
     await p.close();
   }
-  // Known, open: the Build switch has no aria-checked (loka-hcnlh.90); the room's look button
-  // nests one (Book side, for the designer; loka-hcnlh.96). A new violation, or one more node, fails.
-  const known = ['aria-required-attr ×1', 'nested-interactive ×2'];
+  // Known, open: the room's look button nests one (Book side, for the designer; loka-hcnlh.96).
+  // A new violation, or one more node, fails.
+  const known = ['nested-interactive ×2'];
   assert.deepEqual(
     found,
     [390, 1280].flatMap((w) => known.map((v) => `${w}: ${v}`)),
   );
+});
+
+// Breaks (loka-hcnlh.87): a click into the Tools minutes field keeping its value, so typing appends
+// (605) where the panel's field replaced it.
+test('typing into the Tools minutes field replaces its value', LONG, async () => {
+  const p = await book(390);
+  await p.getByRole('button', { name: 'Notebook' }).click();
+  await p.getByRole('button', { name: 'Tools', exact: true }).first().click();
+  const minutes = p.getByRole('textbox', { name: 'minutes' });
+  assert.equal(await minutes.inputValue(), '60');
+  await minutes.click();
+  await p.waitForTimeout(200); // a person types after the focus: react-native-web selects in a timeout
+  await p.keyboard.type('5');
+  assert.equal(await minutes.inputValue(), '5');
+  await p.close();
 });
 
 // Breaks (panel :199, on the builder's terms: a bad value is written and the compile refuses it,
@@ -131,8 +147,8 @@ test("a slow read of a link's old target never shows under its new one", LONG, a
 
 // Breaks (panel :331): the warden's Combat or Schedule block not drawn on the showcase's own file
 // and schema; Run fights not saying it runs, or offered twice; Add hour not writing the
-// first free hour, or Undo not taking it back. The hour field is drawn 0 px wide (loka-hcnlh.89),
-// so typing an hour is generic.test.ts:546's alone until that is fixed.
+// first free hour, or Undo not taking the last write back; the hour field drawn too narrow to type in
+// (loka-hcnlh.89), or an hour past the day written.
 test("the warden's Combat and Schedule blocks run and write on the showcase", LONG, async () => {
   const p = await book(390);
   const rel = 'areas/low_wardle/npcs/warden.json';
@@ -154,8 +170,17 @@ test("the warden's Combat and Schedule blocks run and write on the showcase", LO
     await sheet(p).getByRole('button', { name: 'Add hour' }).click();
     await until(() => hours().length === 3, 'Add hour written');
     assert.deepEqual(hours(), ['0', '13', '14']);
+    const hour = sheet(p).getByRole('textbox', { name: 'hour 14' });
+    await hour.fill('99');
+    await hour.blur();
+    await sheet(p).getByText('an hour is below 24').waitFor();
+    assert.deepEqual(hours(), ['0', '13', '14']);
+    await hour.fill('15');
+    await hour.blur();
+    await until(() => hours().includes('15'), 'hour 15 written');
+    assert.deepEqual(hours(), ['0', '13', '15']);
     await undo(p).click();
-    await until(() => hours().length === 2, 'Undo took the hour back');
+    await until(() => hours().includes('14'), 'Undo took the move back');
   } finally {
     writeFileSync(join(cart, rel), bytes);
   }
@@ -222,25 +247,36 @@ test(
   },
 );
 
+/** Deletes boar_gore from the palette, past the compile's reload. */
+async function remove(p: Page, path: string) {
+  await palette(p, 'boar_gore', /^boar_gore · /);
+  const compiled = p.waitForEvent('load', LONG);
+  await palette(p, 'Delete the selected definition');
+  await until(() => !existsSync(path), 'deleted');
+  await compiled;
+}
+
 // Last: it deletes a file. Breaks (panel :592): a Delete put back from nowhere in the GUI, so only
-// git brings the file back; a refused put-back (409) not shown.
-// The Build strip offers no Undo chip after a Delete (loka-hcnlh.88): the count-0 pin goes red when it does.
-test('Recent puts back the file Delete removed, once', LONG, async () => {
-  const p = await book(390);
+// git brings the file back; the Build strip offering no Undo chip after a Delete (loka-hcnlh.88);
+// a refused put-back (409) not shown.
+test('the Undo chip and Recent put back the file Delete removed', LONG, async () => {
+  let p = await book(390);
   const rel = 'areas/combat/reactions/boar_gore.json';
   const path = join(cart, rel);
   const bytes = readFileSync(path, 'utf8');
   try {
-    await palette(p, 'boar_gore', /^boar_gore · /);
-    const compiled = p.waitForEvent('load', LONG);
-    await palette(p, 'Delete the selected definition');
-    await until(() => !existsSync(path), 'deleted');
-    await compiled;
-    assert.equal(await undo(p).count(), 0); // loka-hcnlh.88
+    await remove(p, path);
+    await undo(p).click();
+    await until(() => existsSync(path), 'the Undo chip put it back');
+    assert.equal(readFileSync(path, 'utf8'), bytes);
+    await p.close();
+    p = await book(390); // a page that the put-back's compile no longer reloads
+    await remove(p, path);
     await p.getByRole('button', { name: 'Notebook' }).click();
     await p.getByRole('button', { name: 'Recent', exact: true }).first().click();
     const back = sheet(p)
       .getByText(/ you · areas\/combat\/reactions\/boar_gore\.json$/)
+      .first() // the newest: the second Delete
       .locator('xpath=..') // its row
       .getByRole('button', { name: 'Put back' });
     await p.route('**/__author/undo', (r) => r.fulfill({ status: 409, json: { file: rel } }), {
