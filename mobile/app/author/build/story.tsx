@@ -1,4 +1,4 @@
-// size: allow 335, the rows, their part and beat edits and the sheets share the tab's drafts and pick
+// size: allow 340, the rows, their part and beat edits and the sheets share the tab's drafts and pick (Add beat's next number too)
 // The notebook's Story tab (design §4.8, slice 5.4b): the panel's Story list (kernel/ts/play/storylist.ts `rows`)
 // as rows. A node row has Go there, Sheet, Trace, Consequences and Flow (flow.tsx); Add part starts the outline or adds a
 // part; a part adds a beat, is retitled and removed; a beat binds, retitles, is removed and shows Knowledge. Trace, Consequences, Knowledge, Facts and Pacing are sheets.
@@ -191,6 +191,12 @@ function partActs(r: L.Row, s: L.Story) {
   ];
 }
 
+/** A part's new beat number: as typed, else the next after every beat of the outline (each n is unique). */
+const next = (id: string, s: L.Story) =>
+  numbers.get(id)?.trim()
+    ? Number(numbers.get(id))
+    : Math.max(0, ...(L.outlineOf(s)?.beats ?? []).map((b) => b.n)) + 1;
+
 /** One list row: a part or beat opens or shuts and shows its edits, a node shows its actions. */
 function storyRow(r: L.Row, s: L.Story) {
   const label = [
@@ -211,7 +217,7 @@ function storyRow(r: L.Row, s: L.Story) {
     r.kind === 'seed' ? line(label, 'head') : act(label, press, r.open, 'head', picked === r.id);
   const adds = r.id.startsWith('part:') && [
     field(WORDS.number, numbers, r.id, undefined, TWO),
-    act(WORDS.add, () => void run(() => ed.addBeat(partNo(r.id), Number(numbers.get(r.id))))),
+    act(WORDS.add, () => void run(() => ed.addBeat(partNo(r.id), next(r.id, s)))),
   ];
   const acts =
     picked !== r.id

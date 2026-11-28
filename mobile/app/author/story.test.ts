@@ -174,18 +174,31 @@ test('the Story tab marks a beat unwritten, a node with its refusals, unwritten 
   );
 });
 
-test('Add beat 3 on the second part (part:1) writes beat 3 after beat 2 there', async () => {
+// Breaks: Add beat ignoring the typed number (the computed next here is 3).
+test('Add beat 5 on the second part (part:1) writes beat 5 after beat 2 there', async () => {
   posts = [];
-  type('number', '3', 1);
+  type('number', '5', 1);
   await press('Add beat', 1);
   assert.deepEqual(posts, [
     change([
       {
         path: ['parts', 1, 'beats'],
-        value: [{ n: 2, nodes: ['dialogues/farewell'] }, { n: 3 }],
+        value: [{ n: 2, nodes: ['dialogues/farewell'] }, { n: 5 }],
       },
     ]),
   ]);
+});
+
+// Breaks: Add beat with the number left empty doing nothing (Number(undefined) is NaN, refused off
+// screen), or taking the next number in its own part only (beat numbers are unique across the outline).
+test('Add beat with no number on part 1 writes beat 3, the next across the outline', async () => {
+  posts = [];
+  await press('Add beat', 0);
+  const [, { ops }] = posts[0] ?? [, {}];
+  assert.deepEqual(
+    ops?.[0]?.value?.map((b: { n: number }) => b.n),
+    [1, 3],
+  );
 });
 
 test("Retitle with the field emptied removes beat 1's title; one Undo puts back that gesture", async () => {

@@ -54,7 +54,15 @@ test('a put-back of a changed file shows `<file> changed since; not put back.`',
   const s = await opened({
     '/journal': () => [
       200,
-      [{ id: 7, at: 0, by: 'editor', files: ['rooms/hall.json', 'rooms/loft.json'] }],
+      [
+        {
+          id: 7,
+          at: 0,
+          what: 'change rooms/hall.json',
+          by: 'editor',
+          files: ['rooms/hall.json', 'rooms/loft.json'],
+        },
+      ],
     ],
     '/undo': () => [409, { file: 'rooms/loft.json', bytes: '{}', sha256: 'S' }],
   });
@@ -169,8 +177,8 @@ test("the edges: a clean put-back, an outside entry, a refused Find, a sheet's r
     '/journal': () => [
       200,
       [
-        { id: 9, at: 0, by: 'outside', files: ['rooms/hall.json'] },
-        { id: 8, at: 0, by: 'editor', files: ['rooms/hall.json'] },
+        { id: 9, at: 0, what: 'outside', by: 'outside', files: ['rooms/hall.json'] },
+        { id: 8, at: 0, what: 'change rooms/hall.json', by: 'editor', files: ['rooms/hall.json'] },
       ],
     ],
     '/undo': () => [200, { file: 'rooms/hall.json' }],
@@ -222,6 +230,58 @@ test('the Contents tab lists a cutscene file under New cutscene', async () => {
   known.files = { 'scene.x': 'scenes/x.json', 'room.y': 'rooms/y.json' };
   await press(() => sheets.contents.body(''), 'scenes/x.json');
   assert.deepEqual(opens, ['def:scenes/x.json']);
+});
+
+// Breaks: a Recent row naming only its file, so a delete reads as an edit of it (F15), a move as
+// an edit, or a row delete as the whole file deleted.
+test('Recent says what each change did: new, edit, delete, move, put back', async () => {
+  const at = (id: number, what: string) => ({ id, at: 0, what, by: 'editor', files: ['r.json'] });
+  const ws = [
+    'new reactions r',
+    'set r.json:2',
+    'delete r.json',
+    'move r.json to x',
+    'delete r k',
+    'undo delete r.json',
+  ];
+  await opened({ '/journal': () => [200, ws.map((w, i) => at(i, w))] });
+  known.files = { again: 'x' }; // a new /story: Recent asks /journal again
+  recentRows();
+  await settle();
+  const said = nodes(recentRows())
+    .filter((n) => n.type === 'Text')
+    .map(words)
+    .filter((w) => w.includes(' · '));
+  assert.deepEqual(
+    said.map((w) => w.split(' · ')[1]),
+    [
+      'new r.json',
+      'edit r.json',
+      'delete r.json',
+      'move r.json',
+      'delete k from r.json',
+      'put back r.json',
+    ],
+  );
+});
+
+// Breaks: Contents New making a fact or cutscene silently, with no sheet opened, or opening a
+// cutscene's quest rather than its scene (F14).
+test("Contents New opens the new thing's file: facts.json, a cutscene's scene", async () => {
+  const { sheets } = await import('./build/sheet.tsx');
+  await import('./build/contents.tsx');
+  const wrote: Record<string, string[]> = {
+    facts: ['facts.json'],
+    cutscene: ['quests/cutscene_1_quest.json', 'scenes/cutscene_1.json'],
+  };
+  const { opens, press } = await opened({
+    '/templates': () => [200, []],
+    '/new': (sent) => [200, { id: 1, files: wrote[sent.kind] }],
+  });
+  await press(() => sheets.contents.body(''), 'Contents');
+  await press(() => sheets.contents.body(''), 'New facts', 5);
+  await press(() => sheets.contents.body(''), 'New cutscene', 5);
+  assert.deepEqual(opens, ['def:facts.json', 'def:scenes/cutscene_1.json']);
 });
 
 // Breaks: a definition sheet with no source footer.

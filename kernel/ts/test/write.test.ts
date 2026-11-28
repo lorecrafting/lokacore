@@ -514,6 +514,7 @@ test('/new refuses a name that is a flag before it runs anything, and journals w
   writeFileSync(
     join(bin, 'mise'),
     '#!/bin/sh\ntouch "$0.ran"\n[ "$6" = taken ] && { echo "noise\nrooms/taken.json exists" >&2; exit 1; }\n' +
+      '[ "$6" = lone ] && { echo "** (Mix) mix loka.new: no rooms in areas/north yet: bin/loka new areas north first" >&2; exit 1; }\n' +
       'for root; do :; done\nsleep 0.5\nd=$root; [ "$7" = --area ] && d=$root/areas/$8\n' +
       'mkdir -p "$d/rooms"; echo "{}" > "$d/rooms/$6.json"\n' +
       '[ "$7" = --from ] && echo "{}" > "$root/areas/north/rooms/$8.json"\nsleep 0.5\n',
@@ -530,6 +531,9 @@ test('/new refuses a name that is a flag before it runs anything, and journals w
   // Break: loka.new's refusal answered as another status, or by other words than its last line.
   const taken = { status: 400, body: 'rooms/taken.json exists' };
   assert.deepEqual(await ask('/new', { kind: 'room', name: 'taken' }), taken);
+  // Break: mix's CLI line (its ** (Mix) prefix, `bin/loka new`) reaching the builder as written (F12).
+  const lone = { status: 400, body: 'no rooms in areas/north yet: use New areas first' };
+  assert.deepEqual(await ask('/new', { kind: 'npcs', name: 'lone' }), lone);
   const making = ask('/new', { kind: 'room', name: 'cellar' });
   // Break: a write during the run lands in the new entry's snapshot diff, so its undo reverts it.
   await new Promise((r) => setTimeout(r, 200));

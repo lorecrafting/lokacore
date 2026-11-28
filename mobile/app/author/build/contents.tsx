@@ -37,15 +37,25 @@ const filesOf = (kind: string, dir = kind === 'cutscene' ? 'scenes' : kind) =>
     .filter((f) => f.endsWith('.json') && (f.split('/').at(-2) ?? f.split('.')[0]) === dir)
     .sort();
 
-/** New `kind`: its starter under a free key (or the typed one); a person or item opens its sheet. */
+/** New `kind`: its starter under a free key (or the typed one), then its sheet: a person's or item's, else its file's. */
 export const made = (kind: string) =>
   run(async () => {
     const [, all] = (await known.api?.('/templates')) ?? []; // the templates' keys are taken too
     const temps: { dir: string; key: string }[] = Array.isArray(all) ? all : []; // a refusal is words
     const held = temps.filter((t) => t.dir === kind).map((t) => t.key);
-    const key = await create(io, kind, known.nodes, held, names.get(kind));
+    let files: string[] = []; // the files /new wrote (create keeps only the key)
+    const post: typeof io.post = async (route, sent) => {
+      const told = await io.post(route, sent);
+      files = (told.told as { files?: string[] })?.files ?? [];
+      return told;
+    };
+    const key = await create({ ...io, post }, kind, known.nodes, held, names.get(kind));
     names.delete(kind);
+    // its own file (a cutscene's scenes/<key>.json, not its quest), else the one it changed (facts.json)
+    const own =
+      files.find((f) => f.endsWith(`/${key}.json`)) ?? files.find((f) => f !== 'cartridge.json');
     if (key && (kind === 'npcs' || kind === 'items')) known.open(`${nodeOf(kind)}:${key}`);
+    else if (key && own) known.open(`def:${own}`);
   });
 
 sheets.contents = {
