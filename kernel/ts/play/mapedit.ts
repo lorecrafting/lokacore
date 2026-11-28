@@ -1,4 +1,4 @@
-// size: allow 310, every map gesture the builder's sheets run, incl. the Person and Item sheets' put and unput
+// size: allow 311, every map gesture the builder's sheets run, incl. the Person and Item sheets' put and unput
 // The map's edits (editor-map-and-story-rulings.md, Left to E3b; gui-editor-design §3): each gesture
 // as write-route calls (§5.1) in order, undone together. No React or fetch here: the panel passes its
 // routes in; tested from kernel/ts/test/author_mapedit.test.ts.
@@ -187,7 +187,8 @@ export async function create(
   if (!name) return '';
   const { ok, told } = await io.post('new', { kind, name });
   if (!ok) no(said(told));
-  if (!(told as { files: string[] }).files.length) no(`${name} already exists`); // the starter reran on its file
+  if (!(told as { files: string[] }).files.some((f) => `/${f}`.endsWith(`/${name}.json`)))
+    no(`${name} already exists`); // the starter reran on its file
   return name;
 }
 

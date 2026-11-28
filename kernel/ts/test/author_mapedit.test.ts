@@ -1,4 +1,4 @@
-// size: allow 655, one scaffolded cartridge the tests edit in turn and the last undoes; a split needs a second scaffold
+// size: allow 670, one scaffolded cartridge the tests edit in turn and the last undoes; a split needs a second scaffold
 // The editor map's edits (kernel/ts/play/mapedit.ts) through the real write routes
 // (play/write.ts) and the real `mix loka.new`, on one scaffolded cartridge the tests edit in turn;
 // the last one undoes every gesture. Expected files are written by hand.
@@ -14,7 +14,7 @@ import { added } from '../play/card.ts';
 import { paired } from '../play/action.ts';
 import { serve } from '../play/live.ts';
 import { cellAt, dragged, toward, type MapRoom } from '../play/map.ts';
-import { editor, freeKey, type Editor, type Io } from '../play/mapedit.ts';
+import { create, editor, freeKey, type Editor, type Io } from '../play/mapedit.ts';
 
 const REPO = join(import.meta.dirname, '../../..');
 const dir = realpathSync(mkdtempSync(join(tmpdir(), 'loka-mapedit-')));
@@ -618,6 +618,23 @@ test('new room and new NPC from a bundled room land in its area folder, joined i
   assert.deepEqual(json('areas/pen/rooms/paddock.json').exits, { north: { to: 'f' } });
   assert.equal(json('areas/pen/npcs/ram.json').room, 'f');
   assert.ok(!existsSync(join(src, 'rooms/f.json')));
+});
+
+test("New counts only the kind's own file as made, not a capability merge into cartridge.json", async () => {
+  // Breaks: create() taking any written file (`files.length`) as made, when the starter reran on a kept key.
+  type Wrote = (name: string) => string[];
+  const post = (files: Wrote) => async (_: string, sent: { name: string }) => ({
+    ok: true,
+    told: { files: files(sent.name) },
+  });
+  const made = (files: Wrote, kind = 'skills') =>
+    create({ post: post(files) } as unknown as Io, kind, [], []);
+  await assert.rejects(
+    made(() => ['cartridge.json']),
+    /already exists/,
+  );
+  assert.match(await made((n) => ['cartridge.json', `skills/${n}.json`]), /^skill_\d+$/);
+  assert.equal(await made(() => ['outline.json'], 'outline'), 'outline'); // a root file has no folder
 });
 
 test("Add dialogue in a world without the capability writes the speaker into the dialogue's file", async () => {
