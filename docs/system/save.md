@@ -25,7 +25,7 @@ compatibility. `save_corrupt` is only a damaged save. The
 saves open as save corrupt) describes the behavior before loka-daha.
 
 Saved quest rows require valid `DefinitionRef` quest and `StateScope` scope fields before
-receipt recovery. Malformed fields are `save_corrupt`; no quest is silently skipped. An optional `started_at` (toolbox row W23) must be a LogicalTime not after the saved clock, else `save_corrupt`; a row without it (an older save) loads and shows no hint.
+receipt recovery. Malformed fields are `save_corrupt` (in dev, `cartridge_error`, below); no quest is silently skipped. An optional `started_at` (toolbox row W23) must be a LogicalTime not after the saved clock, else `save_corrupt`; a row without it (an older save) loads and shows no hint.
 
 Refusals, nothing written:
 
@@ -35,6 +35,7 @@ Refusals, nothing written:
 | `save_corrupt` | the head, a state row, the identity or the RNG does not parse; half a save (rows or receipts without their tables) | yes, in place; reports and the trace survive |
 | `save_corrupt` | SQLite says the file is not a database or a page is malformed (`store.ts:178`) | yes, but `newGame` throws: the host deletes the file (below) |
 | `pinned_release_missing` | the pin names a release the app does not carry, or a kernel_api other than the installed one | yes, on the newest release |
+| `cartridge_error` | dev only (`host.dev`: `?dev=1`, `bin/loka check`): the cartridge does not compile, its genesis or first screen throws, or a save whose rows parse does not restore, recover its receipts or load its head under it (`session.ts` `built`, `store.ts` `restored`); the reply's message is the error's own text, naming the file when the error does; a release reports these as above | no: the author fixes the files; the Build strip stays above it |
 
 ### What reopen proves
 

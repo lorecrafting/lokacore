@@ -1,3 +1,4 @@
+// size: allow 320, the dev cartridge_error classification (loka-hcnlh.100.1) sits beside the refusals it splits from
 import { ElapsedRecoveryError } from './elapsed-store.ts';
 import type {
   GameSubscription,
@@ -57,16 +58,18 @@ function lastId(db: Db): number {
 // save_corrupt with the new game in place (the file is fine), a damaged receipt or a world whose
 // first screen cannot be built, whatever row's shape stops it (ROADMAP SM2a), so both are read
 // once here, not lazily. ponytail: later screens' reads are not checked; typed row validation is R12's.
-function checked(story: Extract<ReturnType<typeof openStory>, { kind: 'open' }>) {
+function checked(story: Extract<ReturnType<typeof openStory>, { kind: 'open' }>, dev?: boolean) {
   const refusal = (e: unknown) =>
     Object.assign(new Error((e as Error).message), {
       cause: { kind: 'save_corrupt', newGame: story.newGame },
     });
-  try {
-    gameView(story.world());
-  } catch (e) {
-    throw refusal(e);
-  }
+  built(dev, () => {
+    try {
+      gameView(story.world());
+    } catch (e) {
+      throw dev ? e : refusal(e);
+    }
+  });
   try {
     const last = story.narration();
     // a line that parses but is not text would throw in the presenter's draw, outside SaveError
@@ -78,21 +81,37 @@ function checked(story: Extract<ReturnType<typeof openStory>, { kind: 'open' }>)
   }
 }
 
+// In dev a cartridge that does not compile, build its world, save it or draw its first screen says why,
+// and offers no start over: the author fixes the files (save.md, refusals).
+function built<T>(dev: boolean | undefined, make: () => T): T {
+  try {
+    return make();
+  } catch (e) {
+    if (!dev) throw e;
+    throw Object.assign(new Error(String(e)), { cause: { kind: 'cartridge_error' } });
+  }
+}
+
 /**
  * The game on the save in `db` (a new one if empty, its ids from `host.newId`, a random UUID each call)
  * of the bundled cartridge; open `db` once per process. A save that does not open throws, its
  * refusal (kind and newGame) as the error's cause.
  */
 export function openGame(db: Db, bundled: Bundled, host: HostPart) {
-  const cartridge = cartridgeOf(bundled);
+  const [cartridge, fresh] = built(host.dev, () => {
+    const c = cartridgeOf(bundled);
+    return [c, newWorld(c, CONTEXT as never, SEED as never)] as const;
+  });
   if (cartridge.manifest.time_policy && !host.time)
     throw Object.assign(new Error('elapsed clocks are required'), {
       cause: { kind: 'elapsed_clock_missing' },
     });
-  const fresh = newWorld(cartridge, CONTEXT as never, SEED as never);
-  const story = openStory(db, [{ content_hash: bundled.sha256, fresh }], host);
-  if (story.kind !== 'open') throw Object.assign(new Error(story.kind), { cause: story });
-  checked(story);
+  const story = built(host.dev, () =>
+    openStory(db, [{ content_hash: bundled.sha256, fresh }], host),
+  );
+  const why = story.kind === 'cartridge_error' ? story.message : story.kind;
+  if (story.kind !== 'open') throw Object.assign(new Error(why), { cause: story });
+  checked(story, host.dev);
   return managedGame(story, cartridge, db);
 }
 const terminal = (reply: Reply) => reply.kind !== 'pending' && reply.kind !== 'catching_up';

@@ -7,7 +7,7 @@ import type { Json } from '../../../kernel/ts/src/foundation/canonical.ts';
 import type { ErrorCode, HostKind } from '../../../kernel/ts/src/contracts.gen.ts';
 import type { World } from '../../../kernel/ts/src/runtime/decision.ts';
 import { INSTALLED, newWorld } from '../../../kernel/ts/src/runtime/world.ts';
-import { corrupt, identityOf, load, reconcile, replace } from './store.ts';
+import { CartridgeError, corrupt, identityOf, load, reconcile, replace } from './store.ts';
 import type { Db, Meta } from './store.ts';
 import { chronicle } from './chronicle.ts';
 import { narration } from './narration.ts';
@@ -67,7 +67,7 @@ const SAVE_FORMAT = 'loka-save-v2';
  * the save's lineage and the world's character; its actor is the character. Not opened, nothing
  * written: a newer format (`unsupported_save_format`, checked first; the player updates the app,
  * 10 §§31-32), and, offering only the player's new game (settled as any; reopen once `replaced`),
- * an uninstalled pin (`pinned_release_missing`, 10 §32) or a corrupt save (`save_corrupt`, OFF-07; also a refused catch-up, `opened`). `invoke` takes one ActionInvocation: malformed or
+ * an uninstalled pin (`pinned_release_missing`, 10 §32) or a corrupt save (`save_corrupt`, OFF-07; also a refused catch-up, `opened`), or in dev a cartridge that cannot restore it (`cartridge_error`, save.md). `invoke` takes one ActionInvocation: malformed or
  * another actor's gets no receipt; a known invocation replays its receipt (altered intent, or a
  * response that is not a DecisionResult, is a conflict) before anything is resolved against the current world; a NEW one with a host view
  * token (`view:<run>:<revision>`) other than `token()` is `stale_view` (04 §16; other tokens are only admission
@@ -106,6 +106,8 @@ export function openStory(db: Db, releases: readonly [Release, ...Release[]], ho
     Object.assign(s, { fresh: base, ...loaded });
     s.recoveryHeader = undefined;
   } catch (e) {
+    if (e instanceof CartridgeError)
+      return { kind: 'cartridge_error' as const, message: e.message };
     if (!(e instanceof ElapsedRecoveryError) && !corrupt(e)) throw e;
     s.corruptFile = !(e instanceof ElapsedRecoveryError) && corrupt(e);
     return refuse({ kind: 'save_corrupt' as const }); // SQLite cannot read the file

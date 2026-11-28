@@ -82,7 +82,11 @@ export type Opener = { npc_id: string; player: boolean };
  */
 export type Failed = {
   kind?:
-    'unsupported_save_format' | 'save_corrupt' | 'pinned_release_missing' | 'elapsed_clock_missing';
+    | 'unsupported_save_format'
+    | 'save_corrupt'
+    | 'pinned_release_missing'
+    | 'elapsed_clock_missing'
+    | 'cartridge_error'; // dev only (save.md)
   message: string;
   code?: 'start_over_pending';
   startOver: boolean;

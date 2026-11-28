@@ -18,6 +18,8 @@ const PLAIN: Record<string, string> = {
   pinned_release_missing: 'This save was made with a different version of the game.',
   unsupported_save_format:
     'The save was made by a newer version of the app. Update the app to go on.',
+  // builder-only placeholder (loka-hcnlh.100.1): the designer words it
+  cartridge_error: "The world's files do not build. The save and the files are untouched.",
 };
 
 /**
@@ -25,7 +27,7 @@ const PLAIN: Record<string, string> = {
  * - Use: App, when the save fails to open; no GameView behind it.
  * - Rules: an error haptic on arrival, no sound; the Page's centred variant; `startOver` asks first: it destroys the save (10 §31; the
  *   shell's confirm); `tryAgain` (a page reload on web) reopens the save, offered only on the other-tab lock and a worker timeout.
- * - States: release; format; corrupt; locked; timed out.
+ * - States: release; format; corrupt; locked; timed out; cartridge error (dev only: the error text).
  * - Story: RecoveryPages.stories.tsx
  */
 export function SaveError({

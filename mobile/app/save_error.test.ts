@@ -40,3 +40,23 @@ test('Try again retries the open on the other-tab lock and a worker timeout, now
   } as const;
   assert.deepEqual(labels(draw(corrupt, tried)), ['Start over']);
 });
+
+// Breaks (loka-hcnlh.100.1): a dev cartridge failure shows the damaged-save headline, hides its own
+// text behind the generic line, or offers Start over; control: save_corrupt keeps its words.
+test('a dev cartridge_error names its cause, says the save is untouched and offers nothing', () => {
+  const g = globalThis as any;
+  g[Symbol.for('loka-book-test-state')] = (v: unknown) => [v, () => {}];
+  g[Symbol.for('loka-book-test-effect')] = () => {};
+  const words = (failed: Failed) =>
+    nodes(SaveError({ failed, startOver: () => {}, tryAgain: () => {} }))
+      .flatMap((n) => [n.props?.children].flat())
+      .filter((c) => typeof c === 'string')
+      .join('\n');
+  const message = 'Error: cartridge did not load: CONTENT_HASH_MISMATCH';
+  const shown = words({ kind: 'cartridge_error', message, startOver: false });
+  assert.match(shown, /untouched/);
+  assert.ok(shown.includes(message), shown);
+  assert.doesNotMatch(shown, /damaged/i);
+  assert.deepEqual(labels(draw({ kind: 'cartridge_error', message, startOver: false }, [])), []);
+  assert.match(words({ kind: 'save_corrupt', message: 'x', startOver: true }), /damaged/i);
+});
