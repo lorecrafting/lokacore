@@ -137,8 +137,8 @@ test("a greyed Add mechanic… row shows its field's description", async () => {
 
 // Breaks (F18 of loka-hcnlh.101): a lone `~` drawn as a word field's text, so typing on a phone
 // keyboard (no select-all) writes `~Wren`.
-test('a word field holding a lone ~ shows it as its placeholder', async () => {
+test('a word field holding a lone ~ is empty, its placeholder naming it unwritten', async () => {
   const s = await opened('items/wren.json', { name: { prose: '~' } });
   const f = s.shown().find((x) => x.props?.accessibilityLabel === 'name' && x.props.onBlur);
-  assert.deepEqual([f?.props.defaultValue, f?.props.placeholder], ['', '~']);
+  assert.deepEqual([f?.props.defaultValue, f?.props.placeholder], ['', 'Unwritten: name']);
 });
