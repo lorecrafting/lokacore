@@ -188,6 +188,18 @@ test('Add beat 3 on the second part (part:1) writes beat 3 after beat 2 there', 
   ]);
 });
 
+// Breaks: Add beat with the number left empty doing nothing (Number(undefined) is NaN, refused off
+// screen), or taking the next number in its own part only (beat numbers are unique across the outline).
+test('Add beat with no number on part 1 writes beat 3, the next across the outline', async () => {
+  posts = [];
+  await press('Add beat', 0);
+  const [, { ops }] = posts[0] ?? [, {}];
+  assert.deepEqual(
+    ops?.[0]?.value?.map((b: { n: number }) => b.n),
+    [1, 3],
+  );
+});
+
 test("Retitle with the field emptied removes beat 1's title; one Undo puts back that gesture", async () => {
   await press('greet · 1 refusal'); // a node picked
   await press('1  Meet Nell'); // beat 1 open, now picked
