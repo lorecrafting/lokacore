@@ -98,14 +98,12 @@ function built<T>(dev: boolean | undefined, make: () => T): T {
  * refusal (kind and newGame) as the error's cause.
  */
 export function openGame(db: Db, bundled: Bundled, host: HostPart) {
-  const [cartridge, fresh] = built(host.dev, () => {
-    const c = cartridgeOf(bundled);
-    return [c, newWorld(c, CONTEXT as never, SEED as never)] as const;
-  });
+  const cartridge = built(host.dev, () => cartridgeOf(bundled));
   if (cartridge.manifest.time_policy && !host.time)
     throw Object.assign(new Error('elapsed clocks are required'), {
       cause: { kind: 'elapsed_clock_missing' },
     });
+  const fresh = built(host.dev, () => newWorld(cartridge, CONTEXT as never, SEED as never));
   const story = openStory(db, [{ content_hash: bundled.sha256, fresh }], host);
   const why = story.kind === 'cartridge_error' ? story.message : story.kind;
   if (story.kind !== 'open') throw Object.assign(new Error(why), { cause: story });
