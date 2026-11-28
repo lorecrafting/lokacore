@@ -95,7 +95,8 @@ test('Find `cellar` lists the two referrers; each opens its sheet', async () => 
 // Breaks: a world press posting the current world's key or none, or the Book reloading before
 // /world names the picked world, or keeping the world left's place, or a refused GET never asked again,
 // or the keys cleared before the POST, or a switch polling with no line or swallowing a press, or a
-// sampler among the real worlds or their copies, or the Samples fold open unasked (worlds.test.ts: open).
+// sampler among the real worlds or their copies, or the Samples fold open unasked or not toggling
+// on a press (worlds.test.ts: open).
 test('switching worlds posts the picked key, then reloads once /world names it', async () => {
   let current = 'farm';
   let gets = 0;
@@ -130,6 +131,15 @@ test('switching worlds posts the picked key, then reloads once /world names it',
     ...['Farm', 'Mill', 'New blank world', 'New copy of Farm', 'New copy of Mill'],
     'Samples', // the sampler, and its copy, under the fold, closed
   ]);
+  const sampled = () =>
+    nodes(worldRows())
+      .filter((n) => n.props?.accessibilityRole === 'button')
+      .map(words)
+      .slice(5);
+  await s.press(worldRows, 'Samples');
+  assert.deepEqual(sampled(), ['Samples', 'Cellar', 'New copy of Cellar']);
+  await s.press(worldRows, 'Samples');
+  assert.deepEqual(sampled(), ['Samples']);
   await s.press(worldRows, 'Mill');
   assert.ok(nodes(worldRows()).map(words).includes('busy'));
   assert.equal(reloads, 0);
