@@ -76,10 +76,15 @@ function keysOf(h: Hooks, shown: string) {
     : [...h.said].filter(([, s]) => s && plain(s).trim() === shown.trim()).map(([k]) => k); // a key with no words is undefined
 }
 
-/** The one person's or item's name in these words: two in the same words (or two new `~`) get none. */
+const NAME = /^(npc|item)\.\w+\.name$/;
+/** The one person's or item's name in these words: the key the page bound them to (a new `~`'s
+ * marks name it; a refused compile's file words may differ from those drawn), else the one name
+ * key whose unbound words they are: two in the same words get none. */
 function nameKey(h: Hooks, shown: string) {
+  const w = drawnWords(h.seen, shown);
+  if (w) return NAME.test(h.seen.get(w)!) ? h.seen.get(w) : undefined; // a room's title in a name's words
   const keys = [...h.said].filter(
-    ([k, s]) => /^(npc|item)\.\w+\.name$/.test(k) && s && plain(s).trim() === shown.trim(),
+    ([k, s]) => NAME.test(k) && s && plain(s).trim() === shown.trim(),
   );
   return keys.length === 1 ? keys[0][0] : undefined;
 }
