@@ -84,6 +84,7 @@ const field = (label: string, key: string, numeric = false) => (
     placeholder={label}
     placeholderTextColor={ink('dim')}
     defaultValue={typed[key]}
+    selectTextOnFocus={numeric} // typing replaces a number, as the panel's minutes field did
     inputMode={numeric ? 'numeric' : undefined}
     onChangeText={(v) => void ((typed[key] = v), known.redraw())}
     style={{ ...inRow, minWidth: 80, borderBottomWidth: 1, borderColor: ink('action') }} // mutate-skip: layout; ruled as Contents' name field

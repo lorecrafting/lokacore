@@ -48,7 +48,7 @@ export function Notice({ placed, room }: { placed?: Place; room?: string }) {
 export const buildSwitch = (on: boolean, flip: () => void) => (
   <Pressable
     accessibilityRole="switch"
-    accessibilityState={{ checked: on }}
+    aria-checked={on} // react-native-web drops accessibilityState.checked
     accessibilityLabel={WORDS.build}
     onPress={flip}
     style={CONTROL}

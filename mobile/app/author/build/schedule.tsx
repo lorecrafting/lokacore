@@ -23,7 +23,7 @@ import { ed, row, run } from './roomedit.tsx';
 import { act, greyed } from './sheet.tsx';
 
 export const WORDS = { add: 'Add hour', hour: (h: string) => `hour ${h}` };
-const HOUR = { ...INPUT, flexGrow: 0, width: size.touch }; // mutate-skip: a style, no logic
+const HOUR = { ...INPUT, flexGrow: 0, flexBasis: size.touch }; // mutate-skip: a style; basis 0 drew it 0 px
 
 /** Hour `h`: its number, written as the schedule moved on leaving the field (a refusal is shown,
  * never written), its value, and its Remove. */
