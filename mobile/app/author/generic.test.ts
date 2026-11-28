@@ -429,7 +429,9 @@ test('a greyed mechanic turns its capability on in cartridge.json, then adds the
     ],
   );
   const l = await narrow('liquids', {}); // amount needs resource first: no write turns it on
-  const amount = l.shown().find((x) => String(x.key).startsWith('mechanic amount '));
+  const amount = l
+    .shown()
+    .find((x) => x.props?.accessibilityRole && String(x.key).startsWith('mechanic amount '));
   assert.deepEqual([amount.props.disabled, amount.props.accessibilityState.disabled], [true, true]);
   assert.equal(words(amount).includes(WORDS.first), true);
   // slot has no least value: revealed empty once equipment is on, and kept where web's reload

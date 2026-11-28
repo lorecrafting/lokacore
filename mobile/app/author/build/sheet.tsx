@@ -5,6 +5,7 @@ import { Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } fr
 import { focusTitle } from '../../book/title.ts';
 import { motion, size, space, type } from '../../book/tokens.ts';
 import { ink, type Builder } from './build.ts';
+import { hint, note } from './note.tsx';
 import { openSource } from './source.ts';
 
 const WORDS = { close: 'Back', grow: 'Full height', shut: 'Close' };
@@ -56,30 +57,47 @@ export const act = (
   expanded?: boolean,
   key = label,
   selected?: boolean,
+  about?: string, // a field's schema description, beneath its name (form.tsx `about`)
+) => {
+  const name = (
+    <Text key="n" style={{ ...type.control, color: ink(selected ? 'bg' : 'action') }}>
+      {label}
+    </Text>
+  );
+  // one child without a description: tests and callers read `children.props` of a plain button
+  return (
+    <Pressable
+      key={key}
+      accessibilityRole="button"
+      {...hint(label, about)}
+      accessibilityState={
+        expanded === undefined && selected === undefined
+          ? undefined
+          : {
+              ...(expanded !== undefined && { expanded }),
+              ...(selected !== undefined && { selected }),
+            }
+      }
+      onPress={run}
+      style={selected ? PICKED : CONTROL}
+    >
+      {about ? [name, note(about)] : name}
+    </Pressable>
+  );
+};
+
+/** A control that cannot act yet, dim with why; pressable only given `run` (Add mechanic… turns one on). */
+export const greyed = (
+  label: string,
+  why: string,
+  key: string,
+  run?: () => void,
+  about?: string, // as `act`'s, beneath the reason
 ) => (
   <Pressable
     key={key}
     accessibilityRole="button"
-    accessibilityState={
-      expanded === undefined && selected === undefined
-        ? undefined
-        : {
-            ...(expanded !== undefined && { expanded }),
-            ...(selected !== undefined && { selected }),
-          }
-    }
-    onPress={run}
-    style={selected ? PICKED : CONTROL}
-  >
-    <Text style={{ ...type.control, color: ink(selected ? 'bg' : 'action') }}>{label}</Text>
-  </Pressable>
-);
-
-/** A control that cannot act yet, dim with why; pressable only given `run` (Add mechanic… turns one on). */
-export const greyed = (label: string, why: string, key: string, run?: () => void) => (
-  <Pressable
-    key={key}
-    accessibilityRole="button"
+    {...hint(`${label}, ${why}`, about)}
     accessibilityState={{ disabled: !run }}
     disabled={!run}
     onPress={run}
@@ -87,6 +105,7 @@ export const greyed = (label: string, why: string, key: string, run?: () => void
   >
     <Text style={{ ...type.control, color: ink('dim') }}>{label}</Text>
     <Text style={{ ...type.label, color: ink(run ? 'action' : 'dim') }}>{why}</Text>
+    {note(about)}
   </Pressable>
 );
 
