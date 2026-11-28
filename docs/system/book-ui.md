@@ -1158,7 +1158,7 @@ reasons and limits: [prose in the Book rulings](../design/prose-in-the-book-ruli
     Undo takes back, no confirm; it leaves the row after the reread. A write sent from an old read
     is refused as the generic sheet's are, never overwritten.
   - **Tools (6.2a-b, [builder mode §4.3 item 3, §5](../rnd/in-game-builder-mode-2026-11-19.md)).**
-    First a row of the tab's readers, `Play`, `State`, `Why`, `Step` and `Numbers` (6.2b); the open
+    First a row of the tab's readers, `Play`, `State`, `Why`, `Step`, `Numbers` (6.2b) and `Worlds` (6.3b); the open
     one is marked selected, `Play` at first. Then the open reader's rows. None but Play changes the
     game. With no game or no state yet, State, Why and Step show one plain line saying so.
     **Play** (6.2a): the refusal line, then in order:
@@ -1206,6 +1206,13 @@ reasons and limits: [prose in the Book rulings](../design/prose-in-the-book-ruli
       say so in the danger tone. Then the reports under `Pools`, `Levels` and `Fights` headings,
       each table row one line ([looks](../BOOK-UI-COMPONENTS.md#component-catalogue)); a section
       with nothing to measure says so in one plain line.
+    - **Worlds** (6.3b, [`GET /world`](cartridge.md#author-preview)): the refusal line; while a switch
+      waits, one plain line naming the world opening; a row of the listed worlds, the current one
+      marked selected, a press on another switching to it; then a name field, `New blank world` and
+      `New copy of <title>` for each listed world. The `*_sampler` worlds are not in those rows: last
+      comes a `Samples` fold (an act, expanded while open, its rows unindented as Flow's `Filters…`), drawn only
+      when there is a sampler and shut at first unless the current world is one; open, it lists the
+      samplers' switches, then their copies.
   - **Flow walk (5.5b, [builder mode decision 9 as amended](../rnd/in-game-builder-mode-2026-11-19.md)).**
     `flow:<ref>`, one sheet titled `Flow <key>`; not the panel's canvas shrunk. In order: the
     walk's trail, when it has more than one step (its keys joined ` › `, under the header); a
