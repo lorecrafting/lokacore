@@ -230,12 +230,12 @@ export function serve(port: number, source: string, artifact: string, on: Hooks 
   let last: Message = { text: {}, said: [], compiled: true };
   const send = (client: ServerResponse, once = {}) =>
     client.write(`data: ${JSON.stringify({ ...last, ...once })}\n\n`);
-  const map = storyRoute(source, artifact);
+  const map = storyRoute(source, artifact, () => last.text);
   const said = told((message) => {
     last = { ...last, ...message };
     // §7: a Hold serves the last whole model; a compile's pushes, or the release, make a new one.
     if (last.held) map.keep(last.diagnostics ?? []);
-    else if ('compiled' in message || 'diagnostics' in message || 'held' in message) map.stale();
+    else if (['compiled', 'diagnostics', 'held', 'text'].some((k) => k in message)) map.stale();
     for (const client of clients) send(client);
   }, source);
   const editor = editing(source, said, (o) => clients.forEach((c) => send(c, o)), on, artifact);

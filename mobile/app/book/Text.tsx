@@ -9,8 +9,9 @@ type Props = ComponentProps<typeof Text>;
  */
 const authorSeam: { line?: (p: Props) => Props } = {};
 export { authorSeam };
-const Line = (p: Props) => (
-  <Text allowFontScaling={false} {...(authorSeam.line ? authorSeam.line(p) : p)} />
+// `unseen`: a line only a screen reader reads (Heard), so the seam never draws a second field for it
+const Line = ({ unseen, ...p }: Props & { unseen?: true }) => (
+  <Text allowFontScaling={false} {...(authorSeam.line && !unseen ? authorSeam.line(p) : p)} />
 );
 /**
  * Every Book line: its size is already the Reading size (reading.ts), so the system never scales

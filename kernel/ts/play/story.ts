@@ -138,11 +138,12 @@ const ownFiles = (source: string, refs: Map<string, string>) => {
 const cartridgeOf = (c: Obj) =>
   `${(c.manifest as Obj).id as string}@${(c.manifest as Obj).version as string}`;
 
-/** The model for `source` compiled to `dev`, with the compile's diagnostics. */
-export function story(source: string, dev: Dev, diagnostics: Diagnostic[]) {
+/** The model for `source` compiled to `dev`, its diagnostics and the prose pushed in place (`text`). */
+export function story(source: string, dev: Dev, diagnostics: Diagnostic[], text: Obj = {}) {
   const loaded = loadCartridge(artifactBytes(dev), INSTALLED);
   if (!loaded.ok) throw new Error(`the kernel refuses the artifact: ${JSON.stringify(loaded)}`);
   const c = loaded.cartridge as unknown as Obj;
+  c.text = { ...(c.text as Obj), ...text };
   const graph = contentGraph(c);
   graph.edges.push(...links(c));
   const report = reachReport(c);
@@ -272,12 +273,12 @@ function beats(source: string, bound: Bound) {
 /** live.ts's `GET /story`: the model built on the first ask after each compile (`stale()`), with
  * an ETag by its body's hash (an outline.json edit recompiles to the same artifact hash).
  * `keep()` builds it now if none is built: a Hold serves that whole model to its end (§7). */
-export function storyRoute(source: string, artifact: string) {
+export function storyRoute(source: string, artifact: string, text = (): Obj => ({})) {
   let model: { etag: string; body: string } | undefined;
   const build = (diagnostics: unknown[]) => {
     if (model) return model;
     const dev = JSON.parse(readFileSync(artifact, 'utf8')) as Dev;
-    const body = JSON.stringify(story(source, dev, diagnostics as Diagnostic[]));
+    const body = JSON.stringify(story(source, dev, diagnostics as Diagnostic[], text()));
     return (model = { etag: `"${createHash('sha256').update(body).digest('hex')}"`, body });
   };
   return {

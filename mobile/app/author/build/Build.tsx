@@ -123,7 +123,7 @@ export function install(book: Pick<Hooks, 'seen' | 'said' | 'redraw' | 'api'>) {
     wrote,
     unsee,
     pencil: (shown, key) => {
-      const room = pencil(shown, placed?.here(), open); // the page's own title: its ghosts follow
+      const room = !key && pencil(shown, placed?.here(), open); // the page's own title (no thing's name key): its ghosts follow
       return room ? (
         <>
           {room}

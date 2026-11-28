@@ -1,4 +1,4 @@
-// size: allow 600, a cut page’s caption, the phone field tests and the Checks refusal (shown, cleared) join the field seam’s harness
+// size: allow 620, a cut page’s caption, the phone field tests, the Checks refusal (shown, cleared) and the name-or-title pencil cases join the field seam’s harness
 // Build's in-place field (docs/system/book-ui.md#author-mode; slice 1.3): a room description's
 // line opens its field through the Book seam. The server's /line and /edit: kernel/ts/test/author.test.ts.
 import assert from 'node:assert/strict';
@@ -496,7 +496,9 @@ test('the keep-my-place notice offers its three ways back', async () => {
 // Breaks: the pencil missing from the room's own title, on another room's or a non-title line, a
 // press (or Enter, Space) opening no Room sheet, another key opening one, its press also looking,
 // no redraw when the map comes, an unwritten title or exit showing `~` (ruling 9), or a person's
-// name pencil keyed by the words drawn (two names in the same words: one gets the other's sheet).
+// name pencil keyed by the words drawn (two names in the same words: one gets the other's sheet),
+// a new person's `~` name under a `~` room title opening the Room sheet, or a room's title in a
+// person's name words opening the person's (loka-hcnlh.101).
 test("the room title's pencil opens its Room sheet: summary and exits", async () => {
   map = [
     { key: 'loft', area: 'mill', title: 'Loft', file: 'L', exits: [{ dir: 'down', to: 'cellar' }] },
@@ -547,9 +549,22 @@ test("the room title's pencil opens its Room sheet: summary and exits", async ()
   const title = drawn.find((n) => n.props?.accessibilityRole === 'header');
   assert.equal(title.props.children[0].props.children, 'title', 'a `~` title drawn');
   assert.equal(pencil(page('A low loft.', 'Loft')), undefined, "another room's title");
-  const hen = (k: string) => (said.set(k, 'Hen'), pencil(page('', 'Hen')));
+  const header = (shown: string) =>
+    pencil(nodes(seamLine({ accessibilityRole: 'header', children: shown } as any).children));
+  const hen = (k: string) => (said.set(k, 'Hen'), header('Hen')); // words no key was bound to
   assert.equal(hen('npc.hen.name').props.accessibilityLabel, 'Edit hen');
   assert.equal(hen('item.hen.name'), undefined, 'two names in the same words: no pencil');
+  here = 'loft';
+  said.set('npc.miller.name', 'Loft'); // a person named as the room is titled
+  seen.clear(); // a new page (nextPage): the 'Loft' description above shared these words
+  assert.equal(pencil(page('', 'Loft')).props.accessibilityLabel, 'Edit Loft', "the room's title");
+  said.delete('npc.miller.name');
+  said.set('npc.wren.name', '~'); // a new person's unwritten name under an unwritten room title
+  const wren = tagged('npc.wren.name', '~');
+  bind(seen, wren, 'npc.wren.name');
+  const named = nodes(seamLine({ accessibilityRole: 'header', children: wren } as any).children);
+  assert.equal(pencil(named).props.accessibilityLabel, 'Edit wren', "the person's, not the room's");
+  said.delete('npc.wren.name');
   build.install({ seen, said, redraw() {}, api }); // the stored state: no sheet open
 });
 

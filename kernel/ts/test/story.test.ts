@@ -1,7 +1,7 @@
 // The Story map's model (docs/rnd/story-map-design-2026-11-05.md section 11 S1) over a planted copy
 // of scene_sampler: two dialogues joined by `then` (one in an area folder), a choice_resolved
 // reaction, a room no exit reaches and an outline.json.
-// size: allow 516, K1b's condition nodes sit with the rest of the map's model.
+// size: allow 520, K1b's condition nodes sit with the rest of the map's model.
 import assert from 'node:assert/strict';
 import { execFileSync, spawnSync } from 'node:child_process';
 import {
@@ -426,7 +426,8 @@ test('an artifact the kernel refuses is an error naming the refusal', () => {
 });
 
 // Break: the model rebuilt on every request (no 304), kept across a publish (a hold's release
-// pushes no diagnostics), or served to a foreign Host.
+// pushes no diagnostics) or a prose write (pushed in place, not written: F2 of loka-hcnlh.101), or
+// served to a foreign Host.
 test('GET /story: an ETag, 304 until the next compile pushes, and refused to a foreign Host', async (t) => {
   writeFileSync(join(dir, 'dev.json'), JSON.stringify(dev));
   const server = serve(0, src, join(dir, 'dev.json'));
@@ -459,6 +460,9 @@ test('GET /story: an ETag, 304 until the next compile pushes, and refused to a f
   );
   assert.equal(rebound, 403); // a DNS-rebound page: E1's Host check
   assert.equal((await fetch(`http://127.0.0.1:${port}/story`, { method: 'POST' })).status, 405);
+  server.push({ text: { 'room.shed.name': 'Wren' } }); // what a prose write pushes
+  const { map } = (await (await get()).json()) as { map: { key: string; title: string }[] };
+  assert.equal(map.find((r) => r.key === 'shed')?.title, 'Wren');
 });
 
 // Break: GET /story drops the watcher's diagnostics (S2's badges), or a Hold serves a mix (a

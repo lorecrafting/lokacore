@@ -974,7 +974,8 @@ reasons and limits: [prose in the Book rulings](../design/prose-in-the-book-ruli
   buttons are Edit in place's and Changed on disk's above. Unwritten lines never show `~`
   (ruling 9): an unwritten line is a blank ruled line of its own height with its field name
   (`description`) on it; its field opens empty with the hint `Unwritten: <field>`, and leaving it
-  empty keeps `~`. A line the last compile refused carries Confirming's unconfirmed mark. Looks:
+  empty keeps `~`. A line only a screen reader reads (a live copy) is never a field. A line the
+  last compile refused carries Confirming's unconfirmed mark. Looks:
   [author-mode marks](../BOOK-UI-COMPONENTS.md#component-catalogue).
 - **Build: Undo, Checks, keep my place** (slice 1.4, [builder mode §4.1, §5](../rnd/in-game-builder-mode-2026-11-19.md)).
   The strip wraps to more rows when its items do not fit; looks:
@@ -1099,8 +1100,10 @@ reasons and limits: [prose in the Book rulings](../design/prose-in-the-book-ruli
     new thing placed in this room, keyed `npc_N`, `item_N` or `<template>_N`, every word
     unwritten, and opens its sheet on top.
   - **Name pencil.** In Build a page title that is exactly one person's or item's name (unless it
-    is this room's own title) is followed by a pencil named `Edit <key>`, which opens its Person or Item sheet. Two
-    things drawn in the same words get none.
+    is this room's own title) is followed by a pencil named `Edit <key>`, which opens its Person or Item sheet. The
+    name is the one the page drew those words for (a new thing's unwritten name, a refused compile's
+    old words), else the one name whose file words they are; two things drawn in the same words get
+    none. A thing's name never takes the room title's pencil, both unwritten included.
   - **Person and Item sheets.** Titled by the key. A summary line names where it starts: `Room ·
     <key>`, `Person · <key>` or `Item · <key>`. A person then has a `Room` field and `Move`; an item
     has `Room`, `Person` and `Item`, which pick the holder's kind, then a field named by that kind
@@ -1264,7 +1267,8 @@ reasons and limits: [prose in the Book rulings](../design/prose-in-the-book-ruli
     subject) draws nothing; the compiler reports it.
   - **Typed fields** (a string, a number, a text's words, a definition's key) show the present
     value on a ruled line and write when they lose focus, only when changed; a number field that
-    does not read as a number writes nothing. Each fits the sheet's width, however deep its block.
+    does not read as a number writes nothing. One holding `~` opens empty with the hint
+    `Unwritten: <field>`, never `~` (ruling 9); typing replaces it, and leaving it empty keeps `~`. Each fits the sheet's width, however deep its block.
   - **Add mechanic…** (slice 2.3b; root fields only, after `Add…`). The fields that are mechanics
     are never in `Add…`; they are in `Add mechanic…`, which opens or closes their list and is not
     drawn while the list would be empty. First the absent mechanics this cartridge allows for the
