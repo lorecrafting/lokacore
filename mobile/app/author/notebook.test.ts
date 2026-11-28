@@ -213,6 +213,17 @@ test('the Checks tab shows the Checks sheet', async () => {
   assert.equal(drawn, 1);
 });
 
+// Breaks: the cutscene row listing no files (filesOf matching the kind name, not its `scenes/` directory).
+test('the Contents tab lists a cutscene file under New cutscene', async () => {
+  const { sheets } = await import('./build/sheet.tsx');
+  await import('./build/contents.tsx');
+  const { opens, press } = await opened({});
+  await press(() => sheets.contents.body(''), 'Contents');
+  known.files = { 'scene.x': 'scenes/x.json', 'room.y': 'rooms/y.json' };
+  await press(() => sheets.contents.body(''), 'scenes/x.json');
+  assert.deepEqual(opens, ['def:scenes/x.json']);
+});
+
 // Breaks: a definition sheet with no source footer.
 test("a definition sheet's foot names its file", async () => {
   const { sheets } = await import('./build/sheet.tsx');

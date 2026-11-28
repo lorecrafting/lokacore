@@ -118,6 +118,24 @@ test('a new /story re-reads the lines; Add after, words line sends {add:{after, 
   assert.deepEqual(ops(), [{ add: { after: 3, kind: 'words' } }]);
 });
 
+// Breaks: the speaker kind greyed though the header names roles, sent without its role, or offered
+// pressable with no role named.
+test('Add offers a speaker line per header role and sends its value; none named stays refused', async () => {
+  const file = 'scenes/r.scene';
+  files[file] = 'npc: bram\nwith: nell\n\n- A #a\n  * x\n';
+  let all = await drawn(() => lines(file), file, 4);
+  await press(named(all, 'Add after line 4'));
+  all = nodes(lines(file));
+  assert.ok(named(all, 'speaker line bram'));
+  await press(named(all, 'speaker line nell'));
+  assert.deepEqual(ops(), [{ add: { after: 4, kind: 'speaker', value: 'nell' } }]);
+  files['scenes/b.scene'] = '- A #a\n  * x\n';
+  all = await drawn(() => lines('scenes/b.scene'), 'scenes/b.scene', 1);
+  await press(named(all, 'Add after line 1'));
+  all = nodes(lines('scenes/b.scene'));
+  assert.equal(named(all, 'speaker line').props.disabled, true);
+});
+
 // Breaks: a refused act drawn pressable, without its reason, or sending anyway (by press or Alt-key).
 test('a cross-depth move and an empty cut are greyed with the refusal and send nothing', async () => {
   files['scenes/b.scene'] = '- A #a\n  * x\n  - Deep #d\n- B #b\n';
@@ -345,6 +363,23 @@ test('a point trigger: its kinds, values and outcomes lit and each pick writes i
   assert.deepEqual(wrote(), [{ story_point: 'q', outcome: 'c' }]);
   await press(draw().find((x) => x.key === 'outcome a'));
   assert.deepEqual(wrote(), [{ story_point: 'p', outcome: 'a' }]);
+});
+
+// Breaks: a current value no point offers drawn nowhere or unlit (nothing lit), or pressing it rewriting the on.
+test('a point trigger on a point no longer offered shows it lit first; pressing it sends nothing', async () => {
+  const all = trigger({ story_point: 'gone', outcome: 'z' }, { points: { q: ['c'] } }, [
+    { ref: 'story_point/q', kind: 'story_point' },
+  ]);
+  const values = all.filter((x) => /^value /.test(x.key));
+  assert.deepEqual(
+    values.map((x) => [x.key, lit(x)]),
+    [
+      ['value gone', true],
+      ['value q', false],
+    ],
+  );
+  await press(values[0]);
+  assert.deepEqual(sent, []);
 });
 
 // Breaks: a quest's typed outcome not written on leaving the field, an unchanged or refused one
