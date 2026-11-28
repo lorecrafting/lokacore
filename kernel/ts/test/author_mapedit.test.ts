@@ -1,4 +1,4 @@
-// size: allow 630, one scaffolded cartridge the tests edit in turn and the last undoes; a split needs a second scaffold
+// size: allow 655, one scaffolded cartridge the tests edit in turn and the last undoes; a split needs a second scaffold
 // The editor map's edits (kernel/ts/play/mapedit.ts) through the real write routes
 // (play/write.ts) and the real `mix loka.new`, on one scaffolded cartridge the tests edit in turn;
 // the last one undoes every gesture. Expected files are written by hand.
@@ -625,4 +625,29 @@ test('undo puts every gesture back: the files are byte-identical to the start', 
   while (ed.undoable()) await ed.undo();
   assert.deepEqual(Object.fromEntries(files().map((f) => [f, read(f)])), snapshot);
   await assert.rejects(ed.undo(), /no map edit to undo/);
+});
+
+test("Add dialogue in a world without the capability writes the speaker into the dialogue's file", async () => {
+  // Breaks: talk() taking `new`'s first file, cartridge.json when the capability was just turned on.
+  const at = (rel = '') => join(dir, 'talk', rel);
+  const read = (rel: string) => JSON.parse(readFileSync(at(rel), 'utf8'));
+  execFileSync('mix', ['loka.new', 'cartridge', at()], { cwd: REPO, stdio: 'ignore' });
+  execFileSync('mix', ['loka.new', 'npcs', 'smith', at()], { cwd: REPO, stdio: 'ignore' });
+  const cartridge = read('cartridge.json');
+  delete cartridge.requires.capabilities.dialogue;
+  writeFileSync(at('cartridge.json'), JSON.stringify(cartridge));
+  const s = await open(at());
+  const file = await editor(s.io).talk('smith', []).finally(s.close);
+  const [said, top] = [read(file), read('cartridge.json')];
+  assert.deepEqual(
+    [file, said.npc, said.roles, top.npc, top.roles, top.requires.capabilities.dialogue],
+    [
+      'dialogues/dialogue_1.json',
+      'smith',
+      { smith: { role: 'npc', npc: 'smith' } },
+      undefined,
+      undefined,
+      1,
+    ],
+  );
 });

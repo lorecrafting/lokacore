@@ -153,3 +153,11 @@ test('a shop refuses an absent keeper and a sale that would give away a protecte
     error: { code: 'invalid_state' },
   });
 });
+
+// Break: a world starting at clock 0 births no player row of a shop's currency (Fresh `spent`), so
+// the first Buy is refused as insufficient and a saved world fails its shop audit on reopen.
+test('a shop world starting at clock 0 sells to the player from the start', () => {
+  const w = fresh((c) => (c.calendar.start = 0));
+  const r = trade(w, 'buy', 2);
+  assert.deepEqual([pennies(r.world), pennies(r.world, npc(w, 'fishmonger'))], [18, 22]);
+});

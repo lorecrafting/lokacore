@@ -168,8 +168,9 @@ function place(
   };
 }
 
-// A currency moved through a player's clock-0 row: a service, transport, wage or dialogue payment.
+// A currency moved through a player's clock-0 row: a shop, service, transport, wage or dialogue payment.
 const spent = (cartridge: Cartridge, k: string) =>
+  Object.values(cartridge.npcs ?? {}).some((npc) => npc.shop?.resource.key === k) ||
   Object.values(cartridge.services ?? {}).some((offer) => offer.currency.key === k) ||
   Object.values(cartridge.transports ?? {}).some((t) => t.currency.key === k) ||
   cartridge.world?.group?.wage?.resource.key === k ||
