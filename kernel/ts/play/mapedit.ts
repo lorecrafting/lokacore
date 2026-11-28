@@ -191,11 +191,12 @@ export async function create(
   return name;
 }
 
-/** A new dialogue (/new's starter, at the root) spoken by NPC `npc`, one gesture; resolves its file. */
+/** A new dialogue (/new's starter, at the root) spoken by NPC `npc`, one gesture; resolves its file
+ * (not files[0]: a world without dialogue gets the capability in cartridge.json first). */
 async function talk(s: Run, npc: string, nodes: { kind: string; ref: string }[]) {
   const name = freeKey('dialogue', nodeOf('dialogues'), nodes, []);
   const told = await s.call('new', { kind: 'dialogues', name });
-  const file = told.files?.[0] ?? no(`${name} already exists`); // the starter reran on its file
+  const file = told.files?.find((f) => f.endsWith(`/${name}.json`)) ?? no(`${name} already exists`);
   // The speaker must be one of the roles (the compiler's unknown_kind), so the starter's roles go.
   const role = { role: 'npc', npc };
   await s.change(file, () => [
