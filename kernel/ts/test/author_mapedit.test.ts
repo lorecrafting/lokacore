@@ -620,13 +620,6 @@ test('new room and new NPC from a bundled room land in its area folder, joined i
   assert.ok(!existsSync(join(src, 'rooms/f.json')));
 });
 
-test('undo puts every gesture back: the files are byte-identical to the start', async () => {
-  // Breaks: an undo that skips a gesture's earlier writes, or a refused gesture left on the stack.
-  while (ed.undoable()) await ed.undo();
-  assert.deepEqual(Object.fromEntries(files().map((f) => [f, read(f)])), snapshot);
-  await assert.rejects(ed.undo(), /no map edit to undo/);
-});
-
 test("Add dialogue in a world without the capability writes the speaker into the dialogue's file", async () => {
   // Breaks: talk() taking `new`'s first file, cartridge.json when the capability was just turned on.
   const at = (rel = '') => join(dir, 'talk', rel);
@@ -650,4 +643,11 @@ test("Add dialogue in a world without the capability writes the speaker into the
       1,
     ],
   );
+});
+
+test('undo puts every gesture back: the files are byte-identical to the start', async () => {
+  // Breaks: an undo that skips a gesture's earlier writes, or a refused gesture left on the stack.
+  while (ed.undoable()) await ed.undo();
+  assert.deepEqual(Object.fromEntries(files().map((f) => [f, read(f)])), snapshot);
+  await assert.rejects(ed.undo(), /no map edit to undo/);
 });
