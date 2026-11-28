@@ -43,8 +43,7 @@ test('Build on, its strip and a sheet add no serious or critical axe violation',
   );
 });
 
-// Breaks (loka-hcnlh.87): a click into the Tools minutes field keeping its value, so typing appends
-// (605) where the panel's field replaced it.
+// Breaks (loka-hcnlh.87): a click into Tools minutes keeping its value, so typing appends (605).
 test('typing into the Tools minutes field replaces its value', LONG, async () => {
   const p = await book(390); // mutate-skip: the phone width
   await p.getByRole('button', { name: 'Notebook' }).click();
@@ -170,8 +169,11 @@ test("the warden's Combat and Schedule blocks run and write on the showcase", LO
     assert.equal(await run.count(), 0); // one run at a time
     await sheet(p).getByText('no world').waitFor();
     await sheet(p).getByRole('button', { name: 'daily_schedule' }).click();
+    const compiled = p.waitForEvent('load', LONG); // a reload mid-typing drops the hour's draft
     await sheet(p).getByRole('button', { name: 'Add hour' }).click();
     await until(() => hours().length === 3, 'Add hour written');
+    await compiled;
+    await sheet(p).getByRole('button', { name: 'daily_schedule' }).click(); // the reload folds it
     assert.deepEqual(hours(), ['0', '13', '14']);
     const hour = sheet(p).getByRole('textbox', { name: 'hour 14' });
     await hour.fill('99');
@@ -261,13 +263,11 @@ async function remove(p: Page) {
   await compiled;
 }
 
-// Last: it deletes a file. Breaks (panel :592): a Delete put back from nowhere in the GUI, so only
-// git brings the file back; the Build strip offering no Undo chip after a Delete (loka-hcnlh.88);
-// a refused put-back (409) not shown.
+// Last: it deletes a file. Breaks (panel :592): a Delete only git brings back; no Undo chip after a
+// Delete (loka-hcnlh.88); a refused put-back (409) not shown.
 test('the Undo chip and Recent put back the file Delete removed', LONG, async () => {
   let p = await book(390); // mutate-skip: the phone width
-  const rel = gore;
-  const path = join(cart, rel);
+  const path = join(cart, gore);
   const bytes = readFileSync(path, 'utf8');
   try {
     await remove(p);
@@ -284,11 +284,11 @@ test('the Undo chip and Recent put back the file Delete removed', LONG, async ()
       .first() // the newest: the second Delete
       .locator('xpath=..') // its row
       .getByRole('button', { name: 'Put back' });
-    await p.route('**/__author/undo', (r) => r.fulfill({ status: 409, json: { file: rel } }), {
+    await p.route('**/__author/undo', (r) => r.fulfill({ status: 409, json: { file: gore } }), {
       times: 1,
     });
     await back.click();
-    await sheet(p).getByText(`${rel} changed since; not put back.`).waitFor();
+    await sheet(p).getByText(`${gore} changed since; not put back.`).waitFor();
     assert.equal(existsSync(path), false);
     await back.click();
     await until(() => existsSync(path), 'put back');
