@@ -46,13 +46,16 @@ test('Build on, its strip and a sheet add no serious or critical axe violation',
 // Breaks (loka-hcnlh.87): a click into the Tools minutes field keeping its value, so typing appends
 // (605) where the panel's field replaced it.
 test('typing into the Tools minutes field replaces its value', LONG, async () => {
-  const p = await book(390);
+  const p = await book(390); // mutate-skip: the phone width
   await p.getByRole('button', { name: 'Notebook' }).click();
   await p.getByRole('button', { name: 'Tools', exact: true }).first().click();
   const minutes = p.getByRole('textbox', { name: 'minutes' });
   assert.equal(await minutes.inputValue(), '60');
   await minutes.click();
-  await p.waitForTimeout(200); // a person types after the focus: react-native-web selects in a timeout
+  await p.waitForFunction(() => {
+    const e = document.activeElement as HTMLInputElement; // react-native-web selects in a timeout
+    return e.selectionStart === 0 && e.selectionEnd === e.value.length;
+  });
   await p.keyboard.type('5');
   assert.equal(await minutes.inputValue(), '5');
   await p.close();
@@ -247,8 +250,10 @@ test(
   },
 );
 
+const gore = 'areas/combat/reactions/boar_gore.json';
 /** Deletes boar_gore from the palette, past the compile's reload. */
-async function remove(p: Page, path: string) {
+async function remove(p: Page) {
+  const path = join(cart, gore);
   await palette(p, 'boar_gore', /^boar_gore · /);
   const compiled = p.waitForEvent('load', LONG);
   await palette(p, 'Delete the selected definition');
@@ -260,18 +265,18 @@ async function remove(p: Page, path: string) {
 // git brings the file back; the Build strip offering no Undo chip after a Delete (loka-hcnlh.88);
 // a refused put-back (409) not shown.
 test('the Undo chip and Recent put back the file Delete removed', LONG, async () => {
-  let p = await book(390);
-  const rel = 'areas/combat/reactions/boar_gore.json';
+  let p = await book(390); // mutate-skip: the phone width
+  const rel = gore;
   const path = join(cart, rel);
   const bytes = readFileSync(path, 'utf8');
   try {
-    await remove(p, path);
+    await remove(p);
     await undo(p).click();
     await until(() => existsSync(path), 'the Undo chip put it back');
     assert.equal(readFileSync(path, 'utf8'), bytes);
     await p.close();
-    p = await book(390); // a page that the put-back's compile no longer reloads
-    await remove(p, path);
+    p = await book(390); // mutate-skip: the phone width; a page that the put-back's compile no longer reloads
+    await remove(p);
     await p.getByRole('button', { name: 'Notebook' }).click();
     await p.getByRole('button', { name: 'Recent', exact: true }).first().click();
     const back = sheet(p)
