@@ -16,8 +16,6 @@ import {
   exitActs,
   foot,
   grows,
-  joinTo,
-  moveTo,
   inRow,
   refusal,
   row,
@@ -26,6 +24,7 @@ import {
   type Node,
   type Template,
 } from './roomedit.tsx';
+import { joinTo, moveTo } from './roomfields.tsx';
 
 // placeholders: the owner writes these words
 const WORDS = {

@@ -7,6 +7,9 @@ import { reveal } from './reveal.ts';
 import { known } from './room.tsx';
 import { ed, run } from './roomedit.tsx';
 
+/** A typed field left while another gesture writes: its text is kept, and this said (loka-x1frg). */
+export const BUSY = 'Not written: another change was still saving. Try again.';
+
 export type Obj = Record<string, unknown>;
 export type Step = string | number;
 export type Write = Parameters<typeof ed.change>[number];
@@ -37,21 +40,30 @@ export type At = {
 };
 export const opened = new Set<string>(); // the folded blocks and Add… menus open, by file and path
 export const drafts = new Map<string, string>(); // each typed field, as typed
+/** A refused write's text, kept for the next try unless newer typing replaced it (a late refusal). */
+export const keep = (key: string, v: string) => drafts.has(key) || void drafts.set(key, v);
 export const id = (at: At, path: Step[]) => `${at.file}:${JSON.stringify(path)}`;
 export const toggle = (key: string) => (
   opened.has(key) ? opened.delete(key) : opened.add(key),
   known.redraw()
 );
-export const set = (at: At, path: Step[], value: unknown) =>
+/** Resolves whether the write went through (roomedit `run`, which says `busy` when another gesture
+ * writes); undefined when it only reveals. */
+export const set = (
+  at: At,
+  path: Step[],
+  value: unknown,
+  busy = '',
+): Promise<boolean> | undefined =>
   value === undefined
-    ? (reveal(id(at, path), true), known.redraw())
-    : send(at, ops(path, value), () => reveal(id(at, path), false));
+    ? void (reveal(id(at, path), true), known.redraw())
+    : send(at, ops(path, value), () => reveal(id(at, path), false), busy);
 /** `o` with the ops it brings along (`At.pair`). */
 export const own = (at: At, o: Ops) => at.pair?.(o) ?? o;
 /** One `/change` of `o` to the file, unless the gate refuses it: then the refusal shows, nothing sent. */
-export const send = (at: At, o: Ops, then = () => {}) => {
+export const send = (at: At, o: Ops, then = () => {}, busy = '') => {
   const w = own(at, o);
-  void run(async () => at.gate?.(w) ?? ed.change([at.file, at.was, w]).then(then));
+  return run(async () => at.gate?.(w) ?? ed.change([at.file, at.was, w]).then(then), busy);
 };
 /** A write at `path`; at the root (a picked branch, a whole list) one op per top-level field. */
 export const ops = (path: Step[], value: unknown) =>

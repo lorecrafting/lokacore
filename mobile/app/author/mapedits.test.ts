@@ -49,8 +49,10 @@ const doc: Record<string, unknown> = {
 let posts: [string, any][] = [];
 let id = 0;
 let refuse = ''; // an /undo refused with these words
+let held: Promise<void> | undefined; // an /undo not yet answered
 const api = async (path: string, sent?: object): Promise<[number, any]> => {
   if (refuse && path === '/undo') return [409, refuse];
+  if (path === '/undo') await held;
   if (sent) return (posts.push([path, sent]), [200, { id: ++id }]);
   if (path === '/story') return [200, { map, files: {} }];
   const file = decodeURIComponent(path.split('file=')[1]!);
@@ -270,4 +272,24 @@ test('Undo pressed while a gesture still runs keeps the chip; a refused put-back
     .filter((e) => e.type === 'Text')
     .map((e) => e.props.children);
   assert.ok(said.includes('put back stopped: Hold on'), String(said));
+});
+
+// Breaks (loka-x1frg): a field left while the Undo puts back is refused with its own note, and the
+// strip then shows that note as the Undo's failure though the Undo went through.
+test('a field refused while Undo puts back leaves the strip saying nothing about the Undo', async () => {
+  await press('Cancel'); // the test before left Join… armed
+  pick('hall');
+  await press('New room east');
+  let release = () => {};
+  held = new Promise((r) => (release = r));
+  named(strip(), 'Undo').props.onPress();
+  await settle();
+  assert.equal(await roomedit.run(async () => {}, 'Not written: busy'), false, 'ran mid-Undo');
+  release();
+  held = undefined;
+  await settle();
+  const said = strip()
+    .filter((e) => e.type === 'Text')
+    .map((e) => String(e.props.children));
+  assert.ok(!said.some((t) => t.includes('Not written')), String(said));
 });

@@ -66,6 +66,14 @@ Lessons from PM sessions (merging, batches, spawns, hosted CI), moved out of the
 - **`git reset --hard` on a branch whose commit you have not pushed costs the work.** Push, then rewrite.
 - **A careless grep turns a relative path into a wrong one.** `../system/...` from `docs/BUILDERS-GUIDE.md` is `system/...`; `bin/check_docs.exs` runs before every commit here and catches it.
 
+- **Merging main into a slice branch: regenerate only `docs/reviews/README.md`; stop on any other conflict.** A helper that resolved the index and committed left conflict markers in `test/loka/builder_todo_baseline.txt` (#821); the pre-push regen caught it.
+- **Agents share one scratchpad: name throwaway worktrees per agent and remove only your own.** A developer removed another's mutation worktree, taking it for its own.
+
+## Agents
+
+- **A compacted agent cannot be resumed** (SendMessage is refused); spawn a fresh one with a state note: branch, worktree, head, what is done, what is next.
+- **Two developers race on shared lists.** Two slices each emptying part of the todo baseline conflict on merge, and a red control that needs a todo row breaks once the list is empty; plant controls on their own rows.
+
 ## Cloud sessions
 
 - In a cloud container only: `gh` works over REST only (no `gh pr create`/`merge`; use the GitHub MCP tools); `gh auth status` misreports; branch deletion is blocked, so the owner deletes merged branches. Locally `gh pr merge` and `bin/merge_pr.sh` work.

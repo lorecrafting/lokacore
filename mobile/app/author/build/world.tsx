@@ -16,7 +16,7 @@ import CAPS from '../../../../protocol/capability_registry.json' with { type: 'j
 import { type } from '../../book/tokens.ts';
 import { ink } from './build.ts';
 import { block, INPUT } from './form.tsx';
-import { id, set, type At, type Block, type Ops, type Step } from './formwrite.ts';
+import { BUSY, id, set, type At, type Block, type Ops, type Step } from './formwrite.ts';
 import { known } from './room.tsx';
 import { ed, refusal, row, run } from './roomedit.tsx';
 import { act, raise } from './sheet.tsx';
@@ -139,12 +139,15 @@ function field(at: At, path: Step[], value: string, pick: { kind: string; keys: 
   const key = id(at, path);
   const text = typing.get(key);
   const no = text ? refusePick(pick, text) : undefined;
-  const write = (k: string) => {
+  const write = (k: string, busy = BUSY) => {
     pressing = undefined;
     typing.delete(key);
     told.delete(key);
-    if (k === value) known.redraw();
-    else set(at, path, k);
+    if (k === value) return known.redraw();
+    // not written: a typed key is kept to write on leaving unless newer typing replaced it; a press says and keeps nothing
+    void set(at, path, k, busy)?.then(
+      (ok) => ok || !busy || typing.has(key) || void (typing.set(key, k), known.redraw()), // mutate-skip: the repaint; the harness re-renders on every read
+    );
   };
   const { shown, more } = text === undefined ? { shown: [], more: 0 } : matches(pick.keys, text);
   const small = (tone: 'danger' | 'dim') => ({ ...type.small, color: ink(tone) });
@@ -160,7 +163,7 @@ function field(at: At, path: Step[], value: string, pick: { kind: string; keys: 
     </Text>,
     <View key={`picks ${key}`} style={row} onPointerDown={() => void (pressing = key)}>
       {(pick.keys.length <= SHORT ? pick.keys : shown).map((k) =>
-        cloneElement(act(k, () => write(k), undefined, k, k === value) as ReactElement<Press>, {
+        cloneElement(act(k, () => write(k, ''), undefined, k, k === value) as ReactElement<Press>, {
           onPressIn: () => void (pressing = key), // native: no pointerdown
         }),
       )}

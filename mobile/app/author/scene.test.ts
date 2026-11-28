@@ -14,8 +14,8 @@ Object.assign(globalThis, {
 });
 const { lines, pages, scenic } = await import('./build/scene.tsx');
 const { known } = await import('./build/room.tsx');
-const { onSaved, refused, running, wire } = await import('./build/roomedit.tsx');
-const { opened } = await import('./build/formwrite.ts');
+const { onSaved, refused, run, running, wire } = await import('./build/roomedit.tsx');
+const { BUSY, opened } = await import('./build/formwrite.ts');
 const { ink } = await import('./build/build.ts');
 
 const files: Record<string, string> = {};
@@ -370,4 +370,33 @@ test('a quest trigger writes a typed outcome on blur, refuses a bad one, shows t
   assert.deepEqual([sent, refused()], [[], 'not a key, or another scene starts on it']);
   await type('failed');
   assert.deepEqual(wrote(), [{ quest: 'other_quest', outcome: 'failed' }]);
+});
+
+// Breaks (loka-x1frg review finding 1): a quest outcome left while another gesture writes dropped
+// without a word, so leaving the field again writes nothing though the field still shows it.
+test('a quest outcome left while another gesture writes is kept and said; leaving again writes it', async () => {
+  const input = () =>
+    trigger({ quest: 'other_quest', outcome: 'completed' }, {}, []).find(
+      (x) => x.props?.accessibilityLabel === 'outcome',
+    );
+  sent.length = 0;
+  let release = () => {};
+  const other = run(() => new Promise<void>((r) => (release = r)));
+  try {
+    input().props.onChangeText('failed');
+    input().props.onBlur();
+    await tick();
+    assert.deepEqual([sent, refused()], [[], BUSY], 'written mid-gesture, or dropped unsaid');
+  } finally {
+    release();
+    await other;
+  }
+  assert.equal(input().props.defaultValue, 'failed', 'drawn again, the kept draft was hidden');
+  input().props.onBlur();
+  while (running()) await tick();
+  assert.deepEqual(
+    wrote(),
+    [{ quest: 'other_quest', outcome: 'failed' }],
+    'the outcome was forgotten',
+  );
 });

@@ -1,7 +1,7 @@
 // The Room sheet's edits (design §7, slice 2.1): an exit's One-way and Delete, `＋` a new room on a
 // free side (born `~`), Move to area and Delete room. The gestures are the panel's own
 // (kernel/ts/play/mapedit.ts, drop.ts) over the same write routes; no words are written here.
-import { Text, TextInput, View } from 'react-native';
+import { Text, View } from 'react-native';
 import { grows as sides, type MapRoom } from '../../../../kernel/ts/play/map.ts';
 import {
   BACK,
@@ -27,11 +27,6 @@ const WORDS = {
   oneWay: 'One-way',
   unlink: 'Delete',
   grow: (dir: string) => `＋ ${dir}`,
-  area: 'Area',
-  move: 'Move to area',
-  to: 'Exit to',
-  join: (dir: string) => `Join ${dir}`,
-  noRoom: (key: string) => `No room ${key}`,
   drop: (key: string, refs?: number) =>
     refs === undefined ? `Delete ${key}` : `Delete ${key} · ${WORDS.refs(refs)}`,
   refs: (n: number) => `${n} referrers`,
@@ -53,7 +48,6 @@ let busy = false; // one gesture at a time: a press while one runs does nothing
 let ran: Promise<void> = Promise.resolve(); // the gesture running now
 let said = ''; // the last refusal, shown at the sheet's top until the next press
 let asking: { key: string; files: string[]; answer: (yes: boolean) => void } | undefined;
-const drafts = new Map<string, string>(); // each room's Move field (and `join:` Join field), as typed
 let saved = (_ids: number[]) => {}; // Build.tsx's Undo chip
 
 /** mapedit's Io over the builder's /__author calls: a missing source rejects, as the panel's does. */
@@ -86,23 +80,30 @@ export const refused = () => said;
 export const tell = (why: string) =>
   busy ? void ((said = why), after()) : void run(async () => why);
 
-/** Runs one gesture; a refusal (a thrown or returned reason) shows in the sheet. */
-export async function run(go: () => Promise<unknown>) {
+/** Runs one gesture; a refusal (a thrown or returned reason) shows in the sheet. Resolves whether it
+ * went through: false when refused, or never run (no api; another gesture writing, said only as
+ * `busyNote`, as a press pressed twice is a double-tap; loka-x1frg). */
+export async function run(go: () => Promise<unknown>, busyNote = ''): Promise<boolean> {
   if (asking) {
     const { answer } = asking; // another press answers a pending Delete question Keep, then goes on
     asking = undefined;
     answer(false);
     await ran;
   }
-  if (busy || !api) return;
+  if (!api) return false;
+  if (busy) return (busyNote && tell(busyNote), false);
   busy = true;
   said = '';
+  let wrote = false;
   ran = (async () => {
     const was = ed.undoable();
     try {
       const why = await go();
       if (typeof why === 'string') said = why;
-      else if (ed.undoable() > was) saved(ed.last());
+      else {
+        wrote = true;
+        if (ed.undoable() > was) saved(ed.last());
+      }
     } catch (e) {
       said = (e as Error).message;
     } finally {
@@ -110,7 +111,7 @@ export async function run(go: () => Promise<unknown>) {
       after();
     }
   })();
-  return ran;
+  return ran.then(() => wrote);
 }
 
 const text = { ...type.small, color: ink('fg'), paddingHorizontal: space.md };
@@ -210,52 +211,6 @@ export const addTo = (
     await ed.made(r, dir, key, up);
     open(`${nodeOf(dir)}:${key}`);
   });
-
-const field = {
-  ...inRow,
-  flex: 1, // mutate-skip: layout; the field fills the row's free width, ruled as Build's tap field
-  minWidth: 0, // mutate-skip: layout; it may shrink
-  borderBottomWidth: size.rule,
-  borderColor: ink('action'),
-};
-/** Move to area: the field's area, or the root when it is empty. */
-export const moveTo = (r: MapRoom) => (
-  <View key={`move:${r.key}`} style={row}>
-    <TextInput
-      defaultValue={drafts.get(r.key) ?? r.area ?? ''} // drawn again, it shows what Move sends
-      placeholder={WORDS.area}
-      accessibilityLabel={WORDS.area}
-      onChangeText={(d) => void drafts.set(r.key, d)}
-      style={field}
-    />
-    {act(
-      WORDS.move,
-      () => void run(() => ed.move(r, (drafts.get(r.key) ?? r.area ?? '').trim() || null)),
-    )}
-  </View>
-);
-
-/** Join: an exit each free way to the typed room and back, any level, no layout (panel linkTo). */
-export const joinTo = (r: MapRoom, rooms: MapRoom[]) => (
-  <View key={`join:${r.key}`} style={row}>
-    <TextInput
-      defaultValue={drafts.get(`join:${r.key}`)}
-      placeholder={WORDS.to}
-      accessibilityLabel={WORDS.to}
-      onChangeText={(d) => void drafts.set(`join:${r.key}`, d)}
-      style={field}
-    />
-    {Object.keys(BACK)
-      .filter((dir) => !r.exits.some((e) => e.dir === dir))
-      .map((dir) =>
-        act(WORDS.join(dir), () => {
-          const to = drafts.get(`join:${r.key}`)?.trim();
-          const b = rooms.find((o) => o.key === to);
-          void run(async () => to && (b ? ed.link(r, dir, b) : WORDS.noRoom(to)));
-        }),
-      )}
-  </View>
-);
 
 /** Deletes `key` from `file`, asking in sheet `shut` for the other files it takes; once it is
  * gone, `shut` and the key's other sheets close (the foot's Delete, and the palette's). */

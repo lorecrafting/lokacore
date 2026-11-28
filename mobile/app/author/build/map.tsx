@@ -13,7 +13,8 @@ import { glyph, mapKey } from './mapcontrols.tsx';
 import { size, space, type } from '../../book/tokens.ts';
 import { ink } from './build.ts';
 import { known } from './room.tsx';
-import { ed, moveTo, refusal, run } from './roomedit.tsx';
+import { ed, refusal, run } from './roomedit.tsx';
+import { moveTo } from './roomfields.tsx';
 import { act, CONTROL, DOCK, sheets } from './sheet.tsx';
 
 // ponytail: placeholder chrome; the designer words it (the owner writes player-facing words only).
