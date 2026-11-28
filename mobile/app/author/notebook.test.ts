@@ -126,20 +126,23 @@ test('switching worlds posts the picked key, then reloads once /world names it',
   await settle();
   const marked = nodes(worldRows()).filter((n) => n.props?.accessibilityState?.selected);
   assert.deepEqual(marked.map(words), ['Farm']);
-  const buttons = nodes(worldRows()).filter((n) => n.props?.accessibilityRole === 'button');
-  assert.deepEqual(buttons.map(words), [
-    ...['Farm', 'Mill', 'New blank world', 'New copy of Farm', 'New copy of Mill'],
-    'Samples', // the sampler, and its copy, under the fold, closed
-  ]);
-  const sampled = () =>
+  const buttons = () =>
     nodes(worldRows())
       .filter((n) => n.props?.accessibilityRole === 'button')
-      .map(words)
-      .slice(5);
+      .map(words);
+  const copies = ['New blank world', 'New copy of Farm', 'New copy of Mill'];
+  assert.deepEqual(buttons(), ['Farm', 'Mill', 'Samples', ...copies]); // the sampler under the fold, closed
   await s.press(worldRows, 'Samples');
-  assert.deepEqual(sampled(), ['Samples', 'Cellar', 'New copy of Cellar']);
+  assert.deepEqual(buttons(), [
+    'Farm',
+    'Mill',
+    'Samples',
+    'Cellar',
+    ...copies,
+    'New copy of Cellar',
+  ]);
   await s.press(worldRows, 'Samples');
-  assert.deepEqual(sampled(), ['Samples']);
+  assert.deepEqual(buttons(), ['Farm', 'Mill', 'Samples', ...copies]);
   await s.press(worldRows, 'Mill');
   assert.ok(nodes(worldRows()).map(words).includes('busy'));
   assert.equal(reloads, 0);

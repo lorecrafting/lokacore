@@ -1060,8 +1060,6 @@ build. The author tools below are reachable only in that bundle (a production ex
   name `[a-z][a-z0-9_]{0,31}` (`mix loka.new`'s 32), refused while a write is in flight. The watcher then exits 75 and
   `bin/loka dev` restarts it on that world, remembered in `.dev-cartridge/world` for the next
   `bin/author.sh` with no folder; journal, Hold and the panel's selection start empty.
-  The builder's Worlds tab lists the `*_sampler` folders under a Samples fold, closed unless the
-  current world is one.
   `was` is the sha256 of the whole file (for `/edit`, the line's text): a file
   changed since answers 409 with its current bytes, and nothing is written. One path guard reads
   every path a body names: a normal relative path under the real source root (not the root as a

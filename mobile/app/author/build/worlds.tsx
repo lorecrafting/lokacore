@@ -103,7 +103,8 @@ const copies = (list: Worlds['worlds']) =>
     ),
   );
 
-/** Real worlds first; the samplers under a Samples fold, closed unless the current world is one. */
+/** Real worlds first, then a Samples fold (closed unless the current world is a sampler) above the
+ * name row, whose copies take the samplers' while it is open. */
 export function worldRows() {
   if (!asked) ask();
   const real = all?.worlds.filter((w) => !sample(w.name)) ?? [];
@@ -115,6 +116,16 @@ export function worldRows() {
     <View key="worlds" style={row}>
       {picks(real)}
     </View>,
+    samples.length ? (
+      <View key="samples fold" style={row}>
+        {act(WORDS.samples, () => toggle(SAMPLES), shown, `fold ${SAMPLES}`)}
+      </View>
+    ) : null,
+    shown ? (
+      <View key="samples" style={row}>
+        {picks(samples)}
+      </View>
+    ) : null,
     <View key="new world" style={row}>
       <TextInput
         accessibilityLabel={WORDS.name}
@@ -128,17 +139,7 @@ export function worldRows() {
         pick(() => ({ name, new: true })),
       )}
       {copies(real)}
+      {shown ? copies(samples) : null}
     </View>,
-    samples.length ? (
-      <View key="samples fold" style={row}>
-        {act(WORDS.samples, () => toggle(SAMPLES), shown, `fold ${SAMPLES}`)}
-      </View>
-    ) : null,
-    shown ? (
-      <View key="samples" style={row}>
-        {picks(samples)}
-        {copies(samples)}
-      </View>
-    ) : null,
   ];
 }
